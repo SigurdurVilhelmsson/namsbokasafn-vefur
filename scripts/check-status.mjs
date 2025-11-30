@@ -4,7 +4,7 @@
  * Repository Health Check Script
  *
  * Runs all health checks and updates REPOSITORY-STATUS.md
- * Can be run via: pnpm check:status
+ * Can be run via: npm run check:status
  * Or ask Claude: "Check my repository status"
  */
 
@@ -46,11 +46,11 @@ const results = {
 // 1. Security Check
 log('🔒 Security Check...', 'blue');
 try {
-  const audit = run('pnpm audit --json');
+  const audit = run('npm audit --json');
   if (audit) {
     const auditData = JSON.parse(audit);
-    const vulns = auditData.metadata?.vulnerabilities || {};
-    const total = Object.values(vulns).reduce((sum, count) => sum + count, 0);
+    const vulns = auditData.vulnerabilities || {};
+    const total = Object.keys(vulns).length;
 
     if (total === 0) {
       results.security.status = 'good';
@@ -72,7 +72,7 @@ let qualityPassed = true;
 
 // TypeScript
 try {
-  run('pnpm type-check', { stdio: 'pipe' });
+  run('npm run type-check', { stdio: 'pipe' });
   log('  ✅ TypeScript: No errors', 'green');
 } catch (error) {
   qualityPassed = false;
@@ -82,7 +82,7 @@ try {
 
 // ESLint
 try {
-  run('pnpm lint', { stdio: 'pipe' });
+  run('npm run lint', { stdio: 'pipe' });
   log('  ✅ ESLint: No errors', 'green');
 } catch (error) {
   qualityPassed = false;
@@ -92,7 +92,7 @@ try {
 
 // Prettier
 try {
-  run('pnpm format:check', { stdio: 'pipe' });
+  run('npm run format:check', { stdio: 'pipe' });
   log('  ✅ Prettier: All files formatted', 'green');
 } catch (error) {
   qualityPassed = false;
@@ -105,7 +105,7 @@ results.quality.status = qualityPassed ? 'good' : 'warning';
 // 3. Dependencies Check
 log('\n📦 Dependencies...', 'blue');
 try {
-  const outdated = run('pnpm outdated');
+  const outdated = run('npm outdated');
   if (outdated && outdated.trim()) {
     const lines = outdated.split('\n').filter(l => l.trim());
     const count = lines.length - 1; // Subtract header
@@ -117,7 +117,7 @@ try {
     log('  ✅ All dependencies up to date', 'green');
   }
 } catch (error) {
-  // pnpm outdated exits with code 1 if updates exist
+  // npm outdated exits with code 1 if updates exist
   results.dependencies.status = 'warning';
   log('  ⚠️  Some packages have updates', 'yellow');
 }
@@ -180,16 +180,16 @@ if (hasIssues) {
   console.log('='.repeat(60) + '\n');
 
   if (results.security.status !== 'good') {
-    log('  1. Fix security vulnerabilities: pnpm audit --fix', 'yellow');
+    log('  1. Fix security vulnerabilities: npm audit fix', 'yellow');
   }
   if (results.quality.details.includes('Files need formatting')) {
-    log('  2. Format code: pnpm format', 'yellow');
+    log('  2. Format code: npm run format', 'yellow');
   }
   if (results.quality.details.includes('ESLint issues')) {
-    log('  3. Fix linting: pnpm lint:fix', 'yellow');
+    log('  3. Fix linting: npm run lint:fix', 'yellow');
   }
   if (results.dependencies.status === 'warning') {
-    log('  4. Review updates: pnpm outdated', 'yellow');
+    log('  4. Review updates: npm outdated', 'yellow');
   }
 } else {
   console.log('\n' + '='.repeat(60));
