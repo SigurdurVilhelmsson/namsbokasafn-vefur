@@ -1,16 +1,25 @@
-import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Check, X, BookOpen, Brain } from 'lucide-react';
-import { useSettingsStore } from '@/stores/settingsStore';
-import { useReaderStore } from '@/stores/readerStore';
-import { loadTableOfContents } from '@/utils/contentLoader';
-import type { TableOfContents, Chapter } from '@/types/content';
+import { useState, useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
+import {
+  ChevronDown,
+  ChevronRight,
+  Check,
+  X,
+  BookOpen,
+  Brain,
+} from "lucide-react";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { useReaderStore } from "@/stores/readerStore";
+import { loadTableOfContents } from "@/utils/contentLoader";
+import type { TableOfContents, Chapter } from "@/types/content";
 
 export default function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useSettingsStore();
   const { isRead, getChapterProgress } = useReaderStore();
   const [toc, setToc] = useState<TableOfContents | null>(null);
-  const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set([1]));
+  const [manuallyExpandedChapters, setManuallyExpandedChapters] = useState<
+    Set<number>
+  >(new Set());
   const { chapterSlug, sectionSlug } = useParams();
 
   // Load table of contents on mount
@@ -18,22 +27,25 @@ export default function Sidebar() {
     loadTableOfContents()
       .then(setToc)
       .catch((error) => {
-        console.error('Gat ekki hlaðið efnisyfirliti:', error);
+        console.error("Gat ekki hlaðið efnisyfirliti:", error);
       });
   }, []);
 
-  // Expand current chapter
-  useEffect(() => {
-    if (toc && chapterSlug) {
-      const chapter = toc.chapters.find((c) => c.slug === chapterSlug);
-      if (chapter) {
-        setExpandedChapters((prev) => new Set(prev).add(chapter.number));
-      }
+  // Compute which chapters should be expanded (current chapter + manually expanded)
+  const expandedChapters = new Set(manuallyExpandedChapters);
+  if (toc && chapterSlug) {
+    const currentChapter = toc.chapters.find((c) => c.slug === chapterSlug);
+    if (currentChapter) {
+      expandedChapters.add(currentChapter.number);
     }
-  }, [chapterSlug, toc]);
+  }
+  // Always expand chapter 1 by default
+  if (toc && toc.chapters.length > 0) {
+    expandedChapters.add(1);
+  }
 
   const toggleChapter = (chapterNumber: number) => {
-    setExpandedChapters((prev) => {
+    setManuallyExpandedChapters((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(chapterNumber)) {
         newSet.delete(chapterNumber);
@@ -69,7 +81,7 @@ export default function Sidebar() {
           fixed lg:static inset-y-0 left-0 z-50
           w-80 border-r border-[var(--border-color)] bg-[var(--bg-secondary)]
           transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           overflow-y-auto
         `}
       >
@@ -102,7 +114,10 @@ export default function Sidebar() {
                   currentChapter={chapterSlug}
                   currentSection={sectionSlug}
                   isRead={isRead}
-                  progress={getChapterProgress(chapter.slug, chapter.sections.length)}
+                  progress={getChapterProgress(
+                    chapter.slug,
+                    chapter.sections.length,
+                  )}
                 />
               ))}
             </ul>
@@ -161,7 +176,7 @@ function ChapterItem({
           w-full flex items-center justify-between rounded-lg p-2
           text-left font-sans font-medium transition-colors
           hover:bg-[var(--bg-primary)]
-          ${isCurrentChapter ? 'bg-[var(--bg-primary)]' : ''}
+          ${isCurrentChapter ? "bg-[var(--bg-primary)]" : ""}
         `}
       >
         <span className="flex items-center gap-2">
@@ -171,7 +186,9 @@ function ChapterItem({
           </span>
         </span>
         {progress > 0 && (
-          <span className="text-xs text-[var(--text-secondary)]">{progress}%</span>
+          <span className="text-xs text-[var(--text-secondary)]">
+            {progress}%
+          </span>
         )}
       </button>
 
@@ -190,11 +207,14 @@ function ChapterItem({
                   className={`
                     flex items-center gap-2 rounded-lg p-2 text-sm
                     transition-colors hover:bg-[var(--bg-primary)]
-                    ${isCurrent ? 'bg-[var(--accent-color)]/10 font-medium text-[var(--accent-color)]' : ''}
+                    ${isCurrent ? "bg-[var(--accent-color)]/10 font-medium text-[var(--accent-color)]" : ""}
                   `}
                 >
                   {isReadSection && (
-                    <Check size={14} className="text-green-600 dark:text-green-400" />
+                    <Check
+                      size={14}
+                      className="text-green-600 dark:text-green-400"
+                    />
                   )}
                   <span>
                     {section.number} {section.title}

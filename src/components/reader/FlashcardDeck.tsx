@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { ChevronLeft, ChevronRight, RotateCw } from 'lucide-react';
-import { useFlashcardStore } from '@/stores/flashcardStore';
-import type { Flashcard } from '@/types/flashcard';
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, RotateCw } from "lucide-react";
+import { useFlashcardStore } from "@/stores/flashcardStore";
+import type { Flashcard } from "@/types/flashcard";
 
 interface FlashcardDeckProps {
   deckId: string;
@@ -22,7 +22,9 @@ export default function FlashcardDeck({ deckId }: FlashcardDeckProps) {
   if (!deck || deck.cards.length === 0) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-[var(--text-secondary)]">Engin kort í þessum búnka</p>
+        <p className="text-[var(--text-secondary)]">
+          Engin kort í þessum búnka
+        </p>
       </div>
     );
   }
@@ -38,7 +40,9 @@ export default function FlashcardDeck({ deckId }: FlashcardDeckProps) {
           <span className="text-[var(--text-secondary)]">
             Kort {currentCardIndex + 1} af {deck.cards.length}
           </span>
-          <span className="text-[var(--text-secondary)]">{Math.round(progress)}%</span>
+          <span className="text-[var(--text-secondary)]">
+            {Math.round(progress)}%
+          </span>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-primary)]">
           <div
@@ -71,7 +75,7 @@ export default function FlashcardDeck({ deckId }: FlashcardDeckProps) {
           className="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-6 py-2 font-sans font-medium text-white transition-colors hover:bg-[var(--accent-hover)]"
         >
           <RotateCw size={20} />
-          {showAnswer ? 'Fela svar' : 'Sýna svar'}
+          {showAnswer ? "Fela svar" : "Sýna svar"}
         </button>
 
         <button
@@ -106,7 +110,11 @@ interface FlashcardComponentProps {
   onFlip: () => void;
 }
 
-function FlashcardComponent({ card, showAnswer, onFlip }: FlashcardComponentProps) {
+function FlashcardComponent({
+  card,
+  showAnswer,
+  onFlip,
+}: FlashcardComponentProps) {
   const [isFlipping, setIsFlipping] = useState(false);
 
   const handleFlip = () => {
@@ -122,13 +130,13 @@ function FlashcardComponent({ card, showAnswer, onFlip }: FlashcardComponentProp
       <button
         onClick={handleFlip}
         className={`relative h-96 w-full cursor-pointer rounded-xl border-2 border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-lg transition-all duration-300 hover:shadow-xl ${
-          isFlipping ? 'scale-95' : 'scale-100'
+          isFlipping ? "scale-95" : "scale-100"
         }`}
       >
         <div className="flex h-full flex-col items-center justify-center p-8">
           {/* Front/Back indicator */}
           <div className="absolute left-4 top-4 rounded-full bg-[var(--accent-color)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent-color)]">
-            {showAnswer ? 'Svar' : 'Spurning'}
+            {showAnswer ? "Svar" : "Spurning"}
           </div>
 
           {/* Card content */}
@@ -138,13 +146,15 @@ function FlashcardComponent({ card, showAnswer, onFlip }: FlashcardComponentProp
             </p>
 
             {!showAnswer && card.category && (
-              <p className="text-sm text-[var(--text-secondary)]">{card.category}</p>
+              <p className="text-sm text-[var(--text-secondary)]">
+                {card.category}
+              </p>
             )}
           </div>
 
           {/* Flip hint */}
           <div className="absolute bottom-4 text-sm text-[var(--text-secondary)]">
-            Smelltu til að {showAnswer ? 'fela svar' : 'sjá svar'}
+            Smelltu til að {showAnswer ? "fela svar" : "sjá svar"}
           </div>
         </div>
       </button>

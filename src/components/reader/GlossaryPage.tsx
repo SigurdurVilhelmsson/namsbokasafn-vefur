@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { Search, BookOpen } from 'lucide-react';
-import { useGlossary } from '@/hooks/useGlossary';
-import { Link } from 'react-router-dom';
+import { useState } from "react";
+import { Search, BookOpen } from "lucide-react";
+import { useGlossary } from "@/hooks/useGlossary";
+import { Link } from "react-router-dom";
 
 export default function GlossaryPage() {
   const { glossary, loading, searchTerms, getTermsByLetter } = useGlossary();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   if (loading) {
     return (
@@ -18,7 +18,9 @@ export default function GlossaryPage() {
   if (!glossary) {
     return (
       <div className="flex min-h-[80vh] items-center justify-center">
-        <p className="text-red-600 dark:text-red-400">Gat ekki hlaðið orðasafni</p>
+        <p className="text-red-600 dark:text-red-400">
+          Gat ekki hlaðið orðasafni
+        </p>
       </div>
     );
   }
@@ -71,8 +73,8 @@ export default function GlossaryPage() {
             ) : (
               <>
                 <p className="text-sm text-[var(--text-secondary)]">
-                  {filteredTerms.length}{' '}
-                  {filteredTerms.length === 1 ? 'niðurstaða' : 'niðurstöður'}
+                  {filteredTerms.length}{" "}
+                  {filteredTerms.length === 1 ? "niðurstaða" : "niðurstöður"}
                 </p>
 
                 <div className="space-y-3">
@@ -89,7 +91,7 @@ export default function GlossaryPage() {
         {!searchQuery && termsByLetter && (
           <div className="space-y-8">
             {Object.entries(termsByLetter)
-              .sort(([a], [b]) => a.localeCompare(b, 'is'))
+              .sort(([a], [b]) => a.localeCompare(b, "is"))
               .map(([letter, terms]) => (
                 <div key={letter}>
                   <h2 className="mb-4 border-b-2 border-[var(--accent-color)] pb-2 font-sans text-2xl font-bold text-[var(--accent-color)]">
@@ -120,7 +122,17 @@ export default function GlossaryPage() {
 }
 
 // Kort fyrir einstakt hugtök (card for individual term)
-function TermCard({ term }: { term: { term: string; english?: string; definition: string; chapter: string; section: string } }) {
+function TermCard({
+  term,
+}: {
+  term: {
+    term: string;
+    english?: string;
+    definition: string;
+    chapter: string;
+    section: string;
+  };
+}) {
   return (
     <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] p-4 transition-all hover:border-[var(--accent-color)]">
       <div className="mb-2 flex items-baseline justify-between gap-4">

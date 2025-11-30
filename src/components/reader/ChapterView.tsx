@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { loadTableOfContents } from '@/utils/contentLoader';
-import { useReaderStore } from '@/stores/readerStore';
-import type { Chapter } from '@/types/content';
-import { Check } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { loadTableOfContents } from "@/utils/contentLoader";
+import { useReaderStore } from "@/stores/readerStore";
+import type { Chapter } from "@/types/content";
+import { Check } from "lucide-react";
 
 export default function ChapterView() {
   const { chapterSlug } = useParams<{ chapterSlug: string }>();
@@ -19,7 +19,7 @@ export default function ChapterView() {
         setChapter(foundChapter || null);
       })
       .catch((error) => {
-        console.error('Gat ekki hlaðið kafla:', error);
+        console.error("Gat ekki hlaðið kafla:", error);
       });
   }, [chapterSlug]);
 
@@ -39,7 +39,9 @@ export default function ChapterView() {
           <h1 className="mb-2 font-sans text-4xl font-bold text-[var(--text-primary)]">
             Kafli {chapter.number}
           </h1>
-          <h2 className="text-2xl text-[var(--text-secondary)]">{chapter.title}</h2>
+          <h2 className="text-2xl text-[var(--text-secondary)]">
+            {chapter.title}
+          </h2>
         </div>
 
         {/* Listi yfir kaflahlutar (section list) */}

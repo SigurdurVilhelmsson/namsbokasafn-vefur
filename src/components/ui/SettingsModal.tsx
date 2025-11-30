@@ -1,5 +1,5 @@
-import Modal from './Modal';
-import { useSettingsStore, FontSize, FontFamily } from '@/stores/settingsStore';
+import Modal from "./Modal";
+import { useSettingsStore, FontSize, FontFamily } from "@/stores/settingsStore";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -7,18 +7,19 @@ interface SettingsModalProps {
 }
 
 export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
-  const { fontSize, setFontSize, fontFamily, setFontFamily } = useSettingsStore();
+  const { fontSize, setFontSize, fontFamily, setFontFamily } =
+    useSettingsStore();
 
   const fontSizes: { value: FontSize; label: string }[] = [
-    { value: 'small', label: 'Lítið' },
-    { value: 'medium', label: 'Miðlungs' },
-    { value: 'large', label: 'Stórt' },
-    { value: 'xlarge', label: 'Mjög stórt' },
+    { value: "small", label: "Lítið" },
+    { value: "medium", label: "Miðlungs" },
+    { value: "large", label: "Stórt" },
+    { value: "xlarge", label: "Mjög stórt" },
   ];
 
   const fontFamilies: { value: FontFamily; label: string }[] = [
-    { value: 'serif', label: 'Serif (lestur)' },
-    { value: 'sans', label: 'Sans-serif (nútímalegt)' },
+    { value: "serif", label: "Serif (lestur)" },
+    { value: "sans", label: "Sans-serif (nútímalegt)" },
   ];
 
   return (
@@ -34,8 +35,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 onClick={() => setFontSize(size.value)}
                 className={`rounded-lg border-2 px-4 py-3 text-center transition-all ${
                   fontSize === size.value
-                    ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 font-semibold'
-                    : 'border-[var(--border-color)] hover:border-[var(--accent-color)]/50'
+                    ? "border-[var(--accent-color)] bg-[var(--accent-color)]/10 font-semibold"
+                    : "border-[var(--border-color)] hover:border-[var(--accent-color)]/50"
                 }`}
               >
                 <div className={`font-size-${size.value}`}>{size.label}</div>
@@ -54,14 +55,20 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 onClick={() => setFontFamily(family.value)}
                 className={`rounded-lg border-2 px-4 py-3 text-left transition-all ${
                   fontFamily === family.value
-                    ? 'border-[var(--accent-color)] bg-[var(--accent-color)]/10 font-semibold'
-                    : 'border-[var(--border-color)] hover:border-[var(--accent-color)]/50'
+                    ? "border-[var(--accent-color)] bg-[var(--accent-color)]/10 font-semibold"
+                    : "border-[var(--border-color)] hover:border-[var(--accent-color)]/50"
                 }`}
               >
-                <div className={family.value === 'serif' ? 'font-serif' : 'font-sans'}>
+                <div
+                  className={
+                    family.value === "serif" ? "font-serif" : "font-sans"
+                  }
+                >
                   {family.label}
                 </div>
-                <div className={`mt-1 text-sm text-[var(--text-secondary)] ${family.value === 'serif' ? 'font-serif' : 'font-sans'}`}>
+                <div
+                  className={`mt-1 text-sm text-[var(--text-secondary)] ${family.value === "serif" ? "font-serif" : "font-sans"}`}
+                >
                   Dæmi: Efnafræði
                 </div>
               </button>
@@ -72,10 +79,13 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         {/* Sýnishorn (preview) */}
         <div>
           <h3 className="mb-3 font-sans text-lg font-semibold">Forskoðun</h3>
-          <div className={`rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 font-size-${fontSize} ${fontFamily === 'serif' ? 'font-serif' : 'font-sans'}`}>
+          <div
+            className={`rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 font-size-${fontSize} ${fontFamily === "serif" ? "font-serif" : "font-sans"}`}
+          >
             <p className="mb-2">
-              Efnafræði er vísindin um efni og breytingar þess. Hún fjallar um uppbyggingu,
-              eiginleika og hegðun efna, svo og orkubreytingar sem fylgja efnahvörfum.
+              Efnafræði er vísindin um efni og breytingar þess. Hún fjallar um
+              uppbyggingu, eiginleika og hegðun efna, svo og orkubreytingar sem
+              fylgja efnahvörfum.
             </p>
             <p className="text-[var(--text-secondary)]">
               Þetta er sýnishorn af textanum með núverandi stillingum.
@@ -86,8 +96,8 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         {/* Upplýsingar (info) */}
         <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-4">
           <p className="text-sm text-[var(--text-secondary)]">
-            💡 <strong>Ábending:</strong> Stillingar eru vistaðar sjálfkrafa í vafranum þínum og
-            verða vistaðar á milli heimsókna.
+            💡 <strong>Ábending:</strong> Stillingar eru vistaðar sjálfkrafa í
+            vafranum þínum og verða vistaðar á milli heimsókna.
           </p>
         </div>
       </div>

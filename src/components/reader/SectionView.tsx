@@ -1,11 +1,20 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Check, Bookmark } from 'lucide-react';
-import { loadTableOfContents, loadSectionContent, findSectionBySlug } from '@/utils/contentLoader';
-import { useReaderStore } from '@/stores/readerStore';
-import MarkdownRenderer from './MarkdownRenderer';
-import NavigationButtons from './NavigationButtons';
-import type { SectionContent, NavigationContext, Chapter, Section } from '@/types/content';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { Check, Bookmark } from "lucide-react";
+import {
+  loadTableOfContents,
+  loadSectionContent,
+  findSectionBySlug,
+} from "@/utils/contentLoader";
+import { useReaderStore } from "@/stores/readerStore";
+import MarkdownRenderer from "./MarkdownRenderer";
+import NavigationButtons from "./NavigationButtons";
+import type {
+  SectionContent,
+  NavigationContext,
+  Chapter,
+  Section,
+} from "@/types/content";
 
 export default function SectionView() {
   const { chapterSlug, sectionSlug } = useParams<{
@@ -30,30 +39,43 @@ export default function SectionView() {
   useEffect(() => {
     if (!chapterSlug || !sectionSlug) return;
 
-    setLoading(true);
-    setError(null);
-
     // Setja núverandi staðsetningu
     setCurrentLocation(chapterSlug, sectionSlug);
 
-    Promise.all([loadTableOfContents(), loadSectionContent(chapterSlug, sectionSlug)])
-      .then(([toc, sectionContent]) => {
+    // Async loading function
+    const loadContent = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const [toc, sectionContent] = await Promise.all([
+          loadTableOfContents(),
+          loadSectionContent(chapterSlug, sectionSlug),
+        ]);
+
         setContent(sectionContent);
 
         // Finna navigation context
         const result = findSectionBySlug(toc, chapterSlug, sectionSlug);
         if (!result) {
-          setError('Kafli fannst ekki');
+          setError("Kafli fannst ekki");
+          setLoading(false);
           return;
         }
 
         const { chapter, section } = result;
-        const chapterIndex = toc.chapters.findIndex((c) => c.slug === chapterSlug);
-        const sectionIndex = chapter.sections.findIndex((s) => s.slug === sectionSlug);
+        const chapterIndex = toc.chapters.findIndex(
+          (c) => c.slug === chapterSlug,
+        );
+        const sectionIndex = chapter.sections.findIndex(
+          (s) => s.slug === sectionSlug,
+        );
 
         // Finna fyrri og næsta kafla
-        let previous: { chapter: Chapter; section: Section } | undefined = undefined;
-        let next: { chapter: Chapter; section: Section } | undefined = undefined;
+        let previous: { chapter: Chapter; section: Section } | undefined =
+          undefined;
+        let next: { chapter: Chapter; section: Section } | undefined =
+          undefined;
 
         if (sectionIndex > 0) {
           // Fyrri kafli í sama chapter
@@ -92,12 +114,14 @@ export default function SectionView() {
         });
 
         setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Villa við að hlaða kafla:', err);
-        setError('Gat ekki hlaðið kaflann. Vinsamlegast reyndu aftur.');
+      } catch (err) {
+        console.error("Villa við að hlaða kafla:", err);
+        setError("Gat ekki hlaðið kaflann. Vinsamlegast reyndu aftur.");
         setLoading(false);
-      });
+      }
+    };
+
+    loadContent();
   }, [chapterSlug, sectionSlug, setCurrentLocation]);
 
   // Merkja sem lesið þegar notandi skrollar niður (mark as read when scrolling down)
@@ -106,7 +130,9 @@ export default function SectionView() {
 
     const handleScroll = () => {
       const scrollPercentage =
-        (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+        (window.scrollY /
+          (document.documentElement.scrollHeight - window.innerHeight)) *
+        100;
 
       // Merkja sem lesið ef notandi hefur skrollað 80% niður
       if (scrollPercentage > 80 && !isRead(chapterSlug, sectionSlug)) {
@@ -114,8 +140,8 @@ export default function SectionView() {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [chapterSlug, sectionSlug, loading, isRead, markAsRead]);
 
   const handleToggleBookmark = () => {
@@ -146,12 +172,9 @@ export default function SectionView() {
       <div className="flex min-h-[80vh] items-center justify-center">
         <div className="text-center">
           <p className="mb-4 text-lg text-red-600 dark:text-red-400">
-            {error || 'Villa kom upp'}
+            {error || "Villa kom upp"}
           </p>
-          <a
-            href="/"
-            className="text-[var(--accent-color)] hover:underline"
-          >
+          <a href="/" className="text-[var(--accent-color)] hover:underline">
             Fara til baka á forsíðu
           </a>
         </div>
@@ -159,8 +182,10 @@ export default function SectionView() {
     );
   }
 
-  const sectionRead = chapterSlug && sectionSlug && isRead(chapterSlug, sectionSlug);
-  const bookmarked = chapterSlug && sectionSlug && isBookmarked(chapterSlug, sectionSlug);
+  const sectionRead =
+    chapterSlug && sectionSlug && isRead(chapterSlug, sectionSlug);
+  const bookmarked =
+    chapterSlug && sectionSlug && isBookmarked(chapterSlug, sectionSlug);
 
   return (
     <div className="min-h-screen">
@@ -174,13 +199,13 @@ export default function SectionView() {
                 onClick={handleMarkAsRead}
                 className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-sans font-medium transition-colors ${
                   sectionRead
-                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                    : 'border border-[var(--border-color)] hover:bg-[var(--bg-primary)]'
+                    ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                    : "border border-[var(--border-color)] hover:bg-[var(--bg-primary)]"
                 }`}
                 disabled={!!sectionRead}
               >
                 <Check size={16} />
-                {sectionRead ? 'Lesið' : 'Merkja sem lesið'}
+                {sectionRead ? "Lesið" : "Merkja sem lesið"}
               </button>
             </div>
 
@@ -188,20 +213,24 @@ export default function SectionView() {
               onClick={handleToggleBookmark}
               className={`rounded-lg p-2 transition-colors ${
                 bookmarked
-                  ? 'text-yellow-600 dark:text-yellow-400'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]'
+                  ? "text-yellow-600 dark:text-yellow-400"
+                  : "text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]"
               }`}
-              aria-label={bookmarked ? 'Fjarlægja bókamerki' : 'Bæta við bókamerki'}
-              title={bookmarked ? 'Fjarlægja bókamerki' : 'Bæta við bókamerki'}
+              aria-label={
+                bookmarked ? "Fjarlægja bókamerki" : "Bæta við bókamerki"
+              }
+              title={bookmarked ? "Fjarlægja bókamerki" : "Bæta við bókamerki"}
             >
-              <Bookmark size={20} fill={bookmarked ? 'currentColor' : 'none'} />
+              <Bookmark size={20} fill={bookmarked ? "currentColor" : "none"} />
             </button>
           </div>
 
           {/* Markmið kafla (learning objectives) */}
           {content.objectives && content.objectives.length > 0 && (
             <div className="mb-8 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] p-6">
-              <h3 className="mb-3 font-sans text-lg font-semibold">Markmið kaflans</h3>
+              <h3 className="mb-3 font-sans text-lg font-semibold">
+                Markmið kaflans
+              </h3>
               <ul className="list-inside list-disc space-y-2 text-[var(--text-secondary)]">
                 {content.objectives.map((objective, index) => (
                   <li key={index}>{objective}</li>

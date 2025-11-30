@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { BookOpen, ArrowRight } from 'lucide-react';
-import { loadTableOfContents } from '@/utils/contentLoader';
-import { useReaderStore } from '@/stores/readerStore';
-import type { TableOfContents } from '@/types/content';
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { BookOpen, ArrowRight } from "lucide-react";
+import { loadTableOfContents } from "@/utils/contentLoader";
+import { useReaderStore } from "@/stores/readerStore";
+import type { TableOfContents } from "@/types/content";
 
 export default function HomePage() {
   const [toc, setToc] = useState<TableOfContents | null>(null);
@@ -13,7 +13,7 @@ export default function HomePage() {
     loadTableOfContents()
       .then(setToc)
       .catch((error) => {
-        console.error('Gat ekki hlaðið efnisyfirliti:', error);
+        console.error("Gat ekki hlaðið efnisyfirliti:", error);
       });
   }, []);
 
@@ -35,7 +35,7 @@ export default function HomePage() {
       : `/kafli/${defaultChapter.slug}/${defaultSection.slug}`;
 
   const continueLinkText =
-    currentChapter && currentSection ? 'Halda áfram að lesa' : 'Byrja að lesa';
+    currentChapter && currentSection ? "Halda áfram að lesa" : "Byrja að lesa";
 
   return (
     <div className="min-h-[80vh] p-6">
@@ -84,8 +84,8 @@ export default function HomePage() {
                   Kafli {chapter.number}: {chapter.title}
                 </h3>
                 <p className="mt-2 text-sm text-[var(--text-secondary)]">
-                  {chapter.sections.length}{' '}
-                  {chapter.sections.length === 1 ? 'kafli' : 'kaflar'}
+                  {chapter.sections.length}{" "}
+                  {chapter.sections.length === 1 ? "kafli" : "kaflar"}
                 </p>
               </Link>
             ))}
@@ -95,7 +95,8 @@ export default function HomePage() {
         {/* Fótur með upplýsingum (footer with info) */}
         <div className="mt-12 text-center text-sm text-[var(--text-secondary)]">
           <p>
-            Þýðing á OpenStax Chemistry 2e kennslubók fyrir íslensk framhaldsskólanema
+            Þýðing á OpenStax Chemistry 2e kennslubók fyrir íslensk
+            framhaldsskólanema
           </p>
         </div>
       </div>
