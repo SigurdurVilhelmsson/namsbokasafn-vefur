@@ -1,6 +1,6 @@
 # Repository Health Dashboard
 
-> **Last Updated**: 2025-11-30 (run `npm run check:status` or ask Claude to update)
+> **Last Updated**: 2025-11-30 (Updated with accessibility audit and test infrastructure)
 
 ---
 
@@ -17,12 +17,12 @@
 
 | Category | Status | Last Check | Priority |
 |----------|--------|------------|----------|
-| 🔒 Security | 🟢 | 2025-11-30 | - |
+| 🔒 Security | 🟢 | 2025-11-30 | 0 vulnerabilities |
 | 📦 Dependencies | 🟢 | 2025-11-30 | All up to date! |
-| 💻 Code Quality | 🟢 | 2025-11-30 | - |
-| 🧪 Tests | ⚪ | Never | Need setup |
+| 💻 Code Quality | 🟢 | 2025-11-30 | All checks passing |
+| 🧪 Tests | 🟢 | 2025-11-30 | Vitest configured, 8 tests passing |
 | 📚 Documentation | 🟢 | 2025-11-30 | - |
-| ♿ Accessibility | 🟡 | Never | Run audit |
+| ♿ Accessibility | 🟡 | 2025-11-30 | Score: 65/100, 4 critical issues |
 | ⚡ Performance | ⚪ | Never | Need baseline |
 | 🎨 UX/Navigation | ⚪ | Never | Need review |
 
@@ -42,15 +42,17 @@ None currently. Great job! 🎉
 
 ## ⚠️ Warnings (Address Soon)
 
-### Accessibility Audit Needed
-- **Last Audit**: Never
-- **Action**: Run accessibility checklist (docs/checklists/ACCESSIBILITY-CHECKLIST.md)
-- **Estimated Time**: 1 hour
-
-### Test Suite Not Configured
-- **Current Status**: No tests set up
-- **Action**: Consider adding Vitest for unit tests
-- **Estimated Time**: 2-3 hours initial setup
+### Accessibility Issues (4 Critical, 5 Moderate)
+- **Last Audit**: 2025-11-30
+- **Score**: 65/100 (Partial WCAG 2.1 AA compliance)
+- **Critical Issues**:
+  1. Missing skip link for keyboard navigation
+  2. Form inputs missing labels (SearchModal, GlossaryPage)
+  3. Multiple H1 elements on pages (Header conflict)
+  4. Missing aria-expanded on collapsible elements
+- **Detailed Report**: docs/audits/accessibility-audit-2025-11-30.md
+- **Quick Wins**: ~55 minutes of fixes can improve score to 75/100
+- **Estimated Time**: 2-3 days to reach 85/100
 
 ---
 
@@ -60,6 +62,7 @@ None currently. Great job! 🎉
 1. [x] Run security audit: `npm audit` - ✅ Complete (0 vulnerabilities)
 2. [x] Check code quality: `npm run check:quality` - ✅ Complete (all passing)
 3. [x] Review dependency updates: `npm outdated` - ✅ Complete (all updated!)
+4. [x] Update npm to latest version (11.6.4) - ✅ Complete
 
 **If You Have 30 Minutes:**
 - [x] Review major dependency updates (React 19, Vite 7, Tailwind 4) - ✅ Complete
@@ -67,8 +70,12 @@ None currently. Great job! 🎉
 - [x] Migrate to Tailwind CSS 4 - ✅ Complete
 
 **If You Have 1 Hour:**
-- [ ] Run accessibility audit using docs/checklists/ACCESSIBILITY-CHECKLIST.md
-- [ ] Set up basic test infrastructure with Vitest
+- [x] Run accessibility audit - ✅ Complete (score: 65/100)
+- [x] Set up basic test infrastructure with Vitest - ✅ Complete (8 tests passing)
+
+**Next Priority:**
+- [ ] Fix accessibility critical issues (~55 min quick wins)
+- [ ] Add more component tests
 
 ---
 
@@ -91,9 +98,11 @@ None currently. Great job! 🎉
 - **Recent Major Updates**: React 19, Vite 7, Tailwind 4, react-markdown 10, eslint-plugin-react-hooks 7, globals 16
 
 ### Testing
-- **Test Coverage**: N/A
-- **Tests Passing**: N/A
-- **Status**: Test suite not yet configured
+- **Test Framework**: Vitest 4.0.14
+- **Testing Library**: @testing-library/react 16.3.0
+- **Tests Passing**: 8/8 (100%)
+- **Test Coverage**: Not yet measured (run `npm run test:coverage`)
+- **Status**: ✅ Infrastructure set up, basic Button component tests passing
 
 ### Documentation
 - **README Current**: ✅ (Comprehensive)
@@ -114,11 +123,15 @@ None! 🎉
 - [x] Upgrade to React 19 - ✅ Complete
 - [x] Upgrade to Vite 7 - ✅ Complete
 - [x] Upgrade to Tailwind CSS 4 - ✅ Complete
-- [ ] Weekly security audit (Sunday)
+- [x] Weekly security audit - ✅ Complete (2025-11-30)
+- [x] Update npm to latest version - ✅ Complete (11.6.4)
+- [ ] Fix accessibility critical issues (~1 hour)
 
 ### Due This Month (December 2025)
-- [ ] Complete accessibility audit
-- [ ] Set up test infrastructure
+- [x] Complete accessibility audit - ✅ Complete (2025-11-30, score: 65/100)
+- [x] Set up test infrastructure - ✅ Complete (2025-11-30, Vitest configured)
+- [ ] Fix accessibility critical issues (4 issues)
+- [ ] Achieve 80%+ test coverage for critical components
 
 ### Due This Quarter (Q1 2026)
 - [ ] Performance baseline with Lighthouse
@@ -128,6 +141,21 @@ None! 🎉
 
 ## 🎮 Recent Wins
 
+- ✅ **npm updated to 11.6.4** (2025-11-30)
+  - Latest major version installed
+- ✅ **Test infrastructure fully configured** (2025-11-30)
+  - Vitest 4.0.14 set up with React Testing Library
+  - happy-dom for fast DOM testing
+  - 8 comprehensive Button component tests passing
+  - Test scripts added: `test`, `test:watch`, `test:ui`, `test:coverage`
+  - Complete test documentation in src/test/README.md
+- ✅ **Accessibility audit completed** (2025-11-30)
+  - Comprehensive code review audit performed
+  - Score: 65/100 (Partial WCAG 2.1 AA)
+  - 15 issues identified (4 critical, 5 moderate, 6 minor)
+  - Detailed report saved: docs/audits/accessibility-audit-2025-11-30.md
+  - Clear implementation roadmap with quick wins identified
+  - Next audit scheduled: 2026-02-28
 - ✅ **Major dependency upgrades completed** (2025-11-30)
   - React 18 → 19 with full compatibility fixes
   - Vite 6 → 7 upgrade successful
@@ -148,6 +176,24 @@ None! 🎉
 ---
 
 ## 📝 Notes
+
+**2025-11-30 (Update 3)**: High-priority tasks completed! Test infrastructure and accessibility audit:
+- **npm 11.6.4**: Updated from 10.9.4 to latest major version
+- **Test Infrastructure**: Vitest fully configured with React Testing Library, happy-dom, and jest-dom matchers
+  - All test scripts working: `npm test`, `npm run test:watch`, `npm run test:ui`, `npm run test:coverage`
+  - 8 comprehensive Button component tests passing (100% pass rate)
+  - Complete test documentation and setup guides created
+- **Accessibility Audit**: Comprehensive code review completed
+  - Overall score: 65/100 (Partial WCAG 2.1 AA compliance)
+  - Excellent foundation: semantic HTML, keyboard nav, ARIA labels on icons
+  - 4 critical issues identified (skip link, form labels, H1 hierarchy, aria-expanded)
+  - 5 moderate issues (focus trap, progress ARIA, live regions, sidebar hidden state)
+  - Quick wins identified: ~55 minutes of fixes can improve score to 75/100
+  - Detailed report with implementation roadmap saved
+- **Security Audit**: 0 vulnerabilities found
+- **Dependencies**: All packages up to date (331 installed)
+
+**Next Steps**: Fix accessibility critical issues, expand test coverage
 
 **2025-11-30 (Update 2)**: Successfully completed major dependency upgrades! All 11 packages updated to latest versions:
 - **React 19.2.0**: Refactored all effects to comply with stricter linting rules
