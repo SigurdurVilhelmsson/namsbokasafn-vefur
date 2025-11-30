@@ -49,11 +49,15 @@ export default function GlossaryPage() {
 
           {/* Leitarreitur (search input) */}
           <div className="relative">
+            <label htmlFor="glossary-search" className="sr-only">
+              Leita að hugtaki
+            </label>
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
               size={20}
             />
             <input
+              id="glossary-search"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

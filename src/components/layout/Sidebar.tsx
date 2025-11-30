@@ -172,6 +172,8 @@ function ChapterItem({
     <li>
       <button
         onClick={onToggle}
+        aria-expanded={expanded}
+        aria-controls={`chapter-${chapter.number}-sections`}
         className={`
           w-full flex items-center justify-between rounded-lg p-2
           text-left font-sans font-medium transition-colors
@@ -194,7 +196,10 @@ function ChapterItem({
 
       {/* Sections */}
       {expanded && (
-        <ul className="ml-6 mt-1 space-y-1 border-l-2 border-[var(--border-color)] pl-3">
+        <ul
+          id={`chapter-${chapter.number}-sections`}
+          className="ml-6 mt-1 space-y-1 border-l-2 border-[var(--border-color)] pl-3"
+        >
           {chapter.sections.map((section) => {
             const isCurrent =
               isCurrentChapter && currentSection === section.slug;

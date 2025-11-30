@@ -85,11 +85,15 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       <div className="space-y-4">
         {/* Leitarreitur (search input) */}
         <div className="relative">
+          <label htmlFor="search-input" className="sr-only">
+            Leita að efni
+          </label>
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]"
             size={20}
           />
           <input
+            id="search-input"
             ref={inputRef}
             type="text"
             value={query}
