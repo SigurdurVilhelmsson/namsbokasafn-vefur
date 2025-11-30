@@ -10,176 +10,248 @@ Efnafræðilesari er vefforrit sem hannað er til að gera efnafræðinám skemm
 - 📱 Sveigjanlega hönnun fyrir síma og tölvur
 - 🌓 Ljóst og dökkt þema
 - 🔖 Lesframvinda og bókamerki
+- 🔍 Öfluga leitarvél
+- 📖 Gagnvirkt orðasafn
 - 🧮 KaTeX stuðningur fyrir stærðfræðijöfnur
-- 📖 Auðvelda leiðsögn milli kafla
 - ♿ Aðgengilega hönnun (WCAG 2.1 AA)
 
-## 🚀 Uppsetning
+## 🚀 Setup
 
-### Kröfur
+### Requirements
 
-- Node.js 18 eða nýrri
-- npm eða yarn
+- Node.js 18 or newer
+- npm or yarn
 
-### Setja upp staðbundið
+### Local Development
 
 ```bash
-# Klóna verkefnið
-git clone https://github.com/yourusername/Chemistry-Reader.git
+# Clone the repository
+git clone https://github.com/SigurdurVilhelmsson/Chemistry-Reader.git
 cd Chemistry-Reader
 
-# Setja upp dependencies
+# Install dependencies
 npm install
 
-# Keyra þróunarþjón
+# Run development server
 npm run dev
 ```
 
-Opnaðu síðan [http://localhost:5173](http://localhost:5173) í vafranum þínum.
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-### Bygja fyrir framleiðslu
+### Production Build
 
 ```bash
-# Byggja
+# Build
 npm run build
 
-# Forskoða byggingu
+# Preview build
 npm run preview
 ```
 
-## 📁 Verkefnaskipan
+## 📁 Project Structure
 
 ```
 efnafraedi-lesari/
 ├── public/
-│   └── content/              # Markdown efni og auðlindir
-│       ├── toc.json         # Efnisyfirlit
-│       └── chapters/        # Kaflar og kaflahlutir
+│   └── content/              # Markdown content and resources
+│       ├── toc.json         # Table of contents
+│       ├── glossary.json    # Glossary terms
+│       └── chapters/        # Chapter sections
 ├── src/
 │   ├── components/          # React components
-│   │   ├── layout/         # Útlit components (Header, Sidebar, etc.)
-│   │   ├── reader/         # Lestrar components (MarkdownRenderer, etc.)
+│   │   ├── layout/         # Layout components (Header, Sidebar)
+│   │   ├── reader/         # Reader components (MarkdownRenderer, etc.)
 │   │   └── ui/             # UI components (Button, Modal, etc.)
 │   ├── hooks/              # Custom React hooks
 │   ├── stores/             # Zustand state management
 │   ├── types/              # TypeScript type definitions
-│   ├── utils/              # Hjálparföll
-│   └── styles/             # CSS og styling
-├── DEVELOPMENT.md          # Þróunaráætlun (6 áfangar)
-└── Chemistry_Textbook_Reader_Specification.md  # Tæknileg hönnun
+│   ├── utils/              # Utility functions
+│   └── styles/             # CSS and styling
+├── DEVELOPMENT.md          # Development roadmap (6 phases)
+└── Chemistry_Textbook_Reader_Specification.md  # Technical specification
 ```
 
-## 🎯 Eiginleikar
+## 🎯 Features
 
-### Núverandi eiginleikar (Áfangi 1)
+### Phase 1: Core Reader (Completed)
 
-- ✅ Markdown rendering með KaTeX stuðningi
-- ✅ Ljóst/dökkt þema með viðhaldi
-- ✅ Sveigjanlegt útlit fyrir allar skjástærðir
-- ✅ Leiðsögn milli kafla
-- ✅ Lesframvinda tracking
-- ✅ Bókamerki
-- ✅ Sérsniðnar markdown þættir (dæmi, athugasemdir, viðvaranir)
+- ✅ Markdown rendering with KaTeX support
+- ✅ Light/dark theme with persistence
+- ✅ Responsive layout for all screen sizes
+- ✅ Chapter navigation
+- ✅ Reading progress tracking
+- ✅ Bookmarks
+- ✅ Custom markdown components (examples, notes, warnings)
 
-### Væntanlegir eiginleikar
+### Phase 2: Study Tools (Completed)
 
-Sjá [DEVELOPMENT.md](./DEVELOPMENT.md) fyrir ítarlega áætlun um framtíðarþróun:
+- ✅ Settings modal (font size, font family)
+- ✅ Search with Ctrl/Cmd+K shortcut
+- ✅ Full-text search across all content
+- ✅ Glossary system with 15+ terms
+- ✅ Alphabetically organized glossary page
 
-- **Áfangi 2**: Orðasafn, leit, áherslur, glósur
-- **Áfangi 3**: Minniskort, próf, spaced repetition
-- **Áfangi 4**: AI tútor samþætting, greiningarkerfi
-- **Áfangi 5**: Samvinnueiginleikar, offline stuðningur
-- **Áfangi 6**: Rannsóknarverkfæri, aðgengilegir eiginleikar
+### Upcoming Features
 
-## 🛠️ Tæknilegur stafli
+See [DEVELOPMENT.md](./DEVELOPMENT.md) for detailed roadmap:
 
-- **Frontend**: React 18 með TypeScript
+- **Phase 3**: Flashcards, quizzes, spaced repetition
+- **Phase 4**: AI tutor integration, analytics
+- **Phase 5**: Collaboration features, offline support
+- **Phase 6**: Research tools, advanced accessibility
+
+## 🛠️ Tech Stack
+
+- **Frontend**: React 18 with TypeScript
 - **Build Tool**: Vite
 - **Styling**: Tailwind CSS
 - **State Management**: Zustand
 - **Routing**: React Router
-- **Markdown**: react-markdown með KaTeX stuðningi
+- **Markdown**: react-markdown with KaTeX support
 - **Icons**: Lucide React
 
-## 📝 Bæta við efni
+## 📝 Adding Content
 
-### Bæta við nýjum kafla
+### Adding a New Chapter
 
-1. Búa til möppu í `public/content/chapters/`
-2. Bæta við markdown skrám fyrir hvern kaflahlutu
-3. Uppfæra `public/content/toc.json`
+1. Create a folder in `public/content/chapters/`
+2. Add markdown files for each section
+3. Update `public/content/toc.json`
 
-### Markdown sniðmát
+### Markdown Template
 
 ```markdown
 ---
-title: "Titill kaflans"
+title: "Section Title"
 section: "1.1"
 chapter: 1
 objectives:
-  - Markmið 1
-  - Markmið 2
+  - Objective 1
+  - Objective 2
 ---
 
-# Aðal titill
+# Main Title
 
-Efni hér...
+Content here...
 
-## Undirtitill
+## Subtitle
 
 :::example
-Dæmi hér
+Example content
 :::
 
 :::note
-Athugasemd hér
+Note content
 :::
 
 $$
-\text{Stærðfræði hér}
+Math equation here
 $$
 ```
 
-## 🎨 Þema og stíll
+### Custom Markdown Blocks
 
-Lesarinn styður ljóst og dökkt þema með sjálfvirkri greiningu á kerfisval. Þema er vistað í localStorage og beitt áður en síðan birtist til að forðast blikkun.
+- `:::example` - Styled example blocks
+- `:::note` - Note/information blocks
+- `:::warning` - Warning blocks
+- `$...$` - Inline math
+- `$$...$$` - Block math
 
-## ♿ Aðgengi
+## 🎨 Theming
 
-Verkefnið miðar að WCAG 2.1 AA samræmi:
+The reader supports light and dark themes with automatic system preference detection. Theme preference is saved in localStorage and applied before first paint to prevent flashing.
 
-- Semantic HTML
-- ARIA labels
-- Lyklaborðsleiðsögn
-- Nægilegur litamunur
+### Custom CSS Variables
+
+```css
+/* Light theme */
+--bg-primary: #faf8f5;
+--bg-secondary: #ffffff;
+--text-primary: #1a1a1a;
+--accent-color: #2563eb;
+
+/* Dark theme */
+--bg-primary: #1a1a2e;
+--bg-secondary: #16213e;
+--text-primary: #e2e8f0;
+--accent-color: #3b82f6;
+```
+
+## ♿ Accessibility
+
+The project aims for WCAG 2.1 AA compliance:
+
+- Semantic HTML (article, nav, main, aside, header, footer)
+- ARIA labels for interactive elements
+- Full keyboard navigation (Tab, Enter, Escape)
+- Skip to main content link
 - Focus indicators
-- Alt texti fyrir myndir
+- Alt text for all images
+- Sufficient color contrast
+- Screen reader friendly
 
-## 🤝 Framlag
+## 🚢 Deployment
 
-Við hvetjum til framlags! Vinsamlegast:
+### GitHub Actions
 
-1. Fork-aðu verkefnið
-2. Búðu til feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit-aðu breytingunum (`git commit -m 'Bæta við AmazingFeature'`)
-4. Push-aðu til branch-sins (`git push origin feature/AmazingFeature`)
-5. Opnaðu Pull Request
+The project includes a GitHub Actions workflow for automatic deployment to Linode:
 
-## 📄 Leyfi
+```yaml
+# .github/workflows/deploy.yml
+- Build on push to main
+- Deploy to Linode via SCP
+- Reload Nginx
+```
 
-Þetta verkefni er gefið út undir MIT leyfinu. Sjá [LICENSE](./LICENSE) skrána fyrir nánari upplýsingar.
+### Required Secrets
 
-## 🙏 Þakklæti
+Set these in GitHub repository settings:
+- `LINODE_HOST` - Server IP address
+- `LINODE_USER` - SSH username
+- `LINODE_SSH_KEY` - SSH private key
 
-- **OpenStax** fyrir frábæra opna kennslubók
-- **React** og **Vite** teymi fyrir framúrskarandi verkfæri
-- Allir þeir sem leggja sitt af mörkum til opinna námsefna
+### Nginx Configuration
 
-## 📧 Samband
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name efnafraedi.kvenno.app;
+
+    root /var/www/efnafraedi-lesari/dist;
+    index index.html;
+
+    # SPA routing
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
+
+## 🙏 Acknowledgments
+
+- **OpenStax** for the excellent open textbook
+- **React** and **Vite** teams for outstanding tools
+- All contributors to open educational resources
+
+## 📧 Contact
 
 Sigurður E. Vilhelmsson - [GitHub](https://github.com/SigurdurVilhelmsson)
 
-Verkefna tengill: [https://github.com/SigurdurVilhelmsson/Chemistry-Reader](https://github.com/SigurdurVilhelmsson/Chemistry-Reader)
+Project Link: [https://github.com/SigurdurVilhelmsson/Chemistry-Reader](https://github.com/SigurdurVilhelmsson/Chemistry-Reader)
 
 ---
 
