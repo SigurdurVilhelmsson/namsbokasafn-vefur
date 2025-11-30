@@ -1,0 +1,109 @@
+{
+  "terms": [
+    {
+      "term": "eðlismassi",
+      "english": "density",
+      "definition": "Hlutfall massa og rúmmáls fyrir efni eða hlut. Venjulega táknað með gríska bókstafnum ró (ρ).",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "SI-einingar",
+      "english": "SI Units",
+      "definition": "Alþjóðlegt einingakerfi (franska: Système International d'Unités) sem notað er í vísindum um allan heim. Inniheldur sjö grundvallareiningar.",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "marktækir tölustafir",
+      "english": "significant figures",
+      "definition": "Allir þeir tölustafir sem við vitum með vissu í mælingu, auk eins tölustafar sem er óviss.",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "fasaskipti",
+      "english": "phase transition",
+      "definition": "Breyting á ástandi efnis á milli fasts forms, vökvaforms og loftforms.",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "bráðnun",
+      "english": "melting",
+      "definition": "Fasaskipti þar sem fast efni breytist í vökva við bráðslumark þess.",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "gufun",
+      "english": "evaporation",
+      "definition": "Fasaskipti þar sem vökvi breytist í loftform. Getur átt sér stað við hvaða hitastig sem er.",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "sublímun",
+      "english": "sublimation",
+      "definition": "Fasaskipti þar sem fast efni breytist beint í loftform án þess að fara í gegnum vökvaform.",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "eðlisbreyting",
+      "english": "physical change",
+      "definition": "Breyting á formi eða ástandi efnis án þess að efnafræðileg samsetning breytist.",
+      "chapter": "1",
+      "section": "1.3"
+    },
+    {
+      "term": "efnahvarf",
+      "english": "chemical reaction",
+      "definition": "Ferli þar sem ein eða fleiri efnisgerðir breytast í nýjar efnisgerðir með mismunandi eiginleika.",
+      "chapter": "1",
+      "section": "1.3"
+    },
+    {
+      "term": "ítarlegur eiginleiki",
+      "english": "extensive property",
+      "definition": "Eiginleiki sem er háður magni efnis. Dæmi: massi, rúmmál, lengd.",
+      "chapter": "1",
+      "section": "1.3"
+    },
+    {
+      "term": "þéttlegur eiginleiki",
+      "english": "intensive property",
+      "definition": "Eiginleiki sem er óháður magni efnis. Dæmi: eðlismassi, litur, bræðslumark.",
+      "chapter": "1",
+      "section": "1.3"
+    },
+    {
+      "term": "efnafræði",
+      "english": "chemistry",
+      "definition": "Náttúruvísindi sem rannsaka samsetningu, uppbyggingu, eiginleika og hegðun efna, svo og breytingar sem efni gangast undir við efnahvörf.",
+      "chapter": "1",
+      "section": "1.1"
+    },
+    {
+      "term": "efni",
+      "english": "matter",
+      "definition": "Allt sem hefur massa og tekur pláss. Samanstendur af atómum og sameindum.",
+      "chapter": "1",
+      "section": "1.1"
+    },
+    {
+      "term": "hrein efni",
+      "english": "pure substance",
+      "definition": "Efni með fasta samsetningu. Getur verið frumefni eða samband.",
+      "chapter": "1",
+      "section": "1.1"
+    },
+    {
+      "term": "blanda",
+      "english": "mixture",
+      "definition": "Tvö eða fleiri efni saman þar sem hvert efni heldur sínum eiginleikum.",
+      "chapter": "1",
+      "section": "1.1"
+    }
+  ]
+}
