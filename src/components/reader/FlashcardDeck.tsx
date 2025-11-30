@@ -44,12 +44,24 @@ export default function FlashcardDeck({ deckId }: FlashcardDeckProps) {
             {Math.round(progress)}%
           </span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-primary)]">
+        <div
+          className="h-2 overflow-hidden rounded-full bg-[var(--bg-primary)]"
+          role="progressbar"
+          aria-valuenow={Math.round(progress)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`Framvinda: Kort ${currentCardIndex + 1} af ${deck.cards.length}`}
+        >
           <div
             className="h-full bg-[var(--accent-color)] transition-all duration-300"
             style={{ width: `${progress}%` }}
           />
         </div>
+      </div>
+
+      {/* ARIA live region for card navigation */}
+      <div role="status" aria-live="polite" className="sr-only">
+        Kort {currentCardIndex + 1} af {deck.cards.length}
       </div>
 
       {/* Flashcard */}
@@ -129,6 +141,7 @@ function FlashcardComponent({
     <div className="perspective-1000">
       <button
         onClick={handleFlip}
+        aria-label={showAnswer ? "Fela svar" : "Sýna svar"}
         className={`relative h-96 w-full cursor-pointer rounded-xl border-2 border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-lg transition-all duration-300 hover:shadow-xl ${
           isFlipping ? "scale-95" : "scale-100"
         }`}
