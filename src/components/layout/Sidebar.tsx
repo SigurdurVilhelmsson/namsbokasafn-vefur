@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Check, X, BookOpen } from 'lucide-react';
+import { ChevronDown, ChevronRight, Check, X, BookOpen, Brain } from 'lucide-react';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useReaderStore } from '@/stores/readerStore';
 import { loadTableOfContents } from '@/utils/contentLoader';
@@ -107,14 +107,21 @@ export default function Sidebar() {
               ))}
             </ul>
 
-            {/* Orðasafn tengill (glossary link) */}
-            <div className="mt-6 border-t border-[var(--border-color)] pt-4">
+            {/* Orðasafn og minniskort tenglar (glossary and flashcards links) */}
+            <div className="mt-6 space-y-2 border-t border-[var(--border-color)] pt-4">
               <Link
                 to="/ordabok"
                 className="flex items-center gap-2 rounded-lg p-2 font-sans font-medium transition-colors hover:bg-[var(--bg-primary)]"
               >
                 <BookOpen size={18} />
                 <span>Orðasafn</span>
+              </Link>
+              <Link
+                to="/minniskort"
+                className="flex items-center gap-2 rounded-lg p-2 font-sans font-medium transition-colors hover:bg-[var(--bg-primary)]"
+              >
+                <Brain size={18} />
+                <span>Minniskort</span>
               </Link>
             </div>
           </nav>
