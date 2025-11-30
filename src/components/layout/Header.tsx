@@ -16,7 +16,7 @@ export default function Header() {
     <>
       <header className="sticky top-0 z-50 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-sm">
         <div className="flex h-16 items-center justify-between px-4">
-          {/* Vinstri hluti: Hamburger valmynd fyrir farsíma og titill */}
+          {/* Left side: Hamburger menu for mobile and title */}
           <div className="flex items-center gap-4">
             <button
               onClick={toggleSidebar}
@@ -33,7 +33,7 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Hægri hluti: Leitartakki, þematakki, stillingartakki */}
+          {/* Right side: Search button, theme button, settings button */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSearchOpen(true)}

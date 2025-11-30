@@ -13,7 +13,7 @@ export default function Sidebar() {
   const [expandedChapters, setExpandedChapters] = useState<Set<number>>(new Set([1]));
   const { chapterSlug, sectionSlug } = useParams();
 
-  // Hlaða efnisyfirliti við upphaf (load TOC on mount)
+  // Load table of contents on mount
   useEffect(() => {
     loadTableOfContents()
       .then(setToc)
@@ -22,7 +22,7 @@ export default function Sidebar() {
       });
   }, []);
 
-  // Víkka út kafla sem verið er að lesa (expand current chapter)
+  // Expand current chapter
   useEffect(() => {
     if (toc && chapterSlug) {
       const chapter = toc.chapters.find((c) => c.slug === chapterSlug);
@@ -54,7 +54,7 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Yfirlag fyrir farsíma (mobile overlay) */}
+      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
@@ -63,7 +63,7 @@ export default function Sidebar() {
         />
       )}
 
-      {/* Hliðarspjald (sidebar) */}
+      {/* Sidebar */}
       <aside
         className={`
           fixed lg:static inset-y-0 left-0 z-50
@@ -74,7 +74,7 @@ export default function Sidebar() {
         `}
       >
         <div className="p-4">
-          {/* Loka takki fyrir farsíma (close button for mobile) */}
+          {/* Close button for mobile */}
           <div className="mb-4 flex items-center justify-between lg:hidden">
             <h2 className="font-sans text-lg font-semibold">Efnisyfirlit</h2>
             <button
@@ -86,7 +86,7 @@ export default function Sidebar() {
             </button>
           </div>
 
-          {/* Efnisyfirlit (table of contents) */}
+          {/* Table of contents */}
           <nav aria-label="Efnisyfirlit">
             <h2 className="mb-4 hidden font-sans text-lg font-semibold lg:block">
               Efnisyfirlit
@@ -107,7 +107,7 @@ export default function Sidebar() {
               ))}
             </ul>
 
-            {/* Orðasafn og minniskort tenglar (glossary and flashcards links) */}
+            {/* Glossary and flashcards links */}
             <div className="mt-6 space-y-2 border-t border-[var(--border-color)] pt-4">
               <Link
                 to="/ordabok"
@@ -131,7 +131,7 @@ export default function Sidebar() {
   );
 }
 
-// Hluti fyrir kafla (chapter item component)
+// Chapter item component
 interface ChapterItemProps {
   chapter: Chapter;
   expanded: boolean;
@@ -175,7 +175,7 @@ function ChapterItem({
         )}
       </button>
 
-      {/* Kaflahlutar (sections) */}
+      {/* Sections */}
       {expanded && (
         <ul className="ml-6 mt-1 space-y-1 border-l-2 border-[var(--border-color)] pl-3">
           {chapter.sections.map((section) => {

@@ -1,26 +1,26 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// Gerðir fyrir stillingar
+// Types for settings
 export type Theme = 'light' | 'dark';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 export type FontFamily = 'serif' | 'sans';
 
 interface SettingsState {
-  // Þema (theme)
+  // Theme
   theme: Theme;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
 
-  // Leturstærð (font size)
+  // Font size
   fontSize: FontSize;
   setFontSize: (size: FontSize) => void;
 
-  // Leturgerð (font family)
+  // Font family
   fontFamily: FontFamily;
   setFontFamily: (family: FontFamily) => void;
 
-  // Hliðarspjald opið/lokað (sidebar open/closed)
+  // Sidebar open/closed state
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
@@ -29,16 +29,16 @@ interface SettingsState {
 export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
-      // Sjálfgefin gildi (defaults)
+      // Default values
       theme: 'light',
       fontSize: 'medium',
       fontFamily: 'serif',
       sidebarOpen: true,
 
-      // Þema aðferðir (theme methods)
+      // Theme methods
       setTheme: (theme) => {
         set({ theme });
-        // Uppfæra dark class á html elementinu
+        // Update dark class on html element
         if (theme === 'dark') {
           document.documentElement.classList.add('dark');
         } else {
@@ -57,13 +57,13 @@ export const useSettingsStore = create<SettingsState>()(
           return { theme: newTheme };
         }),
 
-      // Leturstærð aðferðir (font size methods)
+      // Font size methods
       setFontSize: (fontSize) => set({ fontSize }),
 
-      // Leturgerð aðferðir (font family methods)
+      // Font family methods
       setFontFamily: (fontFamily) => set({ fontFamily }),
 
-      // Hliðarspjald aðferðir (sidebar methods)
+      // Sidebar methods
       setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
     }),
