@@ -27,9 +27,9 @@ export default function Header() {
             </button>
 
             <Link to="/" className="flex items-center gap-2">
-              <h1 className="text-xl font-bold font-sans text-[var(--text-primary)]">
+              <span className="text-xl font-bold font-sans text-[var(--text-primary)]">
                 Efnafræðilesari
-              </h1>
+              </span>
             </Link>
           </div>
 
