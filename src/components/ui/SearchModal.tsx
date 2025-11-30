@@ -1,10 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Search, Loader2, FileText } from 'lucide-react';
-import Modal from './Modal';
-import { searchContent, highlightQuery, SearchResult } from '@/utils/searchIndex';
-import { loadTableOfContents } from '@/utils/contentLoader';
-import type { TableOfContents } from '@/types/content';
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Search, Loader2, FileText } from "lucide-react";
+import Modal from "./Modal";
+import {
+  searchContent,
+  highlightQuery,
+  SearchResult,
+} from "@/utils/searchIndex";
+import { loadTableOfContents } from "@/utils/contentLoader";
+import type { TableOfContents } from "@/types/content";
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -12,7 +16,7 @@ interface SearchModalProps {
 }
 
 export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [toc, setToc] = useState<TableOfContents | null>(null);
@@ -34,34 +38,36 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   // Keyboard shortcut Ctrl/Cmd + K
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         if (!isOpen) {
           // Opna modal
-          setQuery('');
+          setQuery("");
           setResults([]);
         }
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
   // Leita þegar query breytist (search when query changes)
   useEffect(() => {
-    if (!toc || query.length < 2) {
-      setResults([]);
-      return;
-    }
+    const performSearch = async () => {
+      if (!toc || query.length < 2) {
+        setResults([]);
+        return;
+      }
 
-    setLoading(true);
+      setLoading(true);
+      const searchResults = await searchContent(query, toc);
+      setResults(searchResults);
+      setLoading(false);
+    };
 
     const timeoutId = setTimeout(() => {
-      searchContent(query, toc).then((searchResults) => {
-        setResults(searchResults);
-        setLoading(false);
-      });
+      performSearch();
     }, 300); // Debounce
 
     return () => clearTimeout(timeoutId);
@@ -70,7 +76,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const handleResultClick = (result: SearchResult) => {
     navigate(`/kafli/${result.chapterSlug}/${result.sectionSlug}`);
     onClose();
-    setQuery('');
+    setQuery("");
     setResults([]);
   };
 
@@ -122,7 +128,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         {results.length > 0 && (
           <div className="space-y-2">
             <p className="text-sm text-[var(--text-secondary)]">
-              {results.length} {results.length === 1 ? 'niðurstaða' : 'niðurstöður'} fundust
+              {results.length}{" "}
+              {results.length === 1 ? "niðurstaða" : "niðurstöður"} fundust
             </p>
 
             <div className="max-h-96 space-y-2 overflow-y-auto">
@@ -133,7 +140,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 text-left transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5"
                 >
                   <div className="mb-1 flex items-center gap-2">
-                    <FileText size={16} className="text-[var(--accent-color)]" />
+                    <FileText
+                      size={16}
+                      className="text-[var(--accent-color)]"
+                    />
                     <span className="font-sans text-sm font-semibold">
                       {result.sectionNumber} {result.sectionTitle}
                     </span>
@@ -152,7 +162,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   {result.matches > 1 && (
                     <p className="mt-2 text-xs text-[var(--accent-color)]">
                       {result.matches} samsvörun
-                      {result.matches !== 1 ? 'ar' : ''}
+                      {result.matches !== 1 ? "ar" : ""}
                     </p>
                   )}
                 </button>

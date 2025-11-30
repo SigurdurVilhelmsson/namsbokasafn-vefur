@@ -1,15 +1,15 @@
-import type { TableOfContents, SectionContent } from '@/types/content';
+import type { TableOfContents, SectionContent } from "@/types/content";
 
 // Load table of contents
 export async function loadTableOfContents(): Promise<TableOfContents> {
   try {
-    const response = await fetch('/content/toc.json');
+    const response = await fetch("/content/toc.json");
     if (!response.ok) {
-      throw new Error('Gat ekki hlaðið efnisyfirliti');
+      throw new Error("Gat ekki hlaðið efnisyfirliti");
     }
     return await response.json();
   } catch (error) {
-    console.error('Villa við að hlaða efnisyfirliti:', error);
+    console.error("Villa við að hlaða efnisyfirliti:", error);
     throw error;
   }
 }
@@ -17,10 +17,12 @@ export async function loadTableOfContents(): Promise<TableOfContents> {
 // Load section content
 export async function loadSectionContent(
   chapterSlug: string,
-  sectionFile: string
+  sectionFile: string,
 ): Promise<SectionContent> {
   try {
-    const response = await fetch(`/content/chapters/${chapterSlug}/${sectionFile}`);
+    const response = await fetch(
+      `/content/chapters/${chapterSlug}/${sectionFile}`,
+    );
     if (!response.ok) {
       throw new Error(`Gat ekki hlaðið kafla: ${chapterSlug}/${sectionFile}`);
     }
@@ -30,21 +32,21 @@ export async function loadSectionContent(
     const { metadata, content } = parseFrontmatter(markdown);
 
     return {
-      title: metadata.title || '',
-      section: metadata.section || '',
-      chapter: metadata.chapter || 0,
-      objectives: metadata.objectives || [],
+      title: typeof metadata.title === "string" ? metadata.title : "",
+      section: typeof metadata.section === "string" ? metadata.section : "",
+      chapter: typeof metadata.chapter === "number" ? metadata.chapter : 0,
+      objectives: Array.isArray(metadata.objectives) ? metadata.objectives : [],
       content,
     };
   } catch (error) {
-    console.error('Villa við að hlaða kaflahlutefni:', error);
+    console.error("Villa við að hlaða kaflahlutefni:", error);
     throw error;
   }
 }
 
 // Parse frontmatter from markdown
 function parseFrontmatter(markdown: string): {
-  metadata: Record<string, any>;
+  metadata: Record<string, string | number | string[]>;
   content: string;
 } {
   const frontmatterRegex = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/;
@@ -58,11 +60,11 @@ function parseFrontmatter(markdown: string): {
   }
 
   const [, frontmatterStr, content] = match;
-  const metadata: Record<string, any> = {};
+  const metadata: Record<string, string | number | string[]> = {};
 
   // Simple YAML parsing
-  const lines = frontmatterStr.split('\n');
-  let currentKey = '';
+  const lines = frontmatterStr.split("\n");
+  let currentKey = "";
   let isArray = false;
 
   lines.forEach((line) => {
@@ -71,15 +73,17 @@ function parseFrontmatter(markdown: string): {
     if (!trimmedLine) return;
 
     // Check if array value
-    if (trimmedLine.startsWith('- ')) {
-      if (isArray && currentKey) {
-        metadata[currentKey].push(trimmedLine.substring(2).trim());
+    if (trimmedLine.startsWith("- ")) {
+      if (isArray && currentKey && Array.isArray(metadata[currentKey])) {
+        (metadata[currentKey] as string[]).push(
+          trimmedLine.substring(2).trim(),
+        );
       }
       return;
     }
 
     // Check if key: value pair
-    const colonIndex = trimmedLine.indexOf(':');
+    const colonIndex = trimmedLine.indexOf(":");
     if (colonIndex > -1) {
       const key = trimmedLine.substring(0, colonIndex).trim();
       const value = trimmedLine.substring(colonIndex + 1).trim();
@@ -111,7 +115,7 @@ export function findChapterBySlug(toc: TableOfContents, slug: string) {
 export function findSectionBySlug(
   toc: TableOfContents,
   chapterSlug: string,
-  sectionSlug: string
+  sectionSlug: string,
 ) {
   const chapter = findChapterBySlug(toc, chapterSlug);
   if (!chapter) return null;

@@ -1,7 +1,7 @@
-import ReactMarkdown from 'react-markdown';
-import remarkMath from 'remark-math';
-import remarkGfm from 'remark-gfm';
-import rehypeKatex from 'rehype-katex';
+import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import remarkGfm from "remark-gfm";
+import rehypeKatex from "rehype-katex";
 
 interface MarkdownRendererProps {
   content: string;
@@ -21,7 +21,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             <figure className="my-6">
               <img
                 src={src}
-                alt={alt || ''}
+                alt={alt || ""}
                 className="mx-auto rounded-lg shadow-md"
                 loading="lazy"
                 {...props}
@@ -48,15 +48,20 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             // Athuga hvort þetta sé sérstök athugasemd eða viðvörun
             const firstChild = Array.isArray(children) ? children[0] : children;
             const text =
-              typeof firstChild === 'string'
+              typeof firstChild === "string"
                 ? firstChild
-                : firstChild && typeof firstChild === 'object' && 'props' in firstChild
-                ? firstChild.props?.children
-                : '';
+                : firstChild &&
+                    typeof firstChild === "object" &&
+                    "props" in firstChild
+                  ? firstChild.props?.children
+                  : "";
 
-            const isNote = typeof text === 'string' && text.startsWith(':::note');
-            const isWarning = typeof text === 'string' && text.startsWith(':::warning');
-            const isExample = typeof text === 'string' && text.startsWith(':::example');
+            const isNote =
+              typeof text === "string" && text.startsWith(":::note");
+            const isWarning =
+              typeof text === "string" && text.startsWith(":::warning");
+            const isExample =
+              typeof text === "string" && text.startsWith(":::example");
 
             if (isNote) {
               return (
@@ -70,7 +75,9 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             if (isWarning) {
               return (
                 <div className="content-block warning my-6">
-                  <div className="mb-2 font-sans font-semibold">⚠️ Viðvörun</div>
+                  <div className="mb-2 font-sans font-semibold">
+                    ⚠️ Viðvörun
+                  </div>
                   <div>{children}</div>
                 </div>
               );
@@ -96,8 +103,15 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           },
 
           // Kóði (code)
-          code: ({ children, className, ...props }: any) => {
-            const isInline = !className?.includes('language-');
+          code: ({
+            children,
+            className,
+            ...props
+          }: {
+            children?: React.ReactNode;
+            className?: string;
+          }) => {
+            const isInline = !className?.includes("language-");
             if (isInline) {
               return (
                 <code
@@ -110,7 +124,10 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             }
             return (
               <pre className="my-6 overflow-x-auto rounded-lg bg-[var(--bg-secondary)] p-4">
-                <code className={`font-mono text-sm ${className || ''}`} {...props}>
+                <code
+                  className={`font-mono text-sm ${className || ""}`}
+                  {...props}
+                >
                   {children}
                 </code>
               </pre>
@@ -122,8 +139,8 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
             <a
               href={href}
               className="text-[var(--accent-color)] underline transition-colors hover:text-[var(--accent-hover)]"
-              target={href?.startsWith('http') ? '_blank' : undefined}
-              rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+              target={href?.startsWith("http") ? "_blank" : undefined}
+              rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
               {...props}
             >
               {children}

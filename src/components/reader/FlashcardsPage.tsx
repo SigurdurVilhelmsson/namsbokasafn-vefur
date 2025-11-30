@@ -1,19 +1,20 @@
-import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Brain, Play } from 'lucide-react';
-import { useFlashcardStore } from '@/stores/flashcardStore';
-import { useGlossary } from '@/hooks/useGlossary';
-import { generateFlashcardsFromGlossary } from '@/utils/flashcardGenerator';
-import FlashcardDeck from './FlashcardDeck';
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Brain, Play } from "lucide-react";
+import { useFlashcardStore } from "@/stores/flashcardStore";
+import { useGlossary } from "@/hooks/useGlossary";
+import { generateFlashcardsFromGlossary } from "@/utils/flashcardGenerator";
+import FlashcardDeck from "./FlashcardDeck";
 
 export default function FlashcardsPage() {
-  const { decks, addDeck, startStudySession, currentDeckId, resetSession } = useFlashcardStore();
+  const { decks, addDeck, startStudySession, currentDeckId, resetSession } =
+    useFlashcardStore();
   const { glossary, loading } = useGlossary();
 
   // Auto-generate glossary deck if it doesn't exist
   useEffect(() => {
     if (glossary && !loading) {
-      const glossaryDeckExists = decks.some((d) => d.id === 'glossary-deck');
+      const glossaryDeckExists = decks.some((d) => d.id === "glossary-deck");
 
       if (!glossaryDeckExists) {
         const glossaryDeck = generateFlashcardsFromGlossary(glossary);
@@ -69,16 +70,21 @@ export default function FlashcardsPage() {
         {/* Available decks */}
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-sans text-2xl font-semibold">Tiltækir búnkar</h2>
+            <h2 className="font-sans text-2xl font-semibold">
+              Tiltækir búnkar
+            </h2>
             {/* Future: Add custom deck creation */}
           </div>
 
           {loading ? (
-            <p className="text-center text-[var(--text-secondary)]">Hleður búnka...</p>
+            <p className="text-center text-[var(--text-secondary)]">
+              Hleður búnka...
+            </p>
           ) : decks.length === 0 ? (
             <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] p-8 text-center">
               <p className="text-[var(--text-secondary)]">
-                Engir búnkar tiltækir. Búnkar eru sjálfkrafa búnir til úr orðasafninu.
+                Engir búnkar tiltækir. Búnkar eru sjálfkrafa búnir til úr
+                orðasafninu.
               </p>
             </div>
           ) : (
@@ -88,7 +94,9 @@ export default function FlashcardsPage() {
                   key={deck.id}
                   className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] p-6 transition-all hover:border-[var(--accent-color)] hover:shadow-lg"
                 >
-                  <h3 className="mb-2 font-sans text-lg font-semibold">{deck.name}</h3>
+                  <h3 className="mb-2 font-sans text-lg font-semibold">
+                    {deck.name}
+                  </h3>
                   {deck.description && (
                     <p className="mb-4 text-sm text-[var(--text-secondary)]">
                       {deck.description}
@@ -96,7 +104,8 @@ export default function FlashcardsPage() {
                   )}
 
                   <div className="mb-4 text-sm text-[var(--text-secondary)]">
-                    {deck.cards.length} {deck.cards.length === 1 ? 'kort' : 'kort'}
+                    {deck.cards.length}{" "}
+                    {deck.cards.length === 1 ? "kort" : "kort"}
                   </div>
 
                   <button
@@ -116,14 +125,21 @@ export default function FlashcardsPage() {
 
         {/* Info section */}
         <div className="mt-8 rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-6">
-          <h3 className="mb-3 font-sans text-lg font-semibold">💡 Ábendingar</h3>
+          <h3 className="mb-3 font-sans text-lg font-semibold">
+            💡 Ábendingar
+          </h3>
           <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
-            <li>• Farðu reglulega í gegnum minniskort til að efla langtímaminni</li>
+            <li>
+              • Farðu reglulega í gegnum minniskort til að efla langtímaminni
+            </li>
             <li>• Reyndu að svara spurningunni áður en þú snýrð kortinu við</li>
             <li>• Ef þú áttar þig ekki á svari, farðu aftur yfir kaflann</li>
             <li>
-              • Búnkar eru sjálfkrafa búnir til úr{' '}
-              <Link to="/ordabok" className="text-[var(--accent-color)] hover:underline">
+              • Búnkar eru sjálfkrafa búnir til úr{" "}
+              <Link
+                to="/ordabok"
+                className="text-[var(--accent-color)] hover:underline"
+              >
                 orðasafninu
               </Link>
             </li>

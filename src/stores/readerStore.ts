@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 // Type for reading progress
 interface ReadingProgress {
@@ -68,7 +68,9 @@ export const useReaderStore = create<ReaderState>()(
           }
         });
 
-        return totalSections > 0 ? Math.round((readCount / totalSections) * 100) : 0;
+        return totalSections > 0
+          ? Math.round((readCount / totalSections) * 100)
+          : 0;
       },
 
       // Set current location
@@ -110,7 +112,7 @@ export const useReaderStore = create<ReaderState>()(
       },
     }),
     {
-      name: 'efnafraedi-reading',
-    }
-  )
+      name: "efnafraedi-reading",
+    },
+  ),
 );
