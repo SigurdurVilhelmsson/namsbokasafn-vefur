@@ -1,11 +1,11 @@
 import { useEffect } from 'react';
 import { useSettingsStore } from '@/stores/settingsStore';
 
-// Hook til að stjórna þema og beita því á documentið (manage theme and apply to document)
+// Hook to manage theme and apply to document
 export function useTheme() {
   const { theme, setTheme, toggleTheme } = useSettingsStore();
 
-  // Beita þema við upphaf (apply theme on mount)
+  // Apply theme on mount
   useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -14,7 +14,7 @@ export function useTheme() {
     }
   }, [theme]);
 
-  // Athuga kerfisval ef ekkert er vistað (check system preference if none saved)
+  // Check system preference if none saved
   useEffect(() => {
     const checkSystemPreference = () => {
       if (

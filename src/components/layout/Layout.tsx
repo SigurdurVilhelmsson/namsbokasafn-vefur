@@ -17,7 +17,7 @@ export default function Layout() {
       <div className="flex">
         <Sidebar />
 
-        {/* Aðal efnissvæði (main content area) */}
+        {/* Main content area */}
         <main className="flex-1 overflow-x-hidden">
           <Outlet />
         </main>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Glossary, GlossaryTerm } from '@/types/glossary';
 
-// Hlaða orðasafni (load glossary)
+// Load glossary
 async function loadGlossary(): Promise<Glossary> {
   try {
     const response = await fetch('/content/glossary.json');
@@ -15,7 +15,7 @@ async function loadGlossary(): Promise<Glossary> {
   }
 }
 
-// Hook til að nota orðasafnið (hook to use glossary)
+// Hook to use glossary
 export function useGlossary() {
   const [glossary, setGlossary] = useState<Glossary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,7 +27,7 @@ export function useGlossary() {
     });
   }, []);
 
-  // Finna hugtök eftir leit (find terms by search)
+  // Find terms by search
   const searchTerms = (query: string): GlossaryTerm[] => {
     if (!glossary || !query.trim()) return [];
 
@@ -41,7 +41,7 @@ export function useGlossary() {
     );
   };
 
-  // Finna hugtök eftir nafni (find term by name)
+  // Find term by name
   const findTerm = (termName: string): GlossaryTerm | undefined => {
     if (!glossary) return undefined;
 
@@ -50,7 +50,7 @@ export function useGlossary() {
     );
   };
 
-  // Raða hugtökum í stafrófsröð (sort terms alphabetically)
+  // Sort terms alphabetically
   const getSortedTerms = (): GlossaryTerm[] => {
     if (!glossary) return [];
 
@@ -59,7 +59,7 @@ export function useGlossary() {
     );
   };
 
-  // Flokka eftir fyrsta staf (group by first letter)
+  // Group by first letter
   const getTermsByLetter = (): Record<string, GlossaryTerm[]> => {
     const sorted = getSortedTerms();
     const grouped: Record<string, GlossaryTerm[]> = {};

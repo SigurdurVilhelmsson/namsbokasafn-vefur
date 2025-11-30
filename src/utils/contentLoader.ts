@@ -1,6 +1,6 @@
 import type { TableOfContents, SectionContent } from '@/types/content';
 
-// Hlaða efnisyfirliti (load table of contents)
+// Load table of contents
 export async function loadTableOfContents(): Promise<TableOfContents> {
   try {
     const response = await fetch('/content/toc.json');
@@ -14,7 +14,7 @@ export async function loadTableOfContents(): Promise<TableOfContents> {
   }
 }
 
-// Hlaða kaflahlutefni (load section content)
+// Load section content
 export async function loadSectionContent(
   chapterSlug: string,
   sectionFile: string
@@ -26,7 +26,7 @@ export async function loadSectionContent(
     }
     const markdown = await response.text();
 
-    // Greina frontmatter og efni (parse frontmatter and content)
+    // Parse frontmatter and content
     const { metadata, content } = parseFrontmatter(markdown);
 
     return {
@@ -42,7 +42,7 @@ export async function loadSectionContent(
   }
 }
 
-// Greina frontmatter úr markdown (parse frontmatter from markdown)
+// Parse frontmatter from markdown
 function parseFrontmatter(markdown: string): {
   metadata: Record<string, any>;
   content: string;
@@ -60,7 +60,7 @@ function parseFrontmatter(markdown: string): {
   const [, frontmatterStr, content] = match;
   const metadata: Record<string, any> = {};
 
-  // Einföld YAML greining (simple YAML parsing)
+  // Simple YAML parsing
   const lines = frontmatterStr.split('\n');
   let currentKey = '';
   let isArray = false;
@@ -70,7 +70,7 @@ function parseFrontmatter(markdown: string): {
 
     if (!trimmedLine) return;
 
-    // Athuga hvort þetta sé array gildi (check if array value)
+    // Check if array value
     if (trimmedLine.startsWith('- ')) {
       if (isArray && currentKey) {
         metadata[currentKey].push(trimmedLine.substring(2).trim());
@@ -78,7 +78,7 @@ function parseFrontmatter(markdown: string): {
       return;
     }
 
-    // Athuga hvort þetta sé key: value par (check if key: value pair)
+    // Check if key: value pair
     const colonIndex = trimmedLine.indexOf(':');
     if (colonIndex > -1) {
       const key = trimmedLine.substring(0, colonIndex).trim();
@@ -87,13 +87,13 @@ function parseFrontmatter(markdown: string): {
       currentKey = key;
 
       if (!value) {
-        // Næsta gildi er líklega array (next value is probably array)
+        // Next value is probably array
         metadata[key] = [];
         isArray = true;
       } else {
-        // Einföld gildi (simple values)
+        // Simple values
         isArray = false;
-        // Reyna að breyta í tölu ef mögulegt (try to convert to number if possible)
+        // Try to convert to number if possible
         metadata[key] = isNaN(Number(value)) ? value : Number(value);
       }
     }
@@ -102,12 +102,12 @@ function parseFrontmatter(markdown: string): {
   return { metadata, content };
 }
 
-// Finna kafla eftir slug (find chapter by slug)
+// Find chapter by slug
 export function findChapterBySlug(toc: TableOfContents, slug: string) {
   return toc.chapters.find((chapter) => chapter.slug === slug);
 }
 
-// Finna kaflahlutu eftir slug (find section by slug)
+// Find section by slug
 export function findSectionBySlug(
   toc: TableOfContents,
   chapterSlug: string,
