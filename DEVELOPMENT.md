@@ -27,68 +27,68 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 
 **Estimated Time:** 3-4 hours
 
-### 1.1 Project Setup
-- [ ] Initialize Vite + React + TypeScript project
-- [ ] Configure Tailwind CSS with custom design tokens
-- [ ] Set up project structure (components, hooks, utils, types)
-- [ ] Configure ESLint and Prettier
-- [ ] Create GitHub repository
-- [ ] Set up GitHub Actions for Linode deployment
+### 1.1 Project Setup ✅
+- [x] Initialize Vite + React + TypeScript project
+- [x] Configure Tailwind CSS with custom design tokens
+- [x] Set up project structure (components, hooks, utils, types)
+- [x] Configure ESLint and Prettier
+- [x] Create GitHub repository
+- [x] Set up GitHub Actions for Linode deployment
 
-### 1.2 Core Layout
-- [ ] **Header Component**
+### 1.2 Core Layout ✅
+- [x] **Header Component**
   - Book title
   - Search button (placeholder)
   - Theme toggle (light/dark)
   - Settings button (placeholder)
-- [ ] **Sidebar Component**
+- [x] **Sidebar Component**
   - Collapsible chapter list
   - Section list within chapters
   - Current section highlighting
   - Mobile hamburger menu
-- [ ] **Content Area**
+- [x] **Content Area**
   - Clean typography optimized for reading
   - Maximum width constraint (720px)
   - Comfortable margins and line height
-- [ ] **Footer/Navigation**
+- [x] **Footer/Navigation**
   - Previous/Next section buttons
   - Current location breadcrumb
 
-### 1.3 Content Rendering
-- [ ] **Markdown Parser Setup**
+### 1.3 Content Rendering ✅
+- [x] **Markdown Parser Setup**
   - react-markdown configuration
   - remark-gfm for tables
   - remark-math + rehype-katex for equations
-- [ ] **Custom Components**
+- [x] **Custom Components**
   - Styled headings (h1-h4)
   - Styled tables with responsive scroll
   - Styled blockquotes for notes
   - Styled code blocks
   - Image component with caption support
-- [ ] **Math Rendering**
+- [x] **Math Rendering**
   - Inline math ($...$)
   - Block math ($$...$$)
   - Chemical equations
 
-### 1.4 Navigation System
-- [ ] React Router setup
-- [ ] Routes: `/`, `/kafli/:chapter`, `/kafli/:chapter/:section`
-- [ ] TOC data loading from `toc.json`
-- [ ] Dynamic section loading from markdown files
+### 1.4 Navigation System ✅
+- [x] React Router setup
+- [x] Routes: `/`, `/kafli/:chapter`, `/kafli/:chapter/:section`
+- [x] TOC data loading from `toc.json`
+- [x] Dynamic section loading from markdown files
 
-### 1.5 Theme System
-- [ ] Light theme (cream/white background)
-- [ ] Dark theme (dark gray background)
-- [ ] System preference detection
-- [ ] Manual toggle
-- [ ] Persistence in localStorage
-- [ ] No flash on page load (CSS custom properties)
+### 1.5 Theme System ✅
+- [x] Light theme (cream/white background)
+- [x] Dark theme (dark gray background)
+- [x] System preference detection
+- [x] Manual toggle
+- [x] Persistence in localStorage
+- [x] No flash on page load (CSS custom properties)
 
-### 1.6 Deployment
-- [ ] Nginx configuration on Linode
-- [ ] SSL certificate via Let's Encrypt
-- [ ] GitHub Actions workflow
-- [ ] Test deployment pipeline
+### 1.6 Deployment ✅
+- [x] Nginx configuration on Linode
+- [x] SSL certificate via Let's Encrypt
+- [x] GitHub Actions workflow
+- [x] Test deployment pipeline
 
 ### Phase 1 Deliverables
 - ✅ Deployed reader at `efnafraedi.kvenno.app`
@@ -105,23 +105,23 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 
 **Estimated Time:** 4-6 hours
 
-### 2.1 Reading Progress System
-- [ ] Track which sections have been read
-- [ ] Visual indicators in sidebar (checkmark, progress bar)
-- [ ] Chapter completion percentage
-- [ ] "Continue Reading" button on landing page
-- [ ] Total book progress indicator
-- [ ] Persistence in localStorage (later: sync to backend)
+### 2.1 Reading Progress System ✅
+- [x] Track which sections have been read
+- [x] Visual indicators in sidebar (checkmark, progress bar)
+- [x] Chapter completion percentage
+- [x] "Continue Reading" button on landing page
+- [x] Total book progress indicator
+- [x] Persistence in localStorage (later: sync to backend)
 
-### 2.2 Bookmarks
-- [ ] Bookmark any section
-- [ ] Bookmark list in sidebar panel
-- [ ] Quick navigation to bookmarks
+### 2.2 Bookmarks ✅
+- [x] Bookmark any section
+- [x] Bookmark list in sidebar panel
+- [x] Quick navigation to bookmarks
 - [ ] Bookmark notes (optional description)
 - [ ] Export bookmarks list
 - [ ] Keyboard shortcut (Cmd/Ctrl + D)
 
-### 2.3 Text Highlighting
+### 2.3 Text Highlighting ⏸️ (Not Yet Implemented)
 - [ ] Select text to highlight
 - [ ] Multiple highlight colors (yellow, green, blue, pink)
 - [ ] Highlights persist per section
@@ -130,7 +130,7 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 - [ ] Export highlights to markdown/text
 - [ ] Highlight organization by chapter
 
-### 2.4 Margin Notes (Annotations)
+### 2.4 Margin Notes (Annotations) ⏸️ (Not Yet Implemented)
 - [ ] Add note to any paragraph
 - [ ] Note indicator in margin
 - [ ] Click to expand/collapse note
@@ -139,38 +139,40 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 - [ ] Export notes with context
 - [ ] Link notes to specific text selections
 
-### 2.5 Settings Panel
-- [ ] Font size adjustment (Small/Medium/Large/X-Large)
-- [ ] Line height adjustment
-- [ ] Font family choice (Serif/Sans-serif/Dyslexia-friendly)
-- [ ] Content width adjustment
-- [ ] Settings persistence
+### 2.5 Settings Panel ✅
+- [x] Font size adjustment (Small/Medium/Large/X-Large)
+- [x] Line height adjustment
+- [x] Font family choice (Serif/Sans-serif/Dyslexia-friendly)
+- [x] Content width adjustment
+- [x] Settings persistence
 
-### 2.6 Search Implementation
-- [ ] Search modal (Cmd/Ctrl + K)
-- [ ] Build search index from content
-- [ ] Search across all chapters
-- [ ] Show matching snippets with highlights
-- [ ] Navigate to result
+### 2.6 Search Implementation ✅
+- [x] Search modal (Cmd/Ctrl + K)
+- [x] Build search index from content
+- [x] Search across all chapters
+- [x] Show matching snippets with highlights
+- [x] Navigate to result
 - [ ] Recent searches history
 - [ ] Search within current chapter option
 
-### 2.7 Glossary System
-- [ ] Load glossary from `glossary.json`
+### 2.7 Glossary System ✅
+- [x] Load glossary from `glossary.json`
 - [ ] Auto-detect glossary terms in content
 - [ ] Hover tooltip showing definition
 - [ ] Click for full glossary entry
-- [ ] Dedicated glossary page (`/ordabok`)
-- [ ] Alphabetical index
-- [ ] Search/filter glossary
+- [x] Dedicated glossary page (`/ordabok`)
+- [x] Alphabetical index
+- [x] Search/filter glossary
 - [ ] Link to sections where term appears
 
 ### Phase 2 Deliverables
-- ✅ Personal study tools (highlights, notes, bookmarks)
+- 🟡 Personal study tools (bookmarks ✅, highlights ⏸️, notes ⏸️)
 - ✅ Reading progress tracking
 - ✅ Full-text search
-- ✅ Interactive glossary
+- 🟡 Interactive glossary (page ✅, inline tooltips ⏸️)
 - ✅ Customizable reading experience
+
+**Phase 2 Status:** ~80% complete. Core features functional, some advanced features deferred.
 
 ---
 
@@ -180,32 +182,33 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 
 **Estimated Time:** 6-8 hours
 
-### 3.1 Flashcard System
-- [ ] **Flashcard Creation**
+### 3.1 Flashcard System ✅
+- [x] **Flashcard Creation**
   - Auto-generate from glossary terms
-  - Auto-generate from chapter learning objectives
-  - Create custom flashcards from highlights
-  - Manual flashcard creation
-- [ ] **Flashcard Interface**
+  - [ ] Auto-generate from chapter learning objectives
+  - [ ] Create custom flashcards from highlights
+  - [ ] Manual flashcard creation
+- [x] **Flashcard Interface**
   - Card flip animation
   - Show/hide answer
-  - Rate difficulty (Easy/Medium/Hard or 1-5)
+  - [ ] Rate difficulty (Easy/Medium/Hard or 1-5)
   - Skip/Next controls
-- [ ] **Organization**
+- [x] **Organization**
   - Flashcard decks per chapter
-  - Combined "All Terms" deck
-  - Custom decks from selections
-  - Deck progress tracking
+  - [x] Combined "All Terms" deck (Glossary deck)
+  - [ ] Custom decks from selections
+  - [x] Deck progress tracking
 
-### 3.2 Spaced Repetition System (SRS)
+### 3.2 Spaced Repetition System (SRS) 🟡 (Infrastructure Ready)
 - [ ] Implement basic SRS algorithm (SM-2 or similar)
+- [x] Store study records (ease, review count, last reviewed)
 - [ ] Schedule card reviews based on difficulty rating
 - [ ] "Due for review" count and notification
 - [ ] Daily study session with due cards
 - [ ] Statistics: cards learned, retention rate
 - [ ] Streak tracking (days studied)
 
-### 3.3 Self-Quiz System
+### 3.3 Self-Quiz System ⏸️ (Not Yet Implemented)
 - [ ] Extract exercises from chapter content
 - [ ] Present as interactive quiz
 - [ ] Multiple choice, fill-in-blank, calculation types
@@ -214,20 +217,20 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 - [ ] Quiz history per chapter
 - [ ] "Practice Mode" vs "Test Mode"
 
-### 3.4 Learning Objectives Tracker
+### 3.4 Learning Objectives Tracker ⏸️ (Not Yet Implemented)
 - [ ] Display learning objectives at chapter start
 - [ ] Checkbox to mark objectives as understood
 - [ ] Link objectives to relevant sections
 - [ ] Summary view of mastered vs. pending objectives
 - [ ] Suggest review for unchecked objectives
 
-### 3.5 Chapter Summary Generator
+### 3.5 Chapter Summary Generator ⏸️ (Not Yet Implemented)
 - [ ] Auto-generated key points per chapter (static)
 - [ ] Collapsible summary at chapter end
 - [ ] "Quick Review" mode showing only summaries
 - [ ] Export summaries as study sheet
 
-### 3.6 Formula Reference Sheet
+### 3.6 Formula Reference Sheet ⏸️ (Not Yet Implemented)
 - [ ] Extract key formulas from content
 - [ ] Dedicated formula reference page
 - [ ] Organized by chapter/topic
@@ -235,18 +238,21 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 - [ ] Copy formula to clipboard
 - [ ] Print-friendly formula sheet
 
-### 3.7 Study Session Mode
+### 3.7 Study Session Mode ⏸️ (Not Yet Implemented)
 - [ ] Focused reading mode (hide sidebar, minimal UI)
 - [ ] Pomodoro timer integration (optional)
 - [ ] Session summary (time spent, sections read)
 - [ ] "Mark as reviewed" at session end
 
 ### Phase 3 Deliverables
-- ✅ Flashcard system with SRS
-- ✅ Self-quiz functionality
-- ✅ Learning progress tracking
-- ✅ Active recall tools
-- ✅ Study session support
+- ✅ Flashcard system (auto-generated from glossary)
+- 🟡 SRS infrastructure (data storage ready, algorithm not implemented)
+- ⏸️ Self-quiz functionality (not yet implemented)
+- 🟡 Learning progress tracking (reading progress ✅, objectives tracking ⏸️)
+- 🟡 Active recall tools (flashcards ✅, quizzes ⏸️)
+- ⏸️ Study session support (not yet implemented)
+
+**Phase 3 Status:** ~30% complete. Flashcard system functional, other features pending.
 
 ---
 
@@ -588,7 +594,201 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 
 ---
 
-*Last Updated: November 2025*
-*Version: 1.0*
+## 📊 Current Status Summary (Updated: 2025-11-30)
+
+### Overall Progress: ~55% of Phase 1-3 Complete
+
+| Phase | Status | Progress | Notes |
+|-------|--------|----------|-------|
+| Phase 1 | ✅ Complete | 100% | Fully deployed and functional |
+| Phase 2 | 🟡 Mostly Complete | 80% | Missing highlights & annotations |
+| Phase 3 | 🟡 Partially Complete | 30% | Flashcards ✅, other features pending |
+| Phase 4 | ⏸️ Not Started | 0% | Requires AI Tutor completion |
+| Phase 5 | ⏸️ Not Started | 0% | Backend features |
+| Phase 6 | 🟡 In Progress | 15% | Test infrastructure ✅, a11y audit ✅ |
+
+### Recent Accomplishments (November 2025)
+
+**Technical Infrastructure:**
+- ✅ React 19 migration complete
+- ✅ Vite 7 upgrade successful
+- ✅ Tailwind CSS 4 migration complete
+- ✅ Test infrastructure with Vitest (8 tests passing)
+- ✅ Repository health monitoring system
+
+**Accessibility:**
+- ✅ Comprehensive accessibility audit completed (Score: 65/100)
+- ✅ 9 accessibility issues fixed (4 critical, 5 moderate)
+- Remaining: Minor improvements for WCAG 2.1 AA compliance
+
+**Features:**
+- ✅ Flashcard system with auto-generation from glossary
+- ✅ Reading progress tracking
+- ✅ Bookmarking system
+- ✅ Full-text search
+- ✅ Glossary page
+
+### Key Metrics
+
+**Code Quality:**
+- 0 ESLint errors/warnings
+- 0 TypeScript errors
+- 0 security vulnerabilities
+- 100% Prettier formatted
+
+**Testing:**
+- 8/8 tests passing
+- Test coverage: Not yet measured
+
+**Accessibility:**
+- WCAG 2.1 score: 65/100 (Partial AA compliance)
+- Target: 85/100 (Full AA compliance)
+
+---
+
+## 🎯 Recommended Next Steps
+
+### Immediate Priorities (Next 1-2 Weeks)
+
+#### 1. Complete Accessibility Fixes (~2-3 days)
+Based on audit findings in `docs/audits/accessibility-audit-2025-11-30.md`:
+- [ ] Fix remaining minor accessibility issues
+- [ ] Achieve WCAG 2.1 AA compliance (target: 85/100)
+- [ ] Add comprehensive keyboard shortcut documentation
+
+**Impact:** High - Essential for educational equity and grant compliance
+
+#### 2. Expand Test Coverage (~1 week)
+- [ ] Add tests for critical components (Header, Sidebar, SearchModal)
+- [ ] Achieve 70%+ code coverage for core features
+- [ ] Set up CI/CD test automation
+
+**Impact:** High - Ensures stability as features are added
+
+### Short-term Goals (Next 1-2 Months)
+
+#### 3. Complete Phase 3 Active Learning Features
+**Priority Order:**
+1. **Self-Quiz System** (Est: 6-8 hours)
+   - Most impactful for learning outcomes
+   - Can reuse existing markdown content
+   - Similar complexity to flashcards
+
+2. **Complete SRS Implementation** (Est: 4-6 hours)
+   - Infrastructure already in place
+   - SM-2 algorithm straightforward
+   - Enhances flashcard effectiveness
+
+3. **Learning Objectives Tracker** (Est: 3-4 hours)
+   - Uses existing frontmatter data
+   - Simple UI additions
+   - High educational value
+
+4. **Formula Reference Sheet** (Est: 4-5 hours)
+   - Valuable reference for students
+   - Can extract from existing content
+   - Moderate complexity
+
+**Total Estimated Time:** 17-23 hours
+
+#### 4. Add Missing Phase 2 Features (Optional)
+**Lower Priority:**
+- Text highlighting (8-10 hours)
+- Margin notes/annotations (10-12 hours)
+
+**Note:** These are nice-to-have but less impactful than Phase 3 active learning features.
+
+### Medium-term Goals (3-6 Months)
+
+#### 5. Phase 4: AI Integration
+**Prerequisites:**
+- AI Chemistry Tutor project must be deployed
+- API endpoints defined and documented
+
+**Features to Implement:**
+1. "Ask AI" button integration
+2. Contextual AI features (explain, simplify, examples)
+3. Smart summaries
+4. Study analytics dashboard
+
+**Estimated Time:** 8-12 hours (after AI Tutor ready)
+
+#### 6. Performance Optimization
+- [ ] Run Lighthouse performance audit
+- [ ] Optimize bundle size
+- [ ] Implement code splitting
+- [ ] Add performance monitoring
+
+### Long-term Vision (6+ Months)
+
+#### Phase 5: Collaboration & Advanced Features
+- User accounts and data sync
+- Teacher features
+- Study groups
+- PWA/offline support
+
+#### Phase 6: Research Platform
+- Research analytics backend
+- A/B testing framework
+- Learning outcome tracking
+
+---
+
+## 🚀 Quick Action Items
+
+**Can be completed today (15-30 min each):**
+1. [ ] Add keyboard shortcut documentation page
+2. [ ] Improve button component test coverage
+3. [ ] Add contributing guidelines to README
+4. [ ] Create issue templates for GitHub
+
+**This week (1-2 hours each):**
+1. [ ] Implement remaining accessibility fixes
+2. [ ] Add tests for Header and Sidebar components
+3. [ ] Set up test coverage reporting
+4. [ ] Document flashcard system usage
+
+**This month:**
+1. [ ] Implement self-quiz system
+2. [ ] Complete SRS algorithm
+3. [ ] Add learning objectives tracker
+4. [ ] Achieve 80%+ test coverage
+
+---
+
+## 💡 Strategic Recommendations
+
+### For Grant Reporting (RANNÍS)
+**Deliverables to highlight:**
+1. ✅ Functional textbook reader (deployed at efnafraedi.kvenno.app)
+2. ✅ Active learning features (flashcards operational)
+3. ✅ Accessibility improvements (WCAG partial compliance)
+4. ✅ Modern tech stack (React 19, full type safety)
+5. 🟡 User testing data (need to collect)
+
+**Suggested milestones for next grant period:**
+- Complete Phase 3 (quizzes, SRS, learning objectives)
+- Pilot study with 20-50 students
+- Usage analytics and learning outcome data
+- AI integration (Phase 4)
+
+### For User Adoption
+**Priority order:**
+1. Self-quizzes (students expect this in study platforms)
+2. SRS flashcards (proven learning technique)
+3. Better mobile experience (many students use phones)
+4. Sharing/export features (students want to save work)
+
+### Technical Debt Management
+**Keep monitoring:**
+- Dependency updates (monthly)
+- Security audits (weekly via npm audit)
+- Performance metrics (add Lighthouse CI)
+- Test coverage (aim for 80%+)
+
+---
+
+*Last Updated: 2025-11-30*
+*Version: 1.1*
 *Author: Sigurður E. Vilhelmsson*
 *Project: Icelandic Chemistry AI Teaching Assistant*
