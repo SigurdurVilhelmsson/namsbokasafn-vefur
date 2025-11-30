@@ -207,6 +207,11 @@ export default function SectionView() {
                 <Check size={16} />
                 {sectionRead ? "Lesið" : "Merkja sem lesið"}
               </button>
+
+              {/* ARIA live region for screen readers */}
+              <div role="status" aria-live="polite" className="sr-only">
+                {sectionRead ? "Kafli merktur sem lesinn" : ""}
+              </div>
             </div>
 
             <button
