@@ -77,6 +77,7 @@ export default function Sidebar() {
 
       {/* Sidebar */}
       <aside
+        aria-hidden={!sidebarOpen ? "true" : undefined}
         className={`
           fixed lg:static inset-y-0 left-0 z-50
           w-80 border-r border-[var(--border-color)] bg-[var(--bg-secondary)]
