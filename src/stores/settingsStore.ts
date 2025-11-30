@@ -1,10 +1,10 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 // Types for settings
-export type Theme = 'light' | 'dark';
-export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
-export type FontFamily = 'serif' | 'sans';
+export type Theme = "light" | "dark";
+export type FontSize = "small" | "medium" | "large" | "xlarge";
+export type FontFamily = "serif" | "sans";
 
 interface SettingsState {
   // Theme
@@ -30,29 +30,29 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       // Default values
-      theme: 'light',
-      fontSize: 'medium',
-      fontFamily: 'serif',
+      theme: "light",
+      fontSize: "medium",
+      fontFamily: "serif",
       sidebarOpen: true,
 
       // Theme methods
       setTheme: (theme) => {
         set({ theme });
         // Update dark class on html element
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark");
         } else {
-          document.documentElement.classList.remove('dark');
+          document.documentElement.classList.remove("dark");
         }
       },
 
       toggleTheme: () =>
         set((state) => {
-          const newTheme = state.theme === 'light' ? 'dark' : 'light';
-          if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
+          const newTheme = state.theme === "light" ? "dark" : "light";
+          if (newTheme === "dark") {
+            document.documentElement.classList.add("dark");
           } else {
-            document.documentElement.classList.remove('dark');
+            document.documentElement.classList.remove("dark");
           }
           return { theme: newTheme };
         }),
@@ -65,10 +65,11 @@ export const useSettingsStore = create<SettingsState>()(
 
       // Sidebar methods
       setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
-      toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+      toggleSidebar: () =>
+        set((state) => ({ sidebarOpen: !state.sidebarOpen })),
     }),
     {
-      name: 'efnafraedi-settings',
-    }
-  )
+      name: "efnafraedi-settings",
+    },
+  ),
 );

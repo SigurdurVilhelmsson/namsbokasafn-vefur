@@ -1,16 +1,16 @@
-import { useState, useEffect } from 'react';
-import type { Glossary, GlossaryTerm } from '@/types/glossary';
+import { useState, useEffect } from "react";
+import type { Glossary, GlossaryTerm } from "@/types/glossary";
 
 // Load glossary
 async function loadGlossary(): Promise<Glossary> {
   try {
-    const response = await fetch('/content/glossary.json');
+    const response = await fetch("/content/glossary.json");
     if (!response.ok) {
-      throw new Error('Gat ekki hlaðið orðasafni');
+      throw new Error("Gat ekki hlaðið orðasafni");
     }
     return await response.json();
   } catch (error) {
-    console.error('Villa við að hlaða orðasafni:', error);
+    console.error("Villa við að hlaða orðasafni:", error);
     return { terms: [] };
   }
 }
@@ -37,7 +37,7 @@ export function useGlossary() {
       (term) =>
         term.term.toLowerCase().includes(normalizedQuery) ||
         term.english?.toLowerCase().includes(normalizedQuery) ||
-        term.definition.toLowerCase().includes(normalizedQuery)
+        term.definition.toLowerCase().includes(normalizedQuery),
     );
   };
 
@@ -46,7 +46,7 @@ export function useGlossary() {
     if (!glossary) return undefined;
 
     return glossary.terms.find(
-      (term) => term.term.toLowerCase() === termName.toLowerCase()
+      (term) => term.term.toLowerCase() === termName.toLowerCase(),
     );
   };
 
@@ -55,7 +55,7 @@ export function useGlossary() {
     if (!glossary) return [];
 
     return [...glossary.terms].sort((a, b) =>
-      a.term.localeCompare(b.term, 'is')
+      a.term.localeCompare(b.term, "is"),
     );
   };
 

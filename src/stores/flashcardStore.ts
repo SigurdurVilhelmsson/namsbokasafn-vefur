@@ -1,6 +1,10 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Flashcard, FlashcardDeck, FlashcardStudyRecord } from '@/types/flashcard';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type {
+  Flashcard,
+  FlashcardDeck,
+  FlashcardStudyRecord,
+} from "@/types/flashcard";
 
 interface FlashcardState {
   // Decks
@@ -55,7 +59,8 @@ export const useFlashcardStore = create<FlashcardState>()(
       removeDeck: (deckId) => {
         set((state) => ({
           decks: state.decks.filter((d) => d.id !== deckId),
-          currentDeckId: state.currentDeckId === deckId ? null : state.currentDeckId,
+          currentDeckId:
+            state.currentDeckId === deckId ? null : state.currentDeckId,
         }));
       },
 
@@ -70,7 +75,7 @@ export const useFlashcardStore = create<FlashcardState>()(
           decks: state.decks.map((deck) =>
             deck.id === deckId
               ? { ...deck, cards: [...deck.cards, card] }
-              : deck
+              : deck,
           ),
         }));
       },
@@ -81,7 +86,7 @@ export const useFlashcardStore = create<FlashcardState>()(
           decks: state.decks.map((deck) =>
             deck.id === deckId
               ? { ...deck, cards: deck.cards.filter((c) => c.id !== cardId) }
-              : deck
+              : deck,
           ),
         }));
       },
@@ -157,7 +162,7 @@ export const useFlashcardStore = create<FlashcardState>()(
       },
     }),
     {
-      name: 'efnafraedi-flashcards',
-    }
-  )
+      name: "efnafraedi-flashcards",
+    },
+  ),
 );

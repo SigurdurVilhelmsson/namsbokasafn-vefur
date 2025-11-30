@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Moon, Sun, Menu, Search, Settings } from 'lucide-react';
-import { useSettingsStore } from '@/stores/settingsStore';
-import { useTheme } from '@/hooks/useTheme';
-import { Link } from 'react-router-dom';
-import SettingsModal from '@/components/ui/SettingsModal';
-import SearchModal from '@/components/ui/SearchModal';
+import { useState } from "react";
+import { Moon, Sun, Menu, Search, Settings } from "lucide-react";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { useTheme } from "@/hooks/useTheme";
+import { Link } from "react-router-dom";
+import SettingsModal from "@/components/ui/SettingsModal";
+import SearchModal from "@/components/ui/SearchModal";
 
 export default function Header() {
   const { toggleTheme, isDark } = useTheme();
@@ -47,8 +47,10 @@ export default function Header() {
             <button
               onClick={toggleTheme}
               className="rounded-lg p-2 hover:bg-[var(--bg-primary)] transition-colors"
-              aria-label={isDark ? 'Skipta yfir í ljóst þema' : 'Skipta yfir í dökkt þema'}
-              title={isDark ? 'Ljóst þema' : 'Dökkt þema'}
+              aria-label={
+                isDark ? "Skipta yfir í ljóst þema" : "Skipta yfir í dökkt þema"
+              }
+              title={isDark ? "Ljóst þema" : "Dökkt þema"}
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
@@ -66,7 +68,10 @@ export default function Header() {
       </header>
 
       {/* Modals */}
-      <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   );

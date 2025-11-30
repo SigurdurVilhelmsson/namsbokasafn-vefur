@@ -1,12 +1,14 @@
-import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { NavigationContext } from '@/types/content';
+import { Link } from "react-router-dom";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import type { NavigationContext } from "@/types/content";
 
 interface NavigationButtonsProps {
   navigation: NavigationContext;
 }
 
-export default function NavigationButtons({ navigation }: NavigationButtonsProps) {
+export default function NavigationButtons({
+  navigation,
+}: NavigationButtonsProps) {
   const { previous, next, current } = navigation;
 
   return (
@@ -14,7 +16,8 @@ export default function NavigationButtons({ navigation }: NavigationButtonsProps
       <div className="mx-auto max-w-reading">
         {/* Brauðmolar (breadcrumb) */}
         <div className="mb-6 text-sm text-[var(--text-secondary)]">
-          Kafli {current.chapter.number} › {current.section.number} {current.section.title}
+          Kafli {current.chapter.number} › {current.section.number}{" "}
+          {current.section.title}
         </div>
 
         {/* Leiðsöguhnappir (navigation buttons) */}
@@ -29,7 +32,9 @@ export default function NavigationButtons({ navigation }: NavigationButtonsProps
                 className="text-[var(--text-secondary)] group-hover:text-[var(--accent-color)]"
               />
               <div className="text-left">
-                <div className="text-xs text-[var(--text-secondary)]">Fyrri kafli</div>
+                <div className="text-xs text-[var(--text-secondary)]">
+                  Fyrri kafli
+                </div>
                 <div className="font-sans text-sm font-medium">
                   {previous.section.number} {previous.section.title}
                 </div>
@@ -45,7 +50,9 @@ export default function NavigationButtons({ navigation }: NavigationButtonsProps
               className="group flex items-center gap-2 rounded-lg border border-[var(--border-color)] px-4 py-3 transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5"
             >
               <div className="text-right">
-                <div className="text-xs text-[var(--text-secondary)]">Næsti kafli</div>
+                <div className="text-xs text-[var(--text-secondary)]">
+                  Næsti kafli
+                </div>
                 <div className="font-sans text-sm font-medium">
                   {next.section.number} {next.section.title}
                 </div>

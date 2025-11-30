@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { useSettingsStore } from '@/stores/settingsStore';
+import { useEffect } from "react";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 // Hook to manage theme and apply to document
 export function useTheme() {
@@ -7,10 +7,10 @@ export function useTheme() {
 
   // Apply theme on mount
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove("dark");
     }
   }, [theme]);
 
@@ -18,10 +18,10 @@ export function useTheme() {
   useEffect(() => {
     const checkSystemPreference = () => {
       if (
-        !localStorage.getItem('efnafraedi-settings') &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches
+        !localStorage.getItem("efnafraedi-settings") &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
       ) {
-        setTheme('dark');
+        setTheme("dark");
       }
     };
 
@@ -32,6 +32,6 @@ export function useTheme() {
     theme,
     setTheme,
     toggleTheme,
-    isDark: theme === 'dark',
+    isDark: theme === "dark",
   };
 }

@@ -1,7 +1,7 @@
-import { Outlet } from 'react-router-dom';
-import { useSettingsStore } from '@/stores/settingsStore';
-import Header from './Header';
-import Sidebar from './Sidebar';
+import { Outlet } from "react-router-dom";
+import { useSettingsStore } from "@/stores/settingsStore";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
 
 export default function Layout() {
   const { fontSize, fontFamily } = useSettingsStore();
@@ -9,7 +9,7 @@ export default function Layout() {
   return (
     <div
       className={`min-h-screen font-size-${fontSize} ${
-        fontFamily === 'sans' ? 'font-sans' : 'font-serif'
+        fontFamily === "sans" ? "font-sans" : "font-serif"
       }`}
     >
       <Header />
