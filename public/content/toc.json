@@ -1,0 +1,36 @@
+{
+  "title": "Efnafræði 2e",
+  "chapters": [
+    {
+      "number": 1,
+      "title": "Grunnhugmyndir",
+      "slug": "01-grunnhugmyndir",
+      "sections": [
+        {
+          "number": "1.1",
+          "title": "Efnafræði í samhengi",
+          "slug": "1-1-efnafraedi-i-samhengi",
+          "file": "1-1-efnafraedi-i-samhengi.md"
+        },
+        {
+          "number": "1.2",
+          "title": "Fasar efna",
+          "slug": "1-2-fasar-efna",
+          "file": "1-2-fasar-efna.md"
+        },
+        {
+          "number": "1.3",
+          "title": "Eðlis- og efnafræðilegir eiginleikar",
+          "slug": "1-3-edlis-og-efnafraedilegir-eiginleikar",
+          "file": "1-3-edlis-og-efnafraedilegir-eiginleikar.md"
+        },
+        {
+          "number": "1.4",
+          "title": "Mælingar",
+          "slug": "1-4-maelingar",
+          "file": "1-4-maelingar.md"
+        }
+      ]
+    }
+  ]
+}
