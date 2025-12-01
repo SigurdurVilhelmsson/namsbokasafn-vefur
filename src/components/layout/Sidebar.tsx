@@ -58,8 +58,8 @@ export default function Sidebar() {
 
   if (!toc) {
     return (
-      <aside className="w-80 bg-[var(--bg-secondary)] p-4 shadow-lg lg:shadow-none lg:shadow-[2px_0_8px_rgba(0,0,0,0.05)]">
-        <p className="text-[var(--text-secondary)]">Hleður efnisyfirlit...</p>
+      <aside className="sticky top-14 z-30 h-[calc(100vh-3.5rem)] w-80 overflow-y-auto bg-white p-4 shadow-none">
+        <p className="text-gray-500">Hleður efnisyfirlit...</p>
       </aside>
     );
   }
@@ -81,10 +81,13 @@ export default function Sidebar() {
       <aside
         aria-hidden={!sidebarOpen ? "true" : undefined}
         className={`
-          fixed lg:static inset-y-0 left-0 z-50
+          fixed lg:sticky
+          inset-y-0 lg:top-14 left-0
+          z-50 lg:z-30
           w-80 bg-white
           transition-transform duration-300 ease-out
           overflow-y-auto
+          lg:h-[calc(100vh-3.5rem)]
           ${sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"}
           lg:shadow-none
         `}

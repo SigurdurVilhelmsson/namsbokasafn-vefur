@@ -33,7 +33,7 @@ export const useSettingsStore = create<SettingsState>()(
       theme: "light",
       fontSize: "medium",
       fontFamily: "serif",
-      sidebarOpen: true,
+      sidebarOpen: false, // Closed by default on mobile; desktop overrides with lg:translate-x-0
 
       // Theme methods
       setTheme: (theme) => {
