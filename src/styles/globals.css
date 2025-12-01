@@ -1,9 +1,8 @@
 /* KaTeX styles - must be imported first */
 @import "katex/dist/katex.min.css";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind v4 import - replaces @tailwind directives */
+@import "tailwindcss";
 
 /* Icelandic font support and custom properties */
 :root {
