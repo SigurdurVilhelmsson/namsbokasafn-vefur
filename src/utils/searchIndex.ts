@@ -125,32 +125,17 @@ export async function searchContent(
 export function highlightQuery(text: string, query: string): string {
   if (!query.trim()) return text;
 
-  const normalizedQuery = normalizeText(query);
-  const parts: string[] = [];
-  let lastIndex = 0;
+  // Create a regex that matches the query case-insensitively
+  // Escape special regex characters in the query
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-  const normalized = normalizeText(text);
-  let searchIndex = 0;
+  // Use regex with global and case-insensitive flags
+  const regex = new RegExp(`(${escapedQuery})`, "gi");
 
-  while (true) {
-    const index = normalized.indexOf(normalizedQuery, searchIndex);
-    if (index === -1) break;
-
-    // Bæta við texta fyrir match
-    parts.push(text.substring(lastIndex, index));
-
-    // Bæta við highlighted match
-    const matchedText = text.substring(index, index + query.length);
-    parts.push(
-      `<mark class="bg-yellow-200 dark:bg-yellow-900/50">${matchedText}</mark>`,
-    );
-
-    lastIndex = index + query.length;
-    searchIndex = index + query.length;
-  }
-
-  // Bæta við afganginum
-  parts.push(text.substring(lastIndex));
-
-  return parts.join("");
+  // Replace all matches with highlighted version
+  return text.replace(
+    regex,
+    (match) =>
+      `<mark class="bg-yellow-200 dark:bg-yellow-900/50">${match}</mark>`,
+  );
 }
