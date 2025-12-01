@@ -40,7 +40,7 @@ export default function Header() {
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
-              className="-ml-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              className="-ml-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 lg:hidden"
               aria-label="Opna/loka valmynd"
             >
               <Menu size={20} />
