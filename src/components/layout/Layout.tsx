@@ -25,9 +25,11 @@ export default function Layout() {
       <div className="flex">
         <Sidebar />
 
-        {/* Main content area */}
+        {/* Main content area with max-width for comfortable reading */}
         <main id="main-content" className="flex-1 overflow-x-hidden">
-          <Outlet />
+          <div className="mx-auto max-w-7xl px-4 py-6">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
