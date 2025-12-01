@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Efnafræðilesari - Design Mockup</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwindcss.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            serif: ['Lora', 'Georgia', 'serif'],
+          },
+          colors: {
+            cream: {
+              50: '#fefdfb',
+              100: '#faf8f5',
+              200: '#f5f0e8',
+            },
+            ink: {
+              700: '#374151',
+              800: '#1f2937',
+              900: '#111827',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Smooth transitions for all interactive elements */
+    * {
+      transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+      transition-duration: 150ms;
+      transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+    
+    /* Reading content styles */
+    .prose-reader {
+      font-size: 1.125rem;
+      line-height: 1.8;
+      color: #374151;
+    }
+    .prose-reader p {
+      margin-bottom: 1.5em;
+    }
+  </style>
+</head>
+<body class="bg-cream-100 text-ink-800 font-sans">
+  
+  <!-- ============================================ -->
+  <!-- HEADER - Clean, minimal, content-focused    -->
+  <!-- ============================================ -->
+  <header class="fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200/50">
+    <div class="flex items-center justify-between px-4 h-14">
+      <!-- Left: Menu + Title -->
+      <div class="flex items-center gap-3">
+        <button id="menuBtn" class="p-2 -ml-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+        <span class="text-sm font-medium text-gray-900">Efnafræðilesari</span>
+      </div>
+      
+      <!-- Right: Actions -->
+      <div class="flex items-center gap-1">
+        <!-- Reading progress indicator (replaces checkbox) -->
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-sm font-medium">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          <span>Lesið</span>
+        </div>
+        
+        <button class="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+          </svg>
+        </button>
+        
+        <button class="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+          </svg>
+        </button>
+        
+        <button id="settingsBtn" class="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </button>
+        
+        <button class="p-2 rounded-lg hover:bg-gray-100 text-gray-600 hover:text-gray-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================ -->
+  <!-- SIDEBAR - Clean slide-out, no visual trace  -->
+  <!-- ============================================ -->
+  
+  <!-- Overlay (hidden by default) -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+  
+  <!-- Sidebar -->
+  <aside id="sidebar" class="fixed top-0 left-0 bottom-0 w-80 bg-white z-50 transform -translate-x-full transition-transform duration-300 ease-out shadow-2xl">
+    <div class="flex flex-col h-full">
+      <!-- Sidebar header -->
+      <div class="flex items-center justify-between px-4 h-14 border-b border-gray-100">
+        <h2 class="font-semibold text-gray-900">Efnisyfirlit</h2>
+        <button id="closeSidebar" class="p-2 -mr-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Sidebar content -->
+      <nav class="flex-1 overflow-y-auto py-4">
+        <!-- Chapter with progress -->
+        <div class="px-4 mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">1. kafli</span>
+            <span class="text-xs font-medium text-emerald-600">50%</span>
+          </div>
+          <div class="h-1 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full w-1/2 bg-emerald-500 rounded-full"></div>
+          </div>
+        </div>
+        
+        <div class="space-y-1 px-2">
+          <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50">
+            <span class="w-6 h-6 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </span>
+            <span class="text-sm">1.1 Efnafræði í samhengi</span>
+          </a>
+          
+          <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50">
+            <span class="w-6 h-6 flex items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+              <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+              </svg>
+            </span>
+            <span class="text-sm">1.2 Fasar efna</span>
+          </a>
+          
+          <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-blue-50 text-blue-700 font-medium">
+            <span class="w-6 h-6 flex items-center justify-center rounded-full bg-blue-100 text-blue-600">
+              <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+            </span>
+            <span class="text-sm">1.3 Eðlis- og efnafræðilegir eiginleikar</span>
+          </a>
+          
+          <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-700 hover:bg-gray-50">
+            <span class="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 text-gray-400">
+              <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+            </span>
+            <span class="text-sm">1.4 Mælingar</span>
+          </a>
+        </div>
+        
+        <!-- Bottom links -->
+        <div class="mt-6 pt-4 border-t border-gray-100 px-2 space-y-1">
+          <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+            <span class="text-sm">Orðasafn</span>
+          </a>
+          
+          <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            <span class="text-sm">Minniskort</span>
+          </a>
+        </div>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- ============================================ -->
+  <!-- MAIN CONTENT - Proper reading typography    -->
+  <!-- ============================================ -->
+  <main class="pt-14 min-h-screen">
+    <article class="max-w-3xl mx-auto px-6 md:px-8 py-12">
+      
+      <!-- Chapter objectives - subtle card -->
+      <div class="mb-10 p-5 bg-white rounded-xl border border-gray-200/60 shadow-sm">
+        <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-3">Markmið kaflans</h3>
+        <ul class="space-y-2 text-gray-600">
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span>Greina á milli eðlislegra og efnafræðilegra eiginleika</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span>Útskýra muninn á eðlisbreytingum og efnahvörfum</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+            </svg>
+            <span>Bera kennsl á dæmi um báðar tegundir eiginleika og breytinga</span>
+          </li>
+        </ul>
+      </div>
+      
+      <!-- Main heading -->
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-8 font-serif">
+        Eðlis- og efnafræðilegir eiginleikar
+      </h1>
+      
+      <!-- Body content -->
+      <div class="prose-reader">
+        <p>
+          Allir eiginleikar efnis flokkast í tvo meginflokka: <strong>eðlislegir eiginleikar</strong> og 
+          <strong>efnafræðilegir eiginleikar</strong>. Þessi flokkun hjálpar okkur að skilja og lýsa efnum 
+          á skipulegan hátt.
+        </p>
+        
+        <h2 class="text-2xl font-semibold text-gray-900 mt-10 mb-4 font-serif">Eðlislegir eiginleikar</h2>
+        
+        <p>
+          <strong>Eðlislegir eiginleikar</strong> eru þeir eiginleikar sem hægt er að mæla eða sjá án þess 
+          að breyta efnafræðilegri samsetningu efnisins.
+        </p>
+        
+        <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-4">Dæmi um eðlislega eiginleika</h3>
+        
+        <!-- Clean table design -->
+        <div class="my-6 bg-white rounded-xl border border-gray-200/60 shadow-sm overflow-hidden">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-gray-50/80">
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Eiginleiki</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Lýsing</th>
+                <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Dæmi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr class="hover:bg-gray-50/50">
+                <td class="px-5 py-4 font-medium text-gray-900">Litur</td>
+                <td class="px-5 py-4 text-gray-600">Sjónrænn eiginleiki</td>
+                <td class="px-5 py-4 text-gray-600">Gull er gult</td>
+              </tr>
+              <tr class="hover:bg-gray-50/50">
+                <td class="px-5 py-4 font-medium text-gray-900">Eðlismassi</td>
+                <td class="px-5 py-4 text-gray-600">Hlutfall massa og rúmmáls</td>
+                <td class="px-5 py-4 text-gray-600">Vatn: 1,0 g/mL</td>
+              </tr>
+              <tr class="hover:bg-gray-50/50">
+                <td class="px-5 py-4 font-medium text-gray-900">Suðumark</td>
+                <td class="px-5 py-4 text-gray-600">Hitastig þegar efni suður</td>
+                <td class="px-5 py-4 text-gray-600">Vatn: 100°C</td>
+              </tr>
+              <tr class="hover:bg-gray-50/50">
+                <td class="px-5 py-4 font-medium text-gray-900">Bræðslumark</td>
+                <td class="px-5 py-4 text-gray-600">Hitastig þegar efni bráðnar</td>
+                <td class="px-5 py-4 text-gray-600">Ís: 0°C</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Note callout -->
+        <div class="my-8 flex gap-4 p-5 bg-blue-50 rounded-xl border border-blue-100">
+          <div class="flex-shrink-0">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-semibold text-blue-900 mb-1">Athugið</h4>
+            <p class="text-blue-800 text-base leading-relaxed m-0">
+              Eðlislegir eiginleikar geta verið annað hvort <em>ítarlegir</em> (háðir magni efnis) eða 
+              <em>víðtækir</em> (óháðir magni).
+            </p>
+          </div>
+        </div>
+        
+      </div>
+    </article>
+  </main>
+
+  <!-- ============================================ -->
+  <!-- SETTINGS MODAL - Modern card-based design   -->
+  <!-- ============================================ -->
+  <div id="settingsModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
+    
+    <!-- Modal content -->
+    <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg transform scale-95 transition-transform duration-200" id="settingsContent">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <h2 class="text-xl font-semibold text-gray-900">Stillingar</h2>
+        <button id="closeSettings" class="p-2 -mr-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Body -->
+      <div class="px-6 py-6 space-y-8">
+        
+        <!-- Font Size -->
+        <div>
+          <label class="block text-sm font-medium text-gray-900 mb-3">Leturstærð</label>
+          <div class="flex gap-2">
+            <button class="flex-1 py-2.5 px-4 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+              Lítið
+            </button>
+            <button class="flex-1 py-2.5 px-4 rounded-lg text-sm font-medium bg-blue-600 text-white shadow-sm">
+              Miðlungs
+            </button>
+            <button class="flex-1 py-2.5 px-4 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+              Stórt
+            </button>
+            <button class="flex-1 py-2.5 px-4 rounded-lg text-sm font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors">
+              Mjög stórt
+            </button>
+          </div>
+        </div>
+        
+        <!-- Font Family -->
+        <div>
+          <label class="block text-sm font-medium text-gray-900 mb-3">Leturgerð</label>
+          <div class="space-y-2">
+            <label class="flex items-center gap-4 p-4 rounded-xl border-2 border-gray-200 cursor-pointer hover:border-gray-300 hover:bg-gray-50 transition-all">
+              <input type="radio" name="font" class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+              <div>
+                <span class="font-serif text-gray-900">Serif (lestur)</span>
+                <p class="text-sm text-gray-500 font-serif mt-0.5">Dæmi: Efnafræði</p>
+              </div>
+            </label>
+            
+            <label class="flex items-center gap-4 p-4 rounded-xl border-2 border-blue-500 bg-blue-50 cursor-pointer ring-2 ring-blue-500/20">
+              <input type="radio" name="font" checked class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+              <div>
+                <span class="font-sans text-gray-900 font-medium">Sans-serif (nútímalegt)</span>
+                <p class="text-sm text-gray-500 font-sans mt-0.5">Dæmi: Efnafræði</p>
+              </div>
+            </label>
+          </div>
+        </div>
+        
+        <!-- Preview -->
+        <div>
+          <label class="block text-sm font-medium text-gray-900 mb-3">Forskoðun</label>
+          <div class="p-5 bg-cream-100 rounded-xl border border-gray-200">
+            <p class="text-gray-700 leading-relaxed">
+              Efnafræði er vísindin um efni og breytingar þess. Hún fjallar um uppbyggingu, eiginleika 
+              og hegðun efna, svo og orkubreytingar sem fylgja efnahvörfum.
+            </p>
+          </div>
+          <p class="mt-3 text-sm text-gray-500 flex items-center gap-2">
+            <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            Stillingar eru vistaðar sjálfkrafa í vafranum þínum
+          </p>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- COMPARISON: BEFORE/AFTER (for reference)    -->
+  <!-- ============================================ -->
+  <section class="mt-16 px-6 pb-16 max-w-5xl mx-auto">
+    <div class="text-center mb-10">
+      <h2 class="text-2xl font-bold text-gray-900 mb-2">Samanburður hönnunar</h2>
+      <p class="text-gray-600">Smelltu á takkana til að sjá breytingar</p>
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <!-- OLD: Table design -->
+      <div class="bg-white rounded-xl p-6 border border-gray-200">
+        <h3 class="text-sm font-semibold text-red-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+          </svg>
+          Gamalt: Töflumiðað útlit
+        </h3>
+        <div class="border border-gray-400 divide-y divide-gray-400">
+          <div class="grid grid-cols-2 divide-x divide-gray-400 text-sm">
+            <div class="p-2 bg-gray-100 font-bold border-b border-gray-400">Lítið</div>
+            <div class="p-2 bg-gray-100 font-bold border-b border-gray-400 border-2 border-blue-500">Miðlungs</div>
+          </div>
+          <div class="grid grid-cols-2 divide-x divide-gray-400 text-sm">
+            <div class="p-2">Stórt</div>
+            <div class="p-2">Mjög stórt</div>
+          </div>
+        </div>
+        <p class="mt-4 text-sm text-gray-500">Sýnilegar rammar, engin sveigjanleiki, úrelt útlit</p>
+      </div>
+      
+      <!-- NEW: Modern design -->
+      <div class="bg-white rounded-xl p-6 border border-gray-200">
+        <h3 class="text-sm font-semibold text-emerald-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+          </svg>
+          Nýtt: Nútímalegt útlit
+        </h3>
+        <div class="flex gap-2">
+          <button class="flex-1 py-2.5 px-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-600">Lítið</button>
+          <button class="flex-1 py-2.5 px-3 rounded-lg text-sm font-medium bg-blue-600 text-white shadow-sm">Miðlungs</button>
+          <button class="flex-1 py-2.5 px-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-600">Stórt</button>
+          <button class="flex-1 py-2.5 px-3 rounded-lg text-sm font-medium bg-gray-100 text-gray-600">Mjög stórt</button>
+        </div>
+        <p class="mt-4 text-sm text-gray-500">Hreinn, nútímalegur og letur sem notendur búast við</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- JavaScript for interactivity -->
+  <script>
+    // Sidebar toggle
+    const menuBtn = document.getElementById('menuBtn');
+    const sidebar = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    const closeSidebar = document.getElementById('closeSidebar');
+    
+    function openSidebar() {
+      sidebar.classList.remove('-translate-x-full');
+      sidebarOverlay.classList.remove('opacity-0', 'pointer-events-none');
+    }
+    
+    function closeSidebarFn() {
+      sidebar.classList.add('-translate-x-full');
+      sidebarOverlay.classList.add('opacity-0', 'pointer-events-none');
+    }
+    
+    menuBtn.addEventListener('click', openSidebar);
+    closeSidebar.addEventListener('click', closeSidebarFn);
+    sidebarOverlay.addEventListener('click', closeSidebarFn);
+    
+    // Settings modal
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const settingsContent = document.getElementById('settingsContent');
+    const closeSettings = document.getElementById('closeSettings');
+    
+    function openSettings() {
+      settingsModal.classList.remove('opacity-0', 'pointer-events-none');
+      settingsContent.classList.remove('scale-95');
+    }
+    
+    function closeSettingsFn() {
+      settingsModal.classList.add('opacity-0', 'pointer-events-none');
+      settingsContent.classList.add('scale-95');
+    }
+    
+    settingsBtn.addEventListener('click', openSettings);
+    closeSettings.addEventListener('click', closeSettingsFn);
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal || e.target.classList.contains('backdrop-blur-sm')) {
+        closeSettingsFn();
+      }
+    });
+    
+    // Escape key closes modals
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSidebarFn();
+        closeSettingsFn();
+      }
+    });
+  </script>
+</body>
+</html>
