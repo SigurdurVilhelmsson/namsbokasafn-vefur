@@ -120,7 +120,7 @@ body {
 }
 
 .reading-content p {
-  font-size: 1.125rem; /* text-lg */
+  font-size: var(--font-size-base); /* Uses the dynamic font size setting */
   line-height: 1.75; /* leading-relaxed */
   color: #374151; /* text-gray-700 */
   margin-bottom: 1.5rem; /* mb-6 */
@@ -138,6 +138,7 @@ body {
 
 .reading-content ul,
 .reading-content ol {
+  font-size: var(--font-size-base);
   margin-bottom: 1em;
   padding-left: 2em;
 }
@@ -147,6 +148,7 @@ body {
 }
 
 .reading-content blockquote {
+  font-size: var(--font-size-base);
   border-left: 4px solid var(--accent-color);
   padding-left: 1em;
   margin: 1.5em 0;
@@ -185,6 +187,7 @@ body {
   text-align: left;
   border: none;
   color: #374151; /* text-gray-700 */
+  font-size: var(--font-size-base);
 }
 
 .reading-content tbody tr {
@@ -285,7 +288,7 @@ body {
 
 .content-block.note p {
   color: #1e40af; /* text-blue-800 */
-  font-size: 1rem; /* text-base */
+  font-size: var(--font-size-base);
   line-height: 1.75; /* leading-relaxed */
   margin: 0;
 }
@@ -306,7 +309,7 @@ body {
 
 .content-block.warning p {
   color: #92400e; /* text-amber-800 */
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
@@ -327,7 +330,7 @@ body {
 
 .content-block.example p {
   color: #374151; /* text-gray-700 */
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
