@@ -58,7 +58,7 @@ export default function Sidebar() {
 
   if (!toc) {
     return (
-      <aside className="w-80 border-r border-[var(--border-color)] bg-[var(--bg-secondary)] p-4">
+      <aside className="w-80 bg-[var(--bg-secondary)] p-4 shadow-lg lg:shadow-none lg:shadow-[2px_0_8px_rgba(0,0,0,0.05)]">
         <p className="text-[var(--text-secondary)]">Hleður efnisyfirlit...</p>
       </aside>
     );
@@ -80,9 +80,10 @@ export default function Sidebar() {
         aria-hidden={!sidebarOpen ? "true" : undefined}
         className={`
           fixed lg:static inset-y-0 left-0 z-50
-          w-80 border-r border-[var(--border-color)] bg-[var(--bg-secondary)]
-          transition-transform duration-300 ease-in-out
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+          w-80 bg-[var(--bg-secondary)]
+          transition-transform duration-200 ease-out
+          ${sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"}
+          lg:shadow-[2px_0_8px_rgba(0,0,0,0.05)]
           overflow-y-auto
         `}
       >
@@ -124,19 +125,19 @@ export default function Sidebar() {
             </ul>
 
             {/* Glossary and flashcards links */}
-            <div className="mt-6 space-y-2 border-t border-[var(--border-color)] pt-4">
+            <div className="mt-6 space-y-2 pt-4">
               <Link
                 to="/ordabok"
-                className="flex items-center gap-2 rounded-lg p-2 font-sans font-medium transition-colors hover:bg-[var(--bg-primary)]"
+                className="flex items-center gap-2 rounded-lg p-2 font-sans font-medium transition-colors hover:bg-[var(--accent-light)]"
               >
-                <BookOpen size={18} />
+                <BookOpen size={18} className="text-[var(--accent-color)]" />
                 <span>Orðasafn</span>
               </Link>
               <Link
                 to="/minniskort"
-                className="flex items-center gap-2 rounded-lg p-2 font-sans font-medium transition-colors hover:bg-[var(--bg-primary)]"
+                className="flex items-center gap-2 rounded-lg p-2 font-sans font-medium transition-colors hover:bg-[var(--accent-light)]"
               >
-                <Brain size={18} />
+                <Brain size={18} className="text-[var(--accent-color)]" />
                 <span>Minniskort</span>
               </Link>
             </div>
@@ -199,7 +200,7 @@ function ChapterItem({
       {expanded && (
         <ul
           id={`chapter-${chapter.number}-sections`}
-          className="ml-6 mt-1 space-y-1 border-l-2 border-[var(--border-color)] pl-3"
+          className="ml-6 mt-1 space-y-1 border-l-2 border-[var(--accent-color)]/20 pl-3"
         >
           {chapter.sections.map((section) => {
             const isCurrent =
