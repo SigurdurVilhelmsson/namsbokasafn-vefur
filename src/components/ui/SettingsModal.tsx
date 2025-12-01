@@ -94,7 +94,10 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <div
             className={`rounded-xl border border-gray-200 bg-gray-50 p-5 font-size-${fontSize} ${fontFamily === "serif" ? "font-serif" : "font-sans"}`}
           >
-            <p className="leading-relaxed text-gray-700">
+            <p
+              className="leading-relaxed text-gray-700"
+              style={{ fontSize: "var(--font-size-base)" }}
+            >
               Efnafræði er vísindin um efni og breytingar þess. Hún fjallar um
               uppbyggingu, eiginleika og hegðun efna, svo og orkubreytingar sem
               fylgja efnahvörfum.
