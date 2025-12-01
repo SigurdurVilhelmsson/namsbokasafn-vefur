@@ -33,34 +33,32 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-[var(--bg-secondary)] shadow-md">
+      <header className="sticky top-0 z-40 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
         {/* Top bar with logo and controls */}
-        <div className="flex h-16 items-center justify-between px-4 bg-[var(--bg-secondary)]">
+        <div className="flex h-14 items-center justify-between px-4">
           {/* Left side: Hamburger menu for mobile and title */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
-              className="rounded-lg p-2 hover:bg-[var(--bg-primary)] lg:hidden"
+              className="-ml-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
               aria-label="Opna/loka valmynd"
             >
-              <Menu size={24} />
+              <Menu size={20} />
             </button>
 
             <Link
               to="/"
-              className="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 text-sm font-medium text-gray-900 no-underline transition-opacity hover:opacity-80"
             >
-              <span className="text-xl font-bold font-sans text-[var(--text-primary)]">
-                Efnafræðilesari
-              </span>
+              Efnafræðilesari
             </Link>
           </div>
 
           {/* Right side: Search button, theme button, settings button */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setSearchOpen(true)}
-              className="rounded-lg p-2 hover:bg-[var(--bg-primary)] transition-colors"
+              className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
               aria-label="Leita"
               title="Leita (Ctrl+K)"
             >
@@ -69,7 +67,7 @@ export default function Header() {
 
             <button
               onClick={toggleTheme}
-              className="rounded-lg p-2 hover:bg-[var(--bg-primary)] transition-colors"
+              className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
               aria-label={
                 isDark ? "Skipta yfir í ljóst þema" : "Skipta yfir í dökkt þema"
               }
@@ -80,7 +78,7 @@ export default function Header() {
 
             <button
               onClick={() => setSettingsOpen(true)}
-              className="rounded-lg p-2 hover:bg-[var(--bg-primary)] transition-colors"
+              className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
               aria-label="Stillingar"
               title="Stillingar"
             >

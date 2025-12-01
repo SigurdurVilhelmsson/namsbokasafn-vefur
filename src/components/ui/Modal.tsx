@@ -94,7 +94,7 @@ export default function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -103,27 +103,27 @@ export default function Modal({
     >
       <div
         ref={modalRef}
-        className="relative mx-4 w-full max-w-2xl rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-2xl"
+        className="relative w-full max-w-lg rounded-2xl bg-white shadow-2xl"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
         {/* Haus (header) */}
-        <div className="flex items-center justify-between border-b border-[var(--border-color)] p-4">
-          <h2 id="modal-title" className="font-sans text-xl font-semibold">
+        <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
+          <h2 id="modal-title" className="font-sans text-xl font-semibold text-gray-900">
             {title}
           </h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-1 hover:bg-[var(--bg-primary)] transition-colors"
+            className="rounded-lg p-2 -mr-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors"
             aria-label="Loka"
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
         {/* Efni (content) */}
-        <div className="max-h-[70vh] overflow-y-auto p-6">{children}</div>
+        <div className="max-h-[70vh] overflow-y-auto px-6 py-6">{children}</div>
       </div>
     </div>
   );
