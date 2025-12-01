@@ -1,21 +1,41 @@
-import { useState } from "react";
-import { Moon, Sun, Menu, Search, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Moon, Sun, Menu, Search, Settings, ChevronLeft } from "lucide-react";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useTheme } from "@/hooks/useTheme";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import SettingsModal from "@/components/ui/SettingsModal";
 import SearchModal from "@/components/ui/SearchModal";
+import { loadTableOfContents } from "@/utils/contentLoader";
+import type { TableOfContents } from "@/types/content";
 
 export default function Header() {
   const { toggleTheme, isDark } = useTheme();
   const { toggleSidebar } = useSettingsStore();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [toc, setToc] = useState<TableOfContents | null>(null);
+  const { chapterSlug, sectionSlug } = useParams();
+
+  // Load table of contents to get section titles
+  useEffect(() => {
+    loadTableOfContents()
+      .then(setToc)
+      .catch((error) => {
+        console.error("Gat ekki hlaðið efnisyfirliti:", error);
+      });
+  }, []);
+
+  // Find current chapter and section titles
+  const currentChapter = toc?.chapters.find((c) => c.slug === chapterSlug);
+  const currentSection = currentChapter?.sections.find(
+    (s) => s.slug === sectionSlug,
+  );
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-[var(--border-color)] bg-[var(--bg-secondary)] shadow-sm">
-        <div className="flex h-16 items-center justify-between px-4">
+      <header className="sticky top-0 z-50 bg-[var(--bg-secondary)] shadow-md">
+        {/* Top bar with logo and controls */}
+        <div className="flex h-16 items-center justify-between px-4 bg-[var(--bg-secondary)]">
           {/* Left side: Hamburger menu for mobile and title */}
           <div className="flex items-center gap-4">
             <button
@@ -26,7 +46,10 @@ export default function Header() {
               <Menu size={24} />
             </button>
 
-            <Link to="/" className="flex items-center gap-2">
+            <Link
+              to="/"
+              className="flex items-center gap-2 no-underline hover:opacity-80 transition-opacity"
+            >
               <span className="text-xl font-bold font-sans text-[var(--text-primary)]">
                 Efnafræðilesari
               </span>
@@ -65,6 +88,29 @@ export default function Header() {
             </button>
           </div>
         </div>
+
+        {/* Colored banner with current section (only show when viewing a section) */}
+        {currentChapter && currentSection && (
+          <div className="bg-[var(--header-banner)] text-[var(--header-banner-text)] px-4 py-3">
+            <div className="max-w-7xl mx-auto flex items-center gap-3">
+              <Link
+                to="/"
+                className="text-[var(--header-banner-text)] hover:opacity-80 transition-opacity no-underline"
+                aria-label="Til baka á heim síðu"
+              >
+                <ChevronLeft size={20} />
+              </Link>
+              <div>
+                <div className="text-sm opacity-90 font-sans">
+                  {currentChapter.number}. {currentChapter.title}
+                </div>
+                <div className="text-lg font-bold font-sans">
+                  {currentSection.number} {currentSection.title}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Modals */}

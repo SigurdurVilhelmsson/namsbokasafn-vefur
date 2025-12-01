@@ -19,15 +19,20 @@
   --line-height-loose: 1.8;
 }
 
-/* Light theme (default) */
+/* Light theme (default) - Soft, pastel color scheme */
 :root {
   --bg-primary: #faf8f5;
   --bg-secondary: #ffffff;
   --text-primary: #1a1a1a;
   --text-secondary: #4a5568;
-  --border-color: #e2e8f0;
-  --accent-color: #2563eb;
-  --accent-hover: #1e40af;
+  --border-color: #e8eaed;
+  /* Soft teal/mint accent - inspired by OpenStax */
+  --accent-color: #5dba9c;
+  --accent-hover: #4ca889;
+  --accent-light: #e8f5f1;
+  /* Header banner color - subtle teal */
+  --header-banner: #6ec4a7;
+  --header-banner-text: #ffffff;
 }
 
 /* Dark theme */
@@ -36,9 +41,12 @@
   --bg-secondary: #16213e;
   --text-primary: #e2e8f0;
   --text-secondary: #94a3b8;
-  --border-color: #334155;
-  --accent-color: #3b82f6;
-  --accent-hover: #60a5fa;
+  --border-color: #2d3748;
+  --accent-color: #5dba9c;
+  --accent-hover: #4ca889;
+  --accent-light: #1e3a32;
+  --header-banner: #4ca889;
+  --header-banner-text: #ffffff;
 }
 
 body {
@@ -76,8 +84,9 @@ body {
 
 .reading-content h1 {
   font-size: 2em;
-  border-bottom: 2px solid var(--border-color);
-  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.5em;
+  margin-bottom: 1em;
 }
 
 .reading-content h2 {
@@ -204,24 +213,25 @@ body {
 
 /* Custom content blocks */
 .content-block {
-  border-radius: 6px;
-  padding: 1em;
+  border-radius: 8px;
+  padding: 1.25em;
   margin: 1.5em 0;
+  border-left: 3px solid;
 }
 
 .content-block.example {
-  background-color: #eff6ff;
-  border-left: 4px solid #3b82f6;
+  background-color: var(--accent-light);
+  border-left-color: var(--accent-color);
 }
 
 .dark .content-block.example {
-  background-color: #1e3a5f;
-  border-left-color: #60a5fa;
+  background-color: var(--accent-light);
+  border-left-color: var(--accent-color);
 }
 
 .content-block.note {
   background-color: #fef3c7;
-  border-left: 4px solid #f59e0b;
+  border-left-color: #f59e0b;
 }
 
 .dark .content-block.note {
@@ -231,7 +241,7 @@ body {
 
 .content-block.warning {
   background-color: #fee2e2;
-  border-left: 4px solid #ef4444;
+  border-left-color: #ef4444;
 }
 
 .dark .content-block.warning {
