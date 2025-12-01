@@ -58,7 +58,7 @@ export default function Sidebar() {
 
   if (!toc) {
     return (
-      <aside className="sticky top-14 z-30 h-[calc(100vh-3.5rem)] w-80 overflow-y-auto bg-white p-4 shadow-none">
+      <aside className="sticky top-0 z-30 h-screen w-80 overflow-y-auto bg-white p-4 pt-14 shadow-none">
         <p className="text-gray-500">Hleður efnisyfirlit...</p>
       </aside>
     );
@@ -82,17 +82,17 @@ export default function Sidebar() {
         aria-hidden={!sidebarOpen ? "true" : undefined}
         className={`
           fixed lg:sticky
-          inset-y-0 lg:top-14 left-0
+          inset-y-0 lg:top-0 left-0
           z-50 lg:z-30
           w-80 bg-white
           transition-transform duration-300 ease-out
           overflow-y-auto
-          lg:h-[calc(100vh-3.5rem)]
+          lg:h-screen lg:pt-14
           ${sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full lg:translate-x-0"}
           lg:shadow-none
         `}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col lg:h-[calc(100vh-3.5rem)]">
           {/* Sidebar header */}
           <div className="flex h-14 items-center justify-between border-b border-gray-100 px-4">
             <h2 className="font-semibold text-gray-900">Efnisyfirlit</h2>
