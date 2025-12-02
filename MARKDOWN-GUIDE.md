@@ -167,6 +167,8 @@ Tables are rendered as modern cards with no internal borders.
 
 The reader supports three types of callout blocks for highlighting important information.
 
+**Available callout types:** `:::note`, `:::warning`, `:::example`, `:::practice-problem`
+
 ### Note Block (Blue)
 
 Use `:::note` for information, tips, or important concepts:
@@ -208,6 +210,36 @@ To find the molar mass of H₂O:
 ```
 
 **Renders as:** Gray card with lightbulb (💡) icon and "Dæmi" title
+
+### Practice Problem Block (Interactive)
+
+Use `:::practice-problem` with nested `:::answer` for interactive problems with hide/reveal answers:
+
+```markdown
+:::practice-problem
+Calculate the pH of a 0.01 M HCl solution.
+
+:::answer
+**Solution:**
+
+HCl is a strong acid that completely dissociates:
+- [H⁺] = 0.01 M
+- pH = -log[H⁺] = -log(0.01) = 2
+
+**Answer: pH = 2**
+:::
+:::
+```
+
+**Features:**
+- **Amber header** with clipboard icon and "Æfingadæmi" title
+- **White content area** for the problem statement
+- **"Sýna svar" button** that reveals the answer when clicked
+- **Green answer area** with smooth slide-down animation
+- **Button changes** to "Fela svar" when answer is visible
+- Students can attempt the problem before checking the solution
+
+**Why this works:** Active recall (trying before checking) is one of the most effective learning techniques. This format encourages students to engage with problems rather than passively reading solutions.
 
 ### Multi-paragraph Callouts
 
@@ -440,17 +472,11 @@ Here's a sentence with a footnote[^1].
 
 ### 🎯 Interactive Problem Solving
 
-#### 1. **Hide/Reveal Answer Blocks**
-```markdown
-:::practice-problem
-Calculate the pH of a 0.01 M HCl solution.
+#### 1. **Hide/Reveal Answer Blocks** ✅ **IMPLEMENTED!**
 
-:::answer
-pH = -log[H⁺] = -log(0.01) = 2
-:::
-:::
-```
-**Why:** Students can attempt problems before checking answers. Builds confidence and prevents passive reading.
+See the [Practice Problem Block](#practice-problem-block-interactive) section in "Currently Implemented Features" above for full documentation and examples.
+
+This feature is now available for use in your markdown files!
 
 #### 2. **Multiple Choice Quizzes**
 ```markdown
