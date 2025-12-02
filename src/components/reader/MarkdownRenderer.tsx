@@ -4,6 +4,9 @@ import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import { useState } from "react";
 
+// Import mhchem for chemical notation
+import "katex/dist/contrib/mhchem.js";
+
 interface MarkdownRendererProps {
   content: string;
 }

@@ -79,7 +79,7 @@ The `objectives` list will be displayed in a special card at the top of the sect
 
 ## 🧪 Math & Chemical Equations
 
-The reader uses **KaTeX** for rendering mathematical and chemical equations.
+The reader uses **KaTeX** with the **mhchem extension** for rendering mathematical and chemical equations.
 
 ### Inline Math
 
@@ -101,24 +101,101 @@ $$
 $$
 ```
 
-### Common Chemical Notation
+---
+
+### ⚗️ Chemical Notation with mhchem
+
+**mhchem** makes writing chemical formulas much easier! Use the `\ce{}` command:
+
+#### Chemical Formulas
 
 ```markdown
-- Subscripts: $\text{H}_2\text{O}$
-- Superscripts: $\text{Fe}^{3+}$
-- Arrows: $\rightarrow$ (forward), $\leftarrow$ (back), $\leftrightarrow$ (equilibrium)
+- Water: $\ce{H2O}$ (automatic subscripts!)
+- Sulfuric acid: $\ce{H2SO4}$
+- Iron(III) oxide: $\ce{Fe2O3}$
+- Ions: $\ce{Fe^3+}$, $\ce{SO4^2-}$
+```
+
+**Why mhchem?** Compare these two approaches:
+
+```markdown
+Old way: $\text{H}_2\text{O}$
+mhchem:  $\ce{H2O}$          ← Much simpler!
+```
+
+#### States of Matter
+
+```markdown
+- Liquid: $\ce{H2O(l)}$
+- Solid: $\ce{NaCl(s)}$
+- Gas: $\ce{CO2(g)}$
+- Aqueous: $\ce{NaCl(aq)}$
+```
+
+#### Reaction Arrows
+
+```markdown
+- Forward: $\ce{A -> B}$
+- Backward: $\ce{A <- B}$
+- Equilibrium: $\ce{A <=> B}$
+- Resonance: $\ce{A <-> B}$
+- With conditions: $\ce{A ->[heat] B}$
+- With catalyst: $\ce{A ->[H2SO4] B}$
+```
+
+#### Complete Chemical Equations
+
+```markdown
+**Combustion of methane:**
+$$
+\ce{CH4(g) + 2O2(g) -> CO2(g) + 2H2O(l)}
+$$
+
+**Photosynthesis:**
+$$
+\ce{6CO2 + 6H2O ->[light] C6H12O6 + 6O2}
+$$
+
+**Rusting of iron:**
+$$
+\ce{4Fe + 3O2 -> 2Fe2O3}
+$$
+
+**Acid-base reaction:**
+$$
+\ce{HCl(aq) + NaOH(aq) -> NaCl(aq) + H2O(l)}
+$$
+
+**With equilibrium:**
+$$
+\ce{N2(g) + 3H2(g) <=> 2NH3(g)}
+$$
+```
+
+#### Complex Notation
+
+```markdown
+- Precipitate: $\ce{AgCl v}$ (↓ arrow)
+- Gas evolution: $\ce{CO2 ^}$ (↑ arrow)
+- Electron transfer: $\ce{Fe^2+ -> Fe^3+ + e-}$
+- With heat (Δ): $\ce{CaCO3 ->[\Delta] CaO + CO2}$
+```
+
+---
+
+### Traditional Math Notation
+
+For pure mathematics (not chemistry), use standard LaTeX:
+
+```markdown
 - Greek letters: $\alpha$, $\beta$, $\gamma$, $\Delta$ (delta for change)
 - Fractions: $\frac{numerator}{denominator}$
+- Subscripts/superscripts: $x_1$, $x^2$
 ```
 
 ### Example Equations
 
 ```markdown
-**Photosynthesis:**
-$$
-6\text{CO}_2 + 6\text{H}_2\text{O} + \text{light energy} \rightarrow \text{C}_6\text{H}_{12}\text{O}_6 + 6\text{O}_2
-$$
-
 **pH calculation:**
 $$
 \text{pH} = -\log[\text{H}^+]
@@ -127,6 +204,11 @@ $$
 **Ideal gas law:**
 $$
 PV = nRT
+$$
+
+**Concentration:**
+$$
+c = \frac{n}{V}
 $$
 ```
 
