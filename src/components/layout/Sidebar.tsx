@@ -31,18 +31,33 @@ export default function Sidebar() {
       });
   }, []);
 
-  // Compute which chapters should be expanded (current chapter + manually expanded)
-  const expandedChapters = new Set(manuallyExpandedChapters);
-  if (toc && chapterSlug) {
-    const currentChapter = toc.chapters.find((c) => c.slug === chapterSlug);
-    if (currentChapter) {
-      expandedChapters.add(currentChapter.number);
+  // Auto-expand chapter 1 on initial mount
+  useEffect(() => {
+    if (toc && toc.chapters.length > 0) {
+      setManuallyExpandedChapters((prev) => {
+        const newSet = new Set(prev);
+        newSet.add(1);
+        return newSet;
+      });
     }
-  }
-  // Always expand chapter 1 by default
-  if (toc && toc.chapters.length > 0) {
-    expandedChapters.add(1);
-  }
+  }, [toc]);
+
+  // Auto-expand current chapter when navigating (if not already manually collapsed)
+  useEffect(() => {
+    if (toc && chapterSlug) {
+      const currentChapter = toc.chapters.find((c) => c.slug === chapterSlug);
+      if (currentChapter) {
+        setManuallyExpandedChapters((prev) => {
+          const newSet = new Set(prev);
+          newSet.add(currentChapter.number);
+          return newSet;
+        });
+      }
+    }
+  }, [toc, chapterSlug]);
+
+  // Use manuallyExpandedChapters directly as the expanded set
+  const expandedChapters = manuallyExpandedChapters;
 
   const toggleChapter = (chapterNumber: number) => {
     setManuallyExpandedChapters((prev) => {
