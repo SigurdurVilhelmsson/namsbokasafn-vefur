@@ -17,7 +17,8 @@ export default function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useSettingsStore();
   const { isRead, getChapterProgress } = useReaderStore();
   const [toc, setToc] = useState<TableOfContents | null>(null);
-  const [manuallyExpandedChapters, setManuallyExpandedChapters] = useState<
+  // Track which chapters user has manually toggled
+  const [manuallyToggledChapters, setManuallyToggledChapters] = useState<
     Set<number>
   >(new Set());
   const { chapterSlug, sectionSlug } = useParams();
@@ -31,36 +32,39 @@ export default function Sidebar() {
       });
   }, []);
 
-  // Auto-expand chapter 1 on initial mount
-  useEffect(() => {
-    if (toc && toc.chapters.length > 0) {
-      setManuallyExpandedChapters((prev) => {
-        const newSet = new Set(prev);
-        newSet.add(1);
-        return newSet;
-      });
-    }
-  }, [toc]);
+  // Calculate which chapters should be expanded
+  const expandedChapters = new Set<number>();
 
-  // Auto-expand current chapter when navigating (if not already manually collapsed)
-  useEffect(() => {
-    if (toc && chapterSlug) {
+  if (toc) {
+    // Auto-expand chapter 1 if user hasn't manually toggled it
+    if (toc.chapters.length > 0 && !manuallyToggledChapters.has(1)) {
+      expandedChapters.add(1);
+    }
+
+    // Auto-expand current chapter if user hasn't manually toggled it
+    if (chapterSlug) {
       const currentChapter = toc.chapters.find((c) => c.slug === chapterSlug);
-      if (currentChapter) {
-        setManuallyExpandedChapters((prev) => {
-          const newSet = new Set(prev);
-          newSet.add(currentChapter.number);
-          return newSet;
-        });
+      if (currentChapter && !manuallyToggledChapters.has(currentChapter.number)) {
+        expandedChapters.add(currentChapter.number);
       }
     }
-  }, [toc, chapterSlug]);
 
-  // Use manuallyExpandedChapters directly as the expanded set
-  const expandedChapters = manuallyExpandedChapters;
+    // Apply manual toggles (these override the auto-expand logic)
+    toc.chapters.forEach((chapter) => {
+      if (manuallyToggledChapters.has(chapter.number)) {
+        // If it was auto-expanded and user toggled it, collapse it
+        if (chapter.number === 1 || (chapterSlug && chapter.slug === chapterSlug)) {
+          expandedChapters.delete(chapter.number);
+        } else {
+          // If it wasn't auto-expanded and user toggled it, expand it
+          expandedChapters.add(chapter.number);
+        }
+      }
+    });
+  }
 
   const toggleChapter = (chapterNumber: number) => {
-    setManuallyExpandedChapters((prev) => {
+    setManuallyToggledChapters((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(chapterNumber)) {
         newSet.delete(chapterNumber);
