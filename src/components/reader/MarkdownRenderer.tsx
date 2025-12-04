@@ -54,18 +54,25 @@ function PracticeProblem({ children }: { children: React.ReactNode }) {
   const contentParts: React.ReactNode[] = [];
   let answerContent: React.ReactNode = null;
 
+  // Process only direct children, not nested practice problems
   childArray.forEach((child) => {
     if (
       child &&
       typeof child === "object" &&
-      "props" in child &&
-      child.props?.className === "practice-answer-container"
+      "props" in child
     ) {
-      // This is the answer block
-      answerContent = child.props.children;
-    } else {
-      // This is problem content
-      contentParts.push(child);
+      // Skip nested practice-problem containers
+      if (child.props?.className === "practice-problem-container") {
+        return;
+      }
+
+      if (child.props?.className === "practice-answer-container") {
+        // This is the answer block
+        answerContent = child.props.children;
+      } else {
+        // This is problem content
+        contentParts.push(child);
+      }
     }
   });
 
