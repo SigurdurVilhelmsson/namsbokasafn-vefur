@@ -97,7 +97,16 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
     <div className="reading-content">
       <ReactMarkdown
         remarkPlugins={[remarkMath, remarkGfm]}
-        rehypePlugins={[rehypeKatex]}
+        rehypePlugins={[
+          [
+            rehypeKatex,
+            {
+              strict: false,
+              trust: true,
+              throwOnError: false,
+            },
+          ],
+        ]}
         components={{
           // Sérsniðnir þættir fyrir mismunandi markdown element (custom components)
 
