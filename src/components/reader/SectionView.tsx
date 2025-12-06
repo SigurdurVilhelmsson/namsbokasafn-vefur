@@ -9,6 +9,7 @@ import {
 import { useReaderStore } from "@/stores/readerStore";
 import MarkdownRenderer from "./MarkdownRenderer";
 import NavigationButtons from "./NavigationButtons";
+import LearningObjectives from "./LearningObjectives";
 import type {
   SectionContent,
   NavigationContext,
@@ -231,17 +232,12 @@ export default function SectionView() {
           </div>
 
           {/* Markmið kafla (learning objectives) */}
-          {content.objectives && content.objectives.length > 0 && (
-            <div className="mb-8 rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] p-6">
-              <h3 className="mb-3 font-sans text-lg font-semibold">
-                Markmið kaflans
-              </h3>
-              <ul className="list-inside list-disc space-y-2 text-[var(--text-secondary)]">
-                {content.objectives.map((objective, index) => (
-                  <li key={index}>{objective}</li>
-                ))}
-              </ul>
-            </div>
+          {content.objectives && content.objectives.length > 0 && chapterSlug && sectionSlug && (
+            <LearningObjectives
+              objectives={content.objectives}
+              chapterSlug={chapterSlug}
+              sectionSlug={sectionSlug}
+            />
           )}
 
           {/* Markdown efni (markdown content) */}
