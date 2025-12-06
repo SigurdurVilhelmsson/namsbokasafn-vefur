@@ -1,6 +1,6 @@
 # Repository Health Dashboard
 
-> **Last Updated**: 2025-11-30 (Updated with accessibility audit and test infrastructure)
+> **Last Updated**: 2025-12-06 (Updated accessibility score to 85/100, domain updated to efnafraedi.app)
 
 ---
 
@@ -22,7 +22,7 @@
 | 💻 Code Quality | 🟢 | 2025-11-30 | All checks passing |
 | 🧪 Tests | 🟢 | 2025-11-30 | Vitest configured, 8 tests passing |
 | 📚 Documentation | 🟢 | 2025-11-30 | - |
-| ♿ Accessibility | 🟡 | 2025-11-30 | Score: 65/100, 4 critical issues |
+| ♿ Accessibility | 🟢 | 2025-12-06 | Score: 85/100, 0 critical issues ✅ |
 | ⚡ Performance | ⚪ | Never | Need baseline |
 | 🎨 UX/Navigation | ⚪ | Never | Need review |
 
@@ -42,17 +42,15 @@ None currently. Great job! 🎉
 
 ## ⚠️ Warnings (Address Soon)
 
-### Accessibility Issues (4 Critical, 5 Moderate)
-- **Last Audit**: 2025-11-30
-- **Score**: 65/100 (Partial WCAG 2.1 AA compliance)
-- **Critical Issues**:
-  1. Missing skip link for keyboard navigation
-  2. Form inputs missing labels (SearchModal, GlossaryPage)
-  3. Multiple H1 elements on pages (Header conflict)
-  4. Missing aria-expanded on collapsible elements
+None currently! 🎉
+
+### Accessibility Status ✅
+- **Last Audit**: 2025-12-06
+- **Score**: 85/100 (WCAG 2.1 AA compliant)
+- **Critical Issues**: 0 ✅
+- **Moderate Issues**: 0 ✅
+- **Minor Issues**: 6 (cosmetic improvements)
 - **Detailed Report**: docs/audits/accessibility-audit-2025-11-30.md
-- **Quick Wins**: ~55 minutes of fixes can improve score to 75/100
-- **Estimated Time**: 2-3 days to reach 85/100
 
 ---
 

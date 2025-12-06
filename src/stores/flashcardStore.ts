@@ -4,19 +4,36 @@ import type {
   Flashcard,
   FlashcardDeck,
   FlashcardStudyRecord,
+  DifficultyRating,
 } from "@/types/flashcard";
+import { DIFFICULTY_TO_QUALITY } from "@/types/flashcard";
+import {
+  processReview,
+  isCardDue,
+  sortCardsByPriority,
+  getDueCards,
+  getNewCards,
+  calculateDeckStats,
+  previewRatingIntervals,
+} from "@/utils/srs";
 
 interface FlashcardState {
   // Decks
   decks: FlashcardDeck[];
 
-  // Study records
+  // Study records (SRS data for each card)
   studyRecords: Record<string, FlashcardStudyRecord>;
 
   // Current session state
   currentDeckId: string | null;
   currentCardIndex: number;
   showAnswer: boolean;
+  studyQueue: string[]; // Card IDs in study order (prioritized by SRS)
+
+  // Study statistics
+  todayStudied: number;
+  studyStreak: number;
+  lastStudyDate: string | null;
 
   // Deck management
   addDeck: (deck: FlashcardDeck) => void;
@@ -28,11 +45,23 @@ interface FlashcardState {
   removeCardFromDeck: (deckId: string, cardId: string) => void;
 
   // Study session
-  startStudySession: (deckId: string) => void;
+  startStudySession: (deckId: string, studyMode?: "all" | "due" | "new") => void;
   nextCard: () => void;
   previousCard: () => void;
   toggleAnswer: () => void;
-  rateCard: (cardId: string, ease: number) => void;
+
+  // SRS functions
+  rateCard: (cardId: string, rating: DifficultyRating) => void;
+  getCardRecord: (cardId: string) => FlashcardStudyRecord | undefined;
+  isCardDue: (cardId: string) => boolean;
+  getDeckStats: (deckId: string) => {
+    total: number;
+    new: number;
+    due: number;
+    learning: number;
+    review: number;
+  };
+  getPreviewIntervals: (cardId: string) => Record<DifficultyRating, string>;
 
   // Reset
   resetSession: () => void;
@@ -47,6 +76,10 @@ export const useFlashcardStore = create<FlashcardState>()(
       currentDeckId: null,
       currentCardIndex: 0,
       showAnswer: false,
+      studyQueue: [],
+      todayStudied: 0,
+      studyStreak: 0,
+      lastStudyDate: null,
 
       // Add a new deck
       addDeck: (deck) => {
@@ -91,25 +124,41 @@ export const useFlashcardStore = create<FlashcardState>()(
         }));
       },
 
-      // Start study session
-      startStudySession: (deckId) => {
+      // Start study session with SRS prioritization
+      startStudySession: (deckId, studyMode = "all") => {
+        const deck = get().getDeck(deckId);
+        if (!deck) return;
+
+        const { studyRecords } = get();
+        const cardIds = deck.cards.map((c) => c.id);
+
+        let queue: string[];
+        switch (studyMode) {
+          case "due":
+            queue = getDueCards(cardIds, studyRecords);
+            break;
+          case "new":
+            queue = getNewCards(cardIds, studyRecords);
+            break;
+          default:
+            // "all" - sort by priority (due first, then new, then future)
+            queue = sortCardsByPriority(cardIds, studyRecords);
+        }
+
         set({
           currentDeckId: deckId,
           currentCardIndex: 0,
           showAnswer: false,
+          studyQueue: queue,
         });
       },
 
-      // Next card
+      // Next card in study queue
       nextCard: () => {
-        const { currentDeckId, currentCardIndex } = get();
-        if (!currentDeckId) return;
-
-        const deck = get().getDeck(currentDeckId);
-        if (!deck) return;
+        const { studyQueue, currentCardIndex } = get();
 
         const nextIndex = currentCardIndex + 1;
-        if (nextIndex < deck.cards.length) {
+        if (nextIndex < studyQueue.length) {
           set({
             currentCardIndex: nextIndex,
             showAnswer: false,
@@ -135,21 +184,77 @@ export const useFlashcardStore = create<FlashcardState>()(
         }));
       },
 
-      // Rate card (for SRS later)
-      rateCard: (cardId, ease) => {
-        const now = new Date().toISOString();
+      // Rate card with SRS algorithm
+      rateCard: (cardId, rating) => {
+        const quality = DIFFICULTY_TO_QUALITY[rating];
+        const existingRecord = get().studyRecords[cardId];
+        const newRecord = processReview(cardId, quality, existingRecord);
+
+        // Update study streak
+        const today = new Date().toISOString().split("T")[0];
+        const { lastStudyDate, studyStreak, todayStudied } = get();
+
+        let newStreak = studyStreak;
+        let newTodayStudied = todayStudied;
+
+        if (lastStudyDate !== today) {
+          // New day
+          const yesterday = new Date();
+          yesterday.setDate(yesterday.getDate() - 1);
+          const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+          if (lastStudyDate === yesterdayStr) {
+            // Continuing streak
+            newStreak = studyStreak + 1;
+          } else {
+            // Streak broken, start new
+            newStreak = 1;
+          }
+          newTodayStudied = 1;
+        } else {
+          newTodayStudied = todayStudied + 1;
+        }
 
         set((state) => ({
           studyRecords: {
             ...state.studyRecords,
-            [cardId]: {
-              cardId,
-              lastReviewed: now,
-              ease,
-              reviewCount: (state.studyRecords[cardId]?.reviewCount || 0) + 1,
-            },
+            [cardId]: newRecord,
           },
+          lastStudyDate: today,
+          studyStreak: newStreak,
+          todayStudied: newTodayStudied,
         }));
+
+        // Auto-advance to next card after rating
+        get().nextCard();
+      },
+
+      // Get study record for a card
+      getCardRecord: (cardId) => {
+        return get().studyRecords[cardId];
+      },
+
+      // Check if a card is due for review
+      isCardDue: (cardId) => {
+        const record = get().studyRecords[cardId];
+        return isCardDue(record);
+      },
+
+      // Get deck statistics
+      getDeckStats: (deckId) => {
+        const deck = get().getDeck(deckId);
+        if (!deck) {
+          return { total: 0, new: 0, due: 0, learning: 0, review: 0 };
+        }
+
+        const cardIds = deck.cards.map((c) => c.id);
+        return calculateDeckStats(cardIds, get().studyRecords);
+      },
+
+      // Get preview of what intervals each rating would give
+      getPreviewIntervals: (cardId) => {
+        const record = get().studyRecords[cardId];
+        return previewRatingIntervals(record);
       },
 
       // Reset session
@@ -158,6 +263,7 @@ export const useFlashcardStore = create<FlashcardState>()(
           currentDeckId: null,
           currentCardIndex: 0,
           showAnswer: false,
+          studyQueue: [],
         });
       },
     }),
