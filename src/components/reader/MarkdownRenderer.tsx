@@ -73,6 +73,12 @@ function PracticeProblem({ children }: { children: React.ReactNode }) {
         // This is problem content
         contentParts.push(child);
       }
+    } else if (typeof child === "string") {
+      // Filter out standalone ::: markers
+      const trimmed = child.trim();
+      if (trimmed !== ":::" && trimmed !== "") {
+        contentParts.push(child);
+      }
     }
   });
 
