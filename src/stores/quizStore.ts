@@ -38,6 +38,11 @@ interface QuizState {
   getSectionStats: (chapterSlug: string, sectionSlug: string) => QuizStats;
   getChapterStats: (chapterSlug: string) => QuizStats;
   getTotalStats: () => QuizStats;
+
+  // Practice problem progress
+  getSectionProgress: (chapterSlug: string, sectionSlug: string) => { total: number; completed: number; percentage: number };
+  getChapterProgress: (chapterSlug: string) => { total: number; completed: number; percentage: number };
+  getOverallProgress: () => { total: number; completed: number; percentage: number };
 }
 
 function generateId(): string {
@@ -300,6 +305,46 @@ export const useQuizStore = create<QuizState>()(
         }
 
         return totalStats;
+      },
+
+      // Get practice problem progress for a section
+      getSectionProgress: (chapterSlug, sectionSlug) => {
+        const { practiceProblemProgress } = get();
+        const problems = Object.values(practiceProblemProgress).filter(
+          (p) => p.chapterSlug === chapterSlug && p.sectionSlug === sectionSlug
+        );
+
+        const total = problems.length;
+        const completed = problems.filter((p) => p.isCompleted).length;
+        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+        return { total, completed, percentage };
+      },
+
+      // Get practice problem progress for a chapter
+      getChapterProgress: (chapterSlug) => {
+        const { practiceProblemProgress } = get();
+        const problems = Object.values(practiceProblemProgress).filter(
+          (p) => p.chapterSlug === chapterSlug
+        );
+
+        const total = problems.length;
+        const completed = problems.filter((p) => p.isCompleted).length;
+        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+        return { total, completed, percentage };
+      },
+
+      // Get overall practice problem progress
+      getOverallProgress: () => {
+        const { practiceProblemProgress } = get();
+        const problems = Object.values(practiceProblemProgress);
+
+        const total = problems.length;
+        const completed = problems.filter((p) => p.isCompleted).length;
+        const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+        return { total, completed, percentage };
       },
     }),
     {
