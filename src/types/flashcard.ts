@@ -17,10 +17,36 @@ export interface FlashcardDeck {
   created: string;
 }
 
-// Study session for a flashcard
+// Study quality ratings (SM-2 algorithm uses 0-5)
+export type StudyQuality = 0 | 1 | 2 | 3 | 4 | 5;
+
+// User-friendly rating options
+export type DifficultyRating = "again" | "hard" | "good" | "easy";
+
+// Map user ratings to SM-2 quality scores
+export const DIFFICULTY_TO_QUALITY: Record<DifficultyRating, StudyQuality> = {
+  again: 0, // Complete blackout, wrong answer
+  hard: 2, // Correct but with difficulty
+  good: 4, // Correct with some hesitation
+  easy: 5, // Perfect recall
+};
+
+// Study session for a flashcard (SM-2 SRS data)
 export interface FlashcardStudyRecord {
   cardId: string;
   lastReviewed: string; // ISO date string
-  ease: number; // Difficulty rating (1-5 or easy/medium/hard)
-  reviewCount: number;
+  nextReview: string; // ISO date string - when the card is due
+  ease: number; // SM-2 ease factor (starts at 2.5, minimum 1.3)
+  interval: number; // Days until next review
+  reviewCount: number; // Number of times reviewed
+  consecutiveCorrect: number; // Streak of correct answers (quality >= 3)
+}
+
+// Statistics for a deck
+export interface DeckStats {
+  totalCards: number;
+  newCards: number; // Never reviewed
+  dueCards: number; // Due for review today
+  learningCards: number; // Recently started learning (interval < 7)
+  reviewCards: number; // In review cycle (interval >= 7)
 }

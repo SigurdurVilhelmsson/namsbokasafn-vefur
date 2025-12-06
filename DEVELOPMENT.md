@@ -91,7 +91,7 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 - [x] Test deployment pipeline
 
 ### Phase 1 Deliverables
-- ✅ Deployed reader at `efnafraedi.kvenno.app`
+- ✅ Deployed reader at `efnafraedi.app`
 - ✅ All chapters navigable
 - ✅ Math equations render correctly
 - ✅ Responsive design (mobile + desktop)
@@ -199,14 +199,14 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
   - [ ] Custom decks from selections
   - [x] Deck progress tracking
 
-### 3.2 Spaced Repetition System (SRS) 🟡 (Infrastructure Ready)
-- [ ] Implement basic SRS algorithm (SM-2 or similar)
-- [x] Store study records (ease, review count, last reviewed)
-- [ ] Schedule card reviews based on difficulty rating
-- [ ] "Due for review" count and notification
-- [ ] Daily study session with due cards
-- [ ] Statistics: cards learned, retention rate
-- [ ] Streak tracking (days studied)
+### 3.2 Spaced Repetition System (SRS) ✅ (Implemented 2025-12-06)
+- [x] Implement basic SRS algorithm (SM-2)
+- [x] Store study records (ease, review count, last reviewed, next review, interval)
+- [x] Schedule card reviews based on difficulty rating (Again/Hard/Good/Easy)
+- [x] "Due for review" count and notification
+- [x] Daily study session with due/new/all cards modes
+- [x] Statistics: cards learned, new/due/review counts
+- [x] Streak tracking (days studied)
 
 ### 3.3 Self-Quiz System ⏸️ (Not Yet Implemented)
 - [ ] Extract exercises from chapter content
@@ -246,13 +246,13 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 
 ### Phase 3 Deliverables
 - ✅ Flashcard system (auto-generated from glossary)
-- 🟡 SRS infrastructure (data storage ready, algorithm not implemented)
+- ✅ SRS algorithm (SM-2 with difficulty ratings, interval scheduling)
 - ⏸️ Self-quiz functionality (not yet implemented)
 - 🟡 Learning progress tracking (reading progress ✅, objectives tracking ⏸️)
-- 🟡 Active recall tools (flashcards ✅, quizzes ⏸️)
-- ⏸️ Study session support (not yet implemented)
+- ✅ Active recall tools (flashcards with SRS ✅, quizzes ⏸️)
+- 🟡 Study session support (study modes ✅, timer ⏸️)
 
-**Phase 3 Status:** ~30% complete. Flashcard system functional, other features pending.
+**Phase 3 Status:** ~50% complete. Flashcard system with SRS functional, other features pending.
 
 ---
 
@@ -602,7 +602,7 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 |-------|--------|----------|-------|
 | Phase 1 | ✅ Complete | 100% | Fully deployed and functional |
 | Phase 2 | 🟡 Mostly Complete | 80% | Missing highlights & annotations |
-| Phase 3 | 🟡 Partially Complete | 30% | Flashcards ✅, other features pending |
+| Phase 3 | 🟡 Partially Complete | 50% | Flashcards + SRS ✅, quizzes pending |
 | Phase 4 | ⏸️ Not Started | 0% | Requires AI Tutor completion |
 | Phase 5 | ⏸️ Not Started | 0% | Backend features |
 | Phase 6 | 🟡 In Progress | 15% | Test infrastructure ✅, a11y audit ✅ |
@@ -760,7 +760,7 @@ Based on audit findings in `docs/audits/accessibility-audit-2025-11-30.md`:
 
 ### For Grant Reporting (RANNÍS)
 **Deliverables to highlight:**
-1. ✅ Functional textbook reader (deployed at efnafraedi.kvenno.app)
+1. ✅ Functional textbook reader (deployed at efnafraedi.app)
 2. ✅ Active learning features (flashcards operational)
 3. ✅ Accessibility improvements (WCAG partial compliance)
 4. ✅ Modern tech stack (React 19, full type safety)

@@ -1,108 +1,76 @@
 # Accessibility Audit - 2025-11-30
 
+> **Updated: 2025-12-06** - Re-audit shows most issues have been fixed!
+
 ## Summary
-- **Score**: 65/100
-- **WCAG Level**: Partial AA (needs improvements)
-- **Critical Issues**: 4
-- **Moderate Issues**: 5
-- **Minor Issues**: 6
+- **Score**: 85/100 ⬆️ (was 65/100)
+- **WCAG Level**: AA Compliant (most requirements met)
+- **Critical Issues**: 0 ✅ (was 4)
+- **Moderate Issues**: 0 ✅ (was 5)
+- **Minor Issues**: 6 (unchanged)
 
 ## Overall Assessment
 
-The Chemistry Reader has a solid accessibility foundation with excellent semantic HTML, modal implementation, and focus management. However, critical gaps in form labels, skip links, and dynamic content announcements prevent full WCAG 2.1 AA compliance.
+The Chemistry Reader now has **excellent accessibility**. All critical and moderate issues from the original audit have been resolved. The application meets WCAG 2.1 AA compliance for core features.
 
 ---
 
-## CRITICAL ISSUES (Must Fix)
+## CRITICAL ISSUES - ALL FIXED ✅
 
-### 1. Missing Skip Link
-**Location:** `index.html` and `src/components/layout/Layout.tsx`
-**Issue:** No "Skip to main content" link for keyboard users
-**Impact:** Keyboard users must tab through entire header and sidebar to reach main content
-**Status:** Pending
-**Fix:**
-```tsx
-// Add to Layout.tsx before Header
-<a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-white">
-  Skip to main content
-</a>
-// Add id to main element
-<main id="main-content" className="flex-1 overflow-x-hidden">
-```
+### 1. ~~Missing Skip Link~~ ✅ FIXED
+**Location:** `src/components/layout/Layout.tsx` (lines 16-21)
+**Status:** ✅ Fixed
+**Implementation:** Skip link with proper styling, targets `#main-content`
 
-### 2. Form Inputs Missing Labels
+### 2. ~~Form Inputs Missing Labels~~ ✅ FIXED
 **Locations:**
-- `src/components/ui/SearchModal.tsx` (line 92-99)
-- `src/components/reader/GlossaryPage.tsx` (line 56-62)
+- `src/components/ui/SearchModal.tsx` (lines 88-90, 96)
+- `src/components/reader/GlossaryPage.tsx` (lines 52-54, 60)
 
-**Issue:** Search inputs rely only on placeholder text, no `<label>` or `aria-label`
-**Impact:** Screen readers cannot properly identify input purpose
-**Status:** Pending
-**Fix:**
-```tsx
-// SearchModal.tsx
-<label htmlFor="search-input" className="sr-only">Leita að efni</label>
-<input id="search-input" ref={inputRef} type="text" /* ... */ />
+**Status:** ✅ Fixed
+**Implementation:** Screen-reader-only labels with proper `htmlFor`/`id` association
 
-// GlossaryPage.tsx
-<label htmlFor="glossary-search" className="sr-only">Leita að hugtaki</label>
-<input id="glossary-search" type="text" /* ... */ />
-```
+### 3. ~~Multiple H1 Elements on Pages~~ ✅ NOT AN ISSUE
+**Location:** `src/components/layout/Header.tsx`
+**Status:** ✅ Not an issue - Header uses Link component, not H1
+**Note:** The title "Efnafræðilesari" is properly inside a Link, not an H1
 
-### 3. Multiple H1 Elements on Pages
-**Location:** `src/components/layout/Header.tsx` (line 30)
-**Issue:** Header contains H1 "Efnafræðilesari" which conflicts with page H1s
-**Impact:** Confuses screen reader navigation, violates heading hierarchy
-**Status:** Pending
-**Fix:** Change Header H1 to a div or span with appropriate styling
-
-### 4. Missing ARIA Expanded State
-**Location:** `src/components/layout/Sidebar.tsx` (line 173-193)
-**Issue:** Chapter toggle buttons lack `aria-expanded` attribute
-**Impact:** Screen readers cannot announce collapse/expand state
-**Status:** Pending
-**Fix:**
-```tsx
-<button
-  onClick={onToggle}
-  aria-expanded={expanded}
-  aria-controls={`chapter-${chapter.number}-sections`}
->
-```
+### 4. ~~Missing ARIA Expanded State~~ ✅ FIXED
+**Location:** `src/components/layout/Sidebar.tsx` (lines 217-218)
+**Status:** ✅ Fixed
+**Implementation:** `aria-expanded` and `aria-controls` on chapter toggle buttons
 
 ---
 
-## MODERATE ISSUES (Should Fix)
+## MODERATE ISSUES - ALL FIXED ✅
 
-### 5. Missing Focus Trap in Modals
-**Location:** `src/components/ui/Modal.tsx`
-**Issue:** No focus trap implementation
-**Impact:** Users can interact with background content while modal is open
-**Status:** Pending
+### 5. ~~Missing Focus Trap in Modals~~ ✅ FIXED
+**Location:** `src/components/ui/Modal.tsx` (lines 32-78)
+**Status:** ✅ Fixed
+**Implementation:** Full focus trap with Tab/Shift+Tab handling, focus restoration
 
-### 6. Progress Bar Missing ARIA Attributes
-**Location:** `src/components/reader/FlashcardDeck.tsx` (line 47-52)
-**Issue:** Progress bar lacks proper ARIA attributes
-**Impact:** Screen readers cannot announce progress
-**Status:** Pending
+### 6. ~~Progress Bar Missing ARIA Attributes~~ ✅ FIXED
+**Location:** `src/components/reader/FlashcardDeck.tsx` (lines 47-59)
+**Status:** ✅ Fixed
+**Implementation:** `role="progressbar"`, `aria-valuenow`, `aria-valuemin`, `aria-valuemax`, `aria-label`
 
-### 7. No ARIA Live Regions for Dynamic Content
-**Locations:** `SectionView.tsx`, `FlashcardDeck.tsx`
-**Issue:** Dynamic updates not announced to screen readers
-**Impact:** Screen reader users miss state changes
-**Status:** Pending
+### 7. ~~No ARIA Live Regions for Dynamic Content~~ ✅ FIXED
+**Locations:**
+- `src/components/reader/SectionView.tsx` (lines 211-214)
+- `src/components/reader/FlashcardDeck.tsx` (lines 62-65)
 
-### 8. Sidebar Not Hidden from Screen Readers When Closed
-**Location:** `src/components/layout/Sidebar.tsx`
-**Issue:** Closed sidebar lacks `aria-hidden="true"`
-**Impact:** Screen reader users can still navigate hidden content
-**Status:** Pending
+**Status:** ✅ Fixed
+**Implementation:** `role="status"` with `aria-live="polite"` for card navigation and read status
 
-### 9. Flashcard Flip Button Unclear Purpose
-**Location:** `src/components/reader/FlashcardDeck.tsx`
-**Issue:** Button needs clearer accessible name
-**Impact:** May confuse screen reader users
-**Status:** Pending
+### 8. ~~Sidebar Not Hidden from Screen Readers When Closed~~ ✅ FIXED
+**Location:** `src/components/layout/Sidebar.tsx` (line 101)
+**Status:** ✅ Fixed
+**Implementation:** Conditional `aria-hidden="true"` when sidebar is closed
+
+### 9. ~~Flashcard Flip Button Unclear Purpose~~ ✅ FIXED
+**Location:** `src/components/reader/FlashcardDeck.tsx` (line 144)
+**Status:** ✅ Fixed
+**Implementation:** Clear `aria-label` that changes based on card state
 
 ---
 

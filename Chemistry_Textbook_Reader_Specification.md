@@ -34,7 +34,7 @@ Build a web-based reader for an Icelandic translation of OpenStax Chemistry 2e t
 - **Web Server:** Nginx (static file serving + reverse proxy)
 - **SSL:** Let's Encrypt via Certbot
 - **CI/CD:** GitHub Actions → SSH deploy to Linode
-- **Domain:** Subdomain of kvenno.app (e.g., `efnafraedi.kvenno.app`)
+- **Domain:** `efnafraedi.app` (dedicated domain)
 
 ---
 
@@ -671,21 +671,21 @@ npm run dev
 
 ### Nginx Configuration
 
-Create `/etc/nginx/sites-available/efnafraedi.kvenno.app`:
+Create `/etc/nginx/sites-available/efnafraedi.app`:
 
 ```nginx
 server {
     listen 80;
-    server_name efnafraedi.kvenno.app;
+    server_name efnafraedi.app www.efnafraedi.app;
     return 301 https://$server_name$request_uri;
 }
 
 server {
     listen 443 ssl http2;
-    server_name efnafraedi.kvenno.app;
+    server_name efnafraedi.app www.efnafraedi.app;
 
-    ssl_certificate /etc/letsencrypt/live/efnafraedi.kvenno.app/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/efnafraedi.kvenno.app/privkey.pem;
+    ssl_certificate /etc/letsencrypt/live/efnafraedi.app/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/efnafraedi.app/privkey.pem;
 
     root /var/www/efnafraedi-lesari/dist;
     index index.html;
@@ -773,7 +773,7 @@ jobs:
 sudo apt install certbot python3-certbot-nginx
 
 # Get certificate
-sudo certbot --nginx -d efnafraedi.kvenno.app
+sudo certbot --nginx -d efnafraedi.app -d www.efnafraedi.app
 
 # Auto-renewal is configured automatically
 ```
@@ -798,7 +798,7 @@ This reader is designed to integrate with the AI Chemistry Tutor in the future:
 1. **Shared Authentication** (if needed later)
 2. **"Ask AI" Button** - On each section, button to ask AI tutor about current content
 3. **Context Passing** - Pass current chapter/section to AI tutor for contextual answers
-4. **Shared Deployment** - Subdomain on Linode (`efnafraedi.kvenno.app` alongside existing apps)
+4. **Shared Deployment** - Dedicated domain (`efnafraedi.app`) on Linode
 5. **Study Analytics API** - Backend endpoint to aggregate learning data (future phases)
 
 For now, build as standalone static site. Integration can be added later without major refactoring.

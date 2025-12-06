@@ -215,7 +215,7 @@ Set these in GitHub repository settings:
 ```nginx
 server {
     listen 443 ssl http2;
-    server_name efnafraedi.kvenno.app;
+    server_name efnafraedi.app www.efnafraedi.app;
 
     root /var/www/efnafraedi-lesari/dist;
     index index.html;
