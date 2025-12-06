@@ -3,9 +3,9 @@ import remarkMath from "remark-math";
 import remarkGfm from "remark-gfm";
 import remarkDirective from "remark-directive";
 import rehypeKatex from "rehype-katex";
-import { useState } from "react";
 import { visit } from "unist-util-visit";
 import type { Root } from "mdast";
+import InteractivePracticeProblem from "./InteractivePracticeProblem";
 
 // Import mhchem for chemical notation
 import "katex/dist/contrib/mhchem.js";
@@ -22,10 +22,16 @@ function remarkCustomDirectives() {
         const data = node.data || (node.data = {});
         data.hName = "div";
 
+        // Get any attributes from the directive (e.g., :::practice-problem{#problem-id})
+        const attributes = node.attributes || {};
+
         // Map directive names to CSS classes
         switch (node.name) {
           case "practice-problem":
-            data.hProperties = { className: "practice-problem-container" };
+            data.hProperties = {
+              className: "practice-problem-container",
+              "data-problem-id": attributes.id || undefined,
+            };
             break;
           case "answer":
             data.hProperties = { className: "practice-answer-container" };
@@ -43,89 +49,6 @@ function remarkCustomDirectives() {
       }
     });
   };
-}
-
-// Collapsible answer component for practice problems
-function PracticeProblem({ children }: { children: React.ReactNode }) {
-  const [showAnswer, setShowAnswer] = useState(false);
-
-  // Extract problem and answer from children
-  const childArray = Array.isArray(children) ? children : [children];
-  const contentParts: React.ReactNode[] = [];
-  let answerContent: React.ReactNode = null;
-
-  // Process only direct children, not nested practice problems
-  childArray.forEach((child) => {
-    if (
-      child &&
-      typeof child === "object" &&
-      "props" in child
-    ) {
-      // Skip nested practice-problem containers
-      if (child.props?.className === "practice-problem-container") {
-        return;
-      }
-
-      if (child.props?.className === "practice-answer-container") {
-        // This is the answer block
-        answerContent = child.props.children;
-      } else {
-        // This is problem content
-        contentParts.push(child);
-      }
-    }
-  });
-
-  return (
-    <div className="practice-problem">
-      <div className="practice-problem-header">
-        <svg
-          className="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-          />
-        </svg>
-        <h4>Æfingadæmi</h4>
-      </div>
-
-      <div className="practice-problem-content">{contentParts}</div>
-
-      {answerContent && (
-        <div className="practice-answer-section">
-          <button
-            onClick={() => setShowAnswer(!showAnswer)}
-            className="practice-answer-toggle"
-          >
-            <span>{showAnswer ? "Fela svar" : "Sýna svar"}</span>
-            <svg
-              className={`h-5 w-5 transition-transform ${showAnswer ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
-
-          {showAnswer && (
-            <div className="practice-answer-content">{answerContent}</div>
-          )}
-        </div>
-      )}
-    </div>
-  );
 }
 
 export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
@@ -147,7 +70,12 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           // Custom handler for directive containers
           div: ({ className, children, ...props }) => {
             if (className === "practice-problem-container") {
-              return <PracticeProblem>{children}</PracticeProblem>;
+              const problemId = (props as { "data-problem-id"?: string })["data-problem-id"];
+              return (
+                <InteractivePracticeProblem problemId={problemId}>
+                  {children}
+                </InteractivePracticeProblem>
+              );
             }
             if (className === "directive-note") {
               return (
