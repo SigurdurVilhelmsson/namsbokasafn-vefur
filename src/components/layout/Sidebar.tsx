@@ -7,6 +7,7 @@ import {
   X,
   BookOpen,
   Brain,
+  Target,
 } from "lucide-react";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useReaderStore } from "@/stores/readerStore";
@@ -159,6 +160,13 @@ export default function Sidebar() {
               >
                 <Brain size={20} />
                 <span className="text-sm">Minniskort</span>
+              </Link>
+              <Link
+                to="/aefingar"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+              >
+                <Target size={20} />
+                <span className="text-sm">Æfingadæmi</span>
               </Link>
             </div>
           </nav>

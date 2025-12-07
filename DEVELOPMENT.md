@@ -208,18 +208,20 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 - [x] Statistics: cards learned, new/due/review counts
 - [x] Streak tracking (days studied)
 
-### 3.3 Self-Quiz System ⏸️ (Not Yet Implemented)
-- [ ] Extract exercises from chapter content
-- [ ] Present as interactive quiz
+### 3.3 Self-Quiz System ⏳ (Partially Implemented 2025-12-06)
+- [x] Extract exercises from chapter content (via practice-problem directives)
+- [x] Present as interactive practice problems with self-assessment
 - [ ] Multiple choice, fill-in-blank, calculation types
-- [ ] Show/hide solution toggle
-- [ ] Track quiz attempts and scores
-- [ ] Quiz history per chapter
+- [x] Show/hide solution toggle
+- [x] Track problem completion (correct/needs practice)
+- [x] Practice progress page with chapter/section breakdown
 - [ ] "Practice Mode" vs "Test Mode"
 
-### 3.4 Learning Objectives Tracker ⏸️ (Not Yet Implemented)
-- [ ] Display learning objectives at chapter start
-- [ ] Checkbox to mark objectives as understood
+### 3.4 Learning Objectives Tracker ✅ (Implemented 2025-12-06)
+- [x] Display learning objectives at section start
+- [x] Checkbox to mark objectives as understood
+- [x] Completion progress bar per section
+- [x] Persist completion state across sessions
 - [ ] Link objectives to relevant sections
 - [ ] Summary view of mastered vs. pending objectives
 - [ ] Suggest review for unchecked objectives
@@ -247,12 +249,12 @@ Transform the Icelandic Chemistry textbook from a static translation into a comp
 ### Phase 3 Deliverables
 - ✅ Flashcard system (auto-generated from glossary)
 - ✅ SRS algorithm (SM-2 with difficulty ratings, interval scheduling)
-- ⏸️ Self-quiz functionality (not yet implemented)
-- 🟡 Learning progress tracking (reading progress ✅, objectives tracking ⏸️)
-- ✅ Active recall tools (flashcards with SRS ✅, quizzes ⏸️)
+- 🟡 Self-quiz functionality (practice problems ✅, quiz types ⏸️)
+- ✅ Learning progress tracking (reading progress ✅, objectives tracking ✅)
+- ✅ Active recall tools (flashcards with SRS ✅, practice problems ✅)
 - 🟡 Study session support (study modes ✅, timer ⏸️)
 
-**Phase 3 Status:** ~50% complete. Flashcard system with SRS functional, other features pending.
+**Phase 3 Status:** ~70% complete. Flashcard system with SRS, practice problems, and learning objectives functional.
 
 ---
 

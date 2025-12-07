@@ -3,9 +3,9 @@ import remarkMath from "remark-math";
 import remarkGfm from "remark-gfm";
 import remarkDirective from "remark-directive";
 import rehypeKatex from "rehype-katex";
-import { useState } from "react";
 import { visit } from "unist-util-visit";
 import type { Root } from "mdast";
+import InteractivePracticeProblem from "./InteractivePracticeProblem";
 
 // Import mhchem for chemical notation
 import "katex/dist/contrib/mhchem.js";
@@ -22,10 +22,16 @@ function remarkCustomDirectives() {
         const data = node.data || (node.data = {});
         data.hName = "div";
 
+        // Get any attributes from the directive (e.g., :::practice-problem{#problem-id})
+        const attributes = node.attributes || {};
+
         // Map directive names to CSS classes
         switch (node.name) {
           case "practice-problem":
-            data.hProperties = { className: "practice-problem-container" };
+            data.hProperties = {
+              className: "practice-problem-container",
+              "data-problem-id": attributes.id || undefined,
+            };
             break;
           case "answer":
             data.hProperties = { className: "practice-answer-container" };
@@ -153,7 +159,12 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           // Custom handler for directive containers
           div: ({ className, children, ...props }) => {
             if (className === "practice-problem-container") {
-              return <PracticeProblem>{children}</PracticeProblem>;
+              const problemId = (props as { "data-problem-id"?: string })["data-problem-id"];
+              return (
+                <InteractivePracticeProblem problemId={problemId}>
+                  {children}
+                </InteractivePracticeProblem>
+              );
             }
             if (className === "directive-note") {
               return (
