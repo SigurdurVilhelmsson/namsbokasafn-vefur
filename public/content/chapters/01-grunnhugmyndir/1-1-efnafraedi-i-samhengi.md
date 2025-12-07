@@ -3,96 +3,59 @@ title: "Efnafræði í samhengi"
 section: "1.1"
 chapter: 1
 objectives:
-  - Útskýra hvað efnafræði er og hvers vegna hún skiptir máli
-  - Lýsa hlutverki efnafræði í daglegu lífi
-  - Greina tengsl efnafræði við önnur vísindagrein
+  - Lýst sögulegri þróun efnafræðinnar
+  - Nefnt dæmi um mikilvægi efnafræði í daglegu lífi
+  - Lýst vísindalegu aðferðinni
+  - Greint á milli tilgátna, kenninga og lögmála
+  - Nefnt dæmi sem lýsa stórsæjum, smásæjum og táknrænum sviðum
 ---
 
-# Efnafræði í samhengi
+Í gegnum mannkynssöguna hefur fólk reynt að breyta efni í nytsamlegri mynd. Forfeður okkar á steinöld tálguðu tinnu í nytsamleg verkfæri og skáru út styttur og leikföng úr viði. Þessar athafnir fólu í sér að breyta lögun efnis án þess að breyta efninu sjálfu. En eftir því sem þekking okkar jókst fór fólk einnig að breyta samsetningu efnanna – leir var breytt í leirmuni, skinn voru sútuð til að búa til flíkur, kopargrýti var breytt í koparverkfæri og vopn og korn var notað til að búa til brauð.
 
-Efnafræði er vísindin um efni og breytingar þess. Hún fjallar um uppbyggingu, eiginleika og hegðun efna, svo og orkubreytingar sem fylgja efnahvörfum. Efnafræði er oft kölluð **miðvísindi** því hún tengist náið mörgum öðrum vísindagreinum.
+Menn fóru að stunda efnafræði þegar þeir lærðu að stjórna eldi og nota hann til að elda, búa til leirmuni og bræða málma. Í kjölfarið fóru þeir að aðskilja og nota tiltekna efnisþætti. Ýmis lyf eins og alóe, myrra og ópíum voru einangruð úr plöntum. Litarefni, eins og indígó og týrusarpurpuri, voru unnin úr plöntu- og dýraefni. Málmar voru blandaðir saman til að mynda málmblöndur – til dæmis var kopar og tini blandað saman til að búa til brons – og flóknari bræðsluaðferðir skiluðu járni. Basar voru unnir úr úr ösku og sápur voru búnar til með því að blanda þessum bösum saman við fitu. Áfengi var framleitt með gerjun og hreinsað með eimingu.
 
-## Hvað er efnafræði?
+Tilraunir til að skilja hegðun efnis ná meira en 2500 ár aftur í tímann. Strax á sjöttu öld f.Kr. ræddu grískir heimspekingar um kerfi þar sem vatn var grundvöllur allra hluta. Þú gætir hafa heyrt um grísku tilgátuna um að efni samanstandi af fjórum frumefnum: jörð, lofti, eldi og vatni. Í kjölfarið dreifðist samruni efnafræðilegrar tækni og heimspekilegra vangaveltna frá Egyptalandi, Kína og austurhluta Miðjarðarhafs með gullgerðarmönnum, sem reyndu að breyta „grunnmálmum" eins og blýi í „eðalmálma" eins og gull og búa til lífselixíra til að lækna sjúkdóma og lengja líf (mynd 1.2).
 
-**Efnafræði** er náttúruvísindi sem rannsaka samsetningu, uppbyggingu, eiginleika og hegðun efna, svo og breytingar sem efni gangast undir við efnahvörf.
+![Þessi mynd sýnir verkstæði gullgerðarmanns um 1580.](images/CNX_Chem_01_01_Alchemist.jpg)
 
-Efnafræðingar kanna:
-- Hvers efni eru gerð
-- Hvernig efni haga sér
-- Hvernig efni breytast
-- Hvaða orka kemur við sögu í þessum breytingum
+**Mynd 1.2** (a) Þessi mynd sýnir verkstæði gullgerðarmanns um 1580. Þrátt fyrir að gullgerðarlist hafi lagt nokkuð af mörkum til meðhöndlunar efnis var hún ekki vísindaleg að nútíma mælikvarða. (b) Þótt búnaðurinn sem Alma Levant Hayden notaði á þessari mynd frá 1952 virðist kannski ekki eins fágaður og sá sem finna má á rannsóknarstofu í dag var aðferð hennar mjög kerfisbundin og vandlega skráð. Hayden var deildarstjóri hjá FDA og er frægust fyrir að afhjúpa að krabbameinslyf, sem var markaðssett af mikilli ákefð, væri ekkert annað en gagnslaus lausn af algengum efnum. (mynd a: Chemical Heritage Foundation; b: NIH History Office)
 
-## Efnafræði í daglegu lífi
+Frá gullgerðarlistinni kom söguleg framvinda sem leiddi til nútíma efnafræði: einangrun lyfja úr náttúrulegum uppsprettum, svo sem plöntum og dýrum. En þótt mörg efnanna sem voru unnin eða meðhöndluð úr þessum náttúrulegu uppsprettum hafi verið mikilvæg við meðferð sjúkdóma voru mörg þeirra af skornum skammti. Til dæmis varð prógesterón, sem er mikilvægt fyrir heilsu kvenna, fáanlegt sem lyf árið 1935, en dýrauppsprettur þess gáfu af sér afar lítið magn, sem takmarkaði framboð þess og jók kostnað. Á sama hátt, á fimmta áratugnum, var farið að nota kortisón til að meðhöndla liðagigt og aðra kvilla og meiðsli, en það þurfti 36 þrepa ferli til að framleiða það. Efnafræðingurinn Percy Lavon Julian sneri sér að gjöfulli uppsprettu: sojabaunum. Áður hafði Julian þróað rannsóknarstofu til að einangra sojaprótein, sem var meðal annars notað í slökkvistörf. Hann einbeitti sér að því að nota steróla úr sojabaunum – efni sem aðallega eru notuð í plöntuhimnur – og gat fljótt framleitt prógesterón og síðar testósterón og önnur hormón. Seinna þróaði hann ferli til að gera slíkt hið sama fyrir kortisón og lagði grunninn að nútíma lyfjahönnun. Þar sem sojabaunir og svipaðar plöntuuppsprettur voru afar gjöfular urðu lyfin fljótlega aðgengileg og björguðu mörgum mannslífum.
 
-Efnafræði er alls staðar í kringum okkur og hefur áhrif á nánast alla þætti daglegs lífs:
+## Efnafræði: Miðlæg vísindi
 
-### Í eldhúsinu
-- Eldhús er í raun efnafræðistofa þar sem efnahvörf eiga sér stað daglega
-- Eldamatur inniheldur prótín, kolvetni, fitu og vítamín
-- Matreiðsla felur í sér efnahvörf eins og karamellugerð og Maillard-hvörf
+Efnafræði er stundum kölluð „miðlæg vísindi" vegna samtengingar hennar við fjölmargar aðrar STEM-greinar (STEM stendur fyrir vísindi, tækni, verkfræði og stærðfræði). Efnafræði og tungumál efnafræðinga gegna mikilvægu hlutverki í líffræði, læknisfræði, efnisfræði, réttarvísindum, umhverfisfræði og mörgum öðrum sviðum (mynd 1.3). Grundvallarreglur eðlisfræðinnar eru nauðsynlegar til að skilja marga þætti efnafræðinnar og það er mikið skörunarsvið milli margra undirgreina innan þessara tveggja sviða, svo sem efnafræðilegrar eðlisfræði og kjarnaefnafræði. Stærðfræði, tölvunarfræði og upplýsingafræði veita mikilvæg verkfæri sem hjálpa okkur að reikna út, túlka, lýsa og almennt skilja efnafræðilegan heim. Líffræði og efnafræði mætast í lífefnafræði, sem er lykilatriði til að skilja þá mörgu flóknu þætti og ferla sem halda lífverum (eins og okkur) á lífi. Efnaverkfræði, efnisfræði og nanótækni sameina efnafræðilegar meginreglur og reynslurannsóknir til að framleiða nytsamleg efni, allt frá bensíni til vefnaðarvöru og rafeindatækja. Landbúnaður, matvælafræði, dýralækningar, bruggun og víngerð hjálpa til við að sjá íbúum heimsins fyrir næringu í formi matar og drykkjar. Læknisfræði, lyfjafræði, líftækni og grasafræði auðkenna og framleiða efni sem hjálpa okkur að halda heilsu. Umhverfisfræði, jarðfræði, haffræði og andrúmsloftsfræði fella inn margar efnafræðilegar hugmyndir til að hjálpa okkur að skilja og vernda efnisheiminn betur. Efnafræðilegar hugmyndir eru notaðar til að skilja alheiminn í stjörnufræði og heimsfræði.
 
-### Í heilbrigðisþjónustu
-- Lyf eru efnasambönd sem hönnuð eru til að hafa ákveðin áhrif á líkamann
-- Sjúkdómsgreiningar byggja á efnafræðilegum prófum
-- Bóluefni og meðferðir byggja á skilningi á efnafræði líkamans
+![Þekking á efnafræði er lykilatriði til að skilja fjölbreytt úrval vísindagreina.](images/CNX_Chem_01_01_ChemWeb.jpg)
 
-### Í umhverfinu
-- Loftslagsbreytingar tengjast efnafræði andrúmslofts
-- Vatnsmengun og hreinsun vatnsgeyma
-- Endurvinnsla og sjálfbær efnanotkun
+**Mynd 1.3** Þekking á efnafræði er lykilatriði til að skilja fjölbreytt úrval vísindagreina. Þessi mynd sýnir aðeins nokkur af tengslum efnafræði og annarra greina.
 
-## Greinar efnafræðinnar
+Hvaða breytingar á efni eru nauðsynlegar í daglegu lífi? Melting og upptaka fæðu, framleiðsla fjölliða sem eru notaðar til að búa til fatnað, ílát, eldunaráhöld og greiðslukort og hreinsun hráolíu í bensín og aðrar afurðir eru aðeins nokkur dæmi. Í þessu námskeiði muntu uppgötva mörg mismunandi dæmi um breytingar á samsetningu og byggingu efnis, hvernig á að flokka þessar breytingar og hvernig þær urðu, orsakir þeirra, orkubreytingarnar sem fylgja þeim og þau lögmál og reglur sem eiga við. Þegar þú lærir um þessa hluti ertu að læra efnafræði, sem er fræðigreinin um samsetningu, eiginleika og víxlverkun efnis. Iðkun efnafræði er ekki takmörkuð við efnafræðibækur eða rannsóknarstofur: Hún á sér stað hvenær sem einhver tekur þátt í breytingum á efni eða aðstæðum sem geta leitt til slíkra breytinga.
 
-Efnafræði skiptist í nokkrar megingreinar:
+## Vísindalega aðferðin
 
-| Grein | Lýsing |
-|-------|--------|
-| **Óefnafræði** | Rannsókn á öllum efnum utan kolefnissambanda |
-| **Líffræðileg efnafræði** | Efnafræði lifandi kerfa og lífræn sameindir |
-| **Sýruefnafræði** | Efnafræðileg greining og mælingar |
-| **Eðlisfræðileg efnafræði** | Eðlisfræðilegar hliðar efnahvarfa |
-| **Lífefnafræði** | Efnafræði lífsferla í lífverum |
+Efnafræði er vísindagrein sem byggir á athugunum og tilraunum. Að fást við efnafræði felur í sér að reyna að svara spurningum og útskýra athuganir með tilliti til lögmála og kenninga efnafræðinnar og nota aðferðir sem eru viðurkenndar af vísindasamfélaginu. Það er engin ein leið til að svara spurningu eða útskýra athugun, en það er einn þáttur sem er sameiginlegur öllum aðferðum: Hver og ein notar þekkingu sem byggir á tilraunum sem hægt er að endurtaka til að sannreyna niðurstöðurnar. Sumar leiðir fela í sér tilgátu, sem er bráðabirgðaútskýring á athugunum sem virkar sem leiðarvísir við söfnun og yfirferð upplýsinga. Tilgáta er prófuð með tilraunum, útreikningum og/eða samanburði við tilraunir annarra og síðan betrumbætt eftir þörfum.
 
-:::note
-Þessar greinar skarast oft og vinna saman. Til dæmis notar lífefnafræði þekkingu úr líffræðilegri efnafræði og eðlisfræðilegri efnafræði.
-:::
+Sumar tilgátur eru tilraunir til að útskýra hegðun sem er tekin saman í lögmálum. Lögmál í vísindum draga saman gríðarlegan fjölda tilraunaathugana og lýsa eða spá fyrir um einhvern þátt náttúrunnar. Ef slík tilgáta reynist geta útskýrt mikið magn tilraunagagna getur hún náð stöðu kenningar. Kenningar í vísindum eru vel rökstuddar, yfirgripsmiklar og prófanlegar útskýringar á tilteknum þáttum náttúrunnar. Kenningar eru viðurkenndar vegna þess að þær veita fullnægjandi útskýringar, en hægt er að breyta þeim ef ný gögn verða tiltæk. Sú uppgötvunarleið sem liggur frá spurningu og athugun til lögmáls eða tilgátu til kenningar, ásamt tilraunakenndri sannprófun tilgátunnar og nauðsynlegri breytingu á kenningunni, er kölluð vísindalega aðferðin (mynd 1.4).
 
-## Vísindaaðferðin
+![Vísindalega aðferðin fylgir ferli sem svipar til þess sem sýnt er á þessari skýringarmynd.](images/CNX_Chem_01_01_SciMethod.jpg)
 
-Efnafræðingar nota **vísindaaðferðina** til að rannsaka náttúruna:
+**Mynd 1.4** Vísindalega aðferðin fylgir ferli sem svipar til þess sem sýnt er á þessari skýringarmynd. Allir lykilþættirnir eru sýndir, í nokkurn veginn réttri röð. Vísindalegar framfarir eru sjaldan snyrtilegar og hreinar: Þær krefjast opinna rannsókna og endurmótunar spurninga og hugmynda til að bregðast við niðurstöðum.
 
-1. **Athuganir** - Safna gögnum um náttúrufyrirbæri
-2. **Tilgáta** - Setja fram skýringu sem hægt er að prófa
-3. **Tilraunir** - Hanna og framkvæma tilraunir til að prófa tilgátuna
-4. **Niðurstöður** - Greina gögn og draga ályktanir
-5. **Kenning** - Ef tilgátan stenst margar prófanir, getur hún orðið að kenningu
+## Svið efnafræðinnar
 
-## Efni og eiginleikar þess
+Efnafræðingar rannsaka og lýsa hegðun efnis og orku á þremur mismunandi sviðum: stórsæju, smásæju og táknrænu. Þessi svið bjóða upp á mismunandi leiðir til að íhuga og lýsa efnafræðilegri hegðun.
 
-Í efnafræði er **efni** allt sem hefur massa og tekur pláss. Allt efni samanstendur af efnum, og hvert efni hefur einkennandi eiginleika.
+*Makró* er grískt orð sem þýðir „stórt". Stórsæja sviðið er okkur kunnuglegt: Það er svið hversdagslegra hluta sem eru nógu stórir til að vera skynjaðir beint með sjón eða snertingu manna. Í daglegu lífi felur þetta í sér matinn sem þú borðar og goluna sem þú finnur á andlitinu. Stórsæja sviðið nær yfir hversdags- og rannsóknarstofuefnafræði, þar sem við fylgjumst með og mælum eðlis- og efnaeiginleika eins og eðlismassa, leysni og eldfimi.
 
-Við greinum á milli tveggja tegunda efna:
+*Míkró* kemur úr grísku og þýðir „lítið". Smásæja svið efnafræðinnar er oft heimsótt í huganum. Sumir þættir smásæja sviðsins eru sýnilegir í venjulegum ljóssmásjám, til dæmis margar líffræðilegar frumur. Fullkomnari tæki geta myndað enn smærri einingar eins og sameindir og atóm (sjá mynd 1.5 (b)).
 
-- **Hrein efni** - efni með fasta samsetningu (t.d. vatn, salt, súrefni)
-- **Blöndur** - tvö eða fleiri efni saman (t.d. loft, sjór, jarðvegur)
+Hins vegar eru flest viðfangsefni á smásæja sviði efnafræðinnar of lítil til að sjást jafnvel með fullkomnustu smásjám og er aðeins hægt að ímynda sér þau. Aðrir þættir smásæja sviðsins eru jónir og rafeindir, róteindir og nifteindir og efnatengi, sem öll eru allt of lítil til að sjá.
 
-## Orka í efnafræði
+Táknræna sviðið inniheldur sérhæft tungumál sem notað er til að tákna þætti stórsæja og smásæja sviðsins. Efnatákn (eins og þau sem notuð eru í lotukerfinu), efnaformúlur og efnajöfnur eru hluti af táknræna sviðinu, sem og gröf, teikningar og útreikningar. Þessi tákn gegna mikilvægu hlutverki í efnafræði vegna þess að þau hjálpa til við að túlka hegðun stórsæja sviðsins með tilliti til þátta smásæja sviðsins. Ein af áskorunum fyrir nemendur sem læra efnafræði er að gera sér grein fyrir því að sömu táknin geta táknað mismunandi hluti á stórsæja og smásæja sviðinu og einn af þeim eiginleikum sem gerir efnafræði heillandi er notkun sviðs sem verður að ímynda sér til að útskýra hegðun á sviði sem hægt er að fylgjast með.
 
-Orka er geta til að vinna vinnu eða framleiða hita. Í efnafræði er orka mikilvæg því:
+Gagnleg leið til að skilja þessi þrjú svið er með hinu nauðsynlega og alls staðar nálæga efni, vatni. Að vatn sé vökvi við meðalhitastig, storkni og myndar fast efni við lægra hitastig og sjóði og myndar gas við hærra hitastig (mynd 1.5) eru stórsæjar athuganir. En sumir eiginleikar vatns falla undir smásæja sviðið — það sem ekki er hægt að sjá með berum augum. Lýsingin á vatni sem samsettu úr tveimur vetnisatómum og einu súrefnisatóm, og útskýringin á storknun og suðu með tilliti til aðdráttarkrafta milli þessara sameinda, er á smásæja sviðinu. Formúlan H₂O, sem getur lýst vatni á annað hvort stórsæju eða smásæju stigi, er dæmi um táknræna sviðið. Skammstafanirnar (*g*) fyrir gas, (*s*) fyrir fast efni og (*l*) fyrir vökva eru einnig táknrænar.
 
-- Efnahvörf fela í sér orkubreytingar
-- Sum hvörf gefa frá sér orku (útvarma)
-- Önnur hvörf taka við orku (innvarma)
+![Raki í lofti, ísjakar og hafið tákna vatn á stórsæja sviðinu.](images/CNX_Chem_01_01_WaterDom.jpg)
 
-Lögmál orkunnar segir að orka sé varðveitt - hún getur breyst á milli forma en heildarorkan helst óbreytt.
-
-## Samantekt
-
-Efnafræði er mikilvæg vísindagrein sem tengist nánast öllum þáttum lífs okkar. Hún:
-
-- Hjálpar okkur að skilja heiminn í kringum okkur
-- Gerir okkur kleift að þróa ný efni og tækni
-- Leysir vandamál í heilbrigðismálum, umhverfismálum og orku
-- Tengist öðrum vísindagreinum eins og líffræði, eðlisfræði og jarðfræði
-
-Með því að læra efnafræði öðlumst við verkfæri til að skilja og bæta heiminn.
+**Mynd 1.5** (a) Raki í lofti, ísjakar og hafið tákna vatn á stórsæja sviðinu. (b) Á sameindastigi (smásæja sviðinu) eru gassameindir langt í sundur og óskipulagðar, sameindir í föstu vatni eru þétt saman og skipulagðar og vökvasameindir eru þétt saman og óskipulagðar. (c) Formúlan H₂O táknar vatn og (*g*), (*s*) og (*l*) tákna fasa þess. Athugið að ský samanstanda í raun annaðhvort af mjög litlum vatnsdropum í vökvaformi eða vatnskristöllum í föstu formi; vatn á gasformi í andrúmslofti okkar er ekki sýnilegt með berum augum, þó að það megi skynja það sem raka. (heimild a: breyting á verki eftir „Gorkaazk"/Wikimedia Commons)
