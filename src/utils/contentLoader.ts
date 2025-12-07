@@ -31,12 +31,19 @@ export async function loadSectionContent(
     // Parse frontmatter and content
     const { metadata, content } = parseFrontmatter(markdown);
 
+    // Transform relative image paths to absolute paths
+    const basePath = `/content/chapters/${chapterSlug}`;
+    const transformedContent = content.replace(
+      /!\[([^\]]*)\]\(images\//g,
+      `![$1](${basePath}/images/`,
+    );
+
     return {
       title: typeof metadata.title === "string" ? metadata.title : "",
       section: typeof metadata.section === "string" ? metadata.section : "",
       chapter: typeof metadata.chapter === "number" ? metadata.chapter : 0,
       objectives: Array.isArray(metadata.objectives) ? metadata.objectives : [],
-      content,
+      content: transformedContent,
     };
   } catch (error) {
     console.error("Villa við að hlaða kaflahlutefni:", error);
