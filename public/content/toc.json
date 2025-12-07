@@ -7,6 +7,12 @@
       "slug": "01-grunnhugmyndir",
       "sections": [
         {
+          "number": "1.0",
+          "title": "Inngangur",
+          "slug": "0-inngangur",
+          "file": "0-inngangur.md"
+        },
+        {
           "number": "1.1",
           "title": "Efnafræði í samhengi",
           "slug": "1-1-efnafraedi-i-samhengi",
@@ -14,9 +20,9 @@
         },
         {
           "number": "1.2",
-          "title": "Fasar efna",
-          "slug": "1-2-fasar-efna",
-          "file": "1-2-fasar-efna.md"
+          "title": "Fasar og flokkun efnis",
+          "slug": "1-2-fasar-og-flokkun-efnis",
+          "file": "1-2-fasar-og-flokkun-efnis.md"
         },
         {
           "number": "1.3",
@@ -29,12 +35,46 @@
           "title": "Mælingar",
           "slug": "1-4-maelingar",
           "file": "1-4-maelingar.md"
-        },        
+        },
+        {
+          "number": "1.5",
+          "title": "Óvissa, hittni og nákvæmni í mælingum",
+          "slug": "1-5-ovissa-hittni-og-naekvaemni",
+          "file": "1-5-ovissa-hittni-og-naekvaemni.md"
+        },
         {
           "number": "1.6",
-          "title": "Stærðfræðileg meðferð á niðurstöðum",
-          "slug": "1-6-maelingar",
-          "file": "1.6 Stærðfræðileg meðferð á niðurstöðum mælinga.md'1-4-maelingar.md"
+          "title": "Stærðfræðileg meðferð á niðurstöðum mælinga",
+          "slug": "1-6-staerdfraedileg-medferd",
+          "file": "1-6-staerdfraedileg-medferd.md"
+        },
+        {
+          "number": "1.7",
+          "title": "Lykilhugtök",
+          "slug": "1-7-lykilhugtok",
+          "file": "1-7-lykilhugtok.md",
+          "type": "glossary"
+        },
+        {
+          "number": "1.8",
+          "title": "Lykiljöfnur",
+          "slug": "1-8-lykiljoefnur",
+          "file": "1-8-lykiljoefnur.md",
+          "type": "equations"
+        },
+        {
+          "number": "1.9",
+          "title": "Samantekt",
+          "slug": "1-9-samantekt",
+          "file": "1-9-samantekt.md",
+          "type": "summary"
+        },
+        {
+          "number": "1.10",
+          "title": "Verkefni",
+          "slug": "1-10-verkefni",
+          "file": "1-10-verkefni.md",
+          "type": "exercises"
         }
       ]
     }
