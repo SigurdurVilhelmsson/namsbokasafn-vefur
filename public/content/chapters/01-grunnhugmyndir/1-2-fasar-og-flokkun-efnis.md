@@ -1,0 +1,134 @@
+---
+title: "Fasar og flokkun efnis"
+section: "1.2"
+chapter: 1
+objectives:
+  - Lýst grunneiginleikum hvers eðlisástands efnis: fasts efnis, vökva og gass
+  - Greint á milli massa og þyngdar
+  - Beitt lögmálinu um varðveislu efnis
+  - Flokkað efni sem frumefni, efnasamband, einsleita efnablöndu eða misleita efnablöndu með tilliti til efnishams og samsetningar
+  - Skilgreint og gefið dæmi um atóm og sameindir
+---
+
+Efni er skilgreint sem allt sem tekur pláss og hefur massa, og það er allt í kringum okkur. Föst efni og vökvar eru augljóslega efni: Við sjáum að þau taka pláss og þyngd þeirra segir okkur að þau hafi massa. Gös eru líka efni; ef gös tækju ekki pláss myndi blaðra ekki blásast upp (auka rúmmál sitt) þegar hún er fyllt með gasi.
+
+Föst efni, vökvar og gös eru þrír efnishamir efnis sem almennt finnast á jörðinni (mynd 1.6). Fast efni er stíft og hefur ákveðna lögun. Vökvi flæðir og tekur lögun íláts síns, nema hvað hann myndar flatt eða örlítið bogað yfirborð þegar þyngdarafl verkar á hann. (Í þyngdarleysi taka vökvar á sig kúlulögun.) Bæði sýni af vökva og föstu efni hafa rúmmál sem eru nánast óháð þrýstingi. Gas tekur bæði lögun og rúmmál íláts síns.
+
+![Algengustu þrír fasar, eða eðlisástand efnis eru fast efni, vökvi og gas.](images/CNX_Chem_01_02_StatesMatt.jpg)
+
+**Mynd 1.6** Algengustu þrír fasar, eða eðlisástand efnis eru fast efni, vökvi og gas.
+
+Fjórði fasi efnis, rafgas, kemur náttúrulega fyrir í iðrum stjarna. Rafgas er hamur efnis á gasformi sem inniheldur umtalsverðan fjölda rafhlaðinna einda (mynd 1.7). Tilvist þessara hlöðnu einda gefur rafgasi einstaka eiginleika sem réttlæta flokkun þess sem efnisham aðskilinn frá gösum. Auk stjarna finnst rafgas í ýmsu öðru háhitaumhverfi (bæði náttúrulegu og manngerðu), svo sem eldingum, ákveðnum sjónvarpsskjám og sérhæfðum greiningartækjum sem notuð eru til að greina snefilmagn málma.
+
+![Hægt er að nota rafgasbrennara til að skera málm.](images/CNX_Chem_01_02_Plasma.jpg)
+
+**Mynd 1.7** Hægt er að nota rafgasbrennara til að skera málm. (heimild: „Hypertherm"/Wikimedia Commons)
+
+Sum sýni af efni virðast hafa eiginleika fastra efna, vökva og/eða gasa á sama tíma. Þetta getur gerst þegar sýnið er samsett úr mörgum litlum bútum. Til dæmis getum við hellt sandi eins og hann væri vökvi vegna þess að hann er samsettur úr mörgum litlum kornum af föstum sandi. Efni getur einnig haft eiginleika fleiri en eins efnishams þegar það er efnablanda, eins og með ský. Ský virðast haga sér nokkuð eins og gös, en þau eru í raun efnablöndur af lofti (gasi) og örsmáum eindum af vatni (vökva eða föstu efni).
+
+Massi hlutar er mælikvarði á magn efnis í honum. Ein leið til að mæla massa hlutar er að mæla kraftinn sem þarf til að hraða honum. Það þarf mun meiri kraft til að hraða bíl en reiðhjóli vegna þess að bíllinn hefur mun meiri massa. Algengari leið til að ákvarða massa hlutar er að nota vog til að bera massa hans saman við staðlaðan massa.
+
+Þótt þyngd sé skyld massa er hún ekki það sama. Þyngd vísar til kraftsins sem þyngdarafl beitir á hlut. Þessi kraftur er í beinu hlutfalli við massa hlutarins. Þyngd hlutar breytist þegar þyngdaraflið breytist, en massi hans gerir það ekki. Massi geimfara breytist ekki þótt hann fari til tunglsins. En þyngd hennar á tunglinu er aðeins einn sjötti af þyngd hennar á jörðinni vegna þess að þyngdarafl tunglsins er aðeins einn sjötti af þyngdarafli jarðar. Hún kann að finna fyrir „þyngdarleysi" á ferð sinni þegar hún verður fyrir hverfandi ytri kröftum (þyngdarkrafti eða öðrum), þótt hún sé auðvitað aldrei „massalaus".
+
+Lögmálið um varðveislu efnis dregur saman margar vísindalegar athuganir á efni: Það segir að *engin greinanleg breyting verði á heildarmagni efnis sem er til staðar þegar efni breytist úr einni tegund í aðra (efnabreyting) eða breytist milli fasts efnis, vökva eða gass (eðlisbreyting)*. Bjórgerð og virkni rafhlaðna eru dæmi um varðveislu efnis (mynd 1.8). Við bjórgerð breytast innihaldsefnin (vatn, ger, korn, malt, humlar og sykur) í bjór (vatn, alkóhól, kolsýra og bragðefni) án þess að neitt efni tapist í raun. Þetta sést best við átöppun, þegar glúkósi breytist í etanól og koldíoxíð, og heildarmassi efnanna breytist ekki. Þetta má einnig sjá í blýsýrurafgeymi í bíl: Upprunalegu efnin (blý, blýoxíð og brennisteinssýra), sem geta framleitt rafmagn, breytast í önnur efni (blýsúlfat og vatn) sem framleiða ekki rafmagn, án þess að raunverulegt magn efnis breytist.
+
+![Massi hráefna í bjór er sá sami og massi bjórsins sem framleiddur er.](images/CNX_Chem_01_02_ConsMatter.jpg)
+
+**Mynd 1.8** (a) Massi hráefna í bjór er sá sami og massi bjórsins sem framleiddur er: Sykur hefur orðið að alkóhóli og koldíoxíði. (b) Massi blýs, blýoxíðs og brennisteinssýru sem notaður er við framleiðslu rafmagns er nákvæmlega jafn massa blýsúlfats og vatns sem myndast.
+
+Þótt þetta varðveislulögmál gildi fyrir allar umbreytingar efnis, eru sannfærandi dæmi fá og langt á milli þeirra vegna þess að utan stýrðra aðstæðna á rannsóknarstofu söfnum við sjaldan öllu efninu sem framleitt er við tiltekna umbreytingu. Til dæmis, þegar þú borðar, meltir og tileinkar þér mat, varðveitist allt efnið í upprunalega matnum. En þar sem hluti efnisins verður hluti af líkama þínum og mikið er skilið út sem ýmiss konar úrgangur, er erfitt að sannreyna það með mælingum.
+
+## Flokkun efnis
+
+Hægt er að flokka efni í nokkra flokka. Tveir meginflokkar eru efnablöndur og hrein efni. Hreint efni hefur fasta samsetningu. Öll sýni af hreinu efni hafa nákvæmlega sömu samsetningu og eiginleika. Öll sýni af súkrósa (borðsykri) samanstanda af 42,1% kolefni, 6,5% vetni og 51,4% súrefni miðað við massa. Öll sýni af súkrósa hafa einnig sömu eðliseiginleika, svo sem bræðslumark, lit og sætleika, óháð því hvaðan það er einangrað.
+
+Hreinum efnum má skipta í tvo flokka: frumefni og efnasambönd. Hrein efni sem ekki er hægt að brjóta niður í einfaldari efni með efnabreytingum eru kölluð frumefni. Járn, silfur, gull, ál, brennisteinn, súrefni og kopar eru kunnugleg dæmi um rúmlega 100 þekkt frumefni, þar af koma um 90 fyrir náttúrulega á jörðinni og um tveir tugir hafa verið búnir til á rannsóknarstofum.
+
+Hrein efni sem samanstanda af tveimur eða fleiri frumefnum eru kölluð efnasambönd. Hægt er að brjóta efnasambönd niður með efnabreytingum til að fá annaðhvort frumefni eða önnur efnasambönd, eða hvort tveggja. Kvikasilfurs(II)oxíð, appelsínugult, kristalkennt fastefni, er hægt að brjóta niður með varma í frumefnin kvikasilfur og súrefni (mynd 1.9). Þegar efnasambandið súkrósi er hitað án lofts brotnar það niður í frumefnið kolefni og efnasambandið vatn. (Upphafsstig þessa ferlis, þegar sykurinn verður brúnn, er þekkt sem karamellumyndun – það er þetta sem gefur karamellueplum, karamelluðum lauk og karamellu hið einkennandi sæta og hnetukennda bragð). Silfurs(I)klóríð er hvítt fast efni sem hægt er að brjóta niður í frumefni sín, silfur og klór, með ljósgleypni. Þessi eiginleiki er grundvöllur notkunar þessa efnasambands í ljósmyndafilmur og ljóslit gleraugu (þau með linsum sem dökkna þegar þau verða fyrir ljósi).
+
+![Efnasambandið kvikasilfurs(II)oxíð brotnar niður í kvikasilfur og súrefni þegar það er hitað.](images/CNX_Chem_01_02_decomp.jpg)
+
+**Mynd 1.9** (a) Efnasambandið kvikasilfurs(II)oxíð, (b) þegar það er hitað, (c) brotnar niður í silfurgljáandi dropa af fljótandi kvikasilfri og ósýnilegt súrefnisgas. (heimild: breyting á verki eftir Paul Flowers)
+
+Eiginleikar samsettra frumefna eru frábrugðnir eiginleikum þeirra í frjálsu eða ósamsettu ástandi. Til dæmis er hvítur kristallaður sykur (súkrósi) efnasamband sem myndast við efnasamruna frumefnisins kolefnis, sem er svart fast efni í einu af ósamsettum formum sínum, og frumefnanna tveggja, vetnis og súrefnis, sem eru litlaus gös þegar þau eru ósamsett. Frjálst natríum, frumefni sem er mjúkt, glansandi, málmkennt fast efni, og frjálst klór, frumefni sem er gulgrænt gas, sameinast og mynda natríumklóríð (borðsalt), efnasamband sem er hvítt, kristalkennt fastefni.
+
+Efnablanda er samsett úr tveimur eða fleiri tegundum efnis sem geta verið til staðar í breytilegu magni og hægt er að aðskilja með eðlisfræðilegum breytingum, svo sem uppgufun (þú munt læra meira um þetta síðar). Efnablanda með samsetningu sem er breytileg frá einum stað til annars er kölluð misleit efnablanda. Ítölsk salatsósa er dæmi um misleita efnablöndu (mynd 1.10). Samsetning hennar getur verið breytileg vegna þess að hún getur verið búin til úr mismunandi magni af olíu, ediki og kryddi. Hún er ekki eins alls staðar í efnablöndunni—einn dropi getur verið að mestu leyti edik, en annar dropi getur verið að mestu leyti olía eða krydd vegna þess að olían og edikið aðskiljast og kryddið sest á botninn. Önnur dæmi um misleitar efnablöndur eru súkkulaðibitakökur (við sjáum aðskilda bita af súkkulaði, hnetum og kökudeigi) og granít (við sjáum kvars, glimmer, feldspat og fleira).
+
+Einsleit efnablanda, einnig kölluð lausn, hefur einsleita samsetningu og lítur eins út alls staðar. Dæmi um lausn er íþróttadrykkur sem samanstendur af vatni, sykri, litarefnum, bragðefnum og söltum sem blandað er saman (mynd 1.10). Hver dropi af íþróttadrykk bragðast eins vegna þess að hver dropi inniheldur sama magn af vatni, sykri og öðrum efnisþáttum. Athugaðu að samsetning íþróttadrykkis getur verið mismunandi. Hann gæti innihaldið meira eða minna af sykri, bragðefnum eða öðrum efnisþáttum en samt verið íþróttadrykkur. Önnur dæmi um einsleitar efnablöndur eru loft, hlynsíróp, bensín og lausn af salti í vatni.
+
+![Salatsósa úr olíu og ediki er misleit efnablanda, íþróttadrykkur er einsleit efnablanda.](images/CNX_Chem_01_02_Mixtures.jpg)
+
+**Mynd 1.10** (a) Salatsósa úr olíu og ediki er misleit efnablanda vegna þess að samsetning hennar er ekki einsleit í gegn. (b) Íþróttadrykkur úr búð er einsleit efnablanda vegna þess að samsetning hans er einsleit í gegn. (heimild a „vinstri": breyting á verki eftir John Mayer; heimild a „hægri": breyting á verki eftir Umberto Salvagnin; heimild b „vinstri": breyting á verki eftir Jeff Bedford)
+
+Þótt frumefnin séu aðeins rétt rúmlega 100 talsins er hægt að búa til tugi milljóna efnasambanda með því að setja þessi frumefni saman á mismunandi hátt. Hvert efnasamband hefur sérstaka samsetningu og hefur ákveðna efnafræðilega og eðlisfræðilega eiginleika sem greina það frá öllum öðrum efnasamböndum. Og auðvitað eru óteljandi leiðir til að setja saman frumefni og efnasambönd til að mynda mismunandi efnablöndur. Samantekt á því hvernig hægt er að greina á milli helstu flokka efnis er sýnd á (mynd 1.11).
+
+![Hægt er að flokka tiltekið efni sem einsleita efnablöndu, misleita efnablöndu, efnasamband eða frumefni.](images/CNX_Chem_01_02_MattType.jpg)
+
+**Mynd 1.11** Hægt er að flokka tiltekið efni sem einsleita efnablöndu, misleita efnablöndu, efnasamband eða frumefni, allt eftir eiginleikum þess.
+
+Ellefu frumefni mynda um 99% af jarðskorpunni og andrúmsloftinu (tafla 1.1). Súrefni er næstum helmingur og kísill um fjórðungur af heildarmagni þessara frumefna. Meirihluta frumefna á jörðinni er að finna í efnasamböndum við önnur frumefni; um fjórðung frumefnanna er einnig að finna í óbundnu ástandi.
+
+### Efnasamsetning jarðar
+
+| Frumefni  | Tákn | Massaprósenta | Frumefni     | Tákn | Massaprósenta |
+|:----------|:-----|:--------------|:-------------|:-----|:--------------|
+| súrefni   | O    | 49,20         | klór         | Cl   | 0,19          |
+| kísill    | Si   | 25,67         | fosfór       | P    | 0,11          |
+| ál        | Al   | 7,50          | mangan       | Mn   | 0,09          |
+| járn      | Fe   | 4,71          | kolefni      | C    | 0,08          |
+| kalsíum   | Ca   | 3,39          | brennisteinn | S    | 0,06          |
+| natríum   | Na   | 2,63          | baríum       | Ba   | 0,04          |
+| kalíum    | K    | 2,40          | nitur        | N    | 0,03          |
+| magnesíum | Mg   | 1,93          | flúor        | F    | 0,03          |
+| vetni     | H    | 0,87          | strontíum    | Sr   | 0,02          |
+| títan     | Ti   | 0,58          | allt annað   | \-   | 0,47          |
+
+*Tafla 1.1*
+
+## Atóm og sameindir
+
+Atóm er smæsta eind frumefnis sem hefur eiginleika þess frumefnis og getur tekið þátt í efnahvarfi. Tökum frumefnið gull sem dæmi. Ímyndaðu þér að skera gullmola í tvennt, skera svo annan helminginn í tvennt og endurtaka þetta ferli þar til eftir stendur gullstykki sem er svo lítið að ekki er hægt að skera það í tvennt (sama hversu pínulítinn hnífurinn þinn er). Þetta minnsta mögulega gullstykki er atóm (úr gríska orðinu *atomos*, sem þýðir „óskiptanlegt") (mynd 1.12). Þessi frumeind væri ekki lengur gull ef henni væri skipt frekar.
+
+![Gullmoli og STM-mynd af gullkristal.](images/CNX_Chem_01_02_GoldAtoms.jpg)
+
+**Mynd 1.12** (a) Þessi mynd sýnir gullmola. (b) Með smugsjá (e. scanning-tunneling microscope, STM) er hægt að ná myndum af yfirborði fastra efna, svo sem þessari mynd af gullkristal. Hver kúla táknar eitt gullatóm. (heimild a: breyting á verki frá Jarðfræðistofnun Bandaríkjanna; heimild b: breyting á verki frá „Erwinrossen"/Wikimedia Commons)
+
+Fyrsta tilgátan um að efni sé samsett úr atómum er eignuð grísku heimspekingunum Levkipposi og Demókrítosi sem þróuðu hugmyndir sínar á 5. öld f.o.t. Það var þó ekki fyrr en snemma á nítjándu öld sem John Dalton (1766-1844), breskur skólakennari með mikinn áhuga á vísindum, studdi þessa tilgátu með magnbundnum (e. quantitative) mælingum. Síðan þá hafa endurteknar tilraunir staðfest marga þætti þessarar tilgátu og er hún orðin ein af meginkenningum efnafræðinnar. Aðrir þættir atómkenningar Daltons eru enn notaðir en með minniháttar breytingum (ítarlegri umfjöllun um kenningu Daltons er að finna í kaflanum um atóm og sameindir).
+
+Frumeind er svo lítil að erfitt er að ímynda sér stærð hennar. Eitt af því minnsta sem við sjáum með berum augum er stakur þráður köngulóarvefs: Þessir þræðir eru um 1/10.000 úr sentimetra (0,0001 cm) í þvermál. Þrátt fyrir að nánast ómögulegt sé að skoða þverskurð eins þráðar án þess að nota smásjá er hann risastór á frumeindakvarða. Ein kolefnisfrumeind í vefnum er um 0,000000015 sentimetrar í þvermál og það þyrfti um 7000 kolefnisatóm til að spanna þvermál strengsins. Til að setja þetta í samhengi, ef kolefnisatóm væri á stærð við tíkall, væri þversnið eins þráðar stærra en fótboltavöllur, sem þyrfti um 150 milljónir kolefnisatóma-„tíkalla" til að hylja. (Mynd 1.13) sýnir venjulega bómull í sífellt meiri stækkun.
+
+![Bómull í sífellt meiri stækkun.](images/CNX_Chem_01_02_Cellulose.jpg)
+
+**Mynd 1.13** Þessar myndir sýna sífellt meiri stækkun: (a) bómullarhnappur, (b) einn bómullarþráður séður í ljóssmásjá (stækkaður 40 sinnum), (c) mynd af bómullarþræði tekin með rafeindasmásjá (mun meiri stækkun en með ljóssmásjá); og (d og e) líkön af þræðinum á atómstigi (kúlur í mismunandi litum tákna atóm mismunandi frumefna). (heimild c: breyting á verki eftir „Featheredtar"/Wikimedia Commons)
+
+Atóm er svo létt að einnig er erfitt að ímynda sér massa þess. Milljarður blýatóma (1.000.000.000 atóm) vegur um 3 × 10⁻¹³ grömm, massi sem er allt of léttur til að vega á jafnvel næmustu vogum heims. Það þyrfti yfir 300.000.000.000.000 blýatóm (300 billjónir, eða 3 × 10¹⁴) til að vega þau og þau myndu aðeins vega 0,0000001 gramm.
+
+Það er sjaldgæft að finna safn stakra atóma. Aðeins nokkur frumefni, eins og gösin helíum, neon og argon, samanstanda af safni stakra atóma sem hreyfast óháð hvert öðru. Önnur frumefni, eins og gösin vetni, nitur, súrefni og klór, eru samsett úr einingum sem samanstanda af atómapörum (mynd 1.14). Eitt form frumefnisins fosfórs samanstendur af einingum sem eru samsettar úr fjórum fosfóratómum. Frumefnið brennisteinn er til í ýmsum myndum, þar af ein sem samanstendur af einingum sem eru samsettar úr átta brennisteinsatómum. Þessar einingar eru kallaðar sameindir. Sameind samanstendur af tveimur eða fleiri atómum sem eru tengd saman með sterkum kröftum sem kallast efnatengi. Atómin í sameind hreyfast sem ein heild, líkt og dósirnar í sex-pakka af gosi eða lyklakippa sem er tengd saman á einum lyklahring. Sameind getur samanstaðið af tveimur eða fleiri eins atómum, eins og í sameindunum sem finnast í frumefnunum vetni, súrefni og brennisteini, eða hún getur samanstaðið af tveimur eða fleiri mismunandi atómum, eins og í sameindunum sem finnast í vatni. Hver vatnssameind er eining sem inniheldur tvö vetnisatóm og eitt súrefnisatóm. Hver glúkósasameind er eining sem inniheldur 6 kolefnisatóm, 12 vetnisatóm og 6 súrefnisatóm. Líkt og atóm eru sameindir ótrúlega litlar og léttar. Ef venjulegt vatnsglas væri stækkað í stærð jarðarinnar væru vatnssameindirnar í því á stærð við golfkúlur.
+
+![Frumefnin vetni, súrefni, fosfór og brennisteinn mynda sameindir.](images/CNX_Chem_01_02_Molecules.jpg)
+
+**Mynd 1.14** Frumefnin vetni, súrefni, fosfór og brennisteinn mynda sameindir sem samanstanda af tveimur eða fleiri atómum sama frumefnis. Efnasamböndin vatn, koltvísýringur og glúkósi samanstanda af samsetningum atóma mismunandi frumefna.
+
+## Niðurbrot vatns / framleiðsla vetnis
+
+Vatn samanstendur af frumefnunum vetni og súrefni sem eru sameinuð í hlutfallinu 2 á móti 1. Hægt er að brjóta vatn niður í vetnis- og súrefnisgas með álagningu orku. Ein leið til að gera þetta er með rafhlöðu eða aflgjafa, eins og sýnt er á (mynd 1.15).
+
+![Niðurbrot vatns með rafgreiningu.](images/CNX_Chem_01_01_Electrolys.jpg)
+
+**Mynd 1.15** Niðurbrot vatns er sýnt á stórsæju, smásæju og táknrænu stigi. Rafhlaðan gefur straum (smásætt) sem sundrar vatninu. Á stórsæjum skala skiptist vökvinn í gasið vetni (vinstra megin) og súrefni (hægra megin). Táknrænt er þessari breytingu lýst með því að sýna hvernig vökvinn H₂O skiptist í gasið H₂ og O₂.
+
+Sundrun vatns felur í sér umröðun atóma í vatnssameindum yfir í aðrar sameindir, þar sem hver sameind er samsett úr tveimur vetnisatómum og tveimur súrefnisatómum, hvort um sig. Tvær vatnssameindir mynda eina súrefnissameind og tvær vetnissameindir. Framsetning á því sem gerist, $2\text{H}_{2}\text{O}(l)\  \rightarrow \ 2\text{H}_{2}(g) + \text{O}_{2}(g)$, verður skoðuð nánar í síðari köflum.
+
+Gastegundirnar tvær sem myndast hafa mjög ólíka eiginleika. Súrefni er ekki eldfimt en er nauðsynlegt fyrir bruna eldsneytis og vetni er mjög eldfimt og öflugur orkugjafi. Hvernig gæti þessi þekking nýst í heiminum? Eitt notkunarsvið felur í sér rannsóknir á sparneytnari samgöngum. Efnarafalsbílar (FCV) ganga fyrir vetni í stað bensíns (mynd 1.16). Þeir eru skilvirkari en farartæki með brunahreyflum, eru ekki mengandi og draga úr losun gróðurhúsalofttegunda, sem gerir okkur minna háð jarðefnaeldsneyti. Efnarafalsbílar eru þó ekki enn hagkvæmir og núverandi vetnisframleiðsla byggir á jarðgasi. Ef við getum þróað ferli til að sundra vatni á hagkvæman hátt, eða framleitt vetni á annan umhverfisvænan hátt, gætu efnarafalsbílar verið framtíðin.
+
+![Efnarafall framleiðir raforku úr vetni og súrefni.](images/CNX_Chem_01_01_FuelCell.jpg)
+
+**Mynd 1.16** Efnarafall framleiðir raforku úr vetni og súrefni með rafefnafræðilegu ferli og myndar aðeins vatn sem úrgangsefni.
+
+## Efnafræði farsíma
+
+Ímyndaðu þér hversu ólíkt líf þitt væri án farsíma (mynd 1.17) og annarra snjalltækja. Farsímar eru gerðir úr fjölmörgum hreinum efnum sem eru unnin úr jörðu, hreinsuð og sett saman með því að beita víðtækri og ítarlegri þekkingu á lögmálum efnafræðinnar. Um 30% þeirra frumefna sem finnast í náttúrunni er að finna í dæmigerðum snjallsíma. Umgjörðin/húsið/ramminn samanstendur af blöndu af sterkum, endingargóðum fjölliðum sem eru aðallega gerðar úr kolefni, vetni, súrefni og nitur [akrýlónítríl bútadíen stýren (ABS) og polycarbonate-hitaplast], og léttum, sterkum burðarmálmum eins og áli, magnesíum og járni. Skjárinn er gerður úr sérstaklega hertu gleri (kísilgleri sem er styrkt með álagningu áls, natríums og kalíums) og húðaður með efni til að gera hann leiðandi (eins og indíumtinoxíði). Í rafrásinni er notað hálfleiðaraefni (yfirleitt kísill); algengir málmar eins og kopar, tin, silfur og gull; og ókunnuglegri frumefni eins og yttríum, praseódým og gadólín. Rafhlaðan byggir á litíumjónum og ýmsum öðrum efnum, þar á meðal járni, kóbalti, kopar, pólýetýlenoxíði og pólýakrýlónítríli.
+
+![Næstum þriðjungur náttúrulegra frumefna er notaður til að framleiða farsíma.](images/CNX_Chem_01_02_CellPhone.jpg)
+
+**Mynd 1.17** Næstum þriðjungur náttúrulegra frumefna er notaður til að framleiða farsíma. (heimild: breytt útgáfa af verki eftir John Taylor)
