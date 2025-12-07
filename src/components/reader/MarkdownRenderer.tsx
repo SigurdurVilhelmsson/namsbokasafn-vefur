@@ -51,6 +51,95 @@ function remarkCustomDirectives() {
   };
 }
 
+// Collapsible answer component for practice problems
+function PracticeProblem({ children }: { children: React.ReactNode }) {
+  const [showAnswer, setShowAnswer] = useState(false);
+
+  // Extract problem and answer from children
+  const childArray = Array.isArray(children) ? children : [children];
+  const contentParts: React.ReactNode[] = [];
+  let answerContent: React.ReactNode = null;
+
+  // Process only direct children, not nested practice problems
+  childArray.forEach((child) => {
+    if (
+      child &&
+      typeof child === "object" &&
+      "props" in child
+    ) {
+      // Skip nested practice-problem containers
+      if (child.props?.className === "practice-problem-container") {
+        return;
+      }
+
+      if (child.props?.className === "practice-answer-container") {
+        // This is the answer block
+        answerContent = child.props.children;
+      } else {
+        // This is problem content
+        contentParts.push(child);
+      }
+    } else if (typeof child === "string") {
+      // Filter out standalone ::: markers
+      const trimmed = child.trim();
+      if (trimmed !== ":::" && trimmed !== "") {
+        contentParts.push(child);
+      }
+    }
+  });
+
+  return (
+    <div className="practice-problem">
+      <div className="practice-problem-header">
+        <svg
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+          />
+        </svg>
+        <h4>Æfingadæmi</h4>
+      </div>
+
+      <div className="practice-problem-content">{contentParts}</div>
+
+      {answerContent && (
+        <div className="practice-answer-section">
+          <button
+            onClick={() => setShowAnswer(!showAnswer)}
+            className="practice-answer-toggle"
+          >
+            <span>{showAnswer ? "Fela svar" : "Sýna svar"}</span>
+            <svg
+              className={`h-5 w-5 transition-transform ${showAnswer ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+
+          {showAnswer && (
+            <div className="practice-answer-content">{answerContent}</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
     <div className="reading-content">
