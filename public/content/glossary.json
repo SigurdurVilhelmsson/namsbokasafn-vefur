@@ -1,109 +1,382 @@
 {
   "terms": [
     {
-      "term": "eðlismassi",
-      "english": "density",
-      "definition": "Hlutfall massa og rúmmáls fyrir efni eða hlut. Venjulega táknað með gríska bókstafnum ró (ρ).",
+      "term": "nákvæmni",
+      "english": "accuracy",
+      "definition": "hversu vel mæling samræmist réttu gildi",
       "chapter": "1",
-      "section": "1.4"
+      "section": "1.5"
     },
     {
-      "term": "SI-einingar",
-      "english": "SI Units",
-      "definition": "Alþjóðlegt einingakerfi (franska: Système International d'Unités) sem notað er í vísindum um allan heim. Inniheldur sjö grundvallareiningar.",
-      "chapter": "1",
-      "section": "1.4"
-    },
-    {
-      "term": "marktækir tölustafir",
-      "english": "significant figures",
-      "definition": "Allir þeir tölustafir sem við vitum með vissu í mælingu, auk eins tölustafar sem er óviss.",
-      "chapter": "1",
-      "section": "1.4"
-    },
-    {
-      "term": "fasaskipti",
-      "english": "phase transition",
-      "definition": "Breyting á ástandi efnis á milli fasts forms, vökvaforms og loftforms.",
+      "term": "frumeind",
+      "english": "atom",
+      "definition": "minnsta ögn frumefnis sem getur gengið í efnasamband",
       "chapter": "1",
       "section": "1.2"
     },
     {
-      "term": "bráðnun",
-      "english": "melting",
-      "definition": "Fasaskipti þar sem fast efni breytist í vökva við bráðslumark þess.",
+      "term": "Celsíus",
+      "english": "Celsius",
+      "definition": "hitastigseining; vatn frýs við 0 °C og sýður við 100 °C á þessum kvarða",
       "chapter": "1",
-      "section": "1.2"
+      "section": "1.6"
     },
     {
-      "term": "gufun",
-      "english": "evaporation",
-      "definition": "Fasaskipti þar sem vökvi breytist í loftform. Getur átt sér stað við hvaða hitastig sem er.",
-      "chapter": "1",
-      "section": "1.2"
-    },
-    {
-      "term": "sublímun",
-      "english": "sublimation",
-      "definition": "Fasaskipti þar sem fast efni breytist beint í loftform án þess að fara í gegnum vökvaform.",
-      "chapter": "1",
-      "section": "1.2"
-    },
-    {
-      "term": "eðlisbreyting",
-      "english": "physical change",
-      "definition": "Breyting á formi eða ástandi efnis án þess að efnafræðileg samsetning breytist.",
+      "term": "efnabreytingar",
+      "english": "chemical change",
+      "definition": "breyting sem myndar nýtt efni úr upprunalega efninu",
       "chapter": "1",
       "section": "1.3"
     },
     {
-      "term": "efnahvarf",
-      "english": "chemical reaction",
-      "definition": "Ferli þar sem ein eða fleiri efnisgerðir breytast í nýjar efnisgerðir með mismunandi eiginleika.",
-      "chapter": "1",
-      "section": "1.3"
-    },
-    {
-      "term": "ítarlegur eiginleiki",
-      "english": "extensive property",
-      "definition": "Eiginleiki sem er háður magni efnis. Dæmi: massi, rúmmál, lengd.",
-      "chapter": "1",
-      "section": "1.3"
-    },
-    {
-      "term": "þéttlegur eiginleiki",
-      "english": "intensive property",
-      "definition": "Eiginleiki sem er óháður magni efnis. Dæmi: eðlismassi, litur, bræðslumark.",
+      "term": "efnaeiginleikar",
+      "english": "chemical properties",
+      "definition": "hegðun sem tengist breytingu á einu efni í annað",
       "chapter": "1",
       "section": "1.3"
     },
     {
       "term": "efnafræði",
       "english": "chemistry",
-      "definition": "Náttúruvísindi sem rannsaka samsetningu, uppbyggingu, eiginleika og hegðun efna, svo og breytingar sem efni gangast undir við efnahvörf.",
+      "definition": "rannsóknir á samsetningu, eiginleikum og samspili efnis",
       "chapter": "1",
       "section": "1.1"
+    },
+    {
+      "term": "efnasamband",
+      "english": "compound",
+      "definition": "hreint efni sem hægt er að brjóta niður í tvö eða fleiri frumefni",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "rúmsentimetri",
+      "english": "cubic centimeter",
+      "definition": "rúmmál tenings með brúnarlengdina nákvæmlega 1 cm",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "rúmmetri",
+      "english": "cubic meter",
+      "definition": "SI-eining rúmmáls",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "eðlismassi",
+      "english": "density",
+      "definition": "hlutfall massa og rúmmáls fyrir efni eða hlut",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "einingagreining",
+      "english": "dimensional analysis",
+      "definition": "fjölhæf stærðfræðileg aðferð sem hægt er að beita á útreikninga, allt frá einföldum einingabreytingum til flóknari, margra þrepa útreikninga sem fela í sér nokkrar mismunandi stærðir",
+      "chapter": "1",
+      "section": "1.6"
+    },
+    {
+      "term": "frumefni",
+      "english": "element",
+      "definition": "efni sem samanstendur af einni tegund atóma; efni sem ekki er hægt að sundra með efnahvarfi",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "nákvæm tala",
+      "english": "exact number",
+      "definition": "tala fengin með talningu eða samkvæmt skilgreiningu",
+      "chapter": "1",
+      "section": "1.5"
+    },
+    {
+      "term": "magnbundinn eiginleiki",
+      "english": "extensive property",
+      "definition": "eiginleiki efnis sem er háður magni efnisins",
+      "chapter": "1",
+      "section": "1.3"
+    },
+    {
+      "term": "Fahrenheit",
+      "english": "Fahrenheit",
+      "definition": "hitastigseining; vatn frýs við 32 °F og sýður við 212 °F á þessum kvarða",
+      "chapter": "1",
+      "section": "1.6"
+    },
+    {
+      "term": "gas",
+      "english": "gas",
+      "definition": "ástand þar sem efni hefur hvorki ákveðið rúmmál né lögun",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "misleit efnablanda",
+      "english": "heterogeneous mixture",
+      "definition": "sambland efna með samsetningu sem er breytileg frá einum punkti til annars",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "einsleit efnablanda",
+      "english": "homogeneous mixture",
+      "definition": "sambland efna með samsetningu sem er einsleit í gegn",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "tilgáta",
+      "english": "hypothesis",
+      "definition": "bráðabirgðaskýring á athugunum sem er leiðarvísir við söfnun og yfirferð upplýsinga",
+      "chapter": "1",
+      "section": "1.1"
+    },
+    {
+      "term": "eðlisbundinn eiginleiki",
+      "english": "intensive property",
+      "definition": "eiginleiki efnis sem er óháður magni efnisins",
+      "chapter": "1",
+      "section": "1.3"
+    },
+    {
+      "term": "kelvin",
+      "english": "kelvin",
+      "definition": "SI eining fyrir hitastig; 273,15 K = 0 ºC",
+      "chapter": "1",
+      "section": "1.6"
+    },
+    {
+      "term": "kílógramm",
+      "english": "kilogram",
+      "definition": "staðaleining SI-kerfisins fyrir massa",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "lögmál",
+      "english": "law",
+      "definition": "staðhæfing sem dregur saman mikinn fjölda athugana og lýsir eða spáir fyrir um einhvern þátt náttúrunnar",
+      "chapter": "1",
+      "section": "1.1"
+    },
+    {
+      "term": "lögmál um varðveislu efnis",
+      "english": "law of conservation of matter",
+      "definition": "þegar efni breytist úr einni gerð í aðra, eða breytir um form, verður engin greinanleg breyting á heildarmagni þess efnis sem er til staðar",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "lengd",
+      "english": "length",
+      "definition": "mælikvarði á eina vídd hlutar",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "vökvi",
+      "english": "liquid",
+      "definition": "ástand efnis sem hefur ákveðið rúmmál en óákveðna lögun",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "lítri",
+      "english": "liter",
+      "definition": "rúmmálseining; 1 L = 1.000 cm³",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "stórsætt svið",
+      "english": "macroscopic domain",
+      "definition": "svið hversdagslegra hluta sem eru nógu stórir til að vera skynjaðir beint með sjón og snertingu",
+      "chapter": "1",
+      "section": "1.1"
+    },
+    {
+      "term": "massi",
+      "english": "mass",
+      "definition": "grunneiginleiki sem gefur til kynna magn efnis",
+      "chapter": "1",
+      "section": "1.4"
     },
     {
       "term": "efni",
       "english": "matter",
-      "definition": "Allt sem hefur massa og tekur pláss. Samanstendur af atómum og sameindum.",
+      "definition": "allt sem tekur pláss og hefur massa",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "metri",
+      "english": "meter",
+      "definition": "stöðluð lengdareining metrakerfisins og SI-kerfisins; 1 m = u.þ.b. 1,094 yardar",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "smásætt svið",
+      "english": "microscopic domain",
+      "definition": "svið hluta sem eru of smáir til að vera skynjaðir beint",
       "chapter": "1",
       "section": "1.1"
     },
     {
-      "term": "hrein efni",
-      "english": "pure substance",
-      "definition": "Efni með fasta samsetningu. Getur verið frumefni eða samband.",
+      "term": "millilítri",
+      "english": "milliliter",
+      "definition": "1/1.000 úr lítra; jafngildir 1 cm³",
       "chapter": "1",
-      "section": "1.1"
+      "section": "1.4"
     },
     {
-      "term": "blanda",
+      "term": "efnablanda",
       "english": "mixture",
-      "definition": "Tvö eða fleiri efni saman þar sem hvert efni heldur sínum eiginleikum.",
+      "definition": "efni sem hægt er að aðskilja í efnisþætti sína með eðlisfræðilegum aðferðum",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "sameind",
+      "english": "molecule",
+      "definition": "tengt safn tveggja eða fleiri atóma af sama eða mismunandi frumefnum",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "eðlisbreyting",
+      "english": "physical change",
+      "definition": "breyting á efnisham eða eiginleikum efnis sem felur ekki í sér breytingu á efnasamsetningu þess",
+      "chapter": "1",
+      "section": "1.3"
+    },
+    {
+      "term": "eðliseiginleiki",
+      "english": "physical property",
+      "definition": "einkenni efnis sem er ekki tengt neinni breytingu á efnasamsetningu þess",
+      "chapter": "1",
+      "section": "1.3"
+    },
+    {
+      "term": "rafgas",
+      "english": "plasma",
+      "definition": "gaskenndur efnishamur sem inniheldur mikinn fjölda rafhlaðinna atóma og/eða sameinda",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "hittni",
+      "english": "precision",
+      "definition": "hversu nálægt mæling er sömu mælingu þegar hún er endurtekin",
+      "chapter": "1",
+      "section": "1.5"
+    },
+    {
+      "term": "hreint efni",
+      "english": "pure substance",
+      "definition": "einsleitt efni sem hefur fasta samsetningu",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "námundun",
+      "english": "rounding",
+      "definition": "aðferð sem notuð er til að tryggja að útreiknaðar niðurstöður endurspegli á réttan hátt óvissuna í þeim mælingum sem notaðar eru í útreikningnum",
+      "chapter": "1",
+      "section": "1.5"
+    },
+    {
+      "term": "vísindaleg aðferð",
+      "english": "scientific method",
+      "definition": "uppgötvunarferli sem leiðir frá spurningu og athugun til lögmáls eða tilgátu til kenningar, ásamt tilraunakenndri sannprófun á tilgátunni og hvers kyns nauðsynlegri breytingu á kenningunni",
       "chapter": "1",
       "section": "1.1"
+    },
+    {
+      "term": "sekúnda",
+      "english": "second",
+      "definition": "SI-eining tíma",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "SI-einingar",
+      "english": "SI units",
+      "definition": "staðlar sem eru fastsettir með alþjóðlegum samningi í Alþjóðlega einingakerfinu (Le Système International d'Unités)",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "markverðir stafir",
+      "english": "significant figures",
+      "definition": "allir mældir tölustafir í ákvörðun, þar með talinn óvissi síðasti tölustafurinn",
+      "chapter": "1",
+      "section": "1.5"
+    },
+    {
+      "term": "fast efni",
+      "english": "solid",
+      "definition": "efnishamur sem er stífur, hefur ákveðið form og nokkuð fast rúmmál",
+      "chapter": "1",
+      "section": "1.2"
+    },
+    {
+      "term": "táknrænt svið",
+      "english": "symbolic domain",
+      "definition": "sérhæft tungumál sem notað er til að tákna þætti á stórsæja og smásæja sviðinu, svo sem efnatákn, efnaformúlur, efnajöfnur, gröf, teikningar og útreikninga",
+      "chapter": "1",
+      "section": "1.1"
+    },
+    {
+      "term": "hitastig",
+      "english": "temperature",
+      "definition": "eðlisbundinn eiginleiki sem táknar hita eða kulda efnis",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "kenning",
+      "english": "theory",
+      "definition": "vel rökstudd, yfirgripsmikil, prófanleg útskýring á tilteknum þætti náttúrunnar",
+      "chapter": "1",
+      "section": "1.1"
+    },
+    {
+      "term": "óvissa",
+      "english": "uncertainty",
+      "definition": "mat á því hversu mikið mæling víkur frá sönnu gildi",
+      "chapter": "1",
+      "section": "1.5"
+    },
+    {
+      "term": "eining",
+      "english": "unit",
+      "definition": "samanburðarstaðall fyrir mælingar",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "umbreytistuðull eininga",
+      "english": "unit conversion factor",
+      "definition": "hlutfall jafngildra magntalna gefið upp með mismunandi einingum; notað til að breyta úr einni einingu í aðra",
+      "chapter": "1",
+      "section": "1.6"
+    },
+    {
+      "term": "rúmmál",
+      "english": "volume",
+      "definition": "rými sem hlutur tekur",
+      "chapter": "1",
+      "section": "1.4"
+    },
+    {
+      "term": "þyngd",
+      "english": "weight",
+      "definition": "kraftur sem þyngdarafl beitir á hlut",
+      "chapter": "1",
+      "section": "1.4"
     }
   ]
 }
