@@ -19,34 +19,36 @@ interface ObjectivesState {
     chapterSlug: string,
     sectionSlug: string,
     objectiveIndex: number,
-    objectiveText: string
+    objectiveText: string,
   ) => void;
   markObjectiveIncomplete: (
     chapterSlug: string,
     sectionSlug: string,
-    objectiveIndex: number
+    objectiveIndex: number,
   ) => void;
   toggleObjective: (
     chapterSlug: string,
     sectionSlug: string,
     objectiveIndex: number,
-    objectiveText: string
+    objectiveText: string,
   ) => void;
   isObjectiveCompleted: (
     chapterSlug: string,
     sectionSlug: string,
-    objectiveIndex: number
+    objectiveIndex: number,
   ) => boolean;
 
   // Progress functions
   getSectionObjectivesProgress: (
     chapterSlug: string,
     sectionSlug: string,
-    totalObjectives: number
+    totalObjectives: number,
   ) => { completed: number; total: number; percentage: number };
-  getChapterObjectivesProgress: (
-    chapterSlug: string
-  ) => { completed: number; total: number; percentage: number };
+  getChapterObjectivesProgress: (chapterSlug: string) => {
+    completed: number;
+    total: number;
+    percentage: number;
+  };
   getOverallObjectivesProgress: () => {
     completed: number;
     total: number;
@@ -56,14 +58,14 @@ interface ObjectivesState {
   // Get all objectives for a section
   getSectionObjectives: (
     chapterSlug: string,
-    sectionSlug: string
+    sectionSlug: string,
   ) => ObjectiveProgress[];
 }
 
 function generateKey(
   chapterSlug: string,
   sectionSlug: string,
-  objectiveIndex: number
+  objectiveIndex: number,
 ): string {
   return `${chapterSlug}/${sectionSlug}/${objectiveIndex}`;
 }
@@ -73,7 +75,12 @@ export const useObjectivesStore = create<ObjectivesState>()(
     (set, get) => ({
       completedObjectives: {},
 
-      markObjectiveComplete: (chapterSlug, sectionSlug, objectiveIndex, objectiveText) => {
+      markObjectiveComplete: (
+        chapterSlug,
+        sectionSlug,
+        objectiveIndex,
+        objectiveText,
+      ) => {
         const key = generateKey(chapterSlug, sectionSlug, objectiveIndex);
         set((state) => ({
           completedObjectives: {
@@ -93,17 +100,32 @@ export const useObjectivesStore = create<ObjectivesState>()(
       markObjectiveIncomplete: (chapterSlug, sectionSlug, objectiveIndex) => {
         const key = generateKey(chapterSlug, sectionSlug, objectiveIndex);
         set((state) => {
-          const { [key]: _, ...rest } = state.completedObjectives;
+          const { [key]: _removed, ...rest } = state.completedObjectives;
+          void _removed; // Explicitly mark as intentionally unused
           return { completedObjectives: rest };
         });
       },
 
-      toggleObjective: (chapterSlug, sectionSlug, objectiveIndex, objectiveText) => {
-        const { isObjectiveCompleted, markObjectiveComplete, markObjectiveIncomplete } = get();
+      toggleObjective: (
+        chapterSlug,
+        sectionSlug,
+        objectiveIndex,
+        objectiveText,
+      ) => {
+        const {
+          isObjectiveCompleted,
+          markObjectiveComplete,
+          markObjectiveIncomplete,
+        } = get();
         if (isObjectiveCompleted(chapterSlug, sectionSlug, objectiveIndex)) {
           markObjectiveIncomplete(chapterSlug, sectionSlug, objectiveIndex);
         } else {
-          markObjectiveComplete(chapterSlug, sectionSlug, objectiveIndex, objectiveText);
+          markObjectiveComplete(
+            chapterSlug,
+            sectionSlug,
+            objectiveIndex,
+            objectiveText,
+          );
         }
       },
 
@@ -112,26 +134,36 @@ export const useObjectivesStore = create<ObjectivesState>()(
         return get().completedObjectives[key]?.isCompleted ?? false;
       },
 
-      getSectionObjectivesProgress: (chapterSlug, sectionSlug, totalObjectives) => {
+      getSectionObjectivesProgress: (
+        chapterSlug,
+        sectionSlug,
+        totalObjectives,
+      ) => {
         const { completedObjectives } = get();
         const prefix = `${chapterSlug}/${sectionSlug}/`;
         const completed = Object.keys(completedObjectives).filter(
-          (key) => key.startsWith(prefix) && completedObjectives[key].isCompleted
+          (key) =>
+            key.startsWith(prefix) && completedObjectives[key].isCompleted,
         ).length;
 
         return {
           completed,
           total: totalObjectives,
-          percentage: totalObjectives > 0 ? Math.round((completed / totalObjectives) * 100) : 0,
+          percentage:
+            totalObjectives > 0
+              ? Math.round((completed / totalObjectives) * 100)
+              : 0,
         };
       },
 
       getChapterObjectivesProgress: (chapterSlug) => {
         const { completedObjectives } = get();
         const chapterObjectives = Object.values(completedObjectives).filter(
-          (obj) => obj.chapterSlug === chapterSlug
+          (obj) => obj.chapterSlug === chapterSlug,
         );
-        const completed = chapterObjectives.filter((obj) => obj.isCompleted).length;
+        const completed = chapterObjectives.filter(
+          (obj) => obj.isCompleted,
+        ).length;
         const total = chapterObjectives.length;
 
         return {
@@ -157,12 +189,13 @@ export const useObjectivesStore = create<ObjectivesState>()(
       getSectionObjectives: (chapterSlug, sectionSlug) => {
         const { completedObjectives } = get();
         return Object.values(completedObjectives).filter(
-          (obj) => obj.chapterSlug === chapterSlug && obj.sectionSlug === sectionSlug
+          (obj) =>
+            obj.chapterSlug === chapterSlug && obj.sectionSlug === sectionSlug,
         );
       },
     }),
     {
       name: "efnafraedi-objectives",
-    }
-  )
+    },
+  ),
 );
