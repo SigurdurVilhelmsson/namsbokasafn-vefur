@@ -14,4 +14,27 @@ export default defineConfig({
     port: 5173,
     host: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core - rarely changes, cache long-term
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          // Markdown rendering - heavy, load on demand
+          'markdown': [
+            'react-markdown',
+            'remark-gfm',
+            'remark-math',
+            'remark-directive',
+            'rehype-katex',
+            'unist-util-visit',
+          ],
+          // KaTeX for math - heavy, load with markdown
+          'katex': ['katex'],
+          // UI utilities - moderate size
+          'ui-vendor': ['lucide-react', 'zustand', 'date-fns'],
+        },
+      },
+    },
+  },
 })
