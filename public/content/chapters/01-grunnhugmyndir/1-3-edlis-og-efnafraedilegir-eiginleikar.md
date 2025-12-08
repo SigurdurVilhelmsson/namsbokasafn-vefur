@@ -5,6 +5,15 @@ chapter: 1
 objectives:
   - Tilgreint hvort eiginleikar efnis og breytingar á því eru eðlisfræðilegir eða efnafræðilegir
   - Tilgreint hvort eiginleikar efnis eru magnbundnir eða eðlisbundnir
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Þau einkenni sem greina eitt efni frá öðru eru kallaðir eiginleikar (e. properties). Eðliseiginleiki (e. physical property) er einkenni efnis sem tengist ekki breytingu á efnasamsetningu þess. Þekkt dæmi um eðliseiginleika eru eðlismassi, litur, harka, bræðslu- og suðumark og rafleiðni. Suma eðliseiginleika, svo sem eðlismassa og lit, er hægt að skoða án þess að breyta eðlisástandi efnisins. Aðra eðliseiginleika, svo sem bræðslumark járns eða frostmark vatns, er aðeins hægt að skoða þegar efni tekur eðlisfræðilegum breytingum. Eðlisbreyting er breyting á ástandi eða eiginleikum efnis án þess að efnafræðileg einkenni þess breytist. Eðlisbreytingar eiga sér stað til dæmis þegar vax bráðnar, sykur leysist upp í kaffi og þegar gufa þéttist í fljótandi vatn (mynd 1.18). Önnur dæmi um eðlisbreytingar eru segulmögnun og afsegulmögnun málma (eins og gert er með algengum þjófavarnarmerkjum) og að mala föst efni í duft (sem getur stundum leitt til áberandi litabreytinga). Í öllum þessum dæmum verður breyting á eðlisástandi, formi eða eiginleikum efnisins en engin breyting verður á efnasamsetningu þess.

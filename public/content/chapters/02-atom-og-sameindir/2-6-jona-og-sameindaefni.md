@@ -6,6 +6,15 @@ objectives:
   - Skilgreint jónaefni og sameindaefni
   - Spáð fyrir um gerð efnasambands sem myndast úr frumefnum út frá staðsetningu þeirra í lotukerfinu
   - Ákvarðað formúlur fyrir einföld jónaefni
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Í venjulegum efnahvörfum helst kjarni hvers atóms (og þar með auðkenni frumefnisins) óbreyttur. Hins vegar er hægt að bæta rafeindum við atóm með flutningi frá öðrum atómum, missa þær með flutningi til annarra atóma eða deila þeim með öðrum atómum. Flutningur og deiling rafeinda milli atóma stjórnar efnafræði frumefnanna. Við myndun sumra efnasambanda fá atóm rafeindir eða missa þær og mynda rafhlaðnar agnir sem kallast jónir.

@@ -1,3 +1,15 @@
+// Gerð fyrir upprunalega heimild og leyfi (CC BY 4.0 attribution)
+export interface SourceAttribution {
+  original: string;
+  authors: string;
+  license: string;
+  licenseUrl: string;
+  originalUrl: string;
+  translator: string;
+  translationYear: number;
+  modifications: string;
+}
+
 // Gerð fyrir kaflahluta (section)
 export interface Section {
   number: string;
@@ -17,6 +29,7 @@ export interface Chapter {
 // Gerð fyrir efnisyfirlit (table of contents)
 export interface TableOfContents {
   title: string;
+  attribution?: SourceAttribution;
   chapters: Chapter[];
 }
 
@@ -31,6 +44,7 @@ export interface SectionContent {
   section: string;
   chapter: number;
   objectives?: string[];
+  source?: SourceAttribution;
   content: string;
 }
 
