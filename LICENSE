@@ -1,4 +1,11 @@
-MIT License
+# License
+
+This project uses dual licensing to cover different aspects of the work:
+
+## 1. Application Code - MIT License
+
+The application code (all TypeScript, JavaScript, CSS, and configuration files)
+is licensed under the MIT License.
 
 Copyright (c) 2025 Sigurður E. Vilhelmsson
 
@@ -19,3 +26,38 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## 2. Educational Content - Creative Commons Attribution 4.0 International
+
+The educational content in the `public/content/` directory is an Icelandic
+translation and adaptation of "Chemistry 2e" by OpenStax, originally available at:
+https://openstax.org/details/books/chemistry-2e
+
+Original Work:
+- Title: Chemistry 2e
+- Authors: Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson
+- Publisher: OpenStax
+- Original License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+- Original Source: https://openstax.org/details/books/chemistry-2e
+
+This translated and adapted content is licensed under the Creative Commons
+Attribution 4.0 International License (CC BY 4.0).
+
+To view a copy of this license, visit:
+https://creativecommons.org/licenses/by/4.0/
+
+You are free to:
+- Share — copy and redistribute the material in any medium or format
+- Adapt — remix, transform, and build upon the material for any purpose, even commercially
+
+Under the following terms:
+- Attribution — You must give appropriate credit to both OpenStax (original authors)
+  and this translation project, provide a link to the license, and indicate if
+  changes were made.
+
+Translation and Adaptation:
+- Translator: Sigurður E. Vilhelmsson
+- Modifications: Translated to Icelandic, adapted for Icelandic high school students
+- Year: 2025
+
+For more details, see CONTENT-LICENSE.md

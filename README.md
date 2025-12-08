@@ -239,12 +239,37 @@ Contributions are welcome! Please:
 
 ## 📄 License
 
-This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
+This project uses dual licensing:
+
+- **Application Code**: Licensed under the MIT License
+- **Educational Content**: Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+See [LICENSE](./LICENSE) and [CONTENT-LICENSE.md](./CONTENT-LICENSE.md) for complete details.
+
+## 📚 Content Attribution
+
+The educational content in this reader is an Icelandic translation and adaptation of **"Chemistry 2e"** by OpenStax.
+
+**Original Work:**
+- **Title**: Chemistry 2e
+- **Authors**: Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson
+- **Publisher**: OpenStax
+- **Source**: https://openstax.org/details/books/chemistry-2e
+- **License**: Creative Commons Attribution 4.0 International (CC BY 4.0)
+- **License URL**: https://creativecommons.org/licenses/by/4.0/
+
+**This Adaptation:**
+- **Translator**: Sigurður E. Vilhelmsson
+- **Modifications**: Translated to Icelandic, adapted for Icelandic high school students
+- **License**: Creative Commons Attribution 4.0 International (CC BY 4.0)
+
+This is a derivative work based on the original OpenStax Chemistry 2e textbook. All translated content maintains the same CC BY 4.0 license as the original work. When using or redistributing this content, please provide attribution to both OpenStax (original authors) and this translation project.
 
 ## 🙏 Acknowledgments
 
-- **OpenStax** for the excellent open textbook
-- **React** and **Vite** teams for outstanding tools
+- **OpenStax** for creating and maintaining excellent open educational resources
+- **Chemistry 2e Authors** (Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson) for their outstanding textbook
+- **React** and **Vite** teams for outstanding development tools
 - All contributors to open educational resources
 
 ## 📧 Contact
