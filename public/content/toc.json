@@ -77,6 +77,89 @@
           "type": "exercises"
         }
       ]
+    },
+    {
+      "number": 2,
+      "title": "Atóm og sameindir",
+      "slug": "02-atom-og-sameindir",
+      "sections": [
+        {
+          "number": "2.0",
+          "title": "Inngangur",
+          "slug": "0-inngangur",
+          "file": "0-inngangur.md"
+        },
+        {
+          "number": "2.1",
+          "title": "Fyrstu hugmyndir atómkenningarinnar",
+          "slug": "2-1-fyrstu-hugmyndir-atomkenningarinnar",
+          "file": "2-1-fyrstu-hugmyndir-atomkenningarinnar.md"
+        },
+        {
+          "number": "2.2",
+          "title": "Þróun atómkenningarinnar",
+          "slug": "2-2-throun-atomkenningarinnar",
+          "file": "2-2-throun-atomkenningarinnar.md"
+        },
+        {
+          "number": "2.3",
+          "title": "Bygging atóma og táknmál",
+          "slug": "2-3-bygging-atoma-og-taknmal",
+          "file": "2-3-bygging-atoma-og-taknmal.md"
+        },
+        {
+          "number": "2.4",
+          "title": "Efnaformúlur",
+          "slug": "2-4-efnaformulur",
+          "file": "2-4-efnaformulur.md"
+        },
+        {
+          "number": "2.5",
+          "title": "Lotukerfið",
+          "slug": "2-5-lotukerfid",
+          "file": "2-5-lotukerfid.md"
+        },
+        {
+          "number": "2.6",
+          "title": "Jóna- og sameindaefni",
+          "slug": "2-6-jona-og-sameindaefni",
+          "file": "2-6-jona-og-sameindaefni.md"
+        },
+        {
+          "number": "2.7",
+          "title": "Nafnakerfi efnafræðinnar",
+          "slug": "2-7-nafnakerfi-efnafraedinnar",
+          "file": "2-7-nafnakerfi-efnafraedinnar.md"
+        },
+        {
+          "number": "2.8",
+          "title": "Lykilhugtök",
+          "slug": "2-8-lykilhugtok",
+          "file": "2-8-lykilhugtok.md",
+          "type": "glossary"
+        },
+        {
+          "number": "2.9",
+          "title": "Lykiljöfnur",
+          "slug": "2-9-lykiljoefnur",
+          "file": "2-9-lykiljoefnur.md",
+          "type": "equations"
+        },
+        {
+          "number": "2.10",
+          "title": "Samantekt",
+          "slug": "2-10-samantekt",
+          "file": "2-10-samantekt.md",
+          "type": "summary"
+        },
+        {
+          "number": "2.11",
+          "title": "Verkefni",
+          "slug": "2-11-verkefni",
+          "file": "2-11-verkefni.md",
+          "type": "exercises"
+        }
+      ]
     }
   ]
 }
