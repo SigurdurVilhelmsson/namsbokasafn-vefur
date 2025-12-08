@@ -6,6 +6,15 @@ objectives:
   - Skilgreint lotulögmálið og útskýrt skipulag frumefna í lotukerfinu
   - Spáð fyrir um almenna eiginleika frumefna út frá staðsetningu þeirra í lotukerfinu
   - Þekkt málma, málmleysingja og hálfmálma út frá eiginleikum þeirra og/eða staðsetningu í lotukerfinu
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Þegar efnafræðingar unnu í árdaga að því að hreinsa málmgrýti og uppgötvuðu fleiri frumefni, gerðu þeir sér grein fyrir því að hægt væri að flokka ýmis frumefni saman eftir svipaðri efnafræðilegri hegðun. Einn slíkur flokkur inniheldur litíum (Li), natríum (Na) og kalíum (K): Öll þessi frumefni eru glansandi, leiða vel varma og rafmagn og hafa svipaða efnaeiginleika. Annar flokkur inniheldur kalsíum (Ca), strontíum (Sr) og baríum (Ba), sem eru einnig glansandi, góðir varma- og rafmagnsleiðarar og eiga sameiginlega efnaeiginleika. Hins vegar eru sértækir eiginleikar þessara tveggja flokka verulega frábrugðnir hvor öðrum.

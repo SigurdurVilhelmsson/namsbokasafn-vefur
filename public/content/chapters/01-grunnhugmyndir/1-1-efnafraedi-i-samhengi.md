@@ -8,6 +8,15 @@ objectives:
   - Lýst vísindalegu aðferðinni
   - Greint á milli tilgátna, kenninga og lögmála
   - Nefnt dæmi sem lýsa stórsæjum, smásæjum og táknrænum sviðum
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Í gegnum mannkynssöguna hefur fólk reynt að breyta efni í nytsamlegri mynd. Forfeður okkar á steinöld tálguðu tinnu í nytsamleg verkfæri og skáru út styttur og leikföng úr viði. Þessar athafnir fólu í sér að breyta lögun efnis án þess að breyta efninu sjálfu. En eftir því sem þekking okkar jókst fór fólk einnig að breyta samsetningu efnanna – leir var breytt í leirmuni, skinn voru sútuð til að búa til flíkur, kopargrýti var breytt í koparverkfæri og vopn og korn var notað til að búa til brauð.

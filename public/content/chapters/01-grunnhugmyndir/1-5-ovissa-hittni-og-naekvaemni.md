@@ -7,6 +7,15 @@ objectives:
   - Greint á milli nákvæmra og ónákvæmra talna
   - Sýnt óvissu í stærðum á réttan hátt með markverðum stöfum
   - Beitt réttum námundunarreglum á útreiknaðar stærðir
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Talning er eina mælingin sem er laus við óvissu, að því gefnu að fjöldi hluta sem verið er að telja breytist ekki á meðan talningin fer fram. Niðurstaða slíkrar talningar er dæmi um nákvæma tölu. Með því að telja eggin í eggjabakka er hægt að ákvarða *nákvæmlega* hversu mörg egg hann inniheldur. Tölur skilgreindra stærða eru einnig nákvæmar. Samkvæmt skilgreiningu er 1 fet nákvæmlega 12 tommur, 1 tomma er nákvæmlega 2,54 sentimetrar og 1 gramm er nákvæmlega 0,001 kílógramm. Stærðir sem fengnar eru úr öðrum mælingum en talningu eru hins vegar misnákvæmar vegna hagnýtra takmarkana á mælingarferlinu sem notað er.

@@ -4,6 +4,15 @@ section: "2.7"
 chapter: 2
 objectives:
   - Gefið algengum tegundum ólífrænna efnasambanda heiti með kerfisbundnum hætti
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Nafnakerfi, safn reglna um að nefna hluti, er mikilvægt í vísindum og í mörgum öðrum aðstæðum. Í þessum hluta er lýst aðferð sem er notuð til að nefna einföld jóna- og sameindaefni, svo sem NaCl, CaCO₃ og N₂O₄. Einföldust þeirra eru tvíefni, þau sem innihalda aðeins tvö frumefni, en við munum einnig skoða hvernig á að nefna jónaefni sem innihalda fjölatóma jónir og einn sérstakan, mjög mikilvægan flokk efnasambanda sem kallast sýrur.

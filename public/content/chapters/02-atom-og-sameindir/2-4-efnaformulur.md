@@ -5,6 +5,15 @@ chapter: 2
 objectives:
   - Sýnt samsetningu sameinda með sameindaformúlum og reynsluformúlum
   - Sýnt tengiskipan atóma innan sameinda með byggingarformúlum
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Sameindaformúla er framsetning á sameind sem notar efnatákn til að gefa til kynna tegundir atóma og síðan lágstafi til að sýna fjölda atóma af hverri tegund í sameindinni. (Lágstafur er aðeins notaður þegar fleiri en eitt atóm af tiltekinni tegund er til staðar.) Sameindaformúlur eru einnig notaðar sem skammstafanir fyrir nöfn efnasambanda.

@@ -2,6 +2,15 @@
 title: "Inngangur"
 section: "1.0"
 chapter: 1
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 ![Efni og ferli eru nauðsynleg fyrir tilveru okkar, veita næringu, halda okkur hreinum og heilbrigðum, framleiða rafeindatæki, gera samgöngur mögulegar og margt fleira.](images/CNX_Chem_01_00_DailyChem.jpg)
