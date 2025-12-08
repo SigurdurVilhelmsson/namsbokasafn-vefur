@@ -10,6 +10,7 @@ import { useReaderStore } from "@/stores/readerStore";
 import MarkdownRenderer from "./MarkdownRenderer";
 import NavigationButtons from "./NavigationButtons";
 import LearningObjectives from "./LearningObjectives";
+import ContentAttribution from "./ContentAttribution";
 import type {
   SectionContent,
   NavigationContext,
@@ -242,6 +243,9 @@ export default function SectionView() {
 
           {/* Markdown efni (markdown content) */}
           <MarkdownRenderer content={content.content} />
+
+          {/* Content attribution (CC BY 4.0 license compliance) */}
+          <ContentAttribution variant="compact" />
         </div>
       </article>
 
