@@ -8,6 +8,15 @@ objectives:
   - Beitt lögmálinu um varðveislu efnis
   - Flokkað efni sem frumefni, efnasamband, einsleita efnablöndu eða misleita efnablöndu með tilliti til efnishams og samsetningar
   - Skilgreint og gefið dæmi um atóm og sameindir
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Efni er skilgreint sem allt sem tekur pláss og hefur massa, og það er allt í kringum okkur. Föst efni og vökvar eru augljóslega efni: Við sjáum að þau taka pláss og þyngd þeirra segir okkur að þau hafi massa. Gös eru líka efni; ef gös tækju ekki pláss myndi blaðra ekki blásast upp (auka rúmmál sitt) þegar hún er fyllt með gasi.

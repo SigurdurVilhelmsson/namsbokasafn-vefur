@@ -5,6 +5,15 @@ chapter: 1
 objectives:
   - Útskýrt einingagreiningu sem nálgun við stærðfræðilega útreikninga sem fela í sér stærðir
   - Notað einingagreiningu til að breyta einingum fyrir tiltekinn eiginleika og í útreikninga sem fela í sér tvo eða fleiri eiginleika
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Oft er það svo að stærð sem vekur áhuga er ekki auðvelt (eða jafnvel mögulegt) að mæla beint, heldur verður að reikna hana út frá öðrum beint mældum eiginleikum og viðeigandi stærðfræðilegum tengslum. Tökum sem dæmi mælingu á meðalhraða íþróttamanns sem hleypur spretti. Þetta er venjulega gert með því að mæla *tímann* sem það tekur íþróttamanninn að hlaupa frá ráslínu að marklínu og *vegalengdina* milli þessara tveggja lína og reikna síðan *hraðann* út frá jöfnunni sem tengir þessa þrjá eiginleika:

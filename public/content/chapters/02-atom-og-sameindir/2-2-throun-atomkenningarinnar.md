@@ -7,6 +7,15 @@ objectives:
   - Dregið saman og túlkað niðurstöður tilrauna Thomsons, Millikans og Rutherfords
   - Lýst þeim þremur öreindum sem atóm eru gerð úr
   - Skilgreint samsætur og gefið dæmi um nokkur frumefni
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Ef efni er gert úr atómum, úr hverju eru atóm þá gerð? Eru þau smæstu eindirnar eða er eitthvað enn smærra til? Í lok 19. aldar rannsakaði fjöldi vísindamanna sem höfðu áhuga á spurningum eins og þessum rafmagnslosun sem hægt var að framleiða í lágþrýstum lofttegundum og var mikilvægasta uppgötvunin gerð af enska eðlisfræðingnum J. J. Thomson með því að nota katóðugeislalampa. Þetta tæki samanstóð af lokuðu glerhylki sem nánast allt loft hafði verið fjarlægt úr; rörið innihélt tvö málmrafskaut. Þegar há spenna var lögð á rafskautin birtist sýnilegur geisli, kallaður katóðugeisli, á milli þeirra. Þessi geisli sveigðist í átt að jákvæðu hleðslunni og frá neikvæðu hleðslunni og myndaðist á sama hátt með sömu eiginleika þegar mismunandi málmar voru notaðir fyrir rafskautin. Í svipuðum tilraunum var geislinn samtímis sveigður með segulsviði og mælingar á umfangi sveigjunnar og styrk segulsviðsins gerðu Thomson kleift að reikna út hlutfall hleðslu og massa einda katóðugeislans. Niðurstöður þessara mælinga bentu til þess að þessar eindir væru mun léttari en atóm.

@@ -7,6 +7,15 @@ objectives:
   - Tilgreint þrjá grundvallarþætti stærðar
   - Lýst eiginleikum og einingum lengdar, massa, rúmmáls, eðlismassa, hitastigs og tíma
   - Framkvæmt einfalda útreikninga og umbreytingar á einingum í metrakerfinu og öðrum einingakerfum
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Mælingar veita stóran hluta þeirra upplýsinga sem liggja til grundvallar tilgátum, kenningum og lögmálum sem lýsa hegðun efnis og orku bæði á stórsæju og smásæju sviði efnafræðinnar. Hver mæling veitir þrenns konar upplýsingar: stærð eða umfang mælingarinnar (tölu), samanburðarstaðal fyrir mælinguna (einingu) og vísbendingu um óvissu mælingarinnar. Á meðan talan og einingin eru skýrt táknaðar þegar stærð er skrifuð, er óvissan þáttur í niðurstöðu mælingarinnar sem er meira óbeint táknaður og verður ræddur síðar.
