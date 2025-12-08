@@ -5,7 +5,15 @@ import remarkDirective from "remark-directive";
 import rehypeKatex from "rehype-katex";
 import { visit } from "unist-util-visit";
 import type { Root } from "mdast";
+import type { Node, Data } from "unist";
 import InteractivePracticeProblem from "./InteractivePracticeProblem";
+
+// Type for directive nodes from remark-directive
+interface DirectiveNode extends Node {
+  name?: string;
+  attributes?: Record<string, string | null | undefined> | null;
+  data?: Data & { hName?: string; hProperties?: Record<string, unknown> };
+}
 
 // Import mhchem for chemical notation
 import "katex/dist/contrib/mhchem.js";
@@ -17,7 +25,7 @@ interface MarkdownRendererProps {
 // Custom remark plugin to handle custom directives
 function remarkCustomDirectives() {
   return (tree: Root) => {
-    visit(tree, (node: any) => {
+    visit(tree, (node: DirectiveNode) => {
       if (node.type === "containerDirective") {
         const data = node.data || (node.data = {});
         data.hName = "div";
@@ -55,7 +63,12 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
   return (
     <div className="reading-content">
       <ReactMarkdown
-        remarkPlugins={[remarkMath, remarkGfm, remarkDirective, remarkCustomDirectives]}
+        remarkPlugins={[
+          remarkMath,
+          remarkGfm,
+          remarkDirective,
+          remarkCustomDirectives,
+        ]}
         rehypePlugins={[
           [
             rehypeKatex,
@@ -70,7 +83,9 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           // Custom handler for directive containers
           div: ({ className, children, ...props }) => {
             if (className === "practice-problem-container") {
-              const problemId = (props as { "data-problem-id"?: string })["data-problem-id"];
+              const problemId = (props as { "data-problem-id"?: string })[
+                "data-problem-id"
+              ];
               return (
                 <InteractivePracticeProblem problemId={problemId}>
                   {children}
@@ -152,7 +167,11 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 </div>
               );
             }
-            return <div className={className} {...props}>{children}</div>;
+            return (
+              <div className={className} {...props}>
+                {children}
+              </div>
+            );
           },
           // Sérsniðnir þættir fyrir mismunandi markdown element (custom components)
 

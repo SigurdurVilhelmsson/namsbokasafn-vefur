@@ -77,10 +77,7 @@ body {
 .reading-content h2,
 .reading-content h3,
 .reading-content h4 {
-  font-family:
-    "Lora",
-    Georgia,
-    serif;
+  font-family: "Lora", Georgia, serif;
   font-weight: 700;
   color: #111827; /* text-gray-900 */
 }

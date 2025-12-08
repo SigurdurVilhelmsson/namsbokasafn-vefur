@@ -85,8 +85,12 @@ export default function FlashcardsPage() {
               <div className="flex items-center gap-2 text-orange-500">
                 <Flame size={24} />
                 <div>
-                  <div className="font-sans font-bold text-lg">{studyStreak}</div>
-                  <div className="text-xs text-[var(--text-secondary)]">daga röð</div>
+                  <div className="font-sans font-bold text-lg">
+                    {studyStreak}
+                  </div>
+                  <div className="text-xs text-[var(--text-secondary)]">
+                    daga röð
+                  </div>
                 </div>
               </div>
             )}
@@ -94,8 +98,12 @@ export default function FlashcardsPage() {
               <div className="flex items-center gap-2 text-[var(--accent-color)]">
                 <BookOpen size={24} />
                 <div>
-                  <div className="font-sans font-bold text-lg">{todayStudied}</div>
-                  <div className="text-xs text-[var(--text-secondary)]">kort í dag</div>
+                  <div className="font-sans font-bold text-lg">
+                    {todayStudied}
+                  </div>
+                  <div className="text-xs text-[var(--text-secondary)]">
+                    kort í dag
+                  </div>
                 </div>
               </div>
             )}
@@ -147,18 +155,26 @@ export default function FlashcardsPage() {
                           <Sparkles size={14} />
                           <span className="font-bold">{stats.new}</span>
                         </div>
-                        <div className="text-xs text-[var(--text-secondary)]">Ný</div>
+                        <div className="text-xs text-[var(--text-secondary)]">
+                          Ný
+                        </div>
                       </div>
                       <div className="rounded-lg bg-[var(--bg-primary)] p-2">
                         <div className="flex items-center justify-center gap-1 text-orange-500">
                           <Clock size={14} />
                           <span className="font-bold">{stats.due}</span>
                         </div>
-                        <div className="text-xs text-[var(--text-secondary)]">Á dag</div>
+                        <div className="text-xs text-[var(--text-secondary)]">
+                          Á dag
+                        </div>
                       </div>
                       <div className="rounded-lg bg-[var(--bg-primary)] p-2">
-                        <div className="font-bold text-[var(--text-secondary)]">{stats.total}</div>
-                        <div className="text-xs text-[var(--text-secondary)]">Alls</div>
+                        <div className="font-bold text-[var(--text-secondary)]">
+                          {stats.total}
+                        </div>
+                        <div className="text-xs text-[var(--text-secondary)]">
+                          Alls
+                        </div>
                       </div>
                     </div>
 

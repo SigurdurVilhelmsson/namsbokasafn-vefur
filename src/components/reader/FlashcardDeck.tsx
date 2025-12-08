@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, RotateCw, Flame, Clock } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  RotateCw,
+  Flame,
+  Clock,
+} from "lucide-react";
 import { useFlashcardStore } from "@/stores/flashcardStore";
 import type { Flashcard, DifficultyRating } from "@/types/flashcard";
 
@@ -47,9 +53,7 @@ export default function FlashcardDeck({ deckId }: FlashcardDeckProps) {
   if (!currentCard) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-[var(--text-secondary)]">
-          Villa: Kort fannst ekki
-        </p>
+        <p className="text-[var(--text-secondary)]">Villa: Kort fannst ekki</p>
       </div>
     );
   }
@@ -57,7 +61,8 @@ export default function FlashcardDeck({ deckId }: FlashcardDeckProps) {
   const progress = ((currentCardIndex + 1) / studyQueue.length) * 100;
   const intervals = getPreviewIntervals(currentCardId);
   const cardRecord = getCardRecord(currentCardId);
-  const isSessionComplete = currentCardIndex >= studyQueue.length - 1 && showAnswer;
+  const isSessionComplete =
+    currentCardIndex >= studyQueue.length - 1 && showAnswer;
 
   const handleRate = (rating: DifficultyRating) => {
     rateCard(currentCardId, rating);
@@ -221,8 +226,10 @@ interface RatingButtonProps {
 function RatingButton({ label, interval, onClick, color }: RatingButtonProps) {
   const colorClasses = {
     red: "border-red-300 hover:bg-red-50 hover:border-red-400 text-red-700 dark:border-red-800 dark:hover:bg-red-900/20 dark:text-red-400",
-    orange: "border-orange-300 hover:bg-orange-50 hover:border-orange-400 text-orange-700 dark:border-orange-800 dark:hover:bg-orange-900/20 dark:text-orange-400",
-    green: "border-green-300 hover:bg-green-50 hover:border-green-400 text-green-700 dark:border-green-800 dark:hover:bg-green-900/20 dark:text-green-400",
+    orange:
+      "border-orange-300 hover:bg-orange-50 hover:border-orange-400 text-orange-700 dark:border-orange-800 dark:hover:bg-orange-900/20 dark:text-orange-400",
+    green:
+      "border-green-300 hover:bg-green-50 hover:border-green-400 text-green-700 dark:border-green-800 dark:hover:bg-green-900/20 dark:text-green-400",
     blue: "border-blue-300 hover:bg-blue-50 hover:border-blue-400 text-blue-700 dark:border-blue-800 dark:hover:bg-blue-900/20 dark:text-blue-400",
   };
 

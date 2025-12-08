@@ -1,5 +1,11 @@
 import { Link } from "react-router-dom";
-import { CheckCircle2, Circle, BookOpen, TrendingUp, Target } from "lucide-react";
+import {
+  CheckCircle2,
+  Circle,
+  BookOpen,
+  TrendingUp,
+  Target,
+} from "lucide-react";
 import { useQuizStore } from "@/stores/quizStore";
 
 export default function PracticeProgressPage() {
@@ -13,7 +19,7 @@ export default function PracticeProgressPage() {
   // Group problems by chapter and section
   const problemsByChapter = new Map<
     string,
-    Map<string, typeof practiceProblemProgress[string][]>
+    Map<string, (typeof practiceProblemProgress)[string][]>
   >();
 
   Object.values(practiceProblemProgress).forEach((problem) => {
@@ -56,7 +62,9 @@ export default function PracticeProgressPage() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <TrendingUp size={20} className="text-emerald-500" />
-                <span className="font-sans font-semibold">Heildarframvinda</span>
+                <span className="font-sans font-semibold">
+                  Heildarframvinda
+                </span>
               </div>
             </div>
             <div className="text-right">
@@ -115,10 +123,10 @@ export default function PracticeProgressPage() {
 
                 // Get chapter display name from first problem
                 const firstSection = sections.values().next().value;
-                const chapterName = firstSection?.[0]?.chapterSlug
-                  ?.replace(/-/g, " ")
-                  ?.replace(/^\d+/, (m) => `${m}.`)
-                  || chapterSlug;
+                const chapterName =
+                  firstSection?.[0]?.chapterSlug
+                    ?.replace(/-/g, " ")
+                    ?.replace(/^\d+/, (m) => `${m}.`) || chapterSlug;
 
                 return (
                   <div
@@ -158,14 +166,14 @@ export default function PracticeProgressPage() {
                         ([sectionSlug, problems]) => {
                           const sectionProgress = getSectionProgress(
                             chapterSlug,
-                            sectionSlug
+                            sectionSlug,
                           );
 
                           // Format section name
-                          const sectionName = sectionSlug
-                            ?.replace(/-/g, " ")
-                            ?.replace(/^\d+/, (m) => `${m}.`)
-                            || sectionSlug;
+                          const sectionName =
+                            sectionSlug
+                              ?.replace(/-/g, " ")
+                              ?.replace(/^\d+/, (m) => `${m}.`) || sectionSlug;
 
                           return (
                             <div
@@ -224,7 +232,7 @@ export default function PracticeProgressPage() {
                                         <p className="text-xs text-[var(--text-secondary)]">
                                           Síðast:{" "}
                                           {new Date(
-                                            problem.lastAttempted
+                                            problem.lastAttempted,
                                           ).toLocaleDateString("is-IS")}
                                         </p>
                                       )}
@@ -234,12 +242,12 @@ export default function PracticeProgressPage() {
                               </div>
                             </div>
                           );
-                        }
+                        },
                       )}
                     </div>
                   </div>
                 );
-              }
+              },
             )}
           </div>
         )}

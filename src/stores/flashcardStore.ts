@@ -45,7 +45,10 @@ interface FlashcardState {
   removeCardFromDeck: (deckId: string, cardId: string) => void;
 
   // Study session
-  startStudySession: (deckId: string, studyMode?: "all" | "due" | "new") => void;
+  startStudySession: (
+    deckId: string,
+    studyMode?: "all" | "due" | "new",
+  ) => void;
   nextCard: () => void;
   previousCard: () => void;
   toggleAnswer: () => void;

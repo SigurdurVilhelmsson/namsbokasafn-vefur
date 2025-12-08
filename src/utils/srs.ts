@@ -34,7 +34,7 @@ const SECOND_INTERVAL = 6;
  */
 export function calculateNewEaseFactor(
   currentEase: number,
-  quality: StudyQuality
+  quality: StudyQuality,
 ): number {
   const newEase =
     currentEase + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
@@ -55,7 +55,7 @@ export function calculateNextInterval(
   consecutiveCorrect: number,
   currentInterval: number,
   easeFactor: number,
-  quality: StudyQuality
+  quality: StudyQuality,
 ): number {
   // If quality < 3, reset to beginning (wrong answer)
   if (quality < 3) {
@@ -85,7 +85,7 @@ export function calculateNextInterval(
 export function processReview(
   cardId: string,
   quality: StudyQuality,
-  existingRecord?: FlashcardStudyRecord
+  existingRecord?: FlashcardStudyRecord,
 ): FlashcardStudyRecord {
   const now = new Date();
   const nowISO = now.toISOString();
@@ -107,7 +107,7 @@ export function processReview(
     currentConsecutive,
     currentInterval,
     newEase,
-    quality
+    quality,
   );
 
   // Calculate next review date
@@ -145,7 +145,7 @@ export function isCardDue(record: FlashcardStudyRecord | undefined): boolean {
  */
 export function sortCardsByPriority(
   cardIds: string[],
-  records: Record<string, FlashcardStudyRecord>
+  records: Record<string, FlashcardStudyRecord>,
 ): string[] {
   return [...cardIds].sort((a, b) => {
     const recordA = records[a];
@@ -179,7 +179,7 @@ export function sortCardsByPriority(
  */
 export function getDueCards(
   cardIds: string[],
-  records: Record<string, FlashcardStudyRecord>
+  records: Record<string, FlashcardStudyRecord>,
 ): string[] {
   return cardIds.filter((id) => isCardDue(records[id]));
 }
@@ -189,7 +189,7 @@ export function getDueCards(
  */
 export function getNewCards(
   cardIds: string[],
-  records: Record<string, FlashcardStudyRecord>
+  records: Record<string, FlashcardStudyRecord>,
 ): string[] {
   return cardIds.filter((id) => !records[id]);
 }
@@ -199,7 +199,7 @@ export function getNewCards(
  */
 export function calculateDeckStats(
   cardIds: string[],
-  records: Record<string, FlashcardStudyRecord>
+  records: Record<string, FlashcardStudyRecord>,
 ): {
   total: number;
   new: number;
@@ -249,7 +249,7 @@ export function calculateDeckStats(
 export function getNextReviewText(
   _interval: number,
   quality: StudyQuality,
-  existingRecord?: FlashcardStudyRecord
+  existingRecord?: FlashcardStudyRecord,
 ): string {
   // Calculate what the interval would be
   const currentEase = existingRecord?.ease ?? DEFAULT_EASE_FACTOR;
@@ -260,7 +260,7 @@ export function getNextReviewText(
     quality >= 3 ? currentConsecutive : 0,
     currentInterval,
     calculateNewEaseFactor(currentEase, quality),
-    quality
+    quality,
   );
 
   if (newInterval === 1) {
@@ -282,7 +282,7 @@ export function getNextReviewText(
  * Preview what intervals each rating would give
  */
 export function previewRatingIntervals(
-  existingRecord?: FlashcardStudyRecord
+  existingRecord?: FlashcardStudyRecord,
 ): Record<DifficultyRating, string> {
   const currentEase = existingRecord?.ease ?? DEFAULT_EASE_FACTOR;
   const currentConsecutive = existingRecord?.consecutiveCorrect ?? 0;
@@ -311,7 +311,7 @@ export function previewRatingIntervals(
       quality >= 3 ? currentConsecutive : 0,
       currentInterval,
       newEase,
-      quality
+      quality,
     );
 
     result[rating] = formatInterval(interval);

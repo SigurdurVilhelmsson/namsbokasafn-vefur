@@ -12,13 +12,16 @@ export default function LearningObjectives({
   chapterSlug,
   sectionSlug,
 }: LearningObjectivesProps) {
-  const { toggleObjective, isObjectiveCompleted, getSectionObjectivesProgress } =
-    useObjectivesStore();
+  const {
+    toggleObjective,
+    isObjectiveCompleted,
+    getSectionObjectivesProgress,
+  } = useObjectivesStore();
 
   const progress = getSectionObjectivesProgress(
     chapterSlug,
     sectionSlug,
-    objectives.length
+    objectives.length,
   );
 
   if (!objectives || objectives.length === 0) {
@@ -57,7 +60,7 @@ export default function LearningObjectives({
           const isCompleted = isObjectiveCompleted(
             chapterSlug,
             sectionSlug,
-            index
+            index,
           );
 
           return (
@@ -81,7 +84,10 @@ export default function LearningObjectives({
                   {isCompleted ? (
                     <CheckCircle2 size={20} className="text-emerald-500" />
                   ) : (
-                    <Circle size={20} className="text-[var(--text-secondary)]" />
+                    <Circle
+                      size={20}
+                      className="text-[var(--text-secondary)]"
+                    />
                   )}
                 </span>
                 <span
