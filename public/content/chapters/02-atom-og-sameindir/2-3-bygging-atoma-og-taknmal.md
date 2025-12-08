@@ -6,6 +6,15 @@ objectives:
   - Skrifað og túlkað tákn sem sýna sætistölu, massatölu og hleðslu atóms eða jónar
   - Skilgreint atómmassaeiningu og meðalatómmassa
   - Reiknað út meðalatómmassa og hlutfallslegt magn samsæta
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Þróun nútíma atómkenningar leiddi margt í ljós um innri byggingu atóma. Í ljós kom að atóm inniheldur mjög lítinn kjarna sem samanstendur af jákvætt hlöðnum róteindum og óhlöðnum nifteindum, umkringdan mun stærra rúmmáli sem inniheldur neikvætt hlaðnar rafeindir. Kjarninn inniheldur meirihluta massa atómsins vegna þess að róteindir og nifteindir eru mun þyngri en rafeindir, en rafeindir taka nánast allt rúmmál atómsins. Þvermál atóms er í stærðargráðunni 10⁻¹⁰ m, en þvermál kjarnans er um það bil 10⁻¹⁵ m — um 100.000 sinnum minna. Til að fá hugmynd um hlutfallslega stærð þeirra má íhuga þetta: Ef kjarninn væri á stærð við bláber, væri atómið á stærð við fótboltaleikvang.

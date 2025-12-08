@@ -6,6 +6,15 @@ objectives:
   - Skilgreint og lýst upphaflegri atómkenningu sem höfð var á efnum
   - Sent frá sér helstu atriði atómkenningar Daltons
   - Útskýrt lögmál fastra og margfaldra efnahlutfalla
+source:
+  original: "Chemistry 2e by OpenStax"
+  authors: "Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson"
+  license: "CC BY 4.0"
+  licenseUrl: "https://creativecommons.org/licenses/by/4.0/"
+  originalUrl: "https://openstax.org/details/books/chemistry-2e"
+  translator: "Sigurður E. Vilhelmsson"
+  translationYear: 2025
+  modifications: "Translated to Icelandic, adapted for Icelandic high school students"
 ---
 
 Fyrstu tilraunirnar til að útskýra hegðun efnis notuðu rökfræði og vangaveltur. Það var ekki fyrr en síðari hluti átjándu aldar að vísindamenn tóku að nota tilraunir til að prófa hugmyndir sínar eða hagnýta þær á rafbundinn hátt. Í þessum hluta munum við fjalla um upphaf atómkenningarinnar og hvernig hún hefur þróast með tímanum.
