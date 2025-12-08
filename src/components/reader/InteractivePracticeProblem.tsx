@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId, useMemo } from "react";
 import { Check, X, Eye, EyeOff, RotateCcw, CheckCircle2 } from "lucide-react";
 import { useQuizStore } from "@/stores/quizStore";
 import { useParams } from "react-router-dom";
@@ -13,7 +13,9 @@ export default function InteractivePracticeProblem({
   problemId,
 }: InteractivePracticeProblemProps) {
   const [showAnswer, setShowAnswer] = useState(false);
-  const [selfAssessment, setSelfAssessment] = useState<"correct" | "incorrect" | null>(null);
+  const [selfAssessment, setSelfAssessment] = useState<
+    "correct" | "incorrect" | null
+  >(null);
   const { chapterSlug = "", sectionSlug = "" } = useParams<{
     chapterSlug: string;
     sectionSlug: string;
@@ -25,29 +27,34 @@ export default function InteractivePracticeProblem({
     getPracticeProblemProgress,
   } = useQuizStore();
 
-  // Generate a stable ID for this problem
-  const stableId = problemId || `${chapterSlug}-${sectionSlug}-${Math.random().toString(36).substr(2, 6)}`;
+  // Generate a stable ID for this problem using React's useId hook
+  const generatedId = useId();
+  const stableId = problemId || `${chapterSlug}-${sectionSlug}-${generatedId}`;
 
-  // Extract problem and answer from children
-  const childArray = Array.isArray(children) ? children : [children];
-  const contentParts: React.ReactNode[] = [];
-  let answerContent: React.ReactNode = null;
+  // Extract problem and answer from children (memoized for stable references)
+  const { contentParts, answerContent } = useMemo(() => {
+    const childArray = Array.isArray(children) ? children : [children];
+    const parts: React.ReactNode[] = [];
+    let answer: React.ReactNode = null;
 
-  // Process only direct children, not nested practice problems
-  childArray.forEach((child) => {
-    if (child && typeof child === "object" && "props" in child) {
-      // Skip nested practice-problem containers
-      if (child.props?.className === "practice-problem-container") {
-        return;
+    // Process only direct children, not nested practice problems
+    childArray.forEach((child) => {
+      if (child && typeof child === "object" && "props" in child) {
+        // Skip nested practice-problem containers
+        if (child.props?.className === "practice-problem-container") {
+          return;
+        }
+
+        if (child.props?.className === "practice-answer-container") {
+          answer = child.props.children;
+        } else {
+          parts.push(child);
+        }
       }
+    });
 
-      if (child.props?.className === "practice-answer-container") {
-        answerContent = child.props.children;
-      } else {
-        contentParts.push(child);
-      }
-    }
-  });
+    return { contentParts: parts, answerContent: answer };
+  }, [children]);
 
   // Track problem viewing
   useEffect(() => {
@@ -55,9 +62,22 @@ export default function InteractivePracticeProblem({
       // Get text content from React nodes for tracking
       const problemText = extractText(contentParts);
       const answerText = extractText(answerContent);
-      markPracticeProblemViewed(stableId, chapterSlug, sectionSlug, problemText, answerText);
+      markPracticeProblemViewed(
+        stableId,
+        chapterSlug,
+        sectionSlug,
+        problemText,
+        answerText,
+      );
     }
-  }, [stableId, chapterSlug, sectionSlug, markPracticeProblemViewed]);
+  }, [
+    stableId,
+    chapterSlug,
+    sectionSlug,
+    markPracticeProblemViewed,
+    contentParts,
+    answerContent,
+  ]);
 
   const progress = getPracticeProblemProgress(stableId);
 
@@ -83,7 +103,9 @@ export default function InteractivePracticeProblem({
   };
 
   return (
-    <div className={`practice-problem ${progress?.isCompleted ? "completed" : ""}`}>
+    <div
+      className={`practice-problem ${progress?.isCompleted ? "completed" : ""}`}
+    >
       {/* Header */}
       <div className="practice-problem-header">
         <div className="flex items-center gap-2">
@@ -168,7 +190,8 @@ export default function InteractivePracticeProblem({
                     <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
                       <RotateCcw size={20} />
                       <span>
-                        Ekki hafa áhyggjur - æfing skapar meistara! Reyndu aftur síðar.
+                        Ekki hafa áhyggjur - æfing skapar meistara! Reyndu aftur
+                        síðar.
                       </span>
                     </div>
                   )}

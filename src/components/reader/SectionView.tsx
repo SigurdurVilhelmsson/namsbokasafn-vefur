@@ -233,13 +233,16 @@ export default function SectionView() {
           </div>
 
           {/* Markmið kafla (learning objectives) */}
-          {content.objectives && content.objectives.length > 0 && chapterSlug && sectionSlug && (
-            <LearningObjectives
-              objectives={content.objectives}
-              chapterSlug={chapterSlug}
-              sectionSlug={sectionSlug}
-            />
-          )}
+          {content.objectives &&
+            content.objectives.length > 0 &&
+            chapterSlug &&
+            sectionSlug && (
+              <LearningObjectives
+                objectives={content.objectives}
+                chapterSlug={chapterSlug}
+                sectionSlug={sectionSlug}
+              />
+            )}
 
           {/* Markdown efni (markdown content) */}
           <MarkdownRenderer content={content.content} />

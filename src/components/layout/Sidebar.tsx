@@ -88,9 +88,7 @@ export default function Sidebar() {
       {/* Overlay (backdrop) */}
       <div
         className={`fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity duration-300 lg:hidden ${
-          sidebarOpen
-            ? "opacity-100"
-            : "pointer-events-none opacity-0"
+          sidebarOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={() => setSidebarOpen(false)}
         aria-hidden="true"
@@ -125,7 +123,10 @@ export default function Sidebar() {
           </div>
 
           {/* Sidebar content */}
-          <nav className="flex-1 overflow-y-auto py-4" aria-label="Efnisyfirlit">
+          <nav
+            className="flex-1 overflow-y-auto py-4"
+            aria-label="Efnisyfirlit"
+          >
             <ul className="space-y-1 px-2">
               {toc.chapters.map((chapter) => (
                 <ChapterItem

@@ -9,7 +9,9 @@ interface ContentAttributionProps {
   variant?: "compact" | "full";
 }
 
-export default function ContentAttribution({ variant = "full" }: ContentAttributionProps) {
+export default function ContentAttribution({
+  variant = "full",
+}: ContentAttributionProps) {
   if (variant === "compact") {
     return (
       <div className="mt-8 border-t border-[var(--border-color)] pt-4 text-xs text-[var(--text-secondary)]">

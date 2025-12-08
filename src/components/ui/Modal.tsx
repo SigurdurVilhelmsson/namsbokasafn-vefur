@@ -38,7 +38,7 @@ export default function Modal({
 
     // Finna öll focusable elements innan modal (find all focusable elements)
     const focusableElements = modalRef.current.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
     );
     const firstElement = focusableElements[0] as HTMLElement;
     const lastElement = focusableElements[
@@ -110,7 +110,10 @@ export default function Modal({
       >
         {/* Haus (header) */}
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-          <h2 id="modal-title" className="font-sans text-xl font-semibold text-gray-900">
+          <h2
+            id="modal-title"
+            className="font-sans text-xl font-semibold text-gray-900"
+          >
             {title}
           </h2>
           <button
