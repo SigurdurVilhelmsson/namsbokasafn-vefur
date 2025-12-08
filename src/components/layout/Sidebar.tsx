@@ -34,32 +34,31 @@ export default function Sidebar() {
   }, []);
 
   // Calculate which chapters should be expanded
+  // Logic: Only the current chapter auto-expands. Other chapters stay collapsed
+  // unless manually expanded by the user.
   const expandedChapters = new Set<number>();
 
   if (toc) {
-    // Auto-expand chapter 1 if user hasn't manually toggled it
-    if (toc.chapters.length > 0 && !manuallyToggledChapters.has(1)) {
-      expandedChapters.add(1);
+    // Find current chapter number
+    const currentChapter = chapterSlug
+      ? toc.chapters.find((c) => c.slug === chapterSlug)
+      : null;
+    const currentChapterNumber = currentChapter?.number;
+
+    // Auto-expand current chapter (or chapter 1 if no chapter is being viewed)
+    const autoExpandChapter = currentChapterNumber ?? 1;
+
+    // Only auto-expand if user hasn't manually collapsed it
+    if (!manuallyToggledChapters.has(autoExpandChapter)) {
+      expandedChapters.add(autoExpandChapter);
     }
 
-    // Auto-expand current chapter if user hasn't manually toggled it
-    if (chapterSlug) {
-      const currentChapter = toc.chapters.find((c) => c.slug === chapterSlug);
-      if (currentChapter && !manuallyToggledChapters.has(currentChapter.number)) {
-        expandedChapters.add(currentChapter.number);
-      }
-    }
-
-    // Apply manual toggles (these override the auto-expand logic)
-    toc.chapters.forEach((chapter) => {
-      if (manuallyToggledChapters.has(chapter.number)) {
-        // If it was auto-expanded and user toggled it, collapse it
-        if (chapter.number === 1 || (chapterSlug && chapter.slug === chapterSlug)) {
-          expandedChapters.delete(chapter.number);
-        } else {
-          // If it wasn't auto-expanded and user toggled it, expand it
-          expandedChapters.add(chapter.number);
-        }
+    // Add any chapters the user has manually expanded
+    manuallyToggledChapters.forEach((chapterNumber) => {
+      // If it's the auto-expand chapter and was toggled, it means user collapsed it
+      // If it's a different chapter and was toggled, it means user expanded it
+      if (chapterNumber !== autoExpandChapter) {
+        expandedChapters.add(chapterNumber);
       }
     });
   }
