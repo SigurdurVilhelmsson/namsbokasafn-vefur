@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { BookOpen, ArrowRight } from "lucide-react";
 import { loadTableOfContents } from "@/utils/contentLoader";
 import { useReaderStore } from "@/stores/readerStore";
+import ContentAttribution from "./ContentAttribution";
 import type { TableOfContents } from "@/types/content";
 
 export default function HomePage() {
@@ -93,12 +94,7 @@ export default function HomePage() {
         </div>
 
         {/* Fótur með upplýsingum (footer with info) */}
-        <div className="mt-12 text-center text-sm text-[var(--text-secondary)]">
-          <p>
-            Þýðing á OpenStax Chemistry 2e kennslubók fyrir íslensk
-            framhaldsskólanema
-          </p>
-        </div>
+        <ContentAttribution variant="full" />
       </div>
     </div>
   );
