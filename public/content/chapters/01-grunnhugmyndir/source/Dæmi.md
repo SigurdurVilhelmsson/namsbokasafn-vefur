@@ -1,4 +1,4 @@
-## Verkefni
+## Dæmi
 
 ### 1.1 Efnafræði í samhengi
 
@@ -853,3 +853,4 @@ Breytið suðuhitastigi fljótandi ammóníaks, −28,1 °F, í gráður á Cels
 [99](http://openstax.org/books/chemistry-2e/pages/chapter-1#fs-idm161487744-solution).
 
 Veðrið í Evrópu var óvenjulega hlýtt sumarið 1995. Í sjónvarpsfréttum var greint frá hitastigi allt að 45 °C. Hvert var hitastigið á Fahrenheit-kvarða?
+
