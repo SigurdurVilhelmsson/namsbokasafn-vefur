@@ -82,10 +82,17 @@
         },
         {
           "number": "1.10",
-          "title": "Verkefni",
-          "slug": "1-10-verkefni",
-          "file": "1-10-verkefni.md",
+          "title": "Dæmi",
+          "slug": "1-10-daemi",
+          "file": "1-10-daemi.md",
           "type": "exercises"
+        },
+        {
+          "number": "1.11",
+          "title": "Svör við dæmum",
+          "slug": "1-11-svor",
+          "file": "1-11-svor.md",
+          "type": "answer-key"
         }
       ]
     },
@@ -165,10 +172,17 @@
         },
         {
           "number": "2.11",
-          "title": "Verkefni",
-          "slug": "2-11-verkefni",
-          "file": "2-11-verkefni.md",
+          "title": "Dæmi",
+          "slug": "2-11-daemi",
+          "file": "2-11-daemi.md",
           "type": "exercises"
+        },
+        {
+          "number": "2.12",
+          "title": "Svör við dæmum",
+          "slug": "2-12-svor",
+          "file": "2-12-svor.md",
+          "type": "answer-key"
         }
       ]
     }
