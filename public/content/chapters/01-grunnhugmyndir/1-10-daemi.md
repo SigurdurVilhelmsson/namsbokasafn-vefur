@@ -18,7 +18,7 @@ source:
 
 ### 1.1 Efnafræði í samhengi
 
-<a id="ex-1"></a>**[1](1-11-svor.md#ans-1).**
+<a id="ex-1"></a>**[1](1-11-svor#ans-1).**
 Útskýrðu hvernig þú gætir gert tilraun til að ákvarða hvort hitastigið úti sé hærra eða lægra en 0 °C (32 °F) án þess að nota hitamæli.
 
 <a id="ex-2"></a>**2.**
@@ -30,7 +30,7 @@ Tilgreindu hver eftirfarandi staðhæfinga er líkust tilgátu, lögmáli eða k
 
 (c) Bensíneyðsla pallbílsins míns hefur minnkað verulega, líklega vegna þess að það er kominn tími á smurningu.
 
-<a id="ex-3"></a>**[3](1-11-svor.md#ans-3).**
+<a id="ex-3"></a>**[3](1-11-svor#ans-3).**
 Tilgreindu hver eftirfarandi staðhæfinga er líkust tilgátu, lögmáli eða kenningu. Útskýrðu svar þitt.
 
 (a) Þrýstingur gassýnis er í beinu hlutfalli við hitastig gassins.
@@ -50,7 +50,7 @@ Tilgreindu hvort undirstrikuðu atriðin eru hluti af stórsæja sviði, smásæ
 
 (d) *Al* er táknið fyrir álfrumeind.
 
-<a id="ex-5"></a>**[5](1-11-svor.md#ans-5).**
+<a id="ex-5"></a>**[5](1-11-svor#ans-5).**
 Tilgreindu hvort undirstrikuðu atriðin eru hluti af stórsæja sviði, smásæja sviði eða táknræna sviði efnafræðinnar. Ef einhver falla undir táknræna sviðið skaltu tilgreina hvort þau eru tákn fyrir stórsæja eða smásæja eiginleika.
 
 (a) Tiltekin sameind inniheldur eina *H* frumeind og eina Cl frumeind.
@@ -64,7 +64,7 @@ Tilgreindu hvort undirstrikuðu atriðin eru hluti af stórsæja sviði, smásæ
 <a id="ex-6"></a>**6.**
 Samkvæmt einni kenningu eykst þrýstingur gass eftir því sem rúmmál þess minnkar vegna þess að sameindirnar í gasinu þurfa að ferðast styttri vegalengd til að rekast á veggi ílátsins. Fylgir þessi kenning stórsærri eða smásærri lýsingu á hegðun efna? Útskýrðu svarið.
 
-<a id="ex-7"></a>**[7](1-11-svor.md#ans-7).**
+<a id="ex-7"></a>**[7](1-11-svor#ans-7).**
 Varminn sem þarf til að bræða 2 kíló af ís er tvöfalt meiri en varminn sem þarf til að bræða 1 kíló af ís. Er þessi athugun stórsæ eða smásæ lýsing á hegðun efna? Útskýrðu svarið.
 
 ### 1.2 Fasar og flokkun efnis
@@ -72,25 +72,25 @@ Varminn sem þarf til að bræða 2 kíló af ís er tvöfalt meiri en varminn s
 <a id="ex-8"></a>**8.**
 Hvers vegna notum við massa hlutar, frekar en þyngd, til að gefa til kynna magn efnisins sem hann inniheldur?
 
-<a id="ex-9"></a>**[9](1-11-svor.md#ans-9).**
+<a id="ex-9"></a>**[9](1-11-svor#ans-9).**
 Hvaða eiginleikar greina á milli fastra efna og vökva? Vökva og gass? Fastra efna og gass?
 
 <a id="ex-10"></a>**10.**
 Hvernig er misleit efnablanda frábrugðin einsleitri efnablöndu? Hvað er líkt með þeim?
 
-<a id="ex-11"></a>**[11](1-11-svor.md#ans-11).**
+<a id="ex-11"></a>**[11](1-11-svor#ans-11).**
 Hvernig er einsleit efnablanda frábrugðin hreinu efni? Hvað er líkt með þeim?
 
 <a id="ex-12"></a>**12.**
 Hvernig er frumefni frábrugðið efnasambandi? Hvað er líkt með þeim?
 
-<a id="ex-13"></a>**[13](1-11-svor.md#ans-13).**
+<a id="ex-13"></a>**[13](1-11-svor#ans-13).**
 Hvernig eru sameindir frumefna frábrugðnar sameindum efnasambanda? Hvað er líkt með þeim?
 
 <a id="ex-14"></a>**14.**
 Hvernig er frumeind frábrugðin sameind? Hvað er líkt með þeim?
 
-<a id="ex-15"></a>**[15](1-11-svor.md#ans-15).**
+<a id="ex-15"></a>**[15](1-11-svor#ans-15).**
 Margt af því sem þú kaupir eru blöndur af hreinum efnasamböndum. Veldu þrjár af þessum vörum og útbúðu lista yfir þau innihaldsefni sem eru hrein efnasambönd.
 
 <a id="ex-16"></a>**16.**
@@ -112,7 +112,7 @@ Flokkaðu hvert eftirfarandi atriða sem frumefni, efnasamband eða efnablöndu:
 
 (h) bensín
 
-<a id="ex-17"></a>**[17](1-11-svor.md#ans-17).**
+<a id="ex-17"></a>**[17](1-11-svor#ans-17).**
 Flokkaðu hvert eftirfarandi atriða sem frumefni, efnasamband eða efnablöndu:
 
 (a) járn
@@ -134,19 +134,19 @@ Flokkaðu hvert eftirfarandi atriða sem frumefni, efnasamband eða efnablöndu:
 <a id="ex-18"></a>**18.**
 Brennisteinsatóm og brennisteinssameind eru ekki það sama. Hver er munurinn?
 
-<a id="ex-19"></a>**[19](1-11-svor.md#ans-19).**
+<a id="ex-19"></a>**[19](1-11-svor#ans-19).**
 Hvað eiga sameindir í súrefnisgasi, sameindir í vetnisgasi og vatnssameindir sameiginlegt? Hvað er ólíkt?
 
 <a id="ex-20"></a>**20.**
 Af hverju er sagt að geimfarar í geimnum séu „þyngdarlausir" en ekki „massalausir"?
 
-<a id="ex-21"></a>**[21](1-11-svor.md#ans-21).**
+<a id="ex-21"></a>**[21](1-11-svor#ans-21).**
 Gerðu lista yfir helstu efnin sem notuð eru og myndast við notkun bifreiðar.
 
 <a id="ex-22"></a>**22.**
 Efni er allt í kringum okkur. Gerðu lista yfir fimmtán mismunandi tegundir efna sem þú rekst á daglega. Listinn þinn ætti að innihalda (og merkja að minnsta kosti eitt dæmi af hverju) eftirfarandi: fast efni, vökva, gas, frumefni, efnasamband, einsleita efnablöndu, misleita efnablöndu og hreint efni.
 
-<a id="ex-23"></a>**[23](1-11-svor.md#ans-23).**
+<a id="ex-23"></a>**[23](1-11-svor#ans-23).**
 Þegar frumefnið járn tærist sameinast það súrefni í loftinu og myndar að lokum rauðbrúnt járn(III)oxíð sem kallast ryð. (a) Ef glansandi járnnagli með upphaflegan massa 23,2 g er vigtaður eftir að hann hefur verið húðaður með ryðlagi, myndir þú búast við að massinn hafi aukist, minnkað eða haldist óbreyttur? Útskýrðu. (b) Ef massi járnnaglans eykst í 24,1 g, hvaða massi af súrefni sameinaðist járninu?
 
 <a id="ex-24"></a>**24.**
@@ -158,7 +158,7 @@ Eins og fram kemur í textanum eru sannfærandi dæmi sem sýna fram á massavar
 
 (c) Antoine Lavoisier, franski vísindamaðurinn sem er talinn hafa fyrst sett fram lögmálið um varðveislu massa, hitaði efnablöndu af tini og lofti í lokaðri flösku til að framleiða tinoxíð. Minnkaði, jókst eða hélst massi lokuðu flöskunnar og innihalds hennar óbreyttur eftir hitunina?
 
-<a id="ex-25"></a>**[25](1-11-svor.md#ans-25).**
+<a id="ex-25"></a>**[25](1-11-svor#ans-25).**
 Ger breytir glúkósa í etanól og koldíoxíð við loftfirrta gerjun eins og sýnt er í einföldu efnajöfnunni hér:
 
 $$\text{glúkósi}\  \rightarrow \ \text{etanól} + \text{koldíoxíð}$$
@@ -176,7 +176,7 @@ Flokkið undirstrikuðu eiginleikana sex í eftirfarandi málsgrein sem efnafræ
 
 Flúor er fölgrænt *gas* sem *hvarfast við flest efni*. Frumefnið í hreinu formi *bráðnar við −220 °C* og *sýður við −188 °C*. Fíndreifðir *málmar brenna í flúor* með skærum loga. *Nítján grömm af flúor hvarfast við 1,0 gramm af vetni*.
 
-<a id="ex-27"></a>**[27](1-11-svor.md#ans-27).**
+<a id="ex-27"></a>**[27](1-11-svor#ans-27).**
 Flokkið hverja af eftirfarandi breytingum sem eðlisfræðilega eða efnafræðilega:
 
 (a) þétting gufu
@@ -202,13 +202,13 @@ Flokkið hverja af eftirfarandi breytingum sem eðlisfræðilega eða efnafræð
 
 (e) segulmögnun skrúfjárns
 
-<a id="ex-29"></a>**[29](1-11-svor.md#ans-29).**
+<a id="ex-29"></a>**[29](1-11-svor#ans-29).**
 Rúmmál sýnis af súrefnisgasi breyttist úr 10 ml í 11 ml þegar hitastigið breyttist. Er þetta efnafræðileg eða eðlisfræðileg breyting?
 
 <a id="ex-30"></a>**30.**
 2,0 lítra rúmmál af vetnisgasi sameinaðist 1,0 lítra af súrefnisgasi og myndaði 2,0 lítra af vatnsgufu. Verður súrefni fyrir efnafræðilegri eða eðlisfræðilegri breytingu?
 
-<a id="ex-31"></a>**[31](1-11-svor.md#ans-31).**
+<a id="ex-31"></a>**[31](1-11-svor#ans-31).**
 Útskýrið muninn á magnbundnum eiginleikum og eðlisbundnum eiginleikum.
 
 <a id="ex-32"></a>**32.**
@@ -224,7 +224,7 @@ Tilgreinið hvort eftirfarandi eiginleikar séu magnbundnir eða eðlisbundnir.
 
 (e) suðumark
 
-<a id="ex-33"></a>**[33](1-11-svor.md#ans-33).**
+<a id="ex-33"></a>**[33](1-11-svor#ans-33).**
 Eðlismassi (d) efnis er eðlisbundinn eiginleiki sem er skilgreindur sem hlutfall massa (m) þess og rúmmáls (V).
 
 $$\text{eðlismassi} = \ \frac{\text{massi}}{\text{rúmmál}}\quad\quad\text{d} = \ \frac{\text{m}}{\text{V}}$$
@@ -236,7 +236,7 @@ $$\text{eðlismassi} = \ \frac{\text{massi}}{\text{rúmmál}}\quad\quad\text{d} 
 <a id="ex-34"></a>**34.**
 Er einn lítri um það bil únsa, pint, kvart eða gallon?
 
-<a id="ex-35"></a>**[35](1-11-svor.md#ans-35).**
+<a id="ex-35"></a>**[35](1-11-svor#ans-35).**
 Er einn metri um það bil þumlungur, fet, yard eða míla?
 
 <a id="ex-36"></a>**36.**
@@ -256,7 +256,7 @@ Tilgreindu þær SI-grunneiningar eða afleiddu einingar sem eiga við um eftirf
 
 (g) hámarkshitastig á Suðurpólnum 1. apríl 1913
 
-<a id="ex-37"></a>**[37](1-11-svor.md#ans-37).**
+<a id="ex-37"></a>**[37](1-11-svor#ans-37).**
 Tilgreindu þær SI-grunneiningar eða afleiddu einingar sem eiga við um eftirfarandi mælingar:
 
 (a) massi tunglsins
@@ -288,7 +288,7 @@ Gefðu upp heiti og tákn þeirra forskeyta sem notuð eru með SI-einingum til 
 
 (f) 0,000001
 
-<a id="ex-39"></a>**[39](1-11-svor.md#ans-39).**
+<a id="ex-39"></a>**[39](1-11-svor#ans-39).**
 Gefðu upp heiti forskeytisins og magnið sem gefið er til kynna með eftirfarandi táknum sem eru notuð með SI grunneiningum.
 
 (a) c
@@ -314,7 +314,7 @@ Stór skartgripur hefur massann 132,6 g. Mæliglas inniheldur í upphafi 48,6 mL
 
 (b) Ef gert er ráð fyrir að skartgripurinn sé gerður úr aðeins einu efni, hvaða efni er líklegt að það sé? Útskýrðu.
 
-<a id="ex-41"></a>**[41](1-11-svor.md#ans-41).**
+<a id="ex-41"></a>**[41](1-11-svor#ans-41).**
 Skoðaðu [eðlismassahermun](http://openstax.org/l/16phetmasvolden) og smelltu á hnappinn „breyta vökva í vatn" (e. turn fluid into water) til að stilla eðlismassa vökvans í bikarglasinu á 1,00 g/mL.
 
 (a) Notaðu vatnsfærsluaðferðina til að mæla massa og rúmmál óþekkta efnisins (veldu grænu blokkina með spurningarmerkjum).
@@ -334,7 +334,7 @@ Farðu í þessa [eðlismassahermun](http://openstax.org/l/16phetmasvolden) og s
 
 (c) Notaðu lóðrétta græna sleðann til að stilla eðlismassa vökvans á gildi vel yfir, síðan vel undir og að lokum nálægt eðlismassa rauðu blokkarinnar og skráðu athuganir þínar.
 
-<a id="ex-43"></a>**[43](1-11-svor.md#ans-43).**
+<a id="ex-43"></a>**[43](1-11-svor#ans-43).**
 Farðu í þessa [eðlismassahermun](http://openstax.org/l/16phetmasvolden) og smelltu á hnappinn „turn fluid into water" til að stilla eðlismassa vökvans í bikarglasinu á 1,00 g/ml. Breyttu efninu í blokkinni í frauð og bíddu síðan þolinmóð/ur þar til frauðblokkin hættir að veltast upp og niður í vatninu.
 
 (a) Frauðblokkin ætti að fljóta á yfirborði vatnsins (þ.e. aðeins að hluta til á kafi). Hvert er rúmmál vatnsins sem færist úr stað?
@@ -362,7 +362,7 @@ Tjáðu hverja eftirfarandi talna með staðalformi og réttum fjölda markverð
 
 (g) 0,000000738592
 
-<a id="ex-45"></a>**[45](1-11-svor.md#ans-45).**
+<a id="ex-45"></a>**[45](1-11-svor#ans-45).**
 Tjáðu hverja eftirfarandi talna með veldisvísisformi og réttum fjölda markverðra stafa:
 
 (a) 704
@@ -394,7 +394,7 @@ Tilgreindu hvort hægt sé að ákvarða eftirfarandi nákvæmlega eða hvort þ
 
 (f) tíminn sem tekur að aka frá Akureyri til Reykjavíkur á meðalhraðanum 83 km/klst.
 
-<a id="ex-47"></a>**[47](1-11-svor.md#ans-47).**
+<a id="ex-47"></a>**[47](1-11-svor#ans-47).**
 Tilgreindu hvort hægt sé að ákvarða eftirfarandi nákvæmlega eða hvort það þurfi að mæla það með einhverri óvissu:
 
 (a) fjölda sekúndna í klukkustund
@@ -426,7 +426,7 @@ Hversu marga markverða stafi innihalda eftirfarandi mælingar?
 
 (g) 0,01400 g/mL
 
-<a id="ex-49"></a>**[49](1-11-svor.md#ans-49).**
+<a id="ex-49"></a>**[49](1-11-svor#ans-49).**
 Hversu marga markverða stafi innihalda eftirfarandi mælingar?
 
 (a) 53 cm
@@ -462,7 +462,7 @@ Eftirfarandi magn var tilgreint á merkimiðum á söluvörum. Ákvarðaðu fjö
 
 (h) 99,80% óvirk innihaldsefni
 
-<a id="ex-51"></a>**[51](1-11-svor.md#ans-51).**
+<a id="ex-51"></a>**[51](1-11-svor#ans-51).**
 Sléttaðu eftirfarandi tölur að tveimur markverðum stöfum:
 
 (a) 0,436
@@ -492,7 +492,7 @@ Sléttaðu eftirfarandi tölur að tveimur markverðum stöfum:
 
 (f) 0,885
 
-<a id="ex-53"></a>**[53](1-11-svor.md#ans-53).**
+<a id="ex-53"></a>**[53](1-11-svor#ans-53).**
 Framkvæmdu eftirfarandi útreikninga og gefðu upp hvert svar með réttum fjölda markverðra stafa.
 
 (a) 628 × 342
@@ -526,7 +526,7 @@ Framkvæmdu eftirfarandi útreikninga og gefðu upp hvert svar með réttum fjö
 
 (h) $\frac{(88.5 - 87.57)}{45.13}$
 
-<a id="ex-55"></a>**[55](1-11-svor.md#ans-55).**
+<a id="ex-55"></a>**[55](1-11-svor#ans-55).**
 Skoðaðu niðurstöður bogfimikeppninnar sem sýndar eru á þessari mynd.
 
 (a) Hvaða bogmaður er nákvæmastur?
@@ -548,7 +548,7 @@ Flokkaðu eftirfarandi mælingasett sem nákvæm, rétt, bæði eða hvorugt.
 
 ### 1.6 Stærðfræðileg meðferð á niðurstöðum mælinga
 
-<a id="ex-57"></a>**[57](1-11-svor.md#ans-57).**
+<a id="ex-57"></a>**[57](1-11-svor#ans-57).**
 Skrifaðu umreikningsstuðla (sem hlutföll) fyrir fjölda:
 
 (a) stika í 1 metra
@@ -566,43 +566,43 @@ Skrifaðu umreikningsstuðla (sem hlutföll) fyrir fjölda:
 
 (c) gramma í 1 únsu
 
-<a id="ex-59"></a>**[59](1-11-svor.md#ans-59).**
+<a id="ex-59"></a>**[59](1-11-svor#ans-59).**
 Merkimiðinn á gosflösku gefur upp rúmmálið í tveimur einingum: 2,0 L og 67,6 fl oz. Notaðu þessar upplýsingar til að leiða út umreikningsstuðul milli enskra og metrískra eininga. Hversu marga markverða stafi geturðu réttlætt í umreikningsstuðlinum þínum?
 
 <a id="ex-60"></a>**60.**
 Merkimiðinn á morgunkornspakka gefur upp massa morgunkornsins í tveimur einingum: 978 grömm og 34,5 oz. Notaðu þessar upplýsingar til að finna umreikningsstuðul milli enskra og metrískra eininga. Hversu marga markverða stafi geturðu réttlætt í umreikningsstuðlinum þínum?
 
-<a id="ex-61"></a>**[61](1-11-svor.md#ans-61).**
+<a id="ex-61"></a>**[61](1-11-svor#ans-61).**
 Fótbolti er spilaður með hringlaga bolta sem hefur ummál á milli 27 og 28 tommur og þyngd á milli 14 og 16 oz. Hverjar eru þessar forskriftir í einingum sentímetra og gramma?
 
 <a id="ex-62"></a>**62.**
 Körfubolti kvenna hefur ummál á milli 28,5 og 29,0 tommur og hámarksþyngd 20 únsur (tveir markverðir stafir). Hverjar eru þessar forskriftir í einingum sentímetra og gramma?
 
-<a id="ex-63"></a>**[63](1-11-svor.md#ans-63).**
+<a id="ex-63"></a>**[63](1-11-svor#ans-63).**
 Hversu margir millilítrar af gosi eru í 12,0 oz dós?
 
 <a id="ex-64"></a>**64.**
 Ein olíutunna er nákvæmlega 42 gallon. Hversu margir lítrar af olíu eru í tunnu?
 
-<a id="ex-65"></a>**[65](1-11-svor.md#ans-65).**
+<a id="ex-65"></a>**[65](1-11-svor#ans-65).**
 Þvermál rauðrar blóðfrumu er um 3 × 10⁻⁴ tommur. Hvert er þvermál hennar í sentímetrum?
 
 <a id="ex-66"></a>**66.**
 Fjarlægðin milli miðju tveggja súrefnisatóma í súrefnissameind er 1,21 × 10⁻⁸ cm. Hver er þessi fjarlægð í tommum?
 
-<a id="ex-67"></a>**[67](1-11-svor.md#ans-67).**
+<a id="ex-67"></a>**[67](1-11-svor#ans-67).**
 Er 197 punda lyftingamaður nógu léttur til að keppa í flokki sem er takmarkaður við þá sem vega 90 kg eða minna?
 
 <a id="ex-68"></a>**68.**
 Mjög góður 197 punda lyftingamaður lyfti 192 kg í hreyfingu sem kallast jafnhending og jark. Hver var massi þyngdarinnar sem lyft var í pundum?
 
-<a id="ex-69"></a>**[69](1-11-svor.md#ans-69).**
+<a id="ex-69"></a>**[69](1-11-svor#ans-69).**
 Margar læknisfræðilegar rannsóknarstofuprófanir eru gerðar með 5,0 μL af blóðsermi. Hvert er þetta rúmmál í millilítrum?
 
 <a id="ex-70"></a>**70.**
 Ef aspiríntöflu inniheldur 325 mg af aspiríni, hversu mörg grömm af aspiríni inniheldur hún?
 
-<a id="ex-71"></a>**[71](1-11-svor.md#ans-71).**
+<a id="ex-71"></a>**[71](1-11-svor#ans-71).**
 Notaðu staðalform (veldisvísa) til að tákna eftirfarandi stærðir með SI-grunneiningum í [töflu 1.2](http://openstax.org/books/chemistry-2e/pages/1-4-measurements#fs-idm81346144):
 
 (a) 0,13 g
@@ -644,13 +644,13 @@ Ljúktu við eftirfarandi umreikninga milli SI-eininga.
 
 (i) 1,9 Gg = \_\_\_\_\_\_\_\_ g
 
-<a id="ex-73"></a>**[73](1-11-svor.md#ans-73).**
+<a id="ex-73"></a>**[73](1-11-svor#ans-73).**
 Bensín er selt í lítrum í mörgum löndum. Hversu marga lítra þarf til að fylla 12,0 gallona bensíntank?
 
 <a id="ex-74"></a>**74.**
 Mjólk er seld í lítrum í mörgum löndum. Hvert er rúmmál nákvæmlega 1/2 gallona af mjólk í lítrum?
 
-<a id="ex-75"></a>**[75](1-11-svor.md#ans-75).**
+<a id="ex-75"></a>**[75](1-11-svor#ans-75).**
 Langt tonn er skilgreint sem nákvæmlega 2240 pund. Hver er þessi massi í kílógrömmum?
 
 <a id="ex-76"></a>**76.**
@@ -670,7 +670,7 @@ Framkvæmdu umreikninginn sem tilgreindur er í hverjum af eftirfarandi liðum:
 
 (g) massa 2,3 oz eggs í grömm
 
-<a id="ex-77"></a>**[77](1-11-svor.md#ans-77).**
+<a id="ex-77"></a>**[77](1-11-svor#ans-77).**
 Framkvæmdu umreikninginn sem tilgreindur er í hverjum af eftirfarandi liðum:
 
 (a) lengd fótboltavallar, 120 m (þrír markverðir stafir), í fet
@@ -690,25 +690,25 @@ Framkvæmdu umreikninginn sem tilgreindur er í hverjum af eftirfarandi liðum:
 <a id="ex-78"></a>**78.**
 Á mörgum efnafræðiráðstefnum hefur verið haldið 50 trilljón angstroma hlaup (tveir markverðir stafir). Hversu langt er þetta hlaup í kílómetrum og mílum? (1 Å = 1 × 10⁻¹⁰ m)
 
-<a id="ex-79"></a>**[79](1-11-svor.md#ans-79).**
+<a id="ex-79"></a>**[79](1-11-svor#ans-79).**
 50 trilljón angstroma hlaup efnafræðings (sjá [dæmi 78](#ex-78)) væri 10.900 álna hlaup fornleifafræðings. Hversu löng er ein alin í metrum og fetum? (1 Å = 1 × 10⁻⁸ cm)
 
 <a id="ex-80"></a>**80.**
 Bensíntankur ákveðins lúxusbíls tekur 22,3 gallon samkvæmt handbók eiganda. Ef eðlismassi bensíns er 0,8206 g/ml, ákvarðaðu þá massa eldsneytisins í kílógrömmum og pundum í fullum tanki.
 
-<a id="ex-81"></a>**[81](1-11-svor.md#ans-81).**
+<a id="ex-81"></a>**[81](1-11-svor#ans-81).**
 Þegar kennari er að undirbúa tilraun þarf hann 225 g af fosfórsýru. Eina ílátið sem er til taks er 150 ml keiluflaska. Er hún nógu stór til að rúma sýruna, en eðlismassi hennar er 1,83 g/ml?
 
 <a id="ex-82"></a>**82.**
 Til að undirbúa rannsóknarstofutíma þarf aðstoðarmaður á rannsóknarstofu 125 g af efnasambandi. Flaska sem inniheldur 1/4 pund er til taks. Hafði nemandinn nóg af efnasambandinu?
 
-<a id="ex-83"></a>**[83](1-11-svor.md#ans-83).**
+<a id="ex-83"></a>**[83](1-11-svor#ans-83).**
 Efnafræðinemi er 159 cm á hæð og vegur 45,8 kg. Hver er hæð hennar í tommum og þyngd í pundum?
 
 <a id="ex-84"></a>**84.**
 Á nýafstöðnum kappakstri lauk sigurvegarinn keppni með meðalhraðann 229,8 km/klst. Hver var hraði hans í kílómetrum á klukkustund, metrum á sekúndu og fetum á sekúndu?
 
-<a id="ex-85"></a>**[85](1-11-svor.md#ans-85).**
+<a id="ex-85"></a>**[85](1-11-svor#ans-85).**
 Leysið þessi dæmi um timburmál.
 
 (a) Til að lýsa fyrir Evrópubúa hvernig hús eru byggð í Bandaríkjunum þarf að breyta málum „tveggja tommu sinnum fjögurra tommu" timburs í metrakerfiseiningar. Málin þykkt × breidd × lengd eru 1,50 tommur × 3,50 tommur × 8,00 fet í Bandaríkjunum. Hver eru málin í cm × cm × m?
@@ -718,13 +718,13 @@ Leysið þessi dæmi um timburmál.
 <a id="ex-86"></a>**86.**
 Talið var að kvikasilfursinnihald í læk væri yfir lágmarki sem talið er öruggt – 1 hluti á milljarð (ppb) miðað við þyngd. Greining leiddi í ljós að styrkurinn var 0,68 hlutar á milljarð. Hvaða magn kvikasilfurs í grömmum var til staðar í 15,0 l af vatninu, en eðlismassi þess er 0,998 g/ml? (1 ppb Hg = 1 ng Hg / 1 g vatns)
 
-<a id="ex-87"></a>**[87](1-11-svor.md#ans-87).**
+<a id="ex-87"></a>**[87](1-11-svor#ans-87).**
 Reiknið út eðlismassa áls ef 27,6 cm³ hefur massann 74,6 g.
 
 <a id="ex-88"></a>**88.**
 Osmíum er eitt af eðlisþyngstu frumefnum sem þekkt eru. Hver er eðlismassi þess ef 2,72 g hafa rúmmálið 0,121 cm³?
 
-<a id="ex-89"></a>**[89](1-11-svor.md#ans-89).**
+<a id="ex-89"></a>**[89](1-11-svor#ans-89).**
 Reiknið út þessa massa.
 
 (a) Hver er massi 6,00 cm³ kvikasilfurs, eðlismassi = 13,5939 g/cm³?
@@ -738,7 +738,7 @@ Reiknið út þessa massa.
 
 (b) Hver er massi 125 ml af klórgasi, eðlismassi = 3,16 g/l?
 
-<a id="ex-91"></a>**[91](1-11-svor.md#ans-91).**
+<a id="ex-91"></a>**[91](1-11-svor#ans-91).**
 Reiknið út þessi rúmmál.
 
 (a) Hvert er rúmmál 25 g af joði, eðlismassi = 4,93 g/cm³?
@@ -752,23 +752,23 @@ Reiknið út þessi rúmmál.
 
 (b) Hvert er rúmmál 39,657 g af brómi, eðlismassi = 2,928 g/cm³?
 
-<a id="ex-93"></a>**[93](1-11-svor.md#ans-93).**
+<a id="ex-93"></a>**[93](1-11-svor#ans-93).**
 Breytið suðuhitastigi gulls, 2966 °C, í gráður á Fahrenheit og kelvin.
 
 <a id="ex-94"></a>**94.**
 Breytið hitastigi sjóðandi heits vatns, 54 °C, í gráður á Fahrenheit og kelvin.
 
-<a id="ex-95"></a>**[95](1-11-svor.md#ans-95).**
+<a id="ex-95"></a>**[95](1-11-svor#ans-95).**
 Breytið hitastigi kaldasta svæðisins í frysti, −10 °F, í gráður á Celsíus og kelvin.
 
 <a id="ex-96"></a>**96.**
 Breytið hitastigi þurríss, −77 °C, í gráður á Fahrenheit og kelvin.
 
-<a id="ex-97"></a>**[97](1-11-svor.md#ans-97).**
+<a id="ex-97"></a>**[97](1-11-svor#ans-97).**
 Breytið suðuhitastigi fljótandi ammóníaks, −28,1 °F, í gráður á Celsíus og kelvin.
 
 <a id="ex-98"></a>**98.**
 Á miðanum á úðabrúsa með sótthreinsiefni er varað við því að hita brúsann yfir 130 °F. Hvert er samsvarandi hitastig á Celsíus- og kelvin-hitastigskvarðanum?
 
-<a id="ex-99"></a>**[99](1-11-svor.md#ans-99).**
+<a id="ex-99"></a>**[99](1-11-svor#ans-99).**
 Veðrið í Evrópu var óvenjulega hlýtt sumarið 1995. Í sjónvarpsfréttum var greint frá hitastigi allt að 45 °C. Hvert var hitastigið á Fahrenheit-kvarða?
