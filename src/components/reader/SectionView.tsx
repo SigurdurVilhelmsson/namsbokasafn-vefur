@@ -52,14 +52,10 @@ export default function SectionView() {
       setError(null);
 
       try {
-        const [toc, sectionContent] = await Promise.all([
-          loadTableOfContents(bookSlug),
-          loadSectionContent(bookSlug, chapterSlug, sectionSlug),
-        ]);
+        // First load TOC to find the section's file
+        const toc = await loadTableOfContents(bookSlug);
 
-        setContent(sectionContent);
-
-        // Finna navigation context
+        // Find section by slug to get the file name
         const result = findSectionBySlug(toc, chapterSlug, sectionSlug);
         if (!result) {
           setError("Kafli fannst ekki");
@@ -68,6 +64,12 @@ export default function SectionView() {
         }
 
         const { chapter, section } = result;
+
+        // Now load the section content using the file name
+        const sectionContent = await loadSectionContent(bookSlug, chapterSlug, section.file);
+        setContent(sectionContent);
+
+        // Find navigation context
         const chapterIndex = toc.chapters.findIndex(
           (c) => c.slug === chapterSlug,
         );
