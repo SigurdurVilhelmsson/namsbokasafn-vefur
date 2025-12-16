@@ -80,8 +80,8 @@ export default function Sidebar() {
 
   if (!toc) {
     return (
-      <aside className="fixed left-0 top-14 lg:top-[7rem] z-30 h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-7rem)] w-80 overflow-y-auto bg-white p-4 shadow-none">
-        <p className="text-gray-500">Hleður efnisyfirlit...</p>
+      <aside className="fixed left-0 top-14 lg:top-[7rem] z-30 h-[calc(100vh-3.5rem)] lg:h-[calc(100vh-7rem)] w-80 overflow-y-auto bg-white dark:bg-gray-900 p-4 shadow-none">
+        <p className="text-gray-500 dark:text-gray-400">Hleður efnisyfirlit...</p>
       </aside>
     );
   }
@@ -104,7 +104,7 @@ export default function Sidebar() {
           fixed
           inset-y-0 lg:top-[7rem] left-0
           z-50 lg:z-30
-          w-80 bg-white
+          w-80 bg-white dark:bg-gray-900
           transition-transform duration-300 ease-out
           overflow-y-auto
           lg:h-[calc(100vh-7rem)]
@@ -114,11 +114,11 @@ export default function Sidebar() {
       >
         <div className="flex h-full flex-col">
           {/* Sidebar header */}
-          <div className="flex h-14 items-center justify-between border-b border-gray-100 px-4">
-            <h2 className="font-semibold text-gray-900">Efnisyfirlit</h2>
+          <div className="flex h-14 items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4">
+            <h2 className="font-semibold text-gray-900 dark:text-gray-100">Efnisyfirlit</h2>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="rounded-lg p-2 -mr-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 lg:hidden"
+              className="rounded-lg p-2 -mr-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 lg:hidden"
               aria-label="Loka valmynd"
             >
               <X size={20} />
@@ -150,24 +150,24 @@ export default function Sidebar() {
             </ul>
 
             {/* Bottom links */}
-            <div className="mt-6 space-y-1 border-t border-gray-100 px-2 pt-4">
+            <div className="mt-6 space-y-1 border-t border-gray-100 dark:border-gray-800 px-2 pt-4">
               <Link
                 to={`/${bookSlug}/ordabok`}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               >
                 <BookOpen size={20} />
                 <span className="text-sm">Orðasafn</span>
               </Link>
               <Link
                 to={`/${bookSlug}/minniskort`}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               >
                 <Brain size={20} />
                 <span className="text-sm">Minniskort</span>
               </Link>
               <Link
                 to={`/${bookSlug}/aefingar`}
-                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               >
                 <Target size={20} />
                 <span className="text-sm">Æfingadæmi</span>
@@ -210,14 +210,14 @@ function ChapterItem({
       {progress > 0 && (
         <div className="mb-2 px-4">
           <div className="mb-2 flex items-center justify-between">
-            <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
+            <span className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
               {chapter.number}. kafli
             </span>
-            <span className="text-xs font-medium text-emerald-600">
+            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
               {progress}%
             </span>
           </div>
-          <div className="h-1 overflow-hidden rounded-full bg-gray-100">
+          <div className="h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
             <div
               className="h-full rounded-full bg-emerald-500"
               style={{ width: `${progress}%` }}
@@ -230,7 +230,7 @@ function ChapterItem({
         onClick={onToggle}
         aria-expanded={expanded}
         aria-controls={`chapter-${chapter.number}-sections`}
-        className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left font-medium text-gray-700 transition-colors hover:bg-gray-50"
+        className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
       >
         <span className="flex items-center gap-2">
           {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
@@ -257,21 +257,21 @@ function ChapterItem({
                   to={`/${bookSlug}/kafli/${chapter.slug}/${section.slug}`}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
                     isCurrent
-                      ? "bg-blue-50 font-medium text-blue-700"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-blue-50 dark:bg-blue-900/30 font-medium text-blue-700 dark:text-blue-300"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
                 >
                   {isReadSection ? (
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100">
-                      <Check size={14} className="text-emerald-600" />
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
+                      <Check size={14} className="text-emerald-600 dark:text-emerald-400" />
                     </span>
                   ) : isCurrent ? (
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100">
-                      <span className="h-2 w-2 rounded-full bg-blue-600" />
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
+                      <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400" />
                     </span>
                   ) : (
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100">
-                      <span className="h-2 w-2 rounded-full bg-gray-300" />
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+                      <span className="h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-500" />
                     </span>
                   )}
                   <span className="text-sm">
