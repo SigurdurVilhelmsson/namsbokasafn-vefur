@@ -253,10 +253,20 @@ body {
 }
 
 .reading-content figcaption {
-  font-size: 0.9em;
+  font-size: 0.75rem; /* 12px - matches OpenStax caption size */
   color: var(--text-secondary);
   margin-top: 0.5em;
-  font-style: italic;
+  font-style: normal;
+  text-align: center;
+}
+
+/* Figure caption paragraphs (e.g., **Mynd 1.2** ...) */
+.reading-content .figure-caption {
+  font-size: 0.75rem; /* 12px - matches OpenStax caption size */
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: -1rem; /* Pull up closer to image */
+  margin-bottom: 1.5rem;
 }
 
 /* Modern callout blocks - Card-based with icons */
