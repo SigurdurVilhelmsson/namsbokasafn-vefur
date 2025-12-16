@@ -4,6 +4,9 @@
 /* Tailwind v4 import - replaces @tailwind directives */
 @import "tailwindcss";
 
+/* Configure dark mode to use .dark class instead of media query */
+@variant dark (&:where(.dark, .dark *));
+
 /* Icelandic font support and custom properties */
 :root {
   /* Font sizes */
