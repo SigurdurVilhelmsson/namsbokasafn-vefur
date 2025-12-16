@@ -2,18 +2,20 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { loadTableOfContents } from "@/utils/contentLoader";
 import { useReaderStore } from "@/stores/readerStore";
+import { useBook } from "@/hooks/useBook";
 import type { Chapter } from "@/types/content";
 import { Check } from "lucide-react";
 
 export default function ChapterView() {
   const { chapterSlug } = useParams<{ chapterSlug: string }>();
+  const { bookSlug } = useBook();
   const [chapter, setChapter] = useState<Chapter | null>(null);
   const { isRead } = useReaderStore();
 
   useEffect(() => {
-    if (!chapterSlug) return;
+    if (!chapterSlug || !bookSlug) return;
 
-    loadTableOfContents()
+    loadTableOfContents(bookSlug)
       .then((toc) => {
         const foundChapter = toc.chapters.find((c) => c.slug === chapterSlug);
         setChapter(foundChapter || null);
@@ -21,7 +23,7 @@ export default function ChapterView() {
       .catch((error) => {
         console.error("Gat ekki hlaðið kafla:", error);
       });
-  }, [chapterSlug]);
+  }, [chapterSlug, bookSlug]);
 
   if (!chapter) {
     return (
@@ -54,7 +56,7 @@ export default function ChapterView() {
             return (
               <Link
                 key={section.slug}
-                to={`/kafli/${chapter.slug}/${section.slug}`}
+                to={`/${bookSlug}/kafli/${chapter.slug}/${section.slug}`}
                 className="block rounded-lg border border-[var(--border-color)] p-4 transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5"
               >
                 <div className="flex items-start gap-3">
@@ -78,7 +80,7 @@ export default function ChapterView() {
         {/* Tengill til baka (back link) */}
         <div className="mt-8">
           <Link
-            to="/"
+            to={`/${bookSlug}`}
             className="text-[var(--accent-color)] hover:text-[var(--accent-hover)] hover:underline"
           >
             ← Til baka á forsíðu

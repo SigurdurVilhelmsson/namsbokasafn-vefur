@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Search, BookOpen } from "lucide-react";
 import { useGlossary } from "@/hooks/useGlossary";
+import { useBook } from "@/hooks/useBook";
 import { Link } from "react-router-dom";
 
 export default function GlossaryPage() {
-  const { glossary, loading, searchTerms, getTermsByLetter } = useGlossary();
+  const { bookSlug } = useBook();
+  const { glossary, loading, searchTerms, getTermsByLetter } = useGlossary(bookSlug);
   const [searchQuery, setSearchQuery] = useState("");
 
   if (loading) {
@@ -114,7 +116,7 @@ export default function GlossaryPage() {
         {/* Tengill til baka (back link) */}
         <div className="mt-8">
           <Link
-            to="/"
+            to={`/${bookSlug}`}
             className="text-[var(--accent-color)] hover:text-[var(--accent-hover)] hover:underline"
           >
             ← Til baka á forsíðu

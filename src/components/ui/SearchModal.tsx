@@ -7,6 +7,7 @@ import {
   highlightQuery,
   SearchResult,
 } from "@/utils/searchIndex";
+import { useBook } from "@/hooks/useBook";
 import { loadTableOfContents } from "@/utils/contentLoader";
 import type { TableOfContents } from "@/types/content";
 
@@ -22,11 +23,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [toc, setToc] = useState<TableOfContents | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+  const { bookSlug } = useBook();
 
   // Hlaða TOC við upphaf (load TOC on mount)
   useEffect(() => {
-    loadTableOfContents().then(setToc);
-  }, []);
+    if (!bookSlug) return;
+    loadTableOfContents(bookSlug).then(setToc);
+  }, [bookSlug]);
 
   // Focus á input þegar modal opnast (focus input when modal opens)
   useEffect(() => {
@@ -55,13 +58,13 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   // Leita þegar query breytist (search when query changes)
   useEffect(() => {
     const performSearch = async () => {
-      if (!toc || query.length < 2) {
+      if (!toc || query.length < 2 || !bookSlug) {
         setResults([]);
         return;
       }
 
       setLoading(true);
-      const searchResults = await searchContent(query, toc);
+      const searchResults = await searchContent(query, toc, bookSlug);
       setResults(searchResults);
       setLoading(false);
     };
@@ -71,10 +74,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     }, 300); // Debounce
 
     return () => clearTimeout(timeoutId);
-  }, [query, toc]);
+  }, [query, toc, bookSlug]);
 
   const handleResultClick = (result: SearchResult) => {
-    navigate(`/kafli/${result.chapterSlug}/${result.sectionSlug}`);
+    navigate(`/${bookSlug}/kafli/${result.chapterSlug}/${result.sectionSlug}`);
     onClose();
     setQuery("");
     setResults([]);
