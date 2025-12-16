@@ -36,14 +36,14 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
+      <header className="sticky top-0 z-40 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
         {/* Top bar with logo and controls */}
         <div className="flex h-14 items-center justify-between px-4">
           {/* Left side: Hamburger menu for mobile and title */}
           <div className="flex items-center gap-3">
             <button
               onClick={toggleSidebar}
-              className="-ml-2 rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 lg:hidden"
+              className="-ml-2 rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white lg:hidden"
               aria-label="Opna/loka valmynd"
             >
               <Menu size={20} />
@@ -52,7 +52,7 @@ export default function Header() {
             {/* Link to catalog */}
             <Link
               to="/"
-              className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              className="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               aria-label="Til baka í bókasafn"
               title="Til baka í bókasafn"
             >
@@ -61,7 +61,7 @@ export default function Header() {
 
             <Link
               to={`/${bookSlug}`}
-              className="flex items-center gap-2 text-sm font-medium text-gray-900 no-underline transition-opacity hover:opacity-80"
+              className="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100 no-underline transition-opacity hover:opacity-80"
             >
               {book?.title ?? 'Lesari'}
             </Link>
@@ -71,7 +71,7 @@ export default function Header() {
           <div className="flex items-center gap-1">
             <button
               onClick={() => setSearchOpen(true)}
-              className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              className="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               aria-label="Leita"
               title="Leita (Ctrl+K)"
             >
@@ -80,7 +80,7 @@ export default function Header() {
 
             <button
               onClick={toggleTheme}
-              className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              className="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               aria-label={
                 isDark ? "Skipta yfir í ljóst þema" : "Skipta yfir í dökkt þema"
               }
@@ -91,7 +91,7 @@ export default function Header() {
 
             <button
               onClick={() => setSettingsOpen(true)}
-              className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              className="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
               aria-label="Stillingar"
               title="Stillingar"
             >
