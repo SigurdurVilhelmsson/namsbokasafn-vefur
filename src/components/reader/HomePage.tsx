@@ -3,20 +3,23 @@ import { Link } from "react-router-dom";
 import { BookOpen, ArrowRight } from "lucide-react";
 import { loadTableOfContents } from "@/utils/contentLoader";
 import { useReaderStore } from "@/stores/readerStore";
+import { useBook } from "@/hooks/useBook";
 import ContentAttribution from "./ContentAttribution";
 import type { TableOfContents } from "@/types/content";
 
 export default function HomePage() {
   const [toc, setToc] = useState<TableOfContents | null>(null);
+  const { bookSlug } = useBook();
   const { currentChapter, currentSection } = useReaderStore();
 
   useEffect(() => {
-    loadTableOfContents()
+    if (!bookSlug) return;
+    loadTableOfContents(bookSlug)
       .then(setToc)
       .catch((error) => {
         console.error("Gat ekki hlaðið efnisyfirliti:", error);
       });
-  }, []);
+  }, [bookSlug]);
 
   if (!toc) {
     return (
@@ -32,8 +35,8 @@ export default function HomePage() {
 
   const continueLink =
     currentChapter && currentSection
-      ? `/kafli/${currentChapter}/${currentSection}`
-      : `/kafli/${defaultChapter.slug}/${defaultSection.slug}`;
+      ? `/${bookSlug}/kafli/${currentChapter}/${currentSection}`
+      : `/${bookSlug}/kafli/${defaultChapter.slug}/${defaultSection.slug}`;
 
   const continueLinkText =
     currentChapter && currentSection ? "Halda áfram að lesa" : "Byrja að lesa";
@@ -78,7 +81,7 @@ export default function HomePage() {
             {toc.chapters.map((chapter) => (
               <Link
                 key={chapter.number}
-                to={`/kafli/${chapter.slug}`}
+                to={`/${bookSlug}/kafli/${chapter.slug}`}
                 className="block rounded-lg border border-[var(--border-color)] p-4 transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5"
               >
                 <h3 className="font-sans text-lg font-semibold text-[var(--text-primary)]">

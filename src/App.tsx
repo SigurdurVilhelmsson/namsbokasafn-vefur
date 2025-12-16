@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
-import Layout from "@/components/layout/Layout";
+import BookLayout from "@/components/layout/BookLayout";
+import LandingPage from "@/components/catalog/LandingPage";
 import HomePage from "@/components/reader/HomePage";
 
 // Lazy load route components for code splitting
@@ -29,7 +30,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        {/* Landing page - book catalog */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Book-specific routes */}
+        <Route path="/:bookSlug" element={<BookLayout />}>
           <Route index element={<HomePage />} />
           <Route
             path="ordabok"
@@ -71,8 +76,10 @@ function App() {
               </Suspense>
             }
           />
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
+
+        {/* Catch-all redirect */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

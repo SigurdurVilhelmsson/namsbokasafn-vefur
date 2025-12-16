@@ -7,6 +7,7 @@ import {
   findSectionBySlug,
 } from "@/utils/contentLoader";
 import { useReaderStore } from "@/stores/readerStore";
+import { useBook } from "@/hooks/useBook";
 import MarkdownRenderer from "./MarkdownRenderer";
 import NavigationButtons from "./NavigationButtons";
 import LearningObjectives from "./LearningObjectives";
@@ -23,6 +24,7 @@ export default function SectionView() {
     chapterSlug: string;
     sectionSlug: string;
   }>();
+  const { bookSlug } = useBook();
   const [content, setContent] = useState<SectionContent | null>(null);
   const [navigation, setNavigation] = useState<NavigationContext | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,7 +41,7 @@ export default function SectionView() {
 
   // Hlaða efni kafla (load section content)
   useEffect(() => {
-    if (!chapterSlug || !sectionSlug) return;
+    if (!chapterSlug || !sectionSlug || !bookSlug) return;
 
     // Setja núverandi staðsetningu
     setCurrentLocation(chapterSlug, sectionSlug);
@@ -51,8 +53,8 @@ export default function SectionView() {
 
       try {
         const [toc, sectionContent] = await Promise.all([
-          loadTableOfContents(),
-          loadSectionContent(chapterSlug, sectionSlug),
+          loadTableOfContents(bookSlug),
+          loadSectionContent(bookSlug, chapterSlug, sectionSlug),
         ]);
 
         setContent(sectionContent);
@@ -124,7 +126,7 @@ export default function SectionView() {
     };
 
     loadContent();
-  }, [chapterSlug, sectionSlug, setCurrentLocation]);
+  }, [chapterSlug, sectionSlug, bookSlug, setCurrentLocation]);
 
   // Merkja sem lesið þegar notandi skrollar niður (mark as read when scrolling down)
   useEffect(() => {
@@ -176,7 +178,7 @@ export default function SectionView() {
           <p className="mb-4 text-lg text-red-600 dark:text-red-400">
             {error || "Villa kom upp"}
           </p>
-          <a href="/" className="text-[var(--accent-color)] hover:underline">
+          <a href={`/${bookSlug}`} className="text-[var(--accent-color)] hover:underline">
             Fara til baka á forsíðu
           </a>
         </div>

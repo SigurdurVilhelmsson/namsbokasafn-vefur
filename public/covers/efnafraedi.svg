@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="533" viewBox="0 0 400 533">
+  <defs>
+    <linearGradient id="bg-efna" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5dba9c"/>
+      <stop offset="100%" style="stop-color:#3d9b7f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="533" fill="url(#bg-efna)"/>
+
+  <!-- Decorative hexagon pattern (chemistry theme) -->
+  <g fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2">
+    <path d="M50,150 l25,-43 h50 l25,43 l-25,43 h-50 z"/>
+    <path d="M300,100 l20,-35 h40 l20,35 l-20,35 h-40 z"/>
+    <path d="M320,400 l15,-26 h30 l15,26 l-15,26 h-30 z"/>
+    <path d="M30,350 l18,-31 h36 l18,31 l-18,31 h-36 z"/>
+  </g>
+
+  <!-- Flask icon -->
+  <g transform="translate(150, 180)">
+    <path d="M50,0 v60 l-40,80 h80 l-40,-80 v-60" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3"/>
+    <path d="M35,0 h30" stroke="white" stroke-width="3"/>
+    <ellipse cx="50" cy="120" rx="30" ry="10" fill="rgba(255,255,255,0.3)"/>
+  </g>
+
+  <!-- Title -->
+  <text x="200" y="350" font-family="Georgia, serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">Efnafræði</text>
+
+  <!-- Subtitle -->
+  <text x="200" y="390" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.9)" text-anchor="middle">OpenStax Chemistry 2e</text>
+
+  <!-- Bottom decoration -->
+  <rect x="100" y="430" width="200" height="3" fill="rgba(255,255,255,0.5)"/>
+</svg>

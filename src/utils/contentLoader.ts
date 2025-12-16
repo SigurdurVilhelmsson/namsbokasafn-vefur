@@ -1,9 +1,9 @@
 import type { TableOfContents, SectionContent } from "@/types/content";
 
-// Load table of contents
-export async function loadTableOfContents(): Promise<TableOfContents> {
+// Load table of contents for a specific book
+export async function loadTableOfContents(bookSlug: string): Promise<TableOfContents> {
   try {
-    const response = await fetch("/content/toc.json");
+    const response = await fetch(`/content/${bookSlug}/toc.json`);
     if (!response.ok) {
       throw new Error("Gat ekki hlaðið efnisyfirliti");
     }
@@ -14,14 +14,15 @@ export async function loadTableOfContents(): Promise<TableOfContents> {
   }
 }
 
-// Load section content
+// Load section content for a specific book
 export async function loadSectionContent(
+  bookSlug: string,
   chapterSlug: string,
   sectionFile: string,
 ): Promise<SectionContent> {
   try {
     const response = await fetch(
-      `/content/chapters/${chapterSlug}/${sectionFile}`,
+      `/content/${bookSlug}/chapters/${chapterSlug}/${sectionFile}`,
     );
     if (!response.ok) {
       throw new Error(`Gat ekki hlaðið kafla: ${chapterSlug}/${sectionFile}`);
@@ -32,7 +33,7 @@ export async function loadSectionContent(
     const { metadata, content } = parseFrontmatter(markdown);
 
     // Transform relative image paths to absolute paths
-    const basePath = `/content/chapters/${chapterSlug}`;
+    const basePath = `/content/${bookSlug}/chapters/${chapterSlug}`;
     const transformedContent = content.replace(
       /!\[([^\]]*)\]\(images\//g,
       `![$1](${basePath}/images/`,

@@ -11,12 +11,14 @@ import {
 } from "lucide-react";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useReaderStore } from "@/stores/readerStore";
+import { useBook } from "@/hooks/useBook";
 import { loadTableOfContents } from "@/utils/contentLoader";
 import type { TableOfContents, Chapter } from "@/types/content";
 
 export default function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useSettingsStore();
   const { isRead, getChapterProgress } = useReaderStore();
+  const { bookSlug } = useBook();
   const [toc, setToc] = useState<TableOfContents | null>(null);
   // Track which chapters user has manually toggled
   const [manuallyToggledChapters, setManuallyToggledChapters] = useState<
@@ -26,12 +28,13 @@ export default function Sidebar() {
 
   // Load table of contents on mount
   useEffect(() => {
-    loadTableOfContents()
+    if (!bookSlug) return;
+    loadTableOfContents(bookSlug)
       .then(setToc)
       .catch((error) => {
         console.error("Gat ekki hlaðið efnisyfirliti:", error);
       });
-  }, []);
+  }, [bookSlug]);
 
   // Calculate which chapters should be expanded
   // Logic: Only the current chapter auto-expands. Other chapters stay collapsed
@@ -132,6 +135,7 @@ export default function Sidebar() {
                 <ChapterItem
                   key={chapter.number}
                   chapter={chapter}
+                  bookSlug={bookSlug}
                   expanded={expandedChapters.has(chapter.number)}
                   onToggle={() => toggleChapter(chapter.number)}
                   currentChapter={chapterSlug}
@@ -148,21 +152,21 @@ export default function Sidebar() {
             {/* Bottom links */}
             <div className="mt-6 space-y-1 border-t border-gray-100 px-2 pt-4">
               <Link
-                to="/ordabok"
+                to={`/${bookSlug}/ordabok`}
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
               >
                 <BookOpen size={20} />
                 <span className="text-sm">Orðasafn</span>
               </Link>
               <Link
-                to="/minniskort"
+                to={`/${bookSlug}/minniskort`}
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
               >
                 <Brain size={20} />
                 <span className="text-sm">Minniskort</span>
               </Link>
               <Link
-                to="/aefingar"
+                to={`/${bookSlug}/aefingar`}
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
               >
                 <Target size={20} />
@@ -179,6 +183,7 @@ export default function Sidebar() {
 // Chapter item component
 interface ChapterItemProps {
   chapter: Chapter;
+  bookSlug: string;
   expanded: boolean;
   onToggle: () => void;
   currentChapter?: string;
@@ -189,6 +194,7 @@ interface ChapterItemProps {
 
 function ChapterItem({
   chapter,
+  bookSlug,
   expanded,
   onToggle,
   currentChapter,
@@ -248,7 +254,7 @@ function ChapterItem({
             return (
               <li key={section.slug}>
                 <Link
-                  to={`/kafli/${chapter.slug}/${section.slug}`}
+                  to={`/${bookSlug}/kafli/${chapter.slug}/${section.slug}`}
                   className={`flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors ${
                     isCurrent
                       ? "bg-blue-50 font-medium text-blue-700"

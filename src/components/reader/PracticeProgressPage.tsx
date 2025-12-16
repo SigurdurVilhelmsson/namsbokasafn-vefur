@@ -7,8 +7,10 @@ import {
   Target,
 } from "lucide-react";
 import { useQuizStore } from "@/stores/quizStore";
+import { useBook } from "@/hooks/useBook";
 
 export default function PracticeProgressPage() {
+  const { bookSlug } = useBook();
   const {
     practiceProblemProgress,
     getSectionProgress,
@@ -105,7 +107,7 @@ export default function PracticeProgressPage() {
               Farðu í lesefnið og æfðu þig í dæmunum sem þar eru.
             </p>
             <Link
-              to="/"
+              to={`/${bookSlug}`}
               className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 font-medium text-white transition-colors hover:bg-[var(--accent-hover)]"
             >
               Byrja að lesa
@@ -136,7 +138,7 @@ export default function PracticeProgressPage() {
                     {/* Chapter header */}
                     <div className="mb-4 flex items-center justify-between">
                       <Link
-                        to={`/kafli/${chapterSlug}`}
+                        to={`/${bookSlug}/kafli/${chapterSlug}`}
                         className="font-sans text-lg font-semibold capitalize hover:text-[var(--accent-color)]"
                       >
                         {chapterName}
@@ -182,7 +184,7 @@ export default function PracticeProgressPage() {
                             >
                               <div className="mb-3 flex items-center justify-between">
                                 <Link
-                                  to={`/kafli/${chapterSlug}/${sectionSlug}`}
+                                  to={`/${bookSlug}/kafli/${chapterSlug}/${sectionSlug}`}
                                   className="font-medium capitalize hover:text-[var(--accent-color)]"
                                 >
                                   {sectionName}
@@ -255,7 +257,7 @@ export default function PracticeProgressPage() {
         {/* Back link */}
         <div className="mt-8">
           <Link
-            to="/"
+            to={`/${bookSlug}`}
             className="text-[var(--accent-color)] hover:text-[var(--accent-hover)] hover:underline"
           >
             ← Til baka á forsíðu

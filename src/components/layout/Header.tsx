@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Moon, Sun, Menu, Search, Settings, ChevronLeft } from "lucide-react";
+import { Moon, Sun, Menu, Search, Settings, ChevronLeft, Home } from "lucide-react";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useTheme } from "@/hooks/useTheme";
+import { useBook } from "@/hooks/useBook";
 import { Link, useParams } from "react-router-dom";
 import SettingsModal from "@/components/ui/SettingsModal";
 import SearchModal from "@/components/ui/SearchModal";
@@ -11,6 +12,7 @@ import type { TableOfContents } from "@/types/content";
 export default function Header() {
   const { toggleTheme, isDark } = useTheme();
   const { toggleSidebar } = useSettingsStore();
+  const { book, bookSlug } = useBook();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [toc, setToc] = useState<TableOfContents | null>(null);
@@ -18,12 +20,13 @@ export default function Header() {
 
   // Load table of contents to get section titles
   useEffect(() => {
-    loadTableOfContents()
+    if (!bookSlug) return;
+    loadTableOfContents(bookSlug)
       .then(setToc)
       .catch((error) => {
         console.error("Gat ekki hlaðið efnisyfirliti:", error);
       });
-  }, []);
+  }, [bookSlug]);
 
   // Find current chapter and section titles
   const currentChapter = toc?.chapters.find((c) => c.slug === chapterSlug);
@@ -46,11 +49,21 @@ export default function Header() {
               <Menu size={20} />
             </button>
 
+            {/* Link to catalog */}
             <Link
               to="/"
+              className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900"
+              aria-label="Til baka í bókasafn"
+              title="Til baka í bókasafn"
+            >
+              <Home size={20} />
+            </Link>
+
+            <Link
+              to={`/${bookSlug}`}
               className="flex items-center gap-2 text-sm font-medium text-gray-900 no-underline transition-opacity hover:opacity-80"
             >
-              Efnafræðilesari
+              {book?.title ?? 'Lesari'}
             </Link>
           </div>
 
@@ -92,7 +105,7 @@ export default function Header() {
           <div className="bg-[var(--header-banner)] text-[var(--header-banner-text)] px-4 py-3">
             <div className="max-w-7xl mx-auto flex items-center gap-3">
               <Link
-                to="/"
+                to={`/${bookSlug}`}
                 className="text-[var(--header-banner-text)] hover:opacity-80 transition-opacity no-underline"
                 aria-label="Til baka á heim síðu"
               >
