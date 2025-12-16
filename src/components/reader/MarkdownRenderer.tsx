@@ -1,3 +1,4 @@
+import React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import remarkGfm from "remark-gfm";
@@ -175,7 +176,8 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           },
           // Sérsniðnir þættir fyrir mismunandi markdown element (custom components)
 
-          // Myndir (images)
+          // Myndir (images) - no automatic figcaption from alt text
+          // Caption comes from the following paragraph (e.g., **Mynd 1.2** ...)
           img: ({ src, alt, ...props }) => (
             <figure className="my-6">
               <img
@@ -185,13 +187,39 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
                 loading="lazy"
                 {...props}
               />
-              {alt && (
-                <figcaption className="mt-2 text-center text-sm text-[var(--text-secondary)]">
-                  {alt}
-                </figcaption>
-              )}
             </figure>
           ),
+
+          // Paragraphs - detect figure captions (starting with bold "Mynd" or "Figure")
+          p: ({ children, ...props }) => {
+            // Check if this paragraph starts with bold text containing "Mynd" or "Figure"
+            const childArray = React.Children.toArray(children);
+            const firstChild = childArray[0];
+
+            // Check if first child is a strong element with "Mynd" or "Figure"
+            if (
+              firstChild &&
+              React.isValidElement(firstChild) &&
+              (firstChild.type === "strong" || firstChild.type === "b")
+            ) {
+              const strongContent = (
+                firstChild.props as { children?: React.ReactNode }
+              ).children;
+              if (
+                typeof strongContent === "string" &&
+                (strongContent.startsWith("Mynd") ||
+                  strongContent.startsWith("Figure"))
+              ) {
+                return (
+                  <p className="figure-caption" {...props}>
+                    {children}
+                  </p>
+                );
+              }
+            }
+
+            return <p {...props}>{children}</p>;
+          },
 
           // Töflur (tables)
           table: ({ children, ...props }) => (
