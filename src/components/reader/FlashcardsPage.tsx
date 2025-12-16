@@ -3,12 +3,14 @@ import { Link } from "react-router-dom";
 import { Brain, Play, Clock, Sparkles, BookOpen, Flame } from "lucide-react";
 import { useFlashcardStore } from "@/stores/flashcardStore";
 import { useGlossary } from "@/hooks/useGlossary";
+import { useBook } from "@/hooks/useBook";
 import { generateFlashcardsFromGlossary } from "@/utils/flashcardGenerator";
 import FlashcardDeck from "./FlashcardDeck";
 
 type StudyMode = "all" | "due" | "new";
 
 export default function FlashcardsPage() {
+  const { bookSlug } = useBook();
   const {
     decks,
     addDeck,
@@ -19,7 +21,7 @@ export default function FlashcardsPage() {
     studyStreak,
     todayStudied,
   } = useFlashcardStore();
-  const { glossary, loading } = useGlossary();
+  const { glossary, loading } = useGlossary(bookSlug);
   const [selectedMode, setSelectedMode] = useState<StudyMode>("all");
 
   // Auto-generate glossary deck if it doesn't exist
@@ -257,7 +259,7 @@ export default function FlashcardsPage() {
             <li>
               • Búnkar eru sjálfkrafa búnir til úr{" "}
               <Link
-                to="/ordabok"
+                to={`/${bookSlug}/ordabok`}
                 className="text-[var(--accent-color)] hover:underline"
               >
                 orðasafninu
@@ -269,7 +271,7 @@ export default function FlashcardsPage() {
         {/* Back link */}
         <div className="mt-8">
           <Link
-            to="/"
+            to={`/${bookSlug}`}
             className="text-[var(--accent-color)] hover:text-[var(--accent-hover)] hover:underline"
           >
             ← Til baka á forsíðu

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import type { Glossary, GlossaryTerm } from "@/types/glossary";
 
-// Load glossary
-async function loadGlossary(): Promise<Glossary> {
+// Load glossary for a specific book
+async function loadGlossary(bookSlug: string): Promise<Glossary> {
   try {
-    const response = await fetch("/content/glossary.json");
+    const response = await fetch(`/content/${bookSlug}/glossary.json`);
     if (!response.ok) {
       throw new Error("Gat ekki hlaðið orðasafni");
     }
@@ -15,17 +15,22 @@ async function loadGlossary(): Promise<Glossary> {
   }
 }
 
-// Hook to use glossary
-export function useGlossary() {
+// Hook to use glossary for a specific book
+export function useGlossary(bookSlug: string) {
   const [glossary, setGlossary] = useState<Glossary | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadGlossary().then((data) => {
+    if (!bookSlug) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    loadGlossary(bookSlug).then((data) => {
       setGlossary(data);
       setLoading(false);
     });
-  }, []);
+  }, [bookSlug]);
 
   // Find terms by search
   const searchTerms = (query: string): GlossaryTerm[] => {

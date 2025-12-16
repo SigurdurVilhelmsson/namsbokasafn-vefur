@@ -50,6 +50,7 @@ function createSnippet(
 export async function searchContent(
   query: string,
   toc: TableOfContents,
+  bookSlug: string = 'efnafraedi',
 ): Promise<SearchResult[]> {
   if (!query.trim()) return [];
 
@@ -62,7 +63,7 @@ export async function searchContent(
       try {
         // Hlaða efni kaflans (load section content)
         const response = await fetch(
-          `/content/chapters/${chapter.slug}/${section.file}`,
+          `/content/${bookSlug}/chapters/${chapter.slug}/${section.file}`,
         );
         if (!response.ok) continue;
 
