@@ -1,12 +1,23 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-// Type for reading progress
+// =============================================================================
+// CONSTANTS
+// =============================================================================
+
+const STORAGE_KEY = "efnafraedi-reading";
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+interface SectionProgress {
+  read: boolean;
+  lastVisited: string; // ISO date string
+}
+
 interface ReadingProgress {
-  [sectionId: string]: {
-    read: boolean;
-    lastVisited: string; // ISO date string
-  };
+  [sectionId: string]: SectionProgress;
 }
 
 interface ReaderState {
@@ -28,6 +39,28 @@ interface ReaderState {
   isBookmarked: (chapterSlug: string, sectionSlug: string) => boolean;
 }
 
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Create a section ID from chapter and section slugs
+ */
+function createSectionId(chapterSlug: string, sectionSlug: string): string {
+  return `${chapterSlug}/${sectionSlug}`;
+}
+
+/**
+ * Get current timestamp as ISO string
+ */
+function getCurrentTimestamp(): string {
+  return new Date().toISOString();
+}
+
+// =============================================================================
+// STORE
+// =============================================================================
+
 export const useReaderStore = create<ReaderState>()(
   persist(
     (set, get) => ({
@@ -39,13 +72,13 @@ export const useReaderStore = create<ReaderState>()(
 
       // Mark as read
       markAsRead: (chapterSlug, sectionSlug) => {
-        const sectionId = `${chapterSlug}/${sectionSlug}`;
+        const sectionId = createSectionId(chapterSlug, sectionSlug);
         set((state) => ({
           progress: {
             ...state.progress,
             [sectionId]: {
               read: true,
-              lastVisited: new Date().toISOString(),
+              lastVisited: getCurrentTimestamp(),
             },
           },
         }));
@@ -53,37 +86,37 @@ export const useReaderStore = create<ReaderState>()(
 
       // Check if read
       isRead: (chapterSlug, sectionSlug) => {
-        const sectionId = `${chapterSlug}/${sectionSlug}`;
+        const sectionId = createSectionId(chapterSlug, sectionSlug);
         return get().progress[sectionId]?.read || false;
       },
 
       // Get chapter progress as percentage
       getChapterProgress: (chapterSlug, totalSections) => {
-        const progress = get().progress;
-        let readCount = 0;
+        if (totalSections <= 0) return 0;
 
-        Object.keys(progress).forEach((sectionId) => {
-          if (sectionId.startsWith(chapterSlug) && progress[sectionId].read) {
-            readCount++;
-          }
-        });
+        const { progress } = get();
+        const chapterPrefix = `${chapterSlug}/`;
 
-        return totalSections > 0
-          ? Math.round((readCount / totalSections) * 100)
-          : 0;
+        const readCount = Object.entries(progress).filter(
+          ([sectionId, data]) =>
+            sectionId.startsWith(chapterPrefix) && data.read,
+        ).length;
+
+        return Math.round((readCount / totalSections) * 100);
       },
 
       // Set current location
       setCurrentLocation: (chapterSlug, sectionSlug) => {
-        set({ currentChapter: chapterSlug, currentSection: sectionSlug });
-        // Also mark as visited
-        const sectionId = `${chapterSlug}/${sectionSlug}`;
+        const sectionId = createSectionId(chapterSlug, sectionSlug);
+
         set((state) => ({
+          currentChapter: chapterSlug,
+          currentSection: sectionSlug,
           progress: {
             ...state.progress,
             [sectionId]: {
               read: state.progress[sectionId]?.read || false,
-              lastVisited: new Date().toISOString(),
+              lastVisited: getCurrentTimestamp(),
             },
           },
         }));
@@ -91,7 +124,7 @@ export const useReaderStore = create<ReaderState>()(
 
       // Add bookmark
       addBookmark: (chapterSlug, sectionSlug) => {
-        const bookmarkId = `${chapterSlug}/${sectionSlug}`;
+        const bookmarkId = createSectionId(chapterSlug, sectionSlug);
         set((state) => ({
           bookmarks: [...state.bookmarks, bookmarkId],
         }));
@@ -99,7 +132,7 @@ export const useReaderStore = create<ReaderState>()(
 
       // Remove bookmark
       removeBookmark: (chapterSlug, sectionSlug) => {
-        const bookmarkId = `${chapterSlug}/${sectionSlug}`;
+        const bookmarkId = createSectionId(chapterSlug, sectionSlug);
         set((state) => ({
           bookmarks: state.bookmarks.filter((id) => id !== bookmarkId),
         }));
@@ -107,12 +140,12 @@ export const useReaderStore = create<ReaderState>()(
 
       // Check if bookmarked
       isBookmarked: (chapterSlug, sectionSlug) => {
-        const bookmarkId = `${chapterSlug}/${sectionSlug}`;
+        const bookmarkId = createSectionId(chapterSlug, sectionSlug);
         return get().bookmarks.includes(bookmarkId);
       },
     }),
     {
-      name: "efnafraedi-reading",
+      name: STORAGE_KEY,
     },
   ),
 );

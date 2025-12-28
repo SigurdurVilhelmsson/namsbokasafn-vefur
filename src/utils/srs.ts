@@ -15,17 +15,51 @@ import type {
 } from "@/types/flashcard";
 import { addDays, isAfter, startOfDay } from "date-fns";
 
-// Default ease factor for new cards
+// =============================================================================
+// ALGORITHM CONSTANTS
+// =============================================================================
+
+/** Default ease factor for new cards (SM-2 standard) */
 const DEFAULT_EASE_FACTOR = 2.5;
 
-// Minimum ease factor (prevents cards from becoming too hard)
+/** Minimum ease factor - prevents cards from becoming too hard */
 const MIN_EASE_FACTOR = 1.3;
 
-// Initial interval for first review (in days)
+/** Maximum review interval in days (1 year) */
+const MAX_INTERVAL_DAYS = 365;
+
+/** Initial interval for first correct review (in days) */
 const INITIAL_INTERVAL = 1;
 
-// Second review interval
+/** Interval for second correct review (in days) */
 const SECOND_INTERVAL = 6;
+
+/** Minimum quality score considered "correct" in SM-2 */
+const MIN_CORRECT_QUALITY: StudyQuality = 3;
+
+/** Interval threshold (days) below which a card is considered "learning" vs "review" */
+const LEARNING_PHASE_THRESHOLD_DAYS = 7;
+
+// Ease factor adjustment constants (SM-2 formula)
+const EASE_BASE_ADJUSTMENT = 0.1;
+const EASE_LINEAR_COEFFICIENT = 0.08;
+const EASE_QUADRATIC_COEFFICIENT = 0.02;
+
+// =============================================================================
+// QUALITY MAPPING
+// =============================================================================
+
+/** Maps user-friendly difficulty ratings to SM-2 quality scores */
+const RATING_TO_QUALITY: Record<DifficultyRating, StudyQuality> = {
+  again: 0,
+  hard: 2,
+  good: 4,
+  easy: 5,
+};
+
+// =============================================================================
+// CORE ALGORITHM FUNCTIONS
+// =============================================================================
 
 /**
  * Calculate the new ease factor based on the quality of recall
@@ -36,10 +70,13 @@ export function calculateNewEaseFactor(
   currentEase: number,
   quality: StudyQuality,
 ): number {
-  const newEase =
-    currentEase + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
+  const qualityDelta = 5 - quality;
+  const adjustment =
+    EASE_BASE_ADJUSTMENT -
+    qualityDelta * (EASE_LINEAR_COEFFICIENT + qualityDelta * EASE_QUADRATIC_COEFFICIENT);
 
-  // Ensure ease factor doesn't go below minimum
+  const newEase = currentEase + adjustment;
+
   return Math.max(MIN_EASE_FACTOR, newEase);
 }
 
@@ -58,7 +95,7 @@ export function calculateNextInterval(
   quality: StudyQuality,
 ): number {
   // If quality < 3, reset to beginning (wrong answer)
-  if (quality < 3) {
+  if (quality < MIN_CORRECT_QUALITY) {
     return INITIAL_INTERVAL;
   }
 
@@ -75,8 +112,7 @@ export function calculateNextInterval(
   // Subsequent reviews: multiply previous interval by ease factor
   const newInterval = Math.round(currentInterval * easeFactor);
 
-  // Cap maximum interval at 365 days (1 year)
-  return Math.min(newInterval, 365);
+  return Math.min(newInterval, MAX_INTERVAL_DAYS);
 }
 
 /**
@@ -100,7 +136,7 @@ export function processReview(
   const newEase = calculateNewEaseFactor(currentEase, quality);
 
   // Update consecutive correct count
-  const newConsecutive = quality >= 3 ? currentConsecutive + 1 : 0;
+  const newConsecutive = quality >= MIN_CORRECT_QUALITY ? currentConsecutive + 1 : 0;
 
   // Calculate new interval
   const newInterval = calculateNextInterval(
@@ -124,6 +160,10 @@ export function processReview(
   };
 }
 
+// =============================================================================
+// CARD STATUS FUNCTIONS
+// =============================================================================
+
 /**
  * Check if a card is due for review
  */
@@ -138,6 +178,17 @@ export function isCardDue(record: FlashcardStudyRecord | undefined): boolean {
 
   return !isAfter(nextReview, now);
 }
+
+/**
+ * Check if a card is in the learning phase (interval < threshold)
+ */
+function isInLearningPhase(record: FlashcardStudyRecord): boolean {
+  return record.interval < LEARNING_PHASE_THRESHOLD_DAYS;
+}
+
+// =============================================================================
+// CARD SORTING AND FILTERING
+// =============================================================================
 
 /**
  * Sort cards by priority for studying
@@ -194,6 +245,10 @@ export function getNewCards(
   return cardIds.filter((id) => !records[id]);
 }
 
+// =============================================================================
+// STATISTICS
+// =============================================================================
+
 /**
  * Calculate deck statistics
  */
@@ -222,12 +277,10 @@ export function calculateDeckStats(
 
     const isDue = isCardDue(record);
 
-    if (record.interval < 7) {
-      // Learning phase
+    if (isInLearningPhase(record)) {
       learningCount++;
       if (isDue) dueCount++;
     } else {
-      // Review phase
       reviewCount++;
       if (isDue) dueCount++;
     }
@@ -241,6 +294,10 @@ export function calculateDeckStats(
     review: reviewCount,
   };
 }
+
+// =============================================================================
+// INTERVAL DISPLAY
+// =============================================================================
 
 /**
  * Get estimated next review times for display
@@ -257,25 +314,13 @@ export function getNextReviewText(
   const currentInterval = existingRecord?.interval ?? 0;
 
   const newInterval = calculateNextInterval(
-    quality >= 3 ? currentConsecutive : 0,
+    quality >= MIN_CORRECT_QUALITY ? currentConsecutive : 0,
     currentInterval,
     calculateNewEaseFactor(currentEase, quality),
     quality,
   );
 
-  if (newInterval === 1) {
-    return "1 dagur";
-  } else if (newInterval < 7) {
-    return `${newInterval} dagar`;
-  } else if (newInterval < 30) {
-    const weeks = Math.round(newInterval / 7);
-    return weeks === 1 ? "1 vika" : `${weeks} vikur`;
-  } else if (newInterval < 365) {
-    const months = Math.round(newInterval / 30);
-    return months === 1 ? "1 mánuður" : `${months} mánuðir`;
-  } else {
-    return "1+ ár";
-  }
+  return formatIntervalLong(newInterval);
 }
 
 /**
@@ -289,12 +334,6 @@ export function previewRatingIntervals(
   const currentInterval = existingRecord?.interval ?? 0;
 
   const ratings: DifficultyRating[] = ["again", "hard", "good", "easy"];
-  const qualityMap: Record<DifficultyRating, StudyQuality> = {
-    again: 0,
-    hard: 2,
-    good: 4,
-    easy: 5,
-  };
 
   const result: Record<DifficultyRating, string> = {
     again: "",
@@ -304,36 +343,55 @@ export function previewRatingIntervals(
   };
 
   for (const rating of ratings) {
-    const quality = qualityMap[rating];
+    const quality = RATING_TO_QUALITY[rating];
     const newEase = calculateNewEaseFactor(currentEase, quality);
 
     const interval = calculateNextInterval(
-      quality >= 3 ? currentConsecutive : 0,
+      quality >= MIN_CORRECT_QUALITY ? currentConsecutive : 0,
       currentInterval,
       newEase,
       quality,
     );
 
-    result[rating] = formatInterval(interval);
+    result[rating] = formatIntervalShort(interval);
   }
 
   return result;
 }
 
 /**
- * Format interval as human-readable Icelandic text
+ * Format interval as short human-readable Icelandic text (for buttons)
  */
-function formatInterval(days: number): string {
+function formatIntervalShort(days: number): string {
   if (days === 1) {
     return "1 d";
-  } else if (days < 7) {
+  } else if (days < LEARNING_PHASE_THRESHOLD_DAYS) {
     return `${days} d`;
   } else if (days < 30) {
     const weeks = Math.round(days / 7);
     return `${weeks} v`;
-  } else if (days < 365) {
+  } else if (days < MAX_INTERVAL_DAYS) {
     const months = Math.round(days / 30);
     return `${months} m`;
+  } else {
+    return "1+ ár";
+  }
+}
+
+/**
+ * Format interval as long human-readable Icelandic text
+ */
+function formatIntervalLong(days: number): string {
+  if (days === 1) {
+    return "1 dagur";
+  } else if (days < LEARNING_PHASE_THRESHOLD_DAYS) {
+    return `${days} dagar`;
+  } else if (days < 30) {
+    const weeks = Math.round(days / 7);
+    return weeks === 1 ? "1 vika" : `${weeks} vikur`;
+  } else if (days < MAX_INTERVAL_DAYS) {
+    const months = Math.round(days / 30);
+    return months === 1 ? "1 mánuður" : `${months} mánuðir`;
   } else {
     return "1+ ár";
   }

@@ -8,6 +8,22 @@ import type {
   PracticeProblem,
 } from "@/types/quiz";
 
+// =============================================================================
+// CONSTANTS
+// =============================================================================
+
+const STORAGE_KEY = "efnafraedi-quiz";
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+interface ProgressResult {
+  total: number;
+  completed: number;
+  percentage: number;
+}
+
 interface QuizState {
   // Current quiz session
   currentSession: QuizSession | null;
@@ -53,18 +69,14 @@ interface QuizState {
   getSectionProgress: (
     chapterSlug: string,
     sectionSlug: string,
-  ) => { total: number; completed: number; percentage: number };
-  getChapterProgress: (chapterSlug: string) => {
-    total: number;
-    completed: number;
-    percentage: number;
-  };
-  getOverallProgress: () => {
-    total: number;
-    completed: number;
-    percentage: number;
-  };
+  ) => ProgressResult;
+  getChapterProgress: (chapterSlug: string) => ProgressResult;
+  getOverallProgress: () => ProgressResult;
 }
+
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
 
 function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -79,6 +91,62 @@ function createEmptyStats(): QuizStats {
     bestScore: 0,
   };
 }
+
+/**
+ * Calculate progress from a list of practice problems
+ */
+function calculateProgress(problems: PracticeProblem[]): ProgressResult {
+  const total = problems.length;
+  const completed = problems.filter((p) => p.isCompleted).length;
+  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  return { total, completed, percentage };
+}
+
+/**
+ * Aggregate stats from multiple section stats
+ */
+function aggregateStats(statsArray: QuizStats[]): QuizStats {
+  const aggregated = createEmptyStats();
+
+  for (const sectionStats of statsArray) {
+    aggregated.totalAttempts += sectionStats.totalAttempts;
+    aggregated.questionsAnswered += sectionStats.questionsAnswered;
+    aggregated.correctAnswers += sectionStats.correctAnswers;
+    aggregated.bestScore = Math.max(aggregated.bestScore, sectionStats.bestScore);
+
+    // Track latest attempt time
+    if (
+      sectionStats.lastAttempted &&
+      (!aggregated.lastAttempted || sectionStats.lastAttempted > aggregated.lastAttempted)
+    ) {
+      aggregated.lastAttempted = sectionStats.lastAttempted;
+    }
+  }
+
+  // Calculate average score
+  if (aggregated.questionsAnswered > 0) {
+    aggregated.averageScore = Math.round(
+      (aggregated.correctAnswers / aggregated.questionsAnswered) * 100,
+    );
+  }
+
+  return aggregated;
+}
+
+/**
+ * Create a stats key from chapter and section slugs
+ */
+function createStatsKey(chapterSlug?: string, sectionSlug?: string): string {
+  if (sectionSlug && chapterSlug) {
+    return `${chapterSlug}/${sectionSlug}`;
+  }
+  return chapterSlug || "global";
+}
+
+// =============================================================================
+// STORE
+// =============================================================================
 
 export const useQuizStore = create<QuizState>()(
   persist(
@@ -181,9 +249,10 @@ export const useQuizStore = create<QuizState>()(
         };
 
         // Update stats
-        const statsKey = currentSession.sectionSlug
-          ? `${currentSession.chapterSlug}/${currentSession.sectionSlug}`
-          : currentSession.chapterSlug || "global";
+        const statsKey = createStatsKey(
+          currentSession.chapterSlug,
+          currentSession.sectionSlug,
+        );
 
         const currentStats = stats[statsKey] || createEmptyStats();
         const correctCount = endedSession.answers.filter(
@@ -279,74 +348,26 @@ export const useQuizStore = create<QuizState>()(
       // Get stats for a specific section
       getSectionStats: (chapterSlug, sectionSlug) => {
         const { stats } = get();
-        return stats[`${chapterSlug}/${sectionSlug}`] || createEmptyStats();
+        const key = createStatsKey(chapterSlug, sectionSlug);
+        return stats[key] || createEmptyStats();
       },
 
       // Get stats for a chapter (aggregate all sections)
       getChapterStats: (chapterSlug) => {
         const { stats } = get();
-        const chapterStats = createEmptyStats();
+        const chapterPrefix = `${chapterSlug}/`;
 
-        Object.entries(stats).forEach(([key, sectionStats]) => {
-          if (key.startsWith(`${chapterSlug}/`)) {
-            chapterStats.totalAttempts += sectionStats.totalAttempts;
-            chapterStats.questionsAnswered += sectionStats.questionsAnswered;
-            chapterStats.correctAnswers += sectionStats.correctAnswers;
-            chapterStats.bestScore = Math.max(
-              chapterStats.bestScore,
-              sectionStats.bestScore,
-            );
-            if (
-              !chapterStats.lastAttempted ||
-              (sectionStats.lastAttempted &&
-                sectionStats.lastAttempted > chapterStats.lastAttempted)
-            ) {
-              chapterStats.lastAttempted = sectionStats.lastAttempted;
-            }
-          }
-        });
+        const sectionStats = Object.entries(stats)
+          .filter(([key]) => key.startsWith(chapterPrefix))
+          .map(([, value]) => value);
 
-        // Calculate average
-        if (chapterStats.totalAttempts > 0) {
-          chapterStats.averageScore = Math.round(
-            (chapterStats.correctAnswers / chapterStats.questionsAnswered) *
-              100,
-          );
-        }
-
-        return chapterStats;
+        return aggregateStats(sectionStats);
       },
 
       // Get total stats across all quizzes
       getTotalStats: () => {
         const { stats } = get();
-        const totalStats = createEmptyStats();
-
-        Object.values(stats).forEach((sectionStats) => {
-          totalStats.totalAttempts += sectionStats.totalAttempts;
-          totalStats.questionsAnswered += sectionStats.questionsAnswered;
-          totalStats.correctAnswers += sectionStats.correctAnswers;
-          totalStats.bestScore = Math.max(
-            totalStats.bestScore,
-            sectionStats.bestScore,
-          );
-          if (
-            !totalStats.lastAttempted ||
-            (sectionStats.lastAttempted &&
-              sectionStats.lastAttempted > totalStats.lastAttempted)
-          ) {
-            totalStats.lastAttempted = sectionStats.lastAttempted;
-          }
-        });
-
-        // Calculate average
-        if (totalStats.questionsAnswered > 0) {
-          totalStats.averageScore = Math.round(
-            (totalStats.correctAnswers / totalStats.questionsAnswered) * 100,
-          );
-        }
-
-        return totalStats;
+        return aggregateStats(Object.values(stats));
       },
 
       // Get practice problem progress for a section
@@ -356,12 +377,7 @@ export const useQuizStore = create<QuizState>()(
           (p) => p.chapterSlug === chapterSlug && p.sectionSlug === sectionSlug,
         );
 
-        const total = problems.length;
-        const completed = problems.filter((p) => p.isCompleted).length;
-        const percentage =
-          total > 0 ? Math.round((completed / total) * 100) : 0;
-
-        return { total, completed, percentage };
+        return calculateProgress(problems);
       },
 
       // Get practice problem progress for a chapter
@@ -371,12 +387,7 @@ export const useQuizStore = create<QuizState>()(
           (p) => p.chapterSlug === chapterSlug,
         );
 
-        const total = problems.length;
-        const completed = problems.filter((p) => p.isCompleted).length;
-        const percentage =
-          total > 0 ? Math.round((completed / total) * 100) : 0;
-
-        return { total, completed, percentage };
+        return calculateProgress(problems);
       },
 
       // Get overall practice problem progress
@@ -384,16 +395,11 @@ export const useQuizStore = create<QuizState>()(
         const { practiceProblemProgress } = get();
         const problems = Object.values(practiceProblemProgress);
 
-        const total = problems.length;
-        const completed = problems.filter((p) => p.isCompleted).length;
-        const percentage =
-          total > 0 ? Math.round((completed / total) * 100) : 0;
-
-        return { total, completed, percentage };
+        return calculateProgress(problems);
       },
     }),
     {
-      name: "efnafraedi-quiz",
+      name: STORAGE_KEY,
     },
   ),
 );
