@@ -7,22 +7,21 @@ import type {
   QuizStats,
   PracticeProblem,
 } from "@/types/quiz";
+import {
+  type ProgressResult,
+  createStatsKey,
+  calculateProgress,
+  filterByChapterPrefix,
+  filterItemsByChapter,
+  filterItemsBySection,
+  generateId,
+} from "@/utils/storeHelpers";
 
 // =============================================================================
 // CONSTANTS
 // =============================================================================
 
 const STORAGE_KEY = "efnafraedi-quiz";
-
-// =============================================================================
-// TYPES
-// =============================================================================
-
-interface ProgressResult {
-  total: number;
-  completed: number;
-  percentage: number;
-}
 
 interface QuizState {
   // Current quiz session
@@ -78,10 +77,6 @@ interface QuizState {
 // HELPER FUNCTIONS
 // =============================================================================
 
-function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-}
-
 function createEmptyStats(): QuizStats {
   return {
     totalAttempts: 0,
@@ -90,17 +85,6 @@ function createEmptyStats(): QuizStats {
     averageScore: 0,
     bestScore: 0,
   };
-}
-
-/**
- * Calculate progress from a list of practice problems
- */
-function calculateProgress(problems: PracticeProblem[]): ProgressResult {
-  const total = problems.length;
-  const completed = problems.filter((p) => p.isCompleted).length;
-  const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-  return { total, completed, percentage };
 }
 
 /**
@@ -132,16 +116,6 @@ function aggregateStats(statsArray: QuizStats[]): QuizStats {
   }
 
   return aggregated;
-}
-
-/**
- * Create a stats key from chapter and section slugs
- */
-function createStatsKey(chapterSlug?: string, sectionSlug?: string): string {
-  if (sectionSlug && chapterSlug) {
-    return `${chapterSlug}/${sectionSlug}`;
-  }
-  return chapterSlug || "global";
 }
 
 // =============================================================================
@@ -355,12 +329,9 @@ export const useQuizStore = create<QuizState>()(
       // Get stats for a chapter (aggregate all sections)
       getChapterStats: (chapterSlug) => {
         const { stats } = get();
-        const chapterPrefix = `${chapterSlug}/`;
-
-        const sectionStats = Object.entries(stats)
-          .filter(([key]) => key.startsWith(chapterPrefix))
-          .map(([, value]) => value);
-
+        const sectionStats = filterByChapterPrefix(stats, chapterSlug).map(
+          ([, value]) => value,
+        );
         return aggregateStats(sectionStats);
       },
 
@@ -373,29 +344,28 @@ export const useQuizStore = create<QuizState>()(
       // Get practice problem progress for a section
       getSectionProgress: (chapterSlug, sectionSlug) => {
         const { practiceProblemProgress } = get();
-        const problems = Object.values(practiceProblemProgress).filter(
-          (p) => p.chapterSlug === chapterSlug && p.sectionSlug === sectionSlug,
+        const problems = filterItemsBySection(
+          Object.values(practiceProblemProgress),
+          chapterSlug,
+          sectionSlug,
         );
-
         return calculateProgress(problems);
       },
 
       // Get practice problem progress for a chapter
       getChapterProgress: (chapterSlug) => {
         const { practiceProblemProgress } = get();
-        const problems = Object.values(practiceProblemProgress).filter(
-          (p) => p.chapterSlug === chapterSlug,
+        const problems = filterItemsByChapter(
+          Object.values(practiceProblemProgress),
+          chapterSlug,
         );
-
         return calculateProgress(problems);
       },
 
       // Get overall practice problem progress
       getOverallProgress: () => {
         const { practiceProblemProgress } = get();
-        const problems = Object.values(practiceProblemProgress);
-
-        return calculateProgress(problems);
+        return calculateProgress(Object.values(practiceProblemProgress));
       },
     }),
     {
