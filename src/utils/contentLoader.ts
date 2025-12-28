@@ -52,8 +52,8 @@ export async function loadSectionContent(
   }
 }
 
-// Parse frontmatter from markdown
-function parseFrontmatter(markdown: string): {
+// Parse frontmatter from markdown (exported for testing)
+export function parseFrontmatter(markdown: string): {
   metadata: Record<string, string | number | string[]>;
   content: string;
 } {
