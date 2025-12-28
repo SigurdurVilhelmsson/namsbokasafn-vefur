@@ -16,6 +16,10 @@ import {
   calculateDeckStats,
   previewRatingIntervals,
 } from "@/utils/srs";
+import {
+  getTodayDateString,
+  getYesterdayDateString,
+} from "@/utils/storeHelpers";
 
 // =============================================================================
 // CONSTANTS
@@ -84,22 +88,6 @@ interface FlashcardState {
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
-
-/**
- * Get today's date as an ISO date string (YYYY-MM-DD)
- */
-function getTodayDateString(): string {
-  return new Date().toISOString().split("T")[0];
-}
-
-/**
- * Get yesterday's date as an ISO date string (YYYY-MM-DD)
- */
-function getYesterdayDateString(): string {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  return yesterday.toISOString().split("T")[0];
-}
 
 /**
  * Calculate updated study streak based on last study date

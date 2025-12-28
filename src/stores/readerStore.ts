@@ -1,5 +1,10 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import {
+  createSectionKey,
+  createChapterPrefix,
+  getCurrentTimestamp,
+} from "@/utils/storeHelpers";
 
 // =============================================================================
 // CONSTANTS
@@ -40,24 +45,6 @@ interface ReaderState {
 }
 
 // =============================================================================
-// HELPER FUNCTIONS
-// =============================================================================
-
-/**
- * Create a section ID from chapter and section slugs
- */
-function createSectionId(chapterSlug: string, sectionSlug: string): string {
-  return `${chapterSlug}/${sectionSlug}`;
-}
-
-/**
- * Get current timestamp as ISO string
- */
-function getCurrentTimestamp(): string {
-  return new Date().toISOString();
-}
-
-// =============================================================================
 // STORE
 // =============================================================================
 
@@ -72,7 +59,7 @@ export const useReaderStore = create<ReaderState>()(
 
       // Mark as read
       markAsRead: (chapterSlug, sectionSlug) => {
-        const sectionId = createSectionId(chapterSlug, sectionSlug);
+        const sectionId = createSectionKey(chapterSlug, sectionSlug);
         set((state) => ({
           progress: {
             ...state.progress,
@@ -86,7 +73,7 @@ export const useReaderStore = create<ReaderState>()(
 
       // Check if read
       isRead: (chapterSlug, sectionSlug) => {
-        const sectionId = createSectionId(chapterSlug, sectionSlug);
+        const sectionId = createSectionKey(chapterSlug, sectionSlug);
         return get().progress[sectionId]?.read || false;
       },
 
@@ -95,7 +82,7 @@ export const useReaderStore = create<ReaderState>()(
         if (totalSections <= 0) return 0;
 
         const { progress } = get();
-        const chapterPrefix = `${chapterSlug}/`;
+        const chapterPrefix = createChapterPrefix(chapterSlug);
 
         const readCount = Object.entries(progress).filter(
           ([sectionId, data]) =>
@@ -107,7 +94,7 @@ export const useReaderStore = create<ReaderState>()(
 
       // Set current location
       setCurrentLocation: (chapterSlug, sectionSlug) => {
-        const sectionId = createSectionId(chapterSlug, sectionSlug);
+        const sectionId = createSectionKey(chapterSlug, sectionSlug);
 
         set((state) => ({
           currentChapter: chapterSlug,
@@ -124,7 +111,7 @@ export const useReaderStore = create<ReaderState>()(
 
       // Add bookmark
       addBookmark: (chapterSlug, sectionSlug) => {
-        const bookmarkId = createSectionId(chapterSlug, sectionSlug);
+        const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
         set((state) => ({
           bookmarks: [...state.bookmarks, bookmarkId],
         }));
@@ -132,7 +119,7 @@ export const useReaderStore = create<ReaderState>()(
 
       // Remove bookmark
       removeBookmark: (chapterSlug, sectionSlug) => {
-        const bookmarkId = createSectionId(chapterSlug, sectionSlug);
+        const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
         set((state) => ({
           bookmarks: state.bookmarks.filter((id) => id !== bookmarkId),
         }));
@@ -140,7 +127,7 @@ export const useReaderStore = create<ReaderState>()(
 
       // Check if bookmarked
       isBookmarked: (chapterSlug, sectionSlug) => {
-        const bookmarkId = createSectionId(chapterSlug, sectionSlug);
+        const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
         return get().bookmarks.includes(bookmarkId);
       },
     }),
