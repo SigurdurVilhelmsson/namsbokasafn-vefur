@@ -17,19 +17,22 @@ async function loadGlossary(bookSlug: string): Promise<Glossary> {
 
 // Hook to use glossary for a specific book
 export function useGlossary(bookSlug: string) {
-  const [glossary, setGlossary] = useState<Glossary | null>(null);
-  const [loading, setLoading] = useState(!!bookSlug);
+  const [state, setState] = useState<{
+    glossary: Glossary | null;
+    loading: boolean;
+  }>(() => ({
+    glossary: null,
+    loading: !!bookSlug,
+  }));
 
   useEffect(() => {
     if (!bookSlug) return;
 
     let mounted = true;
-    setLoading(true);
 
     loadGlossary(bookSlug).then((data) => {
       if (mounted) {
-        setGlossary(data);
-        setLoading(false);
+        setState({ glossary: data, loading: false });
       }
     });
 
@@ -37,6 +40,8 @@ export function useGlossary(bookSlug: string) {
       mounted = false;
     };
   }, [bookSlug]);
+
+  const { glossary, loading } = state;
 
   // Find terms by search
   const searchTerms = (query: string): GlossaryTerm[] => {
