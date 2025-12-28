@@ -22,14 +22,24 @@ export function useGlossary(bookSlug: string) {
 
   useEffect(() => {
     if (!bookSlug) {
+      setGlossary(null);
       setLoading(false);
       return;
     }
+
+    let mounted = true;
     setLoading(true);
+
     loadGlossary(bookSlug).then((data) => {
-      setGlossary(data);
-      setLoading(false);
+      if (mounted) {
+        setGlossary(data);
+        setLoading(false);
+      }
     });
+
+    return () => {
+      mounted = false;
+    };
   }, [bookSlug]);
 
   // Find terms by search
