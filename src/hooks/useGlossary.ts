@@ -18,14 +18,10 @@ async function loadGlossary(bookSlug: string): Promise<Glossary> {
 // Hook to use glossary for a specific book
 export function useGlossary(bookSlug: string) {
   const [glossary, setGlossary] = useState<Glossary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!bookSlug);
 
   useEffect(() => {
-    if (!bookSlug) {
-      setGlossary(null);
-      setLoading(false);
-      return;
-    }
+    if (!bookSlug) return;
 
     let mounted = true;
     setLoading(true);
