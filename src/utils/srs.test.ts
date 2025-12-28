@@ -9,6 +9,7 @@ import {
   getNewCards,
   calculateDeckStats,
   previewRatingIntervals,
+  getNextReviewText,
 } from "./srs";
 import type { FlashcardStudyRecord, StudyQuality } from "@/types/flashcard";
 
@@ -690,6 +691,171 @@ describe("previewRatingIntervals", () => {
     const intervals = previewRatingIntervals(existingRecord);
 
     // 30 * 2.5+ = 75+ days = 2-3 months
+    expect(intervals.good).toMatch(/\d+ m/);
+  });
+});
+
+// =============================================================================
+// GET NEXT REVIEW TEXT TESTS
+// =============================================================================
+
+describe("getNextReviewText", () => {
+  it("should return '1 dagur' for new card with correct answer", () => {
+    const text = getNextReviewText(0, 4);
+    expect(text).toBe("1 dagur");
+  });
+
+  it("should return '1 dagur' for new card with wrong answer", () => {
+    const text = getNextReviewText(0, 0);
+    expect(text).toBe("1 dagur");
+  });
+
+  it("should return '6 dagar' for second correct answer", () => {
+    const existingRecord: FlashcardStudyRecord = {
+      cardId: "card-1",
+      lastReviewed: "2024-01-14T12:00:00Z",
+      nextReview: "2024-01-15T00:00:00Z",
+      ease: 2.5,
+      interval: 1,
+      reviewCount: 1,
+      consecutiveCorrect: 1,
+    };
+
+    const text = getNextReviewText(1, 4, existingRecord);
+    expect(text).toBe("6 dagar");
+  });
+
+  it("should return weeks format for longer intervals", () => {
+    const existingRecord: FlashcardStudyRecord = {
+      cardId: "card-1",
+      lastReviewed: "2024-01-08T12:00:00Z",
+      nextReview: "2024-01-15T00:00:00Z",
+      ease: 2.5,
+      interval: 6,
+      reviewCount: 2,
+      consecutiveCorrect: 2,
+    };
+
+    const text = getNextReviewText(6, 4, existingRecord);
+    // 6 * 2.5 = 15 days = 2 weeks
+    expect(text).toBe("2 vikur");
+  });
+
+  it("should return '1 vika' for exactly one week", () => {
+    const existingRecord: FlashcardStudyRecord = {
+      cardId: "card-1",
+      lastReviewed: "2024-01-08T12:00:00Z",
+      nextReview: "2024-01-15T00:00:00Z",
+      ease: 1.3, // Low ease to get ~7 days
+      interval: 6,
+      reviewCount: 2,
+      consecutiveCorrect: 2,
+    };
+
+    const text = getNextReviewText(6, 4, existingRecord);
+    // 6 * 1.3 = 7.8 ≈ 8 days ≈ 1 week
+    expect(text).toBe("1 vika");
+  });
+
+  it("should return months format for very long intervals", () => {
+    const existingRecord: FlashcardStudyRecord = {
+      cardId: "card-1",
+      lastReviewed: "2024-01-01T12:00:00Z",
+      nextReview: "2024-01-15T00:00:00Z",
+      ease: 2.5,
+      interval: 30,
+      reviewCount: 5,
+      consecutiveCorrect: 5,
+    };
+
+    const text = getNextReviewText(30, 4, existingRecord);
+    // 30 * 2.5 = 75 days = ~2-3 months
+    expect(text).toMatch(/\d+ mánuðir/);
+  });
+
+  it("should return '1 mánuður' for exactly one month", () => {
+    const existingRecord: FlashcardStudyRecord = {
+      cardId: "card-1",
+      lastReviewed: "2024-01-01T12:00:00Z",
+      nextReview: "2024-01-15T00:00:00Z",
+      ease: 1.3,
+      interval: 23,
+      reviewCount: 4,
+      consecutiveCorrect: 4,
+    };
+
+    const text = getNextReviewText(23, 4, existingRecord);
+    // 23 * 1.3 = ~30 days = 1 month
+    expect(text).toBe("1 mánuður");
+  });
+
+  it("should return '1+ ár' for max interval", () => {
+    const existingRecord: FlashcardStudyRecord = {
+      cardId: "card-1",
+      lastReviewed: "2024-01-01T12:00:00Z",
+      nextReview: "2024-01-15T00:00:00Z",
+      ease: 2.5,
+      interval: 200,
+      reviewCount: 10,
+      consecutiveCorrect: 10,
+    };
+
+    const text = getNextReviewText(200, 5, existingRecord);
+    // 200 * 2.6 = 520 -> capped at 365
+    expect(text).toBe("1+ ár");
+  });
+
+  it("should reset to 1 day on wrong answer regardless of previous interval", () => {
+    const existingRecord: FlashcardStudyRecord = {
+      cardId: "card-1",
+      lastReviewed: "2024-01-01T12:00:00Z",
+      nextReview: "2024-01-15T00:00:00Z",
+      ease: 2.5,
+      interval: 60,
+      reviewCount: 5,
+      consecutiveCorrect: 5,
+    };
+
+    const text = getNextReviewText(60, 0, existingRecord);
+    expect(text).toBe("1 dagur");
+  });
+});
+
+// =============================================================================
+// INTERVAL FORMATTING EDGE CASES (via previewRatingIntervals)
+// =============================================================================
+
+describe("interval formatting edge cases", () => {
+  it("should show '1+ ár' for intervals at or above 365 days", () => {
+    // Create a record that will result in 365+ day intervals
+    const existingRecord: FlashcardStudyRecord = {
+      cardId: "card-1",
+      lastReviewed: "2024-01-01T12:00:00Z",
+      nextReview: "2024-01-15T00:00:00Z",
+      ease: 2.5,
+      interval: 200,
+      reviewCount: 10,
+      consecutiveCorrect: 10,
+    };
+
+    const intervals = previewRatingIntervals(existingRecord);
+    // With ease 2.5+ and interval 200, good/easy should hit max
+    expect(intervals.easy).toBe("1+ ár");
+  });
+
+  it("should show months for intervals between 30-364 days", () => {
+    const existingRecord: FlashcardStudyRecord = {
+      cardId: "card-1",
+      lastReviewed: "2024-01-01T12:00:00Z",
+      nextReview: "2024-01-15T00:00:00Z",
+      ease: 2.0,
+      interval: 60,
+      reviewCount: 6,
+      consecutiveCorrect: 6,
+    };
+
+    const intervals = previewRatingIntervals(existingRecord);
+    // 60 * 2.0 = 120 days = 4 months
     expect(intervals.good).toMatch(/\d+ m/);
   });
 });
