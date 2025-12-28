@@ -17,6 +17,26 @@ import {
   previewRatingIntervals,
 } from "@/utils/srs";
 
+// =============================================================================
+// CONSTANTS
+// =============================================================================
+
+const STORAGE_KEY = "efnafraedi-flashcards";
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+type StudyMode = "all" | "due" | "new";
+
+interface DeckStats {
+  total: number;
+  new: number;
+  due: number;
+  learning: number;
+  review: number;
+}
+
 interface FlashcardState {
   // Decks
   decks: FlashcardDeck[];
@@ -45,10 +65,7 @@ interface FlashcardState {
   removeCardFromDeck: (deckId: string, cardId: string) => void;
 
   // Study session
-  startStudySession: (
-    deckId: string,
-    studyMode?: "all" | "due" | "new",
-  ) => void;
+  startStudySession: (deckId: string, studyMode?: StudyMode) => void;
   nextCard: () => void;
   previousCard: () => void;
   toggleAnswer: () => void;
@@ -57,18 +74,78 @@ interface FlashcardState {
   rateCard: (cardId: string, rating: DifficultyRating) => void;
   getCardRecord: (cardId: string) => FlashcardStudyRecord | undefined;
   isCardDue: (cardId: string) => boolean;
-  getDeckStats: (deckId: string) => {
-    total: number;
-    new: number;
-    due: number;
-    learning: number;
-    review: number;
-  };
+  getDeckStats: (deckId: string) => DeckStats;
   getPreviewIntervals: (cardId: string) => Record<DifficultyRating, string>;
 
   // Reset
   resetSession: () => void;
 }
+
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+/**
+ * Get today's date as an ISO date string (YYYY-MM-DD)
+ */
+function getTodayDateString(): string {
+  return new Date().toISOString().split("T")[0];
+}
+
+/**
+ * Get yesterday's date as an ISO date string (YYYY-MM-DD)
+ */
+function getYesterdayDateString(): string {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return yesterday.toISOString().split("T")[0];
+}
+
+/**
+ * Calculate updated study streak based on last study date
+ */
+function calculateStudyStreak(
+  lastStudyDate: string | null,
+  currentStreak: number,
+): number {
+  const today = getTodayDateString();
+
+  if (lastStudyDate === today) {
+    // Already studied today, keep current streak
+    return currentStreak;
+  }
+
+  if (lastStudyDate === getYesterdayDateString()) {
+    // Continuing streak from yesterday
+    return currentStreak + 1;
+  }
+
+  // Streak broken, start new
+  return 1;
+}
+
+/**
+ * Build study queue based on study mode
+ */
+function buildStudyQueue(
+  cardIds: string[],
+  studyRecords: Record<string, FlashcardStudyRecord>,
+  studyMode: StudyMode,
+): string[] {
+  switch (studyMode) {
+    case "due":
+      return getDueCards(cardIds, studyRecords);
+    case "new":
+      return getNewCards(cardIds, studyRecords);
+    default:
+      // "all" - sort by priority (due first, then new, then future)
+      return sortCardsByPriority(cardIds, studyRecords);
+  }
+}
+
+// =============================================================================
+// STORE
+// =============================================================================
 
 export const useFlashcardStore = create<FlashcardState>()(
   persist(
@@ -134,19 +211,7 @@ export const useFlashcardStore = create<FlashcardState>()(
 
         const { studyRecords } = get();
         const cardIds = deck.cards.map((c) => c.id);
-
-        let queue: string[];
-        switch (studyMode) {
-          case "due":
-            queue = getDueCards(cardIds, studyRecords);
-            break;
-          case "new":
-            queue = getNewCards(cardIds, studyRecords);
-            break;
-          default:
-            // "all" - sort by priority (due first, then new, then future)
-            queue = sortCardsByPriority(cardIds, studyRecords);
-        }
+        const queue = buildStudyQueue(cardIds, studyRecords, studyMode);
 
         set({
           currentDeckId: deckId,
@@ -194,29 +259,14 @@ export const useFlashcardStore = create<FlashcardState>()(
         const newRecord = processReview(cardId, quality, existingRecord);
 
         // Update study streak
-        const today = new Date().toISOString().split("T")[0];
+        const today = getTodayDateString();
         const { lastStudyDate, studyStreak, todayStudied } = get();
 
-        let newStreak = studyStreak;
-        let newTodayStudied = todayStudied;
-
-        if (lastStudyDate !== today) {
-          // New day
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          const yesterdayStr = yesterday.toISOString().split("T")[0];
-
-          if (lastStudyDate === yesterdayStr) {
-            // Continuing streak
-            newStreak = studyStreak + 1;
-          } else {
-            // Streak broken, start new
-            newStreak = 1;
-          }
-          newTodayStudied = 1;
-        } else {
-          newTodayStudied = todayStudied + 1;
-        }
+        const isNewDay = lastStudyDate !== today;
+        const newStreak = isNewDay
+          ? calculateStudyStreak(lastStudyDate, studyStreak)
+          : studyStreak;
+        const newTodayStudied = isNewDay ? 1 : todayStudied + 1;
 
         set((state) => ({
           studyRecords: {
@@ -271,7 +321,7 @@ export const useFlashcardStore = create<FlashcardState>()(
       },
     }),
     {
-      name: "efnafraedi-flashcards",
+      name: STORAGE_KEY,
     },
   ),
 );
