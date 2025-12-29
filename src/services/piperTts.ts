@@ -1,6 +1,7 @@
 // =============================================================================
-// PIPER TTS SERVICE
-// Icelandic text-to-speech using Piper TTS models via WebAssembly
+// TIRO TTS SERVICE
+// Icelandic text-to-speech using Tiro.is TTS API
+// https://tts.tiro.is - Icelandic Language Technology Programme
 // =============================================================================
 
 // =============================================================================
@@ -23,173 +24,85 @@ export interface TTSProgress {
 
 export type TTSProgressCallback = (progress: TTSProgress) => void;
 
-// Type for the piper-tts-web module
-interface PiperTTS {
-  predict: (
-    options: { text: string; voiceId: string },
-    onProgress?: (progress: { loaded: number; total: number }) => void
-  ) => Promise<Blob>;
-  download: (
-    voiceId: string,
-    onProgress?: (progress: { loaded: number; total: number }) => void
-  ) => Promise<void>;
-  stored: () => Promise<string[]>;
-  remove: (voiceId: string) => Promise<void>;
-  flush: () => Promise<void>;
-}
-
 // =============================================================================
 // CONSTANTS
 // =============================================================================
 
+// Tiro.is TTS API endpoint
+const TIRO_TTS_API = "https://tts.tiro.is/v0/speech";
+
 /**
- * Available Icelandic voices from Piper TTS
- * These are trained on the Talrómur dataset from Reykjavík University
+ * Available Icelandic voices from Tiro TTS
+ * Developed by Reykjavík University Language and Voice Lab
  */
 export const ICELANDIC_VOICES: IcelandicVoice[] = [
   {
-    id: "is_IS-steinn-medium",
-    name: "Steinn",
+    id: "Alfur",
+    name: "Álfur",
     gender: "male",
-    description: "Karlrödd - Steinn",
+    description: "Karlrödd - Álfur",
   },
   {
-    id: "is_IS-bui-medium",
-    name: "Búi",
+    id: "Dilja",
+    name: "Diljá",
+    gender: "female",
+    description: "Kvenrödd - Diljá",
+  },
+  {
+    id: "Bjartur",
+    name: "Bjartur",
     gender: "male",
-    description: "Karlrödd - Búi",
+    description: "Karlrödd - Bjartur",
   },
   {
-    id: "is_IS-salka-medium",
-    name: "Salka",
+    id: "Rosa",
+    name: "Rósa",
     gender: "female",
-    description: "Kvenrödd - Salka",
-  },
-  {
-    id: "is_IS-ugla-medium",
-    name: "Ugla",
-    gender: "female",
-    description: "Kvenrödd - Ugla",
+    description: "Kvenrödd - Rósa",
   },
 ];
 
-export const DEFAULT_VOICE = ICELANDIC_VOICES[0]; // Steinn
-
-// =============================================================================
-// LAZY MODULE LOADING
-// =============================================================================
-
-let ttsModule: PiperTTS | null = null;
-let moduleLoadPromise: Promise<PiperTTS> | null = null;
-
-/**
- * Configure ONNX Runtime and load piper-tts-web
- * Uses dynamic import to ensure ort is configured before piper loads
- */
-async function loadTtsModule(): Promise<PiperTTS> {
-  if (ttsModule) return ttsModule;
-  if (moduleLoadPromise) return moduleLoadPromise;
-
-  moduleLoadPromise = (async () => {
-    console.log("[PiperTTS] Loading ONNX Runtime...");
-
-    // First, configure ONNX Runtime
-    // @ts-expect-error - onnxruntime-web types don't resolve with package.json exports
-    const ort = await import("onnxruntime-web");
-
-    // Use jsDelivr CDN which has all the WASM files (cdnjs returns 404)
-    ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/";
-    // Disable multi-threading to avoid SharedArrayBuffer/COOP/COEP issues
-    ort.env.wasm.numThreads = 1;
-    console.log("[PiperTTS] ONNX Runtime configured with jsDelivr CDN");
-
-    // Now load piper-tts-web
-    console.log("[PiperTTS] Loading piper-tts-web...");
-    const tts = await import("@mintplex-labs/piper-tts-web");
-    console.log("[PiperTTS] piper-tts-web loaded");
-
-    ttsModule = tts as unknown as PiperTTS;
-    return ttsModule;
-  })();
-
-  return moduleLoadPromise;
-}
+export const DEFAULT_VOICE = ICELANDIC_VOICES[0]; // Álfur
 
 // =============================================================================
 // SERVICE CLASS
 // =============================================================================
 
-class PiperTtsService {
-  private downloadedVoices: Set<string> = new Set();
+class TiroTtsService {
   private currentAudio: HTMLAudioElement | null = null;
   private isInitialized = false;
 
   /**
-   * Initialize the service by checking which voices are already cached
+   * Initialize the service (no-op for Tiro API, kept for interface compatibility)
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
-
-    try {
-      const tts = await loadTtsModule();
-      const stored = await tts.stored();
-      this.downloadedVoices = new Set(stored);
-      this.isInitialized = true;
-      console.log("[PiperTTS] Initialized, cached voices:", stored);
-    } catch (error) {
-      console.error("[PiperTTS] Failed to initialize:", error);
-      // Continue anyway - voices will be downloaded on demand
-      this.isInitialized = true;
-    }
+    this.isInitialized = true;
+    console.log("[TiroTTS] Initialized - using Tiro.is API");
   }
 
   /**
-   * Check if a voice is already downloaded and cached
+   * Check if a voice is available (all voices are always available with API)
    */
-  isVoiceDownloaded(voiceId: string): boolean {
-    return this.downloadedVoices.has(voiceId);
+  isVoiceDownloaded(_voiceId: string): boolean {
+    return true; // API-based, no local download needed
   }
 
   /**
-   * Get list of cached voices
+   * Get list of available voices
    */
   async getCachedVoices(): Promise<string[]> {
-    try {
-      const tts = await loadTtsModule();
-      return await tts.stored();
-    } catch {
-      return [];
-    }
+    return ICELANDIC_VOICES.map((v) => v.id);
   }
 
   /**
-   * Download a voice model for offline use
+   * Download a voice model (no-op for API-based TTS)
    */
   async downloadVoice(
-    voiceId: string,
+    _voiceId: string,
     onProgress?: TTSProgressCallback
   ): Promise<void> {
-    if (this.downloadedVoices.has(voiceId)) {
-      onProgress?.({
-        stage: "ready",
-        loaded: 100,
-        total: 100,
-        percent: 100,
-      });
-      return;
-    }
-
-    const tts = await loadTtsModule();
-    await tts.download(voiceId, (progress) => {
-      onProgress?.({
-        stage: "downloading",
-        loaded: progress.loaded,
-        total: progress.total,
-        percent: Math.round((progress.loaded / progress.total) * 100),
-      });
-    });
-
-    this.downloadedVoices.add(voiceId);
+    // API-based, no download needed
     onProgress?.({
       stage: "ready",
       loaded: 100,
@@ -199,7 +112,7 @@ class PiperTtsService {
   }
 
   /**
-   * Synthesize speech from text
+   * Synthesize speech from text using Tiro.is API
    * Returns an audio blob that can be played
    */
   async synthesize(
@@ -210,9 +123,9 @@ class PiperTtsService {
     // Clean the text for speech
     const cleanedText = this.cleanTextForSpeech(text);
 
-    console.log("[PiperTTS] Original text length:", text.length);
-    console.log("[PiperTTS] Cleaned text:", cleanedText.slice(0, 200) + "...");
-    console.log("[PiperTTS] Using voice:", voiceId);
+    console.log("[TiroTTS] Original text length:", text.length);
+    console.log("[TiroTTS] Cleaned text:", cleanedText.slice(0, 200) + "...");
+    console.log("[TiroTTS] Using voice:", voiceId);
 
     if (!cleanedText.trim()) {
       throw new Error("No text to synthesize after cleaning");
@@ -226,37 +139,38 @@ class PiperTtsService {
     });
 
     try {
-      console.log("[PiperTTS] Starting synthesis...");
-      const tts = await loadTtsModule();
+      console.log("[TiroTTS] Calling Tiro.is API...");
 
-      const audioBlob = await tts.predict(
-        {
-          text: cleanedText,
-          voiceId: voiceId,
+      const response = await fetch(TIRO_TTS_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "audio/mpeg", // Request MP3 format
         },
-        (progress) => {
-          console.log("[PiperTTS] Download progress:", progress);
-          // This callback is for download progress if model isn't cached
-          if (!this.downloadedVoices.has(voiceId)) {
-            onProgress?.({
-              stage: "downloading",
-              loaded: progress.loaded,
-              total: progress.total,
-              percent: Math.round((progress.loaded / progress.total) * 100),
-            });
-          }
-        }
-      );
+        body: JSON.stringify({
+          Engine: "standard",
+          LanguageCode: "is-IS",
+          OutputFormat: "mp3",
+          SampleRate: "22050",
+          Text: cleanedText,
+          TextType: "text",
+          VoiceId: voiceId,
+        }),
+      });
 
-      console.log("[PiperTTS] Synthesis complete, blob size:", audioBlob.size);
-      console.log("[PiperTTS] Blob type:", audioBlob.type);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("[TiroTTS] API error:", response.status, errorText);
+        throw new Error(`Tiro TTS API error: ${response.status} - ${errorText}`);
+      }
+
+      const audioBlob = await response.blob();
+      console.log("[TiroTTS] Synthesis complete, blob size:", audioBlob.size);
+      console.log("[TiroTTS] Blob type:", audioBlob.type);
 
       if (audioBlob.size === 0) {
         throw new Error("Synthesized audio blob is empty");
       }
-
-      // Mark voice as downloaded after successful synthesis
-      this.downloadedVoices.add(voiceId);
 
       onProgress?.({
         stage: "ready",
@@ -267,7 +181,7 @@ class PiperTtsService {
 
       return audioBlob;
     } catch (error) {
-      console.error("[PiperTTS] Synthesis error:", error);
+      console.error("[TiroTTS] Synthesis error:", error);
       throw error;
     }
   }
@@ -281,21 +195,17 @@ class PiperTtsService {
     voiceId: string = DEFAULT_VOICE.id,
     onProgress?: TTSProgressCallback
   ): Promise<HTMLAudioElement> {
-    console.log("[PiperTTS] speak() called");
+    console.log("[TiroTTS] speak() called");
 
     // Stop any currently playing audio
     this.stop();
 
     const audioBlob = await this.synthesize(text, voiceId, onProgress);
 
-    // Ensure blob has correct MIME type for WAV audio
-    const wavBlob = audioBlob.type === "audio/wav"
-      ? audioBlob
-      : new Blob([audioBlob], { type: "audio/wav" });
-
-    const audioUrl = URL.createObjectURL(wavBlob);
-    console.log("[PiperTTS] Created audio URL:", audioUrl);
-    console.log("[PiperTTS] Blob MIME type:", wavBlob.type);
+    // Create audio element with the blob
+    const audioUrl = URL.createObjectURL(audioBlob);
+    console.log("[TiroTTS] Created audio URL:", audioUrl);
+    console.log("[TiroTTS] Blob MIME type:", audioBlob.type);
 
     const audio = new Audio();
     audio.preload = "auto";
@@ -303,12 +213,11 @@ class PiperTtsService {
     this.currentAudio = audio;
 
     // Log audio element state
-    console.log("[PiperTTS] Audio element created, readyState:", audio.readyState);
-    console.log("[PiperTTS] Audio src set to:", audio.src);
+    console.log("[TiroTTS] Audio element created, readyState:", audio.readyState);
 
     // Store URL for cleanup
     const cleanup = () => {
-      console.log("[PiperTTS] Cleanup called");
+      console.log("[TiroTTS] Cleanup called");
       URL.revokeObjectURL(audioUrl);
       if (this.currentAudio === audio) {
         this.currentAudio = null;
@@ -317,20 +226,20 @@ class PiperTtsService {
 
     // Add cleanup listeners (caller can override these)
     audio.addEventListener("ended", () => {
-      console.log("[PiperTTS] Audio ended event");
+      console.log("[TiroTTS] Audio ended event");
       cleanup();
     });
     audio.addEventListener("error", (e) => {
-      console.error("[PiperTTS] Audio error event:", e);
+      console.error("[TiroTTS] Audio error event:", e);
       cleanup();
     });
 
     // Add additional debug listeners
     audio.addEventListener("canplay", () => {
-      console.log("[PiperTTS] Audio canplay event, duration:", audio.duration);
+      console.log("[TiroTTS] Audio canplay event, duration:", audio.duration);
     });
     audio.addEventListener("loadedmetadata", () => {
-      console.log("[PiperTTS] Audio loadedmetadata, duration:", audio.duration);
+      console.log("[TiroTTS] Audio loadedmetadata, duration:", audio.duration);
     });
 
     // Return audio element - caller must call play() after setting up handlers
@@ -374,21 +283,17 @@ class PiperTtsService {
   }
 
   /**
-   * Remove a cached voice model
+   * Remove a cached voice model (no-op for API-based TTS)
    */
-  async removeVoice(voiceId: string): Promise<void> {
-    const tts = await loadTtsModule();
-    await tts.remove(voiceId);
-    this.downloadedVoices.delete(voiceId);
+  async removeVoice(_voiceId: string): Promise<void> {
+    // No-op for API-based TTS
   }
 
   /**
-   * Remove all cached voice models
+   * Remove all cached voice models (no-op for API-based TTS)
    */
   async clearCache(): Promise<void> {
-    const tts = await loadTtsModule();
-    await tts.flush();
-    this.downloadedVoices.clear();
+    // No-op for API-based TTS
   }
 
   /**
@@ -427,8 +332,8 @@ class PiperTtsService {
   }
 }
 
-// Export singleton instance
-export const piperTts = new PiperTtsService();
+// Export singleton instance (keeping name for backward compatibility)
+export const piperTts = new TiroTtsService();
 
 // Also export the class for testing
-export { PiperTtsService };
+export { TiroTtsService as PiperTtsService };
