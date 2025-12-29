@@ -1,14 +1,28 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Loader2, FileText, Filter, X, Sparkles } from "lucide-react";
+import {
+  Search,
+  Loader2,
+  FileText,
+  Filter,
+  X,
+  Sparkles,
+  History,
+  Trash2,
+} from "lucide-react";
 import Modal from "./Modal";
 import {
   searchContent,
   highlightQuery,
   getSearchChapters,
   buildSearchIndex,
+  getSearchHistory,
+  addToSearchHistory,
+  clearSearchHistory,
+  removeFromSearchHistory,
   type SearchResult,
   type SearchFilters,
+  type SearchHistoryItem,
 } from "@/utils/searchIndex";
 import { useBook } from "@/hooks/useBook";
 import { loadTableOfContents } from "@/utils/contentLoader";
@@ -30,9 +44,17 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   );
   const [selectedChapter, setSelectedChapter] = useState<string>("");
   const [showFilters, setShowFilters] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>(
+    () => getSearchHistory(),
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { bookSlug } = useBook();
+
+  // Refresh search history when modal opens
+  const refreshHistory = () => {
+    setSearchHistory(getSearchHistory());
+  };
 
   // Load TOC and build search index on mount
   useEffect(() => {
@@ -58,8 +80,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   // Focus input when modal opens
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      inputRef.current.focus();
+    if (isOpen) {
+      inputRef.current?.focus();
     }
   }, [isOpen]);
 
@@ -97,6 +119,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       const searchResults = await searchContent(query, toc, bookSlug, filters);
       setResults(searchResults);
       setLoading(false);
+
+      // Add to search history after successful search
+      if (searchResults.length > 0) {
+        addToSearchHistory(query, searchResults.length);
+        refreshHistory();
+      }
     };
 
     const timeoutId = setTimeout(() => {
@@ -118,6 +146,20 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   };
 
   const hasActiveFilters = selectedChapter !== "";
+
+  const handleHistoryClick = (historyQuery: string) => {
+    setQuery(historyQuery);
+  };
+
+  const handleRemoveHistoryItem = (historyQuery: string) => {
+    removeFromSearchHistory(historyQuery);
+    refreshHistory();
+  };
+
+  const handleClearHistory = () => {
+    clearSearchHistory();
+    setSearchHistory([]);
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Leita í bókinni">
@@ -211,16 +253,63 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           </div>
         )}
 
-        {/* Hints */}
+        {/* Hints and History */}
         {!indexing && query.length === 0 && (
-          <div className="space-y-2 text-center">
-            <p className="text-sm text-[var(--text-secondary)]">
-              Sláðu inn að minnsta kosti 2 stafi til að leita
-            </p>
-            <p className="flex items-center justify-center gap-1 text-xs text-[var(--text-secondary)]">
-              <Sparkles size={12} className="text-[var(--accent-color)]" />
-              Styður óbeina leit (fuzzy search)
-            </p>
+          <div className="space-y-4">
+            <div className="space-y-2 text-center">
+              <p className="text-sm text-[var(--text-secondary)]">
+                Sláðu inn að minnsta kosti 2 stafi til að leita
+              </p>
+              <p className="flex items-center justify-center gap-1 text-xs text-[var(--text-secondary)]">
+                <Sparkles size={12} className="text-[var(--accent-color)]" />
+                Styður óbeina leit (fuzzy search)
+              </p>
+            </div>
+
+            {/* Search History */}
+            {searchHistory.length > 0 && (
+              <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-3">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)]">
+                    <History size={14} />
+                    Nýlegar leitir
+                  </div>
+                  <button
+                    onClick={handleClearHistory}
+                    className="flex items-center gap-1 rounded px-2 py-1 font-sans text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
+                    title="Hreinsa sögu"
+                  >
+                    <Trash2 size={12} />
+                    Hreinsa
+                  </button>
+                </div>
+                <div className="space-y-1">
+                  {searchHistory.slice(0, 5).map((item) => (
+                    <div
+                      key={item.timestamp}
+                      className="group flex items-center justify-between rounded px-2 py-1.5 hover:bg-[var(--bg-secondary)]"
+                    >
+                      <button
+                        onClick={() => handleHistoryClick(item.query)}
+                        className="flex-1 text-left font-sans text-sm text-[var(--text-primary)]"
+                      >
+                        {item.query}
+                        <span className="ml-2 text-xs text-[var(--text-secondary)]">
+                          ({item.resultCount} niðurstöður)
+                        </span>
+                      </button>
+                      <button
+                        onClick={() => handleRemoveHistoryItem(item.query)}
+                        className="rounded p-1 text-[var(--text-secondary)] opacity-0 transition-opacity hover:text-[var(--text-primary)] group-hover:opacity-100"
+                        title="Fjarlægja"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

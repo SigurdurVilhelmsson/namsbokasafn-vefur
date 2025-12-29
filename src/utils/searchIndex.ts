@@ -347,3 +347,85 @@ export function highlightQuery(text: string, query: string): string {
       `<mark class="bg-yellow-200 dark:bg-yellow-900/50 rounded px-0.5">${match}</mark>`,
   );
 }
+
+// =============================================================================
+// SEARCH HISTORY
+// =============================================================================
+
+const SEARCH_HISTORY_KEY = "efnafraedi-search-history";
+const MAX_HISTORY_ITEMS = 10;
+
+export interface SearchHistoryItem {
+  query: string;
+  timestamp: string;
+  resultCount: number;
+}
+
+/**
+ * Get search history from localStorage
+ */
+export function getSearchHistory(): SearchHistoryItem[] {
+  try {
+    const stored = localStorage.getItem(SEARCH_HISTORY_KEY);
+    if (!stored) return [];
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Add a search to history
+ */
+export function addToSearchHistory(query: string, resultCount: number): void {
+  if (!query.trim() || query.length < 2) return;
+
+  try {
+    const history = getSearchHistory();
+
+    // Remove duplicate if exists
+    const filtered = history.filter(
+      (item) => item.query.toLowerCase() !== query.toLowerCase(),
+    );
+
+    // Add new item at the beginning
+    const newHistory: SearchHistoryItem[] = [
+      {
+        query: query.trim(),
+        timestamp: new Date().toISOString(),
+        resultCount,
+      },
+      ...filtered,
+    ].slice(0, MAX_HISTORY_ITEMS);
+
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(newHistory));
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+/**
+ * Clear search history
+ */
+export function clearSearchHistory(): void {
+  try {
+    localStorage.removeItem(SEARCH_HISTORY_KEY);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+/**
+ * Remove a single item from history
+ */
+export function removeFromSearchHistory(query: string): void {
+  try {
+    const history = getSearchHistory();
+    const filtered = history.filter(
+      (item) => item.query.toLowerCase() !== query.toLowerCase(),
+    );
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(filtered));
+  } catch {
+    // Ignore storage errors
+  }
+}

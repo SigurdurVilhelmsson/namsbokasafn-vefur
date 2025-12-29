@@ -10,6 +10,9 @@ import {
   getCurrentTimestamp,
 } from "@/utils/storeHelpers";
 
+// Confidence level for self-assessment (1-5)
+export type ConfidenceLevel = 1 | 2 | 3 | 4 | 5;
+
 interface ObjectiveProgress {
   chapterSlug: string;
   sectionSlug: string;
@@ -17,6 +20,8 @@ interface ObjectiveProgress {
   objectiveText: string;
   isCompleted: boolean;
   completedAt?: string;
+  confidence?: ConfidenceLevel;
+  assessedAt?: string;
 }
 
 interface ObjectivesState {
@@ -58,6 +63,23 @@ interface ObjectivesState {
 
   // Get all objectives for a section
   getSectionObjectives: (
+    chapterSlug: string,
+    sectionSlug: string,
+  ) => ObjectiveProgress[];
+
+  // Self-assessment
+  setObjectiveConfidence: (
+    chapterSlug: string,
+    sectionSlug: string,
+    objectiveIndex: number,
+    confidence: ConfidenceLevel,
+  ) => void;
+  getObjectiveConfidence: (
+    chapterSlug: string,
+    sectionSlug: string,
+    objectiveIndex: number,
+  ) => ConfidenceLevel | undefined;
+  getLowConfidenceObjectives: (
     chapterSlug: string,
     sectionSlug: string,
   ) => ObjectiveProgress[];
@@ -170,6 +192,43 @@ export const useObjectivesStore = create<ObjectivesState>()(
           chapterSlug,
           sectionSlug,
         );
+      },
+
+      setObjectiveConfidence: (
+        chapterSlug,
+        sectionSlug,
+        objectiveIndex,
+        confidence,
+      ) => {
+        const key = createObjectiveKey(chapterSlug, sectionSlug, objectiveIndex);
+        set((state) => {
+          const existing = state.completedObjectives[key];
+          if (!existing) return state;
+          return {
+            completedObjectives: {
+              ...state.completedObjectives,
+              [key]: {
+                ...existing,
+                confidence,
+                assessedAt: getCurrentTimestamp(),
+              },
+            },
+          };
+        });
+      },
+
+      getObjectiveConfidence: (chapterSlug, sectionSlug, objectiveIndex) => {
+        const key = createObjectiveKey(chapterSlug, sectionSlug, objectiveIndex);
+        return get().completedObjectives[key]?.confidence;
+      },
+
+      getLowConfidenceObjectives: (chapterSlug, sectionSlug) => {
+        const { completedObjectives } = get();
+        return filterItemsBySection(
+          Object.values(completedObjectives),
+          chapterSlug,
+          sectionSlug,
+        ).filter((obj) => obj.confidence !== undefined && obj.confidence <= 2);
       },
     }),
     {
