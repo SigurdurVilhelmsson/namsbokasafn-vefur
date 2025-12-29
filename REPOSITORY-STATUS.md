@@ -129,9 +129,10 @@ None currently! All performance optimizations completed. 🎉
 
 ### Documentation
 - **README Current**: ✅ (Comprehensive)
-- **Guides Updated**: ✅ (DEVELOPMENT.md, LANGUAGE_GUIDE.md)
-- **Project Specification**: ✅ (Chemistry_Textbook_Reader_Specification.md)
+- **Development Plan**: ✅ (RECOMMENDATIONS.md, IMPLEMENTATION_PROGRESS.md)
+- **Guides Updated**: ✅ (MARKDOWN-GUIDE.md, LANGUAGE_GUIDE.md, DEPLOYMENT-GUIDE.md)
 - **Maintenance Docs**: ✅ (REPOSITORY-STATUS.md, checklists system)
+- **Archived**: docs/archive/ (legacy specifications)
 
 ---
 

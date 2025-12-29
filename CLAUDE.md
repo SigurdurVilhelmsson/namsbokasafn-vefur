@@ -29,6 +29,7 @@ npm run check:all        # Security + quality + dependency checks
 - `readerStore`: Reading progress, bookmarks, current location
 - `flashcardStore`: SM-2 spaced repetition, study sessions, card ratings
 - `quizStore`: Quiz attempts and scores
+- `annotationStore`: Text highlights and notes with export capability
 
 ### Content Loading
 - Static content served from `public/content/{bookSlug}/`
@@ -74,6 +75,20 @@ The flashcard system uses SM-2 spaced repetition in `src/utils/srs.ts`:
 - Ease factor range: 1.3-2.5
 - Quality ratings: again(0), hard(2), good(4), easy(5)
 - Be careful modifying this algorithm as it affects learning outcomes
+
+## Key Hooks
+
+- `useKeyboardShortcuts`: Multi-key shortcut handling (←/→ navigation, g+h home, etc.)
+- `useTextToSpeech`: Web Speech API wrapper for read-aloud feature
+- `useBook`: Book context provider for current book configuration
+
+## Development Planning
+
+The project follows a 4-phase improvement plan documented in:
+- `RECOMMENDATIONS.md`: Detailed improvement roadmap with 77 tasks
+- `IMPLEMENTATION_PROGRESS.md`: Progress tracking matrix
+
+**Current Phase**: Phase 1 (Core Experience) - 69% complete
 
 ## Deployment
 

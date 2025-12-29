@@ -39,12 +39,22 @@ Located in the project root:
 | File | Description |
 |------|-------------|
 | [README.md](../README.md) | Project overview and quick start |
-| [DEVELOPMENT.md](../DEVELOPMENT.md) | Development roadmap and phases |
+| [RECOMMENDATIONS.md](../RECOMMENDATIONS.md) | Development roadmap and improvement plan |
+| [IMPLEMENTATION_PROGRESS.md](../IMPLEMENTATION_PROGRESS.md) | Progress tracking for all tasks |
 | [DEPLOYMENT-GUIDE.md](../DEPLOYMENT-GUIDE.md) | Production deployment instructions |
 | [LANGUAGE_GUIDE.md](../LANGUAGE_GUIDE.md) | Icelandic terminology conventions |
 | [MARKDOWN-GUIDE.md](../MARKDOWN-GUIDE.md) | Content markdown format reference |
 | [CHANGELOG.md](../CHANGELOG.md) | Version history |
 | [CONTENT-LICENSE.md](../CONTENT-LICENSE.md) | CC BY 4.0 license details |
+
+### Archived Documentation
+
+Legacy documentation that has been superseded:
+
+| File | Description |
+|------|-------------|
+| [docs/archive/DEVELOPMENT.md](./archive/DEVELOPMENT.md) | Legacy 6-phase development roadmap |
+| [docs/archive/Chemistry_Textbook_Reader_Specification.md](./archive/Chemistry_Textbook_Reader_Specification.md) | Original project specification |
 
 ## Documentation Conventions
 
