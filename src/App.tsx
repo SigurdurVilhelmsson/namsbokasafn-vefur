@@ -13,6 +13,9 @@ const FlashcardsPage = lazy(() => import("@/components/reader/FlashcardsPage"));
 const PracticeProgressPage = lazy(
   () => import("@/components/reader/PracticeProgressPage"),
 );
+const ObjectivesDashboardPage = lazy(
+  () => import("@/components/reader/ObjectivesDashboardPage"),
+);
 
 // Loading fallback component
 function PageLoader() {
@@ -57,6 +60,14 @@ function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <PracticeProgressPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="markmid"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <ObjectivesDashboardPage />
               </Suspense>
             }
           />
