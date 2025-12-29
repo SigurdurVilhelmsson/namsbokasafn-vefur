@@ -169,7 +169,13 @@ export function useTextToSpeech(
   // Speak text
   const speak = useCallback(
     async (text: string) => {
-      if (!isSupported || !text.trim()) return;
+      console.log("[useTextToSpeech] speak() called, text length:", text.length);
+      console.log("[useTextToSpeech] isSupported:", isSupported);
+
+      if (!isSupported || !text.trim()) {
+        console.log("[useTextToSpeech] Aborting: not supported or empty text");
+        return;
+      }
 
       // Stop any ongoing speech
       piperTts.stop();
@@ -181,19 +187,23 @@ export function useTextToSpeech(
       setDownloadProgress(null);
 
       try {
+        console.log("[useTextToSpeech] Calling piperTts.speak()...");
         const audio = await piperTts.speak(
           text,
           selectedVoice.id,
           (progress) => {
+            console.log("[useTextToSpeech] Progress:", progress);
             setDownloadProgress(progress);
           }
         );
 
+        console.log("[useTextToSpeech] Got audio element, setting up handlers");
         audioRef.current = audio;
         audio.playbackRate = rate;
 
         // Set up event handlers BEFORE playing
         audio.onplay = () => {
+          console.log("[useTextToSpeech] onplay event fired");
           setIsSpeaking(true);
           setIsPaused(false);
           setIsLoading(false);
@@ -201,10 +211,12 @@ export function useTextToSpeech(
         };
 
         audio.onpause = () => {
+          console.log("[useTextToSpeech] onpause event fired");
           setIsPaused(true);
         };
 
         audio.onended = () => {
+          console.log("[useTextToSpeech] onended event fired");
           setIsSpeaking(false);
           setIsPaused(false);
           setProgress(1);
@@ -213,7 +225,9 @@ export function useTextToSpeech(
         };
 
         audio.onerror = (e) => {
-          console.error("Audio playback error:", e);
+          console.error("[useTextToSpeech] onerror event fired:", e);
+          console.error("[useTextToSpeech] Audio error code:", (audio as HTMLAudioElement).error?.code);
+          console.error("[useTextToSpeech] Audio error message:", (audio as HTMLAudioElement).error?.message);
           setIsSpeaking(false);
           setIsPaused(false);
           setIsLoading(false);
@@ -221,10 +235,36 @@ export function useTextToSpeech(
           audioRef.current = null;
         };
 
-        // Now play the audio (handlers are set up)
+        // Wait for audio to be ready before playing
+        console.log("[useTextToSpeech] Waiting for audio to be ready...");
+        await new Promise<void>((resolve, reject) => {
+          const onCanPlay = () => {
+            console.log("[useTextToSpeech] canplaythrough event, duration:", audio.duration);
+            audio.removeEventListener("canplaythrough", onCanPlay);
+            audio.removeEventListener("error", onError);
+            resolve();
+          };
+          const onError = () => {
+            audio.removeEventListener("canplaythrough", onCanPlay);
+            audio.removeEventListener("error", onError);
+            reject(new Error("Audio failed to load"));
+          };
+          audio.addEventListener("canplaythrough", onCanPlay);
+          audio.addEventListener("error", onError);
+
+          // If already ready, resolve immediately
+          if (audio.readyState >= 4) {
+            console.log("[useTextToSpeech] Audio already ready");
+            resolve();
+          }
+        });
+
+        // Now play the audio (handlers are set up, audio is loaded)
+        console.log("[useTextToSpeech] Calling audio.play()...");
         await audio.play();
+        console.log("[useTextToSpeech] audio.play() resolved, duration:", audio.duration);
       } catch (error) {
-        console.error("TTS Error:", error);
+        console.error("[useTextToSpeech] TTS Error:", error);
         setIsLoading(false);
         setIsSpeaking(false);
       }

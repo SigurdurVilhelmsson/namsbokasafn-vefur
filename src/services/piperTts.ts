@@ -153,8 +153,12 @@ class PiperTtsService {
     // Clean the text for speech
     const cleanedText = this.cleanTextForSpeech(text);
 
+    console.log("[PiperTTS] Original text length:", text.length);
+    console.log("[PiperTTS] Cleaned text:", cleanedText.slice(0, 200) + "...");
+    console.log("[PiperTTS] Using voice:", voiceId);
+
     if (!cleanedText.trim()) {
-      throw new Error("No text to synthesize");
+      throw new Error("No text to synthesize after cleaning");
     }
 
     onProgress?.({
@@ -164,35 +168,49 @@ class PiperTtsService {
       percent: 0,
     });
 
-    const audioBlob = await tts.predict(
-      {
-        text: cleanedText,
-        voiceId: voiceId as tts.VoiceId,
-      },
-      (progress) => {
-        // This callback is for download progress if model isn't cached
-        if (!this.downloadedVoices.has(voiceId)) {
-          onProgress?.({
-            stage: "downloading",
-            loaded: progress.loaded,
-            total: progress.total,
-            percent: Math.round((progress.loaded / progress.total) * 100),
-          });
+    try {
+      console.log("[PiperTTS] Starting synthesis...");
+      const audioBlob = await tts.predict(
+        {
+          text: cleanedText,
+          voiceId: voiceId as tts.VoiceId,
+        },
+        (progress) => {
+          console.log("[PiperTTS] Download progress:", progress);
+          // This callback is for download progress if model isn't cached
+          if (!this.downloadedVoices.has(voiceId)) {
+            onProgress?.({
+              stage: "downloading",
+              loaded: progress.loaded,
+              total: progress.total,
+              percent: Math.round((progress.loaded / progress.total) * 100),
+            });
+          }
         }
+      );
+
+      console.log("[PiperTTS] Synthesis complete, blob size:", audioBlob.size);
+      console.log("[PiperTTS] Blob type:", audioBlob.type);
+
+      if (audioBlob.size === 0) {
+        throw new Error("Synthesized audio blob is empty");
       }
-    );
 
-    // Mark voice as downloaded after successful synthesis
-    this.downloadedVoices.add(voiceId);
+      // Mark voice as downloaded after successful synthesis
+      this.downloadedVoices.add(voiceId);
 
-    onProgress?.({
-      stage: "ready",
-      loaded: 100,
-      total: 100,
-      percent: 100,
-    });
+      onProgress?.({
+        stage: "ready",
+        loaded: 100,
+        total: 100,
+        percent: 100,
+      });
 
-    return audioBlob;
+      return audioBlob;
+    } catch (error) {
+      console.error("[PiperTTS] Synthesis error:", error);
+      throw error;
+    }
   }
 
   /**
@@ -204,17 +222,34 @@ class PiperTtsService {
     voiceId: string = DEFAULT_VOICE.id,
     onProgress?: TTSProgressCallback
   ): Promise<HTMLAudioElement> {
+    console.log("[PiperTTS] speak() called");
+
     // Stop any currently playing audio
     this.stop();
 
     const audioBlob = await this.synthesize(text, voiceId, onProgress);
-    const audioUrl = URL.createObjectURL(audioBlob);
 
-    const audio = new Audio(audioUrl);
+    // Ensure blob has correct MIME type for WAV audio
+    const wavBlob = audioBlob.type === "audio/wav"
+      ? audioBlob
+      : new Blob([audioBlob], { type: "audio/wav" });
+
+    const audioUrl = URL.createObjectURL(wavBlob);
+    console.log("[PiperTTS] Created audio URL:", audioUrl);
+    console.log("[PiperTTS] Blob MIME type:", wavBlob.type);
+
+    const audio = new Audio();
+    audio.preload = "auto";
+    audio.src = audioUrl;
     this.currentAudio = audio;
+
+    // Log audio element state
+    console.log("[PiperTTS] Audio element created, readyState:", audio.readyState);
+    console.log("[PiperTTS] Audio src set to:", audio.src);
 
     // Store URL for cleanup
     const cleanup = () => {
+      console.log("[PiperTTS] Cleanup called");
       URL.revokeObjectURL(audioUrl);
       if (this.currentAudio === audio) {
         this.currentAudio = null;
@@ -222,8 +257,22 @@ class PiperTtsService {
     };
 
     // Add cleanup listeners (caller can override these)
-    audio.addEventListener("ended", cleanup);
-    audio.addEventListener("error", cleanup);
+    audio.addEventListener("ended", () => {
+      console.log("[PiperTTS] Audio ended event");
+      cleanup();
+    });
+    audio.addEventListener("error", (e) => {
+      console.error("[PiperTTS] Audio error event:", e);
+      cleanup();
+    });
+
+    // Add additional debug listeners
+    audio.addEventListener("canplay", () => {
+      console.log("[PiperTTS] Audio canplay event, duration:", audio.duration);
+    });
+    audio.addEventListener("loadedmetadata", () => {
+      console.log("[PiperTTS] Audio loadedmetadata, duration:", audio.duration);
+    });
 
     // Return audio element - caller must call play() after setting up handlers
     return audio;
