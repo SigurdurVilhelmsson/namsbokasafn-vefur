@@ -62,5 +62,6 @@ export interface PracticeProblem {
   sectionSlug: string;
   isCompleted: boolean;
   attempts: number;
+  successfulAttempts: number; // Track successful completions for mastery
   lastAttempted?: string;
 }

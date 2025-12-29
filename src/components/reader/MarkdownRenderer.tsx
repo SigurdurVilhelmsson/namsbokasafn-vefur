@@ -42,6 +42,12 @@ const DIRECTIVE_CONFIG: Record<
   answer: {
     className: "practice-answer-container",
   },
+  explanation: {
+    className: "practice-explanation-container",
+  },
+  hint: {
+    className: "practice-hint-container",
+  },
   note: {
     className: "directive-note",
   },
