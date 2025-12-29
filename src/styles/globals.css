@@ -819,18 +819,30 @@ textarea:focus-visible,
 .equation-wrapper {
   position: relative;
   display: block;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
 }
 
-.equation-wrapper .copy-button {
+.equation-wrapper:hover {
+  background-color: rgba(93, 186, 156, 0.05);
+}
+
+.dark .equation-wrapper:hover {
+  background-color: rgba(93, 186, 156, 0.1);
+}
+
+.equation-wrapper .equation-actions {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
   opacity: 0;
   transition: opacity 0.15s ease;
 }
 
-.equation-wrapper:hover .copy-button,
-.equation-wrapper:focus-within .copy-button {
+.equation-wrapper:hover .equation-actions,
+.equation-wrapper:focus-within .equation-actions {
   opacity: 1;
 }
 
@@ -842,6 +854,26 @@ textarea:focus-visible,
 .equation-zoomable:hover {
   background-color: rgba(93, 186, 156, 0.1);
   border-radius: 4px;
+}
+
+/* Equation numbering (auto-numbered display equations) */
+.equation-numbered {
+  counter-increment: equation;
+}
+
+.equation-numbered::after {
+  content: "(" counter(equation) ")";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Reset equation counter per section */
+.reading-content {
+  counter-reset: equation;
 }
 
 /* Inline animations */
