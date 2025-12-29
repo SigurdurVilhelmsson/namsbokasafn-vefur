@@ -8,6 +8,12 @@ import { visit } from "unist-util-visit";
 import type { Root } from "mdast";
 import type { Node, Data } from "unist";
 import InteractivePracticeProblem from "./InteractivePracticeProblem";
+import CrossReference from "./CrossReference";
+import {
+  remarkCrossReferences,
+  isCrossReferenceHref,
+  parseCrossReferenceHref,
+} from "@/utils/remarkCrossReferences";
 
 // Import mhchem for chemical notation
 import "katex/dist/contrib/mhchem.js";
@@ -613,7 +619,7 @@ const markdownComponents = {
     );
   },
 
-  // Links
+  // Links - handle cross-references specially
   a: ({
     href,
     children,
@@ -621,17 +627,47 @@ const markdownComponents = {
   }: {
     href?: string;
     children?: React.ReactNode;
-  }) => (
-    <a
-      href={href}
-      className="text-[var(--accent-color)] underline transition-colors hover:text-[var(--accent-hover)]"
-      target={href?.startsWith("http") ? "_blank" : undefined}
-      rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
-      {...props}
-    >
-      {children}
-    </a>
-  ),
+    className?: string;
+    "data-ref-type"?: string;
+    "data-ref-id"?: string;
+  }) => {
+    // Check if this is a cross-reference link
+    if (isCrossReferenceHref(href)) {
+      const refData = parseCrossReferenceHref(href!);
+      if (refData) {
+        return (
+          <CrossReference refType={refData.type} refId={refData.id}>
+            {children}
+          </CrossReference>
+        );
+      }
+    }
+
+    // Check for data attributes from remark plugin
+    if (props["data-ref-type"] && props["data-ref-id"]) {
+      return (
+        <CrossReference
+          refType={props["data-ref-type"] as "sec" | "eq" | "fig" | "tbl" | "def"}
+          refId={props["data-ref-id"]}
+        >
+          {children}
+        </CrossReference>
+      );
+    }
+
+    // Regular link
+    return (
+      <a
+        href={href}
+        className="text-[var(--accent-color)] underline transition-colors hover:text-[var(--accent-hover)]"
+        target={href?.startsWith("http") ? "_blank" : undefined}
+        rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
+        {...props}
+      >
+        {children}
+      </a>
+    );
+  },
 };
 
 // =============================================================================
@@ -647,6 +683,7 @@ export default function MarkdownRenderer({ content }: MarkdownRendererProps) {
           remarkGfm,
           remarkDirective,
           remarkCustomDirectives,
+          remarkCrossReferences,
         ]}
         rehypePlugins={[
           [

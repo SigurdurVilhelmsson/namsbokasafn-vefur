@@ -196,8 +196,8 @@ class PiperTtsService {
   }
 
   /**
-   * Synthesize and play text immediately
-   * Returns the audio element for control (pause/resume/stop)
+   * Synthesize text and return audio element (does NOT auto-play)
+   * Caller should set up event handlers before calling play()
    */
   async speak(
     text: string,
@@ -213,18 +213,19 @@ class PiperTtsService {
     const audio = new Audio(audioUrl);
     this.currentAudio = audio;
 
-    // Clean up URL when audio ends
-    audio.onended = () => {
+    // Store URL for cleanup
+    const cleanup = () => {
       URL.revokeObjectURL(audioUrl);
-      this.currentAudio = null;
+      if (this.currentAudio === audio) {
+        this.currentAudio = null;
+      }
     };
 
-    audio.onerror = () => {
-      URL.revokeObjectURL(audioUrl);
-      this.currentAudio = null;
-    };
+    // Add cleanup listeners (caller can override these)
+    audio.addEventListener("ended", cleanup);
+    audio.addEventListener("error", cleanup);
 
-    await audio.play();
+    // Return audio element - caller must call play() after setting up handlers
     return audio;
   }
 

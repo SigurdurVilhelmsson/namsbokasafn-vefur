@@ -192,7 +192,7 @@ export function useTextToSpeech(
         audioRef.current = audio;
         audio.playbackRate = rate;
 
-        // Set up event handlers
+        // Set up event handlers BEFORE playing
         audio.onplay = () => {
           setIsSpeaking(true);
           setIsPaused(false);
@@ -212,13 +212,17 @@ export function useTextToSpeech(
           audioRef.current = null;
         };
 
-        audio.onerror = () => {
+        audio.onerror = (e) => {
+          console.error("Audio playback error:", e);
           setIsSpeaking(false);
           setIsPaused(false);
           setIsLoading(false);
           stopProgressTracking();
           audioRef.current = null;
         };
+
+        // Now play the audio (handlers are set up)
+        await audio.play();
       } catch (error) {
         console.error("TTS Error:", error);
         setIsLoading(false);
