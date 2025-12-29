@@ -95,8 +95,8 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 2.3 Learning Objectives Tracking
 | Task | Status | Notes |
 |------|--------|-------|
-| Add completion checkboxes | ⬜ | |
-| Create self-assessment modal | ⬜ | |
+| Add completion checkboxes | ✅ | Already in LearningObjectives.tsx |
+| Create self-assessment modal | ✅ | SelfAssessmentModal with confidence ratings |
 | Build objectives dashboard | ⬜ | |
 | Link objectives to flashcards | ⬜ | |
 
@@ -113,7 +113,7 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 |------|--------|-------|
 | Integrate Fuse.js for fuzzy search | ✅ | Weighted search with title priority |
 | Add chapter/section filters | ✅ | Chapter dropdown filter in SearchModal |
-| Add search history | ⬜ | |
+| Add search history | ✅ | Recent searches with result counts |
 | Improve result snippets | ✅ | Better context, relevance indicators |
 
 ---
@@ -196,14 +196,28 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Phase | Total Tasks | Completed | In Progress | Percentage |
 |-------|-------------|-----------|-------------|------------|
 | Phase 1 | 32 | 29 | 0 | 91% |
-| Phase 2 | 17 | 11 | 0 | 65% |
+| Phase 2 | 17 | 14 | 0 | 82% |
 | Phase 3 | 17 | 0 | 0 | 0% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **77** | **40** | **0** | **52%** |
+| **Total** | **77** | **43** | **0** | **56%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-29 (Update 6)
+- **Learning Objectives Self-Assessment**:
+  - Added confidence ratings to objectivesStore (1-5 scale)
+  - Created SelfAssessmentModal component
+  - Emoji-based confidence indicators
+  - Summary with average confidence score
+  - Prompt to create flashcards for low-confidence objectives
+- **Search History**:
+  - localStorage-based history (max 10 items)
+  - Recent searches with result counts
+  - Remove individual items or clear all
+  - One-click to repeat search
+- Phase 2 progress: 65% → 82%
 
 ### 2025-12-29 (Update 5)
 - **Fuse.js fuzzy search integration**:

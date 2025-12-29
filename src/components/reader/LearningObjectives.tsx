@@ -1,5 +1,7 @@
-import { CheckCircle2, Circle, Target } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, Circle, Target, ClipboardCheck } from "lucide-react";
 import { useObjectivesStore } from "@/stores/objectivesStore";
+import SelfAssessmentModal from "./SelfAssessmentModal";
 
 interface LearningObjectivesProps {
   objectives: string[];
@@ -17,6 +19,7 @@ export default function LearningObjectives({
     isObjectiveCompleted,
     getSectionObjectivesProgress,
   } = useObjectivesStore();
+  const [showAssessmentModal, setShowAssessmentModal] = useState(false);
 
   const progress = getSectionObjectivesProgress(
     chapterSlug,
@@ -105,11 +108,30 @@ export default function LearningObjectives({
         })}
       </ul>
 
-      {/* Completion message */}
+      {/* Completion message and self-assessment button */}
       {progress.percentage === 100 && (
-        <div className="mt-4 rounded-lg bg-emerald-100 p-3 text-center text-sm text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-          Vel gert! Þú hefur náð öllum markmiðum kaflans.
+        <div className="mt-4 space-y-3">
+          <div className="rounded-lg bg-emerald-100 p-3 text-center text-sm text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+            Vel gert! Þú hefur náð öllum markmiðum kaflans.
+          </div>
+          <button
+            onClick={() => setShowAssessmentModal(true)}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--accent-color)] bg-[var(--accent-color)]/10 px-4 py-2 font-sans text-sm font-medium text-[var(--accent-color)] transition-colors hover:bg-[var(--accent-color)]/20"
+          >
+            <ClipboardCheck size={16} />
+            Meta sjálfstraust
+          </button>
         </div>
+      )}
+
+      {/* Self-assessment modal */}
+      {showAssessmentModal && (
+        <SelfAssessmentModal
+          objectives={objectives}
+          chapterSlug={chapterSlug}
+          sectionSlug={sectionSlug}
+          onClose={() => setShowAssessmentModal(false)}
+        />
       )}
     </div>
   );
