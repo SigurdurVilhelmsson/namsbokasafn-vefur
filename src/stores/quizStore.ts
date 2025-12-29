@@ -23,6 +23,44 @@ import {
 
 const STORAGE_KEY = "efnafraedi-quiz";
 
+// Mastery levels based on success rate and attempts
+export type MasteryLevel = "novice" | "learning" | "practicing" | "proficient" | "mastered";
+
+export interface MasteryInfo {
+  level: MasteryLevel;
+  successRate: number; // 0-100
+  attempts: number;
+  lastAttempted?: string;
+}
+
+// Thresholds for mastery levels
+const MASTERY_THRESHOLDS = {
+  mastered: { minSuccessRate: 90, minAttempts: 3 },
+  proficient: { minSuccessRate: 75, minAttempts: 2 },
+  practicing: { minSuccessRate: 50, minAttempts: 2 },
+  learning: { minSuccessRate: 0, minAttempts: 1 },
+  novice: { minSuccessRate: 0, minAttempts: 0 },
+};
+
+/**
+ * Calculate mastery level from success rate and attempts
+ */
+function calculateMasteryLevel(successRate: number, attempts: number): MasteryLevel {
+  if (attempts >= MASTERY_THRESHOLDS.mastered.minAttempts && successRate >= MASTERY_THRESHOLDS.mastered.minSuccessRate) {
+    return "mastered";
+  }
+  if (attempts >= MASTERY_THRESHOLDS.proficient.minAttempts && successRate >= MASTERY_THRESHOLDS.proficient.minSuccessRate) {
+    return "proficient";
+  }
+  if (attempts >= MASTERY_THRESHOLDS.practicing.minAttempts && successRate >= MASTERY_THRESHOLDS.practicing.minSuccessRate) {
+    return "practicing";
+  }
+  if (attempts >= MASTERY_THRESHOLDS.learning.minAttempts) {
+    return "learning";
+  }
+  return "novice";
+}
+
 interface QuizState {
   // Current quiz session
   currentSession: QuizSession | null;
@@ -57,7 +95,15 @@ interface QuizState {
     answer: string,
   ) => void;
   markPracticeProblemCompleted: (id: string) => void;
+  markPracticeProblemAttempt: (id: string, success: boolean) => void;
   getPracticeProblemProgress: (id: string) => PracticeProblem | undefined;
+
+  // Mastery tracking
+  getProblemMastery: (id: string) => MasteryInfo;
+  getSectionMastery: (chapterSlug: string, sectionSlug: string) => MasteryInfo;
+  getChapterMastery: (chapterSlug: string) => MasteryInfo;
+  getProblemsForReview: (limit?: number) => PracticeProblem[];
+  getAdaptiveProblems: (chapterSlug?: string, limit?: number) => PracticeProblem[];
 
   // Stats
   getSectionStats: (chapterSlug: string, sectionSlug: string) => QuizStats;
@@ -288,13 +334,14 @@ export const useQuizStore = create<QuizState>()(
                 sectionSlug,
                 isCompleted: false,
                 attempts: 0,
+                successfulAttempts: 0,
               },
             },
           });
         }
       },
 
-      // Mark practice problem as completed
+      // Mark practice problem as completed (successful)
       markPracticeProblemCompleted: (id) => {
         const { practiceProblemProgress } = get();
         const problem = practiceProblemProgress[id];
@@ -307,6 +354,28 @@ export const useQuizStore = create<QuizState>()(
                 ...problem,
                 isCompleted: true,
                 attempts: problem.attempts + 1,
+                successfulAttempts: problem.successfulAttempts + 1,
+                lastAttempted: new Date().toISOString(),
+              },
+            },
+          });
+        }
+      },
+
+      // Record attempt with success/failure
+      markPracticeProblemAttempt: (id, success) => {
+        const { practiceProblemProgress } = get();
+        const problem = practiceProblemProgress[id];
+
+        if (problem) {
+          set({
+            practiceProblemProgress: {
+              ...practiceProblemProgress,
+              [id]: {
+                ...problem,
+                isCompleted: success ? true : problem.isCompleted,
+                attempts: problem.attempts + 1,
+                successfulAttempts: success ? problem.successfulAttempts + 1 : problem.successfulAttempts,
                 lastAttempted: new Date().toISOString(),
               },
             },
@@ -317,6 +386,165 @@ export const useQuizStore = create<QuizState>()(
       // Get practice problem progress
       getPracticeProblemProgress: (id) => {
         return get().practiceProblemProgress[id];
+      },
+
+      // Get mastery info for a specific problem
+      getProblemMastery: (id) => {
+        const problem = get().practiceProblemProgress[id];
+        if (!problem) {
+          return { level: "novice" as MasteryLevel, successRate: 0, attempts: 0 };
+        }
+        const successRate = problem.attempts > 0
+          ? Math.round((problem.successfulAttempts / problem.attempts) * 100)
+          : 0;
+        return {
+          level: calculateMasteryLevel(successRate, problem.attempts),
+          successRate,
+          attempts: problem.attempts,
+          lastAttempted: problem.lastAttempted,
+        };
+      },
+
+      // Get mastery info for a section
+      getSectionMastery: (chapterSlug, sectionSlug) => {
+        const { practiceProblemProgress } = get();
+        const problems = filterItemsBySection(
+          Object.values(practiceProblemProgress),
+          chapterSlug,
+          sectionSlug,
+        );
+
+        if (problems.length === 0) {
+          return { level: "novice" as MasteryLevel, successRate: 0, attempts: 0 };
+        }
+
+        const totalAttempts = problems.reduce((sum, p) => sum + p.attempts, 0);
+        const totalSuccessful = problems.reduce((sum, p) => sum + p.successfulAttempts, 0);
+        const successRate = totalAttempts > 0
+          ? Math.round((totalSuccessful / totalAttempts) * 100)
+          : 0;
+
+        const lastAttempted = problems
+          .map(p => p.lastAttempted)
+          .filter(Boolean)
+          .sort()
+          .pop();
+
+        return {
+          level: calculateMasteryLevel(successRate, Math.min(...problems.map(p => p.attempts))),
+          successRate,
+          attempts: totalAttempts,
+          lastAttempted,
+        };
+      },
+
+      // Get mastery info for a chapter
+      getChapterMastery: (chapterSlug) => {
+        const { practiceProblemProgress } = get();
+        const problems = filterItemsByChapter(
+          Object.values(practiceProblemProgress),
+          chapterSlug,
+        );
+
+        if (problems.length === 0) {
+          return { level: "novice" as MasteryLevel, successRate: 0, attempts: 0 };
+        }
+
+        const totalAttempts = problems.reduce((sum, p) => sum + p.attempts, 0);
+        const totalSuccessful = problems.reduce((sum, p) => sum + p.successfulAttempts, 0);
+        const successRate = totalAttempts > 0
+          ? Math.round((totalSuccessful / totalAttempts) * 100)
+          : 0;
+
+        const lastAttempted = problems
+          .map(p => p.lastAttempted)
+          .filter(Boolean)
+          .sort()
+          .pop();
+
+        return {
+          level: calculateMasteryLevel(successRate, Math.min(...problems.map(p => p.attempts))),
+          successRate,
+          attempts: totalAttempts,
+          lastAttempted,
+        };
+      },
+
+      // Get problems that need review (low mastery or recently failed)
+      getProblemsForReview: (limit = 10) => {
+        const { practiceProblemProgress } = get();
+        const problems = Object.values(practiceProblemProgress);
+
+        // Sort by priority: not completed, low success rate, then oldest attempted
+        return problems
+          .filter(p => p.attempts > 0) // Only include problems that have been attempted
+          .sort((a, b) => {
+            // Prioritize not completed
+            if (!a.isCompleted && b.isCompleted) return -1;
+            if (a.isCompleted && !b.isCompleted) return 1;
+
+            // Then by success rate (lower = higher priority)
+            const aRate = a.attempts > 0 ? a.successfulAttempts / a.attempts : 0;
+            const bRate = b.attempts > 0 ? b.successfulAttempts / b.attempts : 0;
+            if (aRate !== bRate) return aRate - bRate;
+
+            // Then by oldest attempt (older = higher priority)
+            const aTime = a.lastAttempted ? new Date(a.lastAttempted).getTime() : 0;
+            const bTime = b.lastAttempted ? new Date(b.lastAttempted).getTime() : 0;
+            return aTime - bTime;
+          })
+          .slice(0, limit);
+      },
+
+      // Get problems for adaptive practice (mix of mastery levels)
+      getAdaptiveProblems: (chapterSlug, limit = 5) => {
+        const { practiceProblemProgress } = get();
+        let problems = Object.values(practiceProblemProgress);
+
+        // Filter by chapter if provided
+        if (chapterSlug) {
+          problems = filterItemsByChapter(problems, chapterSlug);
+        }
+
+        // Categorize by mastery
+        const byMastery: Record<MasteryLevel, PracticeProblem[]> = {
+          novice: [],
+          learning: [],
+          practicing: [],
+          proficient: [],
+          mastered: [],
+        };
+
+        problems.forEach(p => {
+          const successRate = p.attempts > 0 ? (p.successfulAttempts / p.attempts) * 100 : 0;
+          const level = calculateMasteryLevel(successRate, p.attempts);
+          byMastery[level].push(p);
+        });
+
+        // Build adaptive set: prioritize lower mastery, but include some higher
+        const result: PracticeProblem[] = [];
+        const distribution = [
+          { level: "novice" as MasteryLevel, count: 2 },
+          { level: "learning" as MasteryLevel, count: 2 },
+          { level: "practicing" as MasteryLevel, count: 1 },
+        ];
+
+        for (const { level, count } of distribution) {
+          const available = byMastery[level];
+          // Shuffle for variety
+          const shuffled = [...available].sort(() => Math.random() - 0.5);
+          result.push(...shuffled.slice(0, count));
+        }
+
+        // Fill remaining slots with any unattempted or low-mastery problems
+        if (result.length < limit) {
+          const remaining = [...byMastery.novice, ...byMastery.learning]
+            .filter(p => !result.includes(p))
+            .sort(() => Math.random() - 0.5);
+          result.push(...remaining.slice(0, limit - result.length));
+        }
+
+        return result.slice(0, limit);
       },
 
       // Get stats for a specific section

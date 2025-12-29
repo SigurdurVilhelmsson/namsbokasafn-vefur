@@ -87,10 +87,10 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 2.2 Enhanced Quiz System
 | Task | Status | Notes |
 |------|--------|-------|
-| Add explanations to practice problems | ⬜ | |
-| Implement hint system | ⬜ | |
-| Create `AdaptiveQuiz.tsx` | ⬜ | |
-| Add mastery tracking | ⬜ | |
+| Add explanations to practice problems | ✅ | :::explanation directive in MarkdownRenderer |
+| Implement hint system | ✅ | :::hint directive with progressive reveal |
+| Create `AdaptiveQuiz.tsx` | ✅ | Adaptive problem selection based on mastery |
+| Add mastery tracking | ✅ | MasteryLevel types, success rate tracking in quizStore |
 
 ### 2.3 Learning Objectives Tracking
 | Task | Status | Notes |
@@ -196,14 +196,26 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Phase | Total Tasks | Completed | In Progress | Percentage |
 |-------|-------------|-----------|-------------|------------|
 | Phase 1 | 32 | 29 | 0 | 91% |
-| Phase 2 | 17 | 14 | 0 | 82% |
+| Phase 2 | 20 | 18 | 0 | 90% |
 | Phase 3 | 17 | 0 | 0 | 0% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **77** | **43** | **0** | **56%** |
+| **Total** | **80** | **47** | **0** | **59%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-29 (Update 7)
+- **Enhanced Quiz System complete**:
+  - Added `:::explanation` directive for practice problem explanations
+  - Added `:::hint` directive with progressive reveal (multiple hints)
+  - Updated InteractivePracticeProblem.tsx with hint/explanation support
+  - Created AdaptiveQuiz.tsx component for adaptive learning
+  - Added mastery tracking (MasteryLevel: novice→mastered)
+  - Extended PracticeProblem type with successfulAttempts
+  - Added quizStore methods: getProblemMastery, getSectionMastery, getChapterMastery
+  - Added getProblemsForReview and getAdaptiveProblems for smart problem selection
+- Phase 2 progress: 82% → 90%
 
 ### 2025-12-29 (Update 6)
 - **Learning Objectives Self-Assessment**:
