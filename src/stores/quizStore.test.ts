@@ -649,5 +649,71 @@ describe("quizStore", () => {
       expect(stats.averageScore).toBe(50); // (100 + 0) / 2
       expect(stats.bestScore).toBe(100);
     });
+
+    it("should handle nextQuestion when no session is active", () => {
+      // Ensure no session is active
+      act(() => {
+        useQuizStore.getState().resetSession();
+      });
+
+      const initialIndex = useQuizStore.getState().currentQuestionIndex;
+
+      // Try to navigate without a session
+      act(() => {
+        useQuizStore.getState().nextQuestion();
+      });
+
+      // Should not change anything
+      expect(useQuizStore.getState().currentQuestionIndex).toBe(initialIndex);
+    });
+
+    it("should handle markPracticeProblemCompleted for non-existent problem", () => {
+      const store = useQuizStore.getState();
+      const initialProgress = { ...store.practiceProblemProgress };
+
+      // Try to complete a problem that doesn't exist
+      act(() => {
+        store.markPracticeProblemCompleted("non-existent-id");
+      });
+
+      // Should not change anything
+      const state = useQuizStore.getState();
+      expect(state.practiceProblemProgress).toEqual(initialProgress);
+    });
+
+    it("should return zero average score when no questions answered in aggregated stats", () => {
+      // Get chapter stats for a chapter with no quiz attempts
+      const state = useQuizStore.getState();
+      const stats = state.getChapterStats("non-existent-chapter");
+
+      expect(stats.averageScore).toBe(0);
+      expect(stats.questionsAnswered).toBe(0);
+    });
+
+    it("should track lastAttempted in aggregated stats", () => {
+      const store = useQuizStore.getState();
+
+      // Complete sessions in two different sections
+      act(() => {
+        store.startQuizSession([mockQuestions[0]], "01", "1-1");
+        store.answerQuestion(createAnswer("q1", true, "a"));
+        store.endSession();
+      });
+
+      // Advance time
+      vi.advanceTimersByTime(1000);
+
+      act(() => {
+        store.startQuizSession([mockQuestions[1]], "01", "1-2");
+        store.answerQuestion(createAnswer("q2", true, "b"));
+        store.endSession();
+      });
+
+      const state = useQuizStore.getState();
+      const chapterStats = state.getChapterStats("01");
+
+      // Should have the latest attempt time
+      expect(chapterStats.lastAttempted).toBeDefined();
+    });
   });
 });
