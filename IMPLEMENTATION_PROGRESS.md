@@ -26,12 +26,13 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 1.2 Text-to-Speech Integration
 | Task | Status | Notes |
 |------|--------|-------|
-| Create `useTextToSpeech.ts` hook | ✅ | Web Speech API wrapper |
+| Create `useTextToSpeech.ts` hook | ✅ | Piper TTS with WASM (replaced Web Speech API) |
 | Add TTS controls component | ✅ | Play/pause, speed, voice selection (TTSControls.tsx) |
 | Integrate with `SectionView.tsx` | ✅ | Read section content |
 | Handle equation content | ✅ | Skip or describe math blocks |
+| Add Icelandic voice support | ✅ | 4 voices: Steinn, Búi, Salka, Ugla (Piper TTS) |
+| Store voice preferences | ✅ | localStorage with voice ID and playback rate |
 | Add follow-along highlighting | ⬜ | Highlight current sentence (future enhancement) |
-| Store voice preferences | ⬜ | In settingsStore (future enhancement) |
 
 ### 1.3 WCAG 2.2 Compliance
 | Task | Status | Notes |
@@ -195,15 +196,37 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 
 | Phase | Total Tasks | Completed | In Progress | Percentage |
 |-------|-------------|-----------|-------------|------------|
-| Phase 1 | 32 | 29 | 0 | 91% |
+| Phase 1 | 33 | 31 | 0 | 94% |
 | Phase 2 | 20 | 20 | 0 | 100% |
 | Phase 3 | 17 | 8 | 0 | 47% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **80** | **57** | **0** | **71%** |
+| **Total** | **81** | **59** | **0** | **73%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-29 (Update 10)
+- **Icelandic TTS with Piper**:
+  - Replaced Web Speech API with Piper TTS (client-side WASM)
+  - Added @mintplex-labs/piper-tts-web package
+  - Created piperTts.ts service with voice management
+  - 4 Icelandic voices from Talrómur/Reykjavík University:
+    - Steinn (male, default)
+    - Búi (male)
+    - Salka (female)
+    - Ugla (female)
+  - Voice models (~56 MB each) cached in browser OPFS
+  - Works offline after initial download
+  - Rewrote useTextToSpeech.ts hook for Piper integration
+  - Updated TTSControls.tsx with:
+    - Download progress indicator
+    - Voice selection grid with gender labels
+    - Preload button for faster first playback
+    - Info about offline capability
+  - Voice preferences stored in localStorage
+- Phase 1 progress: 91% → 94%
+- Overall progress: 71% → 73%
 
 ### 2025-12-29 (Update 9)
 - **Interactive Periodic Table complete**:
