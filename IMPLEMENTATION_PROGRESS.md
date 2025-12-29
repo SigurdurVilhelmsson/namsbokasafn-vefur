@@ -123,18 +123,18 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 3.1 Interactive Periodic Table
 | Task | Status | Notes |
 |------|--------|-------|
-| Create `PeriodicTable.tsx` | ⬜ | |
-| Add element detail modal | ⬜ | |
-| Integrate with glossary | ⬜ | |
-| Add keyboard navigation | ⬜ | |
+| Create `PeriodicTable.tsx` | ✅ | Full 118 element grid with category colors |
+| Add element detail modal | ✅ | Modal with atomic/electronic/physical properties |
+| Integrate with glossary | ✅ | Link to search glossary from element modal |
+| Add keyboard navigation | ✅ | Arrow keys for grid, Esc to close, Enter to select |
 
 ### 3.2 Figure Viewer
 | Task | Status | Notes |
 |------|--------|-------|
-| Create `FigureViewer.tsx` with zoom | ⬜ | |
-| Add figure numbering system | ⬜ | |
-| Ensure all figures have alt text | ⬜ | |
-| Add lightbox functionality | ⬜ | |
+| Create `FigureViewer.tsx` with zoom | ✅ | Mouse wheel zoom, pan with drag |
+| Add figure numbering system | ✅ | Chapter.Figure format (e.g., Mynd 1.1) |
+| Ensure all figures have alt text | ✅ | Alt text shown in caption and aria-label |
+| Add lightbox functionality | ✅ | Full screen with keyboard nav, download |
 
 ### 3.3 Cross-Reference System
 | Task | Status | Notes |
@@ -197,13 +197,44 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 |-------|-------------|-----------|-------------|------------|
 | Phase 1 | 32 | 29 | 0 | 91% |
 | Phase 2 | 20 | 20 | 0 | 100% |
-| Phase 3 | 17 | 0 | 0 | 0% |
+| Phase 3 | 17 | 8 | 0 | 47% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **80** | **49** | **0** | **61%** |
+| **Total** | **80** | **57** | **0** | **71%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-29 (Update 9)
+- **Interactive Periodic Table complete**:
+  - Created elements.ts with all 118 elements data
+  - Icelandic names, electron configurations, physical properties
+  - Category color scheme with background/border/text colors
+  - Created PeriodicTable.tsx with standard 18-column grid layout
+  - Element cells show atomic number, symbol, name, mass
+  - Category filter with color-coded legend
+  - Search by name (Icelandic/English), symbol, or atomic number
+  - Element detail modal with:
+    - Atomic properties (number, mass, period, group, block)
+    - Electronic properties (configuration, oxidation states, electronegativity)
+    - Physical properties (melting/boiling point, density)
+    - Phase at room temperature (computed from melting/boiling points)
+  - Keyboard navigation with arrow keys, Enter to select, Esc to close
+  - Navigation between elements with prev/next buttons
+  - Link to glossary search from modal
+  - Created PeriodicTablePage.tsx at /lotukerfi route
+- **Figure Viewer complete**:
+  - Created FigureViewer.tsx with zoom and lightbox functionality
+  - Figure numbering with chapter.figure format (e.g., "Mynd 1.1")
+  - Mouse wheel zoom (0.5x-4x) with pan support
+  - Lightbox mode with full-screen viewing
+  - Keyboard shortcuts: +/- for zoom, 0 to reset, Esc to close
+  - Download button for saving images
+  - Gallery navigation with arrow keys and prev/next buttons
+  - Loading and error states
+  - Alt text displayed in caption and aria-label
+- Phase 3 progress: 0% → 47%
+- Overall progress: 61% → 71%
 
 ### 2025-12-29 (Update 8)
 - **Phase 2 Complete! (100%)**:

@@ -16,6 +16,9 @@ const PracticeProgressPage = lazy(
 const ObjectivesDashboardPage = lazy(
   () => import("@/components/reader/ObjectivesDashboardPage"),
 );
+const PeriodicTablePage = lazy(
+  () => import("@/components/reader/PeriodicTablePage"),
+);
 
 // Loading fallback component
 function PageLoader() {
@@ -68,6 +71,14 @@ function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <ObjectivesDashboardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="lotukerfi"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <PeriodicTablePage />
               </Suspense>
             }
           />
