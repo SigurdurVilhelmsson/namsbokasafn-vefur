@@ -32,6 +32,14 @@ Opnar kennslubækur á íslensku - gagnvirkur veflesari fyrir íslenskar þýði
 - **Sveigjanlegt** - Hannað fyrir síma, spjaldtölvur og tölvur
 - **Ljóst/dökkt þema** - Sjálfvirk greining á kerfisstillingum
 
+### Nýlega bætt við (desember 2025)
+
+- **Yfirstrikun og athugasemdir** - Merkja texta með litum og bæta við glósum
+- **Lestur á rödd** - Lesa efni upphátt með Web Speech API
+- **Flýtilyklar** - Ítarlegir flýtilyklar fyrir flýtinotendur (ýttu á `?`)
+- **Einbeitingarhamur** - Hreinn leshamur án truflana (ýttu á `F`)
+- **Aðgengi (WCAG 2.2)** - Bætt aðgengi fyrir alla notendur
+
 ---
 
 ## Byrjaðu að nota
@@ -188,6 +196,29 @@ Bættu við SVG eða PNG mynd í `public/covers/liffraedi.svg`
 - **react-markdown** 10.1.0 - Markdown rendering
 - **KaTeX** 0.16.11 - Math rendering
 - **Lucide React** 0.555.0 - Icons
+
+---
+
+## Þróunaráætlun
+
+Þetta verkefni er í virkri þróun. Sjá ítarlegri skjöl:
+
+| Skjal | Lýsing |
+|-------|--------|
+| [RECOMMENDATIONS.md](./RECOMMENDATIONS.md) | Ítarlegar umbótaráætlanir í 4 þrepum |
+| [IMPLEMENTATION_PROGRESS.md](./IMPLEMENTATION_PROGRESS.md) | Framvindumæling fyrir öll verkefni |
+| [MARKDOWN-GUIDE.md](./MARKDOWN-GUIDE.md) | Leiðbeiningar um markdown snið |
+| [LANGUAGE_GUIDE.md](./LANGUAGE_GUIDE.md) | Tungumálastefna (íslenska/enska) |
+| [DEPLOYMENT-GUIDE.md](./DEPLOYMENT-GUIDE.md) | Leiðbeiningar um uppsetningu |
+
+### Staða framvindu
+
+| Þrep | Lýsing | Framvinda |
+|------|--------|-----------|
+| Þrep 1 | Grunnupplifun (aðgengi, yfirstrikun, TTS) | 69% |
+| Þrep 2 | Námsaðstoð (minniskort, próf) | 18% |
+| Þrep 3 | Vísindalegir eiginleikar | 0% |
+| Þrep 4 | Háþróaðir eiginleikar | 0% |
 
 ---
 
