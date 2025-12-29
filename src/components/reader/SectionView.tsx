@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Check, Bookmark } from "lucide-react";
+import { Check, Bookmark, Highlighter, Volume2 } from "lucide-react";
 import {
   loadTableOfContents,
   loadSectionContent,
@@ -12,6 +12,9 @@ import MarkdownRenderer from "./MarkdownRenderer";
 import NavigationButtons from "./NavigationButtons";
 import LearningObjectives from "./LearningObjectives";
 import ContentAttribution from "./ContentAttribution";
+import TextHighlighter from "./TextHighlighter";
+import TTSControls from "./TTSControls";
+import AnnotationSidebar from "./AnnotationSidebar";
 import type {
   SectionContent,
   NavigationContext,
@@ -29,6 +32,10 @@ export default function SectionView() {
   const [navigation, setNavigation] = useState<NavigationContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // New Phase 1 state
+  const [showAnnotationSidebar, setShowAnnotationSidebar] = useState(false);
+  const [showTTSControls, setShowTTSControls] = useState(false);
 
   const {
     markAsRead,
@@ -199,8 +206,8 @@ export default function SectionView() {
       <article className="px-6 py-8">
         <div className="mx-auto max-w-reading">
           {/* Aðgerðir (actions) */}
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleMarkAsRead}
                 className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-sans font-medium transition-colors ${
@@ -212,6 +219,38 @@ export default function SectionView() {
               >
                 <Check size={16} />
                 {sectionRead ? "Lesið" : "Merkja sem lesið"}
+              </button>
+
+              {/* Annotation sidebar toggle */}
+              <button
+                onClick={() => setShowAnnotationSidebar(!showAnnotationSidebar)}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-sans font-medium transition-colors ${
+                  showAnnotationSidebar
+                    ? "bg-[var(--accent-light)] text-[var(--accent-color)]"
+                    : "border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]"
+                }`}
+                aria-label="Athugasemdir"
+                aria-expanded={showAnnotationSidebar}
+                title="Athugasemdir og yfirstrikun"
+              >
+                <Highlighter size={16} />
+                <span className="hidden sm:inline">Athugasemdir</span>
+              </button>
+
+              {/* TTS toggle */}
+              <button
+                onClick={() => setShowTTSControls(!showTTSControls)}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-sans font-medium transition-colors ${
+                  showTTSControls
+                    ? "bg-[var(--accent-light)] text-[var(--accent-color)]"
+                    : "border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]"
+                }`}
+                aria-label="Lesa upphátt"
+                aria-expanded={showTTSControls}
+                title="Lesa upphátt"
+              >
+                <Volume2 size={16} />
+                <span className="hidden sm:inline">Lesa upphátt</span>
               </button>
 
               {/* ARIA live region for screen readers */}
@@ -236,6 +275,13 @@ export default function SectionView() {
             </button>
           </div>
 
+          {/* TTS Controls (when visible) */}
+          {showTTSControls && content && (
+            <div className="mb-6">
+              <TTSControls content={content.content} />
+            </div>
+          )}
+
           {/* Markmið kafla (learning objectives) */}
           {content.objectives &&
             content.objectives.length > 0 &&
@@ -248,8 +294,14 @@ export default function SectionView() {
               />
             )}
 
-          {/* Markdown efni (markdown content) */}
-          <MarkdownRenderer content={content.content} />
+          {/* Markdown efni (markdown content) - wrapped with TextHighlighter for annotations */}
+          {chapterSlug && sectionSlug ? (
+            <TextHighlighter chapterSlug={chapterSlug} sectionSlug={sectionSlug}>
+              <MarkdownRenderer content={content.content} />
+            </TextHighlighter>
+          ) : (
+            <MarkdownRenderer content={content.content} />
+          )}
 
           {/* Content attribution (CC BY 4.0 license compliance) */}
           <ContentAttribution variant="compact" />
@@ -258,6 +310,14 @@ export default function SectionView() {
 
       {/* Leiðsöguhnappar (navigation buttons) */}
       {navigation && <NavigationButtons navigation={navigation} />}
+
+      {/* Annotation Sidebar */}
+      <AnnotationSidebar
+        isOpen={showAnnotationSidebar}
+        onClose={() => setShowAnnotationSidebar(false)}
+        currentChapter={chapterSlug}
+        currentSection={sectionSlug}
+      />
     </div>
   );
 }

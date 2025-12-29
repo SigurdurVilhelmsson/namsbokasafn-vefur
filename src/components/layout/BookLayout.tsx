@@ -1,12 +1,37 @@
+import { useState, useCallback } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { BookContext, useBookFromParams } from "@/hooks/useBook";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import KeyboardShortcutsModal from "@/components/ui/KeyboardShortcutsModal";
 
 export default function BookLayout() {
   const { fontSize, fontFamily } = useSettingsStore();
   const bookContext = useBookFromParams();
+
+  // Focus mode state
+  const [focusMode, setFocusMode] = useState(false);
+  const [showShortcutsModal, setShowShortcutsModal] = useState(false);
+
+  // Toggle focus mode callback
+  const handleToggleFocusMode = useCallback(() => {
+    setFocusMode((prev) => !prev);
+  }, []);
+
+  // Open shortcuts modal callback
+  const handleOpenShortcuts = useCallback(() => {
+    setShowShortcutsModal(true);
+  }, []);
+
+  // Keyboard shortcuts
+  const { shortcuts } = useKeyboardShortcuts({
+    enabled: true,
+    bookSlug: bookContext.bookSlug,
+    onToggleFocusMode: handleToggleFocusMode,
+    onOpenShortcuts: handleOpenShortcuts,
+  });
 
   // If book doesn't exist, redirect to landing page
   if (!bookContext.book) {
@@ -18,7 +43,7 @@ export default function BookLayout() {
       <div
         className={`min-h-screen font-size-${fontSize} ${
           fontFamily === "sans" ? "font-sans" : "font-serif"
-        }`}
+        } ${focusMode ? "focus-mode" : ""}`}
       >
         {/* Skip to main content link for keyboard navigation */}
         <a
@@ -28,18 +53,43 @@ export default function BookLayout() {
           Hoppa beint í efni
         </a>
 
-        <Header />
+        {/* Hide header in focus mode */}
+        {!focusMode && <Header />}
 
         <div className="flex">
-          <Sidebar />
+          {/* Hide sidebar in focus mode */}
+          {!focusMode && <Sidebar />}
 
           {/* Main content area with max-width for comfortable reading */}
-          <main id="main-content" className="flex-1 overflow-x-hidden lg:ml-80">
+          <main
+            id="main-content"
+            className={`flex-1 overflow-x-hidden ${
+              focusMode ? "" : "lg:ml-80"
+            }`}
+          >
             <div className="mx-auto max-w-7xl px-4 py-6">
               <Outlet />
             </div>
           </main>
         </div>
+
+        {/* Focus mode exit button */}
+        {focusMode && (
+          <button
+            onClick={handleToggleFocusMode}
+            className="fixed bottom-4 right-4 z-50 rounded-full bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white shadow-lg transition-opacity hover:opacity-90"
+            aria-label="Hætta í einbeitingarham"
+          >
+            Hætta í einbeitingarham (F)
+          </button>
+        )}
+
+        {/* Keyboard shortcuts modal */}
+        <KeyboardShortcutsModal
+          isOpen={showShortcutsModal}
+          onClose={() => setShowShortcutsModal(false)}
+          shortcuts={shortcuts}
+        />
       </div>
     </BookContext.Provider>
   );
