@@ -41,8 +41,8 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Enhance focus indicators | ✅ | Visible focus rings on all interactive elements |
 | Add `prefers-reduced-motion` support | ✅ | Disable animations when requested |
 | Add ARIA live regions | ✅ | Announce dynamic content changes |
-| Verify contrast ratios | ⬜ | Minimum 4.5:1 for text |
-| Test with screen reader | ⬜ | NVDA or VoiceOver testing |
+| Verify contrast ratios | ✅ | Updated accent colors (#1a7d5c light, #6ee7b7 dark) for 4.5:1+ |
+| Test with screen reader | ⬜ | NVDA or VoiceOver testing (manual) |
 | Add landmark roles | ✅ | nav, main, aside, etc. |
 
 ### 1.4 Enhanced Math Accessibility
@@ -51,8 +51,8 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Add click-to-copy LaTeX | ✅ | EquationWrapper in MarkdownRenderer.tsx |
 | Add equation zoom modal | ✅ | Zoom modal with enlarged equations |
 | Implement equation numbering | ✅ | CSS counter in globals.css |
-| Add math-to-speech descriptions | ⬜ | Alt text for equations (future) |
-| Create equation wrapper component | ✅ | EquationWrapper with copy/zoom buttons |
+| Add math-to-speech descriptions | ✅ | latexToSpeech() converts LaTeX to Icelandic descriptions |
+| Create equation wrapper component | ✅ | EquationWrapper with copy/zoom/aria-label |
 
 ### 1.5 Keyboard Navigation
 | Task | Status | Notes |
@@ -195,15 +195,26 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 
 | Phase | Total Tasks | Completed | In Progress | Percentage |
 |-------|-------------|-----------|-------------|------------|
-| Phase 1 | 32 | 27 | 0 | 84% |
+| Phase 1 | 32 | 29 | 0 | 91% |
 | Phase 2 | 17 | 3 | 0 | 18% |
 | Phase 3 | 17 | 0 | 0 | 0% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **77** | **30** | **0** | **39%** |
+| **Total** | **77** | **32** | **0** | **42%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-29 (Update 3)
+- **WCAG contrast compliance**: Updated accent colors
+  - Light mode: #5dba9c → #1a7d5c (4.5:1+ contrast)
+  - Dark mode: #5dba9c → #6ee7b7 (better contrast on dark bg)
+  - Added --accent-decorative for non-text elements
+- **Math-to-speech**: Added latexToSpeech() function
+  - Converts LaTeX to Icelandic descriptions
+  - role="math" and aria-label on equations
+  - Supports fractions, powers, Greek letters, chemical notation
+- Phase 1 progress: 84% → 91%
 
 ### 2025-12-29 (Update 2)
 - **Heading hierarchy fix**: Markdown h1→h2, h2→h3 shift in MarkdownRenderer

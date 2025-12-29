@@ -285,10 +285,65 @@ interface EquationWrapperProps {
   isBlock: boolean;
 }
 
+/**
+ * Convert LaTeX to readable Icelandic description for screen readers
+ */
+function latexToSpeech(latex: string): string {
+  if (!latex) return "Stærðfræðijafna";
+
+  const readable = latex
+    // Fractions
+    .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, "($1) deilt með ($2)")
+    // Subscripts and superscripts
+    .replace(/_\{([^}]+)\}/g, " undirskrift $1")
+    .replace(/\^2/g, " í öðru veldi")
+    .replace(/\^3/g, " í þriðja veldi")
+    .replace(/\^\{([^}]+)\}/g, " í $1 veldi")
+    // Common symbols
+    .replace(/\\pm/g, " plús eða mínus ")
+    .replace(/\\times/g, " sinnum ")
+    .replace(/\\div/g, " deilt með ")
+    .replace(/\\sqrt\{([^}]+)\}/g, "kvaðratrótin af $1")
+    .replace(/\\sum/g, "summa")
+    .replace(/\\int/g, "heildi")
+    .replace(/\\infty/g, "óendanleiki")
+    .replace(/\\pi/g, "pí")
+    .replace(/\\alpha/g, "alfa")
+    .replace(/\\beta/g, "beta")
+    .replace(/\\gamma/g, "gamma")
+    .replace(/\\delta/g, "delta")
+    .replace(/\\theta/g, "theta")
+    .replace(/\\lambda/g, "lambda")
+    .replace(/\\mu/g, "mý")
+    .replace(/\\sigma/g, "sigma")
+    .replace(/\\rho/g, "ró")
+    // Chemical notation
+    .replace(/\\ce\{([^}]+)\}/g, "efnajafna: $1")
+    // Clean up remaining LaTeX commands
+    .replace(/\\[a-zA-Z]+/g, " ")
+    .replace(/[{}]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return readable ? `Stærðfræðijafna: ${readable}` : "Stærðfræðijafna";
+}
+
 function EquationWrapper({ children, isBlock }: EquationWrapperProps) {
   const [copied, setCopied] = React.useState(false);
   const [showZoom, setShowZoom] = React.useState(false);
+  const [ariaLabel, setAriaLabel] = React.useState("Stærðfræðijafna");
   const equationRef = React.useRef<HTMLDivElement>(null);
+
+  // Update aria-label after render when ref is available
+  React.useEffect(() => {
+    if (equationRef.current) {
+      const annotation = equationRef.current.querySelector(
+        'annotation[encoding="application/x-tex"]'
+      );
+      const latex = annotation?.textContent || "";
+      setAriaLabel(latexToSpeech(latex));
+    }
+  }, [children]);
 
   // Extract LaTeX source from KaTeX rendered content
   const getLatexSource = (): string => {
@@ -321,13 +376,26 @@ function EquationWrapper({ children, isBlock }: EquationWrapperProps) {
   };
 
   if (!isBlock) {
-    // Inline equations - just render without wrapper
-    return <span ref={equationRef}>{children}</span>;
+    // Inline equations - add role="math" for accessibility
+    return (
+      <span
+        ref={equationRef}
+        role="math"
+        aria-label={ariaLabel}
+      >
+        {children}
+      </span>
+    );
   }
 
   return (
     <>
-      <div className="equation-wrapper group relative my-4">
+      <div
+        className="equation-wrapper group relative my-4"
+        role="math"
+        aria-label={ariaLabel}
+        tabIndex={0}
+      >
         <div ref={equationRef} className="overflow-x-auto py-2">
           {children}
         </div>
