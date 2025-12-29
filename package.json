@@ -23,12 +23,10 @@
     "check:all": "npm run check:security && npm run check:quality && npm run check:deps"
   },
   "dependencies": {
-    "@mintplex-labs/piper-tts-web": "^1.0.4",
     "date-fns": "^4.1.0",
     "fuse.js": "^7.1.0",
     "katex": "^0.16.11",
     "lucide-react": "^0.555.0",
-    "onnxruntime-web": "^1.21.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
