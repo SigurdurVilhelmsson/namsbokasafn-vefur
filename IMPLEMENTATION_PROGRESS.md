@@ -97,8 +97,8 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 |------|--------|-------|
 | Add completion checkboxes | ✅ | Already in LearningObjectives.tsx |
 | Create self-assessment modal | ✅ | SelfAssessmentModal with confidence ratings |
-| Build objectives dashboard | ⬜ | |
-| Link objectives to flashcards | ⬜ | |
+| Build objectives dashboard | ✅ | ObjectivesDashboardPage at /markmid route |
+| Link objectives to flashcards | ✅ | Create flashcards from objectives, bulk create for low-confidence |
 
 ### 2.4 Focus Mode
 | Task | Status | Notes |
@@ -196,14 +196,28 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Phase | Total Tasks | Completed | In Progress | Percentage |
 |-------|-------------|-----------|-------------|------------|
 | Phase 1 | 32 | 29 | 0 | 91% |
-| Phase 2 | 20 | 18 | 0 | 90% |
+| Phase 2 | 20 | 20 | 0 | 100% |
 | Phase 3 | 17 | 0 | 0 | 0% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **80** | **47** | **0** | **59%** |
+| **Total** | **80** | **49** | **0** | **61%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-29 (Update 8)
+- **Phase 2 Complete! (100%)**:
+  - Created ObjectivesDashboardPage at /markmid route
+  - Shows all learning objectives grouped by chapter/section
+  - Displays completion status and confidence ratings
+  - Confidence statistics: average, assessed count, low-confidence count
+  - Expandable/collapsible chapter sections
+  - Create individual flashcards from any objective
+  - Bulk create flashcards for all low-confidence objectives
+  - Auto-creates "Markmið" deck for objective flashcards
+  - Added route in App.tsx
+- Phase 2 progress: 90% → 100%
+- Overall progress: 59% → 61%
 
 ### 2025-12-29 (Update 7)
 - **Enhanced Quiz System complete**:
