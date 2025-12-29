@@ -15,6 +15,7 @@ import ContentAttribution from "./ContentAttribution";
 import TextHighlighter from "./TextHighlighter";
 import TTSControls from "./TTSControls";
 import AnnotationSidebar from "./AnnotationSidebar";
+import InlineFlashcardReview from "./InlineFlashcardReview";
 import type {
   SectionContent,
   NavigationContext,
@@ -301,6 +302,15 @@ export default function SectionView() {
             </TextHighlighter>
           ) : (
             <MarkdownRenderer content={content.content} />
+          )}
+
+          {/* Inline flashcard review at section end */}
+          {chapterSlug && sectionSlug && (
+            <InlineFlashcardReview
+              bookSlug={bookSlug}
+              chapterSlug={chapterSlug}
+              sectionSlug={sectionSlug}
+            />
           )}
 
           {/* Content attribution (CC BY 4.0 license compliance) */}

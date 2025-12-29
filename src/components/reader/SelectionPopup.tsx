@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Highlighter, MessageSquarePlus, X } from "lucide-react";
+import { Highlighter, MessageSquarePlus, X, Sparkles } from "lucide-react";
 import type { HighlightColor, SelectionPosition } from "@/types/annotation";
 
 // =============================================================================
@@ -10,6 +10,7 @@ interface SelectionPopupProps {
   position: SelectionPosition;
   onHighlight: (color: HighlightColor) => void;
   onAddNote: () => void;
+  onCreateFlashcard: () => void;
   onClose: () => void;
 }
 
@@ -33,6 +34,7 @@ export default function SelectionPopup({
   position,
   onHighlight,
   onAddNote,
+  onCreateFlashcard,
   onClose,
 }: SelectionPopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
@@ -116,6 +118,17 @@ export default function SelectionPopup({
         >
           <MessageSquarePlus size={16} />
           <span className="hidden sm:inline">Athugasemd</span>
+        </button>
+
+        {/* Create flashcard button */}
+        <button
+          onClick={onCreateFlashcard}
+          className="flex items-center gap-1 rounded px-2 py-1 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
+          aria-label="Búa til minniskort"
+          title="Búa til minniskort"
+        >
+          <Sparkles size={16} />
+          <span className="hidden sm:inline">Minniskort</span>
         </button>
 
         {/* Close button */}

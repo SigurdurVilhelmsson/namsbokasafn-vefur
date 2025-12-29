@@ -3,6 +3,7 @@ import { useAnnotationStore } from "@/stores/annotationStore";
 import { useBook } from "@/hooks/useBook";
 import SelectionPopup from "./SelectionPopup";
 import NoteModal from "./NoteModal";
+import FlashcardModal from "./FlashcardModal";
 import type {
   HighlightColor,
   TextSelection,
@@ -122,6 +123,8 @@ export default function TextHighlighter({
 
   const [selection, setSelection] = useState<TextSelection | null>(null);
   const [showNoteModal, setShowNoteModal] = useState(false);
+  const [showFlashcardModal, setShowFlashcardModal] = useState(false);
+  const [flashcardText, setFlashcardText] = useState("");
   const [pendingHighlight, setPendingHighlight] = useState<{
     text: string;
     range: TextRange;
@@ -245,6 +248,28 @@ export default function TextHighlighter({
     window.getSelection()?.removeAllRanges();
   }, []);
 
+  // Handle create flashcard action
+  const handleCreateFlashcard = useCallback(() => {
+    if (!selection) return;
+
+    setFlashcardText(selection.text);
+    setShowFlashcardModal(true);
+    setSelection(null);
+    window.getSelection()?.removeAllRanges();
+  }, [selection]);
+
+  // Handle flashcard save
+  const handleFlashcardSave = useCallback(() => {
+    setShowFlashcardModal(false);
+    setFlashcardText("");
+  }, []);
+
+  // Close flashcard modal
+  const handleCloseFlashcardModal = useCallback(() => {
+    setShowFlashcardModal(false);
+    setFlashcardText("");
+  }, []);
+
   // Restore highlights from saved annotations on mount
   useEffect(() => {
     // TODO: Implement highlight restoration from saved annotations
@@ -264,6 +289,7 @@ export default function TextHighlighter({
           position={selection.position}
           onHighlight={handleHighlight}
           onAddNote={handleAddNote}
+          onCreateFlashcard={handleCreateFlashcard}
           onClose={handleClosePopup}
         />
       )}
@@ -274,6 +300,18 @@ export default function TextHighlighter({
           selectedText={pendingHighlight.text}
           onSave={handleSaveNote}
           onClose={handleCloseNoteModal}
+        />
+      )}
+
+      {/* Flashcard modal */}
+      {showFlashcardModal && flashcardText && (
+        <FlashcardModal
+          selectedText={flashcardText}
+          bookSlug={bookSlug}
+          chapterSlug={chapterSlug}
+          sectionSlug={sectionSlug}
+          onSave={handleFlashcardSave}
+          onClose={handleCloseFlashcardModal}
         />
       )}
     </>
