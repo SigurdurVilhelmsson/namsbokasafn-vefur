@@ -79,10 +79,10 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 2.1 Flashcard-Content Integration
 | Task | Status | Notes |
 |------|--------|-------|
-| Add "Create flashcard" to highlight menu | ⬜ | |
-| Create `InlineFlashcardReview.tsx` | ⬜ | |
-| Add review prompt at section end | ⬜ | |
-| Link flashcards to source sections | ⬜ | |
+| Add "Create flashcard" to highlight menu | ✅ | FlashcardModal.tsx, SelectionPopup updated |
+| Create `InlineFlashcardReview.tsx` | ✅ | Inline card review with SM-2 ratings |
+| Add review prompt at section end | ✅ | Integrated in SectionView.tsx |
+| Link flashcards to source sections | ✅ | Source tracking via card.source property |
 
 ### 2.2 Enhanced Quiz System
 | Task | Status | Notes |
@@ -105,7 +105,7 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 |------|--------|-------|
 | Add `focusMode` to settingsStore | ✅ | Implemented in Phase 1 |
 | Modify `BookLayout.tsx` for focus mode | ✅ | Implemented in Phase 1 |
-| Create floating mini-nav | ⬜ | |
+| Create floating mini-nav | ✅ | FocusModeNav.tsx with expand/collapse |
 | Add keyboard shortcut (F) | ✅ | Implemented in Phase 1 |
 
 ### 2.5 Search Improvements
@@ -196,14 +196,31 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Phase | Total Tasks | Completed | In Progress | Percentage |
 |-------|-------------|-----------|-------------|------------|
 | Phase 1 | 32 | 29 | 0 | 91% |
-| Phase 2 | 17 | 3 | 0 | 18% |
+| Phase 2 | 17 | 8 | 0 | 47% |
 | Phase 3 | 17 | 0 | 0 | 0% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **77** | **32** | **0** | **42%** |
+| **Total** | **77** | **37** | **0** | **48%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-29 (Update 4)
+- **Phase 2 Flashcard-Content Integration complete**:
+  - Created FlashcardModal.tsx for creating cards from selected text
+  - Added "Búa til minniskort" button to SelectionPopup
+  - Deck selection and creation support
+  - Source tracking (bookSlug/chapterSlug/sectionSlug)
+  - Created InlineFlashcardReview.tsx for end-of-section review
+  - SM-2 rating buttons with interval preview
+  - Due card prioritization in inline review
+- **Focus Mode floating mini-nav**:
+  - Created FocusModeNav.tsx component
+  - Collapsible navigation bar
+  - Previous/next section navigation
+  - Home and exit focus mode buttons
+  - Current section title display
+- Phase 2 progress: 18% → 47%
 
 ### 2025-12-29 (Update 3)
 - **WCAG contrast compliance**: Updated accent colors

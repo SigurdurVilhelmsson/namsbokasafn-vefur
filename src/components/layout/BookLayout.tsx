@@ -5,6 +5,7 @@ import { BookContext, useBookFromParams } from "@/hooks/useBook";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import FocusModeNav from "./FocusModeNav";
 import KeyboardShortcutsModal from "@/components/ui/KeyboardShortcutsModal";
 
 export default function BookLayout() {
@@ -73,15 +74,12 @@ export default function BookLayout() {
           </main>
         </div>
 
-        {/* Focus mode exit button */}
+        {/* Focus mode floating navigation */}
         {focusMode && (
-          <button
-            onClick={handleToggleFocusMode}
-            className="fixed bottom-4 right-4 z-50 rounded-full bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white shadow-lg transition-opacity hover:opacity-90"
-            aria-label="Hætta í einbeitingarham"
-          >
-            Hætta í einbeitingarham (F)
-          </button>
+          <FocusModeNav
+            bookSlug={bookContext.bookSlug}
+            onExitFocusMode={handleToggleFocusMode}
+          />
         )}
 
         {/* Keyboard shortcuts modal */}
