@@ -1,11 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Loader2, FileText } from "lucide-react";
+import { Search, Loader2, FileText, Filter, X, Sparkles } from "lucide-react";
 import Modal from "./Modal";
 import {
   searchContent,
   highlightQuery,
-  SearchResult,
+  getSearchChapters,
+  buildSearchIndex,
+  type SearchResult,
+  type SearchFilters,
 } from "@/utils/searchIndex";
 import { useBook } from "@/hooks/useBook";
 import { loadTableOfContents } from "@/utils/contentLoader";
@@ -20,18 +23,40 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [indexing, setIndexing] = useState(false);
   const [toc, setToc] = useState<TableOfContents | null>(null);
+  const [chapters, setChapters] = useState<{ slug: string; title: string }[]>(
+    [],
+  );
+  const [selectedChapter, setSelectedChapter] = useState<string>("");
+  const [showFilters, setShowFilters] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { bookSlug } = useBook();
 
-  // Hlaða TOC við upphaf (load TOC on mount)
+  // Load TOC and build search index on mount
   useEffect(() => {
     if (!bookSlug) return;
-    loadTableOfContents(bookSlug).then(setToc);
+
+    const initSearch = async () => {
+      setIndexing(true);
+      try {
+        const loadedToc = await loadTableOfContents(bookSlug);
+        setToc(loadedToc);
+
+        // Build search index in background
+        await buildSearchIndex(loadedToc, bookSlug);
+        setChapters(getSearchChapters());
+      } catch (error) {
+        console.error("Villa við að byggja leitarvísitölu:", error);
+      }
+      setIndexing(false);
+    };
+
+    initSearch();
   }, [bookSlug]);
 
-  // Focus á input þegar modal opnast (focus input when modal opens)
+  // Focus input when modal opens
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
@@ -44,7 +69,6 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         if (!isOpen) {
-          // Opna modal
           setQuery("");
           setResults([]);
         }
@@ -55,7 +79,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen]);
 
-  // Leita þegar query breytist (search when query changes)
+  // Search when query changes
   useEffect(() => {
     const performSearch = async () => {
       if (!toc || query.length < 2 || !bookSlug) {
@@ -64,17 +88,23 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       }
 
       setLoading(true);
-      const searchResults = await searchContent(query, toc, bookSlug);
+
+      const filters: SearchFilters = {};
+      if (selectedChapter) {
+        filters.chapterSlug = selectedChapter;
+      }
+
+      const searchResults = await searchContent(query, toc, bookSlug, filters);
       setResults(searchResults);
       setLoading(false);
     };
 
     const timeoutId = setTimeout(() => {
       performSearch();
-    }, 300); // Debounce
+    }, 200); // Debounce (faster now with indexed search)
 
     return () => clearTimeout(timeoutId);
-  }, [query, toc, bookSlug]);
+  }, [query, toc, bookSlug, selectedChapter]);
 
   const handleResultClick = (result: SearchResult) => {
     navigate(`/${bookSlug}/kafli/${result.chapterSlug}/${result.sectionSlug}`);
@@ -83,10 +113,16 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     setResults([]);
   };
 
+  const clearFilters = () => {
+    setSelectedChapter("");
+  };
+
+  const hasActiveFilters = selectedChapter !== "";
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Leita í bókinni">
       <div className="space-y-4">
-        {/* Leitarreitur (search input) */}
+        {/* Search input */}
         <div className="relative">
           <label htmlFor="search-input" className="sr-only">
             Leita að efni
@@ -101,22 +137,91 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Leitaðu að efni..."
-            className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] py-3 pl-10 pr-4 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:border-[var(--accent-color)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]/20"
+            placeholder="Leitaðu að efni... (styður óbeint samsvörun)"
+            className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] py-3 pl-10 pr-20 text-[var(--text-primary)] placeholder-[var(--text-secondary)] focus:border-[var(--accent-color)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]/20"
           />
-          {loading && (
-            <Loader2
-              className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-[var(--accent-color)]"
-              size={20}
-            />
-          )}
+          <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1">
+            {loading && (
+              <Loader2
+                className="animate-spin text-[var(--accent-color)]"
+                size={18}
+              />
+            )}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`rounded p-1 transition-colors ${
+                showFilters || hasActiveFilters
+                  ? "bg-[var(--accent-color)]/10 text-[var(--accent-color)]"
+                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              }`}
+              aria-label="Síur"
+              title="Síur"
+            >
+              <Filter size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* Ábending (hint) */}
-        {query.length === 0 && (
-          <p className="text-center text-sm text-[var(--text-secondary)]">
-            Sláðu inn að minnsta kosti 2 stafi til að leita
-          </p>
+        {/* Filters */}
+        {showFilters && (
+          <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-3">
+            <div className="flex items-center justify-between">
+              <span className="font-sans text-sm font-medium text-[var(--text-secondary)]">
+                Síur
+              </span>
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center gap-1 rounded px-2 py-1 font-sans text-xs text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10"
+                >
+                  <X size={12} />
+                  Hreinsa
+                </button>
+              )}
+            </div>
+            <div className="mt-2">
+              <label
+                htmlFor="chapter-filter"
+                className="mb-1 block font-sans text-xs text-[var(--text-secondary)]"
+              >
+                Kafli
+              </label>
+              <select
+                id="chapter-filter"
+                value={selectedChapter}
+                onChange={(e) => setSelectedChapter(e.target.value)}
+                className="w-full rounded border border-[var(--border-color)] bg-[var(--bg-secondary)] px-2 py-1.5 font-sans text-sm text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:outline-none"
+              >
+                <option value="">Allir kaflar</option>
+                {chapters.map((chapter) => (
+                  <option key={chapter.slug} value={chapter.slug}>
+                    {chapter.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
+        {/* Indexing indicator */}
+        {indexing && (
+          <div className="flex items-center justify-center gap-2 text-sm text-[var(--text-secondary)]">
+            <Loader2 className="animate-spin" size={16} />
+            Byggir leitarvísitölu...
+          </div>
+        )}
+
+        {/* Hints */}
+        {!indexing && query.length === 0 && (
+          <div className="space-y-2 text-center">
+            <p className="text-sm text-[var(--text-secondary)]">
+              Sláðu inn að minnsta kosti 2 stafi til að leita
+            </p>
+            <p className="flex items-center justify-center gap-1 text-xs text-[var(--text-secondary)]">
+              <Sparkles size={12} className="text-[var(--accent-color)]" />
+              Styður óbeina leit (fuzzy search)
+            </p>
+          </div>
         )}
 
         {query.length > 0 && query.length < 2 && (
@@ -125,10 +230,11 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           </p>
         )}
 
-        {/* Niðurstöður (results) */}
+        {/* Results */}
         {query.length >= 2 && !loading && results.length === 0 && (
           <p className="text-center text-sm text-[var(--text-secondary)]">
-            Engar niðurstöður fundust fyrir "{query}"
+            Engar niðurstöður fundust fyrir &quot;{query}&quot;
+            {selectedChapter && " í völdum kafla"}
           </p>
         )}
 
@@ -137,6 +243,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <p className="text-sm text-[var(--text-secondary)]">
               {results.length}{" "}
               {results.length === 1 ? "niðurstaða" : "niðurstöður"} fundust
+              {selectedChapter && " í völdum kafla"}
             </p>
 
             <div className="max-h-96 space-y-2 overflow-y-auto">
@@ -146,21 +253,29 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   onClick={() => handleResultClick(result)}
                   className="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 text-left transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5"
                 >
-                  <div className="mb-1 flex items-center gap-2">
-                    <FileText
-                      size={16}
-                      className="text-[var(--accent-color)]"
-                    />
-                    <span className="font-sans text-sm font-semibold">
-                      {result.sectionNumber} {result.sectionTitle}
-                    </span>
+                  <div className="mb-1 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <FileText
+                        size={16}
+                        className="text-[var(--accent-color)]"
+                      />
+                      <span className="font-sans text-sm font-semibold">
+                        {result.sectionNumber} {result.sectionTitle}
+                      </span>
+                    </div>
+                    {/* Relevance indicator */}
+                    {result.score < 0.3 && (
+                      <span className="rounded-full bg-green-500/10 px-2 py-0.5 font-sans text-xs text-green-600 dark:text-green-400">
+                        Nákvæm
+                      </span>
+                    )}
                   </div>
                   <p className="mb-2 text-xs text-[var(--text-secondary)]">
                     Kafli {result.chapterTitle}
                   </p>
                   {result.snippet && (
                     <p
-                      className="text-sm text-[var(--text-secondary)]"
+                      className="line-clamp-2 text-sm text-[var(--text-secondary)]"
                       dangerouslySetInnerHTML={{
                         __html: highlightQuery(result.snippet, query),
                       }}

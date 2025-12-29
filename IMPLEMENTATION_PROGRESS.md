@@ -111,10 +111,10 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 2.5 Search Improvements
 | Task | Status | Notes |
 |------|--------|-------|
-| Integrate Fuse.js for fuzzy search | ⬜ | |
-| Add chapter/section filters | ⬜ | |
+| Integrate Fuse.js for fuzzy search | ✅ | Weighted search with title priority |
+| Add chapter/section filters | ✅ | Chapter dropdown filter in SearchModal |
 | Add search history | ⬜ | |
-| Improve result snippets | ⬜ | |
+| Improve result snippets | ✅ | Better context, relevance indicators |
 
 ---
 
@@ -196,14 +196,31 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Phase | Total Tasks | Completed | In Progress | Percentage |
 |-------|-------------|-----------|-------------|------------|
 | Phase 1 | 32 | 29 | 0 | 91% |
-| Phase 2 | 17 | 8 | 0 | 47% |
+| Phase 2 | 17 | 11 | 0 | 65% |
 | Phase 3 | 17 | 0 | 0 | 0% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **77** | **37** | **0** | **48%** |
+| **Total** | **77** | **40** | **0** | **52%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-29 (Update 5)
+- **Fuse.js fuzzy search integration**:
+  - Installed fuse.js for fuzzy matching
+  - Refactored searchIndex.ts with SearchIndex class
+  - Weighted search: titles (3x), chapters (2x), content (1x)
+  - Threshold 0.4 for typo tolerance
+  - Pre-built index for faster searches
+- **Search filters**:
+  - Chapter filter dropdown in SearchModal
+  - Clear filters button
+  - Filter indicator on search button
+- **Improved search results**:
+  - Relevance score indicator ("Nákvæm" for exact matches)
+  - Better snippet context
+  - line-clamp for consistent result sizing
+- Phase 2 progress: 47% → 65%
 
 ### 2025-12-29 (Update 4)
 - **Phase 2 Flashcard-Content Integration complete**:

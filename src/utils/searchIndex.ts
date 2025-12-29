@@ -1,6 +1,10 @@
+import Fuse from "fuse.js";
 import type { TableOfContents } from "@/types/content";
 
-// Gerð fyrir leitarniðurstöðu (search result type)
+// =============================================================================
+// TYPES
+// =============================================================================
+
 export interface SearchResult {
   chapterSlug: string;
   sectionSlug: string;
@@ -9,134 +13,337 @@ export interface SearchResult {
   sectionNumber: string;
   snippet: string;
   matches: number;
+  score: number; // Fuse.js relevance score (0 = perfect match)
 }
 
-// Einfalda textann fyrir leit (normalize text for search)
-function normalizeText(text: string): string {
-  return text
-    .toLowerCase()
-    .normalize("NFD") // Aðskilja accents frá stöfum
-    .replace(/[\u0300-\u036f]/g, "") // Fjarlægja accents
-    .replace(/[^\w\s]/g, " ") // Fjarlægja greinarmerki
-    .replace(/\s+/g, " ") // Sameina bil
-    .trim();
+export interface SearchDocument {
+  chapterSlug: string;
+  sectionSlug: string;
+  chapterTitle: string;
+  sectionTitle: string;
+  sectionNumber: string;
+  content: string;
+  plainText: string;
 }
 
-// Búa til snippet með highlighted query (create snippet with highlighted query)
-function createSnippet(
-  text: string,
-  query: string,
-  contextLength: number = 100,
-): string {
-  const normalized = normalizeText(text);
-  const normalizedQuery = normalizeText(query);
-
-  const index = normalized.indexOf(normalizedQuery);
-  if (index === -1) return "";
-
-  const start = Math.max(0, index - contextLength);
-  const end = Math.min(text.length, index + query.length + contextLength);
-
-  let snippet = text.substring(start, end);
-
-  // Bæta við ... ef við erum ekki við byrjun/enda
-  if (start > 0) snippet = "..." + snippet;
-  if (end < text.length) snippet = snippet + "...";
-
-  return snippet;
+export interface SearchFilters {
+  chapterSlug?: string;
+  onlyTitles?: boolean;
 }
 
-// Leita í efni (search content)
-export async function searchContent(
-  query: string,
-  toc: TableOfContents,
-  bookSlug: string = 'efnafraedi',
-): Promise<SearchResult[]> {
-  if (!query.trim()) return [];
+// =============================================================================
+// SEARCH INDEX CLASS
+// =============================================================================
 
-  const normalizedQuery = normalizeText(query);
-  const results: SearchResult[] = [];
+class SearchIndex {
+  private fuse: Fuse<SearchDocument> | null = null;
+  private documents: SearchDocument[] = [];
+  private bookSlug: string = "";
+  private isBuilding: boolean = false;
+  private buildPromise: Promise<void> | null = null;
 
-  // Fara í gegnum alla kafla (iterate through all chapters)
-  for (const chapter of toc.chapters) {
-    for (const section of chapter.sections) {
-      try {
-        // Hlaða efni kaflans (load section content)
-        const response = await fetch(
-          `/content/${bookSlug}/chapters/${chapter.slug}/${section.file}`,
-        );
-        if (!response.ok) continue;
+  /**
+   * Build the search index from the table of contents
+   */
+  async buildIndex(toc: TableOfContents, bookSlug: string): Promise<void> {
+    // Return existing build promise if already building
+    if (this.isBuilding && this.buildPromise) {
+      return this.buildPromise;
+    }
 
-        const markdown = await response.text();
+    // Skip if already built for this book
+    if (this.fuse && this.bookSlug === bookSlug && this.documents.length > 0) {
+      return;
+    }
 
-        // Fjarlægja frontmatter (remove frontmatter)
-        const contentWithoutFrontmatter = markdown.replace(
-          /^---[\s\S]*?---\n/,
-          "",
-        );
+    this.isBuilding = true;
+    this.bookSlug = bookSlug;
 
-        // Fjarlægja markdown syntax til að fá hreinan texta
-        const plainText = contentWithoutFrontmatter
-          .replace(/#{1,6}\s/g, "") // Headings
-          .replace(/\*\*(.+?)\*\*/g, "$1") // Bold
-          .replace(/\*(.+?)\*/g, "$1") // Italic
-          .replace(/\[(.+?)\]\(.+?\)/g, "$1") // Links
-          .replace(/`{1,3}[^`]+`{1,3}/g, "") // Code
-          .replace(/^\|.+\|$/gm, "") // Tables
-          .replace(/:::.+?:::/gs, ""); // Custom blocks
+    this.buildPromise = this.doBuildIndex(toc, bookSlug);
+    await this.buildPromise;
 
-        const normalizedContent = normalizeText(plainText);
+    this.isBuilding = false;
+    this.buildPromise = null;
+  }
 
-        // Athuga hvort query sé í textanum (check if query is in the text)
-        if (normalizedContent.includes(normalizedQuery)) {
-          // Telja fjölda matches (count matches)
-          const matches = (
-            normalizedContent.match(new RegExp(normalizedQuery, "g")) || []
-          ).length;
+  private async doBuildIndex(
+    toc: TableOfContents,
+    bookSlug: string,
+  ): Promise<void> {
+    const documents: SearchDocument[] = [];
 
-          // Búa til snippet (create snippet)
-          const snippet = createSnippet(plainText, query);
+    // Load all section content
+    for (const chapter of toc.chapters) {
+      for (const section of chapter.sections) {
+        try {
+          const response = await fetch(
+            `/content/${bookSlug}/chapters/${chapter.slug}/${section.file}`,
+          );
+          if (!response.ok) continue;
 
-          results.push({
+          const markdown = await response.text();
+
+          // Remove frontmatter
+          const contentWithoutFrontmatter = markdown.replace(
+            /^---[\s\S]*?---\n/,
+            "",
+          );
+
+          // Create plain text version for searching
+          const plainText = this.markdownToPlainText(contentWithoutFrontmatter);
+
+          documents.push({
             chapterSlug: chapter.slug,
             sectionSlug: section.slug,
             chapterTitle: chapter.title,
             sectionTitle: section.title,
             sectionNumber: section.number,
-            snippet,
-            matches,
+            content: contentWithoutFrontmatter,
+            plainText,
           });
+        } catch (error) {
+          console.error(
+            `Villa við að hlaða ${chapter.slug}/${section.slug}:`,
+            error,
+          );
         }
-      } catch (error) {
-        console.error(
-          `Villa við að leita í ${chapter.slug}/${section.slug}:`,
-          error,
-        );
       }
     }
+
+    this.documents = documents;
+
+    // Configure Fuse.js for fuzzy search
+    this.fuse = new Fuse(documents, {
+      keys: [
+        { name: "sectionTitle", weight: 3 }, // Title matches are most important
+        { name: "chapterTitle", weight: 2 },
+        { name: "plainText", weight: 1 },
+      ],
+      includeScore: true,
+      includeMatches: true,
+      threshold: 0.4, // Allow some fuzziness (0 = exact, 1 = match anything)
+      ignoreLocation: true, // Don't prioritize matches at the start
+      minMatchCharLength: 2,
+      findAllMatches: true,
+      useExtendedSearch: true,
+    });
   }
 
-  // Raða niðurstöðum eftir fjölda matches (sort by number of matches)
-  results.sort((a, b) => b.matches - a.matches);
+  /**
+   * Convert markdown to plain text for searching
+   */
+  private markdownToPlainText(markdown: string): string {
+    return (
+      markdown
+        // Remove headings
+        .replace(/#{1,6}\s/g, "")
+        // Remove bold/italic
+        .replace(/\*\*(.+?)\*\*/g, "$1")
+        .replace(/\*(.+?)\*/g, "$1")
+        .replace(/__(.+?)__/g, "$1")
+        .replace(/_(.+?)_/g, "$1")
+        // Remove links but keep text
+        .replace(/\[(.+?)\]\(.+?\)/g, "$1")
+        // Remove images
+        .replace(/!\[.*?\]\(.+?\)/g, "")
+        // Remove code blocks
+        .replace(/```[\s\S]*?```/g, "")
+        .replace(/`([^`]+)`/g, "$1")
+        // Remove tables
+        .replace(/^\|.+\|$/gm, "")
+        .replace(/^\s*[-|:]+\s*$/gm, "")
+        // Remove custom blocks
+        .replace(/:::.+?:::/gs, "")
+        // Remove LaTeX
+        .replace(/\$\$[\s\S]*?\$\$/g, "")
+        .replace(/\$[^$]+\$/g, "")
+        // Clean up whitespace
+        .replace(/\n{3,}/g, "\n\n")
+        .trim()
+    );
+  }
 
-  return results;
+  /**
+   * Search the index
+   */
+  search(query: string, filters?: SearchFilters): SearchResult[] {
+    if (!this.fuse || !query.trim()) {
+      return [];
+    }
+
+    // Build search pattern for Fuse.js extended search
+    const searchQuery = query;
+
+    // Use Fuse.js search
+    let results = this.fuse.search(searchQuery);
+
+    // Apply filters
+    if (filters?.chapterSlug) {
+      results = results.filter(
+        (r) => r.item.chapterSlug === filters.chapterSlug,
+      );
+    }
+
+    // Convert to SearchResult format
+    return results.slice(0, 20).map((result) => {
+      const doc = result.item;
+      const score = result.score ?? 1;
+
+      // Create snippet from the match
+      const snippet = this.createSnippet(doc.plainText, query);
+
+      // Count approximate matches
+      const normalizedQuery = this.normalizeText(query);
+      const normalizedContent = this.normalizeText(doc.plainText);
+      const matches = (
+        normalizedContent.match(new RegExp(normalizedQuery, "gi")) || []
+      ).length;
+
+      return {
+        chapterSlug: doc.chapterSlug,
+        sectionSlug: doc.sectionSlug,
+        chapterTitle: doc.chapterTitle,
+        sectionTitle: doc.sectionTitle,
+        sectionNumber: doc.sectionNumber,
+        snippet,
+        matches: Math.max(matches, 1),
+        score,
+      };
+    });
+  }
+
+  /**
+   * Normalize text for comparison
+   */
+  private normalizeText(text: string): string {
+    return text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  /**
+   * Create a snippet with context around the match
+   */
+  private createSnippet(
+    text: string,
+    query: string,
+    contextLength: number = 100,
+  ): string {
+    const normalized = this.normalizeText(text);
+    const normalizedQuery = this.normalizeText(query);
+
+    // Find the position of the query
+    const index = normalized.indexOf(normalizedQuery);
+    if (index === -1) {
+      // If exact match not found, return first part of text
+      return text.length > contextLength * 2
+        ? text.substring(0, contextLength * 2) + "..."
+        : text;
+    }
+
+    // Calculate snippet boundaries
+    const start = Math.max(0, index - contextLength);
+    const end = Math.min(text.length, index + query.length + contextLength);
+
+    let snippet = text.substring(start, end);
+
+    // Add ellipsis if not at start/end
+    if (start > 0) snippet = "..." + snippet;
+    if (end < text.length) snippet = snippet + "...";
+
+    return snippet;
+  }
+
+  /**
+   * Check if index is ready
+   */
+  isReady(): boolean {
+    return this.fuse !== null && this.documents.length > 0;
+  }
+
+  /**
+   * Get chapter list for filtering
+   */
+  getChapters(): { slug: string; title: string }[] {
+    const chapters = new Map<string, string>();
+    for (const doc of this.documents) {
+      if (!chapters.has(doc.chapterSlug)) {
+        chapters.set(doc.chapterSlug, doc.chapterTitle);
+      }
+    }
+    return Array.from(chapters.entries()).map(([slug, title]) => ({
+      slug,
+      title,
+    }));
+  }
 }
 
-// Highlight query í texta (highlight query in text)
+// Singleton instance
+const searchIndex = new SearchIndex();
+
+// =============================================================================
+// EXPORTED FUNCTIONS
+// =============================================================================
+
+/**
+ * Build the search index (call once when loading the book)
+ */
+export async function buildSearchIndex(
+  toc: TableOfContents,
+  bookSlug: string,
+): Promise<void> {
+  await searchIndex.buildIndex(toc, bookSlug);
+}
+
+/**
+ * Search content using fuzzy matching
+ */
+export async function searchContent(
+  query: string,
+  toc: TableOfContents,
+  bookSlug: string = "efnafraedi",
+  filters?: SearchFilters,
+): Promise<SearchResult[]> {
+  // Ensure index is built
+  await searchIndex.buildIndex(toc, bookSlug);
+
+  return searchIndex.search(query, filters);
+}
+
+/**
+ * Check if search index is ready
+ */
+export function isSearchIndexReady(): boolean {
+  return searchIndex.isReady();
+}
+
+/**
+ * Get available chapters for filtering
+ */
+export function getSearchChapters(): { slug: string; title: string }[] {
+  return searchIndex.getChapters();
+}
+
+/**
+ * Highlight query in text (for displaying results)
+ */
 export function highlightQuery(text: string, query: string): string {
   if (!query.trim()) return text;
 
-  // Create a regex that matches the query case-insensitively
-  // Escape special regex characters in the query
+  // Escape special regex characters
   const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-  // Use regex with global and case-insensitive flags
+  // Create regex for matching (case-insensitive)
   const regex = new RegExp(`(${escapedQuery})`, "gi");
 
-  // Replace all matches with highlighted version
+  // Replace matches with highlighted version
   return text.replace(
     regex,
     (match) =>
-      `<mark class="bg-yellow-200 dark:bg-yellow-900/50">${match}</mark>`,
+      `<mark class="bg-yellow-200 dark:bg-yellow-900/50 rounded px-0.5">${match}</mark>`,
   );
 }
