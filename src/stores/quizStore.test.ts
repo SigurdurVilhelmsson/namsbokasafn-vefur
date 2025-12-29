@@ -1,0 +1,653 @@
+import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { act } from "@testing-library/react";
+import { useQuizStore } from "./quizStore";
+import type { QuizQuestion, QuizAnswer } from "@/types/quiz";
+
+// =============================================================================
+// TEST DATA
+// =============================================================================
+
+const mockQuestions: QuizQuestion[] = [
+  {
+    id: "q1",
+    type: "multiple-choice",
+    question: "Hvað er atóm?",
+    options: [
+      { id: "a", text: "Minnsta eining efnis", isCorrect: true },
+      { id: "b", text: "Stærsta eining efnis", isCorrect: false },
+    ],
+    chapterSlug: "01-grunnhugmyndir",
+    sectionSlug: "1-1-efnafraedi",
+  },
+  {
+    id: "q2",
+    type: "multiple-choice",
+    question: "Hvað er sameind?",
+    options: [
+      { id: "a", text: "Eitt atóm", isCorrect: false },
+      { id: "b", text: "Tveir eða fleiri atómar", isCorrect: true },
+    ],
+    chapterSlug: "01-grunnhugmyndir",
+    sectionSlug: "1-1-efnafraedi",
+  },
+  {
+    id: "q3",
+    type: "true-false",
+    question: "Vatn er sameind",
+    chapterSlug: "01-grunnhugmyndir",
+    sectionSlug: "1-2-sameindir",
+  },
+];
+
+function createAnswer(
+  questionId: string,
+  isCorrect: boolean,
+  selectedOptionId?: string,
+): QuizAnswer {
+  return {
+    questionId,
+    selectedOptionId,
+    isCorrect,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+// =============================================================================
+// SETUP
+// =============================================================================
+
+describe("quizStore", () => {
+  beforeEach(() => {
+    // Reset store state before each test
+    const store = useQuizStore.getState();
+    act(() => {
+      store.resetSession();
+    });
+    // Clear persisted data
+    useQuizStore.setState({
+      currentSession: null,
+      currentQuestionIndex: 0,
+      showFeedback: false,
+      practiceProblemProgress: {},
+      sessions: [],
+      stats: {},
+    });
+
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-01-15T12:00:00Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  // ===========================================================================
+  // SESSION MANAGEMENT TESTS
+  // ===========================================================================
+
+  describe("startQuizSession", () => {
+    it("should create a new session with questions", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.startQuizSession(mockQuestions, "01-grunnhugmyndir", "1-1-efnafraedi");
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession).not.toBeNull();
+      expect(state.currentSession?.questions).toHaveLength(3);
+      expect(state.currentSession?.chapterSlug).toBe("01-grunnhugmyndir");
+      expect(state.currentSession?.sectionSlug).toBe("1-1-efnafraedi");
+      expect(state.currentQuestionIndex).toBe(0);
+      expect(state.showFeedback).toBe(false);
+    });
+
+    it("should set score to 0 initially", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.startQuizSession(mockQuestions);
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession?.score).toBe(0);
+      expect(state.currentSession?.answers).toHaveLength(0);
+    });
+
+    it("should record start time", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.startQuizSession(mockQuestions);
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession?.startTime).toContain("2024-01-15");
+    });
+  });
+
+  // ===========================================================================
+  // ANSWER QUESTION TESTS
+  // ===========================================================================
+
+  describe("answerQuestion", () => {
+    beforeEach(() => {
+      const store = useQuizStore.getState();
+      act(() => {
+        store.startQuizSession(mockQuestions);
+      });
+    });
+
+    it("should record a correct answer", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.answerQuestion(createAnswer("q1", true, "a"));
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession?.answers).toHaveLength(1);
+      expect(state.currentSession?.answers[0].isCorrect).toBe(true);
+      expect(state.showFeedback).toBe(true);
+    });
+
+    it("should record an incorrect answer", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.answerQuestion(createAnswer("q1", false, "b"));
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession?.answers).toHaveLength(1);
+      expect(state.currentSession?.answers[0].isCorrect).toBe(false);
+    });
+
+    it("should calculate score correctly", () => {
+      const store = useQuizStore.getState();
+
+      // Answer 2 out of 3 correctly
+      act(() => {
+        store.answerQuestion(createAnswer("q1", true, "a"));
+        store.answerQuestion(createAnswer("q2", true, "b"));
+        store.answerQuestion(createAnswer("q3", false, "a"));
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession?.score).toBe(67); // 2/3 = 66.67% rounded to 67%
+    });
+
+    it("should update existing answer when re-answering", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.answerQuestion(createAnswer("q1", false, "b"));
+      });
+
+      // Change answer
+      act(() => {
+        store.answerQuestion(createAnswer("q1", true, "a"));
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession?.answers).toHaveLength(1);
+      expect(state.currentSession?.answers[0].isCorrect).toBe(true);
+    });
+
+    it("should not record answer without active session", () => {
+      // Reset session first
+      act(() => {
+        useQuizStore.getState().resetSession();
+      });
+
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.answerQuestion(createAnswer("q1", true, "a"));
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession).toBeNull();
+    });
+  });
+
+  // ===========================================================================
+  // NAVIGATION TESTS
+  // ===========================================================================
+
+  describe("navigation", () => {
+    beforeEach(() => {
+      const store = useQuizStore.getState();
+      act(() => {
+        store.startQuizSession(mockQuestions);
+      });
+    });
+
+    it("should move to next question", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.nextQuestion();
+      });
+
+      expect(useQuizStore.getState().currentQuestionIndex).toBe(1);
+      expect(useQuizStore.getState().showFeedback).toBe(false);
+    });
+
+    it("should not go past last question", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.nextQuestion();
+        store.nextQuestion();
+        store.nextQuestion(); // Try to go past the end
+      });
+
+      expect(useQuizStore.getState().currentQuestionIndex).toBe(2);
+    });
+
+    it("should move to previous question", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.nextQuestion();
+        store.previousQuestion();
+      });
+
+      expect(useQuizStore.getState().currentQuestionIndex).toBe(0);
+      expect(useQuizStore.getState().showFeedback).toBe(true);
+    });
+
+    it("should not go before first question", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.previousQuestion();
+      });
+
+      expect(useQuizStore.getState().currentQuestionIndex).toBe(0);
+    });
+  });
+
+  // ===========================================================================
+  // END SESSION TESTS
+  // ===========================================================================
+
+  describe("endSession", () => {
+    beforeEach(() => {
+      const store = useQuizStore.getState();
+      act(() => {
+        store.startQuizSession(mockQuestions, "01-grunnhugmyndir", "1-1-efnafraedi");
+        store.answerQuestion(createAnswer("q1", true, "a"));
+        store.answerQuestion(createAnswer("q2", true, "b"));
+      });
+    });
+
+    it("should save session to history", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.endSession();
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.sessions).toHaveLength(1);
+      expect(state.sessions[0].endTime).toBeDefined();
+    });
+
+    it("should clear current session", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.endSession();
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession).toBeNull();
+      expect(state.currentQuestionIndex).toBe(0);
+      expect(state.showFeedback).toBe(false);
+    });
+
+    it("should update stats", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.endSession();
+      });
+
+      const state = useQuizStore.getState();
+      const stats = state.getSectionStats("01-grunnhugmyndir", "1-1-efnafraedi");
+
+      expect(stats.totalAttempts).toBe(1);
+      expect(stats.questionsAnswered).toBe(2);
+      expect(stats.correctAnswers).toBe(2);
+    });
+
+    it("should not end session if none active", () => {
+      act(() => {
+        useQuizStore.getState().resetSession();
+      });
+
+      const initialSessions = useQuizStore.getState().sessions.length;
+
+      act(() => {
+        useQuizStore.getState().endSession();
+      });
+
+      expect(useQuizStore.getState().sessions.length).toBe(initialSessions);
+    });
+  });
+
+  // ===========================================================================
+  // RESET SESSION TESTS
+  // ===========================================================================
+
+  describe("resetSession", () => {
+    it("should clear session without saving", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.startQuizSession(mockQuestions);
+        store.answerQuestion(createAnswer("q1", true, "a"));
+        store.resetSession();
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession).toBeNull();
+      expect(state.sessions).toHaveLength(0);
+    });
+  });
+
+  // ===========================================================================
+  // PRACTICE PROBLEM TESTS
+  // ===========================================================================
+
+  describe("practice problems", () => {
+    it("should mark problem as viewed", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemViewed(
+          "prob-1",
+          "01-grunnhugmyndir",
+          "1-1-efnafraedi",
+          "Reiknaðu...",
+          "Svarið er 42",
+        );
+      });
+
+      const state = useQuizStore.getState();
+      const problem = state.getPracticeProblemProgress("prob-1");
+
+      expect(problem).toBeDefined();
+      expect(problem?.isCompleted).toBe(false);
+      expect(problem?.attempts).toBe(0);
+    });
+
+    it("should not overwrite existing problem progress", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemViewed(
+          "prob-1",
+          "01-grunnhugmyndir",
+          "1-1-efnafraedi",
+          "Original content",
+          "Original answer",
+        );
+        store.markPracticeProblemCompleted("prob-1");
+        // Try to overwrite
+        store.markPracticeProblemViewed(
+          "prob-1",
+          "01-grunnhugmyndir",
+          "1-1-efnafraedi",
+          "New content",
+          "New answer",
+        );
+      });
+
+      const state = useQuizStore.getState();
+      const problem = state.getPracticeProblemProgress("prob-1");
+
+      expect(problem?.content).toBe("Original content");
+      expect(problem?.isCompleted).toBe(true);
+    });
+
+    it("should mark problem as completed", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemViewed(
+          "prob-1",
+          "01-grunnhugmyndir",
+          "1-1-efnafraedi",
+          "Content",
+          "Answer",
+        );
+        store.markPracticeProblemCompleted("prob-1");
+      });
+
+      const state = useQuizStore.getState();
+      const problem = state.getPracticeProblemProgress("prob-1");
+
+      expect(problem?.isCompleted).toBe(true);
+      expect(problem?.attempts).toBe(1);
+      expect(problem?.lastAttempted).toBeDefined();
+    });
+
+    it("should increment attempts on multiple completions", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemViewed(
+          "prob-1",
+          "01-grunnhugmyndir",
+          "1-1-efnafraedi",
+          "Content",
+          "Answer",
+        );
+        store.markPracticeProblemCompleted("prob-1");
+        store.markPracticeProblemCompleted("prob-1");
+        store.markPracticeProblemCompleted("prob-1");
+      });
+
+      const state = useQuizStore.getState();
+      const problem = state.getPracticeProblemProgress("prob-1");
+
+      expect(problem?.attempts).toBe(3);
+    });
+  });
+
+  // ===========================================================================
+  // STATS TESTS
+  // ===========================================================================
+
+  describe("stats", () => {
+    beforeEach(() => {
+      const store = useQuizStore.getState();
+
+      // Complete two sessions in section 1-1
+      act(() => {
+        store.startQuizSession(
+          [mockQuestions[0], mockQuestions[1]],
+          "01-grunnhugmyndir",
+          "1-1-efnafraedi",
+        );
+        store.answerQuestion(createAnswer("q1", true, "a"));
+        store.answerQuestion(createAnswer("q2", true, "b"));
+        store.endSession();
+
+        store.startQuizSession(
+          [mockQuestions[0], mockQuestions[1]],
+          "01-grunnhugmyndir",
+          "1-1-efnafraedi",
+        );
+        store.answerQuestion(createAnswer("q1", false, "b"));
+        store.answerQuestion(createAnswer("q2", true, "b"));
+        store.endSession();
+      });
+
+      // Complete one session in section 1-2
+      act(() => {
+        store.startQuizSession(
+          [mockQuestions[2]],
+          "01-grunnhugmyndir",
+          "1-2-sameindir",
+        );
+        store.answerQuestion(createAnswer("q3", true, "a"));
+        store.endSession();
+      });
+    });
+
+    it("should get section stats", () => {
+      const state = useQuizStore.getState();
+      const stats = state.getSectionStats("01-grunnhugmyndir", "1-1-efnafraedi");
+
+      expect(stats.totalAttempts).toBe(2);
+      expect(stats.questionsAnswered).toBe(4);
+      expect(stats.correctAnswers).toBe(3);
+      expect(stats.bestScore).toBe(100);
+    });
+
+    it("should get chapter stats (aggregated)", () => {
+      const state = useQuizStore.getState();
+      const stats = state.getChapterStats("01-grunnhugmyndir");
+
+      expect(stats.totalAttempts).toBe(3); // 2 + 1
+      expect(stats.questionsAnswered).toBe(5); // 4 + 1
+      expect(stats.correctAnswers).toBe(4); // 3 + 1
+    });
+
+    it("should get total stats", () => {
+      const state = useQuizStore.getState();
+      const stats = state.getTotalStats();
+
+      expect(stats.totalAttempts).toBe(3);
+      expect(stats.questionsAnswered).toBe(5);
+      expect(stats.correctAnswers).toBe(4);
+    });
+
+    it("should return empty stats for non-existent section", () => {
+      const state = useQuizStore.getState();
+      const stats = state.getSectionStats("99-fake", "fake-section");
+
+      expect(stats.totalAttempts).toBe(0);
+      expect(stats.questionsAnswered).toBe(0);
+    });
+  });
+
+  // ===========================================================================
+  // PROGRESS TESTS
+  // ===========================================================================
+
+  describe("progress", () => {
+    beforeEach(() => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        // Add problems to section 1-1
+        store.markPracticeProblemViewed("p1", "01", "1-1", "P1", "A1");
+        store.markPracticeProblemViewed("p2", "01", "1-1", "P2", "A2");
+        store.markPracticeProblemCompleted("p1");
+
+        // Add problems to section 1-2
+        store.markPracticeProblemViewed("p3", "01", "1-2", "P3", "A3");
+        store.markPracticeProblemCompleted("p3");
+
+        // Add problems to chapter 02
+        store.markPracticeProblemViewed("p4", "02", "2-1", "P4", "A4");
+      });
+    });
+
+    it("should get section progress", () => {
+      const state = useQuizStore.getState();
+      const progress = state.getSectionProgress("01", "1-1");
+
+      expect(progress.total).toBe(2);
+      expect(progress.completed).toBe(1);
+      expect(progress.percentage).toBe(50);
+    });
+
+    it("should get chapter progress", () => {
+      const state = useQuizStore.getState();
+      const progress = state.getChapterProgress("01");
+
+      expect(progress.total).toBe(3); // p1, p2, p3
+      expect(progress.completed).toBe(2); // p1, p3
+      expect(progress.percentage).toBe(67); // 2/3 rounded
+    });
+
+    it("should get overall progress", () => {
+      const state = useQuizStore.getState();
+      const progress = state.getOverallProgress();
+
+      expect(progress.total).toBe(4); // All problems
+      expect(progress.completed).toBe(2); // p1, p3
+      expect(progress.percentage).toBe(50);
+    });
+
+    it("should return zero progress for empty section", () => {
+      const state = useQuizStore.getState();
+      const progress = state.getSectionProgress("99", "fake");
+
+      expect(progress.total).toBe(0);
+      expect(progress.completed).toBe(0);
+      expect(progress.percentage).toBe(0);
+    });
+  });
+
+  // ===========================================================================
+  // EDGE CASES
+  // ===========================================================================
+
+  describe("edge cases", () => {
+    it("should handle session with no chapter/section specified", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.startQuizSession(mockQuestions);
+        store.answerQuestion(createAnswer("q1", true, "a"));
+        store.endSession();
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.sessions).toHaveLength(1);
+      expect(state.sessions[0].chapterSlug).toBeUndefined();
+    });
+
+    it("should handle empty questions array", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.startQuizSession([]);
+      });
+
+      const state = useQuizStore.getState();
+      expect(state.currentSession?.questions).toHaveLength(0);
+    });
+
+    it("should calculate average score correctly over multiple attempts", () => {
+      const store = useQuizStore.getState();
+
+      // First attempt: 100%
+      act(() => {
+        store.startQuizSession([mockQuestions[0]], "01", "1-1");
+        store.answerQuestion(createAnswer("q1", true, "a"));
+        store.endSession();
+      });
+
+      // Second attempt: 0%
+      act(() => {
+        store.startQuizSession([mockQuestions[0]], "01", "1-1");
+        store.answerQuestion(createAnswer("q1", false, "b"));
+        store.endSession();
+      });
+
+      const state = useQuizStore.getState();
+      const stats = state.getSectionStats("01", "1-1");
+
+      expect(stats.averageScore).toBe(50); // (100 + 0) / 2
+      expect(stats.bestScore).toBe(100);
+    });
+  });
+});
