@@ -212,6 +212,72 @@ Content`;
     expect(result.metadata.time).toBe("10:30");
     expect(result.metadata.url).toBe("https://example.com");
   });
+
+  it("should ignore array items before any key is defined", () => {
+    // Edge case: array item appears before any key
+    const markdown = `---
+- orphan item
+title: Test
+---
+Content`;
+
+    const result = parseFrontmatter(markdown);
+
+    // The orphan item should be ignored, title should still work
+    expect(result.metadata.title).toBe("Test");
+    expect(Object.keys(result.metadata)).toHaveLength(1);
+  });
+
+  it("should ignore array items when previous key was not an array", () => {
+    // Edge case: array item after a simple value key
+    const markdown = `---
+title: Test
+- should be ignored
+chapter: 1
+---
+Content`;
+
+    const result = parseFrontmatter(markdown);
+
+    // The array item should be ignored since title is not an array
+    expect(result.metadata.title).toBe("Test");
+    expect(result.metadata.chapter).toBe(1);
+  });
+
+  it("should ignore lines without colons that are not array items", () => {
+    // Edge case: line that's not a key:value pair and not an array item
+    const markdown = `---
+title: Test
+this line has no colon
+chapter: 1
+---
+Content`;
+
+    const result = parseFrontmatter(markdown);
+
+    // The invalid line should be ignored
+    expect(result.metadata.title).toBe("Test");
+    expect(result.metadata.chapter).toBe(1);
+    expect(Object.keys(result.metadata)).toHaveLength(2);
+  });
+
+  it("should handle array items correctly after switching from simple value", () => {
+    // Test the isArray flag being properly reset
+    const markdown = `---
+title: Simple
+items:
+- item1
+- item2
+description: Another simple
+---
+Content`;
+
+    const result = parseFrontmatter(markdown);
+
+    expect(result.metadata.title).toBe("Simple");
+    expect(result.metadata.items).toEqual(["item1", "item2"]);
+    expect(result.metadata.description).toBe("Another simple");
+  });
 });
 
 // =============================================================================
