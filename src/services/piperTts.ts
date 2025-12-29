@@ -5,6 +5,44 @@
 
 import * as tts from "@mintplex-labs/piper-tts-web";
 
+// Configure ONNX Runtime to use jsDelivr CDN for WASM files
+// This fixes the 404 error from cdnjs which doesn't have the right files
+// Access ort through window since it's a global from the bundled library
+declare global {
+  interface Window {
+    ort?: {
+      env: {
+        wasm: {
+          wasmPaths: string | Record<string, string>;
+          numThreads: number;
+        };
+      };
+    };
+  }
+}
+
+// Configure WASM paths before any TTS operations
+function configureOnnxRuntime() {
+  // onnxruntime-web exposes 'ort' as a global or we can import it
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const ort = require("onnxruntime-web");
+
+  if (ort?.env?.wasm) {
+    // Use jsDelivr CDN which has all the WASM files
+    ort.env.wasm.wasmPaths = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/";
+    // Disable multi-threading to avoid SharedArrayBuffer issues
+    ort.env.wasm.numThreads = 1;
+    console.log("[PiperTTS] Configured ONNX Runtime WASM paths");
+  }
+}
+
+// Run configuration immediately
+try {
+  configureOnnxRuntime();
+} catch (e) {
+  console.warn("[PiperTTS] Could not configure ONNX Runtime:", e);
+}
+
 // =============================================================================
 // TYPES
 // =============================================================================
