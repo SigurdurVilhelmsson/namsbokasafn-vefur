@@ -236,12 +236,211 @@ function CustomDiv({
 }
 
 // =============================================================================
+// HEADING COMPONENTS (Shift levels: h1→h2, h2→h3, etc.)
+// =============================================================================
+
+/**
+ * Custom heading components that shift heading levels.
+ * Content h1 becomes h2, h2 becomes h3, etc.
+ * This ensures proper heading hierarchy when content is inside a page with its own h1.
+ */
+interface HeadingProps {
+  children?: React.ReactNode;
+  id?: string;
+  className?: string;
+}
+
+// Individual shifted heading components
+function H1Shifted({ children, ...props }: HeadingProps) {
+  return <h2 {...props}>{children}</h2>;
+}
+
+function H2Shifted({ children, ...props }: HeadingProps) {
+  return <h3 {...props}>{children}</h3>;
+}
+
+function H3Shifted({ children, ...props }: HeadingProps) {
+  return <h4 {...props}>{children}</h4>;
+}
+
+function H4Shifted({ children, ...props }: HeadingProps) {
+  return <h5 {...props}>{children}</h5>;
+}
+
+function H5Shifted({ children, ...props }: HeadingProps) {
+  return <h6 {...props}>{children}</h6>;
+}
+
+function H6Shifted({ children, ...props }: HeadingProps) {
+  // h6 stays h6 (can't go lower)
+  return <h6 {...props}>{children}</h6>;
+}
+
+// =============================================================================
+// EQUATION WRAPPER COMPONENT
+// =============================================================================
+
+interface EquationWrapperProps {
+  children: React.ReactNode;
+  isBlock: boolean;
+}
+
+function EquationWrapper({ children, isBlock }: EquationWrapperProps) {
+  const [copied, setCopied] = React.useState(false);
+  const [showZoom, setShowZoom] = React.useState(false);
+  const equationRef = React.useRef<HTMLDivElement>(null);
+
+  // Extract LaTeX source from KaTeX rendered content
+  const getLatexSource = (): string => {
+    if (!equationRef.current) return "";
+    const annotation = equationRef.current.querySelector(
+      'annotation[encoding="application/x-tex"]'
+    );
+    return annotation?.textContent || "";
+  };
+
+  const handleCopy = async () => {
+    const latex = getLatexSource();
+    if (latex) {
+      try {
+        await navigator.clipboard.writeText(latex);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // Fallback for older browsers
+        const textArea = document.createElement("textarea");
+        textArea.value = latex;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    }
+  };
+
+  if (!isBlock) {
+    // Inline equations - just render without wrapper
+    return <span ref={equationRef}>{children}</span>;
+  }
+
+  return (
+    <>
+      <div className="equation-wrapper group relative my-4">
+        <div ref={equationRef} className="overflow-x-auto py-2">
+          {children}
+        </div>
+        <div className="equation-actions absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+          <button
+            onClick={handleCopy}
+            className="rounded bg-[var(--bg-secondary)] px-2 py-1 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
+            title="Afrita LaTeX"
+            aria-label="Afrita LaTeX jöfnu"
+          >
+            {copied ? "✓ Afritað" : "Afrita"}
+          </button>
+          <button
+            onClick={() => setShowZoom(true)}
+            className="rounded bg-[var(--bg-secondary)] px-2 py-1 text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
+            title="Stækka"
+            aria-label="Stækka jöfnu"
+          >
+            ⊕
+          </button>
+        </div>
+      </div>
+
+      {/* Zoom Modal */}
+      {showZoom && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setShowZoom(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Stækkuð jafna"
+        >
+          <div
+            className="max-h-[80vh] max-w-[90vw] overflow-auto rounded-xl bg-[var(--bg-primary)] p-8 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-2xl">{children}</div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={handleCopy}
+                className="rounded bg-[var(--accent-color)] px-4 py-2 text-sm text-white hover:bg-[var(--accent-hover)]"
+              >
+                {copied ? "✓ Afritað" : "Afrita LaTeX"}
+              </button>
+              <button
+                onClick={() => setShowZoom(false)}
+                className="rounded bg-[var(--bg-secondary)] px-4 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--border-color)]"
+              >
+                Loka
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+// =============================================================================
 // MARKDOWN COMPONENTS
 // =============================================================================
 
 const markdownComponents = {
-  // Custom handler for directive containers
-  div: CustomDiv,
+  // Shifted heading components (h1 in content → h2 in DOM, etc.)
+  h1: H1Shifted,
+  h2: H2Shifted,
+  h3: H3Shifted,
+  h4: H4Shifted,
+  h5: H5Shifted,
+  h6: H6Shifted,
+
+  // Math equations with wrapper
+  span: ({
+    className,
+    children,
+    ...props
+  }: {
+    className?: string;
+    children?: React.ReactNode;
+  }) => {
+    // KaTeX inline math has class "katex"
+    if (className?.includes("katex")) {
+      return (
+        <EquationWrapper isBlock={false}>
+          <span className={className} {...props}>
+            {children}
+          </span>
+        </EquationWrapper>
+      );
+    }
+    return (
+      <span className={className} {...props}>
+        {children}
+      </span>
+    );
+  },
+
+  // KaTeX block math - wrap with equation wrapper
+  div: (props: { className?: string; children?: React.ReactNode }) => {
+    const { className, children, ...rest } = props;
+    // KaTeX display math has class "math-display" or contains katex-display
+    if (className?.includes("math-display") || className?.includes("katex-display")) {
+      return (
+        <EquationWrapper isBlock={true}>
+          <div className={className} {...rest}>
+            {children}
+          </div>
+        </EquationWrapper>
+      );
+    }
+    // Fall back to CustomDiv for directives
+    return <CustomDiv className={className} {...rest}>{children}</CustomDiv>;
+  },
 
   // Images - no automatic figcaption from alt text
   img: ({

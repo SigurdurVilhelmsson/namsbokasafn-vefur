@@ -37,7 +37,7 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Task | Status | Notes |
 |------|--------|-------|
 | Add skip navigation links | ✅ | Skip to main content (BookLayout.tsx) |
-| Audit heading hierarchy | ⬜ | Ensure proper h1-h6 structure |
+| Audit heading hierarchy | ✅ | Markdown h1→h2, h2→h3 shift in MarkdownRenderer |
 | Enhance focus indicators | ✅ | Visible focus rings on all interactive elements |
 | Add `prefers-reduced-motion` support | ✅ | Disable animations when requested |
 | Add ARIA live regions | ✅ | Announce dynamic content changes |
@@ -48,11 +48,11 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 1.4 Enhanced Math Accessibility
 | Task | Status | Notes |
 |------|--------|-------|
-| Add click-to-copy LaTeX | ⬜ | Copy button on equations |
-| Add equation zoom modal | ⬜ | Click to enlarge complex equations |
-| Implement equation numbering | ⬜ | Auto-number display equations |
-| Add math-to-speech descriptions | ⬜ | Alt text for equations |
-| Create equation wrapper component | ⬜ | CSS foundation added in globals.css |
+| Add click-to-copy LaTeX | ✅ | EquationWrapper in MarkdownRenderer.tsx |
+| Add equation zoom modal | ✅ | Zoom modal with enlarged equations |
+| Implement equation numbering | ✅ | CSS counter in globals.css |
+| Add math-to-speech descriptions | ⬜ | Alt text for equations (future) |
+| Create equation wrapper component | ✅ | EquationWrapper with copy/zoom buttons |
 
 ### 1.5 Keyboard Navigation
 | Task | Status | Notes |
@@ -195,15 +195,25 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 
 | Phase | Total Tasks | Completed | In Progress | Percentage |
 |-------|-------------|-----------|-------------|------------|
-| Phase 1 | 32 | 22 | 0 | 69% |
+| Phase 1 | 32 | 27 | 0 | 84% |
 | Phase 2 | 17 | 3 | 0 | 18% |
 | Phase 3 | 17 | 0 | 0 | 0% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **77** | **25** | **0** | **32%** |
+| **Total** | **77** | **30** | **0** | **39%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-29 (Update 2)
+- **Heading hierarchy fix**: Markdown h1→h2, h2→h3 shift in MarkdownRenderer
+- **Math accessibility improvements**:
+  - Created EquationWrapper component with copy-to-clipboard
+  - Added zoom modal for enlarged equations
+  - Added CSS for equation numbering (counter-based)
+  - Enhanced equation hover styles
+- Documentation consolidation completed
+- Phase 1 progress: 69% → 84%
 
 ### 2025-12-29
 - Initial implementation matrix created
