@@ -9,7 +9,19 @@
       "Bash(npm run build)",
       "Bash(npm install)",
       "Bash(npm run lint)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(npm run test:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npm run test:coverage:*)",
+      "Bash(npm install:*)",
+      "WebSearch",
+      "Bash(git mv:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:tts.tiro.is)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

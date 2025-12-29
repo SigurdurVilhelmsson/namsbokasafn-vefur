@@ -140,10 +140,10 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 3.3 Cross-Reference System
 | Task | Status | Notes |
 |------|--------|-------|
-| Design reference syntax | ⬜ | |
-| Create reference parser | ⬜ | |
-| Build reference index | ⬜ | |
-| Add hover preview | ⬜ | |
+| Design reference syntax | ✅ | `[ref:type:id]` syntax in remarkCrossReferences.ts |
+| Create reference parser | ✅ | remarkCrossReferences remark plugin |
+| Build reference index | ✅ | referenceStore.ts with auto-indexing on content load |
+| Add hover preview | ✅ | CrossReference.tsx with preview popup |
 
 ### 3.4 New Content Directives
 | Task | Status | Notes |
@@ -198,13 +198,29 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 |-------|-------------|-----------|-------------|------------|
 | Phase 1 | 33 | 31 | 0 | 94% |
 | Phase 2 | 20 | 20 | 0 | 100% |
-| Phase 3 | 17 | 8 | 0 | 47% |
+| Phase 3 | 17 | 12 | 0 | 71% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **81** | **59** | **0** | **73%** |
+| **Total** | **81** | **63** | **0** | **78%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-29 (Update 11)
+- **Cross-Reference System complete**:
+  - Created remarkCrossReferences.ts remark plugin
+  - Syntax: `[ref:type:id]` where type is sec|eq|fig|tbl|def
+  - Created referenceStore.ts for reference indexing
+  - Auto-builds index from content on section load
+  - Created CrossReference.tsx component with:
+    - Hover preview popup with reference details
+    - Type icons for equations, figures, tables, definitions
+    - Link to source location
+    - Keyboard-accessible (focus/blur triggers preview)
+  - Integrated with MarkdownRenderer.tsx
+  - Label anchor syntax: `{#eq:id}` after equations/figures
+- Phase 3 progress: 47% → 71%
+- Overall progress: 73% → 78%
 
 ### 2025-12-29 (Update 10)
 - **Icelandic TTS with Piper**:

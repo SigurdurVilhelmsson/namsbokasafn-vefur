@@ -7,6 +7,7 @@ import {
   findSectionBySlug,
 } from "@/utils/contentLoader";
 import { useReaderStore } from "@/stores/readerStore";
+import { useReferenceStore } from "@/stores/referenceStore";
 import { useBook } from "@/hooks/useBook";
 import MarkdownRenderer from "./MarkdownRenderer";
 import NavigationButtons from "./NavigationButtons";
@@ -47,6 +48,10 @@ export default function SectionView() {
     removeBookmark,
   } = useReaderStore();
 
+  const buildIndexFromContent = useReferenceStore(
+    (state) => state.buildIndexFromContent
+  );
+
   // Hlaða efni kafla (load section content)
   useEffect(() => {
     if (!chapterSlug || !sectionSlug || !bookSlug) return;
@@ -76,6 +81,15 @@ export default function SectionView() {
         // Now load the section content using the file name
         const sectionContent = await loadSectionContent(bookSlug, chapterSlug, section.file);
         setContent(sectionContent);
+
+        // Build reference index from content for cross-references
+        const chapterNumber = parseInt(chapterSlug.replace(/\D/g, ""), 10) || 1;
+        buildIndexFromContent(
+          chapterSlug,
+          sectionSlug,
+          sectionContent.content,
+          chapterNumber
+        );
 
         // Find navigation context
         const chapterIndex = toc.chapters.findIndex(
@@ -136,7 +150,7 @@ export default function SectionView() {
     };
 
     loadContent();
-  }, [chapterSlug, sectionSlug, bookSlug, setCurrentLocation]);
+  }, [chapterSlug, sectionSlug, bookSlug, setCurrentLocation, buildIndexFromContent]);
 
   // Merkja sem lesið þegar notandi skrollar niður (mark as read when scrolling down)
   useEffect(() => {
