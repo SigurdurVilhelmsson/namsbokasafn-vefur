@@ -63,6 +63,19 @@ const DIRECTIVE_CONFIG: Record<
   example: {
     className: "directive-example",
   },
+  definition: {
+    className: "directive-definition",
+    additionalProps: (attrs) => ({ "data-term": attrs.term || undefined }),
+  },
+  "key-concept": {
+    className: "directive-key-concept",
+  },
+  checkpoint: {
+    className: "directive-checkpoint",
+  },
+  "common-misconception": {
+    className: "directive-common-misconception",
+  },
 };
 
 // =============================================================================
@@ -141,40 +154,121 @@ function LightbulbIcon({ className = "h-6 w-6" }: IconProps) {
   );
 }
 
+function BookOpenIcon({ className = "h-6 w-6" }: IconProps) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+      />
+    </svg>
+  );
+}
+
+function KeyIcon({ className = "h-6 w-6" }: IconProps) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+      />
+    </svg>
+  );
+}
+
+function CheckCircleIcon({ className = "h-6 w-6" }: IconProps) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  );
+}
+
+function XCircleIcon({ className = "h-6 w-6" }: IconProps) {
+  return (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  );
+}
+
 // =============================================================================
 // CONTENT BLOCK COMPONENT
 // =============================================================================
 
+type ContentBlockType =
+  | "note"
+  | "warning"
+  | "example"
+  | "definition"
+  | "key-concept"
+  | "checkpoint"
+  | "common-misconception";
+
 interface ContentBlockProps {
-  type: "note" | "warning" | "example";
+  type: ContentBlockType;
   children: React.ReactNode;
+  term?: string; // For definition blocks
 }
 
 /** Titles for each block type (Icelandic) */
-const BLOCK_TITLES: Record<ContentBlockProps["type"], string> = {
+const BLOCK_TITLES: Record<ContentBlockType, string> = {
   note: "Athugið",
   warning: "Viðvörun",
   example: "Dæmi",
+  definition: "Skilgreining",
+  "key-concept": "Lykilhugtak",
+  checkpoint: "Sjálfsmat",
+  "common-misconception": "Algeng misskilning",
 };
 
 /** Icon components for each block type */
-const BLOCK_ICONS: Record<ContentBlockProps["type"], React.ComponentType<IconProps>> = {
+const BLOCK_ICONS: Record<ContentBlockType, React.ComponentType<IconProps>> = {
   note: InfoIcon,
   warning: WarningIcon,
   example: LightbulbIcon,
+  definition: BookOpenIcon,
+  "key-concept": KeyIcon,
+  checkpoint: CheckCircleIcon,
+  "common-misconception": XCircleIcon,
 };
 
-function ContentBlock({ type, children }: ContentBlockProps) {
+function ContentBlock({ type, children, term }: ContentBlockProps) {
   const Icon = BLOCK_ICONS[type];
   const title = BLOCK_TITLES[type];
+
+  // For definitions, show the term as the title if provided
+  const displayTitle = type === "definition" && term ? term : title;
 
   return (
     <div className={`content-block ${type}`}>
       <div className="content-block-icon flex-shrink-0">
         <Icon />
       </div>
-      <div>
-        <h4 className="content-block-title">{title}</h4>
+      <div className="content-block-content">
+        <h4 className="content-block-title">
+          {type === "definition" && term ? (
+            <>
+              <span className="content-block-label">{title}:</span> {term}
+            </>
+          ) : (
+            displayTitle
+          )}
+        </h4>
         <div>{children}</div>
       </div>
     </div>
@@ -215,6 +309,7 @@ function CustomDiv({
   className?: string;
   children?: React.ReactNode;
   "data-problem-id"?: string;
+  "data-term"?: string;
 }) {
   // Practice problem container
   if (className === "practice-problem-container") {
@@ -237,6 +332,24 @@ function CustomDiv({
 
   if (className === "directive-example") {
     return <ContentBlock type="example">{children}</ContentBlock>;
+  }
+
+  // New Phase 3 content blocks
+  if (className === "directive-definition") {
+    const term = props["data-term"];
+    return <ContentBlock type="definition" term={term}>{children}</ContentBlock>;
+  }
+
+  if (className === "directive-key-concept") {
+    return <ContentBlock type="key-concept">{children}</ContentBlock>;
+  }
+
+  if (className === "directive-checkpoint") {
+    return <ContentBlock type="checkpoint">{children}</ContentBlock>;
+  }
+
+  if (className === "directive-common-misconception") {
+    return <ContentBlock type="common-misconception">{children}</ContentBlock>;
   }
 
   // Default div
