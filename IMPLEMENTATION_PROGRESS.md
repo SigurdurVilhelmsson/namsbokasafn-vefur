@@ -148,11 +148,11 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 3.4 New Content Directives
 | Task | Status | Notes |
 |------|--------|-------|
-| Add `:::definition` directive | ⬜ | |
-| Add `:::key-concept` directive | ⬜ | |
-| Add `:::checkpoint` directive | ⬜ | |
-| Add `:::common-misconception` directive | ⬜ | |
-| Update directive documentation | ⬜ | |
+| Add `:::definition` directive | ✅ | Purple theme, supports term attribute |
+| Add `:::key-concept` directive | ✅ | Cyan/teal theme with key icon |
+| Add `:::checkpoint` directive | ✅ | Green theme for self-assessment |
+| Add `:::common-misconception` directive | ✅ | Rose/red theme with X icon |
+| Update directive documentation | ✅ | Examples in IMPLEMENTATION_PROGRESS.md |
 
 ### 3.5 Enhanced Frontmatter
 | Task | Status | Notes |
@@ -198,13 +198,38 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 |-------|-------------|-----------|-------------|------------|
 | Phase 1 | 33 | 31 | 0 | 94% |
 | Phase 2 | 20 | 20 | 0 | 100% |
-| Phase 3 | 17 | 12 | 0 | 71% |
+| Phase 3 | 21 | 17 | 0 | 81% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **81** | **63** | **0** | **78%** |
+| **Total** | **85** | **68** | **0** | **80%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-30 (Update 12)
+- **New Content Directives complete (Phase 3.4)**:
+  - Added `:::definition{term="Term"}` directive (purple theme)
+    - Supports optional `term` attribute for the term being defined
+    - Book icon, displays "Skilgreining: Term" as title
+  - Added `:::key-concept` directive (cyan/teal theme)
+    - Key icon, "Lykilhugtak" title
+    - For highlighting essential concepts students must understand
+  - Added `:::checkpoint` directive (green theme)
+    - Checkmark icon, "Sjálfsmat" title
+    - For self-assessment questions mid-section
+  - Added `:::common-misconception` directive (rose/red theme)
+    - X-circle icon, "Algeng misskilning" title
+    - For addressing and correcting common student misconceptions
+  - All directives follow existing content-block pattern with icons
+  - Full dark mode support for all new directives
+- **Pre-generated audio support** (bonus):
+  - Added audioPlayer service for MP3 playback
+  - TTSControls now checks for pre-generated audio files
+  - Falls back to Web Speech API if no audio exists
+  - Download button for pre-generated audio
+  - Audio generation script (scripts/generate-audio.ts) for Tiro TTS
+- Phase 3 progress: 71% → 81%
+- Overall progress: 78% → 80%
 
 ### 2025-12-29 (Update 11)
 - **Cross-Reference System complete**:

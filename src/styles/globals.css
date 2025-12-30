@@ -447,6 +447,174 @@ body {
   margin-bottom: 0.25rem; /* mb-1 */
 }
 
+/* Label for definition blocks */
+.content-block-label {
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* Content wrapper */
+.content-block-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ========================================== */
+/* NEW CONTENT DIRECTIVES (Phase 3)          */
+/* ========================================== */
+
+/* Definition block - Purple theme */
+.content-block.definition {
+  background-color: #faf5ff; /* bg-purple-50 */
+  border-color: #e9d5ff; /* border-purple-200 */
+}
+
+.dark .content-block.definition {
+  background-color: rgba(88, 28, 135, 0.2); /* bg-purple-900/20 */
+  border-color: rgba(107, 33, 168, 0.3); /* border-purple-800/30 */
+}
+
+.content-block.definition .content-block-title {
+  color: #581c87; /* text-purple-900 */
+}
+
+.dark .content-block.definition .content-block-title {
+  color: #d8b4fe; /* text-purple-300 */
+}
+
+.content-block.definition .content-block-icon {
+  color: #7c3aed; /* text-purple-600 */
+}
+
+.dark .content-block.definition .content-block-icon {
+  color: #a78bfa; /* text-purple-400 */
+}
+
+.content-block.definition p {
+  color: #6b21a8; /* text-purple-800 */
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.definition p {
+  color: #e9d5ff; /* text-purple-200 */
+}
+
+/* Key Concept block - Teal/Cyan theme */
+.content-block.key-concept {
+  background-color: #ecfeff; /* bg-cyan-50 */
+  border-color: #cffafe; /* border-cyan-200 */
+}
+
+.dark .content-block.key-concept {
+  background-color: rgba(22, 78, 99, 0.2); /* bg-cyan-900/20 */
+  border-color: rgba(21, 94, 117, 0.3); /* border-cyan-800/30 */
+}
+
+.content-block.key-concept .content-block-title {
+  color: #164e63; /* text-cyan-900 */
+}
+
+.dark .content-block.key-concept .content-block-title {
+  color: #67e8f9; /* text-cyan-300 */
+}
+
+.content-block.key-concept .content-block-icon {
+  color: #0891b2; /* text-cyan-600 */
+}
+
+.dark .content-block.key-concept .content-block-icon {
+  color: #22d3ee; /* text-cyan-400 */
+}
+
+.content-block.key-concept p {
+  color: #155e75; /* text-cyan-800 */
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.key-concept p {
+  color: #cffafe; /* text-cyan-200 */
+}
+
+/* Checkpoint block - Green theme */
+.content-block.checkpoint {
+  background-color: #f0fdf4; /* bg-green-50 */
+  border-color: #bbf7d0; /* border-green-200 */
+}
+
+.dark .content-block.checkpoint {
+  background-color: rgba(20, 83, 45, 0.2); /* bg-green-900/20 */
+  border-color: rgba(22, 101, 52, 0.3); /* border-green-800/30 */
+}
+
+.content-block.checkpoint .content-block-title {
+  color: #14532d; /* text-green-900 */
+}
+
+.dark .content-block.checkpoint .content-block-title {
+  color: #86efac; /* text-green-300 */
+}
+
+.content-block.checkpoint .content-block-icon {
+  color: #16a34a; /* text-green-600 */
+}
+
+.dark .content-block.checkpoint .content-block-icon {
+  color: #4ade80; /* text-green-400 */
+}
+
+.content-block.checkpoint p {
+  color: #166534; /* text-green-800 */
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.checkpoint p {
+  color: #bbf7d0; /* text-green-200 */
+}
+
+/* Common Misconception block - Red/Rose theme */
+.content-block.common-misconception {
+  background-color: #fff1f2; /* bg-rose-50 */
+  border-color: #fecdd3; /* border-rose-200 */
+}
+
+.dark .content-block.common-misconception {
+  background-color: rgba(136, 19, 55, 0.2); /* bg-rose-900/20 */
+  border-color: rgba(159, 18, 57, 0.3); /* border-rose-800/30 */
+}
+
+.content-block.common-misconception .content-block-title {
+  color: #881337; /* text-rose-900 */
+}
+
+.dark .content-block.common-misconception .content-block-title {
+  color: #fda4af; /* text-rose-300 */
+}
+
+.content-block.common-misconception .content-block-icon {
+  color: #e11d48; /* text-rose-600 */
+}
+
+.dark .content-block.common-misconception .content-block-icon {
+  color: #fb7185; /* text-rose-400 */
+}
+
+.content-block.common-misconception p {
+  color: #9f1239; /* text-rose-800 */
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.common-misconception p {
+  color: #fecdd3; /* text-rose-200 */
+}
+
 /* Practice Problem Block - Interactive with hide/reveal answer */
 .practice-problem {
   margin: 2rem 0; /* my-8 */
