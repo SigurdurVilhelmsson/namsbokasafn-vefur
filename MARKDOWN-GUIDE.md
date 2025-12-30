@@ -2,7 +2,7 @@
 
 This guide shows all the markdown features supported by the Chemistry Reader application.
 
-**🎨 Jump to:** [Currently Implemented](#-currently-implemented-features) | [Future Possibilities](#-future-possibilities-the-ultimate-chemistry-textbook)
+**🎨 Jump to:** [Frontmatter](#-file-structure) | [Basic Formatting](#-basic-text-formatting) | [Math & Chemistry](#-math--chemical-equations) | [Callouts](#-callout-blocks-special-boxes) | [Educational Blocks](#-educational-directive-blocks) | [Cross-References](#-cross-references) | [Future Ideas](#-future-possibilities-the-ultimate-chemistry-textbook)
 
 ---
 
@@ -25,10 +25,45 @@ objectives:
   - First learning objective
   - Second learning objective
   - Third learning objective
+difficulty: intermediate
+keywords:
+  - efnafræði
+  - sýru-basa
+  - pH-gildi
+prerequisites:
+  - Basic algebra
+  - Understanding of atoms
 ---
 ```
 
-The `objectives` list will be displayed in a special card at the top of the section with emerald checkmark icons.
+### Required Fields
+
+| Field | Description |
+|-------|-------------|
+| `title` | Section title displayed in header |
+| `section` | Section number (e.g., "1.3") |
+| `chapter` | Chapter number (integer) |
+
+### Optional Fields
+
+| Field | Description |
+|-------|-------------|
+| `objectives` | Learning objectives shown in emerald card at top |
+| `difficulty` | Content difficulty: `beginner`, `intermediate`, or `advanced` |
+| `keywords` | Topic keywords (shown in collapsible tag list) |
+| `prerequisites` | Required prior knowledge |
+
+### Difficulty Levels
+
+When specified, a colored indicator appears below the section actions:
+
+- **`beginner`** (Byrjandi): Green, 1 bar - introductory content
+- **`intermediate`** (Miðstig): Amber, 2 bars - requires foundational knowledge
+- **`advanced`** (Framhald): Red, 3 bars - complex topics
+
+### Reading Time
+
+Reading time is **automatically calculated** from content length (no frontmatter needed). Uses 180 words/minute for technical content.
 
 ---
 
@@ -247,9 +282,12 @@ Tables are rendered as modern cards with no internal borders.
 
 ## 💡 Callout Blocks (Special Boxes)
 
-The reader supports three types of callout blocks for highlighting important information.
+The reader supports multiple callout block types for highlighting important information.
 
-**Available callout types:** `:::note`, `:::warning`, `:::example`, `:::practice-problem`
+**Available callout types:**
+- Basic: `:::note`, `:::warning`, `:::example`
+- Interactive: `:::practice-problem` (with `:::answer`, `:::hint`, `:::explanation`)
+- Educational: `:::definition`, `:::key-concept`, `:::checkpoint`, `:::common-misconception`
 
 ### Note Block (Blue)
 
@@ -322,6 +360,177 @@ HCl is a strong acid that completely dissociates:
 - Students can attempt the problem before checking the solution
 
 **Why this works:** Active recall (trying before checking) is one of the most effective learning techniques. This format encourages students to engage with problems rather than passively reading solutions.
+
+### Hint Block (Inside Practice Problems)
+
+Use `:::hint` inside practice problems to provide progressive hints:
+
+```markdown
+:::practice-problem
+Calculate the pH of a 0.01 M HCl solution.
+
+:::hint
+Remember that HCl is a strong acid that completely dissociates.
+:::
+
+:::hint
+Use the formula: pH = -log[H⁺]
+:::
+
+:::answer
+**Solution:** pH = -log(0.01) = 2
+:::
+:::
+```
+
+**Features:**
+- Multiple hints can be added (revealed progressively)
+- Yellow/amber theme with lightbulb icon
+- "Sýna vísbendingu" button reveals one hint at a time
+
+### Explanation Block (Inside Practice Problems)
+
+Use `:::explanation` for detailed explanations after the answer:
+
+```markdown
+:::practice-problem
+What is the molar mass of water?
+
+:::answer
+18.015 g/mol
+:::
+
+:::explanation
+Water (H₂O) contains:
+- 2 hydrogen atoms: 2 × 1.008 = 2.016 g/mol
+- 1 oxygen atom: 1 × 15.999 = 15.999 g/mol
+- Total: 2.016 + 15.999 = **18.015 g/mol**
+:::
+:::
+```
+
+**Features:**
+- Appears after answer is revealed
+- Blue theme with info icon
+- "Sýna útskýringu" button
+
+---
+
+## 📚 Educational Directive Blocks
+
+These blocks are designed specifically for educational content.
+
+### Definition Block (Purple)
+
+Use `:::definition` for key term definitions:
+
+```markdown
+:::definition{term="Mólmassi"}
+Mólmassi efnis er massi eins móls af efninu, gefinn upp í grömmum á mól (g/mol).
+:::
+```
+
+**Features:**
+- Purple theme with book icon
+- Optional `term` attribute displays term in title
+- Title shows "Skilgreining: Mólmassi" (or just "Skilgreining" without term)
+
+### Key Concept Block (Cyan/Teal)
+
+Use `:::key-concept` for essential concepts students must understand:
+
+```markdown
+:::key-concept
+Lögmál Avogadros segir að jafnt rúmmál af gasi við sama þrýsting og hitastig innihaldi jafnmargar sameindir.
+:::
+```
+
+**Features:**
+- Cyan/teal theme with key icon
+- Title: "Lykilhugtak"
+- Use for concepts that will be built upon later
+
+### Checkpoint Block (Green)
+
+Use `:::checkpoint` for self-assessment questions mid-section:
+
+```markdown
+:::checkpoint
+Getur þú:
+- Reiknað mólmassa frá efnaformúlu?
+- Umbreytt á milli móla og gramma?
+- Útskýrt mólhugtakið?
+
+Ef ekki, endurskoðaðu kafla 3.2!
+:::
+```
+
+**Features:**
+- Green theme with checkmark icon
+- Title: "Sjálfsmat"
+- Place after major concepts to verify understanding
+
+### Common Misconception Block (Rose/Red)
+
+Use `:::common-misconception` to address frequent student errors:
+
+```markdown
+:::common-misconception
+**Rangt:** "Hiti eykur alltaf hraða efnahvarfa"
+
+**Rétt:** Þótt hiti auki yfirleitt hvarfhraða, geta sum hvörf (exotherm) hægst við kælingu.
+:::
+```
+
+**Features:**
+- Rose/red theme with X-circle icon
+- Title: "Algengur misskilningur"
+- Explicitly teaching misconceptions is highly effective
+
+---
+
+## 🔗 Cross-References
+
+Reference other sections, equations, figures, and definitions using the cross-reference syntax.
+
+### Syntax
+
+```markdown
+[ref:type:id]
+```
+
+**Types:**
+- `sec` - Section reference
+- `eq` - Equation reference
+- `fig` - Figure reference
+- `tbl` - Table reference
+- `def` - Definition reference
+
+### Creating Reference Anchors
+
+Add anchors after equations, figures, or definitions:
+
+```markdown
+$$
+E = mc^2
+$$ {#eq:einstein}
+
+![Periodic table](./images/periodic-table.png) {#fig:periodic}
+```
+
+### Using References
+
+```markdown
+Sjá [ref:eq:einstein] fyrir orku-massa jöfnuna.
+
+Eins og sýnt er í [ref:fig:periodic], eru frumefnin raðað eftir atómtölu.
+```
+
+**Features:**
+- Hover preview shows referenced content
+- Click navigates to source location
+- Type-specific icons (equation, figure, table, definition)
+- Keyboard accessible (focus triggers preview)
 
 ### Multi-paragraph Callouts
 
@@ -648,23 +857,27 @@ Options: Na, K, Fe, Au
 
 ### 📚 Learning Enhancements
 
-#### 8. **Definition Boxes**
+#### 8. **Definition Boxes** ✅ **IMPLEMENTED!**
+
+See the [Definition Block](#definition-block-purple) section above for full documentation.
+
 ```markdown
-:::definition
-**Molarity**: The concentration of a solution expressed as moles of solute per liter of solution (mol/L or M).
+:::definition{term="Molarity"}
+The concentration of a solution expressed as moles of solute per liter of solution (mol/L or M).
 :::
 ```
-**Why:** Distinct purple theme. Easy to scan for key terms. Could auto-generate glossary.
 
-#### 9. **Common Misconceptions**
+#### 9. **Common Misconceptions** ✅ **IMPLEMENTED!**
+
+See the [Common Misconception Block](#common-misconception-block-rosered) section above for full documentation.
+
 ```markdown
-:::misconception
-❌ **Wrong:** "Heat always makes reactions go faster"
+:::common-misconception
+**Rangt:** "Hiti eykur alltaf hraða efnahvarfa"
 
-✅ **Correct:** While heat usually increases reaction rate, some reactions are exothermic and can be slowed by cooling the surroundings.
+**Rétt:** Þótt hiti auki yfirleitt hvarfhraða, geta sum hvörf hægst við kælingu.
 :::
 ```
-**Why:** Addresses confusion head-on. Studies show explicitly teaching misconceptions is highly effective.
 
 #### 10. **Mnemonic Helpers**
 ```markdown
@@ -908,37 +1121,24 @@ Consider:
 
 ### 🎓 Self-Assessment
 
-#### 28. **Quick Check Questions**
-```markdown
-:::quick-check
-Before moving on, can you:
-- [ ] Define molarity
-- [ ] Calculate moles from mass
-- [ ] Explain the mole concept
-- [ ] Convert between concentration units
+#### 28. **Quick Check Questions** ✅ **IMPLEMENTED!**
 
-If not, review Section 3.2!
-:::
-```
-**Why:** Self-assessment promotes metacognition. Students identify gaps before exams.
+See the [Checkpoint Block](#checkpoint-block-green) section above - use `:::checkpoint` for self-assessment:
 
-#### 29. **Progress Checkpoints**
 ```markdown
 :::checkpoint
-🎯 **Checkpoint: You've completed 60% of Chapter 3!**
+Getur þú:
+- Skilgreint mólstyrk
+- Reiknað mól frá massa
+- Útskýrt mólhugtakið
 
-Mastered:
-✅ Molar mass calculations
-✅ Limiting reagents
-
-Still learning:
-⏳ Percent yield
-⏳ Theoretical vs. actual yield
-
-**Next up:** Practice problems on yields
+Ef ekki, endurskoðaðu kafla 3.2!
 :::
 ```
-**Why:** Gamification motivates. Clear progress indicators reduce overwhelm.
+
+#### 29. **Progress Checkpoints** ✅ **IMPLEMENTED!**
+
+The `:::checkpoint` directive serves this purpose. See [Checkpoint Block](#checkpoint-block-green) above.
 
 #### 30. **Flashcard Sets**
 ```markdown
@@ -1029,28 +1229,32 @@ These features are grounded in research on effective learning:
 
 ## 🎯 Implementation Priority
 
-If implementing these features, consider this order:
+**Already Implemented:** ✅
+1. ✅ Hide/reveal answer blocks (`:::practice-problem` with `:::answer`)
+2. ✅ Definition boxes (`:::definition`)
+3. ✅ Safety warnings (`:::warning`)
+4. ✅ Quick check self-assessments (`:::checkpoint`)
+5. ✅ Progress checkpoints (`:::checkpoint`)
+6. ✅ Common misconceptions (`:::common-misconception`)
+7. ✅ Key concepts (`:::key-concept`)
+8. ✅ Hints and explanations (`:::hint`, `:::explanation`)
+9. ✅ Cross-references (`[ref:type:id]`)
 
-**High Impact, Low Complexity:**
-1. Hide/reveal answer blocks
-2. Definition boxes
-3. Safety warnings
-4. Video embeds
-5. Quick check self-assessments
+**Still Available to Implement:**
 
 **High Impact, Medium Complexity:**
-6. Multiple choice quizzes with feedback
-7. Calculators (molarity, pH, etc.)
-8. Flashcard decks
-9. Interactive graphs
-10. Progress checkpoints
+- Multiple choice quizzes with feedback
+- Calculators (molarity, pH, etc.)
+- Flashcard decks (inline)
+- Interactive graphs
+- Video embeds
 
 **High Impact, High Complexity:**
-11. 3D molecule viewers
-12. Simulation integrations
-13. Reaction mechanism animators
-14. Collaborative discussion threads
-15. Adaptive learning paths
+- 3D molecule viewers
+- Simulation integrations
+- Reaction mechanism animators
+- Collaborative discussion threads
+- Adaptive learning paths
 
 ---
 
