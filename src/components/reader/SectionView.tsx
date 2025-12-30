@@ -291,9 +291,14 @@ export default function SectionView() {
           </div>
 
           {/* TTS Controls (when visible) */}
-          {showTTSControls && content && (
+          {showTTSControls && content && chapterSlug && sectionSlug && (
             <div className="mb-6">
-              <TTSControls content={content.content} />
+              <TTSControls
+                content={content.content}
+                bookSlug={bookSlug}
+                chapterSlug={chapterSlug}
+                sectionSlug={sectionSlug}
+              />
             </div>
           )}
 
