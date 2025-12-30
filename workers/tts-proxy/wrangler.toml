@@ -1,6 +1,7 @@
 name = "tts-proxy"
 main = "worker.js"
 compatibility_date = "2024-01-01"
+account_id = "bfc540751152d4b475bf029f054d2f93"
 
 # After deployment, you'll get a URL like:
 # https://tts-proxy.<your-subdomain>.workers.dev
