@@ -122,13 +122,10 @@ export default function TTSControls({
           <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300">
             <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium">Engin íslensk rödd fannst</p>
+              <p className="font-medium">Engin íslensk rödd tiltæk</p>
               <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-                Vafrinn þinn er ekki með íslenska rödd. Textinn verður lesinn á ensku.
-                Til að fá íslenska rödd, farðu í Windows stillingar → Tími og tungumál → Tungumál og svæði → Bæta við tungumáli → Íslenska.
-              </p>
-              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-                Núverandi rödd: <strong>{actualVoiceName}</strong>
+                Vafrinn þinn er ekki með íslenska rödd. Flestir vafrar og stýrikerfi styðja ekki íslensku í talgervi.
+                Textinn verður lesinn með rödd sem er tiltæk ({actualVoiceName}).
               </p>
             </div>
           </div>
@@ -254,7 +251,7 @@ export default function TTSControls({
             </p>
             {!hasIcelandicVoice && (
               <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-                Settu upp íslenskt tungumál í Windows til að fá íslenska rödd.
+                Íslensk talgervirödd er ekki tiltæk í þessum vafra.
               </p>
             )}
           </div>

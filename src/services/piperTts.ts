@@ -123,7 +123,7 @@ class WebSpeechTtsService {
           // Fall back to first available voice
           this.selectedVoice = this.availableVoices[0] || null;
           this.hasIcelandicVoice = false;
-          console.warn("[WebSpeechTTS] No Icelandic voice found. Install Icelandic language pack in Windows Settings > Time & Language > Language & region");
+          console.warn("[WebSpeechTTS] No Icelandic voice found. Most browsers/OS do not include Icelandic TTS voices.");
         }
       };
 
