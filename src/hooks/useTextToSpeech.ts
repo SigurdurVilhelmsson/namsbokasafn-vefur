@@ -26,6 +26,8 @@ export interface TTSState {
   currentText: string;
   progress: number; // 0 to 1 (playback progress)
   downloadProgress: TTSProgress | null;
+  hasIcelandicVoice: boolean; // True if browser has Icelandic voice
+  actualVoiceName: string; // Name of the actual browser voice being used
 }
 
 interface UseTextToSpeechReturn extends TTSState {
@@ -90,6 +92,8 @@ export function useTextToSpeech(
   const [downloadProgress, setDownloadProgress] = useState<TTSProgress | null>(
     null
   );
+  const [hasIcelandicVoice, setHasIcelandicVoice] = useState(false);
+  const [actualVoiceName, setActualVoiceName] = useState("Hleður...");
   const [rate, setRateState] = useState(() => {
     // Try to restore saved rate preference
     if (typeof window !== "undefined") {
@@ -112,7 +116,10 @@ export function useTextToSpeech(
   // Initialize service
   useEffect(() => {
     if (isSupported) {
-      piperTts.initialize().catch(console.error);
+      piperTts.initialize().then(() => {
+        setHasIcelandicVoice(piperTts.hasIcelandicVoice);
+        setActualVoiceName(piperTts.getSelectedVoiceName());
+      }).catch(console.error);
     }
   }, [isSupported]);
 
@@ -272,6 +279,8 @@ export function useTextToSpeech(
     currentText,
     progress,
     downloadProgress,
+    hasIcelandicVoice,
+    actualVoiceName,
     rate,
     speak,
     pause,

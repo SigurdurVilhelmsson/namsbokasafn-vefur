@@ -1,4 +1,4 @@
-import { Play, Pause, Square, Volume2, Settings, Download, Loader2 } from "lucide-react";
+import { Play, Pause, Square, Volume2, Settings, AlertTriangle, Loader2 } from "lucide-react";
 import { useState } from "react";
 import {
   useTextToSpeech,
@@ -27,22 +27,19 @@ export default function TTSControls({
     isLoading,
     isSpeaking,
     isPaused,
-    voices,
     selectedVoice,
     progress,
-    downloadProgress,
+    hasIcelandicVoice,
+    actualVoiceName,
     rate,
     speak,
     pause,
     resume,
     stop,
-    setVoice,
     setRate,
-    preloadVoice,
   } = useTextToSpeech();
 
   const [showSettings, setShowSettings] = useState(false);
-  const [isPreloading, setIsPreloading] = useState(false);
 
   // Don't render if TTS is not supported
   if (!isSupported) {
@@ -65,82 +62,76 @@ export default function TTSControls({
     stop();
   };
 
-  const handlePreloadVoice = async (voiceId: string) => {
-    setIsPreloading(true);
-    try {
-      await preloadVoice(voiceId);
-    } finally {
-      setIsPreloading(false);
-    }
-  };
-
-  // Show download progress
-  const showDownloadProgress =
-    downloadProgress && downloadProgress.stage === "downloading";
-
   if (compact) {
     return (
-      <button
-        onClick={handlePlayPause}
-        disabled={isLoading}
-        className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)] disabled:cursor-wait disabled:opacity-50"
-        aria-label={
-          isLoading
-            ? "Hleður..."
-            : isSpeaking
-              ? isPaused
-                ? "Halda áfram"
-                : "Gera hlé"
-              : "Lesa upphátt"
-        }
-        title={
-          isLoading
-            ? "Hleður röddinni..."
-            : isSpeaking
-              ? isPaused
-                ? "Halda áfram"
-                : "Gera hlé"
-              : "Lesa upphátt"
-        }
-      >
-        {isLoading ? (
-          <Loader2 size={16} className="animate-spin" />
-        ) : isSpeaking && !isPaused ? (
-          <Pause size={16} />
-        ) : (
-          <Volume2 size={16} />
+      <div className="flex items-center gap-2">
+        <button
+          onClick={handlePlayPause}
+          disabled={isLoading}
+          className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] px-3 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)] disabled:cursor-wait disabled:opacity-50"
+          aria-label={
+            isLoading
+              ? "Hleður..."
+              : isSpeaking
+                ? isPaused
+                  ? "Halda áfram"
+                  : "Gera hlé"
+                : "Lesa upphátt"
+          }
+          title={
+            isLoading
+              ? "Hleður röddinni..."
+              : isSpeaking
+                ? isPaused
+                  ? "Halda áfram"
+                  : "Gera hlé"
+                : "Lesa upphátt"
+          }
+        >
+          {isLoading ? (
+            <Loader2 size={16} className="animate-spin" />
+          ) : isSpeaking && !isPaused ? (
+            <Pause size={16} />
+          ) : (
+            <Volume2 size={16} />
+          )}
+          <span className="hidden sm:inline">
+            {isLoading
+              ? "Hleður..."
+              : isSpeaking
+                ? isPaused
+                  ? "Halda áfram"
+                  : "Gera hlé"
+                : "Lesa upphátt"}
+          </span>
+        </button>
+        {!hasIcelandicVoice && (
+          <span title="Engin íslensk rödd fannst - notar enska rödd" className="text-amber-500">
+            <AlertTriangle size={16} />
+          </span>
         )}
-        <span className="hidden sm:inline">
-          {isLoading
-            ? "Hleður..."
-            : isSpeaking
-              ? isPaused
-                ? "Halda áfram"
-                : "Gera hlé"
-              : "Lesa upphátt"}
-        </span>
-      </button>
+      </div>
     );
   }
 
   return (
     <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-4">
-      {/* Download progress banner */}
-      {showDownloadProgress && (
-        <div className="mb-4 rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
-          <div className="mb-2 flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
-            <Download size={16} className="animate-pulse" />
-            <span>Sæki raddlíkan ({selectedVoice.name})...</span>
+      {/* Warning banner if no Icelandic voice */}
+      {!hasIcelandicVoice && (
+        <div className="mb-4 rounded-lg bg-amber-50 p-3 dark:bg-amber-900/20">
+          <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300">
+            <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium">Engin íslensk rödd fannst</p>
+              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                Vafrinn þinn er ekki með íslenska rödd. Textinn verður lesinn á ensku.
+                Til að fá íslenska rödd, farðu í Windows stillingar → Tími og tungumál → Tungumál og svæði → Bæta við tungumáli → Íslenska.
+              </p>
+              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                Núverandi rödd: <strong>{actualVoiceName}</strong>
+              </p>
+            </div>
           </div>
-          <div className="h-2 overflow-hidden rounded-full bg-blue-200 dark:bg-blue-800">
-            <div
-              className="h-full bg-blue-500 transition-all duration-300"
-              style={{ width: `${downloadProgress.percent}%` }}
-            />
-          </div>
-          <p className="mt-1 text-xs text-blue-600 dark:text-blue-400">
-            {downloadProgress.percent}% - Þetta þarf aðeins að gerast einu sinni
-          </p>
         </div>
       )}
 
@@ -149,7 +140,7 @@ export default function TTSControls({
         {/* Play/Pause button */}
         <button
           onClick={handlePlayPause}
-          disabled={isLoading && !showDownloadProgress}
+          disabled={isLoading}
           className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-color)] text-white transition-colors hover:bg-[var(--accent-hover)] disabled:cursor-wait disabled:opacity-50"
           aria-label={
             isLoading
@@ -182,7 +173,7 @@ export default function TTSControls({
         )}
 
         {/* Progress bar */}
-        {isSpeaking && !showDownloadProgress && (
+        {isSpeaking && (
           <div className="flex-1">
             <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-primary)]">
               <div
@@ -200,7 +191,10 @@ export default function TTSControls({
         {!isSpeaking && !isLoading && (
           <div className="flex-1">
             <p className="text-sm text-[var(--text-secondary)]">
-              Rödd: <span className="font-medium">{selectedVoice.name}</span>
+              Rödd: <span className="font-medium">{actualVoiceName}</span>
+              {hasIcelandicVoice && (
+                <span className="ml-1 text-xs text-green-600 dark:text-green-400">(íslenska)</span>
+              )}
             </p>
           </div>
         )}
@@ -223,60 +217,6 @@ export default function TTSControls({
       {/* Settings panel */}
       {showSettings && (
         <div className="mt-4 space-y-4 border-t border-[var(--border-color)] pt-4">
-          {/* Voice selector */}
-          <div>
-            <label
-              htmlFor="tts-voice"
-              className="mb-2 block text-sm font-medium text-[var(--text-secondary)]"
-            >
-              Rödd
-            </label>
-            <div className="grid grid-cols-2 gap-2">
-              {voices.map((voice) => (
-                <button
-                  key={voice.id}
-                  onClick={() => setVoice(voice)}
-                  className={`flex flex-col items-start rounded-lg border p-3 text-left transition-colors ${
-                    selectedVoice.id === voice.id
-                      ? "border-[var(--accent-color)] bg-[var(--accent-light)]"
-                      : "border-[var(--border-color)] hover:bg-[var(--bg-primary)]"
-                  }`}
-                >
-                  <span className="font-medium text-[var(--text-primary)]">
-                    {voice.name}
-                  </span>
-                  <span className="text-xs text-[var(--text-secondary)]">
-                    {voice.gender === "male" ? "Karlrödd" : "Kvenrödd"}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Preload button */}
-          <div>
-            <button
-              onClick={() => handlePreloadVoice(selectedVoice.id)}
-              disabled={isPreloading}
-              className="flex items-center gap-2 rounded-lg border border-[var(--border-color)] px-4 py-2 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-primary)] disabled:cursor-wait disabled:opacity-50"
-            >
-              {isPreloading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>Sæki rödd...</span>
-                </>
-              ) : (
-                <>
-                  <Download size={16} />
-                  <span>Sækja rödd fyrirfram</span>
-                </>
-              )}
-            </button>
-            <p className="mt-1 text-xs text-[var(--text-secondary)]">
-              Sækir raddlíkan (~56 MB) til að hraða upplestur
-            </p>
-          </div>
-
           {/* Speed slider */}
           <div>
             <label
@@ -301,12 +241,22 @@ export default function TTSControls({
             </div>
           </div>
 
-          {/* Info about first-time download */}
+          {/* Voice info */}
           <div className="rounded-lg bg-[var(--bg-primary)] p-3">
-            <p className="text-xs text-[var(--text-secondary)]">
-              <strong>Athugið:</strong> Við fyrstu notkun þarf að sækja raddlíkan
-              (~56 MB). Eftir það er rödd geymd í vafra og virkar án nettengingar.
+            <p className="text-sm font-medium text-[var(--text-primary)]">
+              {selectedVoice.name}
             </p>
+            <p className="text-xs text-[var(--text-secondary)]">
+              {selectedVoice.gender === "male" ? "Karlrödd" : "Kvenrödd"}
+            </p>
+            <p className="mt-2 text-xs text-[var(--text-secondary)]">
+              Vafrarödd: <strong>{actualVoiceName}</strong>
+            </p>
+            {!hasIcelandicVoice && (
+              <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                Settu upp íslenskt tungumál í Windows til að fá íslenska rödd.
+              </p>
+            )}
           </div>
         </div>
       )}

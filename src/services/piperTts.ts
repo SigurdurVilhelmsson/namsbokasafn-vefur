@@ -64,6 +64,7 @@ class WebSpeechTtsService {
   private availableVoices: SpeechSynthesisVoice[] = [];
   private isInitialized = false;
   private selectedVoice: SpeechSynthesisVoice | null = null;
+  public hasIcelandicVoice = false;
 
   /**
    * Initialize the service and load available voices
@@ -99,18 +100,30 @@ class WebSpeechTtsService {
       const loadVoiceList = () => {
         this.availableVoices = this.synthesis!.getVoices();
 
-        // Find best Icelandic voice
+        // Log all available voices for debugging
+        console.log("[WebSpeechTTS] Available voices:",
+          this.availableVoices.map(v => `${v.name} (${v.lang})`).join(", ")
+        );
+
+        // Find best Icelandic voice - check multiple patterns
         const icelandicVoice = this.availableVoices.find(
-          (v) => v.lang.startsWith("is") || v.lang === "is-IS"
+          (v) =>
+            v.lang === "is-IS" ||
+            v.lang === "is" ||
+            v.lang.startsWith("is-") ||
+            v.name.toLowerCase().includes("icelandic") ||
+            v.name.toLowerCase().includes("íslenska")
         );
 
         if (icelandicVoice) {
           this.selectedVoice = icelandicVoice;
-          console.log("[WebSpeechTTS] Found Icelandic voice:", icelandicVoice.name);
+          this.hasIcelandicVoice = true;
+          console.log("[WebSpeechTTS] Found Icelandic voice:", icelandicVoice.name, icelandicVoice.lang);
         } else {
           // Fall back to first available voice
           this.selectedVoice = this.availableVoices[0] || null;
-          console.log("[WebSpeechTTS] No Icelandic voice, using:", this.selectedVoice?.name);
+          this.hasIcelandicVoice = false;
+          console.warn("[WebSpeechTTS] No Icelandic voice found. Install Icelandic language pack in Windows Settings > Time & Language > Language & region");
         }
       };
 
@@ -308,6 +321,20 @@ class WebSpeechTtsService {
    */
   getCurrentAudio(): HTMLAudioElement | null {
     return null;
+  }
+
+  /**
+   * Get the name of the currently selected voice
+   */
+  getSelectedVoiceName(): string {
+    return this.selectedVoice?.name || "Engin rödd";
+  }
+
+  /**
+   * Get all available browser voices
+   */
+  getBrowserVoices(): SpeechSynthesisVoice[] {
+    return this.availableVoices;
   }
 
   /**
