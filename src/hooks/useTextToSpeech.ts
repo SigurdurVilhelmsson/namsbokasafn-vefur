@@ -18,7 +18,7 @@ export interface TTSOptions {
 
 export interface TTSState {
   isSupported: boolean;
-  isLoading: boolean; // True when downloading model or synthesizing
+  isLoading: boolean; // True when synthesizing
   isSpeaking: boolean;
   isPaused: boolean;
   voices: IcelandicVoice[];
@@ -59,11 +59,9 @@ export function useTextToSpeech(
 ): UseTextToSpeechReturn {
   const opts = { ...DEFAULT_OPTIONS, ...options };
 
-  // Check browser support (requires modern browser with WASM support)
+  // Check browser support (Web Speech API)
   const isSupported =
-    typeof window !== "undefined" &&
-    typeof WebAssembly !== "undefined" &&
-    "AudioContext" in window;
+    typeof window !== "undefined" && "speechSynthesis" in window;
 
   // State
   const [isLoading, setIsLoading] = useState(false);
@@ -110,7 +108,6 @@ export function useTextToSpeech(
 
   // Refs
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const progressIntervalRef = useRef<number | null>(null);
 
   // Initialize service
   useEffect(() => {
@@ -140,30 +137,7 @@ export function useTextToSpeech(
   useEffect(() => {
     return () => {
       piperTts.stop();
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-      }
     };
-  }, []);
-
-  // Track playback progress
-  const startProgressTracking = useCallback((audio: HTMLAudioElement) => {
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-    }
-
-    progressIntervalRef.current = window.setInterval(() => {
-      if (audio.duration > 0) {
-        setProgress(audio.currentTime / audio.duration);
-      }
-    }, 100);
-  }, []);
-
-  const stopProgressTracking = useCallback(() => {
-    if (progressIntervalRef.current) {
-      clearInterval(progressIntervalRef.current);
-      progressIntervalRef.current = null;
-    }
   }, []);
 
   // Speak text
@@ -179,7 +153,6 @@ export function useTextToSpeech(
 
       // Stop any ongoing speech
       piperTts.stop();
-      stopProgressTracking();
 
       setCurrentText(text);
       setIsLoading(true);
@@ -199,77 +172,46 @@ export function useTextToSpeech(
 
         console.log("[useTextToSpeech] Got audio element, setting up handlers");
         audioRef.current = audio;
-        audio.playbackRate = rate;
 
-        // Set up event handlers BEFORE playing
-        audio.onplay = () => {
-          console.log("[useTextToSpeech] onplay event fired");
+        // Set up event handlers for the fake audio element
+        audio.addEventListener("play", () => {
+          console.log("[useTextToSpeech] play event fired");
           setIsSpeaking(true);
           setIsPaused(false);
           setIsLoading(false);
-          startProgressTracking(audio);
-        };
+        });
 
-        audio.onpause = () => {
-          console.log("[useTextToSpeech] onpause event fired");
+        audio.addEventListener("pause", () => {
+          console.log("[useTextToSpeech] pause event fired");
           setIsPaused(true);
-        };
+        });
 
-        audio.onended = () => {
-          console.log("[useTextToSpeech] onended event fired");
+        audio.addEventListener("ended", () => {
+          console.log("[useTextToSpeech] ended event fired");
           setIsSpeaking(false);
           setIsPaused(false);
           setProgress(1);
-          stopProgressTracking();
           audioRef.current = null;
-        };
+        });
 
-        audio.onerror = (e) => {
-          console.error("[useTextToSpeech] onerror event fired:", e);
-          console.error("[useTextToSpeech] Audio error code:", (audio as HTMLAudioElement).error?.code);
-          console.error("[useTextToSpeech] Audio error message:", (audio as HTMLAudioElement).error?.message);
+        audio.addEventListener("error", () => {
+          console.error("[useTextToSpeech] error event fired");
           setIsSpeaking(false);
           setIsPaused(false);
           setIsLoading(false);
-          stopProgressTracking();
           audioRef.current = null;
-        };
-
-        // Wait for audio to be ready before playing
-        console.log("[useTextToSpeech] Waiting for audio to be ready...");
-        await new Promise<void>((resolve, reject) => {
-          const onCanPlay = () => {
-            console.log("[useTextToSpeech] canplaythrough event, duration:", audio.duration);
-            audio.removeEventListener("canplaythrough", onCanPlay);
-            audio.removeEventListener("error", onError);
-            resolve();
-          };
-          const onError = () => {
-            audio.removeEventListener("canplaythrough", onCanPlay);
-            audio.removeEventListener("error", onError);
-            reject(new Error("Audio failed to load"));
-          };
-          audio.addEventListener("canplaythrough", onCanPlay);
-          audio.addEventListener("error", onError);
-
-          // If already ready, resolve immediately
-          if (audio.readyState >= 4) {
-            console.log("[useTextToSpeech] Audio already ready");
-            resolve();
-          }
         });
 
-        // Now play the audio (handlers are set up, audio is loaded)
-        console.log("[useTextToSpeech] Calling audio.play()...");
-        await audio.play();
-        console.log("[useTextToSpeech] audio.play() resolved, duration:", audio.duration);
+        // Web Speech API auto-starts, so just set state
+        setIsSpeaking(true);
+        setIsLoading(false);
       } catch (error) {
         console.error("[useTextToSpeech] TTS Error:", error);
         setIsLoading(false);
         setIsSpeaking(false);
       }
     },
-    [isSupported, rate, selectedVoice.id, startProgressTracking, stopProgressTracking]
+    [isSupported, selectedVoice.id]
   );
 
   // Pause speech
@@ -287,35 +229,26 @@ export function useTextToSpeech(
   // Stop speech
   const stop = useCallback(() => {
     piperTts.stop();
-    stopProgressTracking();
     setIsSpeaking(false);
     setIsPaused(false);
     setProgress(0);
     setCurrentText("");
     setIsLoading(false);
     audioRef.current = null;
-  }, [stopProgressTracking]);
+  }, []);
 
   // Set voice
   const setVoice = useCallback((voice: IcelandicVoice) => {
     setSelectedVoice(voice);
   }, []);
 
-  // Set rate
-  const setRate = useCallback(
-    (newRate: number) => {
-      const clampedRate = Math.max(0.5, Math.min(2, newRate));
-      setRateState(clampedRate);
+  // Set rate (note: Web Speech API rate is set per utterance, not dynamically)
+  const setRate = useCallback((newRate: number) => {
+    const clampedRate = Math.max(0.5, Math.min(2, newRate));
+    setRateState(clampedRate);
+  }, []);
 
-      // Update current audio if playing
-      if (audioRef.current) {
-        audioRef.current.playbackRate = clampedRate;
-      }
-    },
-    []
-  );
-
-  // Preload a voice for faster playback later
+  // Preload a voice (no-op for Web Speech API)
   const preloadVoice = useCallback(
     async (voiceId: string) => {
       if (!isSupported) return;

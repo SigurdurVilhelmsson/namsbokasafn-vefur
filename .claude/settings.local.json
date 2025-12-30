@@ -21,7 +21,17 @@
       "Bash(git mv:*)",
       "WebFetch(domain:github.com)",
       "WebFetch(domain:tts.tiro.is)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(npx wrangler deploy)",
+      "Bash(set CLOUDFLARE_API_TOKEN=kbcIzJpTd5ahM7KcSMOf_BxpVMQrB0N4tAWFYa0s)",
+      "Bash($env:CLOUDFLARE_API_TOKEN=\"kbcIzJpTd5ahM7KcSMOf_BxpVMQrB0N4tAWFYa0s\")",
+      "Bash(CLOUDFLARE_API_TOKEN=kbcIzJpTd5ahM7KcSMOf_BxpVMQrB0N4tAWFYa0s npx wrangler deploy:*)",
+      "Bash(CLOUDFLARE_API_TOKEN=xLO_4cNAL1S5nSnKx4NGS-EgIppK9ApUTmb7sUBT npx wrangler:*)",
+      "Bash(export CLOUDFLARE_API_TOKEN=xLO_4cNAL1S5nSnKx4NGS-EgIppK9ApUTmb7sUBT)",
+      "Bash(curl:*)",
+      "WebFetch(domain:repository.clarin.is)",
+      "WebFetch(domain:tiro.is)",
+      "WebFetch(domain:ttsmp3.com)"
     ]
   }
 }

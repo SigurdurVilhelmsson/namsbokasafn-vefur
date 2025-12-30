@@ -1,7 +1,7 @@
 // =============================================================================
-// TIRO TTS SERVICE
-// Icelandic text-to-speech using Tiro.is TTS API
-// https://tts.tiro.is - Icelandic Language Technology Programme
+// WEB SPEECH TTS SERVICE
+// Icelandic text-to-speech using browser's Web Speech API
+// Falls back gracefully if no Icelandic voices are available
 // =============================================================================
 
 // =============================================================================
@@ -28,83 +28,134 @@ export type TTSProgressCallback = (progress: TTSProgress) => void;
 // CONSTANTS
 // =============================================================================
 
-// TTS API endpoint - use proxy in production to avoid CORS issues
-// Set VITE_TTS_PROXY_URL to your Cloudflare Worker URL
-const TTS_API_URL =
-  import.meta.env.VITE_TTS_PROXY_URL || "https://tts.tiro.is/v0/speech";
-
 /**
- * Available Icelandic voices from Tiro TTS
- * Developed by Reykjavík University Language and Voice Lab
+ * Preferred Icelandic voices (will match against available browser voices)
  */
 export const ICELANDIC_VOICES: IcelandicVoice[] = [
   {
-    id: "Alfur",
-    name: "Álfur",
-    gender: "male",
-    description: "Karlrödd - Álfur",
-  },
-  {
-    id: "Dilja",
-    name: "Diljá",
+    id: "is-IS-GudrunNeural",
+    name: "Guðrún",
     gender: "female",
-    description: "Kvenrödd - Diljá",
+    description: "Kvenrödd - Guðrún",
   },
   {
-    id: "Bjartur",
-    name: "Bjartur",
+    id: "is-IS-GunnarNeural",
+    name: "Gunnar",
     gender: "male",
-    description: "Karlrödd - Bjartur",
+    description: "Karlrödd - Gunnar",
   },
   {
-    id: "Rosa",
-    name: "Rósa",
+    id: "is-IS",
+    name: "Íslenska",
     gender: "female",
-    description: "Kvenrödd - Rósa",
+    description: "Sjálfgefin íslensk rödd",
   },
 ];
 
-export const DEFAULT_VOICE = ICELANDIC_VOICES[0]; // Álfur
+export const DEFAULT_VOICE = ICELANDIC_VOICES[0];
 
 // =============================================================================
 // SERVICE CLASS
 // =============================================================================
 
-class TiroTtsService {
-  private currentAudio: HTMLAudioElement | null = null;
+class WebSpeechTtsService {
+  private synthesis: SpeechSynthesis | null = null;
+  private currentUtterance: SpeechSynthesisUtterance | null = null;
+  private availableVoices: SpeechSynthesisVoice[] = [];
   private isInitialized = false;
+  private selectedVoice: SpeechSynthesisVoice | null = null;
 
   /**
-   * Initialize the service (no-op for Tiro API, kept for interface compatibility)
+   * Initialize the service and load available voices
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
+
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      console.warn("[WebSpeechTTS] Speech synthesis not supported");
+      this.isInitialized = true;
+      return;
+    }
+
+    this.synthesis = window.speechSynthesis;
+
+    // Load voices (may be async in some browsers)
+    await this.loadVoices();
     this.isInitialized = true;
-    console.log("[TiroTTS] Initialized - using Tiro.is API");
+
+    console.log("[WebSpeechTTS] Initialized with voices:", this.availableVoices.length);
   }
 
   /**
-   * Check if a voice is available (all voices are always available with API)
+   * Load available voices from the browser
+   */
+  private loadVoices(): Promise<void> {
+    return new Promise((resolve) => {
+      if (!this.synthesis) {
+        resolve();
+        return;
+      }
+
+      const loadVoiceList = () => {
+        this.availableVoices = this.synthesis!.getVoices();
+
+        // Find best Icelandic voice
+        const icelandicVoice = this.availableVoices.find(
+          (v) => v.lang.startsWith("is") || v.lang === "is-IS"
+        );
+
+        if (icelandicVoice) {
+          this.selectedVoice = icelandicVoice;
+          console.log("[WebSpeechTTS] Found Icelandic voice:", icelandicVoice.name);
+        } else {
+          // Fall back to first available voice
+          this.selectedVoice = this.availableVoices[0] || null;
+          console.log("[WebSpeechTTS] No Icelandic voice, using:", this.selectedVoice?.name);
+        }
+      };
+
+      // Voices may load asynchronously
+      if (this.synthesis.getVoices().length > 0) {
+        loadVoiceList();
+        resolve();
+      } else {
+        this.synthesis.addEventListener("voiceschanged", () => {
+          loadVoiceList();
+          resolve();
+        }, { once: true });
+
+        // Timeout fallback
+        setTimeout(() => {
+          loadVoiceList();
+          resolve();
+        }, 1000);
+      }
+    });
+  }
+
+  /**
+   * Check if a voice is available
    */
   isVoiceDownloaded(_voiceId: string): boolean {
-    return true; // API-based, no local download needed
+    return this.availableVoices.length > 0;
   }
 
   /**
    * Get list of available voices
    */
   async getCachedVoices(): Promise<string[]> {
-    return ICELANDIC_VOICES.map((v) => v.id);
+    return this.availableVoices
+      .filter((v) => v.lang.startsWith("is"))
+      .map((v) => v.name);
   }
 
   /**
-   * Download a voice model (no-op for API-based TTS)
+   * Download a voice (no-op for Web Speech API)
    */
   async downloadVoice(
     _voiceId: string,
     onProgress?: TTSProgressCallback
   ): Promise<void> {
-    // API-based, no download needed
     onProgress?.({
       stage: "ready",
       loaded: 100,
@@ -114,20 +165,38 @@ class TiroTtsService {
   }
 
   /**
-   * Synthesize speech from text using Tiro.is API
-   * Returns an audio blob that can be played
+   * Synthesize speech - Web Speech API doesn't return blobs
+   * This is kept for interface compatibility but throws
    */
   async synthesize(
-    text: string,
-    voiceId: string = DEFAULT_VOICE.id,
-    onProgress?: TTSProgressCallback
+    _text: string,
+    _voiceId: string = DEFAULT_VOICE.id,
+    _onProgress?: TTSProgressCallback
   ): Promise<Blob> {
-    // Clean the text for speech
-    const cleanedText = this.cleanTextForSpeech(text);
+    throw new Error("Web Speech API does not support blob synthesis. Use speak() instead.");
+  }
 
-    console.log("[TiroTTS] Original text length:", text.length);
-    console.log("[TiroTTS] Cleaned text:", cleanedText.slice(0, 200) + "...");
-    console.log("[TiroTTS] Using voice:", voiceId);
+  /**
+   * Speak text using Web Speech API
+   * Returns a fake audio element for interface compatibility
+   */
+  async speak(
+    text: string,
+    _voiceId: string = DEFAULT_VOICE.id,
+    onProgress?: TTSProgressCallback
+  ): Promise<HTMLAudioElement> {
+    console.log("[WebSpeechTTS] speak() called");
+
+    if (!this.synthesis) {
+      throw new Error("Speech synthesis not available");
+    }
+
+    // Stop any current speech
+    this.stop();
+
+    // Clean the text
+    const cleanedText = this.cleanTextForSpeech(text);
+    console.log("[WebSpeechTTS] Cleaned text length:", cleanedText.length);
 
     if (!cleanedText.trim()) {
       throw new Error("No text to synthesize after cleaning");
@@ -135,172 +204,128 @@ class TiroTtsService {
 
     onProgress?.({
       stage: "synthesizing",
-      loaded: 0,
+      loaded: 50,
       total: 100,
-      percent: 0,
+      percent: 50,
     });
 
-    try {
-      console.log("[TiroTTS] Calling TTS API:", TTS_API_URL);
+    // Create utterance
+    const utterance = new SpeechSynthesisUtterance(cleanedText);
 
-      const response = await fetch(TTS_API_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "audio/mpeg", // Request MP3 format
-        },
-        body: JSON.stringify({
-          Engine: "standard",
-          LanguageCode: "is-IS",
-          OutputFormat: "mp3",
-          SampleRate: "22050",
-          Text: cleanedText,
-          TextType: "text",
-          VoiceId: voiceId,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("[TiroTTS] API error:", response.status, errorText);
-        throw new Error(`Tiro TTS API error: ${response.status} - ${errorText}`);
-      }
-
-      const audioBlob = await response.blob();
-      console.log("[TiroTTS] Synthesis complete, blob size:", audioBlob.size);
-      console.log("[TiroTTS] Blob type:", audioBlob.type);
-
-      if (audioBlob.size === 0) {
-        throw new Error("Synthesized audio blob is empty");
-      }
-
-      onProgress?.({
-        stage: "ready",
-        loaded: 100,
-        total: 100,
-        percent: 100,
-      });
-
-      return audioBlob;
-    } catch (error) {
-      console.error("[TiroTTS] Synthesis error:", error);
-      throw error;
+    if (this.selectedVoice) {
+      utterance.voice = this.selectedVoice;
     }
-  }
 
-  /**
-   * Synthesize text and return audio element (does NOT auto-play)
-   * Caller should set up event handlers before calling play()
-   */
-  async speak(
-    text: string,
-    voiceId: string = DEFAULT_VOICE.id,
-    onProgress?: TTSProgressCallback
-  ): Promise<HTMLAudioElement> {
-    console.log("[TiroTTS] speak() called");
+    utterance.lang = "is-IS";
+    utterance.rate = 1;
+    utterance.pitch = 1;
 
-    // Stop any currently playing audio
-    this.stop();
+    this.currentUtterance = utterance;
 
-    const audioBlob = await this.synthesize(text, voiceId, onProgress);
+    // Create a fake audio element to maintain interface compatibility
+    const fakeAudio = document.createElement("audio");
 
-    // Create audio element with the blob
-    const audioUrl = URL.createObjectURL(audioBlob);
-    console.log("[TiroTTS] Created audio URL:", audioUrl);
-    console.log("[TiroTTS] Blob MIME type:", audioBlob.type);
+    // Set up utterance events
+    utterance.onstart = () => {
+      console.log("[WebSpeechTTS] Speech started");
+      fakeAudio.dispatchEvent(new Event("play"));
+    };
 
-    const audio = new Audio();
-    audio.preload = "auto";
-    audio.src = audioUrl;
-    this.currentAudio = audio;
+    utterance.onend = () => {
+      console.log("[WebSpeechTTS] Speech ended");
+      fakeAudio.dispatchEvent(new Event("ended"));
+      this.currentUtterance = null;
+    };
 
-    // Log audio element state
-    console.log("[TiroTTS] Audio element created, readyState:", audio.readyState);
+    utterance.onerror = (event) => {
+      console.error("[WebSpeechTTS] Speech error:", event.error);
+      fakeAudio.dispatchEvent(new Event("error"));
+      this.currentUtterance = null;
+    };
 
-    // Store URL for cleanup
-    const cleanup = () => {
-      console.log("[TiroTTS] Cleanup called");
-      URL.revokeObjectURL(audioUrl);
-      if (this.currentAudio === audio) {
-        this.currentAudio = null;
+    utterance.onpause = () => {
+      fakeAudio.dispatchEvent(new Event("pause"));
+    };
+
+    utterance.onresume = () => {
+      fakeAudio.dispatchEvent(new Event("play"));
+    };
+
+    // Override audio element methods
+    fakeAudio.play = async () => {
+      if (this.synthesis && this.currentUtterance) {
+        this.synthesis.speak(this.currentUtterance);
       }
     };
 
-    // Add cleanup listeners (caller can override these)
-    audio.addEventListener("ended", () => {
-      console.log("[TiroTTS] Audio ended event");
-      cleanup();
-    });
-    audio.addEventListener("error", (e) => {
-      console.error("[TiroTTS] Audio error event:", e);
-      cleanup();
+    fakeAudio.pause = () => {
+      this.pause();
+    };
+
+    onProgress?.({
+      stage: "ready",
+      loaded: 100,
+      total: 100,
+      percent: 100,
     });
 
-    // Add additional debug listeners
-    audio.addEventListener("canplay", () => {
-      console.log("[TiroTTS] Audio canplay event, duration:", audio.duration);
-    });
-    audio.addEventListener("loadedmetadata", () => {
-      console.log("[TiroTTS] Audio loadedmetadata, duration:", audio.duration);
-    });
+    // Auto-start speaking
+    this.synthesis.speak(utterance);
 
-    // Return audio element - caller must call play() after setting up handlers
-    return audio;
+    return fakeAudio;
   }
 
   /**
-   * Stop current playback
+   * Stop current speech
    */
   stop(): void {
-    if (this.currentAudio) {
-      this.currentAudio.pause();
-      this.currentAudio.currentTime = 0;
-      this.currentAudio = null;
+    if (this.synthesis) {
+      this.synthesis.cancel();
     }
+    this.currentUtterance = null;
   }
 
   /**
-   * Pause current playback
+   * Pause current speech
    */
   pause(): void {
-    if (this.currentAudio) {
-      this.currentAudio.pause();
+    if (this.synthesis) {
+      this.synthesis.pause();
     }
   }
 
   /**
-   * Resume current playback
+   * Resume current speech
    */
   resume(): void {
-    if (this.currentAudio) {
-      this.currentAudio.play();
+    if (this.synthesis) {
+      this.synthesis.resume();
     }
   }
 
   /**
-   * Get current audio element (for external control)
+   * Get current audio element (not applicable for Web Speech)
    */
   getCurrentAudio(): HTMLAudioElement | null {
-    return this.currentAudio;
+    return null;
   }
 
   /**
-   * Remove a cached voice model (no-op for API-based TTS)
+   * Remove a cached voice (no-op)
    */
   async removeVoice(_voiceId: string): Promise<void> {
-    // No-op for API-based TTS
+    // No-op
   }
 
   /**
-   * Remove all cached voice models (no-op for API-based TTS)
+   * Clear cache (no-op)
    */
   async clearCache(): Promise<void> {
-    // No-op for API-based TTS
+    // No-op
   }
 
   /**
    * Clean text for speech synthesis
-   * Removes markdown, equations, and other non-readable content
    */
   private cleanTextForSpeech(text: string): string {
     return (
@@ -334,8 +359,8 @@ class TiroTtsService {
   }
 }
 
-// Export singleton instance (keeping name for backward compatibility)
-export const piperTts = new TiroTtsService();
+// Export singleton instance
+export const piperTts = new WebSpeechTtsService();
 
 // Also export the class for testing
-export { TiroTtsService as PiperTtsService };
+export { WebSpeechTtsService as PiperTtsService };
