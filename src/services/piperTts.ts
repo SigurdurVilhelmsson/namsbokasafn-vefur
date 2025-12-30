@@ -28,8 +28,10 @@ export type TTSProgressCallback = (progress: TTSProgress) => void;
 // CONSTANTS
 // =============================================================================
 
-// Tiro.is TTS API endpoint
-const TIRO_TTS_API = "https://tts.tiro.is/v0/speech";
+// TTS API endpoint - use proxy in production to avoid CORS issues
+// Set VITE_TTS_PROXY_URL to your Cloudflare Worker URL
+const TTS_API_URL =
+  import.meta.env.VITE_TTS_PROXY_URL || "https://tts.tiro.is/v0/speech";
 
 /**
  * Available Icelandic voices from Tiro TTS
@@ -139,9 +141,9 @@ class TiroTtsService {
     });
 
     try {
-      console.log("[TiroTTS] Calling Tiro.is API...");
+      console.log("[TiroTTS] Calling TTS API:", TTS_API_URL);
 
-      const response = await fetch(TIRO_TTS_API, {
+      const response = await fetch(TTS_API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,0 +1,9 @@
+name = "tts-proxy"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# After deployment, you'll get a URL like:
+# https://tts-proxy.<your-subdomain>.workers.dev
+#
+# Set this URL in your app's environment:
+# VITE_TTS_PROXY_URL=https://tts-proxy.<your-subdomain>.workers.dev
