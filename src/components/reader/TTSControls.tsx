@@ -1,8 +1,13 @@
-import { Play, Pause, Square, Volume2, Settings, AlertTriangle, Loader2 } from "lucide-react";
+import { Play, Pause, Square, Settings, Download, Loader2 } from "lucide-react";
 import { useState } from "react";
 import {
-  useTextToSpeech,
+  usePreGeneratedAudio,
+  formatTime,
   getRateLabel,
+} from "@/hooks/usePreGeneratedAudio";
+import {
+  useTextToSpeech,
+  getRateLabel as getWebSpeechRateLabel,
 } from "@/hooks/useTextToSpeech";
 
 // =============================================================================
@@ -11,6 +16,9 @@ import {
 
 interface TTSControlsProps {
   content: string;
+  bookSlug?: string;
+  chapterSlug?: string;
+  sectionSlug?: string;
   compact?: boolean;
 }
 
@@ -20,48 +28,83 @@ interface TTSControlsProps {
 
 export default function TTSControls({
   content,
+  bookSlug,
+  chapterSlug,
+  sectionSlug,
   compact = false,
 }: TTSControlsProps) {
-  const {
-    isSupported,
-    isLoading,
-    isSpeaking,
-    isPaused,
-    selectedVoice,
-    progress,
-    hasIcelandicVoice,
-    actualVoiceName,
-    rate,
-    speak,
-    pause,
-    resume,
-    stop,
-    setRate,
-  } = useTextToSpeech();
+  // Pre-generated audio (preferred)
+  const preGenAudio = usePreGeneratedAudio(bookSlug, chapterSlug, sectionSlug);
+
+  // Web Speech API fallback
+  const webSpeech = useTextToSpeech();
 
   const [showSettings, setShowSettings] = useState(false);
 
-  // Don't render if TTS is not supported
-  if (!isSupported) {
+  // Determine which mode to use
+  const usePreGenerated = preGenAudio.hasAudio === true;
+  const isCheckingAudio = preGenAudio.hasAudio === null;
+
+  // Combined state
+  const isLoading = isCheckingAudio || (usePreGenerated ? preGenAudio.isLoading : webSpeech.isLoading);
+  const isPlaying = usePreGenerated ? preGenAudio.isPlaying : webSpeech.isSpeaking;
+  const isPaused = usePreGenerated ? preGenAudio.isPaused : webSpeech.isPaused;
+  const progress = usePreGenerated ? preGenAudio.progress : webSpeech.progress;
+  const rate = usePreGenerated ? preGenAudio.rate : webSpeech.rate;
+
+  // Don't render if neither mode is supported
+  if (!webSpeech.isSupported && preGenAudio.hasAudio === false) {
     return null;
   }
 
   const handlePlayPause = async () => {
-    if (isSpeaking) {
+    if (isPlaying) {
       if (isPaused) {
-        resume();
+        usePreGenerated ? preGenAudio.resume() : webSpeech.resume();
       } else {
-        pause();
+        usePreGenerated ? preGenAudio.pause() : webSpeech.pause();
       }
     } else {
-      await speak(content);
+      if (usePreGenerated) {
+        await preGenAudio.play();
+      } else {
+        await webSpeech.speak(content);
+      }
     }
   };
 
   const handleStop = () => {
-    stop();
+    usePreGenerated ? preGenAudio.stop() : webSpeech.stop();
   };
 
+  const handleRateChange = (newRate: number) => {
+    if (usePreGenerated) {
+      preGenAudio.setRate(newRate);
+    } else {
+      webSpeech.setRate(newRate);
+    }
+  };
+
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!usePreGenerated || !preGenAudio.duration) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const position = x / rect.width;
+    preGenAudio.seek(Math.max(0, Math.min(1, position)));
+  };
+
+  const handleDownload = () => {
+    if (!bookSlug || !chapterSlug || !sectionSlug) return;
+
+    const url = `/content/${bookSlug}/chapters/${chapterSlug}/${sectionSlug}.mp3`;
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${sectionSlug}.mp3`;
+    link.click();
+  };
+
+  // Compact mode
   if (compact) {
     return (
       <div className="flex items-center gap-2">
@@ -72,16 +115,7 @@ export default function TTSControls({
           aria-label={
             isLoading
               ? "Hleður..."
-              : isSpeaking
-                ? isPaused
-                  ? "Halda áfram"
-                  : "Gera hlé"
-                : "Lesa upphátt"
-          }
-          title={
-            isLoading
-              ? "Hleður röddinni..."
-              : isSpeaking
+              : isPlaying
                 ? isPaused
                   ? "Halda áfram"
                   : "Gera hlé"
@@ -90,47 +124,60 @@ export default function TTSControls({
         >
           {isLoading ? (
             <Loader2 size={16} className="animate-spin" />
-          ) : isSpeaking && !isPaused ? (
+          ) : isPlaying && !isPaused ? (
             <Pause size={16} />
           ) : (
-            <Volume2 size={16} />
+            <Play size={16} />
           )}
           <span className="hidden sm:inline">
             {isLoading
               ? "Hleður..."
-              : isSpeaking
+              : isPlaying
                 ? isPaused
                   ? "Halda áfram"
                   : "Gera hlé"
                 : "Lesa upphátt"}
           </span>
         </button>
-        {!hasIcelandicVoice && (
-          <span title="Engin íslensk rödd fannst - notar enska rödd" className="text-amber-500">
-            <AlertTriangle size={16} />
-          </span>
-        )}
       </div>
     );
   }
 
   return (
     <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-4">
-      {/* Warning banner if no Icelandic voice */}
-      {!hasIcelandicVoice && (
-        <div className="mb-4 rounded-lg bg-amber-50 p-3 dark:bg-amber-900/20">
-          <div className="flex items-start gap-2 text-sm text-amber-700 dark:text-amber-300">
-            <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-medium">Engin íslensk rödd tiltæk</p>
-              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
-                Vafrinn þinn er ekki með íslenska rödd. Flestir vafrar og stýrikerfi styðja ekki íslensku í talgervi.
-                Textinn verður lesinn með rödd sem er tiltæk ({actualVoiceName}).
-              </p>
-            </div>
-          </div>
+      {/* Audio source indicator */}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {usePreGenerated ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+              Íslensk hljóðskrá
+            </span>
+          ) : isCheckingAudio ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+              <Loader2 size={10} className="animate-spin" />
+              Athuga hljóðskrá...
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+              Talgervi vafra
+            </span>
+          )}
         </div>
-      )}
+
+        {/* Download button (only for pre-generated) */}
+        {usePreGenerated && (
+          <button
+            onClick={handleDownload}
+            className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
+            aria-label="Sækja hljóðskrá"
+            title="Sækja hljóðskrá"
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">Sækja</span>
+          </button>
+        )}
+      </div>
 
       {/* Main controls */}
       <div className="flex items-center gap-4">
@@ -142,7 +189,7 @@ export default function TTSControls({
           aria-label={
             isLoading
               ? "Hleður..."
-              : isSpeaking
+              : isPlaying
                 ? isPaused
                   ? "Halda áfram"
                   : "Gera hlé"
@@ -151,7 +198,7 @@ export default function TTSControls({
         >
           {isLoading ? (
             <Loader2 size={24} className="animate-spin" />
-          ) : isSpeaking && !isPaused ? (
+          ) : isPlaying && !isPaused ? (
             <Pause size={24} />
           ) : (
             <Play size={24} className="ml-1" />
@@ -159,7 +206,7 @@ export default function TTSControls({
         </button>
 
         {/* Stop button */}
-        {(isSpeaking || isLoading) && (
+        {(isPlaying || isLoading) && (
           <button
             onClick={handleStop}
             className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--border-color)] text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
@@ -170,31 +217,29 @@ export default function TTSControls({
         )}
 
         {/* Progress bar */}
-        {isSpeaking && (
-          <div className="flex-1">
-            <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-primary)]">
-              <div
-                className="h-full bg-[var(--accent-color)] transition-all duration-300"
-                style={{ width: `${progress * 100}%` }}
-              />
-            </div>
-            <p className="mt-1 text-xs text-[var(--text-secondary)]">
-              {Math.round(progress * 100)}% lesið
-            </p>
+        <div className="flex-1">
+          <div
+            className={`h-2 overflow-hidden rounded-full bg-[var(--bg-primary)] ${
+              usePreGenerated && preGenAudio.duration > 0 ? "cursor-pointer" : ""
+            }`}
+            onClick={handleSeek}
+          >
+            <div
+              className="h-full bg-[var(--accent-color)] transition-all duration-100"
+              style={{ width: `${progress * 100}%` }}
+            />
           </div>
-        )}
-
-        {/* Voice indicator when not playing */}
-        {!isSpeaking && !isLoading && (
-          <div className="flex-1">
-            <p className="text-sm text-[var(--text-secondary)]">
-              Rödd: <span className="font-medium">{actualVoiceName}</span>
-              {hasIcelandicVoice && (
-                <span className="ml-1 text-xs text-green-600 dark:text-green-400">(íslenska)</span>
-              )}
-            </p>
+          <div className="mt-1 flex justify-between text-xs text-[var(--text-secondary)]">
+            {usePreGenerated && preGenAudio.duration > 0 ? (
+              <>
+                <span>{formatTime(preGenAudio.currentTime)}</span>
+                <span>{formatTime(preGenAudio.duration)}</span>
+              </>
+            ) : (
+              <span>{Math.round(progress * 100)}% lesið</span>
+            )}
           </div>
-        )}
+        </div>
 
         {/* Settings toggle */}
         <button
@@ -220,7 +265,7 @@ export default function TTSControls({
               htmlFor="tts-rate"
               className="mb-2 block text-sm font-medium text-[var(--text-secondary)]"
             >
-              Hraði: {getRateLabel(rate)} ({rate.toFixed(1)}x)
+              Hraði: {usePreGenerated ? getRateLabel(rate) : getWebSpeechRateLabel(rate)} ({rate.toFixed(1)}x)
             </label>
             <input
               id="tts-rate"
@@ -229,7 +274,7 @@ export default function TTSControls({
               max="2"
               step="0.1"
               value={rate}
-              onChange={(e) => setRate(parseFloat(e.target.value))}
+              onChange={(e) => handleRateChange(parseFloat(e.target.value))}
               className="w-full accent-[var(--accent-color)]"
             />
             <div className="mt-1 flex justify-between text-xs text-[var(--text-secondary)]">
@@ -238,21 +283,39 @@ export default function TTSControls({
             </div>
           </div>
 
-          {/* Voice info */}
+          {/* Audio info */}
           <div className="rounded-lg bg-[var(--bg-primary)] p-3">
-            <p className="text-sm font-medium text-[var(--text-primary)]">
-              {selectedVoice.name}
-            </p>
-            <p className="text-xs text-[var(--text-secondary)]">
-              {selectedVoice.gender === "male" ? "Karlrödd" : "Kvenrödd"}
-            </p>
-            <p className="mt-2 text-xs text-[var(--text-secondary)]">
-              Vafrarödd: <strong>{actualVoiceName}</strong>
-            </p>
-            {!hasIcelandicVoice && (
-              <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
-                Íslensk talgervirödd er ekki tiltæk í þessum vafra.
-              </p>
+            {usePreGenerated ? (
+              <>
+                <p className="text-sm font-medium text-[var(--text-primary)]">
+                  Forupptökuð hljóðskrá
+                </p>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Íslensk rödd - Diljá
+                </p>
+                {preGenAudio.duration > 0 && (
+                  <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                    Lengd: {formatTime(preGenAudio.duration)}
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-sm font-medium text-[var(--text-primary)]">
+                  {webSpeech.selectedVoice.name}
+                </p>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  {webSpeech.selectedVoice.gender === "male" ? "Karlrödd" : "Kvenrödd"}
+                </p>
+                <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                  Vafrarödd: <strong>{webSpeech.actualVoiceName}</strong>
+                </p>
+                {!webSpeech.hasIcelandicVoice && (
+                  <p className="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                    Íslensk talgervirödd er ekki tiltæk í þessum vafra.
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
