@@ -1,4 +1,39 @@
-import type { TableOfContents, SectionContent } from "@/types/content";
+import type { TableOfContents, SectionContent, DifficultyLevel } from "@/types/content";
+
+// Average reading speed in words per minute (lower for technical/educational content)
+const WORDS_PER_MINUTE = 180;
+
+// Calculate reading time from markdown content
+export function calculateReadingTime(content: string): number {
+  // Remove markdown syntax for more accurate word count
+  const cleanText = content
+    .replace(/```[\s\S]*?```/g, "") // Remove code blocks
+    .replace(/`[^`]+`/g, "") // Remove inline code
+    .replace(/!\[.*?\]\(.*?\)/g, "") // Remove images
+    .replace(/\[([^\]]+)\]\(.*?\)/g, "$1") // Keep link text
+    .replace(/#{1,6}\s*/g, "") // Remove headers
+    .replace(/[*_~`]/g, "") // Remove emphasis markers
+    .replace(/\$\$[\s\S]*?\$\$/g, "") // Remove block math
+    .replace(/\$[^$]+\$/g, "") // Remove inline math
+    .replace(/:::[\s\S]*?:::/g, "") // Remove directive blocks
+    .trim();
+
+  const wordCount = cleanText.split(/\s+/).filter((word) => word.length > 0).length;
+  const minutes = Math.ceil(wordCount / WORDS_PER_MINUTE);
+
+  // Minimum 1 minute, cap at reasonable maximum
+  return Math.max(1, Math.min(minutes, 60));
+}
+
+// Validate difficulty level
+function parseDifficulty(value: unknown): DifficultyLevel | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.toLowerCase().trim();
+  if (normalized === "beginner" || normalized === "intermediate" || normalized === "advanced") {
+    return normalized;
+  }
+  return undefined;
+}
 
 // Load table of contents for a specific book
 export async function loadTableOfContents(bookSlug: string): Promise<TableOfContents> {
@@ -39,12 +74,25 @@ export async function loadSectionContent(
       `![$1](${basePath}/images/`,
     );
 
+    // Calculate reading time from content
+    const readingTime = calculateReadingTime(transformedContent);
+
+    // Parse optional enhanced frontmatter fields
+    const difficulty = parseDifficulty(metadata.difficulty);
+    const keywords = Array.isArray(metadata.keywords) ? metadata.keywords : undefined;
+    const prerequisites = Array.isArray(metadata.prerequisites) ? metadata.prerequisites : undefined;
+
     return {
       title: typeof metadata.title === "string" ? metadata.title : "",
       section: typeof metadata.section === "string" ? metadata.section : "",
       chapter: typeof metadata.chapter === "number" ? metadata.chapter : 0,
       objectives: Array.isArray(metadata.objectives) ? metadata.objectives : [],
       content: transformedContent,
+      // Enhanced frontmatter
+      readingTime,
+      difficulty,
+      keywords,
+      prerequisites,
     };
   } catch (error) {
     console.error("Villa við að hlaða kaflahlutefni:", error);

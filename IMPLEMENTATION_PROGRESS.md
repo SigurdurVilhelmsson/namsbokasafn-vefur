@@ -157,10 +157,10 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 3.5 Enhanced Frontmatter
 | Task | Status | Notes |
 |------|--------|-------|
-| Update content types | ⬜ | |
-| Modify frontmatter parser | ⬜ | |
-| Add reading time display | ⬜ | |
-| Add difficulty indicator | ⬜ | |
+| Update content types | ✅ | Added DifficultyLevel type, readingTime, difficulty, keywords, prerequisites |
+| Modify frontmatter parser | ✅ | calculateReadingTime(), parseDifficulty() in contentLoader.ts |
+| Add reading time display | ✅ | SectionMetadata.tsx with clock icon and minute display |
+| Add difficulty indicator | ✅ | Beginner/Intermediate/Advanced with color-coded bars |
 
 ---
 
@@ -198,13 +198,37 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 |-------|-------------|-----------|-------------|------------|
 | Phase 1 | 33 | 31 | 0 | 94% |
 | Phase 2 | 20 | 20 | 0 | 100% |
-| Phase 3 | 21 | 17 | 0 | 81% |
+| Phase 3 | 21 | 21 | 0 | 100% |
 | Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **85** | **68** | **0** | **80%** |
+| **Total** | **85** | **72** | **0** | **85%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-30 (Update 13)
+- **Phase 3 Complete! (100%) - Enhanced Frontmatter**:
+  - Updated content types with new fields:
+    - `DifficultyLevel` type: beginner | intermediate | advanced
+    - `readingTime`: Estimated minutes to read
+    - `difficulty`: Section difficulty level
+    - `keywords`: Optional keyword array
+    - `prerequisites`: Optional prerequisite array
+  - Added `calculateReadingTime()` in contentLoader.ts:
+    - Cleans markdown syntax for accurate word count
+    - Removes code blocks, math, images, directives
+    - Uses 180 WPM reading speed for technical content
+  - Added `parseDifficulty()` for validating difficulty levels
+  - Created SectionMetadata.tsx component:
+    - Clock icon with reading time in Icelandic ("X mínútur")
+    - Difficulty indicator with color-coded bars:
+      - Byrjandi (green, 1 bar)
+      - Miðstig (amber, 2 bars)
+      - Framhald (red, 3 bars)
+    - Keywords display with hover tooltip
+  - Integrated in SectionView.tsx after TTS controls
+- Phase 3 progress: 81% → 100%
+- Overall progress: 80% → 85%
 
 ### 2025-12-30 (Update 12)
 - **New Content Directives complete (Phase 3.4)**:
