@@ -17,6 +17,7 @@ import TextHighlighter from "./TextHighlighter";
 import TTSControls from "./TTSControls";
 import AnnotationSidebar from "./AnnotationSidebar";
 import InlineFlashcardReview from "./InlineFlashcardReview";
+import SectionMetadata from "./SectionMetadata";
 import type {
   SectionContent,
   NavigationContext,
@@ -301,6 +302,13 @@ export default function SectionView() {
               />
             </div>
           )}
+
+          {/* Section metadata: reading time, difficulty, keywords */}
+          <SectionMetadata
+            readingTime={content.readingTime}
+            difficulty={content.difficulty}
+            keywords={content.keywords}
+          />
 
           {/* Markmið kafla (learning objectives) */}
           {content.objectives &&

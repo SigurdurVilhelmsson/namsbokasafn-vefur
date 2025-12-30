@@ -38,6 +38,9 @@ export interface ChapterObjectives {
   objectives: string[];
 }
 
+// Erfiðleikastig efnis (difficulty levels)
+export type DifficultyLevel = "beginner" | "intermediate" | "advanced";
+
 // Gerð fyrir efni kaflahlutar með metadata
 export interface SectionContent {
   title: string;
@@ -46,6 +49,11 @@ export interface SectionContent {
   objectives?: string[];
   source?: SourceAttribution;
   content: string;
+  // Enhanced frontmatter (Phase 3.5)
+  readingTime?: number; // Estimated reading time in minutes
+  difficulty?: DifficultyLevel;
+  keywords?: string[];
+  prerequisites?: string[];
 }
 
 // Gerð fyrir leiðsögn (navigation) á milli kaflahhluta
