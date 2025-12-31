@@ -169,10 +169,10 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 4.1 Offline Support
 | Task | Status | Notes |
 |------|--------|-------|
-| Set up Workbox service worker | ⬜ | |
-| Cache content for offline reading | ⬜ | |
-| Add offline indicator | ⬜ | |
-| Sync when back online | ⬜ | |
+| Set up Workbox service worker | ✅ | vite-plugin-pwa with Workbox, auto-generated SW |
+| Cache content for offline reading | ✅ | NetworkFirst for JSON/MD, CacheFirst for images |
+| Add offline indicator | ✅ | OfflineIndicator.tsx with useOnlineStatus hook |
+| Sync when back online | ✅ | Automatic with NetworkFirst strategy |
 
 ### 4.2 Learning Analytics
 | Task | Status | Notes |
@@ -199,12 +199,28 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Phase 1 | 33 | 31 | 0 | 94% |
 | Phase 2 | 20 | 20 | 0 | 100% |
 | Phase 3 | 21 | 21 | 0 | 100% |
-| Phase 4 | 11 | 0 | 0 | 0% |
-| **Total** | **85** | **72** | **0** | **85%** |
+| Phase 4 | 11 | 4 | 0 | 36% |
+| **Total** | **85** | **76** | **0** | **89%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-30 (Update 14)
+- **Offline Support complete (Phase 4.1)**:
+  - Installed vite-plugin-pwa with Workbox for service worker generation
+  - Created PWA manifest (`public/manifest.json`) with Icelandic metadata
+  - Configured caching strategies in `vite.config.ts`:
+    - **NetworkFirst** for content JSON and markdown (fresh when online)
+    - **CacheFirst** for images and book covers (fast loading)
+    - 61 precached entries (~1.9 MB app shell)
+  - Created `useOnlineStatus` hook for online/offline detection
+  - Created `OfflineIndicator` component (amber banner when offline)
+  - Added service worker registration in `main.tsx` with update prompt
+  - Updated `index.html` with manifest link, theme-color, Apple PWA meta tags
+  - Integrated offline indicator in BookLayout
+- Phase 4 progress: 0% → 36%
+- Overall progress: 85% → 89%
 
 ### 2025-12-30 (Update 13)
 - **Phase 3 Complete! (100%) - Enhanced Frontmatter**:
