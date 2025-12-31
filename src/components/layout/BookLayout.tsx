@@ -7,6 +7,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import FocusModeNav from "./FocusModeNav";
 import KeyboardShortcutsModal from "@/components/ui/KeyboardShortcutsModal";
+import OfflineIndicator from "@/components/OfflineIndicator";
 
 export default function BookLayout() {
   const { fontSize, fontFamily } = useSettingsStore();
@@ -88,6 +89,9 @@ export default function BookLayout() {
           onClose={() => setShowShortcutsModal(false)}
           shortcuts={shortcuts}
         />
+
+        {/* Offline indicator */}
+        <OfflineIndicator />
       </div>
     </BookContext.Provider>
   );
