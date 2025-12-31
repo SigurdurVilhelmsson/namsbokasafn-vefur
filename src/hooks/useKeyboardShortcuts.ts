@@ -1,17 +1,24 @@
 import { useEffect, useCallback, useState, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useSettingsStore } from "@/stores/settingsStore";
+import {
+  useSettingsStore,
+  DEFAULT_SHORTCUTS,
+  type ShortcutAction,
+} from "@/stores/settingsStore";
 
 // =============================================================================
 // TYPES
 // =============================================================================
 
 export interface KeyboardShortcut {
+  action: ShortcutAction;
   key: string;
+  defaultKey: string;
   description: string;
   descriptionIs: string; // Icelandic description
   category: "navigation" | "reading" | "study" | "general";
   handler: () => void;
+  isCustomized: boolean;
 }
 
 interface UseKeyboardShortcutsOptions {
@@ -21,6 +28,72 @@ interface UseKeyboardShortcutsOptions {
   onOpenSearch?: () => void;
   onOpenShortcuts?: () => void;
 }
+
+// Shortcut metadata (descriptions and categories)
+const SHORTCUT_METADATA: Record<
+  ShortcutAction,
+  {
+    description: string;
+    descriptionIs: string;
+    category: "navigation" | "reading" | "study" | "general";
+  }
+> = {
+  prevSection: {
+    description: "Previous section",
+    descriptionIs: "Fyrri kafli",
+    category: "navigation",
+  },
+  nextSection: {
+    description: "Next section",
+    descriptionIs: "Næsti kafli",
+    category: "navigation",
+  },
+  goHome: {
+    description: "Go home (book overview)",
+    descriptionIs: "Fara á forsíðu bókar",
+    category: "navigation",
+  },
+  goFlashcards: {
+    description: "Go to flashcards",
+    descriptionIs: "Fara í minniskort",
+    category: "navigation",
+  },
+  goGlossary: {
+    description: "Go to glossary",
+    descriptionIs: "Fara í orðabók",
+    category: "navigation",
+  },
+  toggleSidebar: {
+    description: "Toggle sidebar",
+    descriptionIs: "Opna/loka hliðarslá",
+    category: "reading",
+  },
+  toggleFocusMode: {
+    description: "Toggle focus mode",
+    descriptionIs: "Einbeitingarhamur",
+    category: "reading",
+  },
+  toggleTheme: {
+    description: "Toggle theme (light/dark)",
+    descriptionIs: "Skipta um þema",
+    category: "reading",
+  },
+  openSearch: {
+    description: "Open search",
+    descriptionIs: "Opna leit",
+    category: "general",
+  },
+  showShortcuts: {
+    description: "Show keyboard shortcuts",
+    descriptionIs: "Sýna flýtilykla",
+    category: "general",
+  },
+  closeModal: {
+    description: "Close modal/menu",
+    descriptionIs: "Loka glugga",
+    category: "general",
+  },
+};
 
 // =============================================================================
 // HOOK
@@ -38,7 +111,8 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
   const navigate = useNavigate();
   // location used for potential future enhancements
   useLocation();
-  const { toggleSidebar, toggleTheme } = useSettingsStore();
+  const { toggleSidebar, toggleTheme, getShortcut, shortcutPreferences } =
+    useSettingsStore();
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
 
   // Check if user is typing in an input field
@@ -59,127 +133,53 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
   }, []);
 
   // Navigate to previous/next section based on current URL
-  const navigatePrevNext = useCallback(
-    (direction: "prev" | "next") => {
-      // Find navigation buttons and click them
-      const selector =
-        direction === "prev"
-          ? 'a[aria-label="Fyrri kafli"], button[aria-label="Fyrri kafli"]'
-          : 'a[aria-label="Næsti kafli"], button[aria-label="Næsti kafli"]';
+  const navigatePrevNext = useCallback((direction: "prev" | "next") => {
+    // Find navigation buttons and click them
+    const selector =
+      direction === "prev"
+        ? 'a[aria-label="Fyrri kafli"], button[aria-label="Fyrri kafli"]'
+        : 'a[aria-label="Næsti kafli"], button[aria-label="Næsti kafli"]';
 
-      const button = document.querySelector(selector) as HTMLElement;
-      if (button && !button.hasAttribute("disabled")) {
-        button.click();
-      }
-    },
-    [],
-  );
+    const button = document.querySelector(selector) as HTMLElement;
+    if (button && !button.hasAttribute("disabled")) {
+      button.click();
+    }
+  }, []);
 
-  // Define all shortcuts with useMemo to prevent recreation on every render
-  const shortcuts: KeyboardShortcut[] = useMemo(
-    () => [
-      // Navigation
-      {
-        key: "ArrowLeft",
-        description: "Previous section",
-        descriptionIs: "Fyrri kafli",
-        category: "navigation" as const,
-        handler: () => navigatePrevNext("prev"),
+  // Create handlers map
+  const handlers: Record<ShortcutAction, () => void> = useMemo(
+    () => ({
+      prevSection: () => navigatePrevNext("prev"),
+      nextSection: () => navigatePrevNext("next"),
+      goHome: () => {
+        if (bookSlug) navigate(`/${bookSlug}`);
       },
-      {
-        key: "ArrowRight",
-        description: "Next section",
-        descriptionIs: "Næsti kafli",
-        category: "navigation" as const,
-        handler: () => navigatePrevNext("next"),
+      goFlashcards: () => {
+        if (bookSlug) navigate(`/${bookSlug}/minniskort`);
       },
-      {
-        key: "g h",
-        description: "Go home (book overview)",
-        descriptionIs: "Fara á forsíðu bókar",
-        category: "navigation" as const,
-        handler: () => {
-          if (bookSlug) navigate(`/${bookSlug}`);
-        },
+      goGlossary: () => {
+        if (bookSlug) navigate(`/${bookSlug}/ordabok`);
       },
-      {
-        key: "g f",
-        description: "Go to flashcards",
-        descriptionIs: "Fara í minniskort",
-        category: "navigation" as const,
-        handler: () => {
-          if (bookSlug) navigate(`/${bookSlug}/minniskort`);
-        },
+      toggleSidebar,
+      toggleFocusMode: () => onToggleFocusMode?.(),
+      toggleTheme,
+      openSearch: () => onOpenSearch?.(),
+      showShortcuts: () => {
+        if (onOpenShortcuts) {
+          onOpenShortcuts();
+        } else {
+          setShortcutsModalOpen(true);
+        }
       },
-      {
-        key: "g o",
-        description: "Go to glossary",
-        descriptionIs: "Fara í orðabók",
-        category: "navigation" as const,
-        handler: () => {
-          if (bookSlug) navigate(`/${bookSlug}/ordabok`);
-        },
+      closeModal: () => {
+        setShortcutsModalOpen(false);
+        // Also try to close any open modals by clicking overlay
+        const overlay = document.querySelector('[data-modal-overlay="true"]');
+        if (overlay instanceof HTMLElement) {
+          overlay.click();
+        }
       },
-
-      // Reading
-      {
-        key: "s",
-        description: "Toggle sidebar",
-        descriptionIs: "Opna/loka hliðarslá",
-        category: "reading" as const,
-        handler: toggleSidebar,
-      },
-      {
-        key: "f",
-        description: "Toggle focus mode",
-        descriptionIs: "Einbeitingarhamur",
-        category: "reading" as const,
-        handler: () => onToggleFocusMode?.(),
-      },
-      {
-        key: "t",
-        description: "Toggle theme (light/dark)",
-        descriptionIs: "Skipta um þema",
-        category: "reading" as const,
-        handler: toggleTheme,
-      },
-
-      // General
-      {
-        key: "/",
-        description: "Open search",
-        descriptionIs: "Opna leit",
-        category: "general" as const,
-        handler: () => onOpenSearch?.(),
-      },
-      {
-        key: "?",
-        description: "Show keyboard shortcuts",
-        descriptionIs: "Sýna flýtilykla",
-        category: "general" as const,
-        handler: () => {
-          if (onOpenShortcuts) {
-            onOpenShortcuts();
-          } else {
-            setShortcutsModalOpen(true);
-          }
-        },
-      },
-      {
-        key: "Escape",
-        description: "Close modal/menu",
-        descriptionIs: "Loka glugga",
-        category: "general" as const,
-        handler: () => {
-          setShortcutsModalOpen(false);
-          // Also try to close any open modals by clicking overlay
-          const overlay = document.querySelector('[data-modal-overlay="true"]');
-          if (overlay instanceof HTMLElement) {
-            overlay.click();
-          }
-        },
-      },
-    ],
+    }),
     [
       navigatePrevNext,
       bookSlug,
@@ -191,6 +191,40 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
       onOpenShortcuts,
     ],
   );
+
+  // Build shortcuts array with current key bindings
+  const shortcuts: KeyboardShortcut[] = useMemo(() => {
+    const actions: ShortcutAction[] = [
+      "prevSection",
+      "nextSection",
+      "goHome",
+      "goFlashcards",
+      "goGlossary",
+      "toggleSidebar",
+      "toggleFocusMode",
+      "toggleTheme",
+      "openSearch",
+      "showShortcuts",
+      "closeModal",
+    ];
+
+    return actions.map((action) => {
+      const currentKey = getShortcut(action);
+      const defaultKey = DEFAULT_SHORTCUTS[action];
+      const metadata = SHORTCUT_METADATA[action];
+
+      return {
+        action,
+        key: currentKey,
+        defaultKey,
+        description: metadata.description,
+        descriptionIs: metadata.descriptionIs,
+        category: metadata.category,
+        handler: handlers[action],
+        isCustomized: currentKey !== defaultKey,
+      };
+    });
+  }, [getShortcut, handlers, shortcutPreferences]);
 
   // Track key sequence for multi-key shortcuts (like "g h")
   const [keySequence, setKeySequence] = useState<string[]>([]);
@@ -247,7 +281,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [enabled, isTyping, shortcuts, keySequence, navigatePrevNext]);
+  }, [enabled, isTyping, shortcuts, keySequence]);
 
   return {
     shortcuts,
@@ -307,4 +341,30 @@ export function getCategoryDisplayName(category: string): string {
     general: "Almennt",
   };
   return names[category] || category;
+}
+
+/**
+ * Check if a key string is valid for shortcuts
+ */
+export function isValidShortcutKey(key: string): boolean {
+  // Allow single keys, arrow keys, and multi-key sequences like "g h"
+  const validPatterns = [
+    /^[a-zA-Z0-9/\?\-\=\[\]\\;',\./`]$/, // Single printable chars
+    /^Arrow(Left|Right|Up|Down)$/, // Arrow keys
+    /^(Escape|Enter|Tab|Backspace|Delete|Home|End|PageUp|PageDown)$/, // Special keys
+    /^[a-zA-Z] [a-zA-Z]$/, // Two-key sequences like "g h"
+  ];
+
+  return validPatterns.some((pattern) => pattern.test(key));
+}
+
+/**
+ * Convert keyboard event to key string
+ */
+export function keyEventToString(event: KeyboardEvent): string {
+  // Handle Shift+/ for ?
+  if (event.shiftKey && event.key === "/") {
+    return "?";
+  }
+  return event.key;
 }
