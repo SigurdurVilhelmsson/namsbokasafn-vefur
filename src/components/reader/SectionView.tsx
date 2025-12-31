@@ -9,6 +9,7 @@ import {
 import { useReaderStore } from "@/stores/readerStore";
 import { useReferenceStore } from "@/stores/referenceStore";
 import { useBook } from "@/hooks/useBook";
+import { useReadingSession } from "@/hooks/useReadingSession";
 import MarkdownRenderer from "./MarkdownRenderer";
 import NavigationButtons from "./NavigationButtons";
 import LearningObjectives from "./LearningObjectives";
@@ -51,6 +52,13 @@ export default function SectionView() {
 
   const buildIndexFromContent = useReferenceStore(
     (state) => state.buildIndexFromContent
+  );
+
+  // Track reading time for analytics
+  useReadingSession(
+    bookSlug,
+    chapterSlug || "",
+    sectionSlug || ""
   );
 
   // Hlaða efni kafla (load section content)
