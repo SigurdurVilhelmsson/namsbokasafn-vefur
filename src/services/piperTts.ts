@@ -149,6 +149,7 @@ class WebSpeechTtsService {
   /**
    * Check if a voice is available
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   isVoiceDownloaded(_voiceId: string): boolean {
     return this.availableVoices.length > 0;
   }
@@ -181,11 +182,7 @@ class WebSpeechTtsService {
    * Synthesize speech - Web Speech API doesn't return blobs
    * This is kept for interface compatibility but throws
    */
-  async synthesize(
-    _text: string,
-    _voiceId: string = DEFAULT_VOICE.id,
-    _onProgress?: TTSProgressCallback
-  ): Promise<Blob> {
+  async synthesize(): Promise<Blob> {
     throw new Error("Web Speech API does not support blob synthesis. Use speak() instead.");
   }
 
@@ -195,7 +192,7 @@ class WebSpeechTtsService {
    */
   async speak(
     text: string,
-    _voiceId: string = DEFAULT_VOICE.id,
+    _voiceId: string = DEFAULT_VOICE.id, // eslint-disable-line @typescript-eslint/no-unused-vars
     onProgress?: TTSProgressCallback
   ): Promise<HTMLAudioElement> {
     console.log("[WebSpeechTTS] speak() called");
@@ -340,6 +337,7 @@ class WebSpeechTtsService {
   /**
    * Remove a cached voice (no-op)
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async removeVoice(_voiceId: string): Promise<void> {
     // No-op
   }
