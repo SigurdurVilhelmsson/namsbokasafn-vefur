@@ -177,10 +177,10 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 4.2 Learning Analytics
 | Task | Status | Notes |
 |------|--------|-------|
-| Create `analyticsStore.ts` | ⬜ | |
-| Track time per section | ⬜ | |
-| Build analytics dashboard | ⬜ | |
-| Add data export | ⬜ | |
+| Create `analyticsStore.ts` | ✅ | Zustand store with reading sessions, daily stats, streaks |
+| Track time per section | ✅ | useReadingSession hook with visibility/beforeunload handling |
+| Build analytics dashboard | ✅ | AnalyticsDashboardPage at /greining route |
+| Add data export | ✅ | JSON export with full analytics history |
 
 ### 4.3 Print Stylesheet
 | Task | Status | Notes |
@@ -199,12 +199,38 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Phase 1 | 33 | 31 | 0 | 94% |
 | Phase 2 | 20 | 20 | 0 | 100% |
 | Phase 3 | 21 | 21 | 0 | 100% |
-| Phase 4 | 11 | 8 | 0 | 73% |
-| **Total** | **85** | **80** | **0** | **94%** |
+| Phase 4 | 12 | 12 | 0 | 100% |
+| **Total** | **86** | **84** | **0** | **98%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-31 (Update 16)
+- **Learning Analytics complete (Phase 4.2)**:
+  - Created `analyticsStore.ts` with comprehensive tracking:
+    - Reading sessions per section with start/end times
+    - Daily statistics (reading time, sections visited, flashcards, quizzes)
+    - Study streak tracking (current and longest)
+    - Activity log (last 500 entries)
+    - Weekly and monthly summaries
+  - Created `useReadingSession` hook:
+    - Automatic session tracking on section mount/unmount
+    - Visibility API integration (pause when tab hidden)
+    - beforeunload handling for session save
+    - Periodic updates every 30 seconds
+  - Created `AnalyticsDashboardPage` at `/greining` route:
+    - Overview cards: total time, today's time, weekly average, streak
+    - Weekly bar chart showing last 7 days
+    - Top 5 most-read sections
+    - Recent activity feed
+    - Monthly summary statistics
+    - Data export (JSON download)
+    - Clear all data option with confirmation
+  - Added `formatReadingTime()` helper for Icelandic time formatting
+  - Integrated with SectionView for automatic tracking
+- **Phase 4 Complete! (100%)**
+- Overall progress: 94% → 98%
 
 ### 2025-12-31 (Update 15)
 - **Print Stylesheet complete (Phase 4.3)**:

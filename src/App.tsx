@@ -19,6 +19,9 @@ const ObjectivesDashboardPage = lazy(
 const PeriodicTablePage = lazy(
   () => import("@/components/reader/PeriodicTablePage"),
 );
+const AnalyticsDashboardPage = lazy(
+  () => import("@/components/reader/AnalyticsDashboardPage"),
+);
 
 // Loading fallback component
 function PageLoader() {
@@ -79,6 +82,14 @@ function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <PeriodicTablePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="greining"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <AnalyticsDashboardPage />
               </Suspense>
             }
           />
