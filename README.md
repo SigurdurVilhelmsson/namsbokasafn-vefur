@@ -35,10 +35,14 @@ Opnar kennslubækur á íslensku - gagnvirkur veflesari fyrir íslenskar þýði
 ### Nýlega bætt við (desember 2025)
 
 - **Yfirstrikun og athugasemdir** - Merkja texta með litum og bæta við glósum
-- **Lestur á rödd** - Lesa efni upphátt með Web Speech API
-- **Flýtilyklar** - Ítarlegir flýtilyklar fyrir flýtinotendur (ýttu á `?`)
+- **Lestur á rödd** - Íslensk raddlestur með Piper TTS (4 raddir)
+- **Flýtilyklar** - Sérsniðnir flýtilyklar fyrir flýtinotendur (ýttu á `?`)
 - **Einbeitingarhamur** - Hreinn leshamur án truflana (ýttu á `F`)
 - **Aðgengi (WCAG 2.2)** - Bætt aðgengi fyrir alla notendur
+- **Gagnvirkt lotukerfi** - 118 frumefni með ítarlegum upplýsingum
+- **Námsgreining** - Fylgist með lestíma og námsframvindu
+- **PWA stuðningur** - Virkar án nettengingar eftir fyrstu heimsókn
+- **Prentsnið** - Fínstillt fyrir prentun
 
 ---
 
@@ -205,7 +209,6 @@ Bættu við SVG eða PNG mynd í `public/covers/liffraedi.svg`
 
 | Skjal | Lýsing |
 |-------|--------|
-| [RECOMMENDATIONS.md](./RECOMMENDATIONS.md) | Ítarlegar umbótaráætlanir í 4 þrepum |
 | [IMPLEMENTATION_PROGRESS.md](./IMPLEMENTATION_PROGRESS.md) | Framvindumæling fyrir öll verkefni |
 | [MARKDOWN-GUIDE.md](./MARKDOWN-GUIDE.md) | Leiðbeiningar um markdown snið |
 | [LANGUAGE_GUIDE.md](./LANGUAGE_GUIDE.md) | Tungumálastefna (íslenska/enska) |
@@ -215,10 +218,12 @@ Bættu við SVG eða PNG mynd í `public/covers/liffraedi.svg`
 
 | Þrep | Lýsing | Framvinda |
 |------|--------|-----------|
-| Þrep 1 | Grunnupplifun (aðgengi, yfirstrikun, TTS) | 69% |
-| Þrep 2 | Námsaðstoð (minniskort, próf) | 18% |
-| Þrep 3 | Vísindalegir eiginleikar | 0% |
-| Þrep 4 | Háþróaðir eiginleikar | 0% |
+| Þrep 1 | Grunnupplifun (aðgengi, yfirstrikun, TTS) | 97% |
+| Þrep 2 | Námsaðstoð (minniskort, próf, markmið) | 100% |
+| Þrep 3 | Vísindalegir eiginleikar (lotukerfi, myndaskoðari) | 100% |
+| Þrep 4 | Háþróaðir eiginleikar (PWA, greining, prentun) | 100% |
+
+**Heildarframvinda: 99%** (85 af 86 verkefnum lokið)
 
 ---
 
