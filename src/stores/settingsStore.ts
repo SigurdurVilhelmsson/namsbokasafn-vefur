@@ -6,6 +6,38 @@ export type Theme = "light" | "dark";
 export type FontSize = "small" | "medium" | "large" | "xlarge";
 export type FontFamily = "serif" | "sans";
 
+// Shortcut action identifiers
+export type ShortcutAction =
+  | "prevSection"
+  | "nextSection"
+  | "goHome"
+  | "goFlashcards"
+  | "goGlossary"
+  | "toggleSidebar"
+  | "toggleFocusMode"
+  | "toggleTheme"
+  | "openSearch"
+  | "showShortcuts"
+  | "closeModal";
+
+// Default keyboard shortcuts
+export const DEFAULT_SHORTCUTS: Record<ShortcutAction, string> = {
+  prevSection: "ArrowLeft",
+  nextSection: "ArrowRight",
+  goHome: "g h",
+  goFlashcards: "g f",
+  goGlossary: "g o",
+  toggleSidebar: "s",
+  toggleFocusMode: "f",
+  toggleTheme: "t",
+  openSearch: "/",
+  showShortcuts: "?",
+  closeModal: "Escape",
+};
+
+// Custom shortcut preferences (only stores overrides)
+export type ShortcutPreferences = Partial<Record<ShortcutAction, string>>;
+
 interface SettingsState {
   // Theme
   theme: Theme;
@@ -24,16 +56,24 @@ interface SettingsState {
   sidebarOpen: boolean;
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
+
+  // Keyboard shortcut preferences
+  shortcutPreferences: ShortcutPreferences;
+  setShortcut: (action: ShortcutAction, key: string) => void;
+  resetShortcut: (action: ShortcutAction) => void;
+  resetAllShortcuts: () => void;
+  getShortcut: (action: ShortcutAction) => string;
 }
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       // Default values
       theme: "light",
       fontSize: "medium",
       fontFamily: "serif",
       sidebarOpen: false, // Closed by default on mobile; desktop overrides with lg:translate-x-0
+      shortcutPreferences: {},
 
       // Theme methods
       setTheme: (theme) => {
@@ -67,6 +107,29 @@ export const useSettingsStore = create<SettingsState>()(
       setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
       toggleSidebar: () =>
         set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+
+      // Keyboard shortcut methods
+      setShortcut: (action, key) =>
+        set((state) => ({
+          shortcutPreferences: {
+            ...state.shortcutPreferences,
+            [action]: key,
+          },
+        })),
+
+      resetShortcut: (action) =>
+        set((state) => {
+          const newPrefs = { ...state.shortcutPreferences };
+          delete newPrefs[action];
+          return { shortcutPreferences: newPrefs };
+        }),
+
+      resetAllShortcuts: () => set({ shortcutPreferences: {} }),
+
+      getShortcut: (action) => {
+        const { shortcutPreferences } = get();
+        return shortcutPreferences[action] || DEFAULT_SHORTCUTS[action];
+      },
     }),
     {
       name: "efnafraedi-settings",

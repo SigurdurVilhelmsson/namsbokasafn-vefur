@@ -63,7 +63,7 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Implement section navigation | ✅ | ←/→ for prev/next |
 | Add quick jump shortcuts | ✅ | g+f flashcards, g+o glossary, g+h home |
 | Toggle shortcuts (s, f, t) | ✅ | Sidebar, focus mode, theme |
-| Store shortcut preferences | ⬜ | Allow customization (future enhancement) |
+| Store shortcut preferences | ✅ | Customizable via modal, localStorage persistence |
 
 ### 1.6 Focus Mode (Bonus)
 | Task | Status | Notes |
@@ -196,15 +196,40 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 
 | Phase | Total Tasks | Completed | In Progress | Percentage |
 |-------|-------------|-----------|-------------|------------|
-| Phase 1 | 33 | 31 | 0 | 94% |
+| Phase 1 | 33 | 32 | 0 | 97% |
 | Phase 2 | 20 | 20 | 0 | 100% |
 | Phase 3 | 21 | 21 | 0 | 100% |
 | Phase 4 | 12 | 12 | 0 | 100% |
-| **Total** | **86** | **84** | **0** | **98%** |
+| **Total** | **86** | **85** | **0** | **99%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-31 (Update 17)
+- **Keyboard Shortcut Customization complete (Phase 1.5)**:
+  - Extended `settingsStore.ts` with shortcut preferences:
+    - `ShortcutAction` type for all keyboard actions
+    - `DEFAULT_SHORTCUTS` constant with default key bindings
+    - `shortcutPreferences` state (stores only user overrides)
+    - `setShortcut()`, `resetShortcut()`, `resetAllShortcuts()` methods
+    - `getShortcut()` returns user preference or default
+  - Refactored `useKeyboardShortcuts.ts`:
+    - Action-based shortcut system with metadata
+    - `SHORTCUT_METADATA` defines descriptions (English + Icelandic) and categories
+    - `KeyboardShortcut` interface with `isCustomized` flag
+    - Dynamic key bindings from store
+  - Enhanced `KeyboardShortcutsModal.tsx`:
+    - Click any shortcut to enter edit mode
+    - Press new key to rebind (single keys or multi-key like "g h")
+    - Visual feedback during key capture
+    - Customized shortcuts highlighted in amber
+    - Reset individual shortcut button
+    - Reset all shortcuts button (when customizations exist)
+    - Icelandic instructions in modal footer
+  - Shortcuts persist to localStorage via Zustand
+- Phase 1 progress: 94% → 97%
+- Overall progress: 98% → 99%
 
 ### 2025-12-31 (Update 16)
 - **Learning Analytics complete (Phase 4.2)**:
