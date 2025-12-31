@@ -111,7 +111,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
   const navigate = useNavigate();
   // location used for potential future enhancements
   useLocation();
-  const { toggleSidebar, toggleTheme, getShortcut, shortcutPreferences } =
+  const { toggleSidebar, toggleTheme, getShortcut } =
     useSettingsStore();
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
 
@@ -224,7 +224,7 @@ export function useKeyboardShortcuts(options: UseKeyboardShortcutsOptions = {}) 
         isCustomized: currentKey !== defaultKey,
       };
     });
-  }, [getShortcut, handlers, shortcutPreferences]);
+  }, [getShortcut, handlers]);
 
   // Track key sequence for multi-key shortcuts (like "g h")
   const [keySequence, setKeySequence] = useState<string[]>([]);
@@ -349,7 +349,7 @@ export function getCategoryDisplayName(category: string): string {
 export function isValidShortcutKey(key: string): boolean {
   // Allow single keys, arrow keys, and multi-key sequences like "g h"
   const validPatterns = [
-    /^[a-zA-Z0-9/\?\-\=\[\]\\;',\./`]$/, // Single printable chars
+    /^[a-zA-Z0-9/?=[\]\\;',./`-]$/, // Single printable chars (hyphen at end)
     /^Arrow(Left|Right|Up|Down)$/, // Arrow keys
     /^(Escape|Enter|Tab|Backspace|Delete|Home|End|PageUp|PageDown)$/, // Special keys
     /^[a-zA-Z] [a-zA-Z]$/, // Two-key sequences like "g h"

@@ -346,7 +346,7 @@ export const useAnalyticsStore = create<AnalyticsState>()(
         const { dailyStats } = get();
         const todayStats = dailyStats[today] || createEmptyDailyStats(today);
 
-        let updatedDailyStats = { ...todayStats };
+        const updatedDailyStats = { ...todayStats };
 
         switch (type) {
           case "flashcard":

@@ -104,7 +104,8 @@ export function useReadingSession(
   }, [endSession]);
 
   return {
-    isTracking: sessionActiveRef.current,
+    // Use currentSession presence instead of ref to avoid accessing ref during render
+    isTracking: currentSession !== null,
     currentDuration: currentSession?.durationSeconds || 0,
   };
 }

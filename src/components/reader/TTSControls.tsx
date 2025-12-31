@@ -60,9 +60,17 @@ export default function TTSControls({
   const handlePlayPause = async () => {
     if (isPlaying) {
       if (isPaused) {
-        usePreGenerated ? preGenAudio.resume() : webSpeech.resume();
+        if (usePreGenerated) {
+          preGenAudio.resume();
+        } else {
+          webSpeech.resume();
+        }
       } else {
-        usePreGenerated ? preGenAudio.pause() : webSpeech.pause();
+        if (usePreGenerated) {
+          preGenAudio.pause();
+        } else {
+          webSpeech.pause();
+        }
       }
     } else {
       if (usePreGenerated) {
@@ -74,7 +82,11 @@ export default function TTSControls({
   };
 
   const handleStop = () => {
-    usePreGenerated ? preGenAudio.stop() : webSpeech.stop();
+    if (usePreGenerated) {
+      preGenAudio.stop();
+    } else {
+      webSpeech.stop();
+    }
   };
 
   const handleRateChange = (newRate: number) => {

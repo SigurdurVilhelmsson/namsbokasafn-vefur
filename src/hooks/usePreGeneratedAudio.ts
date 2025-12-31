@@ -51,19 +51,30 @@ export function usePreGeneratedAudio(
     return unsubscribe;
   }, []);
 
+  // Derive whether we have required params (avoids setState in effect)
+  const hasRequiredParams = Boolean(bookSlug && chapterSlug && sectionSlug);
+
+  // Track current check to avoid race conditions
+  const checkIdRef = useRef(0);
+
   // Check if pre-generated audio exists
   useEffect(() => {
-    if (!bookSlug || !chapterSlug || !sectionSlug) {
-      setHasAudio(false);
+    // Skip if we don't have required params - hasAudio will be derived as false
+    if (!hasRequiredParams) {
       return;
     }
 
-    setHasAudio(null); // Loading state
+    // Increment check ID and capture for this effect instance
+    const currentCheckId = ++checkIdRef.current;
 
-    audioPlayer.hasAudio(bookSlug, chapterSlug, sectionSlug).then((exists) => {
-      setHasAudio(exists);
+    // Check for audio file
+    audioPlayer.hasAudio(bookSlug!, chapterSlug!, sectionSlug!).then((exists) => {
+      // Only update if this is still the current check
+      if (checkIdRef.current === currentCheckId) {
+        setHasAudio(exists);
+      }
     });
-  }, [bookSlug, chapterSlug, sectionSlug]);
+  }, [hasRequiredParams, bookSlug, chapterSlug, sectionSlug]);
 
   // Play audio
   const play = useCallback(async () => {
@@ -107,8 +118,11 @@ export function usePreGeneratedAudio(
     };
   }, []);
 
+  // Derive final hasAudio value: false if no params, otherwise use state
+  const effectiveHasAudio = hasRequiredParams ? hasAudio : false;
+
   return {
-    hasAudio,
+    hasAudio: effectiveHasAudio,
     isPlaying: state.isPlaying,
     isPaused: state.isPaused,
     isLoading: state.isLoading,
