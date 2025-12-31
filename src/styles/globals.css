@@ -1081,3 +1081,498 @@ textarea:focus-visible,
 .zoom-in-95 {
   animation-name: zoomIn95;
 }
+
+/* =============================================================================
+   PRINT STYLESHEET
+   Optimized for printing textbook content
+   ============================================================================= */
+
+@media print {
+  /* Reset colors for print */
+  :root {
+    --bg-primary: #ffffff;
+    --bg-secondary: #ffffff;
+    --text-primary: #000000;
+    --text-secondary: #333333;
+    --border-color: #cccccc;
+    --accent-color: #000000;
+  }
+
+  /* Basic print setup */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  html {
+    font-size: 12pt;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* ==========================================
+     HIDE NON-ESSENTIAL ELEMENTS
+     ========================================== */
+
+  /* Navigation and UI elements */
+  header,
+  nav,
+  aside,
+  .sidebar,
+  .focus-mode-nav,
+  .offline-indicator,
+  footer {
+    display: none !important;
+  }
+
+  /* Interactive controls */
+  button,
+  .practice-answer-toggle,
+  .equation-actions,
+  .tts-controls,
+  .annotation-sidebar,
+  .selection-popup,
+  .keyboard-shortcuts-modal,
+  .flashcard-modal,
+  .note-modal {
+    display: none !important;
+  }
+
+  /* Skip links and focus indicators */
+  .skip-link,
+  .sr-only,
+  [aria-hidden="true"] {
+    display: none !important;
+  }
+
+  /* Bookmarks, highlights, and annotation buttons */
+  [class*="bookmark"],
+  [class*="Bookmark"],
+  .highlight-actions {
+    display: none !important;
+  }
+
+  /* Navigation buttons */
+  .navigation-buttons,
+  [class*="NavigationButton"] {
+    display: none !important;
+  }
+
+  /* ==========================================
+     LAYOUT ADJUSTMENTS
+     ========================================== */
+
+  /* Remove sidebar margin, full width */
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .reading-content {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Article content */
+  article {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ==========================================
+     TYPOGRAPHY FOR PRINT
+     ========================================== */
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    color: black !important;
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  h1 {
+    font-size: 24pt !important;
+    margin-top: 0 !important;
+    margin-bottom: 12pt !important;
+  }
+
+  h2 {
+    font-size: 18pt !important;
+    margin-top: 18pt !important;
+    margin-bottom: 8pt !important;
+  }
+
+  h3 {
+    font-size: 14pt !important;
+    margin-top: 14pt !important;
+    margin-bottom: 6pt !important;
+  }
+
+  h4 {
+    font-size: 12pt !important;
+    margin-top: 12pt !important;
+    margin-bottom: 4pt !important;
+  }
+
+  /* Paragraphs */
+  p {
+    color: black !important;
+    font-size: 11pt !important;
+    line-height: 1.6 !important;
+    margin-bottom: 8pt !important;
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Lists */
+  ul, ol {
+    margin-bottom: 8pt !important;
+    padding-left: 20pt !important;
+  }
+
+  li {
+    font-size: 11pt !important;
+    margin-bottom: 4pt !important;
+  }
+
+  /* Links - show URL after link text */
+  a {
+    color: black !important;
+    text-decoration: underline !important;
+  }
+
+  a[href^="http"]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+
+  /* Don't show URLs for internal links */
+  a[href^="/"]:after,
+  a[href^="#"]:after {
+    content: none;
+  }
+
+  /* ==========================================
+     TABLES
+     ========================================== */
+
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin: 12pt 0 !important;
+    page-break-inside: avoid;
+  }
+
+  th, td {
+    border: 1px solid #999 !important;
+    padding: 6pt 8pt !important;
+    font-size: 10pt !important;
+    color: black !important;
+    background: white !important;
+  }
+
+  th {
+    background: #f0f0f0 !important;
+    font-weight: bold !important;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  /* ==========================================
+     IMAGES AND FIGURES
+     ========================================== */
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    page-break-inside: avoid;
+    page-break-before: auto;
+    page-break-after: auto;
+  }
+
+  figure {
+    margin: 12pt 0 !important;
+    page-break-inside: avoid;
+  }
+
+  figcaption {
+    font-size: 10pt !important;
+    color: #333 !important;
+    text-align: center !important;
+    margin-top: 4pt !important;
+  }
+
+  /* ==========================================
+     MATH EQUATIONS (KaTeX)
+     ========================================== */
+
+  .katex {
+    font-size: 11pt !important;
+  }
+
+  .katex-display {
+    margin: 12pt 0 !important;
+    page-break-inside: avoid;
+  }
+
+  /* Equation wrapper for print */
+  .equation-wrapper {
+    page-break-inside: avoid;
+    margin: 10pt 0 !important;
+    padding: 8pt !important;
+    background: transparent !important;
+  }
+
+  /* Hide equation number positioning issues */
+  .equation-numbered::after {
+    position: static !important;
+    display: inline !important;
+    margin-left: 1em;
+  }
+
+  /* ==========================================
+     CONTENT BLOCKS (Notes, Warnings, etc.)
+     ========================================== */
+
+  .content-block {
+    border: 1px solid #999 !important;
+    background: #f9f9f9 !important;
+    padding: 10pt !important;
+    margin: 12pt 0 !important;
+    page-break-inside: avoid;
+    border-radius: 0 !important;
+  }
+
+  .content-block-title {
+    color: black !important;
+    font-weight: bold !important;
+    margin-bottom: 6pt !important;
+  }
+
+  .content-block-icon {
+    display: none !important;
+  }
+
+  .content-block p {
+    color: black !important;
+    margin-bottom: 6pt !important;
+  }
+
+  /* Note block */
+  .content-block.note {
+    border-left: 4pt solid #2563eb !important;
+    background: #f0f7ff !important;
+  }
+
+  /* Warning block */
+  .content-block.warning {
+    border-left: 4pt solid #d97706 !important;
+    background: #fffbeb !important;
+  }
+
+  /* Example block */
+  .content-block.example {
+    border-left: 4pt solid #6b7280 !important;
+    background: #f9fafb !important;
+  }
+
+  /* Definition block */
+  .content-block.definition {
+    border-left: 4pt solid #7c3aed !important;
+    background: #faf5ff !important;
+  }
+
+  /* Key concept block */
+  .content-block.key-concept {
+    border-left: 4pt solid #0891b2 !important;
+    background: #ecfeff !important;
+  }
+
+  /* Checkpoint block */
+  .content-block.checkpoint {
+    border-left: 4pt solid #16a34a !important;
+    background: #f0fdf4 !important;
+  }
+
+  /* Common misconception block */
+  .content-block.common-misconception {
+    border-left: 4pt solid #e11d48 !important;
+    background: #fff1f2 !important;
+  }
+
+  /* ==========================================
+     PRACTICE PROBLEMS
+     ========================================== */
+
+  .practice-problem {
+    border: 1px solid #999 !important;
+    background: white !important;
+    margin: 12pt 0 !important;
+    page-break-inside: avoid;
+    border-radius: 0 !important;
+  }
+
+  .practice-problem-header {
+    background: #fef3c7 !important;
+    border-bottom: 1px solid #fde68a !important;
+    padding: 8pt !important;
+  }
+
+  .practice-problem-header h4 {
+    color: #92400e !important;
+    margin: 0 !important;
+    font-size: 10pt !important;
+  }
+
+  .practice-problem-content {
+    padding: 10pt !important;
+  }
+
+  /* Show answers in print (override hidden state) */
+  .practice-answer-content {
+    display: block !important;
+    padding: 10pt !important;
+    background: #ecfdf5 !important;
+    border-top: 2pt solid #10b981 !important;
+  }
+
+  .practice-answer-content p {
+    color: #065f46 !important;
+  }
+
+  /* ==========================================
+     LEARNING OBJECTIVES
+     ========================================== */
+
+  .learning-objectives {
+    border: 1px solid #10b981 !important;
+    background: #ecfdf5 !important;
+    padding: 10pt !important;
+    margin-bottom: 12pt !important;
+    page-break-inside: avoid;
+  }
+
+  /* ==========================================
+     CODE BLOCKS
+     ========================================== */
+
+  pre, code {
+    font-family: "Courier New", monospace !important;
+    font-size: 10pt !important;
+  }
+
+  pre {
+    background: #f5f5f5 !important;
+    border: 1px solid #ddd !important;
+    padding: 8pt !important;
+    page-break-inside: avoid;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+  }
+
+  code {
+    background: #f0f0f0 !important;
+    padding: 1pt 3pt !important;
+    border-radius: 0 !important;
+  }
+
+  /* ==========================================
+     PAGE BREAK CONTROLS
+     ========================================== */
+
+  /* Force page break before major sections */
+  .page-break-before {
+    page-break-before: always !important;
+  }
+
+  /* Force page break after */
+  .page-break-after {
+    page-break-after: always !important;
+  }
+
+  /* Avoid page breaks inside */
+  .page-break-avoid {
+    page-break-inside: avoid !important;
+  }
+
+  /* Chapter headings start on new page */
+  h1 {
+    page-break-before: always;
+  }
+
+  /* First h1 doesn't need page break */
+  h1:first-of-type {
+    page-break-before: avoid;
+  }
+
+  /* Keep headings with their content */
+  h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+
+  /* ==========================================
+     HIGHLIGHTS (Print-friendly)
+     ========================================== */
+
+  mark,
+  .highlight-yellow,
+  .highlight-green,
+  .highlight-blue,
+  .highlight-pink {
+    background: #ffff99 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* ==========================================
+     PAGE MARGINS & HEADERS
+     ========================================== */
+
+  @page {
+    size: A4;
+    margin: 2cm;
+  }
+
+  @page :first {
+    margin-top: 3cm;
+  }
+
+  /* ==========================================
+     SECTION METADATA (Reading time, difficulty)
+     ========================================== */
+
+  .section-metadata {
+    display: none !important;
+  }
+
+  /* ==========================================
+     CROSS-REFERENCES
+     ========================================== */
+
+  .cross-reference {
+    color: black !important;
+    text-decoration: underline !important;
+    font-weight: 500 !important;
+  }
+
+  .cross-reference-preview {
+    display: none !important;
+  }
+}

@@ -185,10 +185,10 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 ### 4.3 Print Stylesheet
 | Task | Status | Notes |
 |------|--------|-------|
-| Add `@media print` styles | ⬜ | |
-| Hide navigation in print | ⬜ | |
-| Optimize equation rendering | ⬜ | |
-| Add page break controls | ⬜ | |
+| Add `@media print` styles | ✅ | Comprehensive print CSS in globals.css (~500 lines) |
+| Hide navigation in print | ✅ | Header, sidebar, buttons, modals hidden |
+| Optimize equation rendering | ✅ | KaTeX equations sized for print, page-break-inside: avoid |
+| Add page break controls | ✅ | orphans/widows, page-break-before/after, avoid breaks in tables |
 
 ---
 
@@ -199,12 +199,47 @@ This document tracks progress on recommended improvements for Námsbókasafn.
 | Phase 1 | 33 | 31 | 0 | 94% |
 | Phase 2 | 20 | 20 | 0 | 100% |
 | Phase 3 | 21 | 21 | 0 | 100% |
-| Phase 4 | 11 | 4 | 0 | 36% |
-| **Total** | **85** | **76** | **0** | **89%** |
+| Phase 4 | 11 | 8 | 0 | 73% |
+| **Total** | **85** | **80** | **0** | **94%** |
 
 ---
 
 ## Changelog
+
+### 2025-12-31 (Update 15)
+- **Print Stylesheet complete (Phase 4.3)**:
+  - Added comprehensive `@media print` styles to globals.css (~500 lines)
+  - **Hidden elements in print**:
+    - Navigation (header, nav, aside, sidebar)
+    - Interactive controls (buttons, TTS controls, annotation sidebar)
+    - Skip links, screen reader elements, modals
+    - Bookmark and highlight action buttons
+  - **Typography optimized for print**:
+    - 12pt base font, headings 10-24pt
+    - Proper orphans/widows control (3 lines)
+    - pt-based margins and padding
+  - **Page break controls**:
+    - Avoid breaks inside tables, figures, equations, content blocks
+    - Chapter headings (h1) start on new page
+    - Keep headings with following content
+  - **Content blocks styled for print**:
+    - Colored left borders (4pt) for visual distinction
+    - Note (blue), Warning (amber), Example (gray)
+    - Definition (purple), Key Concept (cyan), Checkpoint (green), Misconception (rose)
+  - **Math equations (KaTeX)**:
+    - 11pt font size, centered display
+    - Page-break-inside: avoid
+    - Equation numbering preserved
+  - **Tables**:
+    - 1px borders, gray header background
+    - thead repeats on each page
+  - **Practice problems**:
+    - Answers always visible in print (override hidden state)
+    - Green border-top for answer section
+  - **Links**: External URLs printed after link text
+  - **Page setup**: A4 size, 2cm margins
+- Phase 4 progress: 36% → 73%
+- Overall progress: 89% → 94%
 
 ### 2025-12-30 (Update 14)
 - **Offline Support complete (Phase 4.1)**:
