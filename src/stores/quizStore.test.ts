@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { act } from "@testing-library/react";
-import { useQuizStore } from "./quizStore";
+import { useQuizStore, type MasteryLevel } from "./quizStore";
 import type { QuizQuestion, QuizAnswer } from "@/types/quiz";
 
 // =============================================================================
@@ -593,6 +593,414 @@ describe("quizStore", () => {
       expect(progress.total).toBe(0);
       expect(progress.completed).toBe(0);
       expect(progress.percentage).toBe(0);
+    });
+  });
+
+  // ===========================================================================
+  // PRACTICE PROBLEM ATTEMPT TRACKING
+  // ===========================================================================
+
+  describe("markPracticeProblemAttempt", () => {
+    beforeEach(() => {
+      const store = useQuizStore.getState();
+      act(() => {
+        store.markPracticeProblemViewed(
+          "prob-1",
+          "01-grunnhugmyndir",
+          "1-1-efnafraedi",
+          "Reiknaðu massa",
+          "42 g",
+        );
+      });
+    });
+
+    it("should record a successful attempt", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemAttempt("prob-1", true);
+      });
+
+      const problem = useQuizStore.getState().getPracticeProblemProgress("prob-1");
+      expect(problem?.attempts).toBe(1);
+      expect(problem?.successfulAttempts).toBe(1);
+      expect(problem?.isCompleted).toBe(true);
+      expect(problem?.lastAttempted).toBeDefined();
+    });
+
+    it("should record a failed attempt", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemAttempt("prob-1", false);
+      });
+
+      const problem = useQuizStore.getState().getPracticeProblemProgress("prob-1");
+      expect(problem?.attempts).toBe(1);
+      expect(problem?.successfulAttempts).toBe(0);
+      expect(problem?.isCompleted).toBe(false);
+    });
+
+    it("should track multiple attempts", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemAttempt("prob-1", false); // fail
+        store.markPracticeProblemAttempt("prob-1", false); // fail
+        store.markPracticeProblemAttempt("prob-1", true); // success
+      });
+
+      const problem = useQuizStore.getState().getPracticeProblemProgress("prob-1");
+      expect(problem?.attempts).toBe(3);
+      expect(problem?.successfulAttempts).toBe(1);
+      expect(problem?.isCompleted).toBe(true);
+    });
+
+    it("should not affect non-existent problem", () => {
+      const store = useQuizStore.getState();
+      const initialState = { ...store.practiceProblemProgress };
+
+      act(() => {
+        store.markPracticeProblemAttempt("non-existent", true);
+      });
+
+      expect(useQuizStore.getState().practiceProblemProgress).toEqual(initialState);
+    });
+
+    it("should keep isCompleted true once set", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemAttempt("prob-1", true); // completes it
+        store.markPracticeProblemAttempt("prob-1", false); // fail shouldn't un-complete
+      });
+
+      const problem = useQuizStore.getState().getPracticeProblemProgress("prob-1");
+      expect(problem?.isCompleted).toBe(true);
+    });
+  });
+
+  // ===========================================================================
+  // MASTERY TRACKING TESTS
+  // ===========================================================================
+
+  describe("getProblemMastery", () => {
+    it("should return novice for non-existent problem", () => {
+      const state = useQuizStore.getState();
+      const mastery = state.getProblemMastery("non-existent");
+
+      expect(mastery.level).toBe("novice");
+      expect(mastery.successRate).toBe(0);
+      expect(mastery.attempts).toBe(0);
+    });
+
+    it("should return novice for unattempted problem", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemViewed("prob-1", "01", "1-1", "Content", "Answer");
+      });
+
+      const mastery = useQuizStore.getState().getProblemMastery("prob-1");
+      expect(mastery.level).toBe("novice");
+      expect(mastery.attempts).toBe(0);
+    });
+
+    it("should return learning for 1 attempt with low success", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemViewed("prob-1", "01", "1-1", "Content", "Answer");
+        store.markPracticeProblemAttempt("prob-1", false);
+      });
+
+      const mastery = useQuizStore.getState().getProblemMastery("prob-1");
+      expect(mastery.level).toBe("learning");
+      expect(mastery.successRate).toBe(0);
+    });
+
+    it("should return practicing for 2+ attempts with 50%+ success", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemViewed("prob-1", "01", "1-1", "Content", "Answer");
+        store.markPracticeProblemAttempt("prob-1", true);
+        store.markPracticeProblemAttempt("prob-1", false);
+      });
+
+      const mastery = useQuizStore.getState().getProblemMastery("prob-1");
+      expect(mastery.level).toBe("practicing");
+      expect(mastery.successRate).toBe(50);
+    });
+
+    it("should return proficient for 2+ attempts with 75%+ success", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemViewed("prob-1", "01", "1-1", "Content", "Answer");
+        store.markPracticeProblemAttempt("prob-1", true);
+        store.markPracticeProblemAttempt("prob-1", true);
+        store.markPracticeProblemAttempt("prob-1", true);
+        store.markPracticeProblemAttempt("prob-1", false);
+      });
+
+      const mastery = useQuizStore.getState().getProblemMastery("prob-1");
+      expect(mastery.level).toBe("proficient");
+      expect(mastery.successRate).toBe(75);
+    });
+
+    it("should return mastered for 3+ attempts with 90%+ success", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemViewed("prob-1", "01", "1-1", "Content", "Answer");
+        store.markPracticeProblemAttempt("prob-1", true);
+        store.markPracticeProblemAttempt("prob-1", true);
+        store.markPracticeProblemAttempt("prob-1", true);
+      });
+
+      const mastery = useQuizStore.getState().getProblemMastery("prob-1");
+      expect(mastery.level).toBe("mastered");
+      expect(mastery.successRate).toBe(100);
+    });
+
+    it("should include lastAttempted in mastery info", () => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        store.markPracticeProblemViewed("prob-1", "01", "1-1", "Content", "Answer");
+        store.markPracticeProblemAttempt("prob-1", true);
+      });
+
+      const mastery = useQuizStore.getState().getProblemMastery("prob-1");
+      expect(mastery.lastAttempted).toBe("2024-01-15T12:00:00.000Z");
+    });
+  });
+
+  describe("getSectionMastery", () => {
+    beforeEach(() => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        // Add problems to section 1-1
+        store.markPracticeProblemViewed("p1", "01", "1-1", "P1", "A1");
+        store.markPracticeProblemViewed("p2", "01", "1-1", "P2", "A2");
+        // p1: 2 attempts, 2 successful
+        store.markPracticeProblemAttempt("p1", true);
+        store.markPracticeProblemAttempt("p1", true);
+        // p2: 2 attempts, 1 successful
+        store.markPracticeProblemAttempt("p2", true);
+        store.markPracticeProblemAttempt("p2", false);
+      });
+    });
+
+    it("should return aggregate mastery for section", () => {
+      const state = useQuizStore.getState();
+      const mastery = state.getSectionMastery("01", "1-1");
+
+      // Total: 4 attempts, 3 successful = 75%
+      expect(mastery.successRate).toBe(75);
+      expect(mastery.attempts).toBe(4);
+      expect(mastery.level).toBe("proficient"); // 75%+ with 2+ attempts
+    });
+
+    it("should return novice for empty section", () => {
+      const state = useQuizStore.getState();
+      const mastery = state.getSectionMastery("99", "fake");
+
+      expect(mastery.level).toBe("novice");
+      expect(mastery.successRate).toBe(0);
+      expect(mastery.attempts).toBe(0);
+    });
+
+    it("should include lastAttempted from most recent problem", () => {
+      const state = useQuizStore.getState();
+      const mastery = state.getSectionMastery("01", "1-1");
+
+      expect(mastery.lastAttempted).toBeDefined();
+    });
+  });
+
+  describe("getChapterMastery", () => {
+    beforeEach(() => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        // Chapter 01, section 1-1
+        store.markPracticeProblemViewed("p1", "01", "1-1", "P1", "A1");
+        store.markPracticeProblemAttempt("p1", true);
+        store.markPracticeProblemAttempt("p1", true);
+
+        // Chapter 01, section 1-2
+        store.markPracticeProblemViewed("p2", "01", "1-2", "P2", "A2");
+        store.markPracticeProblemAttempt("p2", true);
+        store.markPracticeProblemAttempt("p2", false);
+      });
+    });
+
+    it("should return aggregate mastery for chapter", () => {
+      const state = useQuizStore.getState();
+      const mastery = state.getChapterMastery("01");
+
+      // Total: 4 attempts, 3 successful = 75%
+      expect(mastery.successRate).toBe(75);
+      expect(mastery.attempts).toBe(4);
+    });
+
+    it("should return novice for empty chapter", () => {
+      const state = useQuizStore.getState();
+      const mastery = state.getChapterMastery("99");
+
+      expect(mastery.level).toBe("novice");
+      expect(mastery.successRate).toBe(0);
+    });
+  });
+
+  // ===========================================================================
+  // PROBLEMS FOR REVIEW TESTS
+  // ===========================================================================
+
+  describe("getProblemsForReview", () => {
+    beforeEach(() => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        // Problem 1: completed, high success rate
+        store.markPracticeProblemViewed("p1", "01", "1-1", "P1", "A1");
+        store.markPracticeProblemAttempt("p1", true);
+        store.markPracticeProblemAttempt("p1", true);
+
+        // Problem 2: not completed, low success rate (priority)
+        store.markPracticeProblemViewed("p2", "01", "1-1", "P2", "A2");
+        store.markPracticeProblemAttempt("p2", false);
+        store.markPracticeProblemAttempt("p2", false);
+
+        // Problem 3: completed, medium success rate
+        store.markPracticeProblemViewed("p3", "01", "1-2", "P3", "A3");
+        store.markPracticeProblemAttempt("p3", true);
+        store.markPracticeProblemAttempt("p3", false);
+
+        // Problem 4: never attempted (should not appear)
+        store.markPracticeProblemViewed("p4", "01", "1-2", "P4", "A4");
+      });
+    });
+
+    it("should return problems sorted by priority", () => {
+      const state = useQuizStore.getState();
+      const problems = state.getProblemsForReview();
+
+      // Should only include attempted problems
+      expect(problems.length).toBe(3);
+
+      // First should be p2 (not completed, 0% success)
+      expect(problems[0].id).toBe("p2");
+    });
+
+    it("should respect limit parameter", () => {
+      const state = useQuizStore.getState();
+      const problems = state.getProblemsForReview(2);
+
+      expect(problems.length).toBe(2);
+    });
+
+    it("should exclude unattempted problems", () => {
+      const state = useQuizStore.getState();
+      const problems = state.getProblemsForReview();
+
+      const ids = problems.map(p => p.id);
+      expect(ids).not.toContain("p4");
+    });
+
+    it("should prioritize not completed over completed", () => {
+      const state = useQuizStore.getState();
+      const problems = state.getProblemsForReview();
+
+      // p2 is not completed, should be before p1 and p3 which are completed
+      const p2Index = problems.findIndex(p => p.id === "p2");
+      const p1Index = problems.findIndex(p => p.id === "p1");
+
+      expect(p2Index).toBeLessThan(p1Index);
+    });
+  });
+
+  // ===========================================================================
+  // ADAPTIVE PROBLEMS TESTS
+  // ===========================================================================
+
+  describe("getAdaptiveProblems", () => {
+    beforeEach(() => {
+      const store = useQuizStore.getState();
+
+      act(() => {
+        // Novice problems (never attempted or very few)
+        store.markPracticeProblemViewed("novice1", "01", "1-1", "N1", "A1");
+        store.markPracticeProblemViewed("novice2", "01", "1-1", "N2", "A2");
+        store.markPracticeProblemViewed("novice3", "01", "1-1", "N3", "A3");
+
+        // Learning problems (1 attempt)
+        store.markPracticeProblemViewed("learn1", "01", "1-2", "L1", "A1");
+        store.markPracticeProblemAttempt("learn1", false);
+        store.markPracticeProblemViewed("learn2", "01", "1-2", "L2", "A2");
+        store.markPracticeProblemAttempt("learn2", true);
+
+        // Practicing problems (2+ attempts, 50%+)
+        store.markPracticeProblemViewed("prac1", "01", "1-3", "Pr1", "A1");
+        store.markPracticeProblemAttempt("prac1", true);
+        store.markPracticeProblemAttempt("prac1", false);
+
+        // Mastered problems (high success)
+        store.markPracticeProblemViewed("mast1", "01", "1-4", "M1", "A1");
+        store.markPracticeProblemAttempt("mast1", true);
+        store.markPracticeProblemAttempt("mast1", true);
+        store.markPracticeProblemAttempt("mast1", true);
+
+        // Chapter 02 problem
+        store.markPracticeProblemViewed("ch2-1", "02", "2-1", "C2", "A1");
+      });
+    });
+
+    it("should return problems for adaptive practice", () => {
+      const state = useQuizStore.getState();
+      const problems = state.getAdaptiveProblems();
+
+      expect(problems.length).toBeGreaterThan(0);
+      expect(problems.length).toBeLessThanOrEqual(5);
+    });
+
+    it("should filter by chapter when specified", () => {
+      const state = useQuizStore.getState();
+      const problems = state.getAdaptiveProblems("02");
+
+      // Only ch2-1 is in chapter 02
+      expect(problems.every(p => p.chapterSlug === "02")).toBe(true);
+    });
+
+    it("should respect limit parameter", () => {
+      const state = useQuizStore.getState();
+      const problems = state.getAdaptiveProblems(undefined, 3);
+
+      expect(problems.length).toBeLessThanOrEqual(3);
+    });
+
+    it("should prioritize lower mastery levels", () => {
+      const state = useQuizStore.getState();
+      const problems = state.getAdaptiveProblems("01", 10);
+
+      const ids = problems.map(p => p.id);
+
+      // Should not include mastered problem in limited results
+      // (mastered is lowest priority)
+      if (problems.length < 8) {
+        // If not all problems fit, mastered should be excluded
+        expect(ids).not.toContain("mast1");
+      }
+    });
+
+    it("should return empty array for empty chapter", () => {
+      const state = useQuizStore.getState();
+      const problems = state.getAdaptiveProblems("99");
+
+      expect(problems).toHaveLength(0);
     });
   });
 
