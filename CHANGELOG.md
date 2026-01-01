@@ -12,10 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Learning analytics dashboard at `/greining` route
 - Reading time tracking per section with useReadingSession hook
 - Study streak tracking and weekly statistics
+- Comprehensive unit tests for Zustand stores (413 total tests, 90% coverage)
 
 ### Changed
 - Refactored useKeyboardShortcuts to action-based system
 - Enhanced KeyboardShortcutsModal with rebinding UI
+
+### Fixed
+- ESLint errors across codebase for React 19 compatibility
 
 ## [0.4.0] - 2025-12-31
 
