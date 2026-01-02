@@ -31,12 +31,16 @@ export default function HomePage() {
 
   // Finna síðasta lesna kafla eða byrja á fyrsta kaflanum
   const defaultChapter = toc.chapters[0];
-  const defaultSection = defaultChapter.sections[0];
+  const defaultSection = defaultChapter?.sections[0];
 
+  // Build continue link only if we have valid chapter/section
+  const hasValidDefaults = defaultChapter && defaultSection;
   const continueLink =
     currentChapter && currentSection
       ? `/${bookSlug}/kafli/${currentChapter}/${currentSection}`
-      : `/${bookSlug}/kafli/${defaultChapter.slug}/${defaultSection.slug}`;
+      : hasValidDefaults
+        ? `/${bookSlug}/kafli/${defaultChapter.slug}/${defaultSection.slug}`
+        : `/${bookSlug}`;
 
   const continueLinkText =
     currentChapter && currentSection ? "Halda áfram að lesa" : "Byrja að lesa";
