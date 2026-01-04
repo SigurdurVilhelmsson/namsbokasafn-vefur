@@ -22,6 +22,9 @@ const PeriodicTablePage = lazy(
 const AnalyticsDashboardPage = lazy(
   () => import("@/components/reader/AnalyticsDashboardPage"),
 );
+const BookmarksPage = lazy(
+  () => import("@/components/reader/BookmarksPage"),
+);
 
 // Loading fallback component
 function PageLoader() {
@@ -90,6 +93,14 @@ function App() {
             element={
               <Suspense fallback={<PageLoader />}>
                 <AnalyticsDashboardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="bokamerki"
+            element={
+              <Suspense fallback={<PageLoader />}>
+                <BookmarksPage />
               </Suspense>
             }
           />

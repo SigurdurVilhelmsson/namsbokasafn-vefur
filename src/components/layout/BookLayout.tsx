@@ -56,7 +56,7 @@ export default function BookLayout() {
         </a>
 
         {/* Hide header in focus mode */}
-        {!focusMode && <Header />}
+        {!focusMode && <Header onOpenShortcuts={handleOpenShortcuts} />}
 
         <div className="flex">
           {/* Hide sidebar in focus mode */}
@@ -70,7 +70,7 @@ export default function BookLayout() {
             }`}
           >
             <div className="mx-auto max-w-7xl px-4 py-6">
-              <Outlet />
+              <Outlet context={{ onToggleFocusMode: handleToggleFocusMode, focusMode }} />
             </div>
           </main>
         </div>

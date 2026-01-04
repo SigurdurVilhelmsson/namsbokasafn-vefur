@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Moon, Sun, Menu, Search, Settings, ChevronLeft, Home } from "lucide-react";
+import { Moon, Sun, Menu, Search, Settings, ChevronLeft, Home, Keyboard } from "lucide-react";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useTheme } from "@/hooks/useTheme";
 import { useBook } from "@/hooks/useBook";
@@ -9,7 +9,11 @@ import SearchModal from "@/components/ui/SearchModal";
 import { loadTableOfContents } from "@/utils/contentLoader";
 import type { TableOfContents } from "@/types/content";
 
-export default function Header() {
+interface HeaderProps {
+  onOpenShortcuts?: () => void;
+}
+
+export default function Header({ onOpenShortcuts }: HeaderProps) {
   const { toggleTheme, isDark } = useTheme();
   const { toggleSidebar } = useSettingsStore();
   const { book, bookSlug } = useBook();
@@ -77,6 +81,17 @@ export default function Header() {
             >
               <Search size={20} />
             </button>
+
+            {onOpenShortcuts && (
+              <button
+                onClick={onOpenShortcuts}
+                className="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                aria-label="Flýtilyklar"
+                title="Flýtilyklar (?)"
+              >
+                <Keyboard size={20} />
+              </button>
+            )}
 
             <button
               onClick={toggleTheme}

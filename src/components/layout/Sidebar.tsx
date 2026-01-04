@@ -8,6 +8,9 @@ import {
   BookOpen,
   Brain,
   Target,
+  BarChart3,
+  CheckSquare,
+  Bookmark,
 } from "lucide-react";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useReaderStore } from "@/stores/readerStore";
@@ -149,8 +152,11 @@ export default function Sidebar() {
               ))}
             </ul>
 
-            {/* Bottom links */}
+            {/* Study tools section */}
             <div className="mt-6 space-y-1 border-t border-gray-100 dark:border-gray-800 px-2 pt-4">
+              <h3 className="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                Námsverkfæri
+              </h3>
               <Link
                 to={`/${bookSlug}/ordabok`}
                 className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
@@ -171,6 +177,27 @@ export default function Sidebar() {
               >
                 <Target size={20} />
                 <span className="text-sm">Æfingadæmi</span>
+              </Link>
+              <Link
+                to={`/${bookSlug}/markmid`}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+              >
+                <CheckSquare size={20} />
+                <span className="text-sm">Námsmarkmið</span>
+              </Link>
+              <Link
+                to={`/${bookSlug}/greining`}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+              >
+                <BarChart3 size={20} />
+                <span className="text-sm">Námsgreining</span>
+              </Link>
+              <Link
+                to={`/${bookSlug}/bokamerki`}
+                className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+              >
+                <Bookmark size={20} />
+                <span className="text-sm">Bókamerki</span>
               </Link>
             </div>
           </nav>
