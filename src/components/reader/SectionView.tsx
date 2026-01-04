@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Check, Bookmark, Highlighter, Volume2 } from "lucide-react";
+import { useParams, useOutletContext } from "react-router-dom";
+import { Check, Bookmark, Highlighter, Volume2, Maximize2, Minimize2 } from "lucide-react";
 import {
   loadTableOfContents,
   loadSectionContent,
@@ -26,6 +26,12 @@ import type {
   Section,
 } from "@/types/content";
 
+// Context type from BookLayout
+interface BookLayoutContext {
+  onToggleFocusMode: () => void;
+  focusMode: boolean;
+}
+
 export default function SectionView() {
   const { chapterSlug, sectionSlug } = useParams<{
     chapterSlug: string;
@@ -36,6 +42,9 @@ export default function SectionView() {
   const [navigation, setNavigation] = useState<NavigationContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Get focus mode context from BookLayout
+  const { onToggleFocusMode, focusMode } = useOutletContext<BookLayoutContext>() || {};
 
   // New Phase 1 state
   const [showAnnotationSidebar, setShowAnnotationSidebar] = useState(false);
@@ -276,6 +285,25 @@ export default function SectionView() {
                 <Volume2 size={16} />
                 <span className="hidden sm:inline">Lesa upphátt</span>
               </button>
+
+              {/* Focus mode toggle */}
+              {onToggleFocusMode && (
+                <button
+                  onClick={onToggleFocusMode}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-sans font-medium transition-colors ${
+                    focusMode
+                      ? "bg-[var(--accent-light)] text-[var(--accent-color)]"
+                      : "border border-[var(--border-color)] text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]"
+                  }`}
+                  aria-label={focusMode ? "Loka einbeitingarham" : "Einbeitingarhamur"}
+                  title={focusMode ? "Loka einbeitingarham (f)" : "Einbeitingarhamur (f)"}
+                >
+                  {focusMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                  <span className="hidden sm:inline">
+                    {focusMode ? "Loka" : "Einbeiting"}
+                  </span>
+                </button>
+              )}
 
               {/* ARIA live region for screen readers */}
               <div role="status" aria-live="polite" className="sr-only">
