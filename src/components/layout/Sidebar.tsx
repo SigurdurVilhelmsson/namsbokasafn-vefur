@@ -11,6 +11,7 @@ import {
   BarChart3,
   CheckSquare,
   Bookmark,
+  Atom,
 } from "lucide-react";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useReaderStore } from "@/stores/readerStore";
@@ -21,7 +22,7 @@ import type { TableOfContents, Chapter } from "@/types/content";
 export default function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useSettingsStore();
   const { isRead, getChapterProgress } = useReaderStore();
-  const { bookSlug } = useBook();
+  const { bookSlug, book } = useBook();
   const [toc, setToc] = useState<TableOfContents | null>(null);
   // Track which chapters user has manually toggled
   const [manuallyToggledChapters, setManuallyToggledChapters] = useState<
@@ -199,6 +200,15 @@ export default function Sidebar() {
                 <Bookmark size={20} />
                 <span className="text-sm">Bókamerki</span>
               </Link>
+              {book?.features?.periodicTable && (
+                <Link
+                  to={`/${bookSlug}/lotukerfi`}
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                >
+                  <Atom size={20} />
+                  <span className="text-sm">Lotukerfi</span>
+                </Link>
+              )}
             </div>
           </nav>
         </div>

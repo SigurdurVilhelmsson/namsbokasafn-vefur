@@ -25,6 +25,7 @@ export interface BookConfig {
     glossary: boolean;
     flashcards: boolean;
     exercises: boolean;
+    periodicTable?: boolean;
   };
 }
 
@@ -54,7 +55,8 @@ export const books: BookConfig[] = [
     features: {
       glossary: true,
       flashcards: true,
-      exercises: true
+      exercises: true,
+      periodicTable: true
     }
   },
   {
