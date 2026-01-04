@@ -1,3 +1,4 @@
+import { Keyboard } from "lucide-react";
 import Modal from "./Modal";
 import { useSettingsStore, FontSize, FontFamily } from "@/stores/settingsStore";
 
@@ -117,6 +118,25 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             </svg>
             Stillingar eru vistaðar sjálfkrafa í vafranum þínum
           </p>
+        </div>
+
+        {/* Flýtilyklar (keyboard shortcuts) hint */}
+        <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+              <Keyboard size={20} className="text-blue-600" />
+            </div>
+            <div>
+              <p className="font-medium text-gray-900">Flýtilyklar</p>
+              <p className="text-sm text-gray-600">
+                Ýttu á{" "}
+                <kbd className="rounded bg-white px-1.5 py-0.5 font-mono text-xs shadow-sm border border-gray-200">
+                  ?
+                </kbd>{" "}
+                til að sjá og sérsníða flýtilykla
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </Modal>
