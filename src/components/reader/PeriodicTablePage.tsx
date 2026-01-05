@@ -55,7 +55,7 @@ export default function PeriodicTablePage() {
                 Málmar
               </h3>
               <p className="text-sm text-[var(--text-secondary)]">
-                Alkalímálmar, jarðalkalímálmar, keðjumálmar, málmar eftir keðju
+                Alkalímálmar, jarðalkalímálmar, hliðarmálmar, tregir málmar
               </p>
             </div>
             <div>
@@ -63,15 +63,15 @@ export default function PeriodicTablePage() {
                 Málmleysingjar
               </h3>
               <p className="text-sm text-[var(--text-secondary)]">
-                Málmsnertir, málmleysingjar, halógen, eðalgös
+                Hálfmálmar, málmleysingjar, halógenar, eðalgas
               </p>
             </div>
             <div>
               <h3 className="mb-2 font-sans text-sm font-semibold text-[var(--text-primary)]">
-                Sjaldgæfar jarðir
+                Sjaldgæfir jarðmálmar
               </h3>
               <p className="text-sm text-[var(--text-secondary)]">
-                Lanþaníðar og aktíníðar í neðri röðunum
+                Lantaníðar og aktíníðar í neðri röðunum
               </p>
             </div>
             <div>
