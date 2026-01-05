@@ -30,7 +30,7 @@ Ein gerð Alzheimsr‘s er orsakað af stökkbreytingu í eina af þremur þekkt
 
 Því miður þá er engin lækning til við Alzheimr.  Núverandi meðferð felst aðalega í að meðhöndla einkenni sjúkdómsins.  Vegna hrörnunar í kólínvirkum taugungum (taugungar sem nota taugaboðefnið asetýlkólín) er algeng hjá fólki með Alzheimer, eru nokkur lyf notuð til að meðhöndla sjúkdóminn sem auka á næmni fyrir asetýlkókin, með því að hindra ensím sem brjóta asetýlkólín niður í taugamótunum.  Önnur meðhöndlun felst í því að meðhöndla einkenni með atferlismeðferð, og andlegum æfingum.  Þar sem Alzheimr‘s viðist taka yfir eðlilegt öldrunarferli, er mikið lagt upp úr fyrirbyggjandi meðferð.  Reykingar, offita og hjarta og æðasjúkdómar geta verið áhættuþættir fyrir sjúkdóminn.  Þannig getu meðferð gegn þessum þáttum verið hindrandi fyrir Alzhiemer sjúkdóminn.  Nokkrar rannsóknir hafa sýnt að fólk sem heldur sér andlega virku með því að spila leiki, lesa, leika á hlóðfæri og vera félagsega virk á efri árum, er með minni áhættu á að fá sjúkdóminn.
 
-![Mynd 35.30 Samanburður á eðlilegum heila (vinstra megin) og heila úr Alzhiemer sjúkling (hægra megin) sýnir mikla hrörnun í taugungum, sérstakleg í innan heilaholanna og í drekasvæðinu. (credit: modification of work by “Garrando”/Wikimedia Commons based on original images by ADEAR: "Alzheimer's Disease Education and Referral Center, a service of the National Institute on Aging”)](./images/mynd-35-30.jpeg)
+![Mynd 35.30 Samanburður á eðlilegum heila (vinstra megin) og heila úr Alzhiemer sjúkling (hægra megin) sýnir mikla hrörnun í taugungum, sérstakleg í innan heilaholanna og í drekasvæðinu. (credit: modification of work by “Garrando”/Wikimedia Commons based on original images by ADEAR: "Alzheimer's Disease Education and Referral Center, a service of the National Institute on Aging”)](images/mynd-35-30.jpeg)
 
 ## Parkinson’s
 
@@ -38,7 +38,7 @@ Líkt og með Alzheimer sjúkdóminn er Parkinson‘s taugahrörnunarsjúkdómur
 
 Þó svo að sumir sjúklingar séu með sjúkdóm sem vitað er að orsakast af einni stökkbreytingu, þá eru ástæður Parkinson‘s ekki þekkart.  Sjúkdómurinn er líklega tilkomin vegna erfða og umhverfisþátt (líkt og Alzhiemer).  Krufning á heila Parkinson sjúklinga leiðir í ljós Lewy klumpa -  óeðlileg uppsöfnun á próteini og fjöldi þeirra virðist vera í réttu hlutfalli við hversu alvarlegur sjúdómurinn er.  Það er engin lækning til við Parkison, og meðhöndlun felst í draga úr áhrifum einkennanna.  Algengasta lyfið sem notað er af Parkinson sjúklingum, er L-DOPA, sem er efni sem breytist í dópamín inn í taugungunum heilans.  Sú breyting eykur á styrk dópamíns losunar taugunganna og getur hjálpað til við að bæta upp tap á dópamín taugungunum í svarfyllinni.  Önnur lyf hindra ensími í að brjóta dópamín niður.
 
-![Mynd 35.31 Parkinson sjúklingar eru oft einkennandi hoknir og hafa sérstakt göngulag.](./images/mynd-35-31.jpg)
+![Mynd 35.31 Parkinson sjúklingar eru oft einkennandi hoknir og hafa sérstakt göngulag.](images/mynd-35-31.jpg)
 
 ## Taugaþroskunar Sjúkdómar
 
@@ -60,7 +60,7 @@ U.þ.b. þrjú til fimm prósent barna og fullorðinna eru með athyglisbrest og
 
 Orsök ADHD er óþekkt, þó svo rannsóknir bendi til að seinkunn og óregla í þroska í framheila sem og boðefnatruflun.  Samkvæmt tvíbura rannsóknum, er óreglan með sterkan genaþátt.  Það eru nokkur gen sem koma til greina, en engin bein tenging hefur enn fundist.  Umhverfisþættir, eins og ýmis skordýraeitur, geta mögulega lagt eitthvað að mörkum í þróun ADHD sumra einstaklinga.  Meðhöndlun á ADHD felst oft í atferlismeðferð og lyfjameðferð með örvandi lyfjum, en þau hjálpa þeim að slaka á.
 
-![Mynd 35.32 Margi þeirra sem þjást af ADHD eru með fleiri en eina taugaóreglu.  (credit “chart design and illustration”: modification of work by Leigh Coriale; credit “data”: Drs. Biederman and Faraone, Massachusetts General Hospital).](./images/mynd-35-32.jpg)
+![Mynd 35.32 Margi þeirra sem þjást af ADHD eru með fleiri en eina taugaóreglu.  (credit “chart design and illustration”: modification of work by Leigh Coriale; credit “data”: Drs. Biederman and Faraone, Massachusetts General Hospital).](images/mynd-35-32.jpg)
 
 ## Geðræn vandmál
 

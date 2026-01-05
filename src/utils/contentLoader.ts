@@ -68,9 +68,10 @@ export async function loadSectionContent(
     const { metadata, content } = parseFrontmatter(markdown);
 
     // Transform relative image paths to absolute paths
+    // Handles both "images/" and "./images/" formats
     const basePath = `/content/${bookSlug}/chapters/${chapterSlug}`;
     const transformedContent = content.replace(
-      /!\[([^\]]*)\]\(images\//g,
+      /!\[([^\]]*)\]\(\.?\/?\/?images\//g,
       `![$1](${basePath}/images/`,
     );
 

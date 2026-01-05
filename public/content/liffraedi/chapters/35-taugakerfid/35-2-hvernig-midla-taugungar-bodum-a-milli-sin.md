@@ -23,7 +23,7 @@ Til þess að taugakerfið geti starfað, þurfa taugungar að geta sent og teki
 
 Fosfólípíðsamlokan sem myndar frumuhimnuna, hleypir jónum ekki í gegnum sig.  Til þess að komast inn eða út úr taugung þurfa jónir að fara í gegnum sérhæfð himnuprótein sem kallast jónagöng sem ná í gegnum frumuhimnuna.  Jónagöng geta verið ýmist opin, lokuð eða óvirk (mynd 35.9).  Sum jónagöng þarf að virkja til að þau geti hleypt jónum inn eða út úr frumunni.  Þessi jónagöng eru næm fyrir breytingum í umhverfi sínu og geta breytt um lögun í samræmi við þær breytingar.  Jónagöng sem breyta lögun sinni eftir spennustigi eru kölluð „spennustýrð jónagöng“.  Spennustýrð jónagöng stjórna hlutfallslegum styrk jóna innan og utan frumunnar.  Munurinn á heildar hleðslu milli innri og ytri hluta frumunnar kallast himnuspenna.
 
-![Mynd 35.9 Spennsustýrð jónagöng opnast þegar breyting verður á himnuspennunni.  Eftir að þau hafa opnast, verða þau óvirk í smá stund og opnast ekki aftur þó svo þau fái boð um það.](./images/mynd-35-9.jpg)
+![Mynd 35.9 Spennsustýrð jónagöng opnast þegar breyting verður á himnuspennunni.  Eftir að þau hafa opnast, verða þau óvirk í smá stund og opnast ekki aftur þó svo þau fái boð um það.](images/mynd-35-9.jpg)
 
 ## Hvíldarspenna
 
@@ -31,19 +31,19 @@ Taugungur sem er í hvíld, er neikvætt hlaðinn:  innrihluti frumunnar er um 7
 
 Tafla 35.1 Hvíldarspenna verður til vegna þess að styrkur jóna fyrir innan frumu er ekki sá sami og fyrir utan frumu
 
-![Mynd 35.10  (a) Hvíldarspenna veður til vegna ólíks styrks Na+ og K+ jóna fyrir innan og utan frumuhimnuna.  Taugaboð veldur því að Na+ göng opnast og Na+ flæðir inn í frumuna sem veldur því að (b) hún afskautast.  Þegar boðspennan nær hámarki opnast K+ jónagöng og fruman verður yfirspennt.](./images/mynd-35-10.jpg)
+![Mynd 35.10  (a) Hvíldarspenna veður til vegna ólíks styrks Na+ og K+ jóna fyrir innan og utan frumuhimnuna.  Taugaboð veldur því að Na+ göng opnast og Na+ flæðir inn í frumuna sem veldur því að (b) hún afskautast.  Þegar boðspennan nær hámarki opnast K+ jónagöng og fruman verður yfirspennt.](images/mynd-35-10.jpg)
 
 ## Boðspenna
 
 Taugungur getur tekið við boðum frá öðrum taugungum og, ef boðið er nógu sterkt, fer boðið áfram til næsta taugungs.  Boð á milli taugunga eru almennt flutt á milli þeirra með efnum sem kallast taugaboðefni.  Boð innan taugunga (frá griplum til símaenda) er flutt með stuttum umskautunum á hvíldarspennunni sem kallast boðspenna.  Þegar taugaboðefnin eru losuð frá símaendum yfir á sérhæfða viðtaka í griplum annars taugungs leiðir það til þess að jónagöng opnast og plúshlaðnar jónir flæða inn.  Við það umskautast frumuhimna taugungsins (spennumunurinn minnkar milli ytra og innra hluta frumunnar).  Örvun frá skynfrumu eða taugung umskautar markfrumuna að hrökkspennu (-55mV).  Na+ jónagöng í símahól opnast og  hleypa jákvætthlöðnum jónum inn (mynd 35,10 og 35.11).  Eftir að natríumgöngin hafa opnast umskautast taugungurinn alveg yfir í +40mV.  Boðspenna er sögð vera „allt eða ekkert“ atburður, þar sem að eftir að hrökkspennu er náð, umskautast taugungurinn alltaf algerlega.   Eftir að umskautun er yfirstaðin, þarf fruman að endursetja himnuspennuna að hvíldarspennu.  Til að það sé hægt, þurfa Na+ jónagöngin að lokast og að vera ófær um að opnast aftur (í smá stund).  Hér hefst hlétími þar sem taugungurinn getur ekki myndað boðspennu því natríumjónagöngin geta ekki opnast.  Á sama tíma opnast spennustýrðu K+ jónagöngin þannig að K+ flæðir út úr frumunni.  Við þetta verður himan aftur neikvæð og í smá stund er hún yfirspennt, þar sem himnuspennan verður neikvæðari en venjuleg hvíldarspenna.  Við það verða natríum jónagöngin aftur virk og geta opnast að nýju ef taugungurinn verður aftur áreittur.  Með hjálp jónadælunnar mun fruman svo aftur ná hvíldarspennu (mynd 35.11 og 35.12).
 
-![Mynd 35.12 Boðspennan ferðast niður eftir taugasímanum og hvíldarspennan byggist upp fyrir aftan hana um leið.](./images/mynd-35-12.jpg)
+![Mynd 35.12 Boðspennan ferðast niður eftir taugasímanum og hvíldarspennan byggist upp fyrir aftan hana um leið.](images/mynd-35-12.jpg)
 
 ## Mýelín og flutningur boðspennunnar
 
 Til þess að boðspenna geti flutt boð til annars taugungs, þarf hún að ferðast eftir símanum og ná til símaenda þar sem hún getur losað taugaboðefni yfir á markvef sinn.  Hraði taugaboðsins ræðst af þvermáli símans og því hve vel hann passar upp á jónir sínar (ef jónir leka auðveldlega inn og út um frumuhimnuna, mun boðspennan fljótlega deyja út og ekki ná til símaendans).  Mýelín virkar eins og einangrun sem hindrar það að jónir leki út úr símanum og hraðar þannig um leið ferð boðspennunnar eftir símanum.  Mýelín sjúkdómar eins og MS (multiple slerosis), leiða til þess að mýelínið eyðist og boðspennan nær ekki til símaenda.  Mýlisskor, eru göt á milli mýelínsslíðursins (sjá mynd 35.13).  Þessi göt eru um 1µm að lengd og innihalda spennustýrð Na+ og K+ jónagöng.  Flæði jóna gegnum göngin, sérstaklega Na+, viðhalda boðspennunni aftur og aftur niður eftir símanum.  Þetta stökk boðspennunnar milli mýelínslíðranna kallast stökkleiðni.  Ef mýlelín væri ekki til staðar niður eftir símanum, mundi hægja verulega á hraða boðspennunnar, þar sem hún þyrfti stöðugt að endurnýja sig niður eftir honum, í stað þess að geta hoppað á milli mýelínslíðra.  Mýlisskorin spara einnig orku, þar sem taugungurinn þarf ekki aðeins þarf að byggja upp hýldarspennu á milli mýlisskora en ekki eftir endilöngum símanum.
 
-![Mynd 35.13  Mýlisskor eru smá bil í mýelínsslíðrinu.  Í bilunum eru spennustýrð K+ og Na+ jónagöng.  Boðspennan ferðast eftir símanum með því að hoppa á milli bilanna.](./images/mynd-35-13.jpg)
+![Mynd 35.13  Mýlisskor eru smá bil í mýelínsslíðrinu.  Í bilunum eru spennustýrð K+ og Na+ jónagöng.  Boðspennan ferðast eftir símanum með því að hoppa á milli bilanna.](images/mynd-35-13.jpg)
 
 ## Boðflutningur í taugamótum
 
@@ -53,7 +53,7 @@ Taugamótin er staðurinn þar sem upplýsingar flytjast á milli eins taugungs 
 
 Þegar boðspennan nær niður til símaenda, umskautast frumuhimnan og opnar spennustýrð Na+ jónagöng.  Na+ flæðir inn í frumuna, og umskautar enn frekar himnu fortaugungsins.  Þessi umskautun leiðir til þess að spennustýrð Ca2+ jónagöng opnast.  Kalsíum jónir sem koma inn í frumuna, koma af stað boðferli sem leiðir til þess að smáar himnubundnar blöðrur, sem kallast taugamótablöðrur og innihalda taugboðefni, renna saman við frumuhimnuna og losa þannig taugaboðefni inn í taugamótin. (mynd 35.14) er rafeindarsmájármynd af símaenda sem er að losa taugamótablöðrur út frumuhimnuna).
 
-![Mynd 35.14 Lituð mynd af símaenda sem hefur opnast og boðefnablöðrurnar koma í ljós.  Myndin er tekin með rafeindasmásjá.](./images/mynd-35-14.jpg)
+![Mynd 35.14 Lituð mynd af símaenda sem hefur opnast og boðefnablöðrurnar koma í ljós.  Myndin er tekin með rafeindasmásjá.](images/mynd-35-14.jpg)
 
 Taugaboðefnið flæðir yfir taugamótin og binst við viðtaka í himnum eftirtaugungsins (sjá mynd 35.15).   Binding sérhæfðra taugaboðefna veldur því að bindilstýrð jónagöng, opnast í himnum eftirtaugungsins.  Taugaboðefni geta ýmist verið hvetjandi eða letjandi á himnuspennu eftirtaugungsins (tafla 35.1).  Til dæmis, þegar fortaugungu losar asetýlkólín í taugmót milli taugungs og vöðva, veldur það því að Na+ jónagöng opnast í vöðvafrumunni og umskautun frumuhimnu hennar leiðir til vöðvasamdráttar.  Þessi umskautun kallast „örvandi eftirmótaspenna“ og veldur því að eftirtaugungur er líklegri til að senda boðspennu áfram.  Losun á boðefnis á hindrandi viðtaka kallast „hamlandi eftirmótaspenna“.  Þau valda yfirspennu á frumuhimnunni og draga úr líkum á að eftirtaugungur sendi boðspennuna áfram.  Sem dæmi þá veldur taugaboðefnið GABA (gamma-aminoburtyric acid,  eða gamma smjörsýra) því að Cl- jónagöng opnast í frumuhimnum eftirtaugungsins.  Cl- jónir flæða þá inn í frumuna og yfirstkauta hana, þannig að það verður ólíklegra að fruman sendi boðspennuna áfram.
 
@@ -67,7 +67,7 @@ Nokkrar gerðir af lyfjum nýta sér þessa þætti til að miðla virkun sinni.
 
 ## Tafla 35.2 Staðsetning og virkni taugaboðefna
 
-![Mynd 35.15 Samskipti um efnataugamótum gerast með taugaboðefnum.  Þegar taugahimna fortaugaungs afskautast, opnast spennustýrð Ca2+ jónagöng og Ca2+ flæðir inn í frumuna.  Það veldur því að boðefnabólur renna saman við frumuhimnuna og innihald þeirra er losað út í umfrymið.  Boðefnin flæða yfir taugamótin og bindast boðefnastýrðum jónagöngum, sem leiðir til þess að frumuhimna eftirtaugungsins afskautast.](./images/mynd-35-15.jpg)
+![Mynd 35.15 Samskipti um efnataugamótum gerast með taugaboðefnum.  Þegar taugahimna fortaugaungs afskautast, opnast spennustýrð Ca2+ jónagöng og Ca2+ flæðir inn í frumuna.  Það veldur því að boðefnabólur renna saman við frumuhimnuna og innihald þeirra er losað út í umfrymið.  Boðefnin flæða yfir taugamótin og bindast boðefnastýrðum jónagöngum, sem leiðir til þess að frumuhimna eftirtaugungsins afskautast.](images/mynd-35-15.jpg)
 
 ## Raftaugamót
 
@@ -81,7 +81,7 @@ griplur losa ekki taugaboðefni á símaenda og símaendar hafa ekki viðtaka fy
 
 Stundum er einn taugaboð nægilega öflugur til að senda boðspennu af stað í eftirtaugung, en oft þurfa margir fortaugungar að senda taugaboð á sama tíma til þess að eftirtaugungur umskautis að hrökkspennu (þannig að boðspenna fari af stað).  Þetta ferli kallast uppsöfnun taugaboða og á sér stað í símahólnum (sjá mynd 35.16).  Að auki er einn eftirtaugungur oft tengur mörgum fortaugungum, sem ýmist senda örvandi taugaboð eða letjandi boð.  Þannig getur letjandi taugaboð núllað út hvetjandi taugaboð og öfugt.  Það er því heildar breytingin á himnuspennu eftitaugungs sem ræður því hvort taugaboð fari áfram eða ekki.  Þannig getur uppsöfnun taugaboða og hrökkspenna unnið saman að því að tilviljunnarkennt „suð“ í kerfinu er ekki sent áfram sem upplýsingar.
 
-![Mynd 35.16 Einn taugungur getur tekið við boðum sem eru bæði örvandi og letjandi frá mörgum öðrum taugungum á sama tíma.  Þetta veldur staðbundinni afskautun  og yfirskautun á sama tíma.  Símahóllinn vinnur úr þessum boðum þannig að ef örvandi taugaboð er nægilega öflugt til að koma frumunni að hrökkspennu, fer taugaboðið af stað.](./images/mynd-35-16.jpg)
+![Mynd 35.16 Einn taugungur getur tekið við boðum sem eru bæði örvandi og letjandi frá mörgum öðrum taugungum á sama tíma.  Þetta veldur staðbundinni afskautun  og yfirskautun á sama tíma.  Símahóllinn vinnur úr þessum boðum þannig að ef örvandi taugaboð er nægilega öflugt til að koma frumunni að hrökkspennu, fer taugaboðið af stað.](images/mynd-35-16.jpg)
 
 ## Sveigjanleiki taugamóta
 
@@ -97,4 +97,4 @@ Langtíma bæling er í raun andstaðan við langtíma eflingu.  Þannig eru tau
 
 Markvefur: taugaboð geta farið á milli tveggja taugunga, en þau geta líka farið frá einum taugung yfir á marga taugunga. Einnig geta taugaboð legið til líffæra sem við það breyta starfsemi sinni.  Allur vöðvasamsdráttur fer fram með boðum frá taugakerfinu.  Þegar taugungur sendir boð frá heila til vöðva, þá er vöðvinn, markvefur þess taugungs.
 
-![Mynd 35.18 Kalsíum innkoma í eftirtaugunginn, í gegnum NMDA viðtaka, getur valdið tvennskonar taugamóta sveigjanleika.  Langtíma eflingu (LTP) eða langtíma bælingu (LTD).  LTP kemur upp þegar ákveðið taugamót er sífellt örvað.  Þessi örvun veldur kalsíum og CaMKII-háðri keðjuverkun, sem að lokum leiðir til þess að fleiri viðtakar eru settir í taugamótið.  Næst þegar glútamat er losað frá fortaugung binst það bæði NMDA viðtaka og nýinnsettum AMPA viðtakanum og þannig að minni skammtur af glútamati þarf til að  afskauta eftirtaugunginn.  LTD gerist þegar fáar glútamat sameindir bindast við NMDA viðtakann (vegna lítillar örvunnar frá fortaugungi).  Það litla kalsíum sem flæðir inn í eftirtaugunginn setur að stað ólíka keðjuverkun sem leiðir til þess að AMPA viðtakar eru teknir úr frumuhimnunni.  Þetta gerir eftirtaugunginn ónæmari fyrir boðum frá því glútamati sem fortaugungurinn losar.](./images/mynd-35-18.jpeg)
+![Mynd 35.18 Kalsíum innkoma í eftirtaugunginn, í gegnum NMDA viðtaka, getur valdið tvennskonar taugamóta sveigjanleika.  Langtíma eflingu (LTP) eða langtíma bælingu (LTD).  LTP kemur upp þegar ákveðið taugamót er sífellt örvað.  Þessi örvun veldur kalsíum og CaMKII-háðri keðjuverkun, sem að lokum leiðir til þess að fleiri viðtakar eru settir í taugamótið.  Næst þegar glútamat er losað frá fortaugung binst það bæði NMDA viðtaka og nýinnsettum AMPA viðtakanum og þannig að minni skammtur af glútamati þarf til að  afskauta eftirtaugunginn.  LTD gerist þegar fáar glútamat sameindir bindast við NMDA viðtakann (vegna lítillar örvunnar frá fortaugungi).  Það litla kalsíum sem flæðir inn í eftirtaugunginn setur að stað ólíka keðjuverkun sem leiðir til þess að AMPA viðtakar eru teknir úr frumuhimnunni.  Þetta gerir eftirtaugunginn ónæmari fyrir boðum frá því glútamati sem fortaugungurinn losar.](images/mynd-35-18.jpeg)
