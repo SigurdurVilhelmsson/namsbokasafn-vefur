@@ -330,7 +330,7 @@ function ElementModal({
               onClick={() => onNavigate("prev")}
               disabled={!hasPrev}
               className="rounded-full p-2 transition-colors hover:bg-black/10 disabled:opacity-30"
-              aria-label="Fyrri frumefni"
+              aria-label="Fyrra frumefni"
             >
               <ChevronLeft size={20} style={{ color: colors.text }} />
             </button>
@@ -365,7 +365,7 @@ function ElementModal({
             <div className="rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] p-4">
               <h3 className="mb-3 flex items-center gap-2 font-sans text-sm font-semibold text-[var(--text-primary)]">
                 <Atom size={16} className="text-[var(--accent-color)]" />
-                Frumeigindi
+                Eiginleikar
               </h3>
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between">
@@ -377,7 +377,7 @@ function ElementModal({
                   <dd className="font-medium text-[var(--text-primary)]">{element.atomicMass} u</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-[var(--text-secondary)]">Lotu</dt>
+                  <dt className="text-[var(--text-secondary)]">Lota</dt>
                   <dd className="font-medium text-[var(--text-primary)]">{element.period}</dd>
                 </div>
                 <div className="flex justify-between">
@@ -399,7 +399,7 @@ function ElementModal({
               </h3>
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <dt className="text-[var(--text-secondary)]">Rafeindaröðun</dt>
+                  <dt className="text-[var(--text-secondary)]">Rafeindaskipan</dt>
                   <dd className="font-mono text-xs text-[var(--text-primary)]">
                     {element.electronConfiguration}
                   </dd>
@@ -412,7 +412,7 @@ function ElementModal({
                 </div>
                 {element.electronegativity && (
                   <div className="flex justify-between">
-                    <dt className="text-[var(--text-secondary)]">Rafdrægni</dt>
+                    <dt className="text-[var(--text-secondary)]">Rafneikvæðni</dt>
                     <dd className="font-medium text-[var(--text-primary)]">
                       {element.electronegativity}
                     </dd>
