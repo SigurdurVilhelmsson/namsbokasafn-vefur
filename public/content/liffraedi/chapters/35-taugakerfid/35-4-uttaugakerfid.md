@@ -13,7 +13,7 @@ chapter: 35
 
 Úttaugakerfið (ÚTK) er tengingin á milli miðtaugakerfisins og líkamans.  Miðtaugkerfið er eins og orkuver taugakerfisins.  Það myndar boðin sem stjórna starfsemi líkamans.  Úttaugakerfið er eins og leiðslurnar sem liggja frá orkuverinu til einstakra húsa.  Án þessara „víra“ færu boðin frá MTK aldrei til líkamans og MTK fengi aldrei boð frá líkamanum heldur.
 
-![Mynd 35.26 Í ósjálfráða taugakerfinu, tengist forhnoðutaugungur MTK við eftirhnoðutaugung ÚTK.  Eftirhnoðutaugungurinn verkar eins og marklíffæri.  Ósljálfráðum viðbrögðum er miðlað með drif og sefkerfinu, sem vinna á móti hvort öðru.  Drifkerfið virkja „hrökkva eða stökkva“ viðbragð meðan sefkerfið virkjar „hvíla og melta“ viðbragðið.](./images/mynd-35-26.jpg)
+![Mynd 35.26 Í ósjálfráða taugakerfinu, tengist forhnoðutaugungur MTK við eftirhnoðutaugung ÚTK.  Eftirhnoðutaugungurinn verkar eins og marklíffæri.  Ósljálfráðum viðbrögðum er miðlað með drif og sefkerfinu, sem vinna á móti hvort öðru.  Drifkerfið virkja „hrökkva eða stökkva“ viðbragð meðan sefkerfið virkjar „hvíla og melta“ viðbragðið.](images/mynd-35-26.jpg)
 
 ÚTK skiptist niður í ósjálfráð taugakerfið, sem stjórnar líkamsstarfsemi á meðvitaðrar stjórnuna, og skyn-líkamstaugakerfic, sem flytur skynupplýsingar frá húð, vöðvum og skynfærum til MTK og flytur hreyfiboð frá MTK til vöðva.
 
@@ -23,7 +23,7 @@ chapter: 35
 
 Drifkerfið stjórnar „hrökkva eða stökkva“ viðbragðinu sem fer í gang þegar dýr lendir í hættulegum aðstæðum.  Dæmi um viðbrögð sem drifkerfið stjórnar er hraðari hjartsláttur og hindrun á meltingu.  Þessi viðbrögð koma dýrinu í ástand til að koma sér úr eða verjast árás
 
-![Mynd 35.27 Starfsemi dirf og sefkerfis verka oft á móti hvort öðru](./images/mynd-35-27.jpg)
+![Mynd 35.27 Starfsemi dirf og sefkerfis verka oft á móti hvort öðru](images/mynd-35-27.jpg)
 
 Flestir for-hnoðu-taugungar í drifkerfinu ganga út úr mænunni (sjá mynd 35.27).  Símar þessara taugunga losa asetílkólin yfir á griplur eftir-hnoðu-tugunga í drifkerfishnoðunni (drifkerfishnoðurnar mynda keðju sem liggur niður eftir hryggsúlunni).  Asetílkólin er boðefni sem afskautar og virkjar eftirtaugungana.  Eftirtaugungar hnoðunnar, losa noradrenalín á marklíffæri sín.  Allir þeir sem hafa farið í stórt próf, haldið ræðu, eða keppt í íþróttum, þekkja spennuna sem því fylgir.  Þessari spennu er miðlað af drifkerfinu og getur verið ansi mögnuð.  Styrkur þessara viðbragða kemur til af því að fortaugungar tengjast mörgum eftirtaugungum, sem þannig magna upp áhrif frá hverjum fortaugung.  En einnig vegna þess að nýrnahetturnar losa noradrenalín (og náskylt hormón adrenalín), út í blóðið.  Lífeðlisfræðileg áhrif þessara boðefna eru meðal annar að opna upp lungnaberkjur og lungnablöðrur (auðveldar öndun), eykur hjartslátt, og beinir blóðrásinni frá húð til hjarta, vöðva og heila (til að dýrið geti hugsað og hlaupið).  Styrkur og hraði drifkerfisins hjálpar lífverunni að forðast hættur og vísindamenn hafa einnig fundið að það eykur LTP-sem eykur líkur á að dýrið muni eftir hættulegum aðstæðum og forðist þær þannig síðar.
 
@@ -39,8 +39,8 @@ Taugkerfið sem stjórnar líkamsskyni er myndað úr taugungum sem ganga út ú
 
 Menn eru með 12 heilataugar sem ganga inn og út úr höfðukúpunni, ólíkt mænutaugum sem ganga út úr hryggnum.  Hver taug hefur sitt nafn, sem sést á mynd 35.28.  Sumar heilataugar flytja aðeins skynupplýsingar.  Sem dæmi þá flytur olfactorytaugar bara upplýsingar um lykt frá nefi til heilastofns.  Aðrar heilataugar flytja bara hreyfiboð.  Sem dæmi þá ber augnhreyfitaugin ábyrg fyrir opnun og lokun augnloka og einhverra augnhreyfinga.  Aðrar heilataugar eru blandaðar af skyn- og hreyfitaugum.  Sem dæmi þá flytur tungu- og koktaugin upplýsingar um bragð sem og að miðla boðum um kyngingu.
 
-![Mynd 35.28 heili manna er með 12 heilataugar sem flytja skynupplýsingar til heila og hreyfiboð frá honum til höfuðs og háls.](./images/mynd-35-28.jpg)
+![Mynd 35.28 heili manna er með 12 heilataugar sem flytja skynupplýsingar til heila og hreyfiboð frá honum til höfuðs og háls.](images/mynd-35-28.jpg)
 
 Mænutaugar flytja skynboð og hreyfiboð milli mænu og líkamans.  Hver af þeim 31 mænutaugum (í mönnum) flytja bæði skyn og hreyfiboðs síma.  Bolir skyntaugunganna er safnað saman í bakrótarhnoðu (sjá mynd 35.29).  Hver skyntaugungur tengist – skynviðtaka í húð, vöðva eða skynfæri – og er með taugamót við taugung sem staðsettur er, baklægt í mænunni.  Hreyfitaugungar eru með frumuboli sína, kviðlægt í grá hluta mænunnar sem gengur í gegnum framrót og tengist vöðva.  Þessir taugungar taka oftast við boðum frá taugungum innan mænunnar en eru stundum örvaðir beint af skyntaugungum.
 
-![Mynd 35.29 Mænutaugar innihalda bæði skyn og hreyfisíma.  Bolir skyntaugunganna eru staðsettir í bakrótarhnoðu.  Bolir hreyfitaugunga eru í kviðlæga hluta gráefnisins í mænunni.](./images/mynd-35-29.jpg)
+![Mynd 35.29 Mænutaugar innihalda bæði skyn og hreyfisíma.  Bolir skyntaugunganna eru staðsettir í bakrótarhnoðu.  Bolir hreyfitaugunga eru í kviðlæga hluta gráefnisins í mænunni.](images/mynd-35-29.jpg)

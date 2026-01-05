@@ -20,38 +20,38 @@
         {
           "number": "35.0",
           "title": "Inngangur",
-          "slug": "35-0-inngangur",
-          "file": "35.0-inngangur.md"
+          "slug": "0-inngangur",
+          "file": "0-inngangur.md"
         },
         {
           "number": "35.1",
           "title": "Taugungar og Taugatróðsfrumur",
           "slug": "35-1-taugungar-og-taugatrodsfrumur",
-          "file": "35.1-taugungar-og-taugatrodsfrumur.md"
+          "file": "35-1-taugungar-og-taugatrodsfrumur.md"
         },
         {
           "number": "35.2",
           "title": "Hvernig miðla taugungar boðum á milli sín?",
           "slug": "35-2-hvernig-midla-taugungar-bodum-a-milli-sin",
-          "file": "35.2-hvernig-midla-taugungar-bodum-a-milli-sin.md"
+          "file": "35-2-hvernig-midla-taugungar-bodum-a-milli-sin.md"
         },
         {
           "number": "35.3",
           "title": "Miðtaugakerfið",
           "slug": "35-3-midtaugakerfid",
-          "file": "35.3-midtaugakerfid.md"
+          "file": "35-3-midtaugakerfid.md"
         },
         {
           "number": "35.4",
           "title": "Úttaugakerfið",
           "slug": "35-4-uttaugakerfid",
-          "file": "35.4-uttaugakerfid.md"
+          "file": "35-4-uttaugakerfid.md"
         },
         {
           "number": "35.5",
           "title": "Taugakerfissjúkdómar",
           "slug": "35-5-taugakerfissjukdomar",
-          "file": "35.5-taugakerfissjukdomar.md"
+          "file": "35-5-taugakerfissjukdomar.md"
         }
       ]
     }
