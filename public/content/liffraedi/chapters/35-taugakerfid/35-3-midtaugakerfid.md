@@ -15,13 +15,13 @@ Eftir þennan kafla átt þú að geta eftirfarandi
 
 Miðtaugakerfið (MTK) er samsett úr heila (sjá mynd 35.19) og mænu sem varin eru að þremur vefjalögum sem kallast heila og mænuhimna.  Ysta lagið kallast heilabast  (dura mater).  Dura mater þýðið hörð móðir á latínu enda er það helsta hlutverk þessara þykku himnu að verja miðtaugakerfið.  Heilabastið inniheldur einnig pípur, sem líkjast æðum og flytja blóð frá heilanum til hjartans. Miðlagið er vefjalíkt heilaskúm (arachnoid mater).  Síðasta lagið er reifar (pia mater, mjúk móðir á latínu), sem er í beinni tengingu við heilan og hylur hann og mænuna eins og plastfilma.  Bilið á milli heilaskúms og reifar er fyllt af heila- og mænuvökva (verður hér eftir kallað mænuvökvi).  Mænuvökvinn er myndaður af vef sem kallast æðaflækja (choroid plexus) og finnst í vökvafylltum holum miðtaugakerfisins sem kallast heilahólf (ventricles).  Heilinn flýtur um í mænuvökvanum, sem virkar bæði sem púði og höggdempari.  Mænuvökvinn dreifir líka næringarefnum um heilan og mænuna.    Heildar magn mænuvökva er ekki nema um 8,5 teskeið, en það er stöðugt verið að mynda nýjan vökva í heilahólfunum.  Það getur skapað vandræði ef heilahólfin lokast, þá byggist upp mænuvökvi og veldur bólgu í heila þannig að hann þrýstist út í hauskúpuna.  Þetta fyrirbæri kallast „vatnshöfuð“ (hydrocephalus) og getur valdið krömpum, vitsmunaglöpum, og jafn vel dauða ef ekki tekst að losa út vökva til að létta á þrýsting.
 
-![Mynd 35.19 Heilabörkurinn er umlukinn þremur lögum af himnum, heilabasti, reifar og heilaskúmi.](./images/mynd-35-19.jpg)
+![Mynd 35.19 Heilabörkurinn er umlukinn þremur lögum af himnum, heilabasti, reifar og heilaskúmi.](images/mynd-35-19.jpg)
 
 ## Heilinn
 
 Heilinn er sá hluti miðtaugakerfisins sem hýstur er í höfukúpunni.  Hlutar hans eru heilabörkur, limpiska kerfið, djúphnoðan, stúkan, undirstúkan og litliheili. Hægt er að skera heilan á þrennskonar vegur til að skoða uppbyggingu hans: þykktarskurður þar sem heilinn er skorinn frá vinstri til hægri (sjá mynd 35.21b), krúnusnið þar sem skorið er að aftan og fram (sjá mynd 35.20a) og láréttur skurður þar sem heilinn er sneiddur frá toppi og niður úr.
 
-![Mynd 35.20 Þessar myndir sýna (a) þykkskorinn heila og (b) krúnuskorin heila úr manni](./images/mynd-35-20.jpg)
+![Mynd 35.20 Þessar myndir sýna (a) þykkskorinn heila og (b) krúnuskorin heila úr manni](images/mynd-35-20.jpg)
 
 ## Heilabörkurinn
 
@@ -33,11 +33,11 @@ Hvort heilahvel inniheldur svæði sem kallast „blöð“ sem hafa ólík hlut
 
 Framheilinn er staðsettur fremst og er fyrir ofan augun.  Þetta svæði inniheldur lyktarklumpuna, sem vinnur úr lyktarboðum.  Framheilinn inniheldur einnig hreyfibörkinn, sem er mikilvægur fyrir skipulag og framkvæmd heyfinga.   Svæði innan hreyfibörksins sinna ólíkum vöðvahópum og hægt er að kortleggja hvaða svæði sinna hvaða hreyfingum (sjá mynd 35.22). Sem dæmi, þá eru
 
-![Mynd 35.21 Heilaberkinum í mönnum má skipta upp í fram-, hnakka-, gangauga- og hvirfilblöð](./images/mynd-35-21.jpeg)
+![Mynd 35.21 Heilaberkinum í mönnum má skipta upp í fram-, hnakka-, gangauga- og hvirfilblöð](images/mynd-35-21.jpeg)
 
 taugarnar sem stjórna hreyfingu fingranna staðsettar við hlið þeirra sem sinna hreyfingu handanna.  Taugungar í framheila koma einnig að vitrænni starfsemi og viðhaldi athygli, máli og ákvörðunartöku.  Rannsóknir á fólki sem hefur skaðast á framheila, sýna að hluti hans er mikilvægur fyrir persónuleika, samskipgahæfni og áhættumat.
 
-![Mynd 35.22 Ólíkir hlutar hreyfibörksins stýra ólíkum vöðvahópum.  Vöðvahópar sem liggja saman í líkamanum er stýrt af svæðum sem liggja hlið við hlið í hreyfiberkinum.](./images/mynd-35-22.jpg)
+![Mynd 35.22 Ólíkir hlutar hreyfibörksins stýra ólíkum vöðvahópum.  Vöðvahópar sem liggja saman í líkamanum er stýrt af svæðum sem liggja hlið við hlið í hreyfiberkinum.](images/mynd-35-22.jpg)
 
 Hvirfilblaðið er staðsett efst í heilanum.  Taugungar í hvirfilblaði taka þátt í máli og lestri.  Tvö helstu hlutverk hvirfilblaðsins eru úrvinnsla á líkamsskynjun-snerting, þrýtstingur, sársauki, hiti, kuldi- en einnig úrvinnsla á líkamsstöðu- þ.e. tilfinningin fyrir því að vita hvar hver líkamspartur er í rýminu.  Uppröðun líkamshluta raðast upp í þessi svæði á svipaðan hátt og í hreyfiberkinum.
 
@@ -45,7 +45,7 @@ Hnakkablaðið er staðsett aftast í heilanum.  Helsta starfsemi þess er úrvi
 
 Gagnaugablaðið, er staðsett við grunn heilans og tekur aðalega þátt í túlkun á hljóði.  Gagnaugablaðið inniheldur einnig drekann (hippocampus), en hann er svæði í heilanum sem höndlar með upplýsingar (sjá mynd 35.24).  Hlutverk drekans í varðveislu upplýsinga (minni) kemur að miklu leiti frá rannsóknum á frægum flogaveikissjúkling sem kallaðist HM.  Bæði drekasvæði hans voru fjarlægð til að reyna að lækna hann af flogaveiki.  Hann fékk ekki flog eftir aðgerðina, en gat heldur ekki myndað neinar nýjar minningar (þó svo hann gæti kallað fram minningar frá því fyrir aðgerð, og lært nýjar hreyfingar).
 
-![Mynd 35.24 Randkerfið stjórnar tilfinningum og annarri hegðun.  Það er samsett úr nokkrum stöðvum heilans, eins og girðargránann, drekann sem og stúku, undirstúku og möndluna (amygdala)](./images/mynd-35-24.jpg)
+![Mynd 35.24 Randkerfið stjórnar tilfinningum og annarri hegðun.  Það er samsett úr nokkrum stöðvum heilans, eins og girðargránann, drekann sem og stúku, undirstúku og möndluna (amygdala)](images/mynd-35-24.jpg)
 
 ## Djúphoðan
 
@@ -77,4 +77,4 @@ Tengist við heilastofninn og nær niður í líkaman í gegnum hryggsúluna (sj
 
 Í Bandaríkjunum verða um 10.000 mænuskaðar á ári.  Vegna þess að mænan er upplýsingahraðbraut milli heila og líkama, getur skaði á henni leitt til lömunar.  Hversu mikil lömunin er ræðst af staðsetningu skaðans á mænunni og hvort mænan hafi farið alveg í sundur eða bara marsit.  Sem dæmi, ef mænan skaðast við háls, getur það valdið lömun frá hálsi og niður úr, meðan skaði neðar veldur valdi lömun í fótum.  Erfitt er að meðhöndla mænuskaða því mænutaugungar endunýjast ekki, þó svo að nýjustu rannsóknir bendi til að stofnfrumu ígræðsla geti hjálpað við að brúa bilið á yfir skaðaða svæðið.  Rannsóknir beinast einnig að því hvernig hægt er að draga úr bólgu sem eykur enn frekar á skaðann.  Ein meðferðaleið er að dæla kaldri saltlausn inn í líkaman til að valda ofkólnun.  Kælingin getur hindrað bólgusvar og aðra ferla sem talið er að valdi auknum mænuskaða.
 
-![Mynd 35.25 Þversnið af mænu sýnir grátt efni (taugfrumur, bolir og millitaugungar) og hvítt efni (mýldir taugasímar)](./images/mynd-35-25.jpg)
+![Mynd 35.25 Þversnið af mænu sýnir grátt efni (taugfrumur, bolir og millitaugungar) og hvítt efni (mýldir taugasímar)](images/mynd-35-25.jpg)
