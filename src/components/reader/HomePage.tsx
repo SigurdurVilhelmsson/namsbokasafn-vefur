@@ -59,7 +59,7 @@ export default function HomePage() {
             {toc.title}
           </h1>
           <p className="text-lg text-[var(--text-secondary)]">
-            Gagnvirkur lesari fyrir efnafræðikennslubók
+            Gagnvirkur lesari fyrir kennslubók
           </p>
         </div>
 
