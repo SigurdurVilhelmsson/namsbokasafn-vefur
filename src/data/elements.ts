@@ -53,16 +53,16 @@ export function getElementPhase(element: Element): ElementPhase {
 
 // Category labels in Icelandic
 export const CATEGORY_LABELS: Record<ElementCategory, string> = {
-  "alkali-metal": "Alkalímálmur",
-  "alkaline-earth": "Jarðalkalímálmur",
-  "transition-metal": "Hliðarmálmur",
-  "post-transition": "Tregur málmur",
-  "metalloid": "Hálfmálmur",
-  "nonmetal": "Málmleysingi",
-  "halogen": "Halógeni",
-  "noble-gas": "Eðalgas",
-  "lanthanide": "Lantaníði",
-  "actinide": "Aktíníði",
+  "alkali-metal": "Alkalímálmar",
+  "alkaline-earth": "Jarðalkalímálmar",
+  "transition-metal": "Hliðarmálmar",
+  "post-transition": "Tregir málmar",
+  "metalloid": "Hálfmálmar",
+  "nonmetal": "Málmleysingjar",
+  "halogen": "Halógenar",
+  "noble-gas": "Eðalgastegundir",
+  "lanthanide": "Lantaníðar",
+  "actinide": "Aktíníðar",
 };
 
 // Category color interface
