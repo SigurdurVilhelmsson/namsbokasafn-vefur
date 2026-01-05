@@ -67,8 +67,8 @@ export const books: BookConfig[] = [
     description: 'Kennslubók í líffræði fyrir framhaldsskólanema.',
     subject: 'raunvisindi',
     coverImage: '/covers/liffraedi.svg',
-    translator: '',
-    status: 'coming-soon',
+    translator: 'Þórhallur Halldórsson',
+    status: 'available',
     source: {
       title: 'Biology 2e',
       publisher: 'OpenStax',
@@ -77,9 +77,13 @@ export const books: BookConfig[] = [
       license: 'CC BY 4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
     },
+    stats: {
+      totalChapters: 46,
+      translatedChapters: 1
+    },
     features: {
       glossary: false,
-      flashcards: false,
+      flashcards: true,
       exercises: false
     }
   }
