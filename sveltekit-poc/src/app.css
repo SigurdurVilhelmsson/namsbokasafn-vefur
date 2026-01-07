@@ -249,3 +249,461 @@ body {
 .dark .poc-banner p {
   color: #bfdbfe;
 }
+
+/* ========================================== */
+/* CONTENT BLOCKS (Directives)               */
+/* ========================================== */
+
+.content-block {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid;
+  margin: 2rem 0;
+}
+
+/* Note block - Blue theme */
+.content-block.note {
+  background-color: #eff6ff;
+  border-color: #dbeafe;
+}
+
+.dark .content-block.note {
+  background-color: rgba(30, 58, 138, 0.2);
+  border-color: rgba(30, 64, 175, 0.3);
+}
+
+.content-block.note .content-block-title {
+  color: #1e3a8a;
+}
+
+.dark .content-block.note .content-block-title {
+  color: #93c5fd;
+}
+
+.content-block.note .content-block-icon {
+  color: #2563eb;
+}
+
+.dark .content-block.note .content-block-icon {
+  color: #60a5fa;
+}
+
+.content-block.note p {
+  color: #1e40af;
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.note p {
+  color: #bfdbfe;
+}
+
+/* Warning block - Amber theme */
+.content-block.warning {
+  background-color: #fffbeb;
+  border-color: #fef3c7;
+}
+
+.dark .content-block.warning {
+  background-color: rgba(120, 53, 15, 0.2);
+  border-color: rgba(146, 64, 14, 0.3);
+}
+
+.content-block.warning .content-block-title {
+  color: #78350f;
+}
+
+.dark .content-block.warning .content-block-title {
+  color: #fcd34d;
+}
+
+.content-block.warning .content-block-icon {
+  color: #d97706;
+}
+
+.dark .content-block.warning .content-block-icon {
+  color: #fbbf24;
+}
+
+.content-block.warning p {
+  color: #92400e;
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.warning p {
+  color: #fde68a;
+}
+
+/* Example block - Gray theme */
+.content-block.example {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.dark .content-block.example {
+  background-color: rgba(55, 65, 81, 0.2);
+  border-color: rgba(75, 85, 99, 0.3);
+}
+
+.content-block.example .content-block-title {
+  color: #111827;
+}
+
+.dark .content-block.example .content-block-title {
+  color: #e5e7eb;
+}
+
+.content-block.example .content-block-icon {
+  color: #4b5563;
+}
+
+.dark .content-block.example .content-block-icon {
+  color: #9ca3af;
+}
+
+.content-block.example p {
+  color: #374151;
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.example p {
+  color: #d1d5db;
+}
+
+/* Definition block - Purple theme */
+.content-block.definition {
+  background-color: #faf5ff;
+  border-color: #e9d5ff;
+}
+
+.dark .content-block.definition {
+  background-color: rgba(88, 28, 135, 0.2);
+  border-color: rgba(107, 33, 168, 0.3);
+}
+
+.content-block.definition .content-block-title {
+  color: #581c87;
+}
+
+.dark .content-block.definition .content-block-title {
+  color: #d8b4fe;
+}
+
+.content-block.definition .content-block-icon {
+  color: #7c3aed;
+}
+
+.dark .content-block.definition .content-block-icon {
+  color: #a78bfa;
+}
+
+.content-block.definition p {
+  color: #6b21a8;
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.definition p {
+  color: #e9d5ff;
+}
+
+/* Key Concept block - Teal theme */
+.content-block.key-concept {
+  background-color: #ecfeff;
+  border-color: #cffafe;
+}
+
+.dark .content-block.key-concept {
+  background-color: rgba(22, 78, 99, 0.2);
+  border-color: rgba(21, 94, 117, 0.3);
+}
+
+.content-block.key-concept .content-block-title {
+  color: #164e63;
+}
+
+.dark .content-block.key-concept .content-block-title {
+  color: #67e8f9;
+}
+
+.content-block.key-concept .content-block-icon {
+  color: #0891b2;
+}
+
+.dark .content-block.key-concept .content-block-icon {
+  color: #22d3ee;
+}
+
+.content-block.key-concept p {
+  color: #155e75;
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.key-concept p {
+  color: #a5f3fc;
+}
+
+/* Checkpoint block - Green theme */
+.content-block.checkpoint {
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.dark .content-block.checkpoint {
+  background-color: rgba(20, 83, 45, 0.2);
+  border-color: rgba(22, 101, 52, 0.3);
+}
+
+.content-block.checkpoint .content-block-title {
+  color: #14532d;
+}
+
+.dark .content-block.checkpoint .content-block-title {
+  color: #86efac;
+}
+
+.content-block.checkpoint .content-block-icon {
+  color: #16a34a;
+}
+
+.dark .content-block.checkpoint .content-block-icon {
+  color: #4ade80;
+}
+
+.content-block.checkpoint p {
+  color: #166534;
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.checkpoint p {
+  color: #bbf7d0;
+}
+
+/* Common Misconception block - Red theme */
+.content-block.common-misconception {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+.dark .content-block.common-misconception {
+  background-color: rgba(127, 29, 29, 0.2);
+  border-color: rgba(153, 27, 27, 0.3);
+}
+
+.content-block.common-misconception .content-block-title {
+  color: #7f1d1d;
+}
+
+.dark .content-block.common-misconception .content-block-title {
+  color: #fca5a5;
+}
+
+.content-block.common-misconception .content-block-icon {
+  color: #dc2626;
+}
+
+.dark .content-block.common-misconception .content-block-icon {
+  color: #f87171;
+}
+
+.content-block.common-misconception p {
+  color: #991b1b;
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.dark .content-block.common-misconception p {
+  color: #fecaca;
+}
+
+/* Icon wrapper */
+.content-block-icon {
+  flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Title */
+.content-block-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+/* Label for definition blocks */
+.content-block-label {
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* Content wrapper */
+.content-block-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ========================================== */
+/* PRACTICE PROBLEMS                         */
+/* ========================================== */
+
+.practice-problem {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+
+.practice-problem-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.practice-problem-title {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.practice-answer {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.practice-hint {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background-color: #fef3c7;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.dark .practice-hint {
+  background-color: rgba(120, 53, 15, 0.2);
+}
+
+/* ========================================== */
+/* EQUATION WRAPPER                          */
+/* ========================================== */
+
+.equation-wrapper {
+  position: relative;
+  margin: 1rem 0;
+}
+
+.equation-wrapper .equation-actions {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.equation-wrapper:hover .equation-actions,
+.equation-wrapper:focus-within .equation-actions {
+  opacity: 1;
+}
+
+/* ========================================== */
+/* FIGURE CAPTIONS                           */
+/* ========================================== */
+
+.figure-caption {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+/* ========================================== */
+/* KATEX STYLES                              */
+/* ========================================== */
+
+.katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+}
+
+.katex {
+  font-size: 1.1em;
+}
+
+/* ========================================== */
+/* TABLES                                    */
+/* ========================================== */
+
+.reading-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+}
+
+.reading-content th,
+.reading-content td {
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.reading-content th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+}
+
+.reading-content tr:nth-child(even) {
+  background-color: var(--bg-secondary);
+}
+
+/* ========================================== */
+/* BLOCKQUOTES                               */
+/* ========================================== */
+
+.reading-content blockquote {
+  border-left: 4px solid var(--accent-color);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* ========================================== */
+/* CODE BLOCKS                               */
+/* ========================================== */
+
+.reading-content code {
+  background-color: var(--bg-secondary);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.875em;
+}
+
+.reading-content pre {
+  background-color: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.reading-content pre code {
+  background: none;
+  padding: 0;
+}
