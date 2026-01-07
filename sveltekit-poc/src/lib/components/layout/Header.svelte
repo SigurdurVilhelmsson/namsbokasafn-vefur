@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { settings, theme } from '$lib/stores';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import type { TableOfContents } from '$lib/types/content';
 	import { loadTableOfContents } from '$lib/utils/contentLoader';
+	import SearchModal from '$lib/components/SearchModal.svelte';
 
 	export let bookSlug: string = '';
 	export let bookTitle: string = 'Lesari';
@@ -28,6 +29,14 @@
 		}
 	});
 
+	// Keyboard shortcut for search (Ctrl/Cmd + K)
+	function handleKeydown(e: KeyboardEvent) {
+		if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+			e.preventDefault();
+			searchOpen = true;
+		}
+	}
+
 	// Find current chapter and section titles
 	$: currentChapter = toc?.chapters.find((c) => c.slug === chapterSlug);
 	$: currentSection = currentChapter?.sections.find((s) => s.slug === sectionSlug);
@@ -41,6 +50,8 @@
 		settings.toggleSidebar();
 	}
 </script>
+
+<svelte:window on:keydown={handleKeydown} />
 
 <header
 	class="sticky top-0 z-40 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md"
@@ -207,3 +218,6 @@
 		</div>
 	{/if}
 </header>
+
+<!-- Search Modal -->
+<SearchModal isOpen={searchOpen} {bookSlug} on:close={() => (searchOpen = false)} />
