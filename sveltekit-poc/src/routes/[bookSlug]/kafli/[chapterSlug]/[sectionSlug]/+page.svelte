@@ -6,6 +6,7 @@
 	import type { PageData } from './$types';
 	import { reader, analyticsStore } from '$lib/stores';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
 
 	export let data: PageData;
 
@@ -137,3 +138,6 @@
 		</div>
 	{/if}
 </article>
+
+<!-- Navigation buttons -->
+<NavigationButtons navigation={data.navigation} bookSlug={data.bookSlug} />
