@@ -5,6 +5,7 @@
 	import type { TableOfContents } from '$lib/types/content';
 	import { loadTableOfContents } from '$lib/utils/contentLoader';
 	import SearchModal from '$lib/components/SearchModal.svelte';
+	import SettingsModal from '$lib/components/SettingsModal.svelte';
 
 	export let bookSlug: string = '';
 	export let bookTitle: string = 'Lesari';
@@ -221,3 +222,6 @@
 
 <!-- Search Modal -->
 <SearchModal isOpen={searchOpen} {bookSlug} on:close={() => (searchOpen = false)} />
+
+<!-- Settings Modal -->
+<SettingsModal isOpen={settingsOpen} on:close={() => (settingsOpen = false)} />
