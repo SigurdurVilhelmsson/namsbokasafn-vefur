@@ -5,6 +5,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import type { PageData } from './$types';
 	import { reader, analyticsStore } from '$lib/stores';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 
 	export let data: PageData;
 
@@ -18,50 +19,6 @@
 	onDestroy(() => {
 		analyticsStore.endReadingSession();
 	});
-
-	// Simple markdown to HTML (in production, use mdsvex or a proper markdown processor)
-	function renderMarkdown(content: string): string {
-		return content
-			// Headers
-			.replace(/^#### (.+)$/gm, '<h4 class="text-lg font-semibold mt-6 mb-3">$1</h4>')
-			.replace(/^### (.+)$/gm, '<h3 class="text-xl font-semibold mt-8 mb-4">$1</h3>')
-			.replace(/^## (.+)$/gm, '<h2 class="text-2xl font-bold mt-10 mb-4">$1</h2>')
-			.replace(/^# (.+)$/gm, '<h1 class="text-3xl font-bold mb-6">$1</h1>')
-			// Bold and italic
-			.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-			.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-			.replace(/\*(.+?)\*/g, '<em>$1</em>')
-			// Code blocks
-			.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-x-auto my-4"><code>$2</code></pre>')
-			.replace(/`([^`]+)`/g, '<code class="bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded text-sm">$1</code>')
-			// Lists
-			.replace(/^- (.+)$/gm, '<li class="ml-4">$1</li>')
-			.replace(/(<li.*<\/li>\n?)+/g, '<ul class="list-disc list-inside space-y-2 my-4">$&</ul>')
-			// Links
-			.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-blue-600 dark:text-blue-400 hover:underline">$1</a>')
-			// Images
-			.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<figure class="my-6"><img src="$2" alt="$1" class="rounded-lg shadow-md max-w-full" /><figcaption class="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">$1</figcaption></figure>')
-			// Blockquotes
-			.replace(/^> (.+)$/gm, '<blockquote class="border-l-4 border-blue-500 pl-4 italic my-4 text-gray-700 dark:text-gray-300">$1</blockquote>')
-			// Paragraphs (remaining text)
-			.split('\n\n')
-			.map((p) => {
-				if (
-					p.startsWith('<h') ||
-					p.startsWith('<ul') ||
-					p.startsWith('<pre') ||
-					p.startsWith('<blockquote') ||
-					p.startsWith('<figure')
-				) {
-					return p;
-				}
-				if (p.trim()) {
-					return `<p class="mb-4 leading-relaxed">${p}</p>`;
-				}
-				return '';
-			})
-			.join('\n');
-	}
 
 	function markAsRead() {
 		reader.markAsRead(data.chapterSlug, data.sectionSlug);
@@ -163,9 +120,7 @@
 	{/if}
 
 	<!-- Main content -->
-	<div class="prose prose-lg dark:prose-invert max-w-none">
-		{@html renderMarkdown(data.section.content)}
-	</div>
+	<MarkdownRenderer content={data.section.content} />
 
 	<!-- Mark as read button at bottom -->
 	{#if !isRead}
