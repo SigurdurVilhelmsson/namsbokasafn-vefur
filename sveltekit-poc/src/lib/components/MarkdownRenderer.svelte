@@ -4,6 +4,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { processMarkdown } from '$lib/utils/markdown';
+	import { practiceProblems } from '$lib/actions/practiceProblems';
 
 	// Import KaTeX CSS
 	import 'katex/dist/katex.min.css';
@@ -52,7 +53,7 @@
 		<p class="text-red-600 dark:text-red-400">{error}</p>
 	</div>
 {:else}
-	<div class="reading-content">
+	<div class="reading-content" use:practiceProblems>
 		{@html html}
 	</div>
 {/if}
