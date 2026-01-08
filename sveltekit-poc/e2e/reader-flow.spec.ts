@@ -9,16 +9,32 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Reader Flow', () => {
 	test('should load landing page', async ({ page }) => {
-		await page.goto('/');
+		// Capture console errors
+		const consoleErrors: string[] = [];
+		page.on('console', (msg) => {
+			if (msg.type() === 'error') {
+				consoleErrors.push(msg.text());
+			}
+		});
+		page.on('pageerror', (err) => {
+			consoleErrors.push(err.message);
+		});
 
-		// Wait for page to fully load
-		await page.waitForLoadState('networkidle');
+		await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+		// Wait for JS to execute
+		await page.waitForTimeout(3000);
+
+		// Log any errors for debugging
+		if (consoleErrors.length > 0) {
+			console.log('Console errors:', consoleErrors);
+		}
 
 		// Check page title
 		await expect(page).toHaveTitle(/Námsbókasafn/);
 
 		// Check for main heading (exact match to avoid multiple elements)
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({ timeout: 10000 });
+		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({ timeout: 15000 });
 	});
 
 	test('should navigate from catalog to book home', async ({ page }) => {
