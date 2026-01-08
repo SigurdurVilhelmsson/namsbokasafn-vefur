@@ -17,7 +17,7 @@ import {
 	generateId
 } from '$lib/utils/storeHelpers';
 
-const STORAGE_KEY = 'namsbokasafn-quiz';
+const STORAGE_KEY = 'namsbokasafn:quiz';
 
 interface MasteryInfo {
 	level: MasteryLevel;
