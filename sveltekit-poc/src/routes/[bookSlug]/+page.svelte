@@ -9,6 +9,7 @@
 	import { reader } from '$lib/stores';
 	import { calcChapterProgress } from '$lib/stores/reader';
 	import DownloadBookButton from '$lib/components/DownloadBookButton.svelte';
+	import ErrorMessage from '$lib/components/ErrorMessage.svelte';
 
 	export let data: PageData;
 
@@ -19,15 +20,21 @@
 	// Subscribe to reader progress for reactivity
 	$: progress = $reader.progress;
 
-	onMount(async () => {
+	async function loadContent() {
+		loading = true;
+		error = null;
 		try {
 			toc = await loadTableOfContents(data.bookSlug);
 		} catch (e) {
-			error = 'Gat ekki hlaðið efnisyfirliti';
-			console.error(e);
+			error = 'Gat ekki hlaðið efnisyfirliti. Athugaðu nettengingu eða reyndu aftur síðar.';
+			console.error('Failed to load table of contents:', e);
 		} finally {
 			loading = false;
 		}
+	}
+
+	onMount(() => {
+		loadContent();
 	});
 
 	// Reactive helper using subscribed progress
@@ -58,9 +65,13 @@
 			<span class="ml-3 text-gray-600 dark:text-gray-400">Hleður...</span>
 		</div>
 	{:else if error}
-		<div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
-			<p class="text-red-600 dark:text-red-400">{error}</p>
-		</div>
+		<ErrorMessage
+			message={error}
+			onRetry={loadContent}
+			showBackLink={true}
+			backHref="/"
+			backLabel="Til baka í bókasafn"
+		/>
 	{:else if toc}
 		<!-- Chapter grid -->
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -77,8 +77,15 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		};
 	} catch (e) {
 		console.error('Failed to load section:', e);
+
+		// Provide more specific error message
+		const errorMessage =
+			e instanceof Error && e.message.includes('Failed to fetch')
+				? 'Gat ekki hlaðið kafla. Athugaðu nettengingu.'
+				: 'Kafli fannst ekki eða gat ekki hlaðið efni.';
+
 		throw error(404, {
-			message: 'Kafli fannst ekki'
+			message: errorMessage
 		});
 	}
 };
