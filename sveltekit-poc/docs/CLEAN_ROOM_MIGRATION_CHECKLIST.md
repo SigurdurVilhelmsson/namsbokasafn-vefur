@@ -14,6 +14,9 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 
 ---
 
+## References
+- `sveltekit-poc/docs/IMPROVEMENTS_AND_FEATURES.md`
+
 ## Milestone 0: Scope & Success Criteria (Gate) ☐→
 
 | Status | Item |
@@ -58,7 +61,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | ☑ | Routes: landing, book home, section view, glossary, flashcards, periodic table. |
 | ☑ | Content pipeline: markdown → HTML with KaTeX, directives, cross-references. |
 | ☑ | Reader navigation: prev/next buttons, sidebar TOC, deep links. |
-| ☐→ | Progress tracking: current location + read markers stored locally. |
+| ☑ | Progress tracking: current location + read markers stored locally. |
 | ☑ | Settings: font size/family, focus mode, theme toggle. |
 | ☑ | Keyboard shortcuts: navigation, search, focus mode, shortcuts modal. |
 | ☑ | Search: fuzzy search modal with Ctrl/Cmd+K. |
@@ -231,10 +234,10 @@ Use these files for UX reference and data shape, not for copying code:
 | Milestone | Status | Completion |
 |-----------|--------|------------|
 | 0: Scope | ☐→ | 75% |
-| 1: Core Reader | ☑ | 95% |
+| 1: Core Reader | ☑ | 100% |
 | 2: Offline | ☐ | 0% |
 | 3: Testing | ☐ | 0% |
 | 4: Accessibility | ☐→ | 40% |
 | 5: V2 Features | ☐ | 0% (frozen) |
 
-**Overall v1 readiness: ~45%**
+**Overall v1 readiness: ~50%** (Milestone 1 complete, ready for Milestone 2)
