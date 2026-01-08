@@ -5,12 +5,10 @@
 	import { onMount } from 'svelte';
 	import { processMarkdown } from '$lib/utils/markdown';
 	import { practiceProblems } from '$lib/actions/practiceProblems';
+	import { equations } from '$lib/actions/equations';
 
 	// Import KaTeX CSS
 	import 'katex/dist/katex.min.css';
-
-	// Import mhchem for chemical notation
-	import 'katex/dist/contrib/mhchem.js';
 
 	export let content: string;
 
@@ -53,7 +51,7 @@
 		<p class="text-red-600 dark:text-red-400">{error}</p>
 	</div>
 {:else}
-	<div class="reading-content" use:practiceProblems>
+	<div class="reading-content" use:practiceProblems use:equations>
 		{@html html}
 	</div>
 {/if}

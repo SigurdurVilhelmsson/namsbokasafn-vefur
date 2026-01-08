@@ -12,6 +12,7 @@ import rehypeStringify from 'rehype-stringify';
 import { visit } from 'unist-util-visit';
 import type { Root } from 'mdast';
 import type { Node, Data } from 'unist';
+import type { Element, ElementContent, RootContent } from 'hast';
 
 // =============================================================================
 // TYPES
@@ -316,6 +317,220 @@ function rehypeShiftHeadings() {
 }
 
 // =============================================================================
+// EQUATION ACCESSIBILITY
+// =============================================================================
+
+/**
+ * Convert LaTeX to readable Icelandic description for screen readers
+ */
+function latexToSpeech(latex: string): string {
+	if (!latex) return 'Stærðfræðijafna';
+
+	const readable = latex
+		// Fractions
+		.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '($1) deilt með ($2)')
+		// Text commands
+		.replace(/\\text\{([^}]+)\}/g, '$1')
+		// Subscripts and superscripts
+		.replace(/_\{([^}]+)\}/g, ' undirskrift $1')
+		.replace(/\^2/g, ' í öðru veldi')
+		.replace(/\^3/g, ' í þriðja veldi')
+		.replace(/\^\{([^}]+)\}/g, ' í $1 veldi')
+		// Common symbols
+		.replace(/\\pm/g, ' plús eða mínus ')
+		.replace(/\\times/g, ' sinnum ')
+		.replace(/\\div/g, ' deilt með ')
+		.replace(/\\cdot/g, ' sinnum ')
+		.replace(/\\sqrt\{([^}]+)\}/g, 'kvaðratrótin af $1')
+		.replace(/\\sum/g, 'summa')
+		.replace(/\\int/g, 'heildi')
+		.replace(/\\infty/g, 'óendanleiki')
+		.replace(/\\pi/g, 'pí')
+		.replace(/\\alpha/g, 'alfa')
+		.replace(/\\beta/g, 'beta')
+		.replace(/\\gamma/g, 'gamma')
+		.replace(/\\delta/g, 'delta')
+		.replace(/\\theta/g, 'theta')
+		.replace(/\\lambda/g, 'lambda')
+		.replace(/\\mu/g, 'mý')
+		.replace(/\\sigma/g, 'sigma')
+		.replace(/\\rho/g, 'ró')
+		.replace(/\\left/g, '')
+		.replace(/\\right/g, '')
+		// Chemical notation
+		.replace(/\\ce\{([^}]+)\}/g, 'efnajafna: $1')
+		// Clean up remaining LaTeX commands
+		.replace(/\\[a-zA-Z]+/g, ' ')
+		.replace(/[{}]/g, '')
+		.replace(/\s+/g, ' ')
+		.trim();
+
+	return readable ? `Stærðfræðijafna: ${readable}` : 'Stærðfræðijafna';
+}
+
+/**
+ * Check if a paragraph contains only a single KaTeX equation (treat as block)
+ */
+function isBlockEquation(parent: Element, katexNode: Element): boolean {
+	if (parent.tagName !== 'p') return false;
+
+	// Check if katex span is the only significant child
+	const significantChildren = parent.children?.filter((child) => {
+		if (child.type === 'text') {
+			return (child as { value: string }).value.trim().length > 0;
+		}
+		return child.type === 'element';
+	}) || [];
+
+	return significantChildren.length === 1 && significantChildren[0] === katexNode;
+}
+
+/**
+ * Extract LaTeX source from KaTeX element
+ */
+function extractLatex(node: Element): string {
+	let latex = '';
+	visit(node, 'element', (child: Element) => {
+		if (
+			child.tagName === 'annotation' &&
+			child.properties?.encoding === 'application/x-tex'
+		) {
+			const textNode = child.children?.[0];
+			if (textNode && 'value' in textNode) {
+				latex = textNode.value as string;
+			}
+		}
+	});
+	return latex;
+}
+
+/**
+ * Create equation wrapper element
+ */
+function createEquationWrapper(katexNode: Element, latex: string): Element {
+	const ariaLabel = latexToSpeech(latex);
+
+	return {
+		type: 'element',
+		tagName: 'div',
+		properties: {
+			className: 'equation-wrapper group',
+			role: 'math',
+			'aria-label': ariaLabel,
+			tabIndex: 0,
+			'data-latex': latex
+		},
+		children: [
+			{
+				type: 'element',
+				tagName: 'div',
+				properties: { className: 'equation-content' },
+				children: [katexNode]
+			},
+			{
+				type: 'element',
+				tagName: 'div',
+				properties: { className: 'equation-actions' },
+				children: [
+					{
+						type: 'element',
+						tagName: 'button',
+						properties: {
+							className: 'equation-copy-btn',
+							type: 'button',
+							title: 'Afrita LaTeX',
+							'aria-label': 'Afrita LaTeX jöfnu',
+							'data-action': 'copy-latex'
+						},
+						children: [{ type: 'text', value: 'Afrita' }]
+					},
+					{
+						type: 'element',
+						tagName: 'button',
+						properties: {
+							className: 'equation-zoom-btn',
+							type: 'button',
+							title: 'Stækka',
+							'aria-label': 'Stækka jöfnu',
+							'data-action': 'zoom-equation'
+						},
+						children: [{ type: 'text', value: '⊕' }]
+					}
+				]
+			}
+		]
+	};
+}
+
+/**
+ * Rehype plugin to wrap KaTeX equations with accessibility and interaction features
+ */
+function rehypeEquationWrapper() {
+	return (tree: Node) => {
+		// Process paragraphs that contain only equations - convert to block equations
+		visit(tree, 'element', (node: Element, index, parent) => {
+			if (!parent || index === undefined) return;
+
+			// Check if this is a paragraph containing only a KaTeX equation
+			if (node.tagName === 'p') {
+				const children = node.children || [];
+
+				// Find katex spans
+				const katexSpans = children.filter((child) => {
+					if (child.type !== 'element') return false;
+					const el = child as Element;
+					const className = Array.isArray(el.properties?.className)
+						? el.properties.className.join(' ')
+						: (el.properties?.className as string) || '';
+					return el.tagName === 'span' && className.includes('katex');
+				}) as Element[];
+
+				// Check if paragraph has only whitespace text and one katex span
+				const nonWhitespaceText = children.filter((child) => {
+					if (child.type === 'text') {
+						return (child as { value: string }).value.trim().length > 0;
+					}
+					return child.type === 'element';
+				});
+
+				if (nonWhitespaceText.length === 1 && katexSpans.length === 1) {
+					// This is a standalone block equation
+					const katexNode = katexSpans[0];
+					const latex = extractLatex(katexNode);
+					const wrapper = createEquationWrapper(katexNode, latex);
+
+					// Replace the paragraph with the wrapper
+					const parentEl = parent as { children: RootContent[] };
+					if (parentEl.children) {
+						parentEl.children[index] = wrapper as RootContent;
+					}
+					return;
+				}
+			}
+		});
+
+		// Second pass: add accessibility to remaining inline equations
+		visit(tree, 'element', (node: Element) => {
+			const className = Array.isArray(node.properties?.className)
+				? node.properties.className.join(' ')
+				: (node.properties?.className as string) || '';
+
+			if (node.tagName === 'span' && className.includes('katex')) {
+				// Skip if already wrapped (check if parent is equation-content)
+				const latex = extractLatex(node);
+
+				// Add accessibility attributes if not already present
+				node.properties = node.properties || {};
+				if (!node.properties.role) {
+					node.properties.role = 'math';
+					node.properties['aria-label'] = latexToSpeech(latex);
+				}
+			}
+		});
+	};
+}
+
+// =============================================================================
 // MARKDOWN PROCESSOR
 // =============================================================================
 
@@ -336,6 +551,7 @@ export async function processMarkdown(content: string): Promise<string> {
 			trust: true,
 			throwOnError: false
 		})
+		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
@@ -362,6 +578,7 @@ export function processMarkdownSync(content: string): string {
 			trust: true,
 			throwOnError: false
 		})
+		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
