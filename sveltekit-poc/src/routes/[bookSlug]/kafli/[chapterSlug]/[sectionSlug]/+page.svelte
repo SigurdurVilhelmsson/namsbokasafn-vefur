@@ -48,18 +48,18 @@
 	<title>{data.section.section} {data.section.title} | Námsbókasafn</title>
 </svelte:head>
 
-<article class="max-w-3xl mx-auto">
+<article class="max-w-3xl mx-auto px-1 sm:px-0">
 	<!-- Reading progress bar -->
-	<div class="mb-6 flex items-center justify-between">
-		<div class="flex items-center gap-3">
+	<div class="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2">
+		<div class="flex items-center gap-2 sm:gap-3">
 			{#if data.section.readingTime}
-				<span class="text-sm text-gray-500 dark:text-gray-400">
-					~{data.section.readingTime} mín lestur
+				<span class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+					~{data.section.readingTime} mín
 				</span>
 			{/if}
 			{#if data.section.difficulty}
 				<span
-					class="text-xs px-2 py-1 rounded-full {data.section.difficulty === 'beginner'
+					class="text-xs px-2 py-0.5 sm:py-1 rounded-full {data.section.difficulty === 'beginner'
 						? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
 						: data.section.difficulty === 'intermediate'
 							? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
@@ -73,7 +73,7 @@
 				</span>
 			{/if}
 		</div>
-		<div class="flex items-center gap-2">
+		<div class="flex items-center gap-1 sm:gap-2">
 			<!-- Annotations button -->
 			<button
 				on:click={() => (showAnnotationSidebar = true)}
@@ -99,19 +99,20 @@
 			{#if !isRead}
 				<button
 					on:click={markAsRead}
-					class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+					class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+					aria-label="Merkja sem lesið"
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 					</svg>
-					Merkja sem lesið
+					<span class="hidden sm:inline">Merkja sem lesið</span>
 				</button>
 			{:else}
-				<span class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+				<span class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 					</svg>
-					Lesið
+					<span class="hidden sm:inline">Lesið</span>
 				</span>
 			{/if}
 		</div>

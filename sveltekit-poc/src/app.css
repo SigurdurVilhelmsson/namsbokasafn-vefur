@@ -1060,3 +1060,80 @@ body {
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* ========================================== */
+/* RESPONSIVE STYLES                          */
+/* ========================================== */
+
+/* Mobile-first adjustments */
+@media (max-width: 640px) {
+  /* Reading content padding on mobile */
+  .reading-content {
+    padding: 1.5rem 1rem;
+  }
+
+  /* Smaller headings on mobile */
+  .reading-content h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .reading-content h2 {
+    font-size: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  .reading-content h3 {
+    font-size: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  /* Content blocks stack on mobile */
+  .content-block {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .content-block-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* Tables scroll horizontally */
+  .reading-content table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* Equation actions always visible on touch */
+  .equation-wrapper .equation-actions {
+    opacity: 1;
+  }
+
+  /* Figure lightbox toolbar */
+  .figure-lightbox-zoom-level {
+    display: none;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .reading-content {
+    padding: 2rem 1.25rem;
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (pointer: coarse) {
+  /* Ensure minimum 44px tap targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+  }
+
+  /* Larger touch targets for navigation links */
+  .nav-link {
+    padding: 0.75rem 1rem;
+  }
+}

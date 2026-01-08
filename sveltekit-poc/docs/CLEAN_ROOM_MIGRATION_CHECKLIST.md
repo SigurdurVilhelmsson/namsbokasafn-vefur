@@ -164,7 +164,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 
 ---
 
-## Milestone 4: Accessibility & Polish (Gate) ☐
+## Milestone 4: Accessibility & Polish (Gate) ☑
 
 | Status | Item |
 | --- | --- |
@@ -173,7 +173,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | ☑ | Focus outlines and skip-to-content link. |
 | ☑ | Reader comfort: line length, line height tuning. |
 | ☑ | Dyslexia-friendly font option. |
-| ☐ | Responsive behavior verified on phone + tablet. |
+| ☑ | Responsive behavior verified on phone + tablet. |
 | ☑ | Cross-reference hover previews (equations/figures/tables). |
 | ☑ | Quick glossary lookup from reader view. |
 | ☑ | IntersectionObserver for "end of section" read detection. |
@@ -291,9 +291,9 @@ Use these files for UX reference and data shape, not for copying code:
 | 1: Core Reader | ☑ | 100% |
 | 2: Offline | ☑ | 100% |
 | 3: Testing | ☑ | 100% |
-| 4: Accessibility | ☐→ | 89% |
+| 4: Accessibility | ☑ | 100% |
 | 5: V2 Features | ☐→ | 33% (3/9 done early) |
 
-**Overall v1 readiness: ~85%** (Milestones 1-3 complete)
+**Overall v1 readiness: ~95%** (Milestones 1-4 complete)
 
-**Note:** Some V2 features (annotations, figure viewer, adaptive quiz) were implemented ahead of schedule. Focus should now shift to completing Milestone 4 (Accessibility & Polish).
+**Note:** V1 is feature-complete. Only remaining items are Milestone 0 correctness criteria (documentation task) and optional V2 features.
