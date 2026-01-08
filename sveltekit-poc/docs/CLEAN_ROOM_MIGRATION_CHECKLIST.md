@@ -2,7 +2,7 @@
 
 This tracker defines the SvelteKit migration with gated milestones. Each gate must be green before proceeding to the next. Features are implemented cleanly—the React app serves as UX reference, not code to copy.
 
-**Last updated:** 2025-01-08
+**Last updated:** 2026-01-08
 
 ## Legend
 - ☐ Not started
@@ -142,11 +142,11 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 
 ---
 
-## Milestone 3: Quality & Testing (Gate) ☐
+## Milestone 3: Quality & Testing (Gate) ☐→
 
 | Status | Item |
 | --- | --- |
-| ☐ | Unit tests for stores (settings, reader, flashcard). |
+| ☑ | Unit tests for stores (settings, reader, flashcard). |
 | ☐ | Unit tests for markdown utils (KaTeX, directives). |
 | ☐ | Smoke test for reader flow (catalog → book → section → navigate). |
 | ☐ | Error handling for missing content. |
@@ -287,8 +287,8 @@ Use these files for UX reference and data shape, not for copying code:
 | 0: Scope | ☐→ | 75% |
 | 1: Core Reader | ☑ | 100% |
 | 2: Offline | ☑ | 100% |
-| 3: Testing | ☐ | 0% |
+| 3: Testing | ☐→ | 15% |
 | 4: Accessibility | ☐→ | 40% |
 | 5: V2 Features | ☐ | 0% (frozen) |
 
-**Overall v1 readiness: ~70%** (Milestones 1-2 complete, ready for Milestone 3)
+**Overall v1 readiness: ~72%** (Milestones 1-2 complete, Milestone 3 in progress)
