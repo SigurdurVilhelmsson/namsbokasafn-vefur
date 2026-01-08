@@ -148,7 +148,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | --- | --- |
 | ☑ | Unit tests for stores (settings, reader, flashcard). |
 | ☑ | Unit tests for markdown utils (KaTeX, directives). |
-| ☐ | Smoke test for reader flow (catalog → book → section → navigate). |
+| ☑ | Smoke test for reader flow (catalog → book → section → navigate). |
 | ☐ | Error handling for missing content. |
 | ☐ | Error handling for offline failures. |
 | ☐ | PWA update flow tested (version prompt or auto-reload). |
@@ -287,7 +287,7 @@ Use these files for UX reference and data shape, not for copying code:
 | 0: Scope | ☐→ | 75% |
 | 1: Core Reader | ☑ | 100% |
 | 2: Offline | ☑ | 100% |
-| 3: Testing | ☐→ | 30% |
+| 3: Testing | ☐→ | 43% |
 | 4: Accessibility | ☐→ | 40% |
 | 5: V2 Features | ☐ | 0% (frozen) |
 
