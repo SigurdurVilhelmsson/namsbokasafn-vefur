@@ -48,7 +48,7 @@ interface SettingsState {
 	shortcutPreferences: ShortcutPreferences;
 }
 
-const STORAGE_KEY = 'namsbokasafn-settings';
+const STORAGE_KEY = 'namsbokasafn:settings';
 
 const defaultSettings: SettingsState = {
 	theme: 'light',

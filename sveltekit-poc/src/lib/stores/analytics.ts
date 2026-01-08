@@ -12,7 +12,7 @@ import {
 	generateId
 } from '$lib/utils/storeHelpers';
 
-const STORAGE_KEY = 'namsbokasafn-analytics';
+const STORAGE_KEY = 'namsbokasafn:analytics';
 
 export interface ReadingSession {
 	sectionKey: string;

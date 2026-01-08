@@ -8,7 +8,7 @@ import { browser } from '$app/environment';
 import type { Annotation, HighlightColor, TextRange, AnnotationStats } from '$lib/types/annotation';
 import { generateId, getCurrentTimestamp } from '$lib/utils/storeHelpers';
 
-const STORAGE_KEY = 'namsbokasafn-annotations';
+const STORAGE_KEY = 'namsbokasafn:annotations';
 
 interface AnnotationState {
 	annotations: Annotation[];

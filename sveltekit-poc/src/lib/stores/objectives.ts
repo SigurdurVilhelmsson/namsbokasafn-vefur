@@ -15,7 +15,7 @@ import {
 	getCurrentTimestamp
 } from '$lib/utils/storeHelpers';
 
-const STORAGE_KEY = 'namsbokasafn-objectives';
+const STORAGE_KEY = 'namsbokasafn:objectives';
 
 export type ConfidenceLevel = 1 | 2 | 3 | 4 | 5;
 

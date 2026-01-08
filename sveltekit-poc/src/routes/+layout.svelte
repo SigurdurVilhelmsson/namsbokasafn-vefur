@@ -2,10 +2,17 @@
   Root Layout - Global styles and theme management
 -->
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores';
 	import { browser } from '$app/environment';
+	import { migrateStorageKeys } from '$lib/utils/storageMigration';
 	import PWAUpdater from '$lib/components/PWAUpdater.svelte';
 	import '../app.css';
+
+	// Run storage migration on startup
+	onMount(() => {
+		migrateStorageKeys();
+	});
 
 	// Reactive theme class on html element
 	$: if (browser) {

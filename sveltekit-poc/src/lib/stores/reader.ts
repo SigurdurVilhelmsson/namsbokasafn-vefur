@@ -11,7 +11,7 @@ import {
 	getCurrentTimestamp
 } from '$lib/utils/storeHelpers';
 
-const STORAGE_KEY = 'namsbokasafn-reading';
+const STORAGE_KEY = 'namsbokasafn:reader';
 
 export interface SectionProgress {
 	read: boolean;
