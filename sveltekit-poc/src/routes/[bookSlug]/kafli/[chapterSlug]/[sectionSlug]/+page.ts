@@ -74,7 +74,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			navigation,
 			bookSlug,
 			chapterSlug,
-			sectionSlug
+			sectionSlug,
+			chapterNumber: chapterIndex + 1
 		};
 	} catch (e) {
 		console.error('Failed to load section:', e);

@@ -148,7 +148,13 @@
 		chapterSlug={data.chapterSlug}
 		sectionSlug={data.sectionSlug}
 	>
-		<MarkdownRenderer content={data.section.content} />
+		<MarkdownRenderer
+			content={data.section.content}
+			bookSlug={data.bookSlug}
+			chapterSlug={data.chapterSlug}
+			sectionSlug={data.sectionSlug}
+			chapterNumber={data.chapterNumber}
+		/>
 	</TextHighlighter>
 
 	<!-- End of section detection - auto-marks as read when user scrolls here -->

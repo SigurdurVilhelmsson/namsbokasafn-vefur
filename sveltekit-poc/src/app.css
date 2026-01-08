@@ -1037,3 +1037,26 @@ body {
   color: var(--text-secondary);
   text-align: center;
 }
+
+/* ========================================== */
+/* CROSS-REFERENCES                          */
+/* ========================================== */
+
+.reading-content a.cross-reference {
+  color: var(--accent-color);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--accent-color);
+  padding-bottom: 1px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.reading-content a.cross-reference:hover {
+  color: var(--accent-hover);
+  border-bottom-style: solid;
+}
+
+.reading-content a.cross-reference:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
