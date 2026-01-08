@@ -332,7 +332,7 @@ export function highlightQuery(text: string, query: string): string {
 // SEARCH HISTORY
 // =============================================================================
 
-const SEARCH_HISTORY_KEY = 'namsbokasafn-search-history';
+const SEARCH_HISTORY_KEY = 'namsbokasafn:search-history';
 const MAX_HISTORY_ITEMS = 10;
 
 export interface SearchHistoryItem {

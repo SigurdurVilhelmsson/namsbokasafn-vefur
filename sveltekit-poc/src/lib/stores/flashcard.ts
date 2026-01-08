@@ -23,7 +23,7 @@ import {
 } from '$lib/utils/srs';
 import { getTodayDateString, getYesterdayDateString } from '$lib/utils/storeHelpers';
 
-const STORAGE_KEY = 'namsbokasafn-flashcards';
+const STORAGE_KEY = 'namsbokasafn:flashcards';
 
 type StudyMode = 'all' | 'due' | 'new';
 

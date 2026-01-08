@@ -28,3 +28,8 @@ coverage
 .env
 .env.local
 .env.*.local
+
+# SvelteKit
+sveltekit-poc/.svelte-kit
+sveltekit-poc/build
+sveltekit-poc/static/content
