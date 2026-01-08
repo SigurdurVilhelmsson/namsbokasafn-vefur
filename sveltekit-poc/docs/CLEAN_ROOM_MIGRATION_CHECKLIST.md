@@ -10,12 +10,9 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 - ☑ Done
 
 ## Current Focus
-**Milestone 1 wrap-up**: Complete reader flow testing, then proceed to Milestone 2 (Offline).
+**Milestone 2**: Offline/PWA setup and content integrity.
 
 ---
-
-## References
-- `sveltekit-poc/docs/IMPROVEMENTS_AND_FEATURES.md`
 
 ## Milestone 0: Scope & Success Criteria (Gate) ☐→
 
@@ -134,12 +131,14 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | ☐ | Cache strategy documented (precache vs runtime). |
 | ☐ | Content validation during build: broken refs, missing alt text, duplicate IDs. |
 | ☐ | Production static file serving (not symlink). |
+| ☐ | Normalize storage keys to `namsbokasafn:<bookSlug>:*` namespace. |
 
 ### Correctness Criteria (Milestone 2)
 - User can tap "Download" and see progress bar
 - After download completes, airplane mode still loads full book
 - Images and math render correctly offline
 - Cache clears properly on book update
+- Multi-book data does not collide in localStorage
 
 ---
 
@@ -153,11 +152,13 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | ☐ | Error handling for missing content. |
 | ☐ | Error handling for offline failures. |
 | ☐ | PWA update flow tested (version prompt or auto-reload). |
+| ☐ | Sanitize/escape HTML in search result snippets. |
 
 ### Correctness Criteria (Milestone 3)
 - All tests pass in CI
 - Graceful fallback when content is missing
 - Clear error message when offline and content not cached
+- No XSS vectors in search results
 
 ---
 
@@ -172,6 +173,8 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | ☐ | Dyslexia-friendly font option. |
 | ☐ | Responsive behavior verified on phone + tablet. |
 | ☐ | Cross-reference hover previews (equations/figures/tables). |
+| ☐ | Quick glossary lookup from reader view. |
+| ☐ | IntersectionObserver for "end of section" read detection. |
 
 ---
 
@@ -182,7 +185,7 @@ These are explicitly deferred. Do not start until Milestones 1-4 are complete.
 | Status | Item |
 | --- | --- |
 | ☐ | Annotations: highlight + note + delete + export. |
-| ☐ | Highlight restore after refresh/navigation. |
+| ☐ | Highlight restore after refresh/navigation (stable anchors, not DOM-dependent). |
 | ☐ | TTS: Icelandic voice with fallback and controls. |
 | ☐ | Print stylesheet (@media print CSS). |
 | ☐ | Analytics dashboard. |
@@ -190,6 +193,51 @@ These are explicitly deferred. Do not start until Milestones 1-4 are complete.
 | ☐ | Bookmarks page. |
 | ☐ | Self-assessment modal. |
 | ☐ | Figure viewer (zoom modal). |
+
+---
+
+## Technical Improvements (Address When Relevant)
+
+These are technical debt items to address opportunistically during development:
+
+### Performance
+| Status | Item |
+| --- | --- |
+| ☐ | Move search index building to web worker or precompute at build time. |
+| ☐ | Cache TOC and section content to avoid repeated fetches. |
+
+### Content Pipeline
+| Status | Item |
+| --- | --- |
+| ☐ | Replace custom frontmatter parser with build-time step (gray-matter or similar). |
+| ☐ | Precompute cross-reference numbering for deterministic results. |
+
+### Data Integrity
+| Status | Item |
+| --- | --- |
+| ☐ | Content linting for consistent frontmatter and directive usage. |
+
+---
+
+## Future Features (Backlog)
+
+Ideas for post-v2. Not scheduled—evaluate based on user feedback.
+
+### P1 - High Value
+- **Line focus mode**: Highlight current line/paragraph while dimming others.
+- **Contrast presets**: High contrast, sepia, and custom color schemes.
+- **Indexed search with filters**: Filter by chapter, section, or content type.
+
+### P2 - Medium Value
+- **Auto-generated flashcards**: Create cards from definitions and key concepts.
+- **Chapter recaps**: Quick summaries and quizzes tied to learning objectives.
+- **"Next recommended section"**: Suggest sections based on progress and objectives.
+- **Search history**: Save common study topic searches.
+
+### P3 - Low Priority / Exploratory
+- **Teacher/sharing tools**: Exportable study decks and reading plans.
+- **Class progress summaries**: Local or export-based progress reports.
+- **Spaced repetition dashboard**: Visualize SRS progress across all cards.
 
 ---
 
@@ -202,6 +250,7 @@ These patterns should be reimplemented cleanly, not copied:
 - **Ad-hoc parsing**: Content validation should be build-time, not runtime.
 - **Incomplete dashboards**: Analytics/objectives not in v1 scope.
 - **Workarounds**: Any `// TODO` or `// HACK` comments in React code.
+- **Hardcoded book slugs**: Storage keys like `efnafraedi-*` should be namespaced.
 
 ---
 
@@ -226,6 +275,8 @@ Use these files for UX reference and data shape, not for copying code:
 1. All items in current milestone must be ☑ before moving to next gate.
 2. If a gate is blocked, fix it before adding new features.
 3. V2 features (Milestone 5) are frozen until v1 ships.
+4. Technical Improvements are addressed opportunistically, not as blockers.
+5. Future Features (Backlog) are not scheduled until v2 is complete.
 
 ---
 
