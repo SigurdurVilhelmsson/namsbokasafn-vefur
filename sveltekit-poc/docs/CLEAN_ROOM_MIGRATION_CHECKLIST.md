@@ -124,7 +124,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 
 | Status | Item |
 | --- | --- |
-| ☑ | PWA setup with `@vite-pwa/sveltekit`. |
+| ☑ | PWA setup with `@vite-pwa/sveltekit` (workbox runtime caching, manifest, update prompts). |
 | ☐ | Explicit "Download book" UI with progress indicator. |
 | ☐ | Storage size estimate shown before download. |
 | ☐ | Offline read succeeds after download (TOC, markdown, images, math). |
