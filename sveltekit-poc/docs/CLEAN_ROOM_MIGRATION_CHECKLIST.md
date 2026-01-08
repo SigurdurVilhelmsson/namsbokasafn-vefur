@@ -147,7 +147,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | Status | Item |
 | --- | --- |
 | ☑ | Unit tests for stores (settings, reader, flashcard). |
-| ☐ | Unit tests for markdown utils (KaTeX, directives). |
+| ☑ | Unit tests for markdown utils (KaTeX, directives). |
 | ☐ | Smoke test for reader flow (catalog → book → section → navigate). |
 | ☐ | Error handling for missing content. |
 | ☐ | Error handling for offline failures. |
@@ -287,8 +287,8 @@ Use these files for UX reference and data shape, not for copying code:
 | 0: Scope | ☐→ | 75% |
 | 1: Core Reader | ☑ | 100% |
 | 2: Offline | ☑ | 100% |
-| 3: Testing | ☐→ | 15% |
+| 3: Testing | ☐→ | 30% |
 | 4: Accessibility | ☐→ | 40% |
 | 5: V2 Features | ☐ | 0% (frozen) |
 
-**Overall v1 readiness: ~72%** (Milestones 1-2 complete, Milestone 3 in progress)
+**Overall v1 readiness: ~74%** (Milestones 1-2 complete, Milestone 3 in progress)
