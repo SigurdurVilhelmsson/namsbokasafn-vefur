@@ -127,11 +127,11 @@
 						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Leturstærð
 						</label>
-						<div class="flex gap-2">
+						<div class="grid grid-cols-2 gap-2 sm:flex">
 							{#each fontSizes as size}
 								<button
 									on:click={() => settings.setFontSize(size.value)}
-									class="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors {$fontSize === size.value
+									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$fontSize === size.value
 										? 'bg-[var(--accent-color)] text-white shadow-sm'
 										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
 								>
@@ -178,11 +178,11 @@
 						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Línubil
 						</label>
-						<div class="flex gap-2">
+						<div class="grid grid-cols-3 gap-2 sm:flex">
 							{#each lineHeights as height}
 								<button
 									on:click={() => settings.setLineHeight(height.value)}
-									class="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors {$lineHeight === height.value
+									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineHeight === height.value
 										? 'bg-[var(--accent-color)] text-white shadow-sm'
 										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
 								>
@@ -197,11 +197,11 @@
 						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Línubreidd
 						</label>
-						<div class="flex gap-2">
+						<div class="grid grid-cols-3 gap-2 sm:flex">
 							{#each lineWidths as width}
 								<button
 									on:click={() => settings.setLineWidth(width.value)}
-									class="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors {$lineWidth === width.value
+									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineWidth === width.value
 										? 'bg-[var(--accent-color)] text-white shadow-sm'
 										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
 								>
