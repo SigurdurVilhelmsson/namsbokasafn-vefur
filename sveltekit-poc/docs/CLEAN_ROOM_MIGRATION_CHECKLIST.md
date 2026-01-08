@@ -153,7 +153,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | ☑ | Smoke test for reader flow (catalog → book → section → navigate). |
 | ☑ | Error handling for missing content. |
 | ☑ | Error handling for offline failures. |
-| ☐ | PWA update flow tested (version prompt or auto-reload). |
+| ☑ | PWA update flow tested (version prompt or auto-reload). |
 | ☐ | Sanitize/escape HTML in search result snippets. |
 
 ### Correctness Criteria (Milestone 3)
@@ -290,10 +290,10 @@ Use these files for UX reference and data shape, not for copying code:
 | 0: Scope | ☐→ | 75% |
 | 1: Core Reader | ☑ | 100% |
 | 2: Offline | ☑ | 100% |
-| 3: Testing | ☐→ | 71% |
+| 3: Testing | ☐→ | 86% |
 | 4: Accessibility | ☐→ | 40% |
 | 5: V2 Features | ☐→ | 33% (3/9 done early) |
 
-**Overall v1 readiness: ~78%** (Milestones 1-2 complete, Milestone 3 at 71%)
+**Overall v1 readiness: ~82%** (Milestones 1-2 complete, Milestone 3 at 86%)
 
 **Note:** Some V2 features (annotations, figure viewer, adaptive quiz) were implemented ahead of schedule. Focus should return to completing Milestone 3 before adding more features.
