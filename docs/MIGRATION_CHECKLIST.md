@@ -53,6 +53,7 @@ This checklist defines a no-regret bar for fully committing to the SvelteKit mig
 ### Svelte Actions (New Pattern)
 - `sveltekit-poc/src/lib/actions/equations.ts` (new - KaTeX copy/zoom interactivity)
 - `sveltekit-poc/src/lib/actions/practiceProblems.ts` (ported from React component logic)
+- `sveltekit-poc/src/lib/actions/keyboardShortcuts.ts` (ported - multi-key sequence support)
 
 ## 4) Missing or Incomplete (To Port)
 
@@ -77,9 +78,9 @@ These must be complete before removing the React app:
 ### P1 - Important Features
 Should be ported for feature parity:
 
-- [ ] **Keyboard shortcuts**: `src/hooks/useKeyboardShortcuts.ts` → Svelte action
+- [x] **Keyboard shortcuts**: `src/hooks/useKeyboardShortcuts.ts` → Svelte action ✅
   - Navigation (←/→), home (g+h), search (Cmd+K), etc.
-  - `src/components/ui/KeyboardShortcutsModal.tsx`
+  - `src/components/ui/KeyboardShortcutsModal.tsx` → `KeyboardShortcutsModal.svelte`
 - [ ] **TTS controls**: `src/components/reader/TTSControls.tsx`
   - `src/hooks/useTextToSpeech.ts` → Svelte store
 - [ ] **Cross-reference UI**: `src/components/reader/CrossReference.tsx`
@@ -120,7 +121,7 @@ Nice-to-have, can be added post-migration:
 | Layout Components | 5/5 | 0 | ✅ Complete |
 | Reader Components | 7/18 | 11 | 🟡 In Progress |
 | UI Components | 4/6 | 2 | 🟡 In Progress |
-| Hooks → Actions | 1/4 | 3 | 🟡 In Progress |
+| Hooks → Actions | 2/4 | 2 | 🟡 In Progress |
 | Utils | 5/5 | 0 | ✅ Complete |
 | PWA | 0/1 | 1 | ❌ Not Started |
 | Tests | 0/3 | 3 | ❌ Not Started |
