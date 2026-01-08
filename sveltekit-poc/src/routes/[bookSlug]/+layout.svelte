@@ -7,12 +7,15 @@
 	import Header from '$lib/components/layout/Header.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import FocusModeNav from '$lib/components/layout/FocusModeNav.svelte';
+	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
+	import { keyboardShortcuts } from '$lib/actions/keyboardShortcuts';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
 
 	let focusMode = false;
 	let showShortcutsModal = false;
+	let headerComponent: Header;
 
 	function toggleFocusMode() {
 		focusMode = !focusMode;
@@ -22,6 +25,14 @@
 		showShortcutsModal = true;
 	}
 
+	function closeShortcuts() {
+		showShortcutsModal = false;
+	}
+
+	function openSearch() {
+		headerComponent?.openSearch();
+	}
+
 	$: bookSlug = $page.params.bookSlug ?? '';
 </script>
 
@@ -29,6 +40,13 @@
 	class="min-h-screen font-size-{$fontSize} {$fontFamily === 'sans'
 		? 'font-sans'
 		: 'font-serif'} {focusMode ? 'focus-mode' : ''}"
+	use:keyboardShortcuts={{
+		bookSlug,
+		onToggleFocusMode: toggleFocusMode,
+		onOpenSearch: openSearch,
+		onOpenShortcuts: openShortcuts,
+		onCloseModal: closeShortcuts
+	}}
 >
 	<!-- Skip to main content link for keyboard navigation -->
 	<a
@@ -41,6 +59,7 @@
 	<!-- Hide header in focus mode -->
 	{#if !focusMode}
 		<Header
+			bind:this={headerComponent}
 			{bookSlug}
 			bookTitle={data.book?.title ?? 'Lesari'}
 			onOpenShortcuts={openShortcuts}
@@ -69,3 +88,6 @@
 		<FocusModeNav {bookSlug} onExitFocusMode={toggleFocusMode} />
 	{/if}
 </div>
+
+<!-- Keyboard Shortcuts Modal -->
+<KeyboardShortcutsModal isOpen={showShortcutsModal} onClose={closeShortcuts} />

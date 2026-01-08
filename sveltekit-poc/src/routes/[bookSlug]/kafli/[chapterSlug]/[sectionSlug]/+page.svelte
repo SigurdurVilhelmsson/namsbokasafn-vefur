@@ -5,10 +5,19 @@
 	import { onMount, onDestroy } from 'svelte';
 	import type { PageData } from './$types';
 	import { reader, analyticsStore } from '$lib/stores';
+	import { isSectionRead, isSectionBookmarked } from '$lib/stores/reader';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
+	import TextHighlighter from '$lib/components/TextHighlighter.svelte';
+	import AnnotationSidebar from '$lib/components/AnnotationSidebar.svelte';
 
 	export let data: PageData;
+
+	let showAnnotationSidebar = false;
+
+	// Subscribe to reader state for reactivity
+	$: progress = $reader.progress;
+	$: bookmarks = $reader.bookmarks;
 
 	// Mark section as read and start analytics session
 	onMount(() => {
@@ -25,8 +34,9 @@
 		reader.markAsRead(data.chapterSlug, data.sectionSlug);
 	}
 
-	$: isRead = reader.isRead(data.chapterSlug, data.sectionSlug);
-	$: isBookmarked = reader.isBookmarked(data.chapterSlug, data.sectionSlug);
+	// Reactive checks using subscribed state
+	$: isRead = isSectionRead(progress, data.chapterSlug, data.sectionSlug);
+	$: isBookmarked = isSectionBookmarked(bookmarks, data.chapterSlug, data.sectionSlug);
 
 	function toggleBookmark() {
 		reader.toggleBookmark(data.chapterSlug, data.sectionSlug);
@@ -63,6 +73,17 @@
 			{/if}
 		</div>
 		<div class="flex items-center gap-2">
+			<!-- Annotations button -->
+			<button
+				on:click={() => (showAnnotationSidebar = true)}
+				class="p-2 rounded-lg transition-colors text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-500"
+				aria-label="Opna athugasemdir"
+				title="Athugasemdir"
+			>
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+				</svg>
+			</button>
 			<button
 				on:click={toggleBookmark}
 				class="p-2 rounded-lg transition-colors {isBookmarked
@@ -120,8 +141,14 @@
 		</div>
 	{/if}
 
-	<!-- Main content -->
-	<MarkdownRenderer content={data.section.content} />
+	<!-- Main content wrapped in TextHighlighter for annotation support -->
+	<TextHighlighter
+		bookSlug={data.bookSlug}
+		chapterSlug={data.chapterSlug}
+		sectionSlug={data.sectionSlug}
+	>
+		<MarkdownRenderer content={data.section.content} />
+	</TextHighlighter>
 
 	<!-- Mark as read button at bottom -->
 	{#if !isRead}
@@ -141,3 +168,12 @@
 
 <!-- Navigation buttons -->
 <NavigationButtons navigation={data.navigation} bookSlug={data.bookSlug} />
+
+<!-- Annotation Sidebar -->
+<AnnotationSidebar
+	isOpen={showAnnotationSidebar}
+	onClose={() => (showAnnotationSidebar = false)}
+	bookSlug={data.bookSlug}
+	currentChapter={data.chapterSlug}
+	currentSection={data.sectionSlug}
+/>

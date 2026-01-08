@@ -66,3 +66,15 @@ export {
 	type ReferenceItem,
 	type ReferenceIndex
 } from './reference';
+
+// Offline
+export {
+	offline,
+	currentDownload,
+	downloadedBooks,
+	downloadBook,
+	estimateBookSize,
+	formatBytes,
+	type BookDownloadState,
+	type DownloadProgress
+} from './offline';

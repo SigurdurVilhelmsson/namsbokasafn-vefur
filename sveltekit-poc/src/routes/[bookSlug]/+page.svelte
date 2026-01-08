@@ -7,6 +7,9 @@
 	import type { TableOfContents } from '$lib/types/content';
 	import { loadTableOfContents } from '$lib/utils/contentLoader';
 	import { reader } from '$lib/stores';
+	import { calcChapterProgress } from '$lib/stores/reader';
+	import DownloadBookButton from '$lib/components/DownloadBookButton.svelte';
+	import ErrorMessage from '$lib/components/ErrorMessage.svelte';
 
 	export let data: PageData;
 
@@ -14,19 +17,29 @@
 	let loading = true;
 	let error: string | null = null;
 
-	onMount(async () => {
+	// Subscribe to reader progress for reactivity
+	$: progress = $reader.progress;
+
+	async function loadContent() {
+		loading = true;
+		error = null;
 		try {
 			toc = await loadTableOfContents(data.bookSlug);
 		} catch (e) {
-			error = 'Gat ekki hlaðið efnisyfirliti';
-			console.error(e);
+			error = 'Gat ekki hlaðið efnisyfirliti. Athugaðu nettengingu eða reyndu aftur síðar.';
+			console.error('Failed to load table of contents:', e);
 		} finally {
 			loading = false;
 		}
+	}
+
+	onMount(() => {
+		loadContent();
 	});
 
+	// Reactive helper using subscribed progress
 	function getChapterProgress(chapterSlug: string, totalSections: number): number {
-		return reader.getChapterProgress(chapterSlug, totalSections);
+		return calcChapterProgress(progress, chapterSlug, totalSections);
 	}
 </script>
 
@@ -40,9 +53,10 @@
 		<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 			{data.book?.title ?? 'Bók'}
 		</h1>
-		<p class="text-gray-600 dark:text-gray-400">
+		<p class="text-gray-600 dark:text-gray-400 mb-4">
 			Veldu kafla til að byrja að lesa
 		</p>
+		<DownloadBookButton bookSlug={data.bookSlug} bookTitle={data.book?.title ?? ''} />
 	</div>
 
 	{#if loading}
@@ -51,9 +65,13 @@
 			<span class="ml-3 text-gray-600 dark:text-gray-400">Hleður...</span>
 		</div>
 	{:else if error}
-		<div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
-			<p class="text-red-600 dark:text-red-400">{error}</p>
-		</div>
+		<ErrorMessage
+			message={error}
+			onRetry={loadContent}
+			showBackLink={true}
+			backHref="/"
+			backLabel="Til baka í bókasafn"
+		/>
 	{:else if toc}
 		<!-- Chapter grid -->
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -250,36 +250,78 @@ For Námsbókasafn specifically:
 | **Learning curve** | Learn Astro + keep React | Learn Svelte only |
 | **Long-term maintenance** | Two paradigms | One paradigm |
 
-## Limitations of This PoC
+## Migration Progress
 
-- No KaTeX/math rendering yet (would use remark-math + rehype-katex)
-- No mdsvex for markdown in components (would add for production)
-- Simplified chapter content (hard-coded, not fetched from files)
-- No localStorage persistence for flashcard records (wired but not persisting in PoC)
+### Completed Features
+
+| Feature | Status | Files |
+|---------|--------|-------|
+| **Core Infrastructure** | | |
+| Landing page | ✅ | `src/routes/+page.svelte` |
+| Book layout & navigation | ✅ | `src/routes/[bookSlug]/+layout.svelte` |
+| Chapter view | ✅ | `src/routes/[bookSlug]/kafli/[chapterSlug]/+page.svelte` |
+| Section view | ✅ | `src/routes/[bookSlug]/kafli/[chapterSlug]/[sectionSlug]/+page.svelte` |
+| **State Management** | | |
+| Settings store | ✅ | `src/lib/stores/settings.ts` |
+| Reader store | ✅ | `src/lib/stores/reader.ts` |
+| Flashcard store (SM-2) | ✅ | `src/lib/stores/flashcard.ts` |
+| Annotation store | ✅ | `src/lib/stores/annotation.ts` |
+| Quiz store | ✅ | `src/lib/stores/quiz.ts` |
+| Analytics store | ✅ | `src/lib/stores/analytics.ts` |
+| Objectives store | ✅ | `src/lib/stores/objectives.ts` |
+| Offline store | ✅ | `src/lib/stores/offline.ts` |
+| **Content Rendering** | | |
+| Markdown renderer | ✅ | `src/lib/components/MarkdownRenderer.svelte` |
+| KaTeX/math equations | ✅ | `src/lib/actions/equations.ts` |
+| Practice problems | ✅ | `src/lib/actions/practiceProblems.ts` |
+| Custom directives | ✅ | Content blocks in `app.css` |
+| **Study Tools** | | |
+| Flashcard study | ✅ | `src/lib/components/FlashcardStudy.svelte` |
+| Glossary page | ✅ | `src/routes/[bookSlug]/ordabok/+page.svelte` |
+| Periodic table | ✅ | `src/lib/components/PeriodicTable.svelte` |
+| **Annotation System** | ✅ | |
+| Text highlighter | ✅ | `src/lib/components/TextHighlighter.svelte` |
+| Selection popup | ✅ | `src/lib/components/SelectionPopup.svelte` |
+| Note modal | ✅ | `src/lib/components/NoteModal.svelte` |
+| Annotation sidebar | ✅ | `src/lib/components/AnnotationSidebar.svelte` |
+| **Figure Viewer** | ✅ | |
+| Figure viewer component | ✅ | `src/lib/components/FigureViewer.svelte` |
+| Image lightbox | ✅ | `src/lib/components/ImageLightbox.svelte` |
+| Lightbox action | ✅ | `src/lib/actions/figureViewer.ts` |
+| **Quiz System** | ✅ | |
+| Adaptive quiz | ✅ | `src/lib/components/AdaptiveQuiz.svelte` |
+| Quiz page | ✅ | `src/routes/[bookSlug]/prof/+page.svelte` |
+| **UI Components** | | |
+| Header | ✅ | `src/lib/components/layout/Header.svelte` |
+| Sidebar | ✅ | `src/lib/components/layout/Sidebar.svelte` |
+| Search modal | ✅ | `src/lib/components/SearchModal.svelte` |
+| Settings modal | ✅ | `src/lib/components/SettingsModal.svelte` |
+| Keyboard shortcuts | ✅ | `src/lib/actions/keyboardShortcuts.ts` |
+| **PWA Support** | ✅ | |
+| PWA updater | ✅ | `src/lib/components/PWAUpdater.svelte` |
+| Download book button | ✅ | `src/lib/components/DownloadBookButton.svelte` |
+| **Testing** | | |
+| Unit tests | ✅ | 129 tests passing |
+| E2E tests | ✅ | Playwright smoke tests |
+
+### Still Missing (from React app)
+
+| Feature | Priority | Notes |
+|---------|----------|-------|
+| TTSControls | Medium | Text-to-speech functionality |
+| BookmarksPage | Medium | Dedicated bookmarks management page |
+| LearningObjectives display | Medium | Objectives dashboard |
+| Analytics dashboard | Low | Reading analytics visualization |
+| InlineFlashcardReview | Low | Review flashcards inline in content |
 
 ## Next Steps
 
-To extend this PoC to production:
+To complete the migration:
 
-1. **Add mdsvex for markdown:**
-   ```bash
-   npm install mdsvex
-   ```
-
-2. **Add KaTeX support:**
-   ```bash
-   npm install katex remark-math rehype-katex
-   ```
-
-3. **Connect to actual content files:**
-   - Fetch markdown from `public/content/`
-   - Parse YAML frontmatter
-   - Process custom directives
-
-4. **Add PWA support:**
-   ```bash
-   npm install @vite-pwa/sveltekit
-   ```
+1. **Add TTSControls** - Web Speech API wrapper for read-aloud feature
+2. **Create BookmarksPage** - Dedicated page for managing bookmarks
+3. **Convert remaining chapters** - Chapter 3 still in .docx format
+4. **Add analytics dashboard** - Visualize reading progress and study stats
 
 ## Resources
 

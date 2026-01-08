@@ -7,15 +7,15 @@ import {
 import { error } from '@sveltejs/kit';
 import type { NavigationContext } from '$lib/types/content';
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageLoad = async ({ params, fetch }) => {
 	const { bookSlug, chapterSlug, sectionSlug } = params;
 
 	try {
 		// Load section content
-		const section = await loadSectionContent(bookSlug, chapterSlug, `${sectionSlug}.md`);
+		const section = await loadSectionContent(bookSlug, chapterSlug, `${sectionSlug}.md`, fetch);
 
 		// Load TOC for navigation context
-		const toc = await loadTableOfContents(bookSlug);
+		const toc = await loadTableOfContents(bookSlug, fetch);
 		const result = findSectionBySlug(toc, chapterSlug, sectionSlug);
 
 		if (!result) {
@@ -77,8 +77,15 @@ export const load: PageLoad = async ({ params }) => {
 		};
 	} catch (e) {
 		console.error('Failed to load section:', e);
+
+		// Provide more specific error message
+		const errorMessage =
+			e instanceof Error && e.message.includes('Failed to fetch')
+				? 'Gat ekki hlaðið kafla. Athugaðu nettengingu.'
+				: 'Kafli fannst ekki eða gat ekki hlaðið efni.';
+
 		throw error(404, {
-			message: 'Kafli fannst ekki'
+			message: errorMessage
 		});
 	}
 };
