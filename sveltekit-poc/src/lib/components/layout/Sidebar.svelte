@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { settings, sidebarOpen, reader } from '$lib/stores';
+	import { isSectionRead, calcChapterProgress } from '$lib/stores/reader';
 	import { onMount } from 'svelte';
 	import type { TableOfContents, Chapter } from '$lib/types/content';
 	import { loadTableOfContents } from '$lib/utils/contentLoader';
@@ -14,6 +15,9 @@
 	// Get current route params
 	$: chapterSlug = $page.params.chapterSlug;
 	$: sectionSlug = $page.params.sectionSlug;
+
+	// Subscribe to reader progress for reactivity
+	$: progress = $reader.progress;
 
 	// Load table of contents
 	onMount(async () => {
@@ -62,12 +66,13 @@
 		settings.setSidebarOpen(false);
 	}
 
+	// Reactive helpers using subscribed progress
 	function isRead(chapterSlug: string, sectionSlug: string): boolean {
-		return reader.isRead(chapterSlug, sectionSlug);
+		return isSectionRead(progress, chapterSlug, sectionSlug);
 	}
 
 	function getChapterProgress(chapter: Chapter): number {
-		return reader.getChapterProgress(chapter.slug, chapter.sections.length);
+		return calcChapterProgress(progress, chapter.slug, chapter.sections.length);
 	}
 </script>
 

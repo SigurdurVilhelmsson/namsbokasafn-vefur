@@ -13,12 +13,12 @@ import {
 
 const STORAGE_KEY = 'namsbokasafn-reading';
 
-interface SectionProgress {
+export interface SectionProgress {
 	read: boolean;
 	lastVisited: string;
 }
 
-interface ReadingProgress {
+export interface ReadingProgress {
 	[sectionId: string]: SectionProgress;
 }
 
@@ -170,3 +170,48 @@ export const currentLocation = derived(reader, ($reader) => ({
 }));
 
 export const bookmarks = derived(reader, ($reader) => $reader.bookmarks);
+
+export const readingProgress = derived(reader, ($reader) => $reader.progress);
+
+/**
+ * Pure function to check if a section is read.
+ * Use with $reader.progress for reactivity: isSectionRead($reader.progress, chapter, section)
+ */
+export function isSectionRead(
+	progress: ReadingProgress,
+	chapterSlug: string,
+	sectionSlug: string
+): boolean {
+	const sectionId = createSectionKey(chapterSlug, sectionSlug);
+	return progress[sectionId]?.read || false;
+}
+
+/**
+ * Pure function to calculate chapter progress percentage.
+ * Use with $reader.progress for reactivity: calcChapterProgress($reader.progress, chapter, total)
+ */
+export function calcChapterProgress(
+	progress: ReadingProgress,
+	chapterSlug: string,
+	totalSections: number
+): number {
+	if (totalSections <= 0) return 0;
+	const chapterPrefix = createChapterPrefix(chapterSlug);
+	const readCount = Object.entries(progress).filter(
+		([sectionId, data]) => sectionId.startsWith(chapterPrefix) && data.read
+	).length;
+	return Math.round((readCount / totalSections) * 100);
+}
+
+/**
+ * Pure function to check if a section is bookmarked.
+ * Use with $reader.bookmarks for reactivity: isSectionBookmarked($reader.bookmarks, chapter, section)
+ */
+export function isSectionBookmarked(
+	bookmarks: string[],
+	chapterSlug: string,
+	sectionSlug: string
+): boolean {
+	const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
+	return bookmarks.includes(bookmarkId);
+}

@@ -5,10 +5,15 @@
 	import { onMount, onDestroy } from 'svelte';
 	import type { PageData } from './$types';
 	import { reader, analyticsStore } from '$lib/stores';
+	import { isSectionRead, isSectionBookmarked } from '$lib/stores/reader';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
 
 	export let data: PageData;
+
+	// Subscribe to reader state for reactivity
+	$: progress = $reader.progress;
+	$: bookmarks = $reader.bookmarks;
 
 	// Mark section as read and start analytics session
 	onMount(() => {
@@ -25,8 +30,9 @@
 		reader.markAsRead(data.chapterSlug, data.sectionSlug);
 	}
 
-	$: isRead = reader.isRead(data.chapterSlug, data.sectionSlug);
-	$: isBookmarked = reader.isBookmarked(data.chapterSlug, data.sectionSlug);
+	// Reactive checks using subscribed state
+	$: isRead = isSectionRead(progress, data.chapterSlug, data.sectionSlug);
+	$: isBookmarked = isSectionBookmarked(bookmarks, data.chapterSlug, data.sectionSlug);
 
 	function toggleBookmark() {
 		reader.toggleBookmark(data.chapterSlug, data.sectionSlug);

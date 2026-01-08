@@ -7,12 +7,16 @@
 	import type { TableOfContents } from '$lib/types/content';
 	import { loadTableOfContents } from '$lib/utils/contentLoader';
 	import { reader } from '$lib/stores';
+	import { calcChapterProgress } from '$lib/stores/reader';
 
 	export let data: PageData;
 
 	let toc: TableOfContents | null = null;
 	let loading = true;
 	let error: string | null = null;
+
+	// Subscribe to reader progress for reactivity
+	$: progress = $reader.progress;
 
 	onMount(async () => {
 		try {
@@ -25,8 +29,9 @@
 		}
 	});
 
+	// Reactive helper using subscribed progress
 	function getChapterProgress(chapterSlug: string, totalSections: number): number {
-		return reader.getChapterProgress(chapterSlug, totalSections);
+		return calcChapterProgress(progress, chapterSlug, totalSections);
 	}
 </script>
 

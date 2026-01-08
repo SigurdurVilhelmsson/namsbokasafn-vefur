@@ -2,8 +2,9 @@
   KeyboardShortcutsModal - Shows all keyboard shortcuts with editing capability
 -->
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
+	import { browser } from '$app/environment';
 	import { settings, type ShortcutAction } from '$lib/stores/settings';
 	import {
 		getShortcuts,
@@ -122,22 +123,24 @@
 		}
 	}
 
-	// Prevent body scroll when modal is open
-	$: if (isOpen) {
-		document.body.style.overflow = 'hidden';
-	} else {
-		document.body.style.overflow = '';
+	// Prevent body scroll when modal is open (browser only)
+	$: if (browser) {
+		if (isOpen) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
+		}
 	}
 
 	onMount(() => {
 		window.addEventListener('keydown', handleGlobalKeyDown);
 		window.addEventListener('keydown', handleEditKeyDown, true);
-	});
 
-	onDestroy(() => {
-		window.removeEventListener('keydown', handleGlobalKeyDown);
-		window.removeEventListener('keydown', handleEditKeyDown, true);
-		document.body.style.overflow = '';
+		return () => {
+			window.removeEventListener('keydown', handleGlobalKeyDown);
+			window.removeEventListener('keydown', handleEditKeyDown, true);
+			document.body.style.overflow = '';
+		};
 	});
 </script>
 
