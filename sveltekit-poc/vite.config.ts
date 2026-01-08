@@ -123,5 +123,9 @@ export default defineConfig({
 	build: {
 		target: 'es2020',
 		minify: 'esbuild'
+	},
+	// Preview server configuration for SPA fallback
+	preview: {
+		port: 4173
 	}
 });
