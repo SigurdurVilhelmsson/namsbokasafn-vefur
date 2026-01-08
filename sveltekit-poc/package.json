@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "npm run copy-content && vite dev",
-    "build": "npm run copy-content && vite build",
+    "build": "npm run copy-content && npm run validate-content && vite build",
+    "build:no-validate": "npm run copy-content && vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
@@ -12,6 +13,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "copy-content": "node scripts/copy-content.js",
+    "validate-content": "node scripts/validate-content.js",
     "clean": "rm -rf build .svelte-kit static/content"
   },
   "devDependencies": {

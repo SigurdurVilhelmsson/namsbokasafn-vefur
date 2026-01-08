@@ -120,7 +120,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 
 ---
 
-## Milestone 2: Offline + Content Integrity (Gate) ☐→
+## Milestone 2: Offline + Content Integrity (Gate) ☑
 
 | Status | Item |
 | --- | --- |
@@ -129,7 +129,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | ☑ | Storage size estimate shown before download. |
 | ☑ | Offline read succeeds after download (TOC, markdown, images, math). |
 | ☑ | Cache strategy documented (precache vs runtime). See `docs/CACHE_STRATEGY.md`. |
-| ☐ | Content validation during build: broken refs, missing alt text, duplicate IDs. |
+| ☑ | Content validation during build: broken refs, missing alt text, duplicate IDs. |
 | ☑ | Production static file serving (not symlink). Uses `copy-content` script. |
 | ☑ | Normalize storage keys to `namsbokasafn:*` namespace with migration. |
 
@@ -286,9 +286,9 @@ Use these files for UX reference and data shape, not for copying code:
 |-----------|--------|------------|
 | 0: Scope | ☐→ | 75% |
 | 1: Core Reader | ☑ | 100% |
-| 2: Offline | ☐→ | 87% |
+| 2: Offline | ☑ | 100% |
 | 3: Testing | ☐ | 0% |
 | 4: Accessibility | ☐→ | 40% |
 | 5: V2 Features | ☐ | 0% (frozen) |
 
-**Overall v1 readiness: ~65%** (Milestone 1 complete, Milestone 2 at 87%)
+**Overall v1 readiness: ~70%** (Milestones 1-2 complete, ready for Milestone 3)
