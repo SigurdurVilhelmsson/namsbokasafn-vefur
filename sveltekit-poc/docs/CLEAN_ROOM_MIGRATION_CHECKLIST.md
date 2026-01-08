@@ -10,7 +10,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 - ☑ Done
 
 ## Current Focus
-**Milestone 2**: Offline/PWA setup and content integrity.
+**Milestone 3**: Quality & Testing - complete remaining items before polish phase.
 
 ---
 
@@ -74,6 +74,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | `src/components/layout/Layout.tsx` | `src/routes/+layout.svelte` | ☑ |
 | `src/components/layout/BookLayout.tsx` | `src/routes/[bookSlug]/+layout.svelte` | ☑ |
 | `src/components/reader/HomePage.tsx` | `src/routes/[bookSlug]/+page.svelte` | ☑ |
+| `src/components/reader/ChapterView.tsx` | `src/routes/[bookSlug]/kafli/[chapterSlug]/+page.svelte` | ☑ |
 | `src/components/reader/SectionView.tsx` | `src/routes/[bookSlug]/kafli/[chapterSlug]/[sectionSlug]/+page.svelte` | ☑ |
 | `src/components/reader/GlossaryPage.tsx` | `src/routes/[bookSlug]/ordabok/+page.svelte` | ☑ |
 | `src/components/reader/FlashcardsPage.tsx` | `src/routes/[bookSlug]/minniskort/+page.svelte` | ☑ |
@@ -117,6 +118,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | `src/lib/actions/equations.ts` | KaTeX copy/zoom interactivity | ☑ |
 | `src/lib/actions/practiceProblems.ts` | Practice problem reveal/check | ☑ |
 | `src/lib/actions/keyboardShortcuts.ts` | Multi-key sequence shortcuts | ☑ |
+| `src/lib/actions/figureViewer.ts` | Image lightbox for markdown images | ☑ |
 
 ---
 
@@ -150,7 +152,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | ☑ | Unit tests for markdown utils (KaTeX, directives). |
 | ☑ | Smoke test for reader flow (catalog → book → section → navigate). |
 | ☑ | Error handling for missing content. |
-| ☐ | Error handling for offline failures. |
+| ☑ | Error handling for offline failures. |
 | ☐ | PWA update flow tested (version prompt or auto-reload). |
 | ☐ | Sanitize/escape HTML in search result snippets. |
 
@@ -178,21 +180,21 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 
 ---
 
-## Milestone 5: V2 Features (Post-Launch) ☐
+## Milestone 5: V2 Features (Post-Launch) ☐→
 
 These are explicitly deferred. Do not start until Milestones 1-4 are complete.
 
 | Status | Item |
 | --- | --- |
-| ☐ | Annotations: highlight + note + delete + export. |
+| ☑ | Annotations: highlight + note + delete + export. |
 | ☐ | Highlight restore after refresh/navigation (stable anchors, not DOM-dependent). |
 | ☐ | TTS: Icelandic voice with fallback and controls. |
 | ☐ | Print stylesheet (@media print CSS). |
 | ☐ | Analytics dashboard. |
 | ☐ | Learning objectives tracking. |
 | ☐ | Bookmarks page. |
-| ☐ | Self-assessment modal. |
-| ☐ | Figure viewer (zoom modal). |
+| ☑ | Self-assessment modal (AdaptiveQuiz). |
+| ☑ | Figure viewer (zoom modal). |
 
 ---
 
@@ -288,8 +290,10 @@ Use these files for UX reference and data shape, not for copying code:
 | 0: Scope | ☐→ | 75% |
 | 1: Core Reader | ☑ | 100% |
 | 2: Offline | ☑ | 100% |
-| 3: Testing | ☐→ | 57% |
+| 3: Testing | ☐→ | 71% |
 | 4: Accessibility | ☐→ | 40% |
-| 5: V2 Features | ☐ | 0% (frozen) |
+| 5: V2 Features | ☐→ | 33% (3/9 done early) |
 
-**Overall v1 readiness: ~74%** (Milestones 1-2 complete, Milestone 3 in progress)
+**Overall v1 readiness: ~78%** (Milestones 1-2 complete, Milestone 3 at 71%)
+
+**Note:** Some V2 features (annotations, figure viewer, adaptive quiz) were implemented ahead of schedule. Focus should return to completing Milestone 3 before adding more features.
