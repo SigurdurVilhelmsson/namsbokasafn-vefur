@@ -125,8 +125,8 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | Status | Item |
 | --- | --- |
 | ☑ | PWA setup with `@vite-pwa/sveltekit` (workbox runtime caching, manifest, update prompts). |
-| ☐ | Explicit "Download book" UI with progress indicator. |
-| ☐ | Storage size estimate shown before download. |
+| ☑ | Explicit "Download book" UI with progress indicator. |
+| ☑ | Storage size estimate shown before download. |
 | ☐ | Offline read succeeds after download (TOC, markdown, images, math). |
 | ☐ | Cache strategy documented (precache vs runtime). |
 | ☐ | Content validation during build: broken refs, missing alt text, duplicate IDs. |
@@ -286,9 +286,9 @@ Use these files for UX reference and data shape, not for copying code:
 |-----------|--------|------------|
 | 0: Scope | ☐→ | 75% |
 | 1: Core Reader | ☑ | 100% |
-| 2: Offline | ☐→ | 12% |
+| 2: Offline | ☐→ | 37% |
 | 3: Testing | ☐ | 0% |
 | 4: Accessibility | ☐→ | 40% |
 | 5: V2 Features | ☐ | 0% (frozen) |
 
-**Overall v1 readiness: ~50%** (Milestone 1 complete, ready for Milestone 2)
+**Overall v1 readiness: ~55%** (Milestone 1 complete, Milestone 2 in progress)

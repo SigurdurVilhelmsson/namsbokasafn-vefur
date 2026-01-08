@@ -8,6 +8,7 @@
 	import { loadTableOfContents } from '$lib/utils/contentLoader';
 	import { reader } from '$lib/stores';
 	import { calcChapterProgress } from '$lib/stores/reader';
+	import DownloadBookButton from '$lib/components/DownloadBookButton.svelte';
 
 	export let data: PageData;
 
@@ -45,9 +46,10 @@
 		<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 			{data.book?.title ?? 'Bók'}
 		</h1>
-		<p class="text-gray-600 dark:text-gray-400">
+		<p class="text-gray-600 dark:text-gray-400 mb-4">
 			Veldu kafla til að byrja að lesa
 		</p>
+		<DownloadBookButton bookSlug={data.bookSlug} bookTitle={data.book?.title ?? ''} />
 	</div>
 
 	{#if loading}
