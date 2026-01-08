@@ -6,6 +6,7 @@
 	import { processMarkdown } from '$lib/utils/markdown';
 	import { practiceProblems } from '$lib/actions/practiceProblems';
 	import { equations } from '$lib/actions/equations';
+	import { figureViewer } from '$lib/actions/figureViewer';
 
 	// Import KaTeX CSS
 	import 'katex/dist/katex.min.css';
@@ -51,7 +52,7 @@
 		<p class="text-red-600 dark:text-red-400">{error}</p>
 	</div>
 {:else}
-	<div class="reading-content" use:practiceProblems use:equations>
+	<div class="reading-content" use:practiceProblems use:equations use:figureViewer>
 		{@html html}
 	</div>
 {/if}

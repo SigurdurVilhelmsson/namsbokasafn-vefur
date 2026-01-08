@@ -26,7 +26,7 @@ interface MasteryInfo {
 	lastAttempted?: string;
 }
 
-interface PracticeProblem {
+export interface PracticeProblem {
 	id: string;
 	content: string;
 	answer: string;
@@ -437,6 +437,97 @@ function createQuizStore() {
 			const { practiceProblemProgress } = get({ subscribe });
 			const problems = filterItemsByChapter(Object.values(practiceProblemProgress), chapterSlug);
 			return calculateProgress(problems);
+		},
+
+		// Get adaptive problems based on mastery - prioritize problems that need work
+		getAdaptiveProblems: (chapterSlug?: string, maxProblems: number = 5): PracticeProblem[] => {
+			const { practiceProblemProgress } = get({ subscribe });
+			let problems = Object.values(practiceProblemProgress);
+
+			// Filter by chapter if specified
+			if (chapterSlug) {
+				problems = filterItemsByChapter(problems, chapterSlug);
+			}
+
+			// Sort by priority: novice > learning > practicing > proficient > mastered
+			// Also consider time since last attempt (older = higher priority)
+			const priorityOrder: Record<MasteryLevel, number> = {
+				novice: 0,
+				learning: 1,
+				practicing: 2,
+				proficient: 3,
+				mastered: 4
+			};
+
+			const scored = problems.map((problem) => {
+				const successRate =
+					problem.attempts > 0
+						? Math.round((problem.successfulAttempts / problem.attempts) * 100)
+						: 0;
+				const level = calculateMasteryLevel(successRate, problem.attempts);
+				const daysSinceAttempt = problem.lastAttempted
+					? (Date.now() - new Date(problem.lastAttempted).getTime()) / (1000 * 60 * 60 * 24)
+					: 999;
+
+				return {
+					problem,
+					priority: priorityOrder[level],
+					daysSinceAttempt
+				};
+			});
+
+			// Sort: lower priority first, then by days since attempt (older first)
+			scored.sort((a, b) => {
+				if (a.priority !== b.priority) return a.priority - b.priority;
+				return b.daysSinceAttempt - a.daysSinceAttempt;
+			});
+
+			return scored.slice(0, maxProblems).map((s) => s.problem);
+		},
+
+		// Get problems due for review (spaced repetition style)
+		getProblemsForReview: (maxProblems: number = 5): PracticeProblem[] => {
+			const { practiceProblemProgress } = get({ subscribe });
+			const problems = Object.values(practiceProblemProgress);
+
+			// Calculate review intervals based on mastery
+			const reviewIntervals: Record<MasteryLevel, number> = {
+				novice: 0, // Always review
+				learning: 1, // Review after 1 day
+				practicing: 3, // Review after 3 days
+				proficient: 7, // Review after 7 days
+				mastered: 14 // Review after 14 days
+			};
+
+			const now = Date.now();
+			const dueForReview = problems.filter((problem) => {
+				if (!problem.lastAttempted) return true;
+
+				const successRate =
+					problem.attempts > 0
+						? Math.round((problem.successfulAttempts / problem.attempts) * 100)
+						: 0;
+				const level = calculateMasteryLevel(successRate, problem.attempts);
+				const daysSinceAttempt =
+					(now - new Date(problem.lastAttempted).getTime()) / (1000 * 60 * 60 * 24);
+
+				return daysSinceAttempt >= reviewIntervals[level];
+			});
+
+			// Sort by urgency (most overdue first)
+			dueForReview.sort((a, b) => {
+				const aTime = a.lastAttempted ? new Date(a.lastAttempted).getTime() : 0;
+				const bTime = b.lastAttempted ? new Date(b.lastAttempted).getTime() : 0;
+				return aTime - bTime;
+			});
+
+			return dueForReview.slice(0, maxProblems);
+		},
+
+		// Get all problems for a chapter
+		getProblemsForChapter: (chapterSlug: string): PracticeProblem[] => {
+			const { practiceProblemProgress } = get({ subscribe });
+			return filterItemsByChapter(Object.values(practiceProblemProgress), chapterSlug);
 		},
 
 		reset: () => set(defaultState)
