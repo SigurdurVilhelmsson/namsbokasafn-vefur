@@ -229,6 +229,7 @@ Ideas for post-v2. Not scheduled—evaluate based on user feedback.
 - **Indexed search with filters**: Filter by chapter, section, or content type.
 
 ### P2 - Medium Value
+- **Optional auth with cross-device sync**: Login (Google/Microsoft) to sync progress, flashcard SRS state, and bookmarks across devices. App remains fully functional without login. Estimated 80-100 hours. Key challenges: conflict resolution for offline edits, first-login data merge. Recommended stack: Supabase or Firebase.
 - **Auto-generated flashcards**: Create cards from definitions and key concepts.
 - **Chapter recaps**: Quick summaries and quizzes tied to learning objectives.
 - **"Next recommended section"**: Suggest sections based on progress and objectives.
