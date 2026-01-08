@@ -4,7 +4,17 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
-	import { settings, fontSize, fontFamily, type FontSize, type FontFamily } from '$lib/stores';
+	import {
+		settings,
+		fontSize,
+		fontFamily,
+		lineHeight,
+		lineWidth,
+		type FontSize,
+		type FontFamily,
+		type LineHeight,
+		type LineWidth
+	} from '$lib/stores';
 
 	export let isOpen = false;
 
@@ -17,9 +27,22 @@
 		{ value: 'xlarge', label: 'Mjög stórt' }
 	];
 
-	const fontFamilies: { value: FontFamily; label: string }[] = [
-		{ value: 'serif', label: 'Serif (lestur)' },
-		{ value: 'sans', label: 'Sans-serif (nútímalegt)' }
+	const fontFamilies: { value: FontFamily; label: string; description: string }[] = [
+		{ value: 'serif', label: 'Serif', description: 'Klassískt letur fyrir lestur' },
+		{ value: 'sans', label: 'Sans-serif', description: 'Nútímalegt letur' },
+		{ value: 'opendyslexic', label: 'OpenDyslexic', description: 'Letur hannað fyrir lesblinda' }
+	];
+
+	const lineHeights: { value: LineHeight; label: string }[] = [
+		{ value: 'normal', label: 'Venjulegt' },
+		{ value: 'relaxed', label: 'Rýmra' },
+		{ value: 'loose', label: 'Rúmt' }
+	];
+
+	const lineWidths: { value: LineWidth; label: string }[] = [
+		{ value: 'narrow', label: 'Þröngt' },
+		{ value: 'medium', label: 'Miðlungs' },
+		{ value: 'wide', label: 'Breitt' }
 	];
 
 	let modalRef: HTMLDivElement;
@@ -104,11 +127,11 @@
 						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Leturstærð
 						</label>
-						<div class="flex gap-2">
+						<div class="grid grid-cols-2 gap-2 sm:flex">
 							{#each fontSizes as size}
 								<button
 									on:click={() => settings.setFontSize(size.value)}
-									class="flex-1 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors {$fontSize === size.value
+									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$fontSize === size.value
 										? 'bg-[var(--accent-color)] text-white shadow-sm'
 										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
 								>
@@ -138,14 +161,52 @@
 										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-color)] focus:ring-[var(--accent-color)]"
 									/>
 									<div>
-										<span class="text-[var(--text-primary)] {family.value === 'serif' ? 'font-serif font-medium' : 'font-sans font-medium'}">
+										<span class="text-[var(--text-primary)] font-medium {family.value === 'serif' ? 'font-serif' : family.value === 'opendyslexic' ? 'font-opendyslexic' : 'font-sans'}">
 											{family.label}
 										</span>
-										<p class="mt-0.5 text-sm text-[var(--text-secondary)] {family.value === 'serif' ? 'font-serif' : 'font-sans'}">
-											Dæmi: Efnafræði
+										<p class="mt-0.5 text-sm text-[var(--text-secondary)]">
+											{family.description}
 										</p>
 									</div>
 								</label>
+							{/each}
+						</div>
+					</div>
+
+					<!-- Line Height -->
+					<div>
+						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
+							Línubil
+						</label>
+						<div class="grid grid-cols-3 gap-2 sm:flex">
+							{#each lineHeights as height}
+								<button
+									on:click={() => settings.setLineHeight(height.value)}
+									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineHeight === height.value
+										? 'bg-[var(--accent-color)] text-white shadow-sm'
+										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
+								>
+									{height.label}
+								</button>
+							{/each}
+						</div>
+					</div>
+
+					<!-- Line Width -->
+					<div>
+						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
+							Línubreidd
+						</label>
+						<div class="grid grid-cols-3 gap-2 sm:flex">
+							{#each lineWidths as width}
+								<button
+									on:click={() => settings.setLineWidth(width.value)}
+									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineWidth === width.value
+										? 'bg-[var(--accent-color)] text-white shadow-sm'
+										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
+								>
+									{width.label}
+								</button>
 							{/each}
 						</div>
 					</div>
@@ -156,11 +217,12 @@
 							Forskoðun
 						</label>
 						<div
-							class="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 font-size-{$fontSize} {$fontFamily === 'serif' ? 'font-serif' : 'font-sans'}"
+							class="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 font-size-{$fontSize} {$fontFamily === 'opendyslexic' ? 'font-opendyslexic' : $fontFamily === 'serif' ? 'font-serif' : 'font-sans'}"
+							style="max-width: var(--line-width-{$lineWidth})"
 						>
 							<p
-								class="leading-relaxed text-[var(--text-primary)]"
-								style="font-size: var(--font-size-base)"
+								class="text-[var(--text-primary)]"
+								style="font-size: var(--font-size-base); line-height: var(--line-height-{$lineHeight})"
 							>
 								Efnafræði er vísindin um efni og breytingar þess. Hún fjallar um
 								uppbyggingu, eiginleika og hegðun efna, svo og orkubreytingar sem

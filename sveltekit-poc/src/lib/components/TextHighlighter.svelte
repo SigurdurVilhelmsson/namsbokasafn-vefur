@@ -2,10 +2,14 @@
   TextHighlighter - Wrapper that enables text highlighting and annotation
 -->
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { annotationStore } from '$lib/stores/annotation';
+	import { glossaryStore } from '$lib/stores/glossary';
 	import SelectionPopup from './SelectionPopup.svelte';
 	import NoteModal from './NoteModal.svelte';
+	import GlossaryTooltip from './GlossaryTooltip.svelte';
 	import type { HighlightColor, TextRange, TextSelection } from '$lib/types/annotation';
+	import type { GlossaryTerm } from '$lib/types/content';
 
 	export let bookSlug: string;
 	export let chapterSlug: string;
@@ -14,11 +18,19 @@
 	let containerElement: HTMLDivElement;
 	let selection: TextSelection | null = null;
 	let showNoteModal = false;
+	let showGlossaryTooltip = false;
+	let glossaryTerm: GlossaryTerm | null = null;
+	let glossaryPosition: { x: number; y: number } = { x: 0, y: 0 };
 	let pendingHighlight: {
 		text: string;
 		range: TextRange;
 		color: HighlightColor;
 	} | null = null;
+
+	// Load glossary on mount
+	onMount(() => {
+		glossaryStore.load(bookSlug);
+	});
 
 	/**
 	 * Get a CSS selector path to a DOM node for serialization
@@ -237,6 +249,38 @@
 		selection = null;
 		window.getSelection()?.removeAllRanges();
 	}
+
+	/**
+	 * Handle glossary lookup action
+	 */
+	function handleGlossaryLookup() {
+		if (!selection) return;
+
+		const term = glossaryStore.lookup(selection.text);
+		if (term) {
+			glossaryTerm = term;
+			glossaryPosition = {
+				x: selection.position.x,
+				y: selection.position.y + 40 // Position below the selection
+			};
+			showGlossaryTooltip = true;
+		} else {
+			// No match found - could show a "not found" message or navigate to glossary search
+			window.location.href = `/${bookSlug}/ordabok?search=${encodeURIComponent(selection.text)}`;
+		}
+
+		// Clear selection popup but keep text selected for context
+		selection = null;
+	}
+
+	/**
+	 * Close glossary tooltip
+	 */
+	function handleCloseGlossaryTooltip() {
+		showGlossaryTooltip = false;
+		glossaryTerm = null;
+		window.getSelection()?.removeAllRanges();
+	}
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -251,7 +295,18 @@
 		onHighlight={handleHighlight}
 		onAddNote={handleAddNote}
 		onCreateFlashcard={handleCreateFlashcard}
+		onGlossaryLookup={handleGlossaryLookup}
 		onClose={handleClosePopup}
+	/>
+{/if}
+
+<!-- Glossary tooltip -->
+{#if showGlossaryTooltip && glossaryTerm}
+	<GlossaryTooltip
+		term={glossaryTerm}
+		position={glossaryPosition}
+		{bookSlug}
+		onClose={handleCloseGlossaryTooltip}
 	/>
 {/if}
 

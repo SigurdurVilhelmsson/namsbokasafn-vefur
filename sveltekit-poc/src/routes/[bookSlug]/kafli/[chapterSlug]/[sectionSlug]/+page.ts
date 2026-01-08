@@ -2,7 +2,8 @@ import type { PageLoad } from './$types';
 import {
 	loadSectionContent,
 	loadTableOfContents,
-	findSectionBySlug
+	findSectionBySlug,
+	ContentLoadError
 } from '$lib/utils/contentLoader';
 import { error } from '@sveltejs/kit';
 import type { NavigationContext } from '$lib/types/content';
@@ -73,10 +74,18 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			navigation,
 			bookSlug,
 			chapterSlug,
-			sectionSlug
+			sectionSlug,
+			chapterNumber: chapterIndex + 1
 		};
 	} catch (e) {
 		console.error('Failed to load section:', e);
+
+		// Handle offline errors with specific messaging
+		if (e instanceof ContentLoadError && e.isOffline) {
+			throw error(503, {
+				message: e.message
+			});
+		}
 
 		// Provide more specific error message
 		const errorMessage =

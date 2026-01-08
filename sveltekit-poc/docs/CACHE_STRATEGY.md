@@ -230,6 +230,96 @@ caches.open('book-content').then(cache =>
 caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
 ```
 
+## PWA Update Flow
+
+The app uses `registerType: 'prompt'` to show users a notification when a new version is available.
+
+### Update Flow
+
+```
+1. User visits site
+2. Service worker checks for updates (on load + every hour)
+3. If new version found:
+   - New SW installs in background
+   - needRefresh store triggers update prompt
+   - User sees "Ný útgáfa er tilbúin!" notification
+4. User clicks "Uppfæra núna":
+   - updateServiceWorker() is called
+   - New SW activates
+   - Page reloads with new version
+5. If user clicks "Seinna":
+   - Prompt dismisses
+   - Update available on next reload
+```
+
+### Update Prompt Component
+
+The `PWAUpdater.svelte` component handles:
+
+- **Offline ready notification** - Shows when app is first cached (auto-dismisses after 5s)
+- **Update available prompt** - Shows when new version is ready
+  - "Uppfæra núna" button - Activates new SW and reloads
+  - "Seinna" button - Dismisses prompt
+- **Error handling** - Shows error message if update fails
+- **Loading state** - Shows spinner during update
+
+### Testing the Update Flow
+
+#### Automated (E2E)
+
+```bash
+npm run test:e2e -- e2e/pwa.spec.ts
+```
+
+Tests verify:
+- Web manifest is valid and accessible
+- Service worker registers successfully
+- Manifest link and theme-color meta tags present
+- PWA infrastructure is in place
+
+#### Manual Testing
+
+1. **Build and serve production version:**
+   ```bash
+   npm run build
+   npm run preview
+   ```
+
+2. **Initial visit (offline ready):**
+   - Open http://localhost:4173
+   - Watch for green "Forritið er tilbúið til notkunar án nettengingar" notification
+   - Notification should auto-dismiss after 5 seconds
+
+3. **Simulate update:**
+   - Make a small change to any source file
+   - Rebuild: `npm run build`
+   - In browser DevTools → Application → Service Workers
+   - Click "Update" or wait for automatic check
+   - Blue "Ný útgáfa er tilbúin!" prompt should appear
+
+4. **Test update action:**
+   - Click "Uppfæra núna"
+   - Page should reload with new version
+   - Verify change is visible
+
+5. **Test dismiss:**
+   - Trigger update again (rebuild + SW update)
+   - Click "Seinna"
+   - Prompt should disappear
+   - Reload page - should get new version
+
+6. **Test offline after update:**
+   - Go offline (DevTools → Network → Offline)
+   - Navigate around the app
+   - Verify cached content loads correctly
+
+### Chrome DevTools Shortcuts
+
+- **Application → Service Workers** - View SW status, trigger manual update
+- **Application → Manifest** - Verify manifest loads correctly
+- **Application → Cache Storage** - Inspect cached files
+- **Lighthouse → PWA audit** - Verify PWA best practices
+
 ## Future Improvements
 
 1. **Background sync** - Queue failed requests when offline, replay when online

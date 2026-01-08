@@ -3,7 +3,7 @@
 -->
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { settings, fontSize, fontFamily } from '$lib/stores';
+	import { settings, fontSize, fontFamily, lineHeight, lineWidth } from '$lib/stores';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import FocusModeNav from '$lib/components/layout/FocusModeNav.svelte';
@@ -37,9 +37,11 @@
 </script>
 
 <div
-	class="min-h-screen font-size-{$fontSize} {$fontFamily === 'sans'
-		? 'font-sans'
-		: 'font-serif'} {focusMode ? 'focus-mode' : ''}"
+	class="min-h-screen font-size-{$fontSize} line-height-{$lineHeight} line-width-{$lineWidth} {$fontFamily === 'opendyslexic'
+		? 'font-opendyslexic'
+		: $fontFamily === 'sans'
+			? 'font-sans'
+			: 'font-serif'} {focusMode ? 'focus-mode' : ''}"
 	use:keyboardShortcuts={{
 		bookSlug,
 		onToggleFocusMode: toggleFocusMode,
