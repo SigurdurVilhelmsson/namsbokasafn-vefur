@@ -8,11 +8,15 @@ export {
 	theme,
 	fontSize,
 	fontFamily,
+	lineHeight,
+	lineWidth,
 	sidebarOpen,
 	DEFAULT_SHORTCUTS,
 	type Theme,
 	type FontSize,
 	type FontFamily,
+	type LineHeight,
+	type LineWidth,
 	type ShortcutAction,
 	type ShortcutPreferences
 } from './settings';
@@ -78,3 +82,11 @@ export {
 	type BookDownloadState,
 	type DownloadProgress
 } from './offline';
+
+// Glossary
+export {
+	glossaryStore,
+	glossaryTerms,
+	glossaryLoading,
+	glossaryError
+} from './glossary';

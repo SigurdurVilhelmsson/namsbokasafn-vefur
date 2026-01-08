@@ -7,11 +7,16 @@
 	import { practiceProblems } from '$lib/actions/practiceProblems';
 	import { equations } from '$lib/actions/equations';
 	import { figureViewer } from '$lib/actions/figureViewer';
+	import { crossReferences } from '$lib/actions/crossReferences';
 
 	// Import KaTeX CSS
 	import 'katex/dist/katex.min.css';
 
 	export let content: string;
+	export let bookSlug: string = '';
+	export let chapterSlug: string = '';
+	export let sectionSlug: string = '';
+	export let chapterNumber: number = 1;
 
 	let html = '';
 	let loading = true;
@@ -52,7 +57,13 @@
 		<p class="text-red-600 dark:text-red-400">{error}</p>
 	</div>
 {:else}
-	<div class="reading-content" use:practiceProblems use:equations use:figureViewer>
+	<div
+		class="reading-content"
+		use:practiceProblems
+		use:equations
+		use:figureViewer
+		use:crossReferences={{ bookSlug, chapterSlug, sectionSlug, chapterNumber, content }}
+	>
 		{@html html}
 	</div>
 {/if}

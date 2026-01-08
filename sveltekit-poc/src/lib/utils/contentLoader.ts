@@ -3,8 +3,31 @@
  */
 
 import type { TableOfContents, SectionContent, DifficultyLevel } from '$lib/types/content';
+import { browser } from '$app/environment';
 
 const WORDS_PER_MINUTE = 180;
+
+/**
+ * Custom error for content loading failures
+ */
+export class ContentLoadError extends Error {
+	readonly isOffline: boolean;
+	readonly statusCode: number;
+
+	constructor(message: string, statusCode: number = 0, isOffline: boolean = false) {
+		super(message);
+		this.name = 'ContentLoadError';
+		this.statusCode = statusCode;
+		this.isOffline = isOffline;
+	}
+}
+
+/**
+ * Check if we're likely offline
+ */
+function checkOffline(): boolean {
+	return browser && !navigator.onLine;
+}
 
 /**
  * Calculate reading time from markdown content
@@ -44,30 +67,69 @@ function parseDifficulty(value: unknown): DifficultyLevel | undefined {
  * Load table of contents for a book
  */
 export async function loadTableOfContents(
-  bookSlug: string,
-  fetchFn: typeof fetch = fetch
+	bookSlug: string,
+	fetchFn: typeof fetch = fetch
 ): Promise<TableOfContents> {
-  const response = await fetchFn(`/content/${bookSlug}/toc.json`);
-  if (!response.ok) {
-    throw new Error('Gat ekki hlaðið efnisyfirliti');
-  }
-  return await response.json();
+	try {
+		const response = await fetchFn(`/content/${bookSlug}/toc.json`);
+		if (!response.ok) {
+			const isOffline = checkOffline();
+			throw new ContentLoadError(
+				isOffline
+					? 'Gat ekki hlaðið efnisyfirliti. Þú ert án nettengingar.'
+					: 'Gat ekki hlaðið efnisyfirliti',
+				response.status,
+				isOffline
+			);
+		}
+		return await response.json();
+	} catch (e) {
+		if (e instanceof ContentLoadError) throw e;
+		const isOffline = checkOffline();
+		throw new ContentLoadError(
+			isOffline
+				? 'Gat ekki hlaðið efnisyfirliti. Þú ert án nettengingar.'
+				: 'Gat ekki hlaðið efnisyfirliti',
+			0,
+			isOffline
+		);
+	}
 }
 
 /**
  * Load section content for a book
  */
 export async function loadSectionContent(
-  bookSlug: string,
-  chapterSlug: string,
-  sectionFile: string,
-  fetchFn: typeof fetch = fetch
+	bookSlug: string,
+	chapterSlug: string,
+	sectionFile: string,
+	fetchFn: typeof fetch = fetch
 ): Promise<SectionContent> {
-  const response = await fetchFn(`/content/${bookSlug}/chapters/${chapterSlug}/${sectionFile}`);
-  if (!response.ok) {
-    throw new Error(`Gat ekki hlaðið kafla: ${chapterSlug}/${sectionFile}`);
-  }
-  const markdown = await response.text();
+	let response: Response;
+	try {
+		response = await fetchFn(`/content/${bookSlug}/chapters/${chapterSlug}/${sectionFile}`);
+	} catch (e) {
+		const isOffline = checkOffline();
+		throw new ContentLoadError(
+			isOffline
+				? 'Gat ekki hlaðið kafla. Þú ert án nettengingar og efnið er ekki í skyndiminni.'
+				: `Gat ekki hlaðið kafla: ${chapterSlug}/${sectionFile}`,
+			0,
+			isOffline
+		);
+	}
+
+	if (!response.ok) {
+		const isOffline = checkOffline();
+		throw new ContentLoadError(
+			isOffline
+				? 'Gat ekki hlaðið kafla. Þú ert án nettengingar og efnið er ekki í skyndiminni.'
+				: `Gat ekki hlaðið kafla: ${chapterSlug}/${sectionFile}`,
+			response.status,
+			isOffline
+		);
+	}
+	const markdown = await response.text();
 
   const { metadata, content } = parseFrontmatter(markdown);
 

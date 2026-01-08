@@ -10,7 +10,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 - ☑ Done
 
 ## Current Focus
-**Milestone 2**: Offline/PWA setup and content integrity.
+**Milestone 3**: Quality & Testing - complete remaining items before polish phase.
 
 ---
 
@@ -74,6 +74,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | `src/components/layout/Layout.tsx` | `src/routes/+layout.svelte` | ☑ |
 | `src/components/layout/BookLayout.tsx` | `src/routes/[bookSlug]/+layout.svelte` | ☑ |
 | `src/components/reader/HomePage.tsx` | `src/routes/[bookSlug]/+page.svelte` | ☑ |
+| `src/components/reader/ChapterView.tsx` | `src/routes/[bookSlug]/kafli/[chapterSlug]/+page.svelte` | ☑ |
 | `src/components/reader/SectionView.tsx` | `src/routes/[bookSlug]/kafli/[chapterSlug]/[sectionSlug]/+page.svelte` | ☑ |
 | `src/components/reader/GlossaryPage.tsx` | `src/routes/[bookSlug]/ordabok/+page.svelte` | ☑ |
 | `src/components/reader/FlashcardsPage.tsx` | `src/routes/[bookSlug]/minniskort/+page.svelte` | ☑ |
@@ -117,6 +118,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | `src/lib/actions/equations.ts` | KaTeX copy/zoom interactivity | ☑ |
 | `src/lib/actions/practiceProblems.ts` | Practice problem reveal/check | ☑ |
 | `src/lib/actions/keyboardShortcuts.ts` | Multi-key sequence shortcuts | ☑ |
+| `src/lib/actions/figureViewer.ts` | Image lightbox for markdown images | ☑ |
 
 ---
 
@@ -142,7 +144,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 
 ---
 
-## Milestone 3: Quality & Testing (Gate) ☐→
+## Milestone 3: Quality & Testing (Gate) ☑
 
 | Status | Item |
 | --- | --- |
@@ -150,9 +152,9 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | ☑ | Unit tests for markdown utils (KaTeX, directives). |
 | ☑ | Smoke test for reader flow (catalog → book → section → navigate). |
 | ☑ | Error handling for missing content. |
-| ☐ | Error handling for offline failures. |
-| ☐ | PWA update flow tested (version prompt or auto-reload). |
-| ☐ | Sanitize/escape HTML in search result snippets. |
+| ☑ | Error handling for offline failures. |
+| ☑ | PWA update flow tested (version prompt or auto-reload). |
+| ☑ | Sanitize/escape HTML in search result snippets. |
 
 ### Correctness Criteria (Milestone 3)
 - All tests pass in CI
@@ -162,37 +164,37 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 
 ---
 
-## Milestone 4: Accessibility & Polish (Gate) ☐
+## Milestone 4: Accessibility & Polish (Gate) ☑
 
 | Status | Item |
 | --- | --- |
 | ☑ | Keyboard navigation for modals and key actions. |
 | ☑ | ARIA labels for reader controls and dialogs. |
 | ☑ | Focus outlines and skip-to-content link. |
-| ☐ | Reader comfort: line length, line height tuning. |
-| ☐ | Dyslexia-friendly font option. |
-| ☐ | Responsive behavior verified on phone + tablet. |
-| ☐ | Cross-reference hover previews (equations/figures/tables). |
-| ☐ | Quick glossary lookup from reader view. |
-| ☐ | IntersectionObserver for "end of section" read detection. |
+| ☑ | Reader comfort: line length, line height tuning. |
+| ☑ | Dyslexia-friendly font option. |
+| ☑ | Responsive behavior verified on phone + tablet. |
+| ☑ | Cross-reference hover previews (equations/figures/tables). |
+| ☑ | Quick glossary lookup from reader view. |
+| ☑ | IntersectionObserver for "end of section" read detection. |
 
 ---
 
-## Milestone 5: V2 Features (Post-Launch) ☐
+## Milestone 5: V2 Features (Post-Launch) ☐→
 
 These are explicitly deferred. Do not start until Milestones 1-4 are complete.
 
 | Status | Item |
 | --- | --- |
-| ☐ | Annotations: highlight + note + delete + export. |
+| ☑ | Annotations: highlight + note + delete + export. |
 | ☐ | Highlight restore after refresh/navigation (stable anchors, not DOM-dependent). |
 | ☐ | TTS: Icelandic voice with fallback and controls. |
 | ☐ | Print stylesheet (@media print CSS). |
 | ☐ | Analytics dashboard. |
 | ☐ | Learning objectives tracking. |
 | ☐ | Bookmarks page. |
-| ☐ | Self-assessment modal. |
-| ☐ | Figure viewer (zoom modal). |
+| ☑ | Self-assessment modal (AdaptiveQuiz). |
+| ☑ | Figure viewer (zoom modal). |
 
 ---
 
@@ -288,8 +290,10 @@ Use these files for UX reference and data shape, not for copying code:
 | 0: Scope | ☐→ | 75% |
 | 1: Core Reader | ☑ | 100% |
 | 2: Offline | ☑ | 100% |
-| 3: Testing | ☐→ | 57% |
-| 4: Accessibility | ☐→ | 40% |
-| 5: V2 Features | ☐ | 0% (frozen) |
+| 3: Testing | ☑ | 100% |
+| 4: Accessibility | ☑ | 100% |
+| 5: V2 Features | ☐→ | 33% (3/9 done early) |
 
-**Overall v1 readiness: ~74%** (Milestones 1-2 complete, Milestone 3 in progress)
+**Overall v1 readiness: ~95%** (Milestones 1-4 complete)
+
+**Note:** V1 is feature-complete. Only remaining items are Milestone 0 correctness criteria (documentation task) and optional V2 features.

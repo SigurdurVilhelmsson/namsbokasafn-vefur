@@ -1,3 +1,28 @@
+/* OpenDyslexic font for dyslexia-friendly reading */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Italic.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* Icelandic font support and custom properties */
 :root {
   /* Font sizes */
@@ -8,8 +33,13 @@
 
   /* Line heights */
   --line-height-normal: 1.6;
-  --line-height-relaxed: 1.7;
-  --line-height-loose: 1.8;
+  --line-height-relaxed: 1.8;
+  --line-height-loose: 2.0;
+
+  /* Line widths (max-width for reading content) */
+  --line-width-narrow: 38rem;
+  --line-width-medium: 48rem;
+  --line-width-wide: 60rem;
 }
 
 /* Light theme (default) */
@@ -55,6 +85,70 @@ body {
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ========================================== */
+/* FONT FAMILY CLASSES                        */
+/* ========================================== */
+
+.font-opendyslexic {
+  font-family: 'OpenDyslexic', Arial, sans-serif;
+}
+
+.font-opendyslexic h1,
+.font-opendyslexic h2,
+.font-opendyslexic h3,
+.font-opendyslexic h4,
+.font-opendyslexic h5,
+.font-opendyslexic h6 {
+  font-family: 'OpenDyslexic', Arial, sans-serif;
+}
+
+/* ========================================== */
+/* LINE HEIGHT CLASSES                        */
+/* ========================================== */
+
+.line-height-normal .reading-content {
+  line-height: var(--line-height-normal);
+}
+
+.line-height-normal .reading-content p,
+.line-height-normal .reading-content li {
+  line-height: var(--line-height-normal);
+}
+
+.line-height-relaxed .reading-content {
+  line-height: var(--line-height-relaxed);
+}
+
+.line-height-relaxed .reading-content p,
+.line-height-relaxed .reading-content li {
+  line-height: var(--line-height-relaxed);
+}
+
+.line-height-loose .reading-content {
+  line-height: var(--line-height-loose);
+}
+
+.line-height-loose .reading-content p,
+.line-height-loose .reading-content li {
+  line-height: var(--line-height-loose);
+}
+
+/* ========================================== */
+/* LINE WIDTH CLASSES                         */
+/* ========================================== */
+
+.line-width-narrow .reading-content {
+  max-width: var(--line-width-narrow);
+}
+
+.line-width-medium .reading-content {
+  max-width: var(--line-width-medium);
+}
+
+.line-width-wide .reading-content {
+  max-width: var(--line-width-wide);
 }
 
 /* Container */
@@ -942,4 +1036,104 @@ body {
   font-size: 0.875rem;
   color: var(--text-secondary);
   text-align: center;
+}
+
+/* ========================================== */
+/* CROSS-REFERENCES                          */
+/* ========================================== */
+
+.reading-content a.cross-reference {
+  color: var(--accent-color);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--accent-color);
+  padding-bottom: 1px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.reading-content a.cross-reference:hover {
+  color: var(--accent-hover);
+  border-bottom-style: solid;
+}
+
+.reading-content a.cross-reference:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ========================================== */
+/* RESPONSIVE STYLES                          */
+/* ========================================== */
+
+/* Mobile-first adjustments */
+@media (max-width: 640px) {
+  /* Reading content padding on mobile */
+  .reading-content {
+    padding: 1.5rem 1rem;
+  }
+
+  /* Smaller headings on mobile */
+  .reading-content h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .reading-content h2 {
+    font-size: 1.25rem;
+    margin-top: 2rem;
+  }
+
+  .reading-content h3 {
+    font-size: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  /* Content blocks stack on mobile */
+  .content-block {
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+  }
+
+  .content-block-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* Tables scroll horizontally */
+  .reading-content table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* Equation actions always visible on touch */
+  .equation-wrapper .equation-actions {
+    opacity: 1;
+  }
+
+  /* Figure lightbox toolbar */
+  .figure-lightbox-zoom-level {
+    display: none;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .reading-content {
+    padding: 2rem 1.25rem;
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (pointer: coarse) {
+  /* Ensure minimum 44px tap targets */
+  button, a, [role="button"] {
+    min-height: 44px;
+  }
+
+  /* Larger touch targets for navigation links */
+  .nav-link {
+    padding: 0.75rem 1rem;
+  }
 }
