@@ -176,7 +176,7 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 | ☐ | Responsive behavior verified on phone + tablet. |
 | ☐ | Cross-reference hover previews (equations/figures/tables). |
 | ☐ | Quick glossary lookup from reader view. |
-| ☐ | IntersectionObserver for "end of section" read detection. |
+| ☑ | IntersectionObserver for "end of section" read detection. |
 
 ---
 
@@ -291,7 +291,7 @@ Use these files for UX reference and data shape, not for copying code:
 | 1: Core Reader | ☑ | 100% |
 | 2: Offline | ☑ | 100% |
 | 3: Testing | ☑ | 100% |
-| 4: Accessibility | ☐→ | 56% |
+| 4: Accessibility | ☐→ | 67% |
 | 5: V2 Features | ☐→ | 33% (3/9 done early) |
 
 **Overall v1 readiness: ~85%** (Milestones 1-3 complete)
