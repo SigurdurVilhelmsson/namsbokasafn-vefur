@@ -120,11 +120,11 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 
 ---
 
-## Milestone 2: Offline + Content Integrity (Gate) ☐
+## Milestone 2: Offline + Content Integrity (Gate) ☐→
 
 | Status | Item |
 | --- | --- |
-| ☐ | PWA setup with `@vite-pwa/sveltekit`. |
+| ☑ | PWA setup with `@vite-pwa/sveltekit`. |
 | ☐ | Explicit "Download book" UI with progress indicator. |
 | ☐ | Storage size estimate shown before download. |
 | ☐ | Offline read succeeds after download (TOC, markdown, images, math). |
@@ -286,7 +286,7 @@ Use these files for UX reference and data shape, not for copying code:
 |-----------|--------|------------|
 | 0: Scope | ☐→ | 75% |
 | 1: Core Reader | ☑ | 100% |
-| 2: Offline | ☐ | 0% |
+| 2: Offline | ☐→ | 12% |
 | 3: Testing | ☐ | 0% |
 | 4: Accessibility | ☐→ | 40% |
 | 5: V2 Features | ☐ | 0% (frozen) |
