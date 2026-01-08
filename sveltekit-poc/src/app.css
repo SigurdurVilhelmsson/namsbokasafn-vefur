@@ -1,3 +1,28 @@
+/* OpenDyslexic font for dyslexia-friendly reading */
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'OpenDyslexic';
+  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Italic.woff') format('woff');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* Icelandic font support and custom properties */
 :root {
   /* Font sizes */
@@ -8,8 +33,13 @@
 
   /* Line heights */
   --line-height-normal: 1.6;
-  --line-height-relaxed: 1.7;
-  --line-height-loose: 1.8;
+  --line-height-relaxed: 1.8;
+  --line-height-loose: 2.0;
+
+  /* Line widths (max-width for reading content) */
+  --line-width-narrow: 38rem;
+  --line-width-medium: 48rem;
+  --line-width-wide: 60rem;
 }
 
 /* Light theme (default) */
@@ -55,6 +85,70 @@ body {
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
   transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ========================================== */
+/* FONT FAMILY CLASSES                        */
+/* ========================================== */
+
+.font-opendyslexic {
+  font-family: 'OpenDyslexic', Arial, sans-serif;
+}
+
+.font-opendyslexic h1,
+.font-opendyslexic h2,
+.font-opendyslexic h3,
+.font-opendyslexic h4,
+.font-opendyslexic h5,
+.font-opendyslexic h6 {
+  font-family: 'OpenDyslexic', Arial, sans-serif;
+}
+
+/* ========================================== */
+/* LINE HEIGHT CLASSES                        */
+/* ========================================== */
+
+.line-height-normal .reading-content {
+  line-height: var(--line-height-normal);
+}
+
+.line-height-normal .reading-content p,
+.line-height-normal .reading-content li {
+  line-height: var(--line-height-normal);
+}
+
+.line-height-relaxed .reading-content {
+  line-height: var(--line-height-relaxed);
+}
+
+.line-height-relaxed .reading-content p,
+.line-height-relaxed .reading-content li {
+  line-height: var(--line-height-relaxed);
+}
+
+.line-height-loose .reading-content {
+  line-height: var(--line-height-loose);
+}
+
+.line-height-loose .reading-content p,
+.line-height-loose .reading-content li {
+  line-height: var(--line-height-loose);
+}
+
+/* ========================================== */
+/* LINE WIDTH CLASSES                         */
+/* ========================================== */
+
+.line-width-narrow .reading-content {
+  max-width: var(--line-width-narrow);
+}
+
+.line-width-medium .reading-content {
+  max-width: var(--line-width-medium);
+}
+
+.line-width-wide .reading-content {
+  max-width: var(--line-width-wide);
 }
 
 /* Container */

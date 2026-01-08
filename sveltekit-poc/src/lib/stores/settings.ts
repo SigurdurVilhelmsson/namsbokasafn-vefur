@@ -9,7 +9,9 @@ import { browser } from '$app/environment';
 // Types
 export type Theme = 'light' | 'dark';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
-export type FontFamily = 'serif' | 'sans';
+export type FontFamily = 'serif' | 'sans' | 'opendyslexic';
+export type LineHeight = 'normal' | 'relaxed' | 'loose';
+export type LineWidth = 'narrow' | 'medium' | 'wide';
 
 export type ShortcutAction =
 	| 'prevSection'
@@ -44,6 +46,8 @@ interface SettingsState {
 	theme: Theme;
 	fontSize: FontSize;
 	fontFamily: FontFamily;
+	lineHeight: LineHeight;
+	lineWidth: LineWidth;
 	sidebarOpen: boolean;
 	shortcutPreferences: ShortcutPreferences;
 }
@@ -54,6 +58,8 @@ const defaultSettings: SettingsState = {
 	theme: 'light',
 	fontSize: 'medium',
 	fontFamily: 'serif',
+	lineHeight: 'normal',
+	lineWidth: 'medium',
 	sidebarOpen: false,
 	shortcutPreferences: {}
 };
@@ -106,6 +112,12 @@ function createSettingsStore() {
 		// Font family methods
 		setFontFamily: (fontFamily: FontFamily) => update((s) => ({ ...s, fontFamily })),
 
+		// Line height methods
+		setLineHeight: (lineHeight: LineHeight) => update((s) => ({ ...s, lineHeight })),
+
+		// Line width methods
+		setLineWidth: (lineWidth: LineWidth) => update((s) => ({ ...s, lineWidth })),
+
 		// Sidebar methods
 		setSidebarOpen: (sidebarOpen: boolean) => update((s) => ({ ...s, sidebarOpen })),
 
@@ -145,4 +157,6 @@ export const settings = createSettingsStore();
 export const theme = derived(settings, ($settings) => $settings.theme);
 export const fontSize = derived(settings, ($settings) => $settings.fontSize);
 export const fontFamily = derived(settings, ($settings) => $settings.fontFamily);
+export const lineHeight = derived(settings, ($settings) => $settings.lineHeight);
+export const lineWidth = derived(settings, ($settings) => $settings.lineWidth);
 export const sidebarOpen = derived(settings, ($settings) => $settings.sidebarOpen);
