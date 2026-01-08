@@ -10,6 +10,7 @@
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
 	import TextHighlighter from '$lib/components/TextHighlighter.svelte';
 	import AnnotationSidebar from '$lib/components/AnnotationSidebar.svelte';
+	import { readDetection } from '$lib/actions/readDetection';
 
 	export let data: PageData;
 
@@ -149,6 +150,17 @@
 	>
 		<MarkdownRenderer content={data.section.content} />
 	</TextHighlighter>
+
+	<!-- End of section detection - auto-marks as read when user scrolls here -->
+	<div
+		use:readDetection={{
+			onRead: markAsRead,
+			enabled: !isRead,
+			minVisibleTime: 1500
+		}}
+		class="h-4"
+		aria-hidden="true"
+	></div>
 
 	<!-- Mark as read button at bottom -->
 	{#if !isRead}
