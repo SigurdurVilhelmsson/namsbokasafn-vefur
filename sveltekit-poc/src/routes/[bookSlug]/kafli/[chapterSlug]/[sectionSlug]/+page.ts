@@ -7,15 +7,15 @@ import {
 import { error } from '@sveltejs/kit';
 import type { NavigationContext } from '$lib/types/content';
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageLoad = async ({ params, fetch }) => {
 	const { bookSlug, chapterSlug, sectionSlug } = params;
 
 	try {
 		// Load section content
-		const section = await loadSectionContent(bookSlug, chapterSlug, `${sectionSlug}.md`);
+		const section = await loadSectionContent(bookSlug, chapterSlug, `${sectionSlug}.md`, fetch);
 
 		// Load TOC for navigation context
-		const toc = await loadTableOfContents(bookSlug);
+		const toc = await loadTableOfContents(bookSlug, fetch);
 		const result = findSectionBySlug(toc, chapterSlug, sectionSlug);
 
 		if (!result) {

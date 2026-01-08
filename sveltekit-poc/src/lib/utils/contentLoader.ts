@@ -43,8 +43,11 @@ function parseDifficulty(value: unknown): DifficultyLevel | undefined {
 /**
  * Load table of contents for a book
  */
-export async function loadTableOfContents(bookSlug: string): Promise<TableOfContents> {
-  const response = await fetch(`/content/${bookSlug}/toc.json`);
+export async function loadTableOfContents(
+  bookSlug: string,
+  fetchFn: typeof fetch = fetch
+): Promise<TableOfContents> {
+  const response = await fetchFn(`/content/${bookSlug}/toc.json`);
   if (!response.ok) {
     throw new Error('Gat ekki hlaðið efnisyfirliti');
   }
@@ -57,9 +60,10 @@ export async function loadTableOfContents(bookSlug: string): Promise<TableOfCont
 export async function loadSectionContent(
   bookSlug: string,
   chapterSlug: string,
-  sectionFile: string
+  sectionFile: string,
+  fetchFn: typeof fetch = fetch
 ): Promise<SectionContent> {
-  const response = await fetch(`/content/${bookSlug}/chapters/${chapterSlug}/${sectionFile}`);
+  const response = await fetchFn(`/content/${bookSlug}/chapters/${chapterSlug}/${sectionFile}`);
   if (!response.ok) {
     throw new Error(`Gat ekki hlaðið kafla: ${chapterSlug}/${sectionFile}`);
   }
