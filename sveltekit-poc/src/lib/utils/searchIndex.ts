@@ -309,19 +309,39 @@ export function getSearchChapters(): { slug: string; title: string }[] {
 }
 
 /**
+ * Escape HTML entities to prevent XSS attacks
+ */
+export function escapeHtml(text: string): string {
+	const htmlEntities: Record<string, string> = {
+		'&': '&amp;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'"': '&quot;',
+		"'": '&#39;'
+	};
+	return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
+}
+
+/**
  * Highlight query in text (for displaying results)
+ * IMPORTANT: This function returns HTML-safe output with escaped entities
  */
 export function highlightQuery(text: string, query: string): string {
-	if (!query.trim()) return text;
+	if (!query.trim()) return escapeHtml(text);
 
-	// Escape special regex characters
-	const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	// First, escape ALL HTML entities in both text and query
+	const escapedText = escapeHtml(text);
+	const escapedQuery = escapeHtml(query);
+
+	// Escape special regex characters in the query
+	const regexSafeQuery = escapedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 	// Create regex for matching (case-insensitive)
-	const regex = new RegExp(`(${escapedQuery})`, 'gi');
+	const regex = new RegExp(`(${regexSafeQuery})`, 'gi');
 
 	// Replace matches with highlighted version
-	return text.replace(
+	// The matched text is already escaped, so it's safe to wrap in <mark>
+	return escapedText.replace(
 		regex,
 		(match) =>
 			`<mark class="bg-yellow-200 dark:bg-yellow-900/50 rounded px-0.5">${match}</mark>`
