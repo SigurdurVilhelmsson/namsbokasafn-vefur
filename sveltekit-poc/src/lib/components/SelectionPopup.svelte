@@ -10,6 +10,7 @@
 	export let onHighlight: (color: HighlightColor) => void;
 	export let onAddNote: () => void;
 	export let onCreateFlashcard: () => void;
+	export let onGlossaryLookup: (() => void) | undefined = undefined;
 	export let onClose: () => void;
 
 	const HIGHLIGHT_COLORS: { color: HighlightColor; label: string; bg: string }[] = [
@@ -130,6 +131,26 @@
 			</svg>
 			<span class="hidden sm:inline">Minniskort</span>
 		</button>
+
+		<!-- Glossary lookup button -->
+		{#if onGlossaryLookup}
+			<button
+				on:click={onGlossaryLookup}
+				class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
+				aria-label="Fletta upp i ordasafni"
+				title="Fletta upp i ordasafni"
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+					/>
+				</svg>
+				<span class="hidden sm:inline">Orðasafn</span>
+			</button>
+		{/if}
 
 		<!-- Close button -->
 		<button

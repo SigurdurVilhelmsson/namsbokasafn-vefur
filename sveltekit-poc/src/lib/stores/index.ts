@@ -82,3 +82,11 @@ export {
 	type BookDownloadState,
 	type DownloadProgress
 } from './offline';
+
+// Glossary
+export {
+	glossaryStore,
+	glossaryTerms,
+	glossaryLoading,
+	glossaryError
+} from './glossary';
