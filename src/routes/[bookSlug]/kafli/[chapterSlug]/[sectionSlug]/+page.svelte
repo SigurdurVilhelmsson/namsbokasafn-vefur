@@ -4,7 +4,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import type { PageData } from './$types';
-	import { reader, analyticsStore } from '$lib/stores';
+	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
 	import { isSectionRead, isSectionBookmarked } from '$lib/stores/reader';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
@@ -42,6 +42,24 @@
 	function toggleBookmark() {
 		reader.toggleBookmark(data.chapterSlug, data.sectionSlug);
 	}
+
+	// Objectives tracking
+	function toggleObjective(index: number, text: string) {
+		objectivesStore.toggleObjective(data.chapterSlug, data.sectionSlug, index, text);
+		analyticsStore.logActivity('objective', {
+			bookSlug: data.bookSlug,
+			chapterSlug: data.chapterSlug,
+			sectionSlug: data.sectionSlug,
+			action: objectivesStore.isObjectiveCompleted(data.chapterSlug, data.sectionSlug, index) ? 'completed' : 'uncompleted'
+		});
+	}
+
+	function isObjectiveCompleted(index: number): boolean {
+		return objectivesStore.isObjectiveCompleted(data.chapterSlug, data.sectionSlug, index);
+	}
+
+	// Reactive: track objectives state
+	$: objectivesState = $objectivesStore.completedObjectives;
 </script>
 
 <svelte:head>
@@ -120,23 +138,44 @@
 
 	<!-- Learning Objectives -->
 	{#if data.section.objectives && data.section.objectives.length > 0}
+		{@const completedCount = data.section.objectives.filter((_, i) => isObjectiveCompleted(i)).length}
 		<div class="mb-8 p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-			<h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-				</svg>
-				Námsmarkmið
-			</h3>
+			<div class="flex items-center justify-between mb-3">
+				<h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+					</svg>
+					Námsmarkmið
+				</h3>
+				{#if completedCount > 0}
+					<span class="text-sm text-blue-700 dark:text-blue-300">
+						{completedCount}/{data.section.objectives.length} kláruð
+					</span>
+				{/if}
+			</div>
 			<p class="text-sm text-blue-800 dark:text-blue-200 mb-3">
 				Eftir að hafa lesið þennan kafla ættirðu að geta:
 			</p>
 			<ul class="space-y-2">
-				{#each data.section.objectives as objective, i}
-					<li class="flex items-start gap-2 text-blue-800 dark:text-blue-200">
-						<span class="flex-shrink-0 w-6 h-6 rounded-full bg-blue-200 dark:bg-blue-800 flex items-center justify-center text-xs font-medium">
-							{i + 1}
-						</span>
-						<span>{objective}</span>
+				{#each data.section.objectives as objective, i (i)}
+					{@const completed = isObjectiveCompleted(i)}
+					<li class="flex items-start gap-3 text-blue-800 dark:text-blue-200">
+						<button
+							on:click={() => toggleObjective(i, objective)}
+							class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {completed
+								? 'bg-green-500 border-green-500 text-white'
+								: 'border-blue-300 dark:border-blue-600 hover:border-green-400 dark:hover:border-green-500'}"
+							aria-label={completed ? 'Afmerkja markmið' : 'Merkja markmið sem kláruð'}
+						>
+							{#if completed}
+								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+								</svg>
+							{:else}
+								<span class="text-xs font-medium text-blue-600 dark:text-blue-400">{i + 1}</span>
+							{/if}
+						</button>
+						<span class="{completed ? 'line-through opacity-70' : ''}">{objective}</span>
 					</li>
 				{/each}
 			</ul>

@@ -2,7 +2,7 @@
 
 This tracker defines the SvelteKit migration with gated milestones. Each gate must be green before proceeding to the next. Features are implemented cleanly—the React app serves as UX reference, not code to copy.
 
-**Last updated:** 2026-01-08
+**Last updated:** 2026-01-09
 
 ## Legend
 - ☐ Not started
@@ -275,10 +275,10 @@ These are explicitly deferred. Do not start until Milestones 1-4 are complete.
 | ☑ | Annotations: highlight + note + delete + export. |
 | ☑ | Highlight restore after refresh/navigation (stable anchors, not DOM-dependent). |
 | ☐ | TTS: Icelandic voice with fallback and controls. |
-| ☐ | Print stylesheet (@media print CSS). |
-| ☐ | Analytics dashboard. |
-| ☐ | Learning objectives tracking. |
-| ☐ | Bookmarks page. |
+| ☑ | Print stylesheet (@media print CSS). |
+| ☑ | Analytics dashboard. |
+| ☑ | Learning objectives tracking. |
+| ☑ | Bookmarks page. |
 | ☑ | Self-assessment modal (AdaptiveQuiz). |
 | ☑ | Figure viewer (zoom modal). |
 
@@ -292,7 +292,7 @@ These are technical debt items to address opportunistically during development:
 | Status | Item |
 | --- | --- |
 | ☐ | Move search index building to web worker or precompute at build time. |
-| ☐ | Cache TOC and section content to avoid repeated fetches. |
+| ☑ | Cache TOC and section content to avoid repeated fetches. |
 
 ### Content Pipeline
 | Status | Item |
@@ -378,7 +378,7 @@ Use these files for UX reference and data shape, not for copying code:
 | 2: Offline | ☑ | 100% |
 | 3: Testing | ☑ | 100% |
 | 4: Accessibility | ☑ | 100% |
-| 5: V2 Features | ☐→ | 44% (4/9 done) |
+| 5: V2 Features | ☐→ | 89% (8/9 done) |
 
 **Overall v1 readiness: 100%** (Milestones 0-4 complete)
 
