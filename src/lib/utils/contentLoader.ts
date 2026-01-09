@@ -2,7 +2,7 @@
  * Content loading utilities with in-memory caching
  */
 
-import type { TableOfContents, SectionContent, DifficultyLevel } from '$lib/types/content';
+import type { TableOfContents, SectionContent, DifficultyLevel, SectionMetadata } from '$lib/types/content';
 import { browser } from '$app/environment';
 
 const WORDS_PER_MINUTE = 180;
@@ -166,12 +166,16 @@ export async function loadTableOfContents(
 
 /**
  * Load section content for a book (with caching)
+ *
+ * If preloadedMetadata is provided (from toc.json), it will be used instead of
+ * parsing frontmatter at runtime. This is more efficient and handles YAML properly.
  */
 export async function loadSectionContent(
 	bookSlug: string,
 	chapterSlug: string,
 	sectionFile: string,
-	fetchFn: typeof fetch = fetch
+	fetchFn: typeof fetch = fetch,
+	preloadedMetadata?: SectionMetadata
 ): Promise<SectionContent> {
 	// Create cache key
 	const cacheKey = `${bookSlug}/${chapterSlug}/${sectionFile}`;
@@ -210,38 +214,65 @@ export async function loadSectionContent(
 	}
 	const markdown = await response.text();
 
-  const { metadata, content } = parseFrontmatter(markdown);
+	// Transform relative image paths to absolute
+	const basePath = `/content/${bookSlug}/chapters/${chapterSlug}`;
 
-  // Transform relative image paths to absolute
-  const basePath = `/content/${bookSlug}/chapters/${chapterSlug}`;
-  const transformedContent = content.replace(
-    /!\[([^\]]*)\]\(\.?\/?\/?images\//g,
-    `![$1](${basePath}/images/`
-  );
+	let sectionContent: SectionContent;
 
-  const readingTime = calculateReadingTime(transformedContent);
-  const difficulty = parseDifficulty(metadata.difficulty);
-  const keywords = Array.isArray(metadata.keywords) ? metadata.keywords : undefined;
-  const prerequisites = Array.isArray(metadata.prerequisites) ? metadata.prerequisites : undefined;
+	if (preloadedMetadata) {
+		// Use pre-parsed metadata from build time (preferred)
+		// Just extract the content without frontmatter
+		const contentMatch = markdown.match(/^---[\s\S]*?---\n([\s\S]*)$/);
+		const rawContent = contentMatch ? contentMatch[1] : markdown;
+		const transformedContent = rawContent.replace(
+			/!\[([^\]]*)\]\(\.?\/?\/?images\//g,
+			`![$1](${basePath}/images/`
+		);
 
-  const sectionContent: SectionContent = {
-    title: typeof metadata.title === 'string' ? metadata.title : '',
-    section: typeof metadata.section === 'string' ? metadata.section : '',
-    chapter: typeof metadata.chapter === 'number' ? metadata.chapter : 0,
-    objectives: Array.isArray(metadata.objectives) ? metadata.objectives : [],
-    content: transformedContent,
-    readingTime,
-    difficulty,
-    keywords,
-    prerequisites
-  };
+		sectionContent = {
+			title: preloadedMetadata.title,
+			section: preloadedMetadata.section,
+			chapter: preloadedMetadata.chapter,
+			objectives: preloadedMetadata.objectives || [],
+			content: transformedContent,
+			readingTime: preloadedMetadata.readingTime,
+			difficulty: preloadedMetadata.difficulty,
+			keywords: preloadedMetadata.keywords,
+			prerequisites: preloadedMetadata.prerequisites,
+			source: preloadedMetadata.source
+		};
+	} else {
+		// Fallback: parse frontmatter at runtime (for offline/legacy content)
+		const { metadata, content } = parseFrontmatter(markdown);
+		const transformedContent = content.replace(
+			/!\[([^\]]*)\]\(\.?\/?\/?images\//g,
+			`![$1](${basePath}/images/`
+		);
 
-  // Cache the result (browser only)
-  if (browser) {
-    sectionCache.set(cacheKey, sectionContent);
-  }
+		const readingTime = calculateReadingTime(transformedContent);
+		const difficulty = parseDifficulty(metadata.difficulty);
+		const keywords = Array.isArray(metadata.keywords) ? metadata.keywords : undefined;
+		const prerequisites = Array.isArray(metadata.prerequisites) ? metadata.prerequisites : undefined;
 
-  return sectionContent;
+		sectionContent = {
+			title: typeof metadata.title === 'string' ? metadata.title : '',
+			section: typeof metadata.section === 'string' ? metadata.section : '',
+			chapter: typeof metadata.chapter === 'number' ? metadata.chapter : 0,
+			objectives: Array.isArray(metadata.objectives) ? metadata.objectives : [],
+			content: transformedContent,
+			readingTime,
+			difficulty,
+			keywords,
+			prerequisites
+		};
+	}
+
+	// Cache the result (browser only)
+	if (browser) {
+		sectionCache.set(cacheKey, sectionContent);
+	}
+
+	return sectionContent;
 }
 
 /**

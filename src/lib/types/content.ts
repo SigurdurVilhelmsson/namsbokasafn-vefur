@@ -14,12 +14,27 @@ export interface SourceAttribution {
   modifications: string;
 }
 
+// Pre-parsed section metadata (from build-time processing)
+export interface SectionMetadata {
+  title: string;
+  section: string;
+  chapter: number;
+  readingTime?: number;
+  difficulty?: DifficultyLevel;
+  objectives?: string[];
+  keywords?: string[];
+  prerequisites?: string[];
+  source?: SourceAttribution;
+}
+
 // Section within a chapter
 export interface Section {
   number: string;
   title: string;
   slug: string;
   file: string;
+  type?: string;
+  metadata?: SectionMetadata;
 }
 
 // Chapter in a book

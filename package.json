@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npm run copy-content && vite dev",
-    "build": "npm run copy-content && npm run validate-content && vite build",
-    "build:no-validate": "npm run copy-content && vite build",
+    "dev": "npm run prepare-content && vite dev",
+    "build": "npm run prepare-content && npm run validate-content && vite build",
+    "build:no-validate": "npm run prepare-content && vite build",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
@@ -15,8 +15,10 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "copy-content": "node scripts/copy-content.js",
+    "process-content": "node scripts/process-content.js",
+    "prepare-content": "npm run copy-content && npm run process-content",
     "validate-content": "node scripts/validate-content.js",
-    "lint-content": "npm run copy-content && node scripts/validate-content.js",
+    "lint-content": "npm run prepare-content && node scripts/validate-content.js",
     "clean": "rm -rf build .svelte-kit static/content"
   },
   "devDependencies": {
@@ -29,6 +31,7 @@
     "@vite-pwa/sveltekit": "^1.1.0",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.0.0",
+    "gray-matter": "^4.0.3",
     "jsdom": "^24.1.3",
     "prettier": "^3.0.0",
     "prettier-plugin-svelte": "^3.0.0",
