@@ -297,7 +297,7 @@ These are technical debt items to address opportunistically during development:
 ### Content Pipeline
 | Status | Item |
 | --- | --- |
-| ☐ | Replace custom frontmatter parser with build-time step (gray-matter or similar). |
+| ☑ | Replace custom frontmatter parser with build-time step (gray-matter or similar). |
 | ☐ | Precompute cross-reference numbering for deterministic results. |
 
 ### Data Integrity

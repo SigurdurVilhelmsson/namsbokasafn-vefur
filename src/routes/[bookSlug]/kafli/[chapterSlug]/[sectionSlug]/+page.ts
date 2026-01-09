@@ -12,10 +12,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 	const { bookSlug, chapterSlug, sectionSlug } = params;
 
 	try {
-		// Load section content
-		const section = await loadSectionContent(bookSlug, chapterSlug, `${sectionSlug}.md`, fetch);
-
-		// Load TOC for navigation context
+		// Load TOC first to get pre-parsed metadata
 		const toc = await loadTableOfContents(bookSlug, fetch);
 		const result = findSectionBySlug(toc, chapterSlug, sectionSlug);
 
@@ -24,6 +21,15 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		}
 
 		const { chapter, section: currentSection } = result;
+
+		// Load section content with pre-parsed metadata from toc.json
+		const section = await loadSectionContent(
+			bookSlug,
+			chapterSlug,
+			`${sectionSlug}.md`,
+			fetch,
+			currentSection.metadata
+		);
 
 		// Find chapter and section indices
 		const chapterIndex = toc.chapters.findIndex((c) => c.slug === chapterSlug);
