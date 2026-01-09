@@ -2,6 +2,13 @@
  * Reference Store - Cross-references for equations, figures, tables
  * Ported from React/Zustand referenceStore.ts
  *
+ * Supports two modes:
+ * 1. Precomputed mode: Uses reference index from toc.json (build-time processing)
+ * 2. Runtime mode: Parses content on the fly (fallback for legacy content)
+ *
+ * Precomputed mode is preferred as it provides deterministic numbering
+ * regardless of the order sections are visited.
+ *
  * Note: This store is NOT persisted as references are rebuilt from content
  */
 
@@ -13,11 +20,29 @@ export interface ReferenceItem {
 	type: ReferenceType;
 	id: string;
 	label: string;
+	number?: string;
 	title?: string;
 	preview?: string;
 	chapterSlug: string;
 	sectionSlug?: string;
 	anchor?: string;
+}
+
+// Precomputed reference from toc.json
+export interface PrecomputedReference {
+	type: ReferenceType;
+	id: string;
+	number: string;
+	label: string;
+	title?: string;
+	preview?: string;
+	chapterSlug: string;
+	sectionSlug: string;
+	anchor: string;
+}
+
+export interface PrecomputedReferenceIndex {
+	[key: string]: PrecomputedReference;
 }
 
 export interface ReferenceIndex {
@@ -26,6 +51,7 @@ export interface ReferenceIndex {
 
 interface ReferenceState {
 	index: ReferenceIndex;
+	precomputedIndex: PrecomputedReferenceIndex | null;
 	currentChapter: number;
 	currentSection: number;
 	equationCounter: number;
@@ -48,6 +74,7 @@ function generateLabel(type: ReferenceType, number: string): string {
 
 const defaultState: ReferenceState = {
 	index: {},
+	precomputedIndex: null,
 	currentChapter: 1,
 	currentSection: 1,
 	equationCounter: 0,
@@ -61,6 +88,17 @@ function createReferenceStore() {
 
 	return {
 		subscribe,
+
+		/**
+		 * Load precomputed reference index from toc.json
+		 * This should be called once when the book is loaded
+		 */
+		loadPrecomputedIndex: (index: PrecomputedReferenceIndex | null | undefined) => {
+			update((state) => ({
+				...state,
+				precomputedIndex: index || null
+			}));
+		},
 
 		resetCounters: (chapterNumber: number, sectionNumber = 1) => {
 			update((state) => ({
@@ -124,7 +162,15 @@ function createReferenceStore() {
 
 		getReference: (type: ReferenceType, id: string): ReferenceItem | undefined => {
 			const key = `${type}:${id}`;
-			return get({ subscribe }).index[key];
+			const state = get({ subscribe });
+
+			// Check precomputed index first (deterministic numbering)
+			if (state.precomputedIndex && state.precomputedIndex[key]) {
+				return state.precomputedIndex[key];
+			}
+
+			// Fall back to runtime index
+			return state.index[key];
 		},
 
 		getNextEquationNumber: (): string => {
@@ -178,14 +224,12 @@ function createReferenceStore() {
 				}));
 			}
 
-			// Register section
+			// Register section (sections aren't in precomputed index, so always check runtime)
 			const sectionKey = `sec:${chapterSlug}/${sectionSlug}`;
 			if (!state.index[sectionKey]) {
 				const titleMatch = content.match(/^#\s+(.+)$/m);
 				const title = titleMatch ? titleMatch[1] : sectionSlug;
 
-				const store = { subscribe };
-				const currentState = get(store);
 				const fullItem: ReferenceItem = {
 					type: 'sec',
 					id: `${chapterSlug}/${sectionSlug}`,
@@ -205,12 +249,17 @@ function createReferenceStore() {
 			}
 
 			// Find and register labeled equations
+			// Skip if already in precomputed index (deterministic numbering takes precedence)
 			const equationRegex = /\$\$[\s\S]*?\$\$\s*\{#eq:([^}]+)\}/g;
 			let match;
 			while ((match = equationRegex.exec(content)) !== null) {
 				const eqId = match[1];
 				const key = `eq:${eqId}`;
 				const currentState = get({ subscribe });
+
+				// Skip if already in precomputed index
+				if (currentState.precomputedIndex?.[key]) continue;
+
 				if (!currentState.index[key]) {
 					const eqMatch = match[0].match(/\$\$([\s\S]*?)\$\$/);
 					const preview = eqMatch ? eqMatch[1].slice(0, 50).trim() + '...' : undefined;
@@ -244,6 +293,10 @@ function createReferenceStore() {
 				const figId = match[2];
 				const key = `fig:${figId}`;
 				const currentState = get({ subscribe });
+
+				// Skip if already in precomputed index
+				if (currentState.precomputedIndex?.[key]) continue;
+
 				if (!currentState.index[key]) {
 					const number = `${currentState.currentChapter}.${currentState.figureCounter + 1}`;
 					const label = generateLabel('fig', number);
@@ -274,6 +327,10 @@ function createReferenceStore() {
 				const tblId = match[1];
 				const key = `tbl:${tblId}`;
 				const currentState = get({ subscribe });
+
+				// Skip if already in precomputed index
+				if (currentState.precomputedIndex?.[key]) continue;
+
 				if (!currentState.index[key]) {
 					const number = `${currentState.currentChapter}.${currentState.tableCounter + 1}`;
 					const label = generateLabel('tbl', number);

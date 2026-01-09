@@ -45,12 +45,27 @@ export interface Chapter {
   sections: Section[];
 }
 
+// Precomputed reference for deterministic numbering
+export interface PrecomputedReference {
+  type: 'sec' | 'eq' | 'fig' | 'tbl' | 'def';
+  id: string;
+  number: string;
+  label: string;
+  title?: string;
+  preview?: string;
+  chapterSlug: string;
+  sectionSlug: string;
+  anchor: string;
+}
+
 // Table of contents for a book
 export interface TableOfContents {
   title: string;
   attribution?: SourceAttribution;
   source?: SourceAttribution;
   chapters: Chapter[];
+  // Precomputed cross-reference index (from build-time processing)
+  references?: { [key: string]: PrecomputedReference };
 }
 
 // Difficulty levels for content

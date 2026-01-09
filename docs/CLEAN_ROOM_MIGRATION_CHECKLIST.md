@@ -298,7 +298,7 @@ These are technical debt items to address opportunistically during development:
 | Status | Item |
 | --- | --- |
 | ☑ | Replace custom frontmatter parser with build-time step (gray-matter or similar). |
-| ☐ | Precompute cross-reference numbering for deterministic results. |
+| ☑ | Precompute cross-reference numbering for deterministic results. |
 
 ### Data Integrity
 | Status | Item |
