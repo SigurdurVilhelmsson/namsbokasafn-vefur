@@ -1,7 +1,7 @@
 # Námsbókasafn (Textbook Library)
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-19.2-blue)](https://reactjs.org/)
+[![SvelteKit](https://img.shields.io/badge/SvelteKit-2.21-orange)](https://kit.svelte.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Content License: CC BY 4.0](https://img.shields.io/badge/Content%20License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
 
@@ -25,24 +25,14 @@ Opnar kennslubækur á íslensku - gagnvirkur veflesari fyrir íslenskar þýði
 - **Fjölbókakerfi** - Einn lesari fyrir margar kennslubækur
 - **Hrein lesupplifun** - Faglegur lestrargluggur hannaður fyrir lengri námslestur
 - **Minniskort (SRS)** - Gagnvirk minniskort með bilun endurtekningu (spaced repetition)
-- **Orðasafn** - Ítarlegt orðasafn fyrir hverja bók
+- **Orðasafn** - Ítarlegt orðasafn fyrir hverja bók með íslenskri stafrófsröðun
 - **Lesframvinda** - Fylgist með framvindu og vistar bókamerki
 - **Leit** - Öflug leit í öllu efni með Ctrl/Cmd+K flýtilykli
 - **Stærðfræði** - Fullkominn stuðningur fyrir stærðfræðijöfnur með KaTeX
 - **Sveigjanlegt** - Hannað fyrir síma, spjaldtölvur og tölvur
 - **Ljóst/dökkt þema** - Sjálfvirk greining á kerfisstillingum
-
-### Nýlega bætt við (desember 2025)
-
-- **Yfirstrikun og athugasemdir** - Merkja texta með litum og bæta við glósum
-- **Lestur á rödd** - Íslensk raddlestur með Piper TTS (4 raddir)
-- **Flýtilyklar** - Sérsniðnir flýtilyklar fyrir flýtinotendur (ýttu á `?`)
-- **Einbeitingarhamur** - Hreinn leshamur án truflana (ýttu á `F`)
-- **Aðgengi (WCAG 2.2)** - Bætt aðgengi fyrir alla notendur
-- **Gagnvirkt lotukerfi** - 118 frumefni með ítarlegum upplýsingum
-- **Námsgreining** - Fylgist með lestíma og námsframvindu
 - **PWA stuðningur** - Virkar án nettengingar eftir fyrstu heimsókn
-- **Prentsnið** - Fínstillt fyrir prentun
+- **Gagnvirkt lotukerfi** - 118 frumefni með ítarlegum upplýsingum
 
 ---
 
@@ -50,7 +40,7 @@ Opnar kennslubækur á íslensku - gagnvirkur veflesari fyrir íslenskar þýði
 
 ### Forsendur
 
-- **Node.js** 18 eða nýrra
+- **Node.js** 22 eða nýrra
 - **npm**
 
 ### Staðbundin þróun
@@ -83,9 +73,6 @@ npm run preview
 ```
 namsbokasafn-vefur/
 ├── public/
-│   ├── covers/                        # Forsíðumyndir fyrir bækur
-│   │   ├── efnafraedi.svg
-│   │   └── liffraedi.svg
 │   └── content/
 │       └── efnafraedi/               # Efni efnafræðibókar
 │           ├── toc.json              # Efnisyfirlit
@@ -93,29 +80,42 @@ namsbokasafn-vefur/
 │           └── chapters/             # Kaflar
 │               ├── 01-grunnhugmyndir/
 │               └── 02-atom-og-sameindir/
+├── static/
+│   ├── covers/                       # Forsíðumyndir fyrir bækur
+│   │   ├── efnafraedi.svg
+│   │   └── liffraedi.svg
+│   └── icons/                        # PWA icons
 ├── src/
-│   ├── config/
-│   │   └── books.ts                  # Stillingar fyrir allar bækur
-│   ├── components/
-│   │   ├── catalog/                  # Landingssíða og bókakort
-│   │   │   ├── LandingPage.tsx
-│   │   │   ├── BookCard.tsx
-│   │   │   └── BookGrid.tsx
-│   │   ├── layout/                   # Layout íhlutir
-│   │   │   ├── BookLayout.tsx        # Bóka-meðvitað layout
-│   │   │   ├── Header.tsx
-│   │   │   └── Sidebar.tsx
-│   │   ├── reader/                   # Lestraríhlutir
-│   │   └── ui/                       # UI íhlutir
-│   ├── hooks/
-│   │   ├── useBook.ts               # Book context hook
-│   │   ├── useGlossary.ts
-│   │   └── useTheme.ts
-│   ├── stores/                       # Zustand state management
-│   ├── utils/
-│   │   ├── contentLoader.ts         # Efnishleðsla
-│   │   └── srs.ts                   # Spaced repetition algorithm
-│   └── types/
+│   ├── app.html                      # HTML template
+│   ├── app.css                       # Global styles (Tailwind)
+│   ├── lib/
+│   │   ├── components/               # Svelte components
+│   │   │   ├── layout/               # Header, Sidebar, etc.
+│   │   │   ├── BookCard.svelte
+│   │   │   ├── FlashcardStudy.svelte
+│   │   │   ├── MarkdownRenderer.svelte
+│   │   │   └── ...
+│   │   ├── stores/                   # Svelte stores (state management)
+│   │   │   ├── settings.ts
+│   │   │   ├── reader.ts
+│   │   │   ├── flashcard.ts
+│   │   │   └── ...
+│   │   ├── actions/                  # Svelte actions
+│   │   ├── types/                    # TypeScript types
+│   │   └── utils/                    # Utility functions
+│   │       ├── contentLoader.ts
+│   │       ├── srs.ts                # Spaced repetition algorithm
+│   │       └── ...
+│   └── routes/                       # SvelteKit file-based routing
+│       ├── +layout.svelte            # Root layout
+│       ├── +page.svelte              # Landing page
+│       └── [bookSlug]/               # Dynamic book routes
+│           ├── +layout.svelte
+│           ├── +page.svelte          # Book home
+│           ├── ordabok/              # Glossary
+│           ├── minniskort/           # Flashcards
+│           ├── lotukerfi/            # Periodic table
+│           └── kafli/                # Chapters
 └── package.json
 ```
 
@@ -129,43 +129,26 @@ namsbokasafn-vefur/
 | `/:bookSlug/kafli/:chapter/:section` | Kaflaefni |
 | `/:bookSlug/ordabok` | Orðasafn bókar |
 | `/:bookSlug/minniskort` | Minniskort bókar |
-| `/:bookSlug/aefingar` | Æfingadæmi bókar |
+| `/:bookSlug/lotukerfi` | Lotukerfið |
+| `/:bookSlug/prof` | Próf og æfingar |
 
 ---
 
 ## Bæta við nýrri bók
 
-### 1. Bættu við stillingu í `src/config/books.ts`
+### 1. Bættu við stillingu í `src/routes/[bookSlug]/+layout.ts`
 
 ```typescript
-{
-  id: 'liffraedi',
-  slug: 'liffraedi',
-  title: 'Líffræði',
-  subtitle: 'Þýðing á OpenStax Biology 2e',
-  description: 'Kennslubók í líffræði...',
-  subject: 'raunvisindi',
-  coverImage: '/covers/liffraedi.svg',
-  translator: 'Nafn Þýðanda',
-  status: 'available', // 'available' | 'in-progress' | 'coming-soon'
-  source: {
-    title: 'Biology 2e',
-    publisher: 'OpenStax',
-    url: 'https://openstax.org/details/books/biology-2e',
-    authors: ['...'],
-    license: 'CC BY 4.0',
-    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
-  },
-  stats: {
-    totalChapters: 47,
-    translatedChapters: 0
-  },
-  features: {
-    glossary: true,
-    flashcards: true,
-    exercises: true
+const BOOKS: Record<string, BookConfig> = {
+  liffraedi: {
+    id: 'liffraedi',
+    slug: 'liffraedi',
+    title: 'Líffræði',
+    subtitle: 'Þýðing á OpenStax Biology 2e',
+    description: 'Kennslubók í líffræði...',
+    // ... remaining config
   }
-}
+};
 ```
 
 ### 2. Búðu til efnismöppu
@@ -182,48 +165,39 @@ public/content/liffraedi/
 
 ### 3. Búðu til forsíðumynd
 
-Bættu við SVG eða PNG mynd í `public/covers/liffraedi.svg`
+Bættu við SVG eða PNG mynd í `static/covers/liffraedi.svg`
 
 ---
 
 ## Tæknistafl
 
 ### Core
-- **React** 19.2.0
-- **TypeScript** 5.7.2
-- **Vite** 7.2.4
-- **Tailwind CSS** 4.1.17
+- **SvelteKit** 2.21
+- **Svelte** 5.33
+- **TypeScript** 5.7
+- **Vite** 6.3
+- **Tailwind CSS** 4.1
 
 ### Libraries
-- **React Router** 7.1.1 - Routing
-- **Zustand** 5.0.2 - State management
-- **react-markdown** 10.1.0 - Markdown rendering
-- **KaTeX** 0.16.11 - Math rendering
-- **Lucide React** 0.555.0 - Icons
+- **unified/remark/rehype** - Markdown processing
+- **KaTeX** 0.16 - Math rendering
+- **Lucide Svelte** - Icons
+- **@vite-pwa/sveltekit** - PWA support
 
 ---
 
-## Þróunaráætlun
+## Skipanir
 
-Þetta verkefni er í virkri þróun. Sjá ítarlegri skjöl:
-
-| Skjal | Lýsing |
-|-------|--------|
-| [IMPLEMENTATION_PROGRESS.md](./IMPLEMENTATION_PROGRESS.md) | Framvindumæling fyrir öll verkefni |
-| [MARKDOWN-GUIDE.md](./MARKDOWN-GUIDE.md) | Leiðbeiningar um markdown snið |
-| [LANGUAGE_GUIDE.md](./LANGUAGE_GUIDE.md) | Tungumálastefna (íslenska/enska) |
-| [DEPLOYMENT-GUIDE.md](./DEPLOYMENT-GUIDE.md) | Leiðbeiningar um uppsetningu |
-
-### Staða framvindu
-
-| Þrep | Lýsing | Framvinda |
-|------|--------|-----------|
-| Þrep 1 | Grunnupplifun (aðgengi, yfirstrikun, TTS) | 97% |
-| Þrep 2 | Námsaðstoð (minniskort, próf, markmið) | 100% |
-| Þrep 3 | Vísindalegir eiginleikar (lotukerfi, myndaskoðari) | 100% |
-| Þrep 4 | Háþróaðir eiginleikar (PWA, greining, prentun) | 100% |
-
-**Heildarframvinda: 99%** (85 af 86 verkefnum lokið)
+```bash
+npm run dev              # Start dev server (localhost:5173)
+npm run build            # Production build to build/
+npm run preview          # Preview production build
+npm run test             # Run unit tests (Vitest)
+npm run test:e2e         # Run E2E tests (Playwright)
+npm run check            # SvelteKit sync + type check
+npm run lint             # ESLint
+npm run format           # Prettier
+```
 
 ---
 

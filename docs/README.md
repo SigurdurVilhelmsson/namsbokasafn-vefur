@@ -1,8 +1,11 @@
-# SvelteKit Docs
+# Documentation
 
-- `sveltekit-poc/docs/CLEAN_ROOM_MIGRATION_CHECKLIST.md` - Clean-room migration tracker with milestones.
-- `sveltekit-poc/docs/IMPROVEMENTS_AND_FEATURES.md` - Improvement areas and feature ideas for the Svelte build.
+- `docs/CACHE_STRATEGY.md` - PWA caching and offline strategy
+- `docs/CLEAN_ROOM_MIGRATION_CHECKLIST.md` - SvelteKit migration tracker (completed)
+- `docs/ARCHITECTURE.md` - System architecture overview
+- `docs/API.md` - Content API documentation
+- `docs/CONTRIBUTING.md` - Contribution guidelines
 
 ## How to Update
-- Track progress by toggling status symbols in the migration checklist tables.
-- Add new ideas to the improvements list and note if they are short-, medium-, or long-term.
+- Track progress by toggling status symbols in checklist tables
+- Add new ideas to improvement lists with priority levels
