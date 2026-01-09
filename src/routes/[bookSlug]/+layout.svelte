@@ -4,6 +4,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { settings, fontSize, fontFamily, lineHeight, lineWidth } from '$lib/stores';
+	import { referenceStore } from '$lib/stores/reference';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import FocusModeNav from '$lib/components/layout/FocusModeNav.svelte';
@@ -16,6 +17,11 @@
 	let focusMode = false;
 	let showShortcutsModal = false;
 	let headerComponent: Header;
+
+	// Load precomputed references when data changes
+	$: if (data.references) {
+		referenceStore.loadPrecomputedIndex(data.references);
+	}
 
 	function toggleFocusMode() {
 		focusMode = !focusMode;
