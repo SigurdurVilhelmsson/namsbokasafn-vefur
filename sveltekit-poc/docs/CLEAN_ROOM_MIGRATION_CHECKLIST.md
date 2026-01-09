@@ -10,16 +10,16 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 - ☑ Done
 
 ## Current Focus
-**Milestone 3**: Quality & Testing - complete remaining items before polish phase.
+**V1 Complete**: Milestones 0-4 are done. Ready for final review and deployment.
 
 ---
 
-## Milestone 0: Scope & Success Criteria (Gate) ☐→
+## Milestone 0: Scope & Success Criteria (Gate) ☑
 
 | Status | Item |
 | --- | --- |
 | ☑ | Define v1 scope (see below). |
-| ☐ | Define correctness criteria for each v1 feature. |
+| ☑ | Define correctness criteria for each v1 feature. |
 | ☑ | Define performance targets (see below). |
 | ☑ | Identify what will be ignored from React (see "Do Not Port"). |
 
@@ -48,6 +48,92 @@ This tracker defines the SvelteKit migration with gated milestones. Each gate mu
 - JS bundle: 25-35% smaller than React build on reader route
 - TTI: 20-30% faster first contentful paint
 - Offline: book loads fully after initial download
+
+### Correctness Criteria (V1 Features)
+
+**Reader Flow**
+- Landing page displays all available books with cover, title, and status badge
+- Clicking a book navigates to its home page showing chapter list
+- Clicking a chapter/section navigates to the section view
+- Section view displays rendered markdown content
+- URL reflects current location (deep linking works)
+
+**Navigation**
+- Prev/Next buttons appear at bottom of section and navigate correctly
+- Sidebar TOC shows all chapters with expandable sections
+- Current section is highlighted in sidebar
+- Keyboard shortcuts: ←/→ for navigation, `g h` for home, `f` for focus mode, `?` for help
+- All navigation preserves scroll position appropriately
+
+**Content Rendering**
+- Markdown headings, paragraphs, lists, and links render correctly
+- KaTeX math (inline `$...$` and block `$$...$$`) renders without errors
+- Chemical equations via mhchem render correctly
+- Custom directives (note, warning, example, definition, practice-problem) render with proper styling
+- Images load and display with captions
+- Tables render with proper formatting
+- Cross-references link to correct targets
+
+**Search**
+- Ctrl/Cmd+K opens search modal
+- Fuzzy search returns relevant results within 200ms
+- Results show section title, chapter, and highlighted snippet
+- Clicking result navigates to correct section
+- Search history is preserved across sessions
+- No XSS vulnerabilities in search result display
+
+**Settings**
+- Theme toggle switches between light and dark mode
+- Theme preference persists across sessions
+- Font size options (small, medium, large, xlarge) apply to reading content
+- Font family options (serif, sans, OpenDyslexic) apply correctly
+- Line height and line width settings adjust reading content
+- Focus mode hides header/sidebar for distraction-free reading
+- All settings persist in localStorage
+
+**Progress Tracking**
+- Current reading location is saved automatically
+- Returning to book resumes at last position
+- Sections can be marked as read (manual or auto via scroll)
+- Read status persists across sessions
+- Chapter progress percentage displays in sidebar
+- Bookmarks can be added/removed and persist
+
+**Glossary**
+- Glossary page lists all terms alphabetically
+- Search/filter narrows term list
+- Term definitions display correctly
+- Quick lookup from reader shows inline tooltip
+- Link to full glossary entry works
+
+**Flashcards**
+- Flashcard page shows deck overview with due count
+- Study session presents cards one at a time
+- Card flip reveals answer
+- Rating buttons (again, hard, good, easy) work
+- SM-2 algorithm calculates next review date correctly
+- Progress persists across sessions
+
+**Periodic Table** (Chemistry book only)
+- Table displays all elements in correct positions
+- Clicking element shows detail modal
+- Element details include symbol, name, atomic number, mass
+- Category color coding is correct
+
+**Offline Support**
+- "Download book" button shows storage estimate
+- Download progress indicator displays during cache
+- After download, book loads fully in airplane mode
+- All content (markdown, images, math) available offline
+- Clear cache option removes downloaded content
+
+**Accessibility**
+- Skip-to-content link appears on focus
+- All interactive elements are keyboard accessible
+- Modals trap focus and close on Escape
+- ARIA labels present on controls and dialogs
+- Focus outlines visible on all interactive elements
+- Screen reader can navigate content structure
 
 ---
 
@@ -287,13 +373,13 @@ Use these files for UX reference and data shape, not for copying code:
 
 | Milestone | Status | Completion |
 |-----------|--------|------------|
-| 0: Scope | ☐→ | 75% |
+| 0: Scope | ☑ | 100% |
 | 1: Core Reader | ☑ | 100% |
 | 2: Offline | ☑ | 100% |
 | 3: Testing | ☑ | 100% |
 | 4: Accessibility | ☑ | 100% |
 | 5: V2 Features | ☐→ | 33% (3/9 done early) |
 
-**Overall v1 readiness: ~95%** (Milestones 1-4 complete)
+**Overall v1 readiness: 100%** (Milestones 0-4 complete)
 
-**Note:** V1 is feature-complete. Only remaining items are Milestone 0 correctness criteria (documentation task) and optional V2 features.
+**V1 is ready for deployment.** All core features implemented with correctness criteria defined. V2 features (annotations, TTS, print stylesheet, etc.) are optional enhancements for post-launch.
