@@ -13,7 +13,10 @@ export default defineConfig({
 			// Workbox configuration
 			workbox: {
 				// Precache essential app shell
-				globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+				globPatterns: ['client/**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+				// Suppress the prerendered warning - we use SPA fallback, not prerendering
+				// This is a known issue: https://github.com/vite-pwa/sveltekit/issues/55
+				globIgnores: ['**/prerendered/**'],
 
 				// Runtime caching for content
 				runtimeCaching: [
