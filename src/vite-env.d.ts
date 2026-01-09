@@ -1,10 +1,21 @@
 /// <reference types="vite/client" />
-/// <reference types="vite-plugin-pwa/client" />
 
-interface ImportMetaEnv {
-  readonly VITE_TTS_PROXY_URL?: string;
-}
+// PWA virtual module types
+declare module 'virtual:pwa-register/svelte' {
+	import type { Writable } from 'svelte/store';
 
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
+	export interface RegisterSWOptions {
+		immediate?: boolean;
+		onNeedRefresh?: () => void;
+		onOfflineReady?: () => void;
+		onRegistered?: (registration: ServiceWorkerRegistration | undefined) => void;
+		onRegisteredSW?: (swScriptUrl: string, registration: ServiceWorkerRegistration | undefined) => void;
+		onRegisterError?: (error: Error) => void;
+	}
+
+	export function useRegisterSW(options?: RegisterSWOptions): {
+		needRefresh: Writable<boolean>;
+		offlineReady: Writable<boolean>;
+		updateServiceWorker: (reloadPage?: boolean) => Promise<void>;
+	};
 }

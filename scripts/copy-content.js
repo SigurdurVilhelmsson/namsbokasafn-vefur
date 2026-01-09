@@ -1,7 +1,7 @@
 /**
- * Copy content from parent repository to static folder
+ * Copy content from public folder to static folder
  *
- * This script copies book content from ../public/content to ./static/content
+ * This script copies book content from ./public/content to ./static/content
  * It's run before dev and build to ensure content is available.
  *
  * Usage: node scripts/copy-content.js
@@ -14,17 +14,16 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
 
-// Source: parent repo's public/content
-const sourceDir = resolve(projectRoot, '..', 'public', 'content');
-// Destination: this project's static/content
+// Source: public/content in this project
+const sourceDir = resolve(projectRoot, 'public', 'content');
+// Destination: static/content for SvelteKit
 const destDir = resolve(projectRoot, 'static', 'content');
 
 function copyContent() {
 	// Check if source exists
 	if (!existsSync(sourceDir)) {
 		console.error(`Source directory not found: ${sourceDir}`);
-		console.error('Make sure you are running from the sveltekit-poc directory');
-		console.error('and the parent repository has public/content/');
+		console.error('Make sure public/content/ exists in the project root.');
 		process.exit(1);
 	}
 
