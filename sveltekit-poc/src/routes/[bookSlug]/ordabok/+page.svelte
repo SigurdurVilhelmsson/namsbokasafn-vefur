@@ -27,7 +27,10 @@
 		}
 	});
 
-	$: filteredTerms = glossary?.terms.filter((term) => {
+	// Icelandic collation for proper alphabetization
+	const icelandicCollator = new Intl.Collator('is', { sensitivity: 'base' });
+
+	$: filteredTerms = (glossary?.terms.filter((term) => {
 		const matchesSearch =
 			!searchQuery ||
 			term.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -35,10 +38,10 @@
 		const matchesLetter =
 			!selectedLetter || term.term.toUpperCase().startsWith(selectedLetter);
 		return matchesSearch && matchesLetter;
-	}) ?? [];
+	}) ?? []).sort((a, b) => icelandicCollator.compare(a.term, b.term));
 
 	$: letters = glossary
-		? [...new Set(glossary.terms.map((t) => t.term[0].toUpperCase()))].sort()
+		? [...new Set(glossary.terms.map((t) => t.term[0].toUpperCase()))].sort((a, b) => icelandicCollator.compare(a, b))
 		: [];
 
 	function clearFilters() {

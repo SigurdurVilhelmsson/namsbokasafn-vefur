@@ -185,6 +185,9 @@ test.describe('Responsive Behavior', () => {
 
 test.describe('CSS Build Validation', () => {
 	test('should have Tailwind CSS applied (icons properly sized)', async ({ page }) => {
+		// Use mobile viewport to ensure header icons are visible (some are lg:hidden)
+		await page.setViewportSize({ width: 375, height: 667 });
+
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
 
@@ -206,6 +209,9 @@ test.describe('CSS Build Validation', () => {
 	});
 
 	test('should have proper button styling', async ({ page }) => {
+		// Use mobile viewport to ensure header buttons are visible (some are lg:hidden)
+		await page.setViewportSize({ width: 375, height: 667 });
+
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
 
