@@ -79,23 +79,28 @@ describe('markdown utils', () => {
 	describe('heading shifting', () => {
 		it('should shift h1 to h2', async () => {
 			const html = await processMarkdown('# Heading 1');
-			expect(html).toContain('<h2>');
-			expect(html).not.toContain('<h1>');
+			expect(html).toMatch(/<h2[^>]*>/); // h2 with optional attributes (like id)
+			expect(html).not.toMatch(/<h1[^>]*>/);
 		});
 
 		it('should shift h2 to h3', async () => {
 			const html = await processMarkdown('## Heading 2');
-			expect(html).toContain('<h3>');
+			expect(html).toMatch(/<h3[^>]*>/);
 		});
 
 		it('should shift h3 to h4', async () => {
 			const html = await processMarkdown('### Heading 3');
-			expect(html).toContain('<h4>');
+			expect(html).toMatch(/<h4[^>]*>/);
 		});
 
 		it('should cap h6 at h6', async () => {
 			const html = await processMarkdown('###### Heading 6');
-			expect(html).toContain('<h6>');
+			expect(html).toMatch(/<h6[^>]*>/);
+		});
+
+		it('should add id attributes to headings', async () => {
+			const html = await processMarkdown('# My Heading');
+			expect(html).toContain('id="my-heading"');
 		});
 	});
 
@@ -365,7 +370,7 @@ Einstein discovered this.
 See [ref:eq:1] for details.
 `;
 			const html = await processMarkdown(md);
-			expect(html).toContain('<h2>'); // h1 shifted to h2
+			expect(html).toMatch(/<h2[^>]*>/); // h1 shifted to h2 (with id attribute)
 			expect(html).toContain('katex');
 			expect(html).toContain('note');
 			expect(html).toContain('cross-reference');

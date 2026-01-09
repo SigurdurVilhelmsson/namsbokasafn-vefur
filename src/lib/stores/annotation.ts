@@ -1,11 +1,14 @@
 /**
  * Annotation Store - Highlights and notes
- * Ported from React/Zustand annotationStore.ts
+ *
+ * Supports both v1 (legacy DOM-based) and v2 (text-based) annotations.
+ * Legacy annotations are automatically upgraded to v2 on successful restoration.
  */
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { Annotation, HighlightColor, TextRange, AnnotationStats } from '$lib/types/annotation';
+import { isLegacyTextRange } from '$lib/types/annotation';
 import { generateId, getCurrentTimestamp } from '$lib/utils/storeHelpers';
 
 const STORAGE_KEY = 'namsbokasafn:annotations';
@@ -78,11 +81,22 @@ function createAnnotationStore() {
 			return id;
 		},
 
-		// Update an existing annotation
+		// Update an existing annotation (color, note)
 		updateAnnotation: (id: string, updates: Partial<Pick<Annotation, 'color' | 'note'>>) => {
 			update((state) => ({
 				annotations: state.annotations.map((ann) =>
 					ann.id === id ? { ...ann, ...updates, updatedAt: getCurrentTimestamp() } : ann
+				)
+			}));
+		},
+
+		// Upgrade annotation range from v1 to v2 format
+		upgradeAnnotationRange: (id: string, newRange: TextRange) => {
+			update((state) => ({
+				annotations: state.annotations.map((ann) =>
+					ann.id === id
+						? { ...ann, range: newRange, updatedAt: getCurrentTimestamp() }
+						: ann
 				)
 			}));
 		},
@@ -173,7 +187,10 @@ function createAnnotationStore() {
 					if (a.sectionSlug !== b.sectionSlug) {
 						return a.sectionSlug.localeCompare(b.sectionSlug);
 					}
-					return a.range.startOffset - b.range.startOffset;
+					// Use offsetFromAnchor for v2, startOffset for v1
+					const aOffset = a.range.version === 2 ? a.range.offsetFromAnchor : (a.range.startOffset ?? 0);
+					const bOffset = b.range.version === 2 ? b.range.offsetFromAnchor : (b.range.startOffset ?? 0);
+					return aOffset - bOffset;
 				});
 
 			if (bookAnnotations.length === 0) {

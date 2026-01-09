@@ -273,7 +273,7 @@ These are explicitly deferred. Do not start until Milestones 1-4 are complete.
 | Status | Item |
 | --- | --- |
 | ☑ | Annotations: highlight + note + delete + export. |
-| ☐ | Highlight restore after refresh/navigation (stable anchors, not DOM-dependent). |
+| ☑ | Highlight restore after refresh/navigation (stable anchors, not DOM-dependent). |
 | ☐ | TTS: Icelandic voice with fallback and controls. |
 | ☐ | Print stylesheet (@media print CSS). |
 | ☐ | Analytics dashboard. |
@@ -378,8 +378,8 @@ Use these files for UX reference and data shape, not for copying code:
 | 2: Offline | ☑ | 100% |
 | 3: Testing | ☑ | 100% |
 | 4: Accessibility | ☑ | 100% |
-| 5: V2 Features | ☐→ | 33% (3/9 done early) |
+| 5: V2 Features | ☐→ | 44% (4/9 done) |
 
 **Overall v1 readiness: 100%** (Milestones 0-4 complete)
 
-**V1 is ready for deployment.** All core features implemented with correctness criteria defined. V2 features (annotations, TTS, print stylesheet, etc.) are optional enhancements for post-launch.
+**V1 is deployed and running.** V2 features are optional enhancements. Highlight restoration now uses text-based anchoring for stability.
