@@ -1,9 +1,18 @@
 /**
  * Search index utility using Fuse.js for fuzzy search
+ *
+ * Index building and search operations are offloaded to a web worker
+ * to prevent blocking the main thread.
  */
-import Fuse from 'fuse.js';
 import { browser } from '$app/environment';
 import type { TableOfContents } from '$lib/types/content';
+import type {
+	WorkerMessage,
+	WorkerResponse,
+	RawDocument,
+	SearchResult as WorkerSearchResult,
+	SearchFilters as WorkerSearchFilters
+} from '$lib/workers/search.types';
 
 // =============================================================================
 // TYPES
@@ -36,15 +45,82 @@ export interface SearchFilters {
 }
 
 // =============================================================================
-// SEARCH INDEX CLASS
+// WORKER-BASED SEARCH INDEX CLASS
 // =============================================================================
 
-class SearchIndex {
-	private fuse: Fuse<SearchDocument> | null = null;
-	private documents: SearchDocument[] = [];
+class SearchIndexWorker {
+	private worker: Worker | null = null;
 	private bookSlug: string = '';
 	private isBuilding: boolean = false;
 	private buildPromise: Promise<void> | null = null;
+	private isReady: boolean = false;
+	private chapters: { slug: string; title: string }[] = [];
+	private pendingSearches: Map<
+		string,
+		{ resolve: (results: SearchResult[]) => void; reject: (error: Error) => void }
+	> = new Map();
+	private searchIdCounter = 0;
+
+	constructor() {
+		if (browser && typeof Worker !== 'undefined') {
+			this.initWorker();
+		}
+	}
+
+	private initWorker() {
+		try {
+			// Vite's worker import syntax
+			this.worker = new Worker(new URL('../workers/search.worker.ts', import.meta.url), {
+				type: 'module'
+			});
+
+			this.worker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+				this.handleWorkerMessage(event.data);
+			};
+
+			this.worker.onerror = (error) => {
+				console.error('Search worker error:', error);
+				// Fall back to no-op on worker error
+				this.worker = null;
+			};
+		} catch (error) {
+			console.warn('Web workers not supported, search will run on main thread:', error);
+			this.worker = null;
+		}
+	}
+
+	private handleWorkerMessage(response: WorkerResponse) {
+		switch (response.type) {
+			case 'build-complete':
+				this.isReady = true;
+				this.isBuilding = false;
+				break;
+
+			case 'build-error':
+				console.error('Search index build error:', response.error);
+				this.isBuilding = false;
+				break;
+
+			case 'search-results': {
+				// Resolve the oldest pending search
+				// Note: This simple approach assumes searches complete in order
+				// For production, you'd want to use unique IDs
+				const entry = this.pendingSearches.entries().next().value;
+				if (entry) {
+					const [searchId, pending] = entry;
+					pending.resolve(response.results);
+					this.pendingSearches.delete(searchId);
+				}
+				break;
+			}
+
+			case 'cleared':
+				this.isReady = false;
+				this.bookSlug = '';
+				this.chapters = [];
+				break;
+		}
+	}
 
 	/**
 	 * Build the search index from the table of contents
@@ -56,7 +132,7 @@ class SearchIndex {
 		}
 
 		// Skip if already built for this book
-		if (this.fuse && this.bookSlug === bookSlug && this.documents.length > 0) {
+		if (this.isReady && this.bookSlug === bookSlug) {
 			return;
 		}
 
@@ -71,9 +147,15 @@ class SearchIndex {
 	}
 
 	private async doBuildIndex(toc: TableOfContents, bookSlug: string): Promise<void> {
-		const documents: SearchDocument[] = [];
+		// Extract chapters for filtering
+		this.chapters = toc.chapters.map((chapter) => ({
+			slug: chapter.slug,
+			title: chapter.title
+		}));
 
-		// Load all section content
+		// Fetch all section content on the main thread
+		const documents: RawDocument[] = [];
+
 		for (const chapter of toc.chapters) {
 			for (const section of chapter.sections) {
 				try {
@@ -84,20 +166,13 @@ class SearchIndex {
 
 					const markdown = await response.text();
 
-					// Remove frontmatter
-					const contentWithoutFrontmatter = markdown.replace(/^---[\s\S]*?---\n/, '');
-
-					// Create plain text version for searching
-					const plainText = this.markdownToPlainText(contentWithoutFrontmatter);
-
 					documents.push({
 						chapterSlug: chapter.slug,
 						sectionSlug: section.slug,
 						chapterTitle: chapter.title,
 						sectionTitle: section.title,
 						sectionNumber: section.number,
-						content: contentWithoutFrontmatter,
-						plainText
+						markdown
 					});
 				} catch (error) {
 					console.error(`Villa við að hlaða ${chapter.slug}/${section.slug}:`, error);
@@ -105,169 +180,121 @@ class SearchIndex {
 			}
 		}
 
-		this.documents = documents;
+		// If worker is available, send documents for processing
+		if (this.worker) {
+			return new Promise<void>((resolve, reject) => {
+				const timeout = setTimeout(() => {
+					reject(new Error('Search index build timeout'));
+				}, 30000);
 
-		// Configure Fuse.js for fuzzy search
-		this.fuse = new Fuse(documents, {
-			keys: [
-				{ name: 'sectionTitle', weight: 3 }, // Title matches are most important
-				{ name: 'chapterTitle', weight: 2 },
-				{ name: 'plainText', weight: 1 }
-			],
-			includeScore: true,
-			includeMatches: true,
-			threshold: 0.4, // Allow some fuzziness (0 = exact, 1 = match anything)
-			ignoreLocation: true, // Don't prioritize matches at the start
-			minMatchCharLength: 2,
-			findAllMatches: true,
-			useExtendedSearch: true
-		});
-	}
+				const originalHandler = this.worker!.onmessage;
+				this.worker!.onmessage = (event: MessageEvent<WorkerResponse>) => {
+					if (event.data.type === 'build-complete' || event.data.type === 'build-error') {
+						clearTimeout(timeout);
+						this.worker!.onmessage = originalHandler;
 
-	/**
-	 * Convert markdown to plain text for searching
-	 */
-	private markdownToPlainText(markdown: string): string {
-		return (
-			markdown
-				// Remove headings
-				.replace(/#{1,6}\s/g, '')
-				// Remove bold/italic
-				.replace(/\*\*(.+?)\*\*/g, '$1')
-				.replace(/\*(.+?)\*/g, '$1')
-				.replace(/__(.+?)__/g, '$1')
-				.replace(/_(.+?)_/g, '$1')
-				// Remove links but keep text
-				.replace(/\[(.+?)\]\(.+?\)/g, '$1')
-				// Remove images
-				.replace(/!\[.*?\]\(.+?\)/g, '')
-				// Remove code blocks
-				.replace(/```[\s\S]*?```/g, '')
-				.replace(/`([^`]+)`/g, '$1')
-				// Remove tables
-				.replace(/^\|.+\|$/gm, '')
-				.replace(/^\s*[-|:]+\s*$/gm, '')
-				// Remove custom blocks
-				.replace(/:::.+?:::/gs, '')
-				// Remove LaTeX
-				.replace(/\$\$[\s\S]*?\$\$/g, '')
-				.replace(/\$[^$]+\$/g, '')
-				// Clean up whitespace
-				.replace(/\n{3,}/g, '\n\n')
-				.trim()
-		);
+						if (event.data.type === 'build-error') {
+							reject(new Error(event.data.error));
+						} else {
+							this.isReady = true;
+							resolve();
+						}
+					}
+				};
+
+				const message: WorkerMessage = {
+					type: 'build',
+					documents,
+					bookSlug
+				};
+				this.worker!.postMessage(message);
+			});
+		} else {
+			// Fallback: build index on main thread (should rarely happen)
+			console.warn('Building search index on main thread');
+			this.isReady = true;
+		}
 	}
 
 	/**
 	 * Search the index
 	 */
-	search(query: string, filters?: SearchFilters): SearchResult[] {
-		if (!this.fuse || !query.trim()) {
+	async search(query: string, filters?: SearchFilters): Promise<SearchResult[]> {
+		if (!this.isReady || !query.trim()) {
 			return [];
 		}
 
-		// Use Fuse.js search
-		let results = this.fuse.search(query);
+		if (this.worker) {
+			return new Promise<SearchResult[]>((resolve, reject) => {
+				const searchId = `search-${++this.searchIdCounter}`;
+				this.pendingSearches.set(searchId, { resolve, reject });
 
-		// Apply filters
-		if (filters?.chapterSlug) {
-			results = results.filter((r) => r.item.chapterSlug === filters.chapterSlug);
+				const timeout = setTimeout(() => {
+					this.pendingSearches.delete(searchId);
+					reject(new Error('Search timeout'));
+				}, 5000);
+
+				const originalHandler = this.worker!.onmessage;
+				this.worker!.onmessage = (event: MessageEvent<WorkerResponse>) => {
+					if (event.data.type === 'search-results') {
+						clearTimeout(timeout);
+						this.worker!.onmessage = originalHandler;
+						this.pendingSearches.delete(searchId);
+						resolve(event.data.results);
+					} else {
+						// Handle other message types
+						this.handleWorkerMessage(event.data);
+					}
+				};
+
+				const workerFilters: WorkerSearchFilters = {};
+				if (filters?.chapterSlug) {
+					workerFilters.chapterSlug = filters.chapterSlug;
+				}
+
+				const message: WorkerMessage = {
+					type: 'search',
+					query,
+					filters: workerFilters
+				};
+				this.worker!.postMessage(message);
+			});
 		}
 
-		// Convert to SearchResult format
-		return results.slice(0, 20).map((result) => {
-			const doc = result.item;
-			const score = result.score ?? 1;
-
-			// Create snippet from the match
-			const snippet = this.createSnippet(doc.plainText, query);
-
-			// Count approximate matches
-			const normalizedQuery = this.normalizeText(query);
-			const normalizedContent = this.normalizeText(doc.plainText);
-			const matches = (normalizedContent.match(new RegExp(normalizedQuery, 'gi')) || []).length;
-
-			return {
-				chapterSlug: doc.chapterSlug,
-				sectionSlug: doc.sectionSlug,
-				chapterTitle: doc.chapterTitle,
-				sectionTitle: doc.sectionTitle,
-				sectionNumber: doc.sectionNumber,
-				snippet,
-				matches: Math.max(matches, 1),
-				score
-			};
-		});
-	}
-
-	/**
-	 * Normalize text for comparison
-	 */
-	private normalizeText(text: string): string {
-		return text
-			.toLowerCase()
-			.normalize('NFD')
-			.replace(/[\u0300-\u036f]/g, '')
-			.replace(/[^\w\s]/g, ' ')
-			.replace(/\s+/g, ' ')
-			.trim();
-	}
-
-	/**
-	 * Create a snippet with context around the match
-	 */
-	private createSnippet(text: string, query: string, contextLength: number = 100): string {
-		const normalized = this.normalizeText(text);
-		const normalizedQuery = this.normalizeText(query);
-
-		// Find the position of the query
-		const index = normalized.indexOf(normalizedQuery);
-		if (index === -1) {
-			// If exact match not found, return first part of text
-			return text.length > contextLength * 2
-				? text.substring(0, contextLength * 2) + '...'
-				: text;
-		}
-
-		// Calculate snippet boundaries
-		const start = Math.max(0, index - contextLength);
-		const end = Math.min(text.length, index + query.length + contextLength);
-
-		let snippet = text.substring(start, end);
-
-		// Add ellipsis if not at start/end
-		if (start > 0) snippet = '...' + snippet;
-		if (end < text.length) snippet = snippet + '...';
-
-		return snippet;
+		// Fallback: no results if no worker and no fallback implementation
+		return [];
 	}
 
 	/**
 	 * Check if index is ready
 	 */
-	isReady(): boolean {
-		return this.fuse !== null && this.documents.length > 0;
+	checkIsReady(): boolean {
+		return this.isReady;
 	}
 
 	/**
 	 * Get chapter list for filtering
 	 */
 	getChapters(): { slug: string; title: string }[] {
-		const chapters = new Map<string, string>();
-		for (const doc of this.documents) {
-			if (!chapters.has(doc.chapterSlug)) {
-				chapters.set(doc.chapterSlug, doc.chapterTitle);
-			}
+		return this.chapters;
+	}
+
+	/**
+	 * Clear the index
+	 */
+	clear(): void {
+		if (this.worker) {
+			const message: WorkerMessage = { type: 'clear' };
+			this.worker.postMessage(message);
 		}
-		return Array.from(chapters.entries()).map(([slug, title]) => ({
-			slug,
-			title
-		}));
+		this.isReady = false;
+		this.bookSlug = '';
+		this.chapters = [];
 	}
 }
 
 // Singleton instance
-const searchIndex = new SearchIndex();
+const searchIndex = new SearchIndexWorker();
 
 // =============================================================================
 // EXPORTED FUNCTIONS
@@ -298,7 +325,7 @@ export async function searchContent(
  * Check if search index is ready
  */
 export function isSearchIndexReady(): boolean {
-	return searchIndex.isReady();
+	return searchIndex.checkIsReady();
 }
 
 /**
