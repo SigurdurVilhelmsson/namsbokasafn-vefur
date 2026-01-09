@@ -291,7 +291,7 @@ These are technical debt items to address opportunistically during development:
 ### Performance
 | Status | Item |
 | --- | --- |
-| ☐ | Move search index building to web worker or precompute at build time. |
+| ☑ | Move search index building to web worker or precompute at build time. |
 | ☑ | Cache TOC and section content to avoid repeated fetches. |
 
 ### Content Pipeline
