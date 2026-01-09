@@ -16,6 +16,7 @@
     "format": "prettier --write .",
     "copy-content": "node scripts/copy-content.js",
     "validate-content": "node scripts/validate-content.js",
+    "lint-content": "npm run copy-content && node scripts/validate-content.js",
     "clean": "rm -rf build .svelte-kit static/content"
   },
   "devDependencies": {

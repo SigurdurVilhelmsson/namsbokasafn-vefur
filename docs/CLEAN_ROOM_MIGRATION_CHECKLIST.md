@@ -303,7 +303,7 @@ These are technical debt items to address opportunistically during development:
 ### Data Integrity
 | Status | Item |
 | --- | --- |
-| ☐ | Content linting for consistent frontmatter and directive usage. |
+| ☑ | Content linting for consistent frontmatter and directive usage. |
 
 ---
 
