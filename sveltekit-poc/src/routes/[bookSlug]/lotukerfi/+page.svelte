@@ -25,7 +25,7 @@
 				Lotukerfið
 			</h1>
 		</div>
-		<p class="text-gray-600 dark:text-gray-400">
+		<p class="text-gray-600 dark:text-gray-300">
 			Smelltu á frumefni til að sjá nánari upplýsingar. Notaðu örvatakkana til að flakka á milli frumefna.
 		</p>
 	</div>
@@ -59,27 +59,27 @@
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			<div class="text-sm">
 				<h3 class="font-medium text-gray-900 dark:text-gray-100">Alkalímálmar</h3>
-				<p class="text-gray-600 dark:text-gray-400">Mjúkir, hvarfgjarnir málmar í 1. flokki</p>
+				<p class="text-gray-600 dark:text-gray-300">Mjúkir, hvarfgjarnir málmar í 1. flokki</p>
 			</div>
 			<div class="text-sm">
 				<h3 class="font-medium text-gray-900 dark:text-gray-100">Jarðalkalímálmar</h3>
-				<p class="text-gray-600 dark:text-gray-400">Hvarfgjarnir málmar í 2. flokki</p>
+				<p class="text-gray-600 dark:text-gray-300">Hvarfgjarnir málmar í 2. flokki</p>
 			</div>
 			<div class="text-sm">
 				<h3 class="font-medium text-gray-900 dark:text-gray-100">Hliðarmálmar</h3>
-				<p class="text-gray-600 dark:text-gray-400">Harðir málmar með margar oxunartölur</p>
+				<p class="text-gray-600 dark:text-gray-300">Harðir málmar með margar oxunartölur</p>
 			</div>
 			<div class="text-sm">
 				<h3 class="font-medium text-gray-900 dark:text-gray-100">Hálfmálmar</h3>
-				<p class="text-gray-600 dark:text-gray-400">Hafa eiginleika bæði málma og málmleysinga</p>
+				<p class="text-gray-600 dark:text-gray-300">Hafa eiginleika bæði málma og málmleysinga</p>
 			</div>
 			<div class="text-sm">
 				<h3 class="font-medium text-gray-900 dark:text-gray-100">Halógenar</h3>
-				<p class="text-gray-600 dark:text-gray-400">Hvarfgjarnir málmleysingjar í 17. flokki</p>
+				<p class="text-gray-600 dark:text-gray-300">Hvarfgjarnir málmleysingjar í 17. flokki</p>
 			</div>
 			<div class="text-sm">
 				<h3 class="font-medium text-gray-900 dark:text-gray-100">Eðalgastegundir</h3>
-				<p class="text-gray-600 dark:text-gray-400">Óhvarfgjörn gas í 18. flokki</p>
+				<p class="text-gray-600 dark:text-gray-300">Óhvarfgjörn gas í 18. flokki</p>
 			</div>
 		</div>
 	</div>

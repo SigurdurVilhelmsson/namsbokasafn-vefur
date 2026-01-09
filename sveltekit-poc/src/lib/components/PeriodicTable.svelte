@@ -176,12 +176,12 @@
 				type="text"
 				bind:value={searchQuery}
 				placeholder="Leita að frumefni..."
-				class="w-full sm:w-64 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-2 pl-9 pr-4 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				class="w-full sm:w-64 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 py-2 pl-9 pr-4 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
 				aria-label="Leita að frumefni"
 			/>
 		</div>
 
-		<div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+		<div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300">
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
 			</svg>
@@ -195,7 +195,7 @@
 			on:click={() => (filterCategory = null)}
 			class="rounded-full px-3 py-1 text-xs font-medium transition-all {filterCategory === null
 				? 'bg-blue-600 text-white'
-				: 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
+				: 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700'}"
 		>
 			Allt
 		</button>
@@ -216,8 +216,8 @@
 	<!-- Periodic table grid -->
 	<div class="overflow-x-auto" role="grid" aria-label="Lotukerfið">
 		<div
-			class="grid min-w-[800px] gap-0.5"
-			style="grid-template-columns: repeat(18, minmax(40px, 1fr)); grid-template-rows: repeat(10, minmax(40px, 50px));"
+			class="grid min-w-[900px] gap-0.5"
+			style="grid-template-columns: repeat(18, minmax(48px, 1fr)); grid-template-rows: repeat(10, minmax(52px, 64px));"
 		>
 			{#each ELEMENTS as element (element.atomicNumber)}
 				{@const pos = ELEMENT_POSITIONS[element.atomicNumber]}
@@ -238,18 +238,18 @@
 							style="background-color: {colors.bg}; border-color: {colors.border}; color: {colors.text};"
 							aria-label="{element.nameIs} ({element.symbol}), sætistala {element.atomicNumber}"
 						>
-							<span class="absolute left-0.5 top-0 text-[8px] opacity-70 sm:text-[9px]">{element.atomicNumber}</span>
-							<span class="text-sm font-bold leading-tight sm:text-base md:text-lg">{element.symbol}</span>
-							<span class="hidden truncate text-[7px] leading-tight opacity-80 sm:block sm:text-[8px]">{element.nameIs}</span>
-							<span class="hidden text-[6px] opacity-60 md:block">{element.atomicMass.toFixed(2)}</span>
+							<span class="absolute left-0.5 top-0 text-[clamp(0.4rem,0.7vw,0.6rem)] opacity-70">{element.atomicNumber}</span>
+							<span class="text-[clamp(0.75rem,1.2vw,1.125rem)] font-bold leading-tight">{element.symbol}</span>
+							<span class="hidden text-[clamp(0.4rem,0.65vw,0.75rem)] leading-tight opacity-80 sm:block overflow-hidden text-ellipsis whitespace-nowrap max-w-full px-0.5">{element.nameIs}</span>
+							<span class="hidden text-[clamp(0.4rem,0.6vw,0.6rem)] opacity-60 md:block">{element.atomicMass.toFixed(2)}</span>
 						</button>
 					</div>
 				{/if}
 			{/each}
 
 			<!-- Lanthanide/Actinide labels -->
-			<div style="grid-row: 6; grid-column: 3;" class="flex items-center justify-center text-[10px] text-gray-400">57-71</div>
-			<div style="grid-row: 7; grid-column: 3;" class="flex items-center justify-center text-[10px] text-gray-400">89-103</div>
+			<div style="grid-row: 6; grid-column: 3;" class="flex items-center justify-center text-xs text-gray-400">57-71</div>
+			<div style="grid-row: 7; grid-column: 3;" class="flex items-center justify-center text-xs text-gray-400">89-103</div>
 		</div>
 	</div>
 </div>
@@ -326,7 +326,7 @@
 			<!-- Content -->
 			<div class="p-6">
 				{#if selectedElement.description}
-					<p class="mb-6 text-gray-600 dark:text-gray-400">{selectedElement.description}</p>
+					<p class="mb-6 text-gray-700 dark:text-gray-300">{selectedElement.description}</p>
 				{/if}
 
 				<div class="grid gap-4 sm:grid-cols-2">
@@ -341,23 +341,23 @@
 						</h3>
 						<dl class="space-y-2 text-sm">
 							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-400">Sætistala</dt>
+								<dt class="text-gray-500 dark:text-gray-300">Sætistala</dt>
 								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.atomicNumber}</dd>
 							</div>
 							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-400">Atómmassi</dt>
+								<dt class="text-gray-500 dark:text-gray-300">Atómmassi</dt>
 								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.atomicMass} u</dd>
 							</div>
 							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-400">Lota</dt>
+								<dt class="text-gray-500 dark:text-gray-300">Lota</dt>
 								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.period}</dd>
 							</div>
 							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-400">Flokkur</dt>
+								<dt class="text-gray-500 dark:text-gray-300">Flokkur</dt>
 								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.group ?? '—'}</dd>
 							</div>
 							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-400">Blokk</dt>
+								<dt class="text-gray-500 dark:text-gray-300">Blokk</dt>
 								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.block}</dd>
 							</div>
 						</dl>
@@ -373,16 +373,16 @@
 						</h3>
 						<dl class="space-y-2 text-sm">
 							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-400">Rafeindaskipan</dt>
+								<dt class="text-gray-500 dark:text-gray-300">Rafeindaskipan</dt>
 								<dd class="font-mono text-xs text-gray-900 dark:text-gray-100">{selectedElement.electronConfiguration}</dd>
 							</div>
 							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-400">Oxunartölur</dt>
+								<dt class="text-gray-500 dark:text-gray-300">Oxunartölur</dt>
 								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.oxidationStates.join(', ')}</dd>
 							</div>
 							{#if selectedElement.electronegativity}
 								<div class="flex justify-between">
-									<dt class="text-gray-500 dark:text-gray-400">Rafneikvæðni</dt>
+									<dt class="text-gray-500 dark:text-gray-300">Rafneikvæðni</dt>
 									<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.electronegativity}</dd>
 								</div>
 							{/if}
@@ -400,19 +400,19 @@
 						<dl class="space-y-2 text-sm">
 							{#if selectedElement.meltingPoint}
 								<div class="flex justify-between">
-									<dt class="text-gray-500 dark:text-gray-400">Bræðslumark</dt>
+									<dt class="text-gray-500 dark:text-gray-300">Bræðslumark</dt>
 									<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.meltingPoint} K</dd>
 								</div>
 							{/if}
 							{#if selectedElement.boilingPoint}
 								<div class="flex justify-between">
-									<dt class="text-gray-500 dark:text-gray-400">Suðumark</dt>
+									<dt class="text-gray-500 dark:text-gray-300">Suðumark</dt>
 									<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.boilingPoint} K</dd>
 								</div>
 							{/if}
 							{#if selectedElement.density}
 								<div class="flex justify-between">
-									<dt class="text-gray-500 dark:text-gray-400">Eðlismassi</dt>
+									<dt class="text-gray-500 dark:text-gray-300">Eðlismassi</dt>
 									<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.density} g/cm³</dd>
 								</div>
 							{/if}
@@ -429,11 +429,11 @@
 						</h3>
 						<dl class="space-y-2 text-sm">
 							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-400">Tegund</dt>
+								<dt class="text-gray-500 dark:text-gray-300">Tegund</dt>
 								<dd class="font-medium text-gray-900 dark:text-gray-100">{CATEGORY_LABELS[selectedElement.category]}</dd>
 							</div>
 							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-400">Ástand við 25°C</dt>
+								<dt class="text-gray-500 dark:text-gray-300">Ástand við 25°C</dt>
 								<dd class="font-medium text-gray-900 dark:text-gray-100">{getPhaseLabel(selectedElement)}</dd>
 							</div>
 						</dl>
@@ -444,7 +444,7 @@
 				<div class="mt-6 flex justify-center">
 					<a
 						href="/{bookSlug}/ordabok?search={encodeURIComponent(selectedElement.nameIs)}"
-						class="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+						class="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />

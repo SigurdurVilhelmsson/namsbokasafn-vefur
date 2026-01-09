@@ -102,7 +102,7 @@
 		</h1>
 
 		<!-- Description -->
-		<p class="text-gray-600 dark:text-gray-400 mb-4">
+		<p class="text-gray-600 dark:text-gray-300 mb-4">
 			{#if isOfflineError || isOffline}
 				{#if bookSlug && !isBookDownloaded}
 					Þú ert án nettengingar og þessi bók hefur ekki verið sótt fyrir ónettengdan lestur.
@@ -197,7 +197,7 @@
 						<span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
 					{/if}
 				</span>
-				<span class="text-gray-500 dark:text-gray-400">
+				<span class="text-gray-500 dark:text-gray-300">
 					{isOffline ? 'Án tengingar' : 'Tengdur'}
 				</span>
 			</div>

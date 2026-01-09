@@ -93,7 +93,7 @@
 		<div class="p-6">
 			<!-- Selected text preview -->
 			<div class="mb-4">
-				<label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400">
+				<label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-300">
 					Valinn texti
 				</label>
 				<blockquote
@@ -105,7 +105,7 @@
 
 			<!-- Color selector -->
 			<div class="mb-4">
-				<label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400">
+				<label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-300">
 					Litur yfirstrokunar
 				</label>
 				<div class="flex gap-2">
@@ -127,7 +127,7 @@
 			<div class="mb-4">
 				<label
 					for="annotation-note"
-					class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-400"
+					class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-300"
 				>
 					Athugasemd (valfrjalst)
 				</label>

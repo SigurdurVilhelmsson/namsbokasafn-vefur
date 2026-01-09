@@ -226,7 +226,7 @@
 			<button
 				on:click={handleExport}
 				disabled={stats.total === 0}
-				class="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+				class="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
 				title="Flytja ut sem Markdown"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -259,7 +259,7 @@
 							d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
 						/>
 					</svg>
-					<p class="text-gray-500 dark:text-gray-400">Engar athugasemdir fundust</p>
+					<p class="text-gray-500 dark:text-gray-300">Engar athugasemdir fundust</p>
 					<p class="mt-2 text-sm text-gray-400 dark:text-gray-500">
 						Veldu texta til ad yfirstrika eda baeta vid athugasemd
 					</p>
@@ -274,10 +274,10 @@
 						>
 							<!-- Header -->
 							<div class="mb-2 flex items-start justify-between">
-								<span class="text-xs font-medium text-gray-500 dark:text-gray-400">
+								<span class="text-xs font-medium text-gray-500 dark:text-gray-300">
 									{annotation.chapterSlug} / {annotation.sectionSlug}
 								</span>
-								<span class="text-xs text-gray-500 dark:text-gray-400">
+								<span class="text-xs text-gray-500 dark:text-gray-300">
 									{new Date(annotation.createdAt).toLocaleDateString('is-IS')}
 								</span>
 							</div>
@@ -354,7 +354,7 @@
 		<!-- Stats footer -->
 		{#if stats.total > 0}
 			<div class="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
-				<div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+				<div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-300">
 					<span>
 						{stats.total} yfirstrikun{stats.total !== 1 ? 'ar' : ''}
 					</span>

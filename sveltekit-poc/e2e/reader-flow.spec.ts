@@ -182,3 +182,47 @@ test.describe('Responsive Behavior', () => {
 		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({ timeout: 10000 });
 	});
 });
+
+test.describe('CSS Build Validation', () => {
+	test('should have Tailwind CSS applied (icons properly sized)', async ({ page }) => {
+		await page.goto('/');
+		await page.waitForLoadState('networkidle');
+
+		// Navigate to a book to get the header with icon buttons
+		const bookLink = page.getByRole('link', { name: /Efnafræði/i }).first();
+		await bookLink.click();
+		await page.waitForLoadState('networkidle');
+
+		// Check that SVG icons have constrained dimensions (Tailwind w-5 h-5 = 20px)
+		// If Tailwind CSS is missing, icons will be huge (default SVG size)
+		const icon = page.locator('header svg').first();
+		await expect(icon).toBeVisible({ timeout: 10000 });
+
+		const box = await icon.boundingBox();
+		expect(box).not.toBeNull();
+		expect(box!.width).toBeLessThan(50); // Icons should be ~20px, not 100+
+		expect(box!.height).toBeLessThan(50);
+		expect(box!.width).toBeGreaterThan(10); // But not tiny either
+	});
+
+	test('should have proper button styling', async ({ page }) => {
+		await page.goto('/');
+		await page.waitForLoadState('networkidle');
+
+		const bookLink = page.getByRole('link', { name: /Efnafræði/i }).first();
+		await bookLink.click();
+		await page.waitForLoadState('networkidle');
+
+		// Check that header buttons have proper padding (Tailwind p-2 = 8px)
+		const button = page.locator('header button').first();
+		await expect(button).toBeVisible({ timeout: 10000 });
+
+		const padding = await button.evaluate((el) => {
+			const styles = window.getComputedStyle(el);
+			return parseFloat(styles.padding) || parseFloat(styles.paddingTop);
+		});
+
+		// Should have some padding if Tailwind is applied
+		expect(padding).toBeGreaterThan(0);
+	});
+});

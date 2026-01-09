@@ -109,7 +109,7 @@
 				</button>
 			{:else}
 				<div class="flex items-center gap-2">
-					<span class="text-sm text-gray-600 dark:text-gray-400">Eyða?</span>
+					<span class="text-sm text-gray-600 dark:text-gray-300">Eyða?</span>
 					<button
 						on:click={handleDelete}
 						class="rounded-lg bg-red-100 px-3 py-1 text-sm font-medium text-red-700 transition-colors hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
@@ -130,7 +130,7 @@
 		<div class="w-full max-w-xs">
 			<div class="mb-2 flex items-center justify-between text-sm">
 				<span class="font-medium text-gray-700 dark:text-gray-300">Sæki bók...</span>
-				<span class="text-gray-500 dark:text-gray-400">
+				<span class="text-gray-500 dark:text-gray-300">
 					{progress?.downloadedFiles ?? 0} / {progress?.totalFiles ?? 0} skrár
 				</span>
 			</div>
@@ -143,7 +143,7 @@
 				></div>
 			</div>
 
-			<div class="mt-1 text-right text-xs text-gray-500 dark:text-gray-400">
+			<div class="mt-1 text-right text-xs text-gray-500 dark:text-gray-300">
 				{formatBytes(progress?.downloadedBytes ?? 0)}
 			</div>
 		</div>

@@ -96,7 +96,7 @@
 			<h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
 				Tilbúinn að læra?
 			</h2>
-			<p class="text-gray-600 dark:text-gray-400 mb-6">
+			<p class="text-gray-600 dark:text-gray-300 mb-6">
 				Endurtakning með bilum (spaced repetition) hjálpar þér að muna efnið betur.
 			</p>
 
@@ -104,15 +104,15 @@
 			<div class="grid grid-cols-3 gap-4 mb-8">
 				<div class="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
 					<div class="text-2xl font-bold text-gray-900 dark:text-gray-100">{deckStats.new}</div>
-					<div class="text-sm text-gray-500 dark:text-gray-400">Ný kort</div>
+					<div class="text-sm text-gray-500 dark:text-gray-300">Ný kort</div>
 				</div>
 				<div class="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
 					<div class="text-2xl font-bold text-orange-600 dark:text-orange-400">{deckStats.due}</div>
-					<div class="text-sm text-gray-500 dark:text-gray-400">Til endurtekningar</div>
+					<div class="text-sm text-gray-500 dark:text-gray-300">Til endurtekningar</div>
 				</div>
 				<div class="p-4 rounded-lg bg-gray-100 dark:bg-gray-800">
 					<div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{deckStats.total}</div>
-					<div class="text-sm text-gray-500 dark:text-gray-400">Alls</div>
+					<div class="text-sm text-gray-500 dark:text-gray-300">Alls</div>
 				</div>
 			</div>
 
@@ -151,7 +151,7 @@
 			<h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
 				Vel gert!
 			</h2>
-			<p class="text-gray-600 dark:text-gray-400 mb-6">
+			<p class="text-gray-600 dark:text-gray-300 mb-6">
 				Þú hefur lokið öllum kortum fyrir í dag.
 			</p>
 
@@ -175,7 +175,7 @@
 		<div>
 			<!-- Progress bar -->
 			<div class="mb-6">
-				<div class="flex justify-between text-sm text-gray-500 dark:text-gray-400 mb-2">
+				<div class="flex justify-between text-sm text-gray-500 dark:text-gray-300 mb-2">
 					<span>Kort {$studyProgress.current + 1} af {$studyProgress.total}</span>
 					<span>{Math.round((($studyProgress.current) / $studyProgress.total) * 100)}%</span>
 				</div>
@@ -204,12 +204,12 @@
 
 			<!-- Flip hint or rating buttons -->
 			{#if !isFlipped}
-				<p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+				<p class="text-center text-sm text-gray-500 dark:text-gray-300 mt-4">
 					Smelltu á kortið til að sjá svarið
 				</p>
 			{:else}
 				<div class="mt-6">
-					<p class="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+					<p class="text-center text-sm text-gray-500 dark:text-gray-300 mb-4">
 						Hversu auðvelt var þetta?
 					</p>
 					<div class="grid grid-cols-4 gap-2">

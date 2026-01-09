@@ -53,7 +53,7 @@
 	<div class="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2">
 		<div class="flex items-center gap-2 sm:gap-3">
 			{#if data.section.readingTime}
-				<span class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+				<span class="text-xs sm:text-sm text-gray-500 dark:text-gray-300">
 					~{data.section.readingTime} mín
 				</span>
 			{/if}

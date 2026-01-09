@@ -59,7 +59,7 @@
 					{data.chapter.number}
 				</span>
 				<div>
-					<p class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+					<p class="text-sm font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
 						Kafli {data.chapter.number}
 					</p>
 					<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100">
@@ -130,7 +130,7 @@
 
 						<!-- Type badge -->
 						{#if typeIcon}
-							<span class="flex-shrink-0 text-xs font-medium px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+							<span class="flex-shrink-0 text-xs font-medium px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
 								{typeIcon}
 							</span>
 						{/if}

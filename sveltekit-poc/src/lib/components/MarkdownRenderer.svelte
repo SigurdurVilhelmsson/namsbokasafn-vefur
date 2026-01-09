@@ -50,7 +50,7 @@
 {#if loading}
 	<div class="flex items-center justify-center py-8">
 		<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-		<span class="ml-2 text-gray-600 dark:text-gray-400">Hleður efni...</span>
+		<span class="ml-2 text-gray-600 dark:text-gray-300">Hleður efni...</span>
 	</div>
 {:else if error}
 	<div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 my-4">
