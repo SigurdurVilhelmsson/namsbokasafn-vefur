@@ -109,7 +109,7 @@
 			<h2 class="font-semibold text-gray-900 dark:text-gray-100">Efnisyfirlit</h2>
 			<button
 				on:click={closeSidebar}
-				class="rounded-lg p-2 -mr-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 lg:hidden"
+				class="rounded-lg p-2 -mr-2 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 lg:hidden"
 				aria-label="Loka valmynd"
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,7 +121,7 @@
 		<!-- Sidebar content -->
 		<nav class="flex-1 overflow-y-auto py-4" aria-label="Efnisyfirlit">
 			{#if !toc}
-				<p class="text-gray-500 dark:text-gray-400 px-4">Hleður efnisyfirlit...</p>
+				<p class="text-gray-500 dark:text-gray-300 px-4">Hleður efnisyfirlit...</p>
 			{:else}
 				<ul class="space-y-1 px-2">
 					{#each toc.chapters as chapter (chapter.number)}
@@ -133,7 +133,7 @@
 							{#if progress > 0}
 								<div class="mb-2 px-4">
 									<div class="mb-2 flex items-center justify-between">
-										<span class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+										<span class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
 											{chapter.number}. kafli
 										</span>
 										<span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -206,7 +206,7 @@
 
 				<!-- Study tools section -->
 				<div class="mt-6 space-y-1 border-t border-gray-100 dark:border-gray-800 px-2 pt-4">
-					<h3 class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+					<h3 class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
 						Námsverkfæri
 					</h3>
 					<a

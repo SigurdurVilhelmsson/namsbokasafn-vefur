@@ -1,3 +1,70 @@
+@import "tailwindcss";
+
+/* Configure Tailwind v4 to use class-based dark mode (not prefers-color-scheme) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Ensure our custom CSS variables take precedence */
+@layer base {
+  :root {
+    /* Force browser to use light color scheme for native elements */
+    color-scheme: light;
+
+    /* Font sizes */
+    --font-size-base: 16px;
+    --font-size-small: 14px;
+    --font-size-large: 18px;
+    --font-size-xlarge: 20px;
+
+    /* Line heights */
+    --line-height-normal: 1.6;
+    --line-height-relaxed: 1.8;
+    --line-height-loose: 2.0;
+
+    /* Line widths (max-width for reading content) */
+    --line-width-narrow: 38rem;
+    --line-width-medium: 48rem;
+    --line-width-wide: 60rem;
+
+    /* Light theme colors */
+    --bg-primary: #faf8f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f3f4f6;
+    --text-primary: #1a1a1a;
+    --text-secondary: #4a5568;
+    --border-color: #e8eaed;
+    --accent-color: #1a7d5c;
+    --accent-hover: #145f46;
+    --accent-light: #e8f5f1;
+    --accent-decorative: #5dba9c;
+    --header-banner: #1a7d5c;
+    --header-banner-text: #ffffff;
+  }
+
+  .dark {
+    /* Force browser to use dark color scheme for native elements */
+    color-scheme: dark;
+
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #16213e;
+    --bg-tertiary: #1e293b;
+    --text-primary: #e2e8f0;
+    --text-secondary: #cbd5e1;
+    --border-color: #2d3748;
+    --accent-color: #6ee7b7;
+    --accent-hover: #86efac;
+    --accent-light: #1e3a32;
+    --accent-decorative: #5dba9c;
+    --header-banner: #5dba9c;
+    --header-banner-text: #1a1a2e;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Source Serif Pro', Georgia, serif;
+  }
+}
+
 /* OpenDyslexic font for dyslexia-friendly reading */
 @font-face {
   font-family: 'OpenDyslexic';
@@ -23,69 +90,7 @@
   font-display: swap;
 }
 
-/* Icelandic font support and custom properties */
-:root {
-  /* Font sizes */
-  --font-size-base: 16px;
-  --font-size-small: 14px;
-  --font-size-large: 18px;
-  --font-size-xlarge: 20px;
-
-  /* Line heights */
-  --line-height-normal: 1.6;
-  --line-height-relaxed: 1.8;
-  --line-height-loose: 2.0;
-
-  /* Line widths (max-width for reading content) */
-  --line-width-narrow: 38rem;
-  --line-width-medium: 48rem;
-  --line-width-wide: 60rem;
-}
-
-/* Light theme (default) */
-:root {
-  --bg-primary: #faf8f5;
-  --bg-secondary: #ffffff;
-  --text-primary: #1a1a1a;
-  --text-secondary: #4a5568;
-  --border-color: #e8eaed;
-  --accent-color: #1a7d5c;
-  --accent-hover: #145f46;
-  --accent-light: #e8f5f1;
-  --accent-decorative: #5dba9c;
-  --header-banner: #1a7d5c;
-  --header-banner-text: #ffffff;
-}
-
-/* Dark theme */
-.dark {
-  --bg-primary: #1a1a2e;
-  --bg-secondary: #16213e;
-  --text-primary: #e2e8f0;
-  --text-secondary: #a0aec0;
-  --border-color: #2d3748;
-  --accent-color: #6ee7b7;
-  --accent-hover: #86efac;
-  --accent-light: #1e3a32;
-  --accent-decorative: #5dba9c;
-  --header-banner: #5dba9c;
-  --header-banner-text: #1a1a2e;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: 'Source Serif Pro', Georgia, serif;
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
+/* Variables are now in @layer base above */
 
 /* ========================================== */
 /* FONT FAMILY CLASSES                        */

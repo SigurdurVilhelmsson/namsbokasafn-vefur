@@ -59,7 +59,7 @@
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
 			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-			<span class="ml-3 text-gray-600 dark:text-gray-400">Hleður...</span>
+			<span class="ml-3 text-gray-600 dark:text-gray-300">Hleður...</span>
 		</div>
 	{:else if error}
 		<div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
@@ -115,7 +115,7 @@
 		</div>
 
 		<!-- Results count -->
-		<p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+		<p class="text-sm text-gray-500 dark:text-gray-300 mb-4">
 			{filteredTerms.length} {filteredTerms.length === 1 ? 'niðurstaða' : 'niðurstöður'}
 		</p>
 
@@ -125,7 +125,7 @@
 				<svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 				</svg>
-				<p class="text-gray-500 dark:text-gray-400">Engin orð fundust</p>
+				<p class="text-gray-500 dark:text-gray-300">Engin orð fundust</p>
 			</div>
 		{:else}
 			<div class="space-y-4">
@@ -136,7 +136,7 @@
 								{term.term}
 							</h3>
 							{#if term.english}
-								<span class="text-sm text-gray-500 dark:text-gray-400 italic">
+								<span class="text-sm text-gray-500 dark:text-gray-300 italic">
 									{term.english}
 								</span>
 							{/if}
@@ -146,7 +146,7 @@
 						</p>
 						{#if term.relatedTerms && term.relatedTerms.length > 0}
 							<div class="mt-3 flex flex-wrap gap-2">
-								<span class="text-xs text-gray-500 dark:text-gray-400">Tengd orð:</span>
+								<span class="text-xs text-gray-500 dark:text-gray-300">Tengd orð:</span>
 								{#each term.relatedTerms as related}
 									<button
 										on:click={() => (searchQuery = related)}

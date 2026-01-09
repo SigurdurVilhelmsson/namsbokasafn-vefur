@@ -99,7 +99,7 @@
 		<!-- Add note button -->
 		<button
 			on:click={onAddNote}
-			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
+			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
 			aria-label="Baeta vid athugasemd"
 			title="Baeta vid athugasemd"
 		>
@@ -117,7 +117,7 @@
 		<!-- Create flashcard button -->
 		<button
 			on:click={onCreateFlashcard}
-			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
+			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
 			aria-label="Bua til minniskort"
 			title="Bua til minniskort"
 		>
@@ -136,7 +136,7 @@
 		{#if onGlossaryLookup}
 			<button
 				on:click={onGlossaryLookup}
-				class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
+				class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
 				aria-label="Fletta upp i ordasafni"
 				title="Fletta upp i ordasafni"
 			>

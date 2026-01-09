@@ -127,7 +127,7 @@
 		<h3 class="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">
 			Engin aefingadaemi tiltaek
 		</h3>
-		<p class="text-sm text-gray-500 dark:text-gray-400">
+		<p class="text-sm text-gray-500 dark:text-gray-300">
 			Fardu i gegnum efnid og leystu aefingadaemi til ad byrja adlogunarprof.
 		</p>
 	</div>
@@ -141,7 +141,7 @@
 		<div class="mb-6 text-center">
 			<span class="text-5xl mb-4 block">🏆</span>
 			<h3 class="mb-2 text-xl font-bold text-gray-900 dark:text-gray-100">Profi lokid!</h3>
-			<p class="text-gray-500 dark:text-gray-400">
+			<p class="text-gray-500 dark:text-gray-300">
 				Thu hefur lokid vid {totalProblems} daemi
 			</p>
 		</div>
@@ -179,7 +179,7 @@
 
 		<!-- Mastery progress -->
 		<div class="mb-6 space-y-2">
-			<h4 class="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400">
+			<h4 class="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-300">
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
@@ -278,7 +278,7 @@
 				<span class="text-sm font-semibold text-gray-900 dark:text-gray-100">Adlogunarprof</span>
 			</div>
 			<div class="flex items-center gap-3">
-				<span class="text-sm text-gray-500 dark:text-gray-400">
+				<span class="text-sm text-gray-500 dark:text-gray-300">
 					{state.currentIndex + 1} / {totalProblems}
 				</span>
 				<div class="h-2 w-24 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
@@ -309,7 +309,7 @@
 					</span>
 				</div>
 				{#if mastery.attempts > 0}
-					<span class="text-xs text-gray-500 dark:text-gray-400">
+					<span class="text-xs text-gray-500 dark:text-gray-300">
 						{mastery.successRate}% nakvaemni ({mastery.attempts} tilraunir)
 					</span>
 				{/if}
@@ -319,7 +319,7 @@
 		<!-- Problem content -->
 		<div class="p-6">
 			<div class="mb-4">
-				<h4 class="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400">
+				<h4 class="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-300">
 					<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							stroke-linecap="round"
@@ -360,7 +360,7 @@
 
 					<!-- Self-assessment -->
 					<div class="rounded-lg bg-gray-50 dark:bg-gray-900 p-4">
-						<p class="mb-3 text-center text-sm text-gray-500 dark:text-gray-400">Hvernig gekk?</p>
+						<p class="mb-3 text-center text-sm text-gray-500 dark:text-gray-300">Hvernig gekk?</p>
 						<div class="flex gap-3">
 							<button
 								on:click={() => handleAnswer(true)}
@@ -401,7 +401,7 @@
 			<div
 				class="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-2"
 			>
-				<span class="text-sm text-gray-500 dark:text-gray-400">Nuverandi einkunn</span>
+				<span class="text-sm text-gray-500 dark:text-gray-300">Nuverandi einkunn</span>
 				<div class="flex items-center gap-2">
 					<span class="flex items-center gap-1 text-sm text-emerald-600 dark:text-emerald-400">
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

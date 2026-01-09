@@ -53,7 +53,7 @@
 		<h1 class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
 			{data.book?.title ?? 'Bók'}
 		</h1>
-		<p class="text-gray-600 dark:text-gray-400 mb-4">
+		<p class="text-gray-600 dark:text-gray-300 mb-4">
 			Veldu kafla til að byrja að lesa
 		</p>
 		<DownloadBookButton bookSlug={data.bookSlug} bookTitle={data.book?.title ?? ''} />
@@ -62,7 +62,7 @@
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
 			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-			<span class="ml-3 text-gray-600 dark:text-gray-400">Hleður...</span>
+			<span class="ml-3 text-gray-600 dark:text-gray-300">Hleður...</span>
 		</div>
 	{:else if error}
 		<ErrorMessage
@@ -97,7 +97,7 @@
 						{chapter.title}
 					</h2>
 
-					<p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+					<p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
 						{chapter.sections.length} kaflar
 					</p>
 
@@ -116,10 +116,10 @@
 		<!-- Attribution -->
 		{#if toc.source}
 			<div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-				<h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+				<h3 class="text-sm font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider mb-4">
 					Um bókina
 				</h3>
-				<div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+				<div class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
 					<p><strong>Upprunalegt efni:</strong> {toc.source.original}</p>
 					{#if toc.source.authors}
 						<p><strong>Höfundar:</strong> {toc.source.authors}</p>
