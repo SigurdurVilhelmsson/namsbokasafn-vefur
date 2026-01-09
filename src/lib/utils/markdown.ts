@@ -7,6 +7,7 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import remarkDirective from 'remark-directive';
 import remarkRehype from 'remark-rehype';
+import rehypeSlug from 'rehype-slug';
 import rehypeKatex from 'rehype-katex';
 import rehypeStringify from 'rehype-stringify';
 import { visit } from 'unist-util-visit';
@@ -553,6 +554,7 @@ export async function processMarkdown(content: string): Promise<string> {
 		})
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
+		.use(rehypeSlug)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
 		.process(content);
@@ -580,6 +582,7 @@ export function processMarkdownSync(content: string): string {
 		})
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
+		.use(rehypeSlug)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
 		.processSync(content);
