@@ -1,14 +1,17 @@
 /**
- * Content validation script
+ * Content validation and linting script
  *
  * Validates book content for common issues:
  * - Broken internal references
  * - Missing image alt text
  * - Duplicate IDs
  * - Missing referenced images
- * - Invalid frontmatter
+ * - Invalid/incomplete frontmatter
+ * - Unclosed or malformed directives
+ * - Cross-reference format validation
+ * - TOC-frontmatter consistency
  *
- * Usage: node scripts/validate-content.js [--fix]
+ * Usage: node scripts/validate-content.js [--book <bookSlug>]
  * Exit code: 0 if valid, 1 if errors found
  */
 
@@ -20,6 +23,29 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
 const contentDir = resolve(projectRoot, 'static', 'content');
 
+// =============================================================================
+// CONFIGURATION
+// =============================================================================
+
+const VALID_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'];
+const VALID_SECTION_TYPES = ['glossary', 'exercises', 'summary', 'equations', 'answer-key', 'content'];
+
+const DIRECTIVE_NAMES = [
+	'practice-problem',
+	'answer',
+	'explanation',
+	'hint',
+	'note',
+	'warning',
+	'example',
+	'definition',
+	'key-concept',
+	'checkpoint',
+	'common-misconception'
+];
+
+const CROSS_REF_TYPES = ['sec', 'eq', 'fig', 'tbl', 'def'];
+
 // Track all issues found
 const issues = {
 	errors: [],
@@ -29,6 +55,7 @@ const issues = {
 // Track all valid section slugs for cross-reference validation
 const validSections = new Map(); // Map<bookSlug, Set<sectionPath>>
 const validChapters = new Map(); // Map<bookSlug, Set<chapterSlug>>
+const tocData = new Map(); // Map<bookSlug, toc>
 
 /**
  * Log an error
@@ -102,7 +129,7 @@ function indexSections(bookSlug, toc) {
 /**
  * Validate markdown content
  */
-function validateMarkdown(filePath, bookSlug, chapterSlug) {
+function validateMarkdown(filePath, bookSlug, chapterSlug, tocSection = null, tocChapter = null) {
 	const content = readFileSync(filePath, 'utf-8');
 	const lines = content.split('\n');
 	const fileName = basename(filePath);
@@ -196,29 +223,196 @@ function validateMarkdown(filePath, bookSlug, chapterSlug) {
 		}
 	});
 
-	// Check frontmatter
-	validateFrontmatter(filePath, content);
+	// Check frontmatter with TOC consistency
+	validateFrontmatter(filePath, content, tocSection, tocChapter);
+
+	// Check directive usage
+	validateDirectives(filePath, content);
+
+	// Check cross-reference format
+	validateCrossReferences(filePath, content);
+}
+
+/**
+ * Parse frontmatter into object
+ */
+function parseFrontmatter(content) {
+	const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+	if (!match) {
+		return { metadata: null, content, hasFrontmatter: false };
+	}
+
+	const [, frontmatterStr, body] = match;
+	const metadata = {};
+	const lines = frontmatterStr.split('\n');
+	let currentKey = '';
+	let isArray = false;
+
+	for (const line of lines) {
+		const trimmed = line.trim();
+		if (!trimmed) continue;
+
+		if (trimmed.startsWith('- ')) {
+			if (isArray && currentKey && Array.isArray(metadata[currentKey])) {
+				metadata[currentKey].push(trimmed.substring(2).trim());
+			}
+			continue;
+		}
+
+		const colonIndex = trimmed.indexOf(':');
+		if (colonIndex > -1) {
+			const key = trimmed.substring(0, colonIndex).trim();
+			let value = trimmed.substring(colonIndex + 1).trim();
+
+			currentKey = key;
+
+			if (!value) {
+				metadata[key] = [];
+				isArray = true;
+			} else {
+				isArray = false;
+				// Strip surrounding quotes if present
+				if ((value.startsWith('"') && value.endsWith('"')) ||
+				    (value.startsWith("'") && value.endsWith("'"))) {
+					value = value.slice(1, -1);
+				}
+				// Keep section as string (to preserve "1.0" vs "1")
+				// Only convert to number for chapter and other numeric fields
+				if (key === 'section') {
+					metadata[key] = value;
+				} else {
+					const num = Number(value);
+					metadata[key] = isNaN(num) ? value : num;
+				}
+			}
+		}
+	}
+
+	return { metadata, content: body, hasFrontmatter: true };
 }
 
 /**
  * Validate frontmatter
  */
-function validateFrontmatter(filePath, content) {
-	const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
-	if (!frontmatterMatch) {
+function validateFrontmatter(filePath, content, tocSection = null, tocChapter = null) {
+	const { metadata, hasFrontmatter } = parseFrontmatter(content);
+
+	if (!hasFrontmatter) {
 		warning(filePath, 1, 'No frontmatter found');
 		return;
 	}
 
-	const frontmatter = frontmatterMatch[1];
+	// Required fields
+	if (!metadata.title || typeof metadata.title !== 'string') {
+		error(filePath, 1, 'Missing or invalid "title" field in frontmatter');
+	}
 
-	// Check for required fields
-	const requiredFields = ['title'];
-	for (const field of requiredFields) {
-		if (!frontmatter.includes(`${field}:`)) {
-			warning(filePath, 1, `Missing frontmatter field: ${field}`);
+	if (metadata.section === undefined) {
+		warning(filePath, 1, 'Missing "section" field in frontmatter');
+	}
+
+	if (metadata.chapter === undefined) {
+		warning(filePath, 1, 'Missing "chapter" field in frontmatter');
+	}
+
+	// Optional fields validation
+	if (metadata.difficulty !== undefined && !VALID_DIFFICULTIES.includes(metadata.difficulty)) {
+		warning(filePath, 1, `Invalid difficulty "${metadata.difficulty}". Must be: ${VALID_DIFFICULTIES.join(', ')}`);
+	}
+
+	if (metadata.objectives !== undefined && !Array.isArray(metadata.objectives)) {
+		warning(filePath, 1, '"objectives" should be an array');
+	}
+
+	if (metadata.keywords !== undefined && !Array.isArray(metadata.keywords)) {
+		warning(filePath, 1, '"keywords" should be an array');
+	}
+
+	// TOC consistency checks
+	if (tocSection && tocChapter) {
+		const tocSectionNum = String(tocSection.number);
+		const fmSectionNum = String(metadata.section);
+		if (metadata.section !== undefined && tocSectionNum !== fmSectionNum) {
+			warning(filePath, 1, `Section number mismatch: TOC="${tocSectionNum}", frontmatter="${fmSectionNum}"`);
+		}
+
+		if (metadata.chapter !== undefined && metadata.chapter !== tocChapter.number) {
+			warning(filePath, 1, `Chapter number mismatch: TOC="${tocChapter.number}", frontmatter="${metadata.chapter}"`);
 		}
 	}
+}
+
+/**
+ * Validate directive usage
+ */
+function validateDirectives(filePath, content) {
+	const lines = content.split('\n');
+	const openDirectives = [];
+
+	lines.forEach((line, index) => {
+		const lineNum = index + 1;
+
+		// Check for directive opening
+		const openMatch = line.match(/^:::(\w+[-\w]*)(\{.*\})?/);
+		if (openMatch) {
+			const [, directiveName, attrs] = openMatch;
+
+			// Check if known directive
+			if (!DIRECTIVE_NAMES.includes(directiveName)) {
+				warning(filePath, lineNum, `Unknown directive ":::${directiveName}"`);
+			}
+
+			// Check required attributes
+			if (directiveName === 'practice-problem' && (!attrs || !attrs.includes('id='))) {
+				warning(filePath, lineNum, ':::practice-problem should have an id attribute');
+			}
+
+			if (directiveName === 'definition' && (!attrs || !attrs.includes('term='))) {
+				warning(filePath, lineNum, ':::definition should have a term attribute');
+			}
+
+			openDirectives.push({ name: directiveName, line: lineNum });
+		}
+
+		// Check for directive closing
+		if (line.trim() === ':::') {
+			if (openDirectives.length === 0) {
+				error(filePath, lineNum, 'Closing ":::" without matching opening directive');
+			} else {
+				openDirectives.pop();
+			}
+		}
+	});
+
+	// Check for unclosed directives
+	for (const dir of openDirectives) {
+		error(filePath, dir.line, `Unclosed directive ":::${dir.name}"`);
+	}
+}
+
+/**
+ * Validate cross-reference format
+ */
+function validateCrossReferences(filePath, content) {
+	const lines = content.split('\n');
+	const refPattern = /\[ref:(\w+):([^\]]*)\]/g;
+
+	lines.forEach((line, index) => {
+		const lineNum = index + 1;
+		let match;
+
+		while ((match = refPattern.exec(line)) !== null) {
+			const [, refType, refId] = match;
+
+			if (!CROSS_REF_TYPES.includes(refType)) {
+				warning(filePath, lineNum, `Invalid cross-reference type "${refType}". Valid: ${CROSS_REF_TYPES.join(', ')}`);
+			}
+
+			if (!refId || refId.trim() === '') {
+				error(filePath, lineNum, 'Cross-reference has empty id');
+			}
+		}
+	});
 }
 
 /**
@@ -275,6 +469,20 @@ function validateBook(bookSlug) {
 	if (!toc) return;
 
 	indexSections(bookSlug, toc);
+	tocData.set(bookSlug, toc);
+
+	// Validate TOC section types
+	for (const chapter of toc.chapters || []) {
+		for (const section of chapter.sections || []) {
+			if (section.type && !VALID_SECTION_TYPES.includes(section.type)) {
+				warning(
+					join(contentDir, bookSlug, 'toc.json'),
+					0,
+					`Invalid section type "${section.type}" for ${section.file}. Valid: ${VALID_SECTION_TYPES.join(', ')}`
+				);
+			}
+		}
+	}
 
 	// Validate each chapter and section
 	for (const chapter of toc.chapters || []) {
@@ -293,7 +501,7 @@ function validateBook(bookSlug) {
 				continue;
 			}
 
-			validateMarkdown(sectionPath, bookSlug, chapter.slug);
+			validateMarkdown(sectionPath, bookSlug, chapter.slug, section, chapter);
 		}
 	}
 
@@ -344,22 +552,42 @@ function printResults() {
  * Main function
  */
 function main() {
-	console.log('Content Validation');
-	console.log('==================');
+	// Parse arguments
+	const args = process.argv.slice(2);
+	let targetBook = null;
+
+	for (let i = 0; i < args.length; i++) {
+		if (args[i] === '--book' && args[i + 1]) {
+			targetBook = args[i + 1];
+			i++;
+		}
+	}
+
+	console.log('Content Validation & Linting');
+	console.log('============================');
 	console.log(`Content directory: ${contentDir}`);
 
-	const books = getBooks();
-	console.log(`Found ${books.length} book(s): ${books.join(', ')}`);
+	const allBooks = getBooks();
 
-	// First pass: index all sections
-	for (const bookSlug of books) {
+	// Filter to target book if specified
+	const books = targetBook ? allBooks.filter((b) => b === targetBook) : allBooks;
+
+	if (targetBook && books.length === 0) {
+		console.error(`Error: Book "${targetBook}" not found. Available: ${allBooks.join(', ')}`);
+		process.exit(1);
+	}
+
+	console.log(`Validating ${books.length} book(s): ${books.join(', ')}`);
+
+	// First pass: index all sections (need all books for cross-book links)
+	for (const bookSlug of allBooks) {
 		const toc = loadToc(bookSlug);
 		if (toc) {
 			indexSections(bookSlug, toc);
 		}
 	}
 
-	// Second pass: validate content
+	// Second pass: validate content (only target books)
 	for (const bookSlug of books) {
 		validateBook(bookSlug);
 	}
