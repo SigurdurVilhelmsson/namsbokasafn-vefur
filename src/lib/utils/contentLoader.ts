@@ -1,11 +1,64 @@
 /**
- * Content loading utilities
+ * Content loading utilities with in-memory caching
  */
 
 import type { TableOfContents, SectionContent, DifficultyLevel } from '$lib/types/content';
 import { browser } from '$app/environment';
 
 const WORDS_PER_MINUTE = 180;
+
+// ============================================
+// In-memory content cache
+// ============================================
+
+const tocCache = new Map<string, TableOfContents>();
+const sectionCache = new Map<string, SectionContent>();
+
+/**
+ * Clear all cached content (useful for debugging or forcing refresh)
+ */
+export function clearContentCache(): void {
+	tocCache.clear();
+	sectionCache.clear();
+}
+
+/**
+ * Clear cached TOC for a specific book
+ */
+export function clearTocCache(bookSlug?: string): void {
+	if (bookSlug) {
+		tocCache.delete(bookSlug);
+	} else {
+		tocCache.clear();
+	}
+}
+
+/**
+ * Clear cached section content
+ */
+export function clearSectionCache(bookSlug?: string, chapterSlug?: string): void {
+	if (!bookSlug) {
+		sectionCache.clear();
+		return;
+	}
+
+	const prefix = chapterSlug ? `${bookSlug}/${chapterSlug}/` : `${bookSlug}/`;
+	for (const key of sectionCache.keys()) {
+		if (key.startsWith(prefix)) {
+			sectionCache.delete(key);
+		}
+	}
+}
+
+/**
+ * Get cache statistics (for debugging)
+ */
+export function getCacheStats(): { tocEntries: number; sectionEntries: number } {
+	return {
+		tocEntries: tocCache.size,
+		sectionEntries: sectionCache.size
+	};
+}
 
 /**
  * Custom error for content loading failures
@@ -64,12 +117,20 @@ function parseDifficulty(value: unknown): DifficultyLevel | undefined {
 }
 
 /**
- * Load table of contents for a book
+ * Load table of contents for a book (with caching)
  */
 export async function loadTableOfContents(
 	bookSlug: string,
 	fetchFn: typeof fetch = fetch
 ): Promise<TableOfContents> {
+	// Check cache first (browser only)
+	if (browser) {
+		const cached = tocCache.get(bookSlug);
+		if (cached) {
+			return cached;
+		}
+	}
+
 	try {
 		const response = await fetchFn(`/content/${bookSlug}/toc.json`);
 		if (!response.ok) {
@@ -82,7 +143,14 @@ export async function loadTableOfContents(
 				isOffline
 			);
 		}
-		return await response.json();
+		const toc: TableOfContents = await response.json();
+
+		// Cache the result (browser only)
+		if (browser) {
+			tocCache.set(bookSlug, toc);
+		}
+
+		return toc;
 	} catch (e) {
 		if (e instanceof ContentLoadError) throw e;
 		const isOffline = checkOffline();
@@ -97,7 +165,7 @@ export async function loadTableOfContents(
 }
 
 /**
- * Load section content for a book
+ * Load section content for a book (with caching)
  */
 export async function loadSectionContent(
 	bookSlug: string,
@@ -105,6 +173,17 @@ export async function loadSectionContent(
 	sectionFile: string,
 	fetchFn: typeof fetch = fetch
 ): Promise<SectionContent> {
+	// Create cache key
+	const cacheKey = `${bookSlug}/${chapterSlug}/${sectionFile}`;
+
+	// Check cache first (browser only)
+	if (browser) {
+		const cached = sectionCache.get(cacheKey);
+		if (cached) {
+			return cached;
+		}
+	}
+
 	let response: Response;
 	try {
 		response = await fetchFn(`/content/${bookSlug}/chapters/${chapterSlug}/${sectionFile}`);
@@ -145,7 +224,7 @@ export async function loadSectionContent(
   const keywords = Array.isArray(metadata.keywords) ? metadata.keywords : undefined;
   const prerequisites = Array.isArray(metadata.prerequisites) ? metadata.prerequisites : undefined;
 
-  return {
+  const sectionContent: SectionContent = {
     title: typeof metadata.title === 'string' ? metadata.title : '',
     section: typeof metadata.section === 'string' ? metadata.section : '',
     chapter: typeof metadata.chapter === 'number' ? metadata.chapter : 0,
@@ -156,6 +235,13 @@ export async function loadSectionContent(
     keywords,
     prerequisites
   };
+
+  // Cache the result (browser only)
+  if (browser) {
+    sectionCache.set(cacheKey, sectionContent);
+  }
+
+  return sectionContent;
 }
 
 /**
