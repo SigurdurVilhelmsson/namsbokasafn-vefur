@@ -2,12 +2,12 @@
 
 ## System Overview
 
-Námsbókasafn is a static single-page application (SPA) built with React and TypeScript. It serves as an interactive reader for Icelandic translations of OpenStax educational textbooks.
+Námsbókasafn is a static site built with SvelteKit and TypeScript. It serves as an interactive reader for Icelandic translations of OpenStax educational textbooks.
 
 ```mermaid
 graph TB
     subgraph "Client Browser"
-        UI[React SPA]
+        UI[SvelteKit App]
         LocalStorage[(LocalStorage)]
     end
 
@@ -15,7 +15,7 @@ graph TB
         HTML[index.html]
         JS[JavaScript Bundles]
         CSS[Tailwind CSS]
-        Content[/public/content/]
+        Content[/static/content/]
     end
 
     subgraph "Content Structure"
@@ -40,15 +40,17 @@ graph TB
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| UI Framework | React 19.2 | Component-based UI |
+| UI Framework | SvelteKit 2.21 | Full-stack framework with SSG |
+| Components | Svelte 5.33 | Reactive component library |
 | Language | TypeScript 5.7 | Type safety |
-| Build Tool | Vite 7.2 | Fast bundling & HMR |
+| Build Tool | Vite 6.3 | Fast bundling & HMR |
 | Styling | Tailwind CSS 4.1 | Utility-first CSS |
-| Routing | React Router 7.1 | Client-side navigation |
-| State | Zustand 5.0 | Lightweight state management |
-| Markdown | react-markdown 10.1 | Content rendering |
+| Routing | SvelteKit | File-based routing |
+| State | Svelte Stores | Built-in state management |
+| Markdown | unified/remark/rehype | Content rendering |
 | Math | KaTeX 0.16 | LaTeX equation rendering |
-| Icons | Lucide React | UI iconography |
+| Icons | Lucide Svelte | UI iconography |
+| PWA | @vite-pwa/sveltekit | Offline support |
 
 ## Application Architecture
 
@@ -56,87 +58,90 @@ graph TB
 
 ```mermaid
 graph TD
-    App[App.tsx]
+    Layout[+layout.svelte - Root]
 
-    App --> Landing[LandingPage]
-    App --> BookLayout[BookLayout]
+    Layout --> Landing[+page.svelte - Landing]
+    Layout --> BookLayout[BookSlug +layout.svelte]
 
-    Landing --> BookGrid[BookGrid]
-    BookGrid --> BookCard[BookCard]
+    Landing --> BookCard[BookCard.svelte]
 
-    BookLayout --> Header[Header]
-    BookLayout --> Sidebar[Sidebar]
-    BookLayout --> Outlet[Outlet - Content Area]
+    BookLayout --> Header[Header.svelte]
+    BookLayout --> Sidebar[Sidebar.svelte]
+    BookLayout --> Pages[Page Content]
 
-    Outlet --> HomePage[HomePage]
-    Outlet --> ChapterView[ChapterView]
-    Outlet --> SectionView[SectionView]
-    Outlet --> GlossaryPage[GlossaryPage]
-    Outlet --> FlashcardsPage[FlashcardsPage]
-    Outlet --> PracticeProgress[PracticeProgressPage]
+    Pages --> HomePage[+page.svelte - Book Home]
+    Pages --> ChapterView[kafli/chapterSlug/+page.svelte]
+    Pages --> SectionView[kafli/chapterSlug/sectionSlug/+page.svelte]
+    Pages --> GlossaryPage[ordabok/+page.svelte]
+    Pages --> FlashcardsPage[minniskort/+page.svelte]
+    Pages --> PeriodicTable[lotukerfi/+page.svelte]
+    Pages --> QuizPage[prof/+page.svelte]
 
-    SectionView --> MarkdownRenderer[MarkdownRenderer]
-    SectionView --> NavigationButtons[NavigationButtons]
-    SectionView --> LearningObjectives[LearningObjectives]
+    SectionView --> MarkdownRenderer[MarkdownRenderer.svelte]
+    SectionView --> NavigationButtons[NavigationButtons.svelte]
 
-    Header --> SearchModal[SearchModal]
-    Header --> SettingsModal[SettingsModal]
+    Header --> SearchModal[SearchModal.svelte]
+    Header --> SettingsModal[SettingsModal.svelte]
 
-    FlashcardsPage --> FlashcardDeck[FlashcardDeck]
+    FlashcardsPage --> FlashcardStudy[FlashcardStudy.svelte]
 ```
 
 ### Directory Structure
 
 ```
 src/
-├── App.tsx                 # Root component with routing
-├── main.tsx               # Application entry point
-├── config/
-│   └── books.ts           # Book configuration registry
-├── components/
-│   ├── catalog/           # Landing page components
-│   │   ├── LandingPage.tsx
-│   │   ├── BookCard.tsx
-│   │   └── BookGrid.tsx
-│   ├── layout/            # Page structure components
-│   │   ├── BookLayout.tsx # Context provider wrapper
-│   │   ├── Header.tsx     # Navigation header
-│   │   └── Sidebar.tsx    # Table of contents
-│   ├── reader/            # Content display components
-│   │   ├── ChapterView.tsx
-│   │   ├── SectionView.tsx
-│   │   ├── MarkdownRenderer.tsx
-│   │   ├── GlossaryPage.tsx
-│   │   ├── FlashcardsPage.tsx
-│   │   ├── FlashcardDeck.tsx
+├── app.html               # HTML template
+├── app.css                # Global styles + Tailwind
+├── lib/
+│   ├── components/        # Svelte components
+│   │   ├── layout/        # Page structure components
+│   │   │   ├── Header.svelte
+│   │   │   ├── Sidebar.svelte
+│   │   │   └── FocusModeNav.svelte
+│   │   ├── BookCard.svelte
+│   │   ├── FlashcardStudy.svelte
+│   │   ├── MarkdownRenderer.svelte
+│   │   ├── PeriodicTable.svelte
+│   │   ├── SearchModal.svelte
+│   │   ├── SettingsModal.svelte
 │   │   └── ...
-│   └── ui/                # Reusable UI components
-│       ├── Modal.tsx
-│       ├── Button.tsx
-│       ├── SettingsModal.tsx
-│       └── SearchModal.tsx
-├── hooks/
-│   ├── useBook.ts         # Book context hook
-│   ├── useTheme.ts        # Theme management
-│   └── useGlossary.ts     # Glossary data loading
-├── stores/                # Zustand state stores
-│   ├── settingsStore.ts   # UI preferences
-│   ├── readerStore.ts     # Reading progress
-│   ├── flashcardStore.ts  # Flashcard study data
-│   ├── quizStore.ts       # Exercise tracking
-│   └── objectivesStore.ts # Learning objectives
-├── types/
-│   ├── content.ts         # Content data types
-│   ├── flashcard.ts       # Flashcard types
-│   ├── glossary.ts        # Glossary types
-│   └── quiz.ts            # Quiz types
-├── utils/
-│   ├── contentLoader.ts   # Markdown/JSON loading
-│   ├── searchIndex.ts     # Full-text search
-│   ├── srs.ts             # Spaced repetition algorithm
-│   └── flashcardGenerator.ts
-└── styles/
-    └── globals.css        # Global styles & CSS variables
+│   ├── stores/            # Svelte stores
+│   │   ├── settings.ts    # UI preferences
+│   │   ├── reader.ts      # Reading progress
+│   │   ├── flashcard.ts   # Flashcard study data
+│   │   ├── quiz.ts        # Quiz tracking
+│   │   ├── annotation.ts  # Highlights & notes
+│   │   └── ...
+│   ├── actions/           # Svelte actions
+│   │   ├── equations.ts   # KaTeX rendering
+│   │   ├── practiceProblems.ts
+│   │   ├── crossReferences.ts
+│   │   └── figureViewer.ts
+│   ├── types/
+│   │   ├── book.ts
+│   │   ├── content.ts
+│   │   ├── flashcard.ts
+│   │   └── ...
+│   └── utils/
+│       ├── contentLoader.ts
+│       ├── markdown.ts
+│       ├── searchIndex.ts
+│       └── srs.ts         # Spaced repetition
+└── routes/                # SvelteKit file-based routing
+    ├── +layout.svelte     # Root layout
+    ├── +page.svelte       # Landing page
+    └── [bookSlug]/
+        ├── +layout.svelte # Book layout with sidebar
+        ├── +layout.ts     # Book config loader
+        ├── +page.svelte   # Book home
+        ├── ordabok/
+        ├── minniskort/
+        ├── lotukerfi/
+        ├── prof/
+        └── kafli/
+            └── [chapterSlug]/
+                ├── +page.svelte
+                └── [sectionSlug]/
 ```
 
 ## Data Flow
@@ -146,25 +151,21 @@ src/
 ```mermaid
 sequenceDiagram
     participant User
-    participant Router
-    participant BookLayout
+    participant Router as SvelteKit Router
+    participant LoadFn as +page.ts load()
     participant ContentLoader
-    participant PublicContent
+    participant StaticContent
     participant Component
 
     User->>Router: Navigate to /efnafraedi/kafli/01/1-1
-    Router->>BookLayout: Render with params
-    BookLayout->>ContentLoader: loadTableOfContents("efnafraedi")
-    ContentLoader->>PublicContent: GET /content/efnafraedi/toc.json
-    PublicContent-->>ContentLoader: TableOfContents
-    ContentLoader-->>BookLayout: TOC data
-    BookLayout->>Component: Render SectionView
-    Component->>ContentLoader: loadSectionContent(book, chapter, section)
-    ContentLoader->>PublicContent: GET /content/.../section.md
-    PublicContent-->>ContentLoader: Markdown content
+    Router->>LoadFn: Call load function
+    LoadFn->>ContentLoader: loadSectionContent(book, chapter, section)
+    ContentLoader->>StaticContent: fetch /content/.../section.md
+    StaticContent-->>ContentLoader: Markdown content
     ContentLoader->>ContentLoader: Parse frontmatter
     ContentLoader->>ContentLoader: Transform image paths
-    ContentLoader-->>Component: SectionContent
+    ContentLoader-->>LoadFn: SectionContent
+    LoadFn-->>Component: data prop
     Component->>User: Rendered content
 ```
 
@@ -172,12 +173,12 @@ sequenceDiagram
 
 ```mermaid
 graph LR
-    subgraph "Zustand Stores"
-        Settings[settingsStore]
-        Reader[readerStore]
-        Flashcard[flashcardStore]
-        Quiz[quizStore]
-        Objectives[objectivesStore]
+    subgraph "Svelte Stores"
+        Settings[settings.ts]
+        Reader[reader.ts]
+        Flashcard[flashcard.ts]
+        Quiz[quiz.ts]
+        Annotation[annotation.ts]
     end
 
     subgraph "Persistence"
@@ -188,7 +189,7 @@ graph LR
         Header
         Sidebar
         SectionView
-        FlashcardDeck
+        FlashcardStudy
         SettingsModal
     end
 
@@ -196,25 +197,25 @@ graph LR
     Reader <--> LS
     Flashcard <--> LS
     Quiz <--> LS
-    Objectives <--> LS
+    Annotation <--> LS
 
     Settings --> Header
     Settings --> SettingsModal
     Reader --> Sidebar
     Reader --> SectionView
-    Flashcard --> FlashcardDeck
+    Flashcard --> FlashcardStudy
 ```
 
 ## Key Architectural Decisions
 
-### 1. Static Content Architecture
+### 1. Static Site Generation
 
-**Decision**: All book content is stored as static files in `/public/content/`.
+**Decision**: Use SvelteKit with `@sveltejs/adapter-static` for SSG.
 
 **Rationale**:
 - No backend server required
 - Easy deployment to any static hosting
-- Content can be updated independently
+- Excellent performance (pre-rendered HTML)
 - Works offline after initial load
 - Simple content management via Git
 
@@ -228,83 +229,92 @@ graph LR
 - Works offline
 - Instant load of user preferences
 
-### 3. Context-Based Book Scoping
+### 3. Svelte Stores for State Management
 
-**Decision**: Use React Context (`BookContext`) to provide book-specific data to all child components.
-
-**Rationale**:
-- Avoids prop drilling
-- Clean separation between book selection and reading
-- Easy to add multi-book support
-
-### 4. Lazy Loading Routes
-
-**Decision**: Use React.lazy() for route-level code splitting.
+**Decision**: Use Svelte's built-in stores instead of external libraries.
 
 **Rationale**:
-- Smaller initial bundle
-- Faster first paint
-- Only load code when needed
+- No additional dependencies
+- Automatic subscription/unsubscription with `$` syntax
+- Simple API for localStorage persistence
+- TypeScript support
 
-### 5. Zustand for State Management
+### 4. File-Based Routing
 
-**Decision**: Use Zustand instead of Redux or React Context for global state.
+**Decision**: Use SvelteKit's file-based routing.
 
 **Rationale**:
-- Minimal boilerplate
-- Built-in persistence middleware
-- Works well with TypeScript
-- No Provider wrapper needed
+- Intuitive structure
+- Automatic code splitting
+- Load functions for data fetching
+- Type-safe route parameters
+
+### 5. Svelte Actions for DOM Manipulation
+
+**Decision**: Use Svelte actions for complex DOM interactions (equations, lightbox, etc.).
+
+**Rationale**:
+- Clean separation of concerns
+- Reusable across components
+- Proper lifecycle management
+- Works well with server-side rendering
 
 ## Routing Architecture
 
-| Path | Component | Description |
-|------|-----------|-------------|
-| `/` | LandingPage | Book catalog |
-| `/:bookSlug` | HomePage | Book home page |
-| `/:bookSlug/ordabok` | GlossaryPage | Vocabulary/glossary |
-| `/:bookSlug/minniskort` | FlashcardsPage | Flashcard study |
-| `/:bookSlug/aefingar` | PracticeProgressPage | Practice problems |
-| `/:bookSlug/kafli/:chapter` | ChapterView | Chapter overview |
-| `/:bookSlug/kafli/:chapter/:section` | SectionView | Section content |
+| Path | Component | Load Function |
+|------|-----------|---------------|
+| `/` | `+page.svelte` | - |
+| `/:bookSlug` | `[bookSlug]/+page.svelte` | `+layout.ts` (book config) |
+| `/:bookSlug/ordabok` | `ordabok/+page.svelte` | - |
+| `/:bookSlug/minniskort` | `minniskort/+page.svelte` | - |
+| `/:bookSlug/lotukerfi` | `lotukerfi/+page.svelte` | - |
+| `/:bookSlug/prof` | `prof/+page.svelte` | - |
+| `/:bookSlug/kafli/:chapter` | `kafli/[chapterSlug]/+page.svelte` | `+page.ts` |
+| `/:bookSlug/kafli/:chapter/:section` | `[sectionSlug]/+page.svelte` | `+page.ts` |
 
 ## Build Configuration
 
-### Code Splitting Strategy
+### Static Adapter
 
 ```javascript
-// vite.config.ts
-manualChunks: {
-  'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-  'markdown': ['react-markdown', 'remark-gfm', 'remark-math'],
-  'katex': ['katex', 'rehype-katex'],
-  'ui-vendor': ['lucide-react', 'zustand']
-}
+// svelte.config.js
+import adapter from '@sveltejs/adapter-static';
+
+export default {
+  kit: {
+    adapter: adapter({
+      pages: 'build',
+      assets: 'build',
+      fallback: 'index.html',  // SPA fallback
+      precompress: false,
+      strict: true
+    })
+  }
+};
 ```
 
 ### Bundle Output
 
-- `index.html` - Entry point
-- `assets/index-[hash].js` - Main application bundle
-- `assets/react-vendor-[hash].js` - React runtime
-- `assets/markdown-[hash].js` - Markdown processing
-- `assets/katex-[hash].js` - Math rendering
+- `build/` - Static output directory
+- `build/index.html` - Entry point with SPA fallback
+- `build/_app/` - JavaScript and CSS bundles
+- `build/content/` - Static content files
 
 ## Performance Considerations
 
 ### Optimizations Implemented
 
-1. **Route-level code splitting** - Only load components when navigating
-2. **Image lazy loading** - Images load on scroll
-3. **Debounced search** - 300ms delay before searching
-4. **Memoized components** - Prevent unnecessary re-renders
-5. **CSS variables** - Efficient theme switching without re-render
+1. **Static site generation** - Pre-rendered HTML for fast initial load
+2. **Code splitting** - Automatic route-based splitting
+3. **Image lazy loading** - Images load on scroll
+4. **Debounced search** - 300ms delay before searching
+5. **CSS purging** - Tailwind removes unused styles
 
 ### Lighthouse Targets
 
 | Metric | Target | Strategy |
 |--------|--------|----------|
-| LCP | < 2.5s | Code splitting, static assets |
+| LCP | < 2.5s | SSG, static assets |
 | FID | < 100ms | Minimal JavaScript blocking |
 | CLS | < 0.1 | Reserved space for images |
 
@@ -319,17 +329,17 @@ manualChunks: {
 
 ### Adding a New Book
 
-1. Add configuration to `src/config/books.ts`
+1. Add configuration to `src/routes/[bookSlug]/+layout.ts`
 2. Create content directory: `public/content/{bookSlug}/`
 3. Add `toc.json`, `glossary.json`, and chapter content
-4. Add cover image to `public/covers/`
+4. Add cover image to `static/covers/`
 
 ### Adding a New Feature
 
-1. Create store in `src/stores/` if state needed
-2. Add types in `src/types/`
-3. Create components in appropriate directory
-4. Add route if needed in `App.tsx`
+1. Create store in `src/lib/stores/` if state needed
+2. Add types in `src/lib/types/`
+3. Create components in `src/lib/components/`
+4. Add route in `src/routes/` if needed
 5. Update existing components to integrate
 
 ## Deployment Architecture
@@ -343,7 +353,7 @@ graph TB
     subgraph "Build Process"
         GHA[GitHub Actions]
         Build[npm run build]
-        Dist[/dist/ folder]
+        Output[/build/ folder]
     end
 
     subgraph "Production Server"
@@ -358,16 +368,20 @@ graph TB
 
     Repo --> GHA
     GHA --> Build
-    Build --> Dist
-    Dist --> Static
+    Build --> Output
+    Output --> Static
     Nginx --> Static
     SSL --> Nginx
     Browser --> Nginx
 ```
 
-## Future Architecture Considerations
+## Migration History
 
-- **PWA Support**: Service worker for offline reading
-- **Content CDN**: Move content to CDN for faster global access
-- **Incremental Static Regeneration**: If moving to Next.js
-- **Backend Services**: Optional sync service for cross-device progress
+This project was originally built with React 19 and migrated to SvelteKit in January 2025. The migration resulted in:
+
+- ~60% less code due to Svelte's simpler mental model
+- ~50% smaller bundle size (Svelte compiles away the framework)
+- Better DX with file-based routing and built-in stores
+- Unified codebase (no mix of paradigms)
+
+The original React implementation is preserved in the `archive/react-v1` branch.

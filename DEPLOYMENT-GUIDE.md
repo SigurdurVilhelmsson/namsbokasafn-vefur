@@ -9,7 +9,7 @@ Complete guide for deploying the Chemistry Reader to `efnafraedi.app` on Linode.
 - Linode server with Ubuntu/Debian
 - Domain `efnafraedi.app` pointing to your Linode IP
 - SSH access to your server
-- Node.js 18+ installed on your local machine
+- Node.js 22+ installed on your local machine
 
 ---
 
@@ -142,7 +142,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Install dependencies
         run: npm ci
@@ -163,7 +163,7 @@ jobs:
           ssh-keyscan -H $LINODE_HOST >> ~/.ssh/known_hosts
 
           # Deploy built files
-          rsync -avz --delete dist/ $LINODE_USER@$LINODE_HOST:/var/www/efnafraedi-lesari/dist/
+          rsync -avz --delete build/ $LINODE_USER@$LINODE_HOST:/var/www/efnafraedi-lesari/build/
 ```
 
 ### Set GitHub Secrets
@@ -192,10 +192,10 @@ npm run build
 
 ```bash
 # Copy build files to server
-rsync -avz --delete dist/ root@YOUR_LINODE_IP:/var/www/efnafraedi-lesari/dist/
+rsync -avz --delete build/ root@YOUR_LINODE_IP:/var/www/efnafraedi-lesari/build/
 
 # Or using SCP
-scp -r dist/* root@YOUR_LINODE_IP:/var/www/efnafraedi-lesari/dist/
+scp -r build/* root@YOUR_LINODE_IP:/var/www/efnafraedi-lesari/build/
 ```
 
 ---
@@ -299,7 +299,7 @@ To update markdown content or glossary:
 ```bash
 # On local machine
 npm run build
-rsync -avz --delete dist/content/ root@YOUR_LINODE_IP:/var/www/efnafraedi-lesari/dist/content/
+rsync -avz --delete build/content/ root@YOUR_LINODE_IP:/var/www/efnafraedi-lesari/build/content/
 ```
 
 ### Update Application
@@ -309,7 +309,7 @@ rsync -avz --delete dist/content/ root@YOUR_LINODE_IP:/var/www/efnafraedi-lesari
 git pull
 npm install  # if dependencies changed
 npm run build
-rsync -avz --delete dist/ root@YOUR_LINODE_IP:/var/www/efnafraedi-lesari/dist/
+rsync -avz --delete build/ root@YOUR_LINODE_IP:/var/www/efnafraedi-lesari/build/
 ```
 
 ### Monitor SSL Certificate
