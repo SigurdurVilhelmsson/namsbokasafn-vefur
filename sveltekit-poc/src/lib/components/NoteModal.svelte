@@ -113,7 +113,7 @@
 						<button
 							on:click={() => (color = c)}
 							class="h-8 w-8 rounded-full {bg} transition-all {color === c
-								? 'ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-gray-800'
+								? 'ring-2 ring-blue-500 ring-offset-2'
 								: 'hover:scale-110'}"
 							aria-label={label}
 							aria-pressed={color === c}
