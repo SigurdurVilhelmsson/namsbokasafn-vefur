@@ -4,7 +4,7 @@
 	import { isSectionRead, calcChapterProgress } from '$lib/stores/reader';
 	import { onMount } from 'svelte';
 	import type { TableOfContents, Chapter } from '$lib/types/content';
-	import { loadTableOfContents } from '$lib/utils/contentLoader';
+	import { loadTableOfContents, getChapterPath, getSectionPath, findChapterBySlug } from '$lib/utils/contentLoader';
 
 	export let bookSlug: string = '';
 	export let hasPeriodicTable: boolean = false;
@@ -13,8 +13,8 @@
 	let manuallyToggledChapters: Set<number> = new Set();
 
 	// Get current route params
-	$: chapterSlug = $page.params.chapterSlug;
-	$: sectionSlug = $page.params.sectionSlug;
+	$: chapterParam = $page.params.chapterSlug;
+	$: sectionParam = $page.params.sectionSlug;
 
 	// Subscribe to reader progress for reactivity
 	$: progress = $reader.progress;
@@ -35,7 +35,7 @@
 		const expanded = new Set<number>();
 		if (!toc) return expanded;
 
-		const currentChapter = chapterSlug ? toc.chapters.find((c) => c.slug === chapterSlug) : null;
+		const currentChapter = chapterParam ? findChapterBySlug(toc, chapterParam) : null;
 		const currentChapterNumber = currentChapter?.number;
 		const autoExpandChapter = currentChapterNumber ?? 1;
 
@@ -66,13 +66,13 @@
 		settings.setSidebarOpen(false);
 	}
 
-	// Reactive helpers using subscribed progress
-	function isRead(chapterSlug: string, sectionSlug: string): boolean {
-		return isSectionRead(progress, chapterSlug, sectionSlug);
+	// Reactive helpers using subscribed progress (use chapter/section paths)
+	function isRead(chapterPath: string, sectionPath: string): boolean {
+		return isSectionRead(progress, chapterPath, sectionPath);
 	}
 
-	function getChapterProgress(chapter: Chapter): number {
-		return calcChapterProgress(progress, chapter.slug, chapter.sections.length);
+	function getChapterProgressPercent(chapter: Chapter): number {
+		return calcChapterProgress(progress, getChapterPath(chapter), chapter.sections.length);
 	}
 </script>
 
@@ -125,23 +125,24 @@
 			{:else}
 				<ul class="space-y-1 px-2">
 					{#each toc.chapters as chapter (chapter.number)}
-						{@const progress = getChapterProgress(chapter)}
+						{@const chapterPath = getChapterPath(chapter)}
+						{@const progressPercent = getChapterProgressPercent(chapter)}
 						{@const expanded = expandedChapters.has(chapter.number)}
-						{@const isCurrentChapter = chapterSlug === chapter.slug}
+						{@const isCurrentChapter = chapterParam === chapterPath || chapterParam === chapter.slug}
 						<li>
 							<!-- Chapter progress indicator -->
-							{#if progress > 0}
+							{#if progressPercent > 0}
 								<div class="mb-2 px-4">
 									<div class="mb-2 flex items-center justify-between">
 										<span class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
 											{chapter.number}. kafli
 										</span>
 										<span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-											{progress}%
+											{progressPercent}%
 										</span>
 									</div>
 									<div class="h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
-										<div class="h-full rounded-full bg-emerald-500" style="width: {progress}%"></div>
+										<div class="h-full rounded-full bg-emerald-500" style="width: {progressPercent}%"></div>
 									</div>
 								</div>
 							{/if}
@@ -169,12 +170,13 @@
 							<!-- Sections -->
 							{#if expanded}
 								<ul id="chapter-{chapter.number}-sections" class="mt-1 space-y-1">
-									{#each chapter.sections as section (section.slug)}
-										{@const isCurrent = isCurrentChapter && sectionSlug === section.slug}
-										{@const isReadSection = isRead(chapter.slug, section.slug)}
+									{#each chapter.sections as section (section.number)}
+										{@const sectionPath = getSectionPath(section)}
+										{@const isCurrent = isCurrentChapter && (sectionParam === sectionPath || sectionParam === section.slug)}
+										{@const isReadSection = isRead(chapterPath, sectionPath)}
 										<li>
 											<a
-												href="/{bookSlug}/kafli/{chapter.slug}/{section.slug}"
+												href="/{bookSlug}/kafli/{chapterPath}/{sectionPath}"
 												class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors {isCurrent
 													? 'bg-blue-50 dark:bg-blue-900/30 font-medium text-blue-700 dark:text-blue-300'
 													: 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}"

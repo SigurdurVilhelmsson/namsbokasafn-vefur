@@ -31,7 +31,7 @@ export interface SectionMetadata {
 export interface Section {
   number: string;
   title: string;
-  slug: string;
+  slug?: string;  // Optional in v2 - derived from number if not present
   file: string;
   type?: string;
   metadata?: SectionMetadata;
@@ -41,7 +41,7 @@ export interface Section {
 export interface Chapter {
   number: number;
   title: string;
-  slug: string;
+  slug?: string;  // Optional in v2 - derived from number if not present
   sections: Section[];
 }
 

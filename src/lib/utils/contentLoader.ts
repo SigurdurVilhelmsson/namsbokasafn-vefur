@@ -328,22 +328,76 @@ export function parseFrontmatter(markdown: string): {
   return { metadata, content };
 }
 
+// ============================================
+// Path generation helpers (v2 number-based routing)
+// ============================================
+
 /**
- * Find chapter by slug
+ * Get URL path segment for a chapter (zero-padded number)
+ * Example: chapter 2 → "02"
  */
-export function findChapterBySlug(toc: TableOfContents, slug: string) {
-  return toc.chapters.find((chapter) => chapter.slug === slug);
+export function getChapterPath(chapter: { number: number; slug?: string }): string {
+  return String(chapter.number).padStart(2, '0');
 }
 
 /**
- * Find section by slug
+ * Get URL path segment for a section (number with hyphen)
+ * Example: "2.1" → "2-1", "1.10" → "1-10"
  */
-export function findSectionBySlug(toc: TableOfContents, chapterSlug: string, sectionSlug: string) {
-  const chapter = findChapterBySlug(toc, chapterSlug);
+export function getSectionPath(section: { number: string; slug?: string }): string {
+  return section.number.replace('.', '-');
+}
+
+/**
+ * Get folder name for chapter (used for file system paths)
+ * In v2, this is the zero-padded number; in v1, it was the slug
+ */
+export function getChapterFolder(chapter: { number: number; slug?: string }): string {
+  // Use slug if present (v1 format), otherwise use padded number (v2)
+  return chapter.slug || getChapterPath(chapter);
+}
+
+// ============================================
+// Chapter and section lookup functions
+// ============================================
+
+/**
+ * Find chapter by path (supports both v1 slugs and v2 numbers)
+ * @param toc - Table of contents
+ * @param path - Chapter path (e.g., "02" or "02-atom-og-sameindir")
+ */
+export function findChapterBySlug(toc: TableOfContents, path: string) {
+  // First try exact slug match (v1)
+  const bySlug = toc.chapters.find((chapter) => chapter.slug === path);
+  if (bySlug) return bySlug;
+
+  // Then try number match (v2) - path might be "02" or "2"
+  const num = parseInt(path, 10);
+  if (!isNaN(num)) {
+    return toc.chapters.find((chapter) => chapter.number === num);
+  }
+
+  return undefined;
+}
+
+/**
+ * Find section by path (supports both v1 slugs and v2 numbers)
+ * @param toc - Table of contents
+ * @param chapterPath - Chapter path (e.g., "02" or "02-atom-og-sameindir")
+ * @param sectionPath - Section path (e.g., "2-1" or "2-1-fyrstu-hugmyndir")
+ */
+export function findSectionBySlug(toc: TableOfContents, chapterPath: string, sectionPath: string) {
+  const chapter = findChapterBySlug(toc, chapterPath);
   if (!chapter) return null;
 
-  const section = chapter.sections.find((s) => s.slug === sectionSlug);
-  if (!section) return null;
+  // First try exact slug match (v1)
+  let section = chapter.sections.find((s) => s.slug === sectionPath);
+  if (section) return { chapter, section };
 
-  return { chapter, section };
+  // Then try number match (v2) - convert "2-1" back to "2.1"
+  const sectionNumber = sectionPath.replace('-', '.');
+  section = chapter.sections.find((s) => s.number === sectionNumber);
+  if (section) return { chapter, section };
+
+  return null;
 }
