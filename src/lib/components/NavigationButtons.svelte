@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import type { NavigationContext } from '$lib/types/content';
+	import { getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
 
 	export let navigation: NavigationContext;
 	export let bookSlug: string;
@@ -22,7 +23,7 @@
 		<div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
 			{#if previous}
 				<a
-					href="/{bookSlug}/kafli/{previous.chapter.slug}/{previous.section.slug}"
+					href="/{bookSlug}/kafli/{getChapterPath(previous.chapter)}/{getSectionPath(previous.section)}"
 					class="group flex items-center gap-3 rounded-lg border border-[var(--border-color)] px-4 py-3 transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5 sm:max-w-[48%]"
 				>
 					<svg
@@ -46,7 +47,7 @@
 
 			{#if next}
 				<a
-					href="/{bookSlug}/kafli/{next.chapter.slug}/{next.section.slug}"
+					href="/{bookSlug}/kafli/{getChapterPath(next.chapter)}/{getSectionPath(next.section)}"
 					class="group flex items-center gap-3 rounded-lg border border-[var(--border-color)] px-4 py-3 transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5 sm:max-w-[48%] {!previous ? 'sm:ml-auto' : ''}"
 				>
 					<div class="text-left sm:text-right min-w-0 flex-1">

@@ -4,8 +4,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
-	import type { TableOfContents } from '$lib/types/content';
-	import { loadTableOfContents } from '$lib/utils/contentLoader';
+	import type { TableOfContents, Chapter } from '$lib/types/content';
+	import { loadTableOfContents, getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
 	import { reader } from '$lib/stores';
 	import { calcChapterProgress } from '$lib/stores/reader';
 	import DownloadBookButton from '$lib/components/DownloadBookButton.svelte';
@@ -38,8 +38,8 @@
 	});
 
 	// Reactive helper using subscribed progress
-	function getChapterProgress(chapterSlug: string, totalSections: number): number {
-		return calcChapterProgress(progress, chapterSlug, totalSections);
+	function getChapterProgressPercent(chapter: Chapter): number {
+		return calcChapterProgress(progress, getChapterPath(chapter), chapter.sections.length);
 	}
 </script>
 
@@ -76,19 +76,21 @@
 		<!-- Chapter grid -->
 		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 			{#each toc.chapters as chapter}
-				{@const progress = getChapterProgress(chapter.slug, chapter.sections.length)}
+				{@const chapterPath = getChapterPath(chapter)}
+				{@const progressPercent = getChapterProgressPercent(chapter)}
 				{@const firstSection = chapter.sections[0]}
+				{@const firstSectionPath = firstSection ? getSectionPath(firstSection) : ''}
 				<a
-					href="/{data.bookSlug}/kafli/{chapter.slug}/{firstSection?.slug ?? ''}"
+					href="/{data.bookSlug}/kafli/{chapterPath}/{firstSectionPath}"
 					class="group block rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 transition-all hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-700"
 				>
 					<div class="flex items-start justify-between mb-3">
 						<span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-bold">
 							{chapter.number}
 						</span>
-						{#if progress > 0}
+						{#if progressPercent > 0}
 							<span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-								{progress}%
+								{progressPercent}%
 							</span>
 						{/if}
 					</div>
@@ -101,11 +103,11 @@
 						{chapter.sections.length} kaflar
 					</p>
 
-					{#if progress > 0}
+					{#if progressPercent > 0}
 						<div class="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
 							<div
 								class="h-full rounded-full bg-emerald-500 transition-all duration-300"
-								style="width: {progress}%"
+								style="width: {progressPercent}%"
 							></div>
 						</div>
 					{/if}

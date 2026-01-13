@@ -3,6 +3,8 @@ import {
 	loadSectionContent,
 	loadTableOfContents,
 	findSectionBySlug,
+	getChapterFolder,
+	getSectionPath,
 	ContentLoadError
 } from '$lib/utils/contentLoader';
 import { error } from '@sveltejs/kit';
@@ -22,18 +24,21 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
 		const { chapter, section: currentSection } = result;
 
-		// Load section content with pre-parsed metadata from toc.json
+		// Get the actual folder name for content loading (supports both v1 and v2)
+		const chapterFolder = getChapterFolder(chapter);
+
+		// Load section content using the file name from toc.json
 		const section = await loadSectionContent(
 			bookSlug,
-			chapterSlug,
-			`${sectionSlug}.md`,
+			chapterFolder,
+			currentSection.file,
 			fetch,
 			currentSection.metadata
 		);
 
-		// Find chapter and section indices
-		const chapterIndex = toc.chapters.findIndex((c) => c.slug === chapterSlug);
-		const sectionIndex = chapter.sections.findIndex((s) => s.slug === sectionSlug);
+		// Find chapter and section indices using number-based matching
+		const chapterIndex = toc.chapters.findIndex((c) => c.number === chapter.number);
+		const sectionIndex = chapter.sections.findIndex((s) => s.number === currentSection.number);
 
 		// Build navigation context
 		let previous: NavigationContext['previous'];
@@ -81,7 +86,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			bookSlug,
 			chapterSlug,
 			sectionSlug,
-			chapterNumber: chapterIndex + 1
+			chapterNumber: chapter.number
 		};
 	} catch (e) {
 		console.error('Failed to load section:', e);

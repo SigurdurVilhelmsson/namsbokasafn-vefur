@@ -6,6 +6,7 @@
  */
 import { browser } from '$app/environment';
 import type { TableOfContents } from '$lib/types/content';
+import { getChapterPath, getSectionPath, getChapterFolder } from '$lib/utils/contentLoader';
 import type {
 	WorkerMessage,
 	WorkerResponse,
@@ -147,9 +148,9 @@ class SearchIndexWorker {
 	}
 
 	private async doBuildIndex(toc: TableOfContents, bookSlug: string): Promise<void> {
-		// Extract chapters for filtering
+		// Extract chapters for filtering (use path for routing)
 		this.chapters = toc.chapters.map((chapter) => ({
-			slug: chapter.slug,
+			slug: getChapterPath(chapter),
 			title: chapter.title
 		}));
 
@@ -157,25 +158,30 @@ class SearchIndexWorker {
 		const documents: RawDocument[] = [];
 
 		for (const chapter of toc.chapters) {
+			const chapterFolder = getChapterFolder(chapter);
+			const chapterPath = getChapterPath(chapter);
+
 			for (const section of chapter.sections) {
+				const sectionPath = getSectionPath(section);
+
 				try {
 					const response = await fetch(
-						`/content/${bookSlug}/chapters/${chapter.slug}/${section.file}`
+						`/content/${bookSlug}/chapters/${chapterFolder}/${section.file}`
 					);
 					if (!response.ok) continue;
 
 					const markdown = await response.text();
 
 					documents.push({
-						chapterSlug: chapter.slug,
-						sectionSlug: section.slug,
+						chapterSlug: chapterPath,
+						sectionSlug: sectionPath,
 						chapterTitle: chapter.title,
 						sectionTitle: section.title,
 						sectionNumber: section.number,
 						markdown
 					});
 				} catch (error) {
-					console.error(`Villa við að hlaða ${chapter.slug}/${section.slug}:`, error);
+					console.error(`Villa við að hlaða ${chapterPath}/${sectionPath}:`, error);
 				}
 			}
 		}

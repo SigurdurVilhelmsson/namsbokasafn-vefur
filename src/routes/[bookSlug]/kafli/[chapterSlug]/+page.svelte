@@ -6,20 +6,24 @@
 	import type { Section } from '$lib/types/content';
 	import { reader } from '$lib/stores';
 	import { isSectionRead, calcChapterProgress } from '$lib/stores/reader';
+	import { getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
 
 	export let data: PageData;
 
+	// Get chapter path for number-based routing
+	$: chapterPath = getChapterPath(data.chapter);
+
 	// Subscribe to reader progress for reactivity
 	$: progress = $reader.progress;
-	$: chapterProgress = calcChapterProgress(progress, data.chapter.slug, data.chapter.sections.length);
+	$: chapterProgress = calcChapterProgress(progress, chapterPath, data.chapter.sections.length);
 
 	// Reactive: find first unread section or fall back to first section
-	$: firstUnread = data.chapter.sections.find(s => !isSectionRead(progress, data.chapter.slug, s.slug));
+	$: firstUnread = data.chapter.sections.find(s => !isSectionRead(progress, chapterPath, getSectionPath(s)));
 	$: targetSection = firstUnread ?? data.chapter.sections[0];
 
 	// Check if section is read using reactive progress
-	function isRead(sectionSlug: string): boolean {
-		return isSectionRead(progress, data.chapter.slug, sectionSlug);
+	function isRead(section: Section): boolean {
+		return isSectionRead(progress, chapterPath, getSectionPath(section));
 	}
 
 	// Get section type from section (with type assertion)
@@ -92,11 +96,12 @@
 
 			<div class="space-y-2">
 				{#each data.chapter.sections as section}
-					{@const sectionRead = isRead(section.slug)}
+					{@const sectionPath = getSectionPath(section)}
+					{@const sectionRead = isRead(section)}
 					{@const sectionType = getSectionType(section)}
 					{@const typeIcon = getSectionIcon(sectionType)}
 					<a
-						href="/{data.bookSlug}/kafli/{data.chapter.slug}/{section.slug}"
+						href="/{data.bookSlug}/kafli/{chapterPath}/{sectionPath}"
 						class="group flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 p-4 transition-all hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20"
 					>
 						<!-- Read indicator -->
@@ -170,7 +175,7 @@
 			<!-- Start reading button -->
 			{#if targetSection}
 				<a
-					href="/{data.bookSlug}/kafli/{data.chapter.slug}/{targetSection.slug}"
+					href="/{data.bookSlug}/kafli/{chapterPath}/{getSectionPath(targetSection)}"
 					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
 				>
 					{firstUnread ? 'Halda áfram' : 'Byrja að lesa'}
