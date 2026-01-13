@@ -25,6 +25,25 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
 const contentDir = resolve(projectRoot, 'static', 'content');
 
+// =============================================================================
+// V2 PATH HELPERS (same logic as contentLoader.ts)
+// =============================================================================
+
+// Get URL path for chapter (zero-padded number)
+function getChapterPath(chapter) {
+	return String(chapter.number).padStart(2, '0');
+}
+
+// Get URL path for section (number with dots replaced by dashes)
+function getSectionPath(section) {
+	return section.number.replace('.', '-');
+}
+
+// Get folder name for chapter (slug if present, else padded number)
+function getChapterFolder(chapter) {
+	return chapter.slug || getChapterPath(chapter);
+}
+
 // Reading time calculation (same as in contentLoader.ts)
 const WORDS_PER_MINUTE = 180;
 
@@ -215,29 +234,31 @@ function processBook(bookSlug) {
 
 	// Process each chapter and section
 	for (const chapter of toc.chapters || []) {
-		const chapterDir = join(bookDir, 'chapters', chapter.slug);
+		const chapterFolder = getChapterFolder(chapter);
+		const chapterDir = join(bookDir, 'chapters', chapterFolder);
 		const chapterNumber = chapter.number;
+		const chapterPath = getChapterPath(chapter);
 
 		// Reset counters for each chapter (deterministic numbering per chapter)
 		const counters = { eq: 0, fig: 0, tbl: 0, def: 0 };
 
 		if (!existsSync(chapterDir)) {
-			console.warn(`    Warning: Chapter directory not found: ${chapter.slug}`);
+			console.warn(`    Warning: Chapter directory not found: ${chapterFolder}`);
 			continue;
 		}
 
 		for (const section of chapter.sections || []) {
-			const sectionPath = join(chapterDir, section.file);
-			const sectionSlug = section.slug;
+			const sectionFilePath = join(chapterDir, section.file);
+			const sectionPath = getSectionPath(section);
 
-			if (!existsSync(sectionPath)) {
+			if (!existsSync(sectionFilePath)) {
 				console.warn(`    Warning: Section file not found: ${section.file}`);
 				sectionsSkipped++;
 				continue;
 			}
 
 			try {
-				const fileContent = readFileSync(sectionPath, 'utf-8');
+				const fileContent = readFileSync(sectionFilePath, 'utf-8');
 				const { data: frontmatter, content } = matter(fileContent);
 
 				// Calculate reading time from content
@@ -263,7 +284,7 @@ function processBook(bookSlug) {
 				}
 
 				// Extract cross-references from content
-				const refs = extractReferences(content, chapter.slug, sectionSlug, chapterNumber, counters);
+				const refs = extractReferences(content, chapterPath, sectionPath, chapterNumber, counters);
 				for (const ref of refs) {
 					const { key, ...refData } = ref;
 					referenceIndex[key] = refData;

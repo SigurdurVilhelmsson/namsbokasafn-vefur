@@ -26,7 +26,7 @@
  */
 
 import { execSync, spawnSync } from 'child_process';
-import { existsSync, readdirSync, statSync } from 'fs';
+import { existsSync, readdirSync, statSync, readFileSync } from 'fs';
 import { resolve, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -117,7 +117,15 @@ function getPublicationPath(sourceDir, bookSlug) {
 		const tocPath = resolve(variantPath, 'toc.json');
 
 		if (existsSync(variantPath) && existsSync(tocPath)) {
-			return { path: variantPath, variant };
+			// Check that toc.json has a non-empty chapters array
+			try {
+				const toc = JSON.parse(readFileSync(tocPath, 'utf-8'));
+				if (Array.isArray(toc.chapters) && toc.chapters.length > 0) {
+					return { path: variantPath, variant };
+				}
+			} catch {
+				// Invalid JSON, skip this variant
+			}
 		}
 	}
 

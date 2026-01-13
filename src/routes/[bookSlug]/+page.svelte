@@ -41,6 +41,12 @@
 	function getChapterProgressPercent(chapter: Chapter): number {
 		return calcChapterProgress(progress, getChapterPath(chapter), chapter.sections.length);
 	}
+
+	// Get attribution data (supports both 'source' and 'attribution' fields with v1/v2 field names)
+	$: attribution = toc?.source || toc?.attribution;
+	// Handle both v1 field names (original, authors) and v2 field names (originalTitle, originalAuthors)
+	$: originalTitle = attribution?.original || (attribution as any)?.originalTitle;
+	$: authors = attribution?.authors || (attribution as any)?.originalAuthors;
 </script>
 
 <svelte:head>
@@ -116,28 +122,30 @@
 		</div>
 
 		<!-- Attribution -->
-		{#if toc.source}
+		{#if attribution}
 			<div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
 				<h3 class="text-sm font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider mb-4">
 					Um bókina
 				</h3>
 				<div class="text-sm text-gray-600 dark:text-gray-300 space-y-1">
-					<p><strong>Upprunalegt efni:</strong> {toc.source.original}</p>
-					{#if toc.source.authors}
-						<p><strong>Höfundar:</strong> {toc.source.authors}</p>
+					{#if originalTitle}
+						<p><strong>Upprunalegt efni:</strong> {originalTitle}</p>
 					{/if}
-					{#if toc.source.translator}
-						<p><strong>Þýðandi:</strong> {toc.source.translator}</p>
+					{#if authors}
+						<p><strong>Höfundar:</strong> {authors}</p>
 					{/if}
-					{#if toc.source.license}
+					{#if attribution.translator}
+						<p><strong>Þýðandi:</strong> {attribution.translator}</p>
+					{/if}
+					{#if attribution.license}
 						<p>
 							<strong>Leyfi:</strong>
-							{#if toc.source.licenseUrl}
-								<a href={toc.source.licenseUrl} target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">
-									{toc.source.license}
+							{#if attribution.licenseUrl}
+								<a href={attribution.licenseUrl} target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">
+									{attribution.license}
 								</a>
 							{:else}
-								{toc.source.license}
+								{attribution.license}
 							{/if}
 						</p>
 					{/if}
