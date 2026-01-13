@@ -19,7 +19,8 @@
     "prepare-content": "npm run copy-content && npm run process-content",
     "validate-content": "node scripts/validate-content.js",
     "lint-content": "npm run prepare-content && node scripts/validate-content.js",
-    "clean": "rm -rf build .svelte-kit static/content"
+    "clean": "rm -rf build .svelte-kit static/content",
+    "sync-content": "node scripts/sync-content.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
