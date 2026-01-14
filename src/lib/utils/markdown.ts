@@ -271,6 +271,37 @@ function remarkCrossReferences() {
 // =============================================================================
 
 /**
+ * Rehype plugin to remove orphan directive closing markers (:::)
+ * remark-directive only needs one ::: to close nested containers, but the
+ * markdown content has multiple ::: which become orphaned paragraph text
+ */
+function rehypeRemoveOrphanDirectiveMarkers() {
+	return (tree: Node) => {
+		visit(tree, 'element', (node: Element, index, parent) => {
+			if (!parent || index === undefined) return;
+			if (node.tagName !== 'p') return;
+
+			// Check if paragraph only contains ::: text (possibly with whitespace)
+			const children = node.children || [];
+			if (children.length === 0) return;
+
+			const textContent = children
+				.filter((child): child is { type: 'text'; value: string } => child.type === 'text')
+				.map((child) => child.value)
+				.join('')
+				.trim();
+
+			// Remove paragraphs that only contain ::: markers
+			if (/^(:::\s*)+$/.test(textContent)) {
+				const parentEl = parent as { children: RootContent[] };
+				parentEl.children.splice(index, 1);
+				return index; // Return index to re-check this position
+			}
+		});
+	};
+}
+
+/**
  * Rehype plugin to wrap content blocks with icon and title HTML
  */
 function rehypeContentBlocks() {
@@ -590,6 +621,7 @@ export async function processMarkdown(content: string): Promise<string> {
 			trust: true,
 			throwOnError: false
 		})
+		.use(rehypeRemoveOrphanDirectiveMarkers)
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
 		.use(rehypeSlug)
@@ -619,6 +651,7 @@ export function processMarkdownSync(content: string): string {
 			trust: true,
 			throwOnError: false
 		})
+		.use(rehypeRemoveOrphanDirectiveMarkers)
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
 		.use(rehypeSlug)
