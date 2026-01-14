@@ -6,7 +6,7 @@
 	import type { PageData } from './$types';
 	import type { TableOfContents } from '$lib/types/content';
 	import { analyticsStore, streakInfo, todayStats } from '$lib/stores/analytics';
-	import { loadTableOfContents } from '$lib/utils/contentLoader';
+	import { loadTableOfContents, findSectionBySlug } from '$lib/utils/contentLoader';
 	import { getTodayDateString } from '$lib/utils/storeHelpers';
 
 	export let data: PageData;
@@ -85,14 +85,12 @@
 		}
 	}
 
-	// Get section title from TOC
+	// Get section title from TOC (supports both v1 slugs and v2 numbers)
 	function getSectionTitle(chapterSlug: string, sectionSlug: string): string {
 		if (!toc) return `${chapterSlug}/${sectionSlug}`;
-		const chapter = toc.chapters.find((c) => c.slug === chapterSlug);
-		if (!chapter) return `${chapterSlug}/${sectionSlug}`;
-		const section = chapter.sections.find((s) => s.slug === sectionSlug);
-		if (!section) return `${chapter.title} - ${sectionSlug}`;
-		return `${section.number} ${section.title}`;
+		const result = findSectionBySlug(toc, chapterSlug, sectionSlug);
+		if (!result) return `${chapterSlug}/${sectionSlug}`;
+		return `${result.section.number} ${result.section.title}`;
 	}
 
 	// Get last 7 days for chart

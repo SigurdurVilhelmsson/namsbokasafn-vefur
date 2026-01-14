@@ -50,7 +50,7 @@ export const books: BookConfig[] = [
     },
     stats: {
       totalChapters: 21,
-      translatedChapters: 2
+      translatedChapters: 4
     },
     features: {
       glossary: true,

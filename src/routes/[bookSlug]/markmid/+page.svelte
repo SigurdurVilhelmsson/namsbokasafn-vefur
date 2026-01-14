@@ -11,7 +11,7 @@
 		objectivesWithLowConfidence,
 		type ConfidenceLevel
 	} from '$lib/stores/objectives';
-	import { loadTableOfContents } from '$lib/utils/contentLoader';
+	import { loadTableOfContents, findChapterBySlug, findSectionBySlug } from '$lib/utils/contentLoader';
 
 	export let data: PageData;
 
@@ -45,17 +45,15 @@
 		5: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800'
 	};
 
-	// Get section title from TOC
+	// Get section title from TOC (supports both v1 slugs and v2 numbers)
 	function getSectionInfo(chapterSlug: string, sectionSlug: string): { chapterTitle: string; sectionTitle: string; sectionNumber: string } | null {
 		if (!toc) return null;
-		const chapter = toc.chapters.find((c) => c.slug === chapterSlug);
-		if (!chapter) return null;
-		const section = chapter.sections.find((s) => s.slug === sectionSlug);
-		if (!section) return null;
+		const result = findSectionBySlug(toc, chapterSlug, sectionSlug);
+		if (!result) return null;
 		return {
-			chapterTitle: `${chapter.number}. ${chapter.title}`,
-			sectionTitle: section.title,
-			sectionNumber: section.number
+			chapterTitle: `${result.chapter.number}. ${result.chapter.title}`,
+			sectionTitle: result.section.title,
+			sectionNumber: result.section.number
 		};
 	}
 
@@ -75,10 +73,10 @@
 		return new Map([...grouped.entries()].sort((a, b) => a[0].localeCompare(b[0])));
 	})();
 
-	// Get chapter info from TOC
+	// Get chapter info from TOC (supports both v1 slugs and v2 numbers)
 	function getChapterTitle(chapterSlug: string): string {
 		if (!toc) return chapterSlug;
-		const chapter = toc.chapters.find((c) => c.slug === chapterSlug);
+		const chapter = findChapterBySlug(toc, chapterSlug);
 		return chapter ? `${chapter.number}. ${chapter.title}` : chapterSlug;
 	}
 

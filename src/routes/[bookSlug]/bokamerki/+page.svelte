@@ -6,7 +6,7 @@
 	import type { PageData } from './$types';
 	import type { TableOfContents, Chapter, Section } from '$lib/types/content';
 	import { reader, bookmarks } from '$lib/stores/reader';
-	import { loadTableOfContents } from '$lib/utils/contentLoader';
+	import { loadTableOfContents, findSectionBySlug } from '$lib/utils/contentLoader';
 
 	export let data: PageData;
 
@@ -40,19 +40,13 @@
 		return { chapterSlug: parts[0], sectionSlug: parts[1] };
 	}
 
-	// Find chapter and section info from TOC
+	// Find chapter and section info from TOC (supports both v1 slugs and v2 numbers)
 	function findSectionInfo(
-		toc: TableOfContents,
+		tocData: TableOfContents,
 		chapterSlug: string,
 		sectionSlug: string
 	): { chapter: Chapter; section: Section } | null {
-		const chapter = toc.chapters.find((c) => c.slug === chapterSlug);
-		if (!chapter) return null;
-
-		const section = chapter.sections.find((s) => s.slug === sectionSlug);
-		if (!section) return null;
-
-		return { chapter, section };
+		return findSectionBySlug(tocData, chapterSlug, sectionSlug);
 	}
 
 	// Resolve bookmarks to full info with titles

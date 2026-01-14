@@ -3,7 +3,7 @@
 	import { settings, theme } from '$lib/stores';
 	import { onMount, onDestroy } from 'svelte';
 	import type { TableOfContents } from '$lib/types/content';
-	import { loadTableOfContents } from '$lib/utils/contentLoader';
+	import { loadTableOfContents, findChapterBySlug, findSectionBySlug } from '$lib/utils/contentLoader';
 	import SearchModal from '$lib/components/SearchModal.svelte';
 	import SettingsModal from '$lib/components/SettingsModal.svelte';
 
@@ -44,9 +44,9 @@
 		}
 	}
 
-	// Find current chapter and section titles
-	$: currentChapter = toc?.chapters.find((c) => c.slug === chapterSlug);
-	$: currentSection = currentChapter?.sections.find((s) => s.slug === sectionSlug);
+	// Find current chapter and section titles (supports both v1 slugs and v2 numbers)
+	$: currentChapter = toc && chapterSlug ? findChapterBySlug(toc, chapterSlug) : undefined;
+	$: currentSection = toc && chapterSlug && sectionSlug ? findSectionBySlug(toc, chapterSlug, sectionSlug)?.section : undefined;
 	$: isDark = $theme === 'dark';
 
 	function toggleTheme() {
