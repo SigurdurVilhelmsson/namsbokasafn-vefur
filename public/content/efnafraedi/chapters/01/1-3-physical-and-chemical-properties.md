@@ -38,8 +38,7 @@ efnasamsetningu þess.
      ![Figure A is a photograph of butter melting in a pot on a stove.
   Figure B is a photograph of something being heated on a stove in a pot.
    Water droplets are forming on the underside of a glass cover that has
-    been placed over the pot.](./images/media/rId23.so){width="4.875in"
-                             height="2.03in"}
+    been placed over the pot.](./images/media/rId23.jpg)
 
   -----------------------------------------------------------------------
 
@@ -62,7 +61,7 @@ engri hættu vegna þess að það er ekki hvarfgjarnt.
     with reddish orange rust. Figure B shows the silver colored chrome
   parts of a motorcycle. One of the parts is so shiny that you can see a
                  reflection of the surrounding street and
-  buildings.](./images/media/rId28.so){width="4.875in" height="2.075in"}
+  buildings.](./images/media/rId28.jpg)
 
   -----------------------------------------------------------------------
 
@@ -87,8 +86,7 @@ eldaður, meltur eða rotnar ([mynd 1.20](#CNX_Chem_01_03_ChemChange)).
   a brownish gas rising from the liquid and filling the upper part of the
    flask. Figure B shows a burning match. Figure C shows red meat being
    cooked in a pan. Figure D shows a small bunch of yellow bananas that
-     have many black spots.](./images/media/rId33.so){width="4.875in"
-                             height="4.285in"}
+     have many black spots.](./images/media/rId33.png)
 
   -----------------------------------------------------------------------
 
@@ -156,8 +154,7 @@ með tiltekið efni.
    numbers in the health hazard diamond range from 0 to 4. 0 indicates a
   normal material, 1 indicates slightly hazardous, 2 indicates hazardous,
                 3 indicates extreme danger, and 4 indicates
-              deadly.](./images/media/rId39.so){width="6.0in"
-                       height="4.179998906386702in"}
+              deadly.](./images/media/rId39.jpg)
 
   -----------------------------------------------------------------------
 
@@ -202,7 +199,7 @@ um lotukerfið eftir því sem þú heldur áfram í efnafræðináminu.
   through 16 contain at least one representative of a metal, a metalloid,
      and a nonmetal. A key shows that, at room temperature, metals are
              solids, metalloids are liquids, and nonmetals are
-      gases.](./images/media/rId44.so){width="6.5in" height="5.08in"}
+      gases.](./images/media/rId44.jpg)
 
   -----------------------------------------------------------------------
 

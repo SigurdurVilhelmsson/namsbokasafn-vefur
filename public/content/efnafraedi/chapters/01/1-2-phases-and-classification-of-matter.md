@@ -40,7 +40,7 @@ lögun og rúmmál íláts síns.
      colored liquid. This beaker says takes shape of container, forms
   horizontal surfaces, has fixed volume. The beaker labeled gas is filled
          with a light brown gas. This beaker says expands to fill
-    container.](./images/media/rId25.so){width="6.5in" height="3.1in"}
+    container.](./images/media/rId25.jpg)
 
   -----------------------------------------------------------------------
 
@@ -59,8 +59,7 @@ að greina snefilmagn málma.
   -----------------------------------------------------------------------
   ![A cutting torch is being used to cut a piece of metal. Bright, white
      colored plasma can be seen near the tip of the torch, where it is
-      contacting the metal.](./images/media/rId30.so){width="3.25in"
-                             height="2.555in"}
+      contacting the metal.](./images/media/rId30.jpg)
 
   -----------------------------------------------------------------------
 
@@ -126,7 +125,7 @@ magn efnis breytist.
       that contains sheets of P B and P B O subscript 2 along with H
   subscript 2 S O subscript 4. After the battery is used, it contains an
             equal mass of P B S O subscript 4 and H subscript 2
-        O.](./images/media/rId39.so){width="6.5in" height="3.07in"}
+        O.](./images/media/rId39.jpg)
 
   -----------------------------------------------------------------------
 
@@ -182,8 +181,7 @@ gleraugu (þau með linsum sem dökkna þegar þau verða fyrir ljósi).
   b shows the substance in the test tube being heated over a flame. Photo
     c shows a test tube that is not longer being heated. The orange-red
    substance is almost completely gone, and small, silver droplets of a
-       substance are left.](./images/media/rId46.so){width="4.875in"
-                             height="1.47in"}
+       substance are left.](./images/media/rId46.jpg)
 
   -----------------------------------------------------------------------
 
@@ -244,7 +242,7 @@ hlynsíróp, bensín og lausn af salti í vatni.
      oil. The zoomed in image shows that oil is forming round droplets
   within the red liquid. Diagram B shows a photo of Gatorade G 2. A zoom
     in box is magnifying a portion of the Gatorade, which is uniformly
-      red.](./images/media/rId57.so){width="4.875in" height="1.45in"}
+      red.](./images/media/rId57.jpg)
 
   -----------------------------------------------------------------------
 
@@ -272,7 +270,7 @@ sýnd á ([mynd 1.11](#CNX_Chem_01_02_MattType)).
   does have constant properties and composition, it is a pure substance.
    This leads to the next question: can it be simplified chemically? If
                 no, it is an element. If yes, then it is a
-     compound.](./images/media/rId61.so){width="6.5in" height="2.2in"}
+     compound.](./images/media/rId61.jpg)
 
   -----------------------------------------------------------------------
 
@@ -332,7 +330,7 @@ ef henni væri skipt frekar.
    in color. The microscope image of a gold crystal shows many similarly
    sized gold stripes that are separated by dark areas. Looking closely,
     one can see that the gold stripes are made of many, tiny, circular
-      atoms.](./images/media/rId69.so){width="6.5in" height="2.72in"}
+      atoms.](./images/media/rId69.jpg)
 
   -----------------------------------------------------------------------
 
@@ -378,8 +376,7 @@ stækkun.
   shows that the cotton molecule contains about a dozen atoms. The black
   carbon atoms form rings that are connected by red oxygen atoms. Many of
     the carbon atoms are also bonded to hydrogen atoms, shown as white
-   balls, or other oxygen atoms.](./images/media/rId74.so){width="6.5in"
-                      height="1.6087620297462817in"}
+   balls, or other oxygen atoms.](./images/media/rId74.jpg)
 
   -----------------------------------------------------------------------
 
@@ -432,8 +429,7 @@ sameindir ótrúlega litlar og léttar. Ef venjulegt vatnsglas væri stækkað
   carbon's right side and the other oxygen is bonded to the carbon's left
    side. Glucose, C subscript 6 H subscript 12 O subscript 6, contains a
         chain of carbon atoms that have attached oxygen or hydrogen
-              atoms.](./images/media/rId79.so){width="6.5in"
-                      height="1.8599989063867017in"}
+              atoms.](./images/media/rId79.jpg)
 
   -----------------------------------------------------------------------
 
@@ -461,7 +457,7 @@ rafhlöðu eða aflgjafa, eins og sýnt er á ([mynd
   bubbles in the test tube over the negative terminal are hydrogen gas, 2
      H subscript 2 gas. The bubbles in the test tube over the positive
                   terminal are oxygen gas, O subscript 2
-       gas.](./images/media/rId83.so){width="6.0in" height="3.89in"}
+       gas.](./images/media/rId83.jpg)
 
   -----------------------------------------------------------------------
 
@@ -503,8 +499,7 @@ efnarafalsbílar verið framtíðin.
    through the cathode to reach the oxygen gas molecules at the opposite
    end of the battery. There, the oxygen atoms split up into single red
   spheres. Each oxygen atom takes on two of the incoming protons to form
-        a water molecule.](./images/media/rId87.so){width="4.875in"
-                             height="3.73in"}
+        a water molecule.](./images/media/rId87.jpg)
 
   -----------------------------------------------------------------------
 
@@ -546,7 +541,7 @@ pólýakrýlónítríli.
   of silicon oxide, also known as glass. The glass is strengthened by the
     addition of aluminum, sodium, and potassium. The battery components
    contain lithium combined with other metals such as cobalt, iron, and
-     copper.](./images/media/rId92.so){width="5.89in" height="3.14in"}
+     copper.](./images/media/rId92.jpg)
 
   -----------------------------------------------------------------------
 

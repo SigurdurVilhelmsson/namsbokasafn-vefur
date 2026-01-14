@@ -5,7 +5,7 @@ chapter: 3
 ---
 
   --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   ![This figure shows a swimming pool that is full of water and surrounded by a concrete patio.](./images/media/rId20.jpg){width="6.5in" height="3.0in"}
+   ![This figure shows a swimming pool that is full of water and surrounded by a concrete patio.](./images/media/rId20.jpg)
 
   --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
