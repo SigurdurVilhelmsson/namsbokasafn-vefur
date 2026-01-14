@@ -56,7 +56,7 @@ e\) C~12~H~22~O~11~ (súkrósi, reyrsykur)
 
 \(b\)
 
-![A structure is shown. Two C atoms form a triple bond with each other. Each C atom also forms a single bond with on H atom.](./images/media/rId33.png)
+![A structure is shown. Two C atoms form a triple bond with each other. Each C atom also forms a single bond with on H atom.](./images/media/rId33.jpg)
 
 \(c\)
 
@@ -92,7 +92,7 @@ Hvaða sameind hefur sameindamassa upp á 28,05 amu?
 
 \(a\)
 
-![A structure is shown. A C atom forms a triple bond with another C atom. Each C atom also forms a single bond with an H atom.](./images/media/rId66.png)
+![A structure is shown. A C atom forms a triple bond with another C atom. Each C atom also forms a single bond with an H atom.](./images/media/rId66.jpg)
 
 \(b\)
 

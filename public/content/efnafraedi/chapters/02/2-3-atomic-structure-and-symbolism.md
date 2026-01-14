@@ -229,7 +229,7 @@ Loftsteinn sem fannst í miðri Indiana inniheldur snefil af eðalgasinu neon se
 
 **Lausn**
 
-![None](./images/media/rId71.png)
+![None](./images/media/rId71.jpg)
 
 Meðalmassi neonatóms í sólvindinum er 20,15 amu. (Meðalmassi neonatóms á jörðu niðri er 20.1796 amu. Þessi niðurstaða sýnir að við gætum fundið smávægilegan mun á náttúrulegri gnægð samsæta, allt eftir uppruna þeirra.)
 :::
