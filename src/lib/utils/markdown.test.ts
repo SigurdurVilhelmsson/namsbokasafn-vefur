@@ -218,7 +218,8 @@ The smallest unit of matter.
 `;
 				const html = await processMarkdown(md);
 				expect(html).toContain('definition');
-				expect(html).toContain('data-term="Atóm"');
+				// Term should appear in the title, not as a data attribute (data attributes are cleaned up)
+				expect(html).toContain('Atóm');
 			});
 
 			it('should process key-concept directive', async () => {

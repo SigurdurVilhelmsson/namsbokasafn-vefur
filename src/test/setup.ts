@@ -3,7 +3,7 @@
  * Runs before all tests
  */
 
-import { vi } from 'vitest';
+import { vi, beforeEach } from 'vitest';
 
 // Mock localStorage
 const localStorageMock = (() => {

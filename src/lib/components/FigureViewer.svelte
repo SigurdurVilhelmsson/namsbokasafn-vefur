@@ -3,7 +3,7 @@
 -->
 <script lang="ts">
 	import ImageLightbox from './ImageLightbox.svelte';
-	import type { FigureData } from './ImageLightbox.svelte';
+	import type { FigureData } from '$lib/types/figure';
 
 	export let src: string;
 	export let alt: string;
@@ -29,13 +29,13 @@
 			: `Mynd ${figureNumber}`
 		: null;
 
-	$: figureData: FigureData = {
+	$: figureData = {
 		src,
 		alt,
 		caption,
 		figureNumber,
 		chapterNumber
-	};
+	} as FigureData;
 </script>
 
 <figure class="group relative my-6 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
