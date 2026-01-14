@@ -3,7 +3,6 @@
  */
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
-import remarkSubSuper from 'remark-sub-super';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import remarkDirective from 'remark-directive';
@@ -12,7 +11,8 @@ import rehypeSlug from 'rehype-slug';
 import rehypeKatex from 'rehype-katex';
 import rehypeStringify from 'rehype-stringify';
 import { visit } from 'unist-util-visit';
-import type { Root } from 'mdast';
+import { findAndReplace } from 'mdast-util-find-and-replace';
+import type { Root, PhrasingContent } from 'mdast';
 import type { Node, Data } from 'unist';
 import type { Element, ElementContent, RootContent } from 'hast';
 
@@ -126,6 +126,36 @@ const BLOCK_ICONS: Record<ContentBlockType, string> = {
 // =============================================================================
 // REMARK PLUGINS
 // =============================================================================
+
+/**
+ * Custom remark plugin to handle subscript (~text~) and superscript (^text^) syntax
+ * Must run BEFORE remarkGfm to prevent ~text~ from being parsed as strikethrough
+ */
+function remarkSubSuperscript() {
+	// Match ~subscript~ and ^superscript^ patterns
+	// Negative lookbehind/lookahead to avoid matching within words or escaped
+	const subscriptRegex = /~([^~\s][^~]*[^~\s]|[^~\s])~/g;
+	const superscriptRegex = /\^([^^^\s][^^^]*[^^^\s]|[^^^\s])\^/g;
+
+	return (tree: Root) => {
+		findAndReplace(tree, [
+			[
+				subscriptRegex,
+				(_match: string, content: string): PhrasingContent => ({
+					type: 'html',
+					value: `<sub>${content}</sub>`
+				})
+			],
+			[
+				superscriptRegex,
+				(_match: string, content: string): PhrasingContent => ({
+					type: 'html',
+					value: `<sup>${content}</sup>`
+				})
+			]
+		]);
+	};
+}
 
 /**
  * Custom remark plugin to handle markdown directives
@@ -548,7 +578,7 @@ function rehypeEquationWrapper() {
 export async function processMarkdown(content: string): Promise<string> {
 	const result = await unified()
 		.use(remarkParse)
-		.use(remarkSubSuper) // Handle ~subscript~ and ^superscript^ before GFM
+		.use(remarkSubSuperscript) // Handle ~subscript~ and ^superscript^ before GFM
 		.use(remarkGfm)
 		.use(remarkMath)
 		.use(remarkDirective)
@@ -577,7 +607,7 @@ export async function processMarkdown(content: string): Promise<string> {
 export function processMarkdownSync(content: string): string {
 	const result = unified()
 		.use(remarkParse)
-		.use(remarkSubSuper) // Handle ~subscript~ and ^superscript^ before GFM
+		.use(remarkSubSuperscript) // Handle ~subscript~ and ^superscript^ before GFM
 		.use(remarkGfm)
 		.use(remarkMath)
 		.use(remarkDirective)
