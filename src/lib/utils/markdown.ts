@@ -246,8 +246,14 @@ function rehypeContentBlocks() {
 	return (tree: Node) => {
 		visit(tree, 'element', (node: { tagName: string; properties?: Record<string, unknown>; children?: Node[] }) => {
 			const props = node.properties;
-			if (!props || typeof props.className !== 'string') return;
-			if (!props.className.includes('content-block')) return;
+			if (!props) return;
+
+			// Handle className as either string or array
+			const className = Array.isArray(props.className)
+				? props.className.join(' ')
+				: (typeof props.className === 'string' ? props.className : '');
+
+			if (!className.includes('content-block')) return;
 
 			const blockType = props['dataBlockType'] as ContentBlockType | undefined;
 			if (!blockType) return;
