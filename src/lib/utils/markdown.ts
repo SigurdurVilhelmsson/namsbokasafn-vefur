@@ -602,6 +602,29 @@ function rehypeEquationWrapper() {
 }
 
 // =============================================================================
+// LATEX PREPROCESSING
+// =============================================================================
+
+/**
+ * Preprocess LaTeX to fix commands not supported by KaTeX
+ * - \mspace{Xmu} → appropriate KaTeX spacing
+ */
+function preprocessLatex(content: string): string {
+	// Convert \mspace{Xmu} to KaTeX-compatible spacing
+	// \mspace is MathML spacing that Pandoc generates but KaTeX doesn't support
+	// 1mu = 1/18 em, so we map to closest KaTeX equivalents
+	return content.replace(/\\mspace\{(\d+)mu\}/g, (_match, mu) => {
+		const muValue = parseInt(mu, 10);
+		if (muValue <= 3) return '\\,'; // thin space (3mu)
+		if (muValue <= 4) return '\\:'; // medium space (4mu)
+		if (muValue <= 5) return '\\;'; // thick space (5mu)
+		if (muValue <= 9) return '\\;\\,'; // ~8mu
+		if (muValue <= 18) return '\\quad'; // quad (18mu)
+		return '\\qquad'; // double quad (36mu)
+	});
+}
+
+// =============================================================================
 // MARKDOWN PROCESSOR
 // =============================================================================
 
@@ -609,6 +632,9 @@ function rehypeEquationWrapper() {
  * Process markdown content to HTML
  */
 export async function processMarkdown(content: string): Promise<string> {
+	// Preprocess LaTeX for KaTeX compatibility
+	const preprocessedContent = preprocessLatex(content);
+
 	const result = await unified()
 		.use(remarkParse)
 		.use(remarkSubSuperscript) // Handle ~subscript~ and ^superscript^ before GFM
@@ -629,7 +655,7 @@ export async function processMarkdown(content: string): Promise<string> {
 		.use(rehypeSlug)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
-		.process(content);
+		.process(preprocessedContent);
 
 	return String(result);
 }
@@ -639,6 +665,9 @@ export async function processMarkdown(content: string): Promise<string> {
  * Note: This blocks the event loop - prefer async version
  */
 export function processMarkdownSync(content: string): string {
+	// Preprocess LaTeX for KaTeX compatibility
+	const preprocessedContent = preprocessLatex(content);
+
 	const result = unified()
 		.use(remarkParse)
 		.use(remarkSubSuperscript) // Handle ~subscript~ and ^superscript^ before GFM
@@ -659,7 +688,7 @@ export function processMarkdownSync(content: string): string {
 		.use(rehypeSlug)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
-		.processSync(content);
+		.processSync(preprocessedContent);
 
 	return String(result);
 }
