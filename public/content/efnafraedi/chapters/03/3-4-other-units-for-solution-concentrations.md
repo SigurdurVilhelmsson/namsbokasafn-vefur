@@ -27,10 +27,9 @@ Massaprósenta er einnig nefnd með svipuðum heitum eins og *prósentumassi, pr
 
 Massaprósentur eru vinsælar styrkeiningar fyrir neysluvörur. Á miða á dæmigerðri klórflösku ([mynd 3.17](#CNX_Chem_03_05_bleach)) er styrkur virka efnisins, natríumhýpóklóríts (NaOCl), sagður vera 7,4%. 100,0 g sýni af klór myndi því innihalda 7,4 g af NaOCl.
 
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   ![The sides of two cylindrical containers are shown. Each container's label is partially visible. The left container's label reads "Bleach." The right label contains more information about the product including the phrase, "Contains: Sodium hypochlorite 7.4 %."](./images/media/rId23.jpg)
+  
+![The sides of two cylindrical containers are shown. Each container's label is partially visible. The left container's label reads "Bleach." The right label contains more information about the product including the phrase, "Contains: Sodium hypochlorite 7.4 %."](./images/media/rId23.jpg)
 
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 3.17 Fljótandi klór er vatnslausn af natríumhýpóklóríti (NaOCl). Þessi tegund hefur styrkinn 7,4% NaOCl miðað við massa.
 
@@ -120,10 +119,9 @@ Vín er um það bil 12% etanól (CH~3~CH~2~OH) miðað við rúmmál. Etanól h
 
 „Blandaðar" prósentueiningar, fengnar út frá massa leysts efnis og rúmmáli lausnar, eru vinsælar í ákveðnum lífefnafræðilegum og læknisfræðilegum tilgangi. Massa-rúmmálsprósenta er hlutfall massa leysts efnis og rúmmáls lausnar, gefið upp sem prósenta. Sértækar einingar sem notaðar eru fyrir massa leysts efnis og rúmmál lausnar geta verið breytilegar eftir lausninni. Til dæmis hefur saltvatnslausn, sem notuð er til að undirbúa vökva í æð, styrkinn 0,9% massa/rúmmál (m/v), sem gefur til kynna að samsetningin sé 0,9 g af leystu efni á hverja 100 ml af lausn. Styrkur glúkósa í blóði (almennt kallaður „blóðsykur") er einnig venjulega gefinn upp sem massa-rúmmálshlutfall. Þótt styrkurinn sé ekki beinlínis gefinn upp sem prósenta er hann venjulega gefinn upp í milligrömmum af glúkósa á desilítra (100 ml) af blóði ([mynd 3.18](#CNX_Chem_03_05_saline)).
 
-  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   ![Two pictures are shown labeled a and b. Picture a depicts a clear, colorless solution in a plastic bag being held in a person's hand. Picture b shows a person's hand holding a detection meter with a digital readout screen while another hand holds someone's finger up to the end of the meter. The meter is pressed to the drop of blood that is at the end of the person's finger.](./images/media/rId47.jpg)
+  
+![Two pictures are shown labeled a and b. Picture a depicts a clear, colorless solution in a plastic bag being held in a person's hand. Picture b shows a person's hand holding a detection meter with a digital readout screen while another hand holds someone's finger up to the end of the meter. The meter is pressed to the drop of blood that is at the end of the person's finger.](./images/media/rId47.jpg)
 
-  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 3.18 „Blandaðar" massa-rúmmálseiningar eru algengar í læknisfræðilegu samhengi. (a) NaCl-styrkur saltvatnslausnar er 0,9% (m/v). (b) Þetta tæki mælir glúkósagildi í blóðsýni. Eðlilegt bil fyrir glúkósastyrk í blóði (á fastandi maga) er um 70--100 mg/dL. (heimild a: breyting á verki eftir „The National Guard"/Flickr; heimild b: breyting á verki eftir Biswarup Ganguly)
 
@@ -137,10 +135,9 @@ Skilgreiningar á ppm og ppb sem byggjast á massa eru gefnar hér:
 
 Bæði ppm og ppb eru hentugar einingar til að gefa upp styrk mengunarefna og annarra snefilmengunarefna í vatni. Styrkur þessara mengunarefna er venjulega mjög lágur í hreinsuðu og náttúrulegu vatni og magn þeirra má ekki fara yfir tiltölulega lág styrkleikamörk án þess að valda skaðlegum áhrifum á heilsu og dýralíf. Til dæmis hefur EPA (Umhverfisverndarstofnun Bandaríkjanna) skilgreint hámarksöryggismagn flúoríðjóna í kranavatni sem 4 ppm. Vatnssíur í leiðslum eru hannaðar til að draga úr styrk flúoríðs og nokkurra annarra snefilmengunarefna í kranavatni ([mynd 3.19](#CNX_Chem_03_05_faucet)).
 
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   ![Two pictures are shown labeled a and b. Picture a is a close-up shot of water coming out of a faucet. Picture b shows a machine with the words, "Filtered Water Dispenser." This machine appears to be inside a refrigerator.](./images/media/rId59.jpg)
+  
+![Two pictures are shown labeled a and b. Picture a is a close-up shot of water coming out of a faucet. Picture b shows a machine with the words, "Filtered Water Dispenser." This machine appears to be inside a refrigerator.](./images/media/rId59.jpg)
 
-  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 3.19 (a) Á sumum svæðum getur snefilstyrkur mengunarefna gert ósíað kranavatn óhæft til drykkjar og matargerðar. (b) Vatnssíur í leiðslum draga úr styrk leystra efna í kranavatni. (Heimild a: breytt útgáfa af verki eftir Jenn Durfey; heimild b: breytt útgáfa af verki eftir „vastateparkstaff"/Wikimedia commons)
 
