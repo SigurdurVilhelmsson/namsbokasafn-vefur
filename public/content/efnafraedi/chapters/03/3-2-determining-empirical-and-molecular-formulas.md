@@ -96,7 +96,7 @@ Hver er massaprósenta járns í efnasambandinu Fe~2~O~3~, gefin upp með þremu
 
 Eins og áður hefur komið fram er algengasta aðferðin til að ákvarða efnaformúlu efnasambands að mæla fyrst massa frumefnanna sem það er gert úr. Hins vegar er mikilvægt að hafa í huga að efnaformúlur tákna hlutfallslegan *fjölda* atóma í efninu, ekki massa þeirra. Þess vegna verður að nota allar tilraunagögn sem fela í sér massa til að finna út samsvarandi fjölda atóma í efnasambandinu. Þetta er gert með því að nota mólmassa til að breyta massa hvers frumefnis í fjölda móla. Þessi mólmagn eru notuð til að reikna út heiltöluhlutföll sem hægt er að nota til að leiða út reynsluformúlu efnisins. Ímyndum okkur sýni af efnasambandi sem inniheldur 1,71 g af C og 0,287 g af H. Samsvarandi fjöldi atóma (í mólum) er:
 
-![None](./images/media/rId54.png)
+![None](./images/media/rId54.jpg)
 
 Þannig má tákna þetta efnasamband með formúlunni C~0,142~H~0,284~. Samkvæmt venju innihalda formúlur heiltölulágstafi, sem hægt er að ná með því að deila hverjum lágstaf með minni lágstafnum:
 

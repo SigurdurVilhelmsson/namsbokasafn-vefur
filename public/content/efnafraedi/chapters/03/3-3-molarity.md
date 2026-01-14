@@ -127,7 +127,7 @@ Hversu mörg grömm af NaCl eru í 0,250 L af 5,30*M* lausn?
 
 Rúmmál og mólstyrkur lausnarinnar eru tilgreind, þannig að magn (mól) uppleysta efnisins er auðveldlega reiknað út eins og sýnt er í [dæmi 3.15](#fs-idm64107376):
 
-![None](./images/media/rId54.png)
+![None](./images/media/rId54.jpg)
 
 Að lokum er þetta mólmagn notað til að leiða út massa NaCl:
 
