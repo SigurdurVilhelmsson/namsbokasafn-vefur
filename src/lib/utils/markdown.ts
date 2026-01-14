@@ -317,18 +317,19 @@ function rehypeContentBlocks() {
 
 			if (!className.includes('content-block')) return;
 
-			const blockType = props['dataBlockType'] as ContentBlockType | undefined;
+			// Note: hProperties uses hyphenated names, not camelCase
+			const blockType = props['data-block-type'] as ContentBlockType | undefined;
 			if (!blockType) return;
 
-			const title = (props['dataTitle'] as string) || BLOCK_TITLES[blockType];
-			const icon = (props['dataIcon'] as string) || BLOCK_ICONS[blockType];
-			const term = props['dataTerm'] as string | undefined;
+			const title = (props['data-title'] as string) || BLOCK_TITLES[blockType];
+			const icon = (props['data-icon'] as string) || BLOCK_ICONS[blockType];
+			const term = props['data-term'] as string | undefined;
 
 			// Clean up data attributes from final HTML
-			delete props['dataBlockType'];
-			delete props['dataTitle'];
-			delete props['dataIcon'];
-			delete props['dataTerm'];
+			delete props['data-block-type'];
+			delete props['data-title'];
+			delete props['data-icon'];
+			delete props['data-term'];
 
 			// Build the title text
 			let titleHtml = title;
