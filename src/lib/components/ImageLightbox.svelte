@@ -4,14 +4,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
-
-	export interface FigureData {
-		src: string;
-		alt: string;
-		caption?: string;
-		figureNumber?: number;
-		chapterNumber?: number;
-	}
+	import type { FigureData } from '$lib/types/figure';
 
 	export let figure: FigureData;
 	export let figures: FigureData[] = [];
