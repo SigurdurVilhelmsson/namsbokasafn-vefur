@@ -133,9 +133,10 @@ const BLOCK_ICONS: Record<ContentBlockType, string> = {
  */
 function remarkSubSuperscript() {
 	// Match ~subscript~ and ^superscript^ patterns
-	// Negative lookbehind/lookahead to avoid matching within words or escaped
-	const subscriptRegex = /~([^~\s][^~]*[^~\s]|[^~\s])~/g;
-	const superscriptRegex = /\^([^^^\s][^^^]*[^^^\s]|[^^^\s])\^/g;
+	// Only allow alphanumeric, +, -, − (minus sign) to avoid matching across long text spans
+	// This handles chemical formulas like H~2~O, CO~2~, Na^+^, 10^−3^
+	const subscriptRegex = /~([A-Za-z0-9+\-−]+)~/g;
+	const superscriptRegex = /\^([A-Za-z0-9+\-−]+)\^/g;
 
 	return (tree: Root) => {
 		findAndReplace(tree, [
