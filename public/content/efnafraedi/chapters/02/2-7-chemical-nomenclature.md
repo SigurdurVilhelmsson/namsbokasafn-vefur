@@ -63,37 +63,22 @@ Tafla 2.7
 
 Jónaefni í daglegu lífi
 
-  -----------------------------------------------------------------------------------------------
-  Jónaefni                             Notkun
-  ------------------------------------ ----------------------------------------------------------
-  NaCl, natríumklóríð                  venjulegt borðsalt
-
-  KI, kalíumjoðíð                      bætt við „joðbætt" salt fyrir skjaldkirtilinn
-
-  NaF, natríumflúoríð                  innihaldsefni í tannkremi
-
-  NaHCO~3~, natríumbíkarbónat          matarsódi; notaður í matargerð (og sem sýrubindandi lyf)
-
-  Na~2~CO~3~, natríumkarbónat          þvottasódi; notaður í hreinsiefni
-
-  NaOCl, natríumhýpóklórít             virkt innihaldsefni í bleikiefni til heimilisnota
-
-  CaCO~3~ kalsíumkarbónat              innihaldsefni í sýrubindandi lyfjum
-
-  Mg(OH)~2~, magnesíumhýdroxíð         innihaldsefni í sýrubindandi lyfjum
-
-  Al(OH)~3~, álhýdroxíð                innihaldsefni í sýrubindandi lyfjum
-
-  NaOH, natríumhýdroxíð                lútur; notaður sem frárennslishreinsir
-
-  K~3~PO~4~, kalíumfosfat              aukefni í matvælum (margvísleg not)
-
-  MgSO~4~, magnesíumsúlfat             bætt við hreinsað vatn
-
-  Na~2~HPO~4~, natríumhýdrógenfosfat   kekkjavarnarefni; notað í vörur í duftformi
-
-  Na~2~SO~3~, natríumsúlfít            rotvarnarefni
-  -----------------------------------------------------------------------------------------------
+| Jónaefni | Notkun |
+|---|---|
+| NaCl, natríumklóríð | venjulegt borðsalt |
+| KI, kalíumjoðíð | bætt við „joðbætt" salt fyrir skjaldkirtilinn |
+| NaF, natríumflúoríð | innihaldsefni í tannkremi |
+| NaHCO~3~, natríumbíkarbónat | matarsódi; notaður í matargerð (og sem sýrubindandi lyf) |
+| Na~2~CO~3~, natríumkarbónat | þvottasódi; notaður í hreinsiefni |
+| NaOCl, natríumhýpóklórít | virkt innihaldsefni í bleikiefni til heimilisnota |
+| CaCO~3~ kalsíumkarbónat | innihaldsefni í sýrubindandi lyfjum |
+| Mg(OH)~2~, magnesíumhýdroxíð | innihaldsefni í sýrubindandi lyfjum |
+| Al(OH)~3~, álhýdroxíð | innihaldsefni í sýrubindandi lyfjum |
+| NaOH, natríumhýdroxíð | lútur; notaður sem frárennslishreinsir |
+| K~3~PO~4~, kalíumfosfat | aukefni í matvælum (margvísleg not) |
+| MgSO~4~, magnesíumsúlfat | bætt við hreinsað vatn |
+| Na~2~HPO~4~, natríumhýdrógenfosfat | kekkjavarnarefni; notað í vörur í duftformi |
+| Na~2~SO~3~, natríumsúlfít | rotvarnarefni |
 
 Tafla 2.8
 :::
@@ -104,21 +89,14 @@ Flestir hliðarmálmar og sumir málmar í aðalflokkum geta myndað tvær eða 
 
 Nokkur jónaefni með málmjónum með breytilega hleðslu
 
-  -----------------------------------------------------------------------
-  Efnasamband                         Heiti
-  ----------------------------------- -----------------------------------
-  FeCl~2~                             járn(II) klóríð
-
-  FeCl~3~                             járn(III) klóríð
-
-  Hg~2~O                              kvikasilfurs(I) oxíð
-
-  HgO                                 kvikasilfurs(II) oxíð
-
-  SnF~2~                              tin(II) flúoríð
-
-  SnF~4~                              tin(IV) flúoríð
-  -----------------------------------------------------------------------
+| Efnasamband | Heiti |
+|---|---|
+| FeCl~2~ | járn(II) klóríð |
+| FeCl~3~ | járn(III) klóríð |
+| Hg~2~O | kvikasilfurs(I) oxíð |
+| HgO | kvikasilfurs(II) oxíð |
+| SnF~2~ | tin(II) flúoríð |
+| SnF~4~ | tin(IV) flúoríð |
 
 Tafla 2.9
 
@@ -136,19 +114,13 @@ $\text{sodium carbonate decahydrate}\ \text{Na}_{2}\text{CO}_{3} \bullet 10\text
 
 Forskeyti í nafnakerfum
 
-  --------------------------------------------------------------------------
-  Númer                Forskeyti         Númer             Forskeyti
-  -------------------- ----------------- ----------------- -----------------
-  1 (stundum sleppt)   mónó-             6                 hexa-
-
-  2                    dí-               7                 hepta-
-
-  3                    trí-              8                 októ-
-
-  4                    tetra-            9                 nona-
-
-  5                    penta-            10                deca-
-  --------------------------------------------------------------------------
+| Númer | Forskeyti | Númer | Forskeyti |
+|---|---|---|---|
+| 1 (stundum sleppt) | mónó- | 6 | hexa- |
+| 2 | dí- | 7 | hepta- |
+| 3 | trí- | 8 | októ- |
+| 4 | tetra- | 9 | nona- |
+| 5 | penta- | 10 | deca- |
 
 Tafla 2.10
 
@@ -209,9 +181,10 @@ Skrifaðu formúlur eftirfarandi jónaefna:
 
 Í upphafi tíunda áratugarins uppgötvaði lögfræðiritarinn Erin Brockovich ([mynd 2.32](#CNX_Chem_02_07_ErinBrocko)) háa tíðni alvarlegra veikinda í smábænum Hinckley í Kaliforníu. Rannsókn hennar tengdi að lokum veikindin við grunnvatn sem var mengað af Cr(VI) sem Pacific Gas & Electric (PG&E) notaði til að berjast gegn tæringu í nálægri jarðgasleiðslu. Eins og fram kom í kvikmyndinni *Erin Brockovich* (sem Julia Roberts vann Óskarsverðlaun fyrir), stefndu Erin og lögfræðingurinn Edward Masry PG&E fyrir að menga vatnið nálægt Hinckley árið 1993. Sáttin sem þau unnu árið 1996 -- 333 milljónir dala -- var hæsta upphæð sem nokkru sinni hafði verið veitt í beinni málsókn í Bandaríkjunum á þeim tíma.
 
-  
-![Figure A shows a photo of Erin Brockovich. Figure B shows a 3-D ball-and-stick model of chromate. Chromate has a chromium atom at its center that forms bonds with four oxygen atoms each. Two of the oxygen atoms form single bonds with the chromium atom while the other two form double bonds each. The structure of dichromate consists of two chromate ions that are bonded and share one of their oxygen atoms to which each chromate atom has a single bond.](./images/media/rId44.jpg)
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   ![Figure A shows a photo of Erin Brockovich. Figure B shows a 3-D ball-and-stick model of chromate. Chromate has a chromium atom at its center that forms bonds with four oxygen atoms each. Two of the oxygen atoms form single bonds with the chromium atom while the other two form double bonds each. The structure of dichromate consists of two chromate ions that are bonded and share one of their oxygen atoms to which each chromate atom has a single bond.](./images/media/rId44.jpg){width="6.0in" height="2.2349989063867017in"}
 
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 2.32 (a) Erin Brockovich komst að því að Cr(VI), sem PG&E notaði, hafði mengað vatnsveituna í Hinckley í Kaliforníu. (b) Cr(VI) jónin er oft til staðar í vatni sem fjölatóma jónirnar krómat, $\text{CrO}_{4}^{2 -}$ (vinstri), og díkrómat, $\text{Cr}_{2}\text{O}_{7}^{2 -}$ (hægri).
 
@@ -232,19 +205,13 @@ Tengiseiginleikar ólífrænna sameindasambanda eru frábrugðnir jónaefnum og 
 
 Nöfn nokkurra sameindaefna sem samsett eru úr tveimur frumefnum
 
-  -----------------------------------------------------------------------------------
-  Efnasamband       Heiti                 Efnasamband       Heiti
-  ----------------- --------------------- ----------------- -------------------------
-  SO~2~             brennisteinsdíoxíð    BCl~3~            bórtríklóríð
-
-  SO~3~             brennisteinstríoxíð   SF~6~             brennisteinshexaflúoríð
-
-  NO~2~             niturdíoxíð           PF~5~             fosfórpentaflúoríð
-
-  N~2~O~4~          díniturtetroxíð       P~4~O~10~         tetrafosfórhexoxíð
-
-  N~2~O~5~          díniturpentoxíð       IF~7~             joðheptaflúoríð
-  -----------------------------------------------------------------------------------
+| Efnasamband | Heiti | Efnasamband | Heiti |
+|---|---|---|---|
+| SO~2~ | brennisteinsdíoxíð | BCl~3~ | bórtríklóríð |
+| SO~3~ | brennisteinstríoxíð | SF~6~ | brennisteinshexaflúoríð |
+| NO~2~ | niturdíoxíð | PF~5~ | fosfórpentaflúoríð |
+| N~2~O~4~ | díniturtetroxíð | P~4~O~10~ | tetrafosfórhexoxíð |
+| N~2~O~5~ | díniturpentoxíð | IF~7~ | joðheptaflúoríð |
 
 Tafla 2.11
 
@@ -314,19 +281,13 @@ Til dæmis, þegar gasið HCl (vetnisklóríð) er leyst upp í vatni, er lausni
 
 Nöfn nokkurra einfaldra sýra
 
-  -----------------------------------------------------------------------
-  Heiti gass                          Heiti sýru
-  ----------------------------------- -----------------------------------
-  HF(*g*), vetnisflúoríð              HF(*aq*), flúorsýra
-
-  HCl(*g*), vetnisklóríð              HCl(*aq*), saltsýra
-
-  HBr(*g*), vetnisbrómíð              HBr(*aq*), brómsýra
-
-  HI(*g*), vetnisjoðíð                HI(*aq*), joðsýra
-
-  H~2~S(*g*), vetnissúlfíð            H~2~S(*aq*), brennisteinssýra
-  -----------------------------------------------------------------------
+| Heiti gass | Heiti sýru |
+|---|---|
+| HF(*g*), vetnisflúoríð | HF(*aq*), flúorsýra |
+| HCl(*g*), vetnisklóríð | HCl(*aq*), saltsýra |
+| HBr(*g*), vetnisbrómíð | HBr(*aq*), brómsýra |
+| HI(*g*), vetnisjoðíð | HI(*aq*), joðsýra |
+| H~2~S(*g*), vetnissúlfíð | H~2~S(*aq*), brennisteinssýra |
 
 Tafla 2.12
 
@@ -343,24 +304,15 @@ Tökum H~2~CO~3~ sem dæmi (sem þú gætir freistast til að kalla „vetniskar
 
 Nöfn algengra oxósýra
 
-  -----------------------------------------------------------------------
-  Formúla                 Heiti anjónar           Heiti sýru
-  ----------------------- ----------------------- -----------------------
-  HC~2~H~3~O~2~           asetat                  ediksýra
-
-  HNO~3~                  nítrat                  saltpéturssýra
-
-  HNO~2~                  nítrít                  saltpéturssýrlingur
-
-  HClO~4~                 perklórat               perklórsýra
-
-  H~2~CO~3~               karbónat                kolsýra
-
-  H~2~SO~4~               súlfat                  brennisteinssýra
-
-  H~2~SO~3~               súlfít                  brennisteinssýrlingur
-
-  H~3~PO~4~               fosfat                  fosfórsýra
-  -----------------------------------------------------------------------
+| Formúla | Heiti anjónar | Heiti sýru |
+|---|---|---|
+| HC~2~H~3~O~2~ | asetat | ediksýra |
+| HNO~3~ | nítrat | saltpéturssýra |
+| HNO~2~ | nítrít | saltpéturssýrlingur |
+| HClO~4~ | perklórat | perklórsýra |
+| H~2~CO~3~ | karbónat | kolsýra |
+| H~2~SO~4~ | súlfat | brennisteinssýra |
+| H~2~SO~3~ | súlfít | brennisteinssýrlingur |
+| H~3~PO~4~ | fosfat | fosfórsýra |
 
 Tafla 2.13

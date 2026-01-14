@@ -18,9 +18,10 @@ chapter: 2
 
 Í venjulegum efnahvörfum helst kjarni hvers atóms (og þar með auðkenni frumefnisins) óbreyttur. Hins vegar er hægt að bæta rafeindum við atóm með flutningi frá öðrum atómum, missa þær með flutningi til annarra atóma eða deila þeim með öðrum atómum. Flutningur og deiling rafeinda milli atóma stjórnar efnafræði frumefnanna. Við myndun sumra efnasambanda fá atóm rafeindir eða missa þær og mynda rafhlaðnar agnir sem kallast jónir ([mynd 2.28](#CNX_Chem_02_06_NaCation)).
 
-  
-![Figure A shows a sodium atom, N a, which has a nucleus containing 11 protons and 12 neutrons. The atom's surrounding electron cloud contains 11 electrons. Figure B shows a sodium ion, N a superscript plus sign. Its nucleus contains 11 protons and 12 neutrons. The ion's electron cloud contains 10 electrons and is smaller than that of the sodium atom in figure A.](./images/media/rId21.jpg)
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   ![Figure A shows a sodium atom, N a, which has a nucleus containing 11 protons and 12 neutrons. The atom's surrounding electron cloud contains 11 electrons. Figure B shows a sodium ion, N a superscript plus sign. Its nucleus contains 11 protons and 12 neutrons. The ion's electron cloud contains 10 electrons and is smaller than that of the sodium atom in figure A.](./images/media/rId21.jpg){width="6.5in" height="2.625in"}
 
+  ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 2.28 (a) Natríumatóm (Na) hefur jafnmargar róteindir og rafeindir (11) og er óhlaðið. (b) Natríumkatjón (Na^+^) hefur misst rafeind, þannig að hún hefur einni fleiri róteindir (11) en rafeindir (10), sem gefur henni jákvæða heildarhleðslu, táknað með plúsmerki í háskrift.
 
@@ -30,9 +31,10 @@ Mynd 2.28 (a) Natríumatóm (Na) hefur jafnmargar róteindir og rafeindir (11) o
 
 Taktu eftir notagildi lotukerfisins við að spá fyrir um líklega jónamyndun og hleðslu ([mynd 2.29](#CNX_Chem_02_06_IonCharges)). Þegar farið er frá vinstri til hægri í lotukerfinu hafa aðalflokksfrumefni tilhneigingu til að mynda katjónir með hleðslu sem er jöfn hópstölunni. Það er að segja, frumefni í hópi 1 mynda 1+ jónir; frumefni í hópi 2 mynda 2+ jónir og svo framvegis. Þegar farið er frá hægri til vinstri í lotukerfinu mynda frumefni oft anjónir með neikvæða hleðslu sem er jöfn fjölda hópa sem færst er til vinstri frá eðalgösunum. Til dæmis mynda frumefni í hópi 17 (einn hópur til vinstri við eðalgösin) 1− jónir; frumefni í hópi 16 (tveir hópar til vinstri) mynda 2− jónir og svo framvegis. Þessa þróun má nota sem leiðbeiningu í mörgum tilfellum, en forspárgildi hennar minnkar þegar nær dregur miðju lotukerfisins. Reyndar sýna hliðarmálmar og sumir aðrir málmar oft breytilegar hleðslur sem ekki er hægt að spá fyrir um út frá staðsetningu þeirra í töflunni. Til dæmis getur kopar myndað jónir með 1+ eða 2+ hleðslu og járn getur myndað jónir með 2+ eða 3+ hleðslu.
 
-  
-![Group one of the periodic table contains L i superscript plus sign in period 2, N a superscript plus sign in period 3, K superscript plus sign in period 4, R b superscript plus sign in period 5, C s superscript plus sign in period 6, and F r superscript plus sign in period 7. Group two contains B e superscript 2 plus sign in period 2, M g superscript 2 plus sign in period 3, C a superscript 2 plus sign in period 4, S r superscript 2 plus sign in period 5, B a superscript 2 plus sign in period 6, and R a superscript 2 plus sign in period 7. Group six contains C r superscript 3 plus sign and C r superscript 6 plus sign in period 4. Group seven contains M n superscript 2 plus sign in period 4. Group eight contains F e superscript 2 plus sign and F e superscript 3 plus sign in period 4. Group nine contains C o superscript 2 plus sign in period 4. Group ten contains N i superscript 2 plus sign in period 4, and P t superscript 2 plus sign in period 6. Group 11 contains C U superscript plus sign and C U superscript 2 plus sign in period 4, A g superscript plus sign in period 5, and A u superscript plus sign and A u superscript 3 plus sign in period 6. Group 12 contains Z n superscript 2 plus sign in period 4, C d superscript 2 plus sign in period 5, and H g subscript 2 superscript 2 plus sign and H g superscript 2 plus sign in period 6. Group 13 contains A l superscript 3 plus sign in period 3. Group 14 contains C superscript 4 negative sign in period 2. Group 15 contains N superscript 3 negative sign in period 2, P superscript 3 negative sign in period 3, and A s superscript 3 negative sign in period 4. Group 16 contains O superscript 2 negative sign in period 2, S superscript 2 negative sign in period 3, S e superscript 2 negative sign in period 4 and T e superscript 2 negative sign in period 5. Group 17 contains F superscript negative sign in period 2, C l superscript negative sign in period 3, B r superscript negative sign in period 4, I superscript negative sign in period 5, and A t superscript negative sign in period 6. Group 18 contains H e in period 1, N e in period 2, A r in period 3, K r in period 4, X e in period 5 and R n in period 6.](./images/media/rId25.jpg)
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   ![Group one of the periodic table contains L i superscript plus sign in period 2, N a superscript plus sign in period 3, K superscript plus sign in period 4, R b superscript plus sign in period 5, C s superscript plus sign in period 6, and F r superscript plus sign in period 7. Group two contains B e superscript 2 plus sign in period 2, M g superscript 2 plus sign in period 3, C a superscript 2 plus sign in period 4, S r superscript 2 plus sign in period 5, B a superscript 2 plus sign in period 6, and R a superscript 2 plus sign in period 7. Group six contains C r superscript 3 plus sign and C r superscript 6 plus sign in period 4. Group seven contains M n superscript 2 plus sign in period 4. Group eight contains F e superscript 2 plus sign and F e superscript 3 plus sign in period 4. Group nine contains C o superscript 2 plus sign in period 4. Group ten contains N i superscript 2 plus sign in period 4, and P t superscript 2 plus sign in period 6. Group 11 contains C U superscript plus sign and C U superscript 2 plus sign in period 4, A g superscript plus sign in period 5, and A u superscript plus sign and A u superscript 3 plus sign in period 6. Group 12 contains Z n superscript 2 plus sign in period 4, C d superscript 2 plus sign in period 5, and H g subscript 2 superscript 2 plus sign and H g superscript 2 plus sign in period 6. Group 13 contains A l superscript 3 plus sign in period 3. Group 14 contains C superscript 4 negative sign in period 2. Group 15 contains N superscript 3 negative sign in period 2, P superscript 3 negative sign in period 3, and A s superscript 3 negative sign in period 4. Group 16 contains O superscript 2 negative sign in period 2, S superscript 2 negative sign in period 3, S e superscript 2 negative sign in period 4 and T e superscript 2 negative sign in period 5. Group 17 contains F superscript negative sign in period 2, C l superscript negative sign in period 3, B r superscript negative sign in period 4, I superscript negative sign in period 5, and A t superscript negative sign in period 6. Group 18 contains H e in period 1, N e in period 2, A r in period 3, K r in period 4, X e in period 5 and R n in period 6.](./images/media/rId25.jpg){width="6.5in" height="3.955in"}
 
+  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 2.29 Sum frumefni sýna reglulegt mynstur jónahleðslu þegar þau mynda jónir.
 
@@ -84,59 +86,33 @@ Jónirnar sem við höfum rætt hingað til eru kallaðar einatóma jónir, þa�
 
 Algengar fjölfrumeinda jónir
 
-  -----------------------------------------------------------------------------------------------
-  Heiti             Formúla                             Tengd sýra              Formúla
-  ----------------- ----------------------------------- ----------------------- -----------------
-  ammóníum          $\text{NH}_{4}^{+}$                                         
-
-  hýdróníum         $\text{H}_{3}\text{O}^{+}$                                  
-
-  peroxíð           $\text{O}_{2}^{2 -}$                                        
-
-  hýdroxíð          $\text{OH}^{-}$                                             
-
-  asetat            $\text{CH}_{3}\text{COO}^{-}$       ediksýra                CH~3~COOH
-
-  blásýra           CN^−^                               blásýra                 HCN
-
-  azíð              $\text{N}_{3}^{-}$                  hýdrasósýra             HN~3~
-
-  karbónat          $\text{CO}_{3}^{2 -}$               kolsýra                 H~2~CO~3~
-
-  bíkarbónat        $\text{HCO}_{3}^{-}$                                        
-
-  nítrat            $\text{NO}_{3}^{-}$                 saltpéturssýra          HNO~3~
-
-  nítrít            $\text{NO}_{2}^{-}$                 saltpéturssýrlingur     HNO~2~
-
-  súlfat            $\text{SO}_{4}^{2 -}$               brennisteinssýra        H~2~SO~4~
-
-  vetnissúlfat      $\text{HSO}_{4}^{-}$                                        
-
-  súlfít            $\text{SO}_{3}^{2 -}$               brennisteinssýrlingur   H~2~SO~3~
-
-  vetnissúlfít      $\text{HSO}_{3}^{-}$                                        
-
-  fosfat            $\text{PO}_{4}^{3 -}$               fosfórsýra              H~3~PO~4~
-
-  vetnisfosfat      $\text{HPO}_{4}^{2 -}$                                      
-
-  dívetnisfosfat    $\text{H}_{2}\text{PO}_{4}^{-}$                             
-
-  perklórat         $\text{ClO}_{4}^{-}$                perklórsýra             HClO~4~
-
-  klórat            $\text{ClO}_{3}^{-}$                klórsýra                HClO~3~
-
-  klórít            $\text{ClO}_{2}^{-}$                klórsýrlingur           HClO~2~
-
-  hýpóklórít        ClO^−^                              hýpóklórsýra            HClO
-
-  krómat            $\text{CrO}_{4}^{2 -}$              krómsýra                H~2~CrO~4~
-
-  díkrómat          $\text{Cr}_{2}\text{O}_{7}^{2 -}$   díkrómsýra              H~2~Cr~2~O~7~
-
-  permanganat       $\text{MnO}_{4}^{-}$                permangansýra           HMnO~4~
-  -----------------------------------------------------------------------------------------------
+| Heiti | Formúla | Tengd sýra | Formúla |
+|---|---|---|---|
+| ammóníum | $\text{NH}_{4}^{+}$ |  |  |
+| hýdróníum | $\text{H}_{3}\text{O}^{+}$ |  |  |
+| peroxíð | $\text{O}_{2}^{2 -}$ |  |  |
+| hýdroxíð | $\text{OH}^{-}$ |  |  |
+| asetat | $\text{CH}_{3}\text{COO}^{-}$ | ediksýra | CH~3~COOH |
+| blásýra | CN^−^ | blásýra | HCN |
+| azíð | $\text{N}_{3}^{-}$ | hýdrasósýra | HN~3~ |
+| karbónat | $\text{CO}_{3}^{2 -}$ | kolsýra | H~2~CO~3~ |
+| bíkarbónat | $\text{HCO}_{3}^{-}$ |  |  |
+| nítrat | $\text{NO}_{3}^{-}$ | saltpéturssýra | HNO~3~ |
+| nítrít | $\text{NO}_{2}^{-}$ | saltpéturssýrlingur | HNO~2~ |
+| súlfat | $\text{SO}_{4}^{2 -}$ | brennisteinssýra | H~2~SO~4~ |
+| vetnissúlfat | $\text{HSO}_{4}^{-}$ |  |  |
+| súlfít | $\text{SO}_{3}^{2 -}$ | brennisteinssýrlingur | H~2~SO~3~ |
+| vetnissúlfít | $\text{HSO}_{3}^{-}$ |  |  |
+| fosfat | $\text{PO}_{4}^{3 -}$ | fosfórsýra | H~3~PO~4~ |
+| vetnisfosfat | $\text{HPO}_{4}^{2 -}$ |  |  |
+| dívetnisfosfat | $\text{H}_{2}\text{PO}_{4}^{-}$ |  |  |
+| perklórat | $\text{ClO}_{4}^{-}$ | perklórsýra | HClO~4~ |
+| klórat | $\text{ClO}_{3}^{-}$ | klórsýra | HClO~3~ |
+| klórít | $\text{ClO}_{2}^{-}$ | klórsýrlingur | HClO~2~ |
+| hýpóklórít | ClO^−^ | hýpóklórsýra | HClO |
+| krómat | $\text{CrO}_{4}^{2 -}$ | krómsýra | H~2~CrO~4~ |
+| díkrómat | $\text{Cr}_{2}\text{O}_{7}^{2 -}$ | díkrómsýra | H~2~Cr~2~O~7~ |
+| permanganat | $\text{MnO}_{4}^{-}$ | permangansýra | HMnO~4~ |
 
 Tafla 2.5
 
@@ -152,9 +128,10 @@ Efnasamband sem inniheldur jónir og er haldið saman af jónatengjum er kallað
 
 Oft er hægt að þekkja jónaefni af eiginleikum þeirra. Jónaefni eru föst efni sem bráðna yfirleitt við hátt hitastig og sjóða við enn hærra hitastig. Til dæmis bráðnar natríumklóríð við 801 °C og sýður við 1413 °C. (Til samanburðar bráðnar sameindaefnasambandið vatn við 0 °C og sýður við 100 °C.) Í föstu formi er jónaefni ekki rafleiðandi vegna þess að jónir þess geta ekki flætt („rafmagn" er flæði hlaðinna agna). Þegar það er bráðið getur það hins vegar leitt rafmagn vegna þess að jónir þess geta hreyfst frjálslega um vökvann ([mynd 2.30](#CNX_Chem_02_06_NaClMolten)).
 
-  
-![This figure shows three photos connected by right-facing arrows. The first shows a light bulb as part of a complex lab equipment setup. The light bulb is not lit. The second photo shows a substances being heated or set on fire. The third shows the light bulb again which is lit.](./images/media/rId40.jpg)
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   ![This figure shows three photos connected by right-facing arrows. The first shows a light bulb as part of a complex lab equipment setup. The light bulb is not lit. The second photo shows a substances being heated or set on fire. The third shows the light bulb again which is lit.](./images/media/rId40.jpg){width="4.875in" height="2.065in"}
 
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 2.30 Natríumklóríð bráðnar við 801 °C og leiðir rafmagn þegar það er bráðið. (heimild: breyting á verki eftir Mark Blaser og Matt Evans)
 
@@ -171,7 +148,7 @@ Horfðu á þetta [myndband](http://openstax.org/l/16moltensalt) til að sjá ef
 
 Gimsteinninn safír ([mynd 2.31](#CNX_Chem_02_06_Sapphire)) er að mestu leyti efnasamband áls og súrefnis sem inniheldur álkatjónir, Al^3+^, og súrefnisanjónir, O^2−^. Hver er formúla þessa efnasambands?
 
-![This is a photograph of a ring with a sapphire set in it.](./images/media/rId48.jpg)
+![This is a photograph of a ring with a sapphire set in it.](./images/media/rId48.jpg){width="1.625in" height="1.24in"}
 
 Mynd 2.31 Þótt hreint áloxíð sé litlaust gefa snefilmagni af járni og títani bláum safír sinn einkennandi lit. (heimild: breyting á verki eftir Stanislav Doronenko)
 
