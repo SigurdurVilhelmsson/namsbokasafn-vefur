@@ -18,10 +18,9 @@ chapter: 3
 
 Fyrri kaflar þessarar bókar fjölluðu um samsetningu efna: sýni af efni sem innihalda aðeins eina tegund frumefnis eða efnasambands. Hins vegar eru efnablöndur -- sýni af efni sem innihalda tvö eða fleiri efni sem eru blönduð saman á eðlisfræðilegan hátt -- algengari í náttúrunni en hrein efni. Líkt og með hreint efni gegnir hlutfallsleg samsetning efnablöndu mikilvægu hlutverki við að ákvarða eiginleika hennar. Hlutfallslegt magn súrefnis í lofthjúpi plánetu ákvarðar getu hennar til að viðhalda loftháðu lífi. Hlutfallslegt magn járns, kolefnis, nikkels og annarra frumefna í stáli (efnablanda sem kallast „málmblanda") ákvarðar eðlisfræðilegan styrk þess og viðnám gegn tæringu. Hlutfallslegt magn virka efnisins í lyfi ákvarðar virkni þess við að ná fram tilætluðum lyfjafræðilegum áhrifum. Hlutfallslegt magn sykurs í drykk ákvarðar sætleika hans (sjá [mynd 3.14](#CNX_Chem_03_03_espresso)). Í þessum kafla verður lýst einni af algengustu aðferðunum til að magngreina hlutfallslega samsetningu efnablandna.
 
-  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   ![A picture is shown of sugar being poured from a spoon into a cup.](./images/media/rId21.jpg)
+  
+![A picture is shown of sugar being poured from a spoon into a cup.](./images/media/rId21.jpg)
 
-  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 3.14 Sykur er eitt af mörgum innihaldsefnum í þeirri flóknu efnablöndu sem kaffi er. Magn sykurs í tilteknu magni af kaffi er mikilvægur áhrifaþáttur í sætleika drykkjarins. (Heimild: Jane Whitney)
 
@@ -90,10 +89,9 @@ Hvert er rúmmálið (ml) af sykraða teinu sem lýst er í [dæmi 3.14](#fs-idm
 
 Eimað borðedik ([mynd 3.15](#CNX_Chem_03_04_vinegar)) er lausn af ediksýru, CH~3~CO~2~H, í vatni. 0,500 L ediklausn inniheldur 25,2 g af ediksýru. Hver er styrkur ediksýrulausnarinnar í mólstyrk?
 
-  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   ![A label on a container is shown. The label has a picture of a salad with the words "Distilled White Vinegar," and, "Reduced with water to 5% acidity," written above it.](./images/media/rId43.jpg)
+  
+![A label on a container is shown. The label has a picture of a salad with the words "Distilled White Vinegar," and, "Reduced with water to 5% acidity," written above it.](./images/media/rId43.jpg)
 
-  ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 3.15 Eimað borðedik er lausn af ediksýru í vatni.
 
@@ -184,10 +182,9 @@ Hvert er rúmmál 1,50 *M* KBr-lausnar sem inniheldur 66,0 g af KBr?
 
 Þynning er ferli þar sem styrkur lausnar er minnkaður með því að bæta við leysi. Til dæmis þynnist íste smám saman þegar ísinn bráðnar. Vatnið úr bráðnandi ísnum eykur rúmmál leysisins (vatnsins) og heildarrúmmál lausnarinnar (ísteiðsins) og minnkar þar með hlutfallslegan styrk uppleystu efnanna sem gefa drykknum bragð ([mynd 3.16](#CNX_Chem_03_04_dilution)).
 
-  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   ![This figure shows two graduated cylinders side-by-side. The first has about half as much blue liquid as the second. The blue liquid is darker in the first cylinder than in the second.](./images/media/rId70.jpg)
+  
+![This figure shows two graduated cylinders side-by-side. The first has about half as much blue liquid as the second. The blue liquid is darker in the first cylinder than in the second.](./images/media/rId70.jpg)
 
-  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 3.16 Báðar lausnirnar innihalda sama massa af koparnítrati. Lausnin til hægri er þynntari vegna þess að koparnítratið er leyst upp í meiri leysi. (heimild: Mark Ott)
 
