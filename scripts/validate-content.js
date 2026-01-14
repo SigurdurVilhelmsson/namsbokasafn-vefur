@@ -59,6 +59,8 @@ const tocData = new Map(); // Map<bookSlug, toc>
 
 // =============================================================================
 // V2 FORMAT HELPERS
+// Note: This logic is duplicated from src/lib/utils/tocFormat.ts
+// which has unit tests. Keep both in sync when making changes.
 // =============================================================================
 
 /**
