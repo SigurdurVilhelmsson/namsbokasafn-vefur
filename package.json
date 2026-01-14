@@ -56,7 +56,6 @@
     "remark-math": "^6.0.0",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.0.0",
-    "remark-sub-super": "^1.0.21",
     "unified": "^11.0.0",
     "unist-util-visit": "^5.0.0"
   }
