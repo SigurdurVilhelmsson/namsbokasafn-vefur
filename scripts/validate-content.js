@@ -57,6 +57,36 @@ const validSections = new Map(); // Map<bookSlug, Set<sectionPath>>
 const validChapters = new Map(); // Map<bookSlug, Set<chapterSlug>>
 const tocData = new Map(); // Map<bookSlug, toc>
 
+// =============================================================================
+// V2 FORMAT HELPERS
+// =============================================================================
+
+/**
+ * Get chapter directory name (supports both v1 and v2 formats)
+ * v1: uses chapter.slug directly (e.g., "01-grunnhugmyndir")
+ * v2: derives from chapter.number with zero-padding (e.g., "01")
+ */
+function getChapterDir(chapter) {
+	if (chapter.slug) {
+		return chapter.slug; // v1 format
+	}
+	// v2 format: zero-padded chapter number
+	return String(chapter.number).padStart(2, '0');
+}
+
+/**
+ * Get section slug (supports both v1 and v2 formats)
+ * v1: uses section.slug directly
+ * v2: derives from section.file by removing .md extension
+ */
+function getSectionSlug(section) {
+	if (section.slug) {
+		return section.slug; // v1 format
+	}
+	// v2 format: file name without .md extension
+	return section.file.replace(/\.md$/, '');
+}
+
 /**
  * Log an error
  */
@@ -114,11 +144,12 @@ function indexSections(bookSlug, toc) {
 	const chapters = new Set();
 
 	for (const chapter of toc.chapters || []) {
-		chapters.add(chapter.slug);
+		const chapterDir = getChapterDir(chapter);
+		chapters.add(chapterDir);
 
 		for (const section of chapter.sections || []) {
-			// Store as "chapterSlug/sectionSlug"
-			sections.add(`${chapter.slug}/${section.slug}`);
+			// Store as "chapterDir/sectionSlug"
+			sections.add(`${chapterDir}/${getSectionSlug(section)}`);
 		}
 	}
 
@@ -486,10 +517,11 @@ function validateBook(bookSlug) {
 
 	// Validate each chapter and section
 	for (const chapter of toc.chapters || []) {
-		const chapterDir = join(contentDir, bookSlug, 'chapters', chapter.slug);
+		const chapterDirName = getChapterDir(chapter);
+		const chapterDir = join(contentDir, bookSlug, 'chapters', chapterDirName);
 
 		if (!existsSync(chapterDir)) {
-			error(chapterDir, 0, `Chapter directory not found: ${chapter.slug}`);
+			error(chapterDir, 0, `Chapter directory not found: ${chapterDirName}`);
 			continue;
 		}
 
@@ -501,7 +533,7 @@ function validateBook(bookSlug) {
 				continue;
 			}
 
-			validateMarkdown(sectionPath, bookSlug, chapter.slug, section, chapter);
+			validateMarkdown(sectionPath, bookSlug, chapterDirName, section, chapter);
 		}
 	}
 
