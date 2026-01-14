@@ -579,7 +579,7 @@ export async function processMarkdown(content: string): Promise<string> {
 	const result = await unified()
 		.use(remarkParse)
 		.use(remarkSubSuperscript) // Handle ~subscript~ and ^superscript^ before GFM
-		.use(remarkGfm)
+		.use(remarkGfm, { singleTilde: false }) // Only ~~ for strikethrough, ~ reserved for subscript
 		.use(remarkMath)
 		.use(remarkDirective)
 		.use(remarkCustomDirectives)
@@ -608,7 +608,7 @@ export function processMarkdownSync(content: string): string {
 	const result = unified()
 		.use(remarkParse)
 		.use(remarkSubSuperscript) // Handle ~subscript~ and ^superscript^ before GFM
-		.use(remarkGfm)
+		.use(remarkGfm, { singleTilde: false }) // Only ~~ for strikethrough, ~ reserved for subscript
 		.use(remarkMath)
 		.use(remarkDirective)
 		.use(remarkCustomDirectives)
