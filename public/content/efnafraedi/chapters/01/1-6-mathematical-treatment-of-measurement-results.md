@@ -154,8 +154,7 @@ $\frac{\text{1 oz}}{\text{28.349 g}}\ \text{and}\ \frac{\text{28.349 g}}{\text{1
 Rétti umreikningsstuðullinn er hlutfallið sem styttir út eininguna grömm
 og skilur eftir únsur.
 
-![None](./images/media/rId33.so){width="2.9270833333333335in"
-height="0.7083333333333334in"}
+![None](./images/media/rId33.png)
 
 :::practice-problem
 #### Kannaðu þekkingu þína
@@ -388,8 +387,7 @@ milli þessara þriggja hitastigskvarða.
      water is 373.15 K, while the freezing point of water is 273.15 K.
    233.15 K is equal to negative 40 degrees Celsius, which is also equal
                           to negative 40 degrees
-            Fahrenheit.](./images/media/rId65.so){width="6.5in"
-                       height="4.554998906386702in"}
+            Fahrenheit.](./images/media/rId65.jpg)
 
   -----------------------------------------------------------------------
 

@@ -5,7 +5,7 @@ chapter: 2
 ---
 
   --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-   ![A person is shown blowing into a tube connected to a plastic bag. There is a computer screen displaying data that reads "Mass Spectral Breath Analysis." An arrow from the plastic bag points to an illustration of different molecular compounds contained in the person's exhalation](./images/media/rId20.jpg){width="4.166666666666667in" height="2.7777777777777777in"}
+   ![A person is shown blowing into a tube connected to a plastic bag. There is a computer screen displaying data that reads "Mass Spectral Breath Analysis." An arrow from the plastic bag points to an illustration of different molecular compounds contained in the person's exhalation](./images/media/rId20.jpg)
 
   --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

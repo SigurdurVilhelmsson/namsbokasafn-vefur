@@ -54,8 +54,7 @@ lækna sjúkdóma og lengja líf ([mynd 1.2](#CNX_Chem_01_01_Alchemist)).
    of the containers are being heated over burning embers. A large stove
   in the laboratory is filled with burning embers. There is also a large
                    chest in the corner that is producing
-              steam.](./images/media/rId21.so){width="6.5in"
-                       height="2.516767279090114in"}
+              steam.](./images/media/rId21.jpg)
 
   -----------------------------------------------------------------------
 
@@ -125,7 +124,7 @@ heimsfræði.
     agriculture, and mathematics. Each of these disciplines is further
     connected to other related fields including medicine, biology, food
     science, geology earth sciences, toxicology, physics, and computer
-     science.](./images/media/rId25.so){width="6.5in" height="2.82in"}
+     science.](./images/media/rId25.jpg)
 
   -----------------------------------------------------------------------
 
@@ -190,7 +189,7 @@ vísindalega aðferðin ([mynd 1.4](#CNX_Chem_01_01_SciMethod)).
     additional testing yields constant observations. This leads to the
   observation becomes law box. The other arrow is labeled much additional
   testing supports hypothesis. This arrow leads to the hypothesis becomes
-   theory box.](./images/media/rId36.so){width="6.5in" height="3.83in"}
+   theory box.](./images/media/rId36.jpg)
 
   -----------------------------------------------------------------------
 
@@ -262,7 +261,7 @@ táknrænar.
    water molecules. Three of these rings are connected to each other. In
   the sea, which is the liquid form of water, H subscript 2 O liquid, the
    water molecules are very densely packed. The molecules are not bonded
-     together.](./images/media/rId45.so){width="6.5in" height="3.6in"}
+     together.](./images/media/rId45.jpg)
 
   -----------------------------------------------------------------------
 
