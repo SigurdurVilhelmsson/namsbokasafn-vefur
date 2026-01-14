@@ -60,23 +60,15 @@ Einingar fyrir aðra eiginleika má leiða af þessum sjö grunneiningum.
 
 Grunneiningar SI-kerfisins
 
-  -----------------------------------------------------------------------
-  Mældur eiginleiki       Heiti einingar          Tákn einingar
-  ----------------------- ----------------------- -----------------------
-  lengd                   metri                   m
-
-  massi                   kílógramm               kg
-
-  tími                    sekúnda                 s
-
-  hitastig                kelvin                  K
-
-  rafstraumur             amper                   A
-
-  magn efnis              mól                     mól
-
-  ljósstyrkur             candela                 cd
-  -----------------------------------------------------------------------
+| Mældur eiginleiki | Heiti einingar | Tákn einingar |
+|---|---|---|
+| lengd | metri | m |
+| massi | kílógramm | kg |
+| tími | sekúnda | s |
+| hitastig | kelvin | K |
+| rafstraumur | amper | A |
+| magn efnis | mól | mól |
+| ljósstyrkur | candela | cd |
 
 Tafla 1.2
 
@@ -93,55 +85,19 @@ m). Forskeytin sem notuð eru og veldin sem 10 er hafið í eru talin upp í
 
 Algeng forskeyti eininga
 
-  --------------------------------------------------------------------------
-  Forskeyti         Tákn              Stuðull           Dæmi
-  ----------------- ----------------- ----------------- --------------------
-  femtó             f                 10^−15^           1 femtósekúnda (fs)
-                                                        = 1 $\times$ 10^-15^
-                                                        s (0,000000000000001
-                                                        s)
-
-  píkó              p                 10^−12^           1 píkómetri (pm) = 1
-                                                        $\times$ 10^-12^ m
-                                                        (0,000000000001 m)
-
-  nanó              n                 10^−9^            4 nanógrömm (ng) = 4
-                                                        $\times$ 10^−9^ g
-                                                        (0,000000004 g)
-
-  míkró             µ                 10^−6^            1 míkrólítri (μl) =
-                                                        1 $\times$ 10^-6^ L
-                                                        (0,000001 L)
-
-  milli             m                 10^−3^            2 millimól (mmól) =
-                                                        2 $\times$ 10^-3^
-                                                        mól (0,002 mól)
-
-  senti             c                 10^−2^            7 sentimetrar (cm) =
-                                                        7 $\times$ 10^−2^ m
-                                                        (0,07 m)
-
-  desi              d                 10^−1^            1 desilítri (dL) = 1
-                                                        $\times$ 10^-1^ L
-                                                        (0,1 L )
-
-  kíló              k                 10^3^             1 kílómetri (km) = 1
-                                                        $\times$ 10^3^ m
-                                                        (1000 m)
-
-  mega              M                 10^6^             3 megahertz (MHz) =
-                                                        3 $\times$ 10^6^ Hz
-                                                        (3.000.000 Hz)
-
-  gíga              G                 10^9^             8 gígaár (Gyr) = 8
-                                                        $\times$ 10^9^ ár
-                                                        (8.000.000.000 ár)
-
-  tera              T                 10^12^            5 teravött (TW) = 5
-                                                        $\times$ 10^12^ W
-                                                        (5.000.000.000.000
-                                                        W)
-  --------------------------------------------------------------------------
+| Forskeyti | Tákn | Stuðull | Dæmi |
+|---|---|---|---|
+| femtó | f | 10^−15^ | 1 femtósekúnda (fs) = 1 $\times$ 10^-15^ s (0,000000000000001 s) |
+| píkó | p | 10^−12^ | 1 píkómetri (pm) = 1 $\times$ 10^-12^ m (0,000000000001 m) |
+| nanó | n | 10^−9^ | 4 nanógrömm (ng) = 4 $\times$ 10^−9^ g (0,000000004 g) |
+| míkró | µ | 10^−6^ | 1 míkrólítri (μl) = 1 $\times$ 10^-6^ L (0,000001 L) |
+| milli | m | 10^−3^ | 2 millimól (mmól) = 2 $\times$ 10^-3^ mól (0,002 mól) |
+| senti | c | 10^−2^ | 7 sentimetrar (cm) = 7 $\times$ 10^−2^ m (0,07 m) |
+| desi | d | 10^−1^ | 1 desilítri (dL) = 1 $\times$ 10^-1^ L (0,1 L ) |
+| kíló | k | 10^3^ | 1 kílómetri (km) = 1 $\times$ 10^3^ m (1000 m) |
+| mega | M | 10^6^ | 3 megahertz (MHz) = 3 $\times$ 10^6^ Hz (3.000.000 Hz) |
+| gíga | G | 10^9^ | 8 gígaár (Gyr) = 8 $\times$ 10^9^ ár (8.000.000.000 ár) |
+| tera | T | 10^12^ | 5 teravött (TW) = 5 $\times$ 10^12^ W (5.000.000.000.000 W) |
 
 Tafla 1.3
 
@@ -174,9 +130,10 @@ stikur. Lengri vegalengdir eru oft gefnar upp í kílómetrum (1 km = 1000
 m = 10^3^ m), en styttri vegalengdir má gefa upp í sentimetrum (1 cm =
 0,01 m = 10^−2^ m) eða millimetrum (1 mm = 0,001 m = 10^−3^ m).
 
-  
-![One meter is slightly larger than a yard and one centimeter is less than half the size of one inch. 1 inch is equal to 2.54 cm. 1 m is equal to 1.094 yards which is equal to 39.36 inches.](./images/media/rId31.jpg)
+  -----------------------------------------------------------------------
+   ![One meter is slightly larger than a yard and one centimeter is less than half the size of one inch. 1 inch is equal to 2.54 cm. 1 m is equal to 1.094 yards which is equal to 39.36 inches.](./images/media/rId31.so){width="6.5in" height="3.195in"}
 
+  -----------------------------------------------------------------------
 
 Mynd 1.23 Hlutfallslegar lengdir 1 m, 1 stiku, 1 cm og 1 tommu eru
 sýndar (ekki í raunstærð), ásamt samanburði á 2,54 cm og 1 tommu, og 1 m
@@ -200,9 +157,11 @@ kílógrammsins (10^−3^ kg).
 Nánari upplýsingar má finna á
 https://www.nist.gov/pml/weights-and-measures/si-units-mass
 
-  
-![The photo shows a small metal cylinder on a stand. The cylinder is covered with 2 glass lids, with the smaller glass lid encased within the larger glass lid.](./images/media/rId39.jpg)
+  -----------------------------------------------------------------------
+   ![The photo shows a small metal cylinder on a stand. The cylinder is covered with 2 glass lids, with the smaller glass lid encased within the larger glass lid.](./images/media/rId39.so){width="6.5in"
+                              height="9.2in"}
 
+  -----------------------------------------------------------------------
 
 Mynd 1.24 Þessi eftirmynd af frumgerð kílógrammsins eins og það var áður
 skilgreint er geymd hjá National Institute of Standards and Technology
@@ -257,9 +216,10 @@ langar brúnir. Skammstöfunin **cc** fyrir rúmsentimetra (e. **c**ubic
 **c**entimeter) er oft notuð af heilbrigðisstarfsfólki. Einn
 rúmsentimetri jafngildir einum millilítra (mL) og er 1/1000 úr lítra.
 
-  
-![Figure A shows a large cube, which has a volume of 1 meter cubed. This larger cube is made up of many smaller cubes in a 10 by 10 pattern. Each of these smaller cubes has a volume of 1 decimeter cubed, or one liter. Each of these smaller cubes is, in turn, made up of many tiny cubes. Each of these tiny cubes has a volume of 1 centimeter cubed, or one milliliter. A one cubic centimeter cube is about the same width as a dime, which has a width of 1.8 centimeter.](./images/media/rId59.jpg)
+  -----------------------------------------------------------------------
+    ![Figure A shows a large cube, which has a volume of 1 meter cubed. This larger cube is made up of many smaller cubes in a 10 by 10 pattern. Each of these smaller cubes has a volume of 1 decimeter cubed, or one liter. Each of these smaller cubes is, in turn, made up of many tiny cubes. Each of these tiny cubes has a volume of 1 centimeter cubed, or one milliliter. A one cubic centimeter cube is about the same width as a dime, which has a width of 1.8 centimeter.](./images/media/rId59.so){width="6.0in" height="3.375in"}
 
+  -----------------------------------------------------------------------
 
 Mynd 1.25 (a) Hlutfallslegt rúmmál er sýnt fyrir teninga sem eru 1 m^3^,
 1 dm^3^ (1 L) og 1 cm^3^ (1 mL) (ekki í réttum hlutföllum). (b) Þvermál

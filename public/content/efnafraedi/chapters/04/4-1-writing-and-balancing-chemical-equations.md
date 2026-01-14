@@ -17,9 +17,10 @@ chapter: 4
 
 Í fyrri kafla þessarar bókar var kynnt notkun tákna fyrir frumefni til að tákna einstök atóm. Þegar atóm fá eða missa rafeindir til að mynda jónir, eða sameinast öðrum atómum til að mynda sameindir, er táknum þeirra breytt eða þau sameinuð til að búa til efnaformúlur sem tákna þessar eindir á viðeigandi hátt. Að útvíkka þessa táknfræði til að tákna bæði auðkenni og hlutfallslegt magn efna sem gangast undir efna- (eða eðlis-) breytingu felur í sér að skrifa og stilla efnajöfnu. Tökum sem dæmi hvarfið milli einnar metansameindar (CH~4~) og tveggja tvíatóma súrefnissameinda (O~2~) til að mynda eina koldíoxíðsameind (CO~2~) og tvær vatnssameindir (H~2~O). Efnajafnan sem táknar þetta ferli er sýnd á efri helmingi [myndar 4.2](#CNX_Chem_04_01_rxn2), með rúmfyllandi sameindalíkönum á neðri helmingi myndarinnar.
 
-  
-![This figure shows a balanced chemical equation followed below by a representation of the equation using space-filling models. The equation reads C H subscript 4 plus 2 O subscript 2 arrow C O subscript 2 plus 2 H subscript 2 O. Under the C H subscript 4, the molecule is shown with a central black sphere, representing a C atom, to which 4 smaller white spheres, representing H atoms, are distributed evenly around. All four H atoms are bonded to the central black C atom. This is followed by a plus sign. Under the 2 O subscript 2, two molecules are shown. The molecules are each composed of two red spheres bonded together. The red spheres represent O atoms. To the right of an arrow and under the C O subscript 2, appears a single molecule with a black central sphere with two red spheres bonded to the left and right. Following a plus sign and under the 2 H subscript 2 O, are two molecules, each with a central red sphere and two smaller white spheres attached to the lower right and lower left sides of the central red sphere. Note that in space filling models of molecules, spheres appear slightly compressed in regions where there is a bond between two atoms.](./images/media/rId22.jpg)
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   ![This figure shows a balanced chemical equation followed below by a representation of the equation using space-filling models. The equation reads C H subscript 4 plus 2 O subscript 2 arrow C O subscript 2 plus 2 H subscript 2 O. Under the C H subscript 4, the molecule is shown with a central black sphere, representing a C atom, to which 4 smaller white spheres, representing H atoms, are distributed evenly around. All four H atoms are bonded to the central black C atom. This is followed by a plus sign. Under the 2 O subscript 2, two molecules are shown. The molecules are each composed of two red spheres bonded together. The red spheres represent O atoms. To the right of an arrow and under the C O subscript 2, appears a single molecule with a black central sphere with two red spheres bonded to the left and right. Following a plus sign and under the 2 H subscript 2 O, are two molecules, each with a central red sphere and two smaller white spheres attached to the lower right and lower left sides of the central red sphere. Note that in space filling models of molecules, spheres appear slightly compressed in regions where there is a bond between two atoms.](./images/media/rId22.jpg){width="4.875in" height="2.22in"}
 
+  -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 4.2 Hvarfið milli metans og súrefnis til að mynda koldíoxíð og vatn (sýnt neðst) má tákna með efnajöfnu með formúlum (efst).
 
@@ -36,9 +37,10 @@ Algengt er að nota lægstu mögulegu heiltölustuðlana í efnajöfnu, eins og 
 -   *Ein tylft* metansameinda og *tvær tylftir* súrefnissameinda hvarfast og mynda *eina tylft* koldíoxíðsameinda og *tvær tylftir* vatnssameinda.
 -   *Eitt mól* af metansameindum og *2 mól* af súrefnissameindum hvarfast og mynda *1 mól* af koldíoxíðsameindum og *2 mól* af vatnssameindum.
 
-  
-![This image has a left side, labeled, "Mixture before reaction" separated by a vertical dashed line from right side labeled, "Mixture after reaction." On the left side of the figure, two types of molecules are illustrated with space-filling models. Six of the molecules have only two red spheres bonded together. Three of the molecules have four small white spheres evenly distributed about and bonded to a central, larger black sphere. On the right side of the dashed vertical line, two types of molecules which are different from those on the left side are shown. Six of the molecules have a central red sphere to which smaller white spheres are bonded. The white spheres are not opposite each other on the red atoms, giving the molecule a bent shape or appearance. The second molecule type has a central black sphere to which two red spheres are attached on opposite sides, resulting in a linear shape or appearance. Note that in space filling models of molecules, spheres appear slightly compressed in regions where there is a bond between two atoms. On each side of the dashed line, twelve red, three black, and twelve white spheres are present.](./images/media/rId29.jpg)
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+   ![This image has a left side, labeled, "Mixture before reaction" separated by a vertical dashed line from right side labeled, "Mixture after reaction." On the left side of the figure, two types of molecules are illustrated with space-filling models. Six of the molecules have only two red spheres bonded together. Three of the molecules have four small white spheres evenly distributed about and bonded to a central, larger black sphere. On the right side of the dashed vertical line, two types of molecules which are different from those on the left side are shown. Six of the molecules have a central red sphere to which smaller white spheres are bonded. The white spheres are not opposite each other on the red atoms, giving the molecule a bent shape or appearance. The second molecule type has a central black sphere to which two red spheres are attached on opposite sides, resulting in a linear shape or appearance. Note that in space filling models of molecules, spheres appear slightly compressed in regions where there is a bond between two atoms. On each side of the dashed line, twelve red, three black, and twelve white spheres are present.](./images/media/rId29.jpg){width="6.5in" height="2.52in"}
 
+  -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 Mynd 4.3 Óháð raunverulegum fjölda sameinda sem koma við sögu eru hlutföllin milli fjölda sameinda hverrar tegundar sem hvarfast (hvarfefnin) og sameinda hverrar tegundar sem myndast (myndefnin) þau sömu og eru gefin upp í efnajöfnunni.
 
@@ -52,15 +54,11 @@ Jafnan fyrir hvarfið milli metans og súrefnis til að mynda koldíoxíð og va
 
 $\text{CH}_{4} + 2\text{O}_{2}\  \rightarrow \ \text{CO}_{2} + 2\text{H}_{2}\text{O}$
 
-  --------------------------------------------------------------------------------------------
-  Frumefni          Hvarfefni          Myndefni                              Stillt?
-  ----------------- ------------------ ------------------------------------- -----------------
-  C (frá carbon)    1 $\times$ 1 = 1   1 $\times$ 1 = 1                      1 = 1, já
-
-  H                 4 $\times$ 1 = 4   2 $\times$ 2 = 4                      4 = 4, já
-
-  O                 2 $\times$ 2 = 4   (1 $\times$ 2) + (2 $\times$ 1) = 4   4 = 4, já
-  --------------------------------------------------------------------------------------------
+| Frumefni | Hvarfefni | Myndefni | Stillt? |
+|---|---|---|---|
+| C (frá carbon) | 1 $\times$ 1 = 1 | 1 $\times$ 1 = 1 | 1 = 1, já |
+| H | 4 $\times$ 1 = 4 | 2 $\times$ 2 = 4 | 4 = 4, já |
+| O | 2 $\times$ 2 = 4 | (1 $\times$ 2) + (2 $\times$ 1) = 4 | 4 = 4, já |
 
 Oft má leiða stillta efnajöfnu út frá þáttbundinni lýsingu á einhverju efnahvarfi með frekar einfaldri aðferð sem kallast stilling með skoðun. Tökum sem dæmi sundrun vatns til að mynda vetni og súrefni á sameindaformi Þessu ferli er lýst þáttbundið með *óstilltri* efnajöfnu:
 
@@ -68,37 +66,28 @@ $\text{H}_{2}\text{O}\  \rightarrow \ \text{H}_{2} + \text{O}_{2}\quad\quad\text
 
 Með því að bera saman fjölda H- og O-atóma báðum megin í jöfnunni er staðfest að hún er ekki stillt:
 
-  -------------------------------------------------------------------------
-  Frumefni          Hvarfefni          Myndefni           Stillt?
-  ----------------- ------------------ ------------------ -----------------
-  H                 1 $\times$ 2 = 2   1 $\times$ 2 = 2   2 = 2, já
-
-  O                 1 $\times$ 1 = 1   1 $\times$ 2 = 2   1 ≠ 2, nei
-  -------------------------------------------------------------------------
+| Frumefni | Hvarfefni | Myndefni | Stillt? |
+|---|---|---|---|
+| H | 1 $\times$ 2 = 2 | 1 $\times$ 2 = 2 | 2 = 2, já |
+| O | 1 $\times$ 1 = 1 | 1 $\times$ 2 = 2 | 1 ≠ 2, nei |
 
 Fjöldi H-atóma í hvarfefnum og myndefnum jöfnunnar er jafn, en fjöldi O-atóma er það ekki. Til að ná jafnvægi má breyta *stuðlum* jöfnunnar eftir þörfum. Hafðu auðvitað í huga að *lágvísar formúlunnar* eru hluti skilgreiningar á því hvaða efni um er að ræða og því er ekki hægt að breyta þeim án þess að breyta þáttbundinni merkingu jöfnunnar. Til dæmis, ef formúlu hvarfefnisins er breytt úr H~2~O í H~2~O~2~ myndi það leiða til jafnvægis í fjölda atóma, en það breytir líka gerð hvarfefnisins (það er nú vetnisperoxíð en ekki vatn). Hægt er að ná jafnvægi O-atóma með því að breyta stuðlinum fyrir H~2~O í 2.
 
 $2\text{H}_{2}\text{O}\  \rightarrow \ \text{H}_{2} + \text{O}_{2}\quad\quad\text{(unbalanced)}$
 
-  -----------------------------------------------------------------------------
-  Frumefni          Hvarfefni              Myndefni           Stillt?
-  ----------------- ---------------------- ------------------ -----------------
-  H                 **2** $\times$ 2 = 4   1 $\times$ 2 = 2   4 ≠ 2, nei
-
-  O                 2 $\times$ 1 = 2       1 $\times$ 2 = 2   2 = 2, já
-  -----------------------------------------------------------------------------
+| Frumefni | Hvarfefni | Myndefni | Stillt? |
+|---|---|---|---|
+| H | **2** $\times$ 2 = 4 | 1 $\times$ 2 = 2 | 4 ≠ 2, nei |
+| O | 2 $\times$ 1 = 2 | 1 $\times$ 2 = 2 | 2 = 2, já |
 
 Jafnvægi H-atóma raskaðist við þessa breytingu, en það er auðveldlega endurheimt með því að breyta stuðlinum fyrir myndefnið H~2~ í 2.
 
 $2\text{H}_{2}\text{O}\  \rightarrow \ 2\text{H}_{2} + \text{O}_{2}\quad\quad\text{(balanced)}$
 
-  -----------------------------------------------------------------------------
-  Frumefni          Hvarfefni          Myndefni               Stillt?
-  ----------------- ------------------ ---------------------- -----------------
-  H                 2 $\times$ 2 = 4   **2** $\times$ 2 = 4   4 = 4, já
-
-  O                 2 $\times$ 1 = 2   1 $\times$ 2 = 2       2 = 2, já
-  -----------------------------------------------------------------------------
+| Frumefni | Hvarfefni | Myndefni | Stillt? |
+|---|---|---|---|
+| H | 2 $\times$ 2 = 4 | **2** $\times$ 2 = 4 | 4 = 4, já |
+| O | 2 $\times$ 1 = 2 | 1 $\times$ 2 = 2 | 2 = 2, já |
 
 Þessir stuðlar gefa jafnan fjölda bæði H- og O-atóma í hvarfefnum og myndefnum og stillta jafnan er því:
 
@@ -117,37 +106,28 @@ $\text{N}_{2} + \ \text{O}_{2}\  \rightarrow \ \text{N}_{2}\text{O}_{5}\quad\qua
 
 Næst skaltu telja fjölda hverrar tegundar atóma sem eru til staðar í óstilltu jöfnunni.
 
-  -------------------------------------------------------------------------
-  Frumefni          Hvarfefni          Myndefni           Stillt?
-  ----------------- ------------------ ------------------ -----------------
-  N                 1 $\times$ 2 = 2   1 $\times$ 2 = 2   2 = 2, já
-
-  O                 1 $\times$ 2 = 2   1 $\times$ 5 = 5   2 ≠ 5, nei
-  -------------------------------------------------------------------------
+| Frumefni | Hvarfefni | Myndefni | Stillt? |
+|---|---|---|---|
+| N | 1 $\times$ 2 = 2 | 1 $\times$ 2 = 2 | 2 = 2, já |
+| O | 1 $\times$ 2 = 2 | 1 $\times$ 5 = 5 | 2 ≠ 5, nei |
 
 Þó að nitur sé stillt þarf að breyta stuðlum til að stilla fjölda súrefnisatóma. Til að stilla fjölda súrefnisatóma væri skynsamleg fyrsta tilraun að breyta stuðlum fyrir O~2~ og N~2~O~5~ í heiltölur sem gefa 10 O-atóm (lægsta margfeldi fyrir lágvísi O-atóma í þessum tveimur formúlum).
 
 $\text{N}_{2} + 5\text{O}_{2}\  \rightarrow \ 2\text{N}_{2}\text{O}_{5}\quad\quad\text{(unbalanced)}$
 
-  -----------------------------------------------------------------------------------
-  Frumefni          Hvarfefni               Myndefni                Stillt?
-  ----------------- ----------------------- ----------------------- -----------------
-  N                 1 $\times$ 2 = 2        **2** $\times$ 2 = 4    2 ≠ 4, nei
-
-  O                 **5** $\times$ 2 = 10   **2** $\times$ 5 = 10   10 = 10, já
-  -----------------------------------------------------------------------------------
+| Frumefni | Hvarfefni | Myndefni | Stillt? |
+|---|---|---|---|
+| N | 1 $\times$ 2 = 2 | **2** $\times$ 2 = 4 | 2 ≠ 4, nei |
+| O | **5** $\times$ 2 = 10 | **2** $\times$ 5 = 10 | 10 = 10, já |
 
 Jafnvægi N-atóma hefur raskast við þessa breytingu; það er endurheimt með því að breyta stuðlinum fyrir hvarfefnið N~2~ í 2.
 
 $2\text{N}_{2} + 5\text{O}_{2}\  \rightarrow \ 2\text{N}_{2}\text{O}_{5}$
 
-  ------------------------------------------------------------------------------
-  Frumefni          Hvarfefni              Myndefni            Stillt?
-  ----------------- ---------------------- ------------------- -----------------
-  N                 **2** $\times$ 2 = 4   2 $\times$ 2 = 4    4 = 4, já
-
-  O                 5 $\times$ 2 = 10      2 $\times$ 5 = 10   10 = 10, já
-  ------------------------------------------------------------------------------
+| Frumefni | Hvarfefni | Myndefni | Stillt? |
+|---|---|---|---|
+| N | **2** $\times$ 2 = 4 | 2 $\times$ 2 = 4 | 4 = 4, já |
+| O | 5 $\times$ 2 = 10 | 2 $\times$ 5 = 10 | 10 = 10, já |
 
 Fjöldi N- og O-atóma báðum megin í jöfnunni er nú jafn og því er jafnan stillt.
 :::
@@ -214,7 +194,7 @@ $\text{CaCl}_{2}(aq) + 2\text{AgNO}_{3}(aq)\  \rightarrow \ \text{Ca}\left( \tex
 
 Þessi stillta jafna, sem er fengin á venjulegan hátt, er kölluð sameindajafna vegna þess að hún sýnir ekki berum orðum þær jónir sem eru til staðar í lausninni. Þegar jónaefni leysast upp í vatni geta þau *sundrast* í jónirnar sem þau eru mynduð úr, sem dreifast síðan einsleitt um lausnina (ítarleg umfjöllun um þetta mikilvæga ferli er í kaflanum um lausnir). Jónaefni sem eru leyst upp í vatni eru því frekar táknuð sem aðskildar jónir, í þessu tilfelli:
 
-![None](./images/media/rId68.jpg)
+![None](./images/media/rId68.jpg){width="3.03125in" height="0.8333333333333334in"}
 
 Ólíkt þessum þremur jónaefnum leysist AgCl ekki upp í vatni að neinu marki, eins og hamtákn þess, *s*, gefur til kynna.
 
@@ -224,7 +204,7 @@ $\text{Ca}^{2 +}(aq) + 2\text{Cl}^{\text{−}}(aq) + 2\text{Ag}^{\text{+}}(aq) +
 
 Ef þessi jafna er skoðuð kemur í ljós að tvö efni eru til staðar á sama formi báðum megin við örina, Ca^2+^(*aq*) og $\text{NO}_{3}^{\text{−}}(aq).$ Þessar meðjónir---jónir sem þurfa að vera til staðar til að jafna út hleðslu---breytast hvorki efna- né eðlisfræðilega í ferlinu og því má fjarlægja þær úr jöfnunni til að fá hnitmiðaðri framsetningu sem kallast nettójónajafna:
 
-![None](./images/media/rId76.jpg)
+![None](./images/media/rId76.jpg){width="6.427083333333333in" height="0.4375in"}
 
 Samkvæmt venju er notuð lægsta mögulega heiltala sem stuðull og því er jafnan skrifuð svona:
 
@@ -253,7 +233,7 @@ $\text{CO}_{2}(aq) + 2\text{Na}^{\text{+}}(aq) + 2\text{OH}^{\text{−}}(aq)\  \
 
 Að lokum skaltu finna meðjónina/jónirnar, í þessu tilfelli Na^+^(*aq*), og fjarlægja hana úr báðum hliðum jöfnunnar til að fá nettójónajöfnuna:
 
-![None](./images/media/rId84.jpg)
+![None](./images/media/rId84.jpg){width="5.208333333333333in" height="0.4895833333333333in"}
 :::
 
 :::practice-problem
@@ -261,7 +241,7 @@ Að lokum skaltu finna meðjónina/jónirnar, í þessu tilfelli Na^+^(*aq*), og
 
 Tvíatóma klór og natríumhýdroxíð (lútur) eru hráefnaiðnaðarvörur sem framleiddar eru í miklu magni, ásamt tvíatóma vetni, með rafgreiningu á pækli, samkvæmt eftirfarandi óstilltri jöfnu:
 
-![None](./images/media/rId88.jpg)
+![None](./images/media/rId88.jpg){width="3.96875in" height="0.40625in"}
 
 Skrifaðu stilltar sameinda-, heildarjóna- og nettójónajöfnur fyrir þetta ferli.
 
