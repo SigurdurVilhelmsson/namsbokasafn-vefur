@@ -3,6 +3,7 @@
  */
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
+import remarkSubSuper from 'remark-sub-super';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import remarkDirective from 'remark-directive';
@@ -547,6 +548,7 @@ function rehypeEquationWrapper() {
 export async function processMarkdown(content: string): Promise<string> {
 	const result = await unified()
 		.use(remarkParse)
+		.use(remarkSubSuper) // Handle ~subscript~ and ^superscript^ before GFM
 		.use(remarkGfm)
 		.use(remarkMath)
 		.use(remarkDirective)
@@ -575,6 +577,7 @@ export async function processMarkdown(content: string): Promise<string> {
 export function processMarkdownSync(content: string): string {
 	const result = unified()
 		.use(remarkParse)
+		.use(remarkSubSuper) // Handle ~subscript~ and ^superscript^ before GFM
 		.use(remarkGfm)
 		.use(remarkMath)
 		.use(remarkDirective)

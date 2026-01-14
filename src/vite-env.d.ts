@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
 
+// remark-sub-super doesn't have type declarations
+declare module 'remark-sub-super';
+
 // PWA virtual module types
 declare module 'virtual:pwa-register/svelte' {
 	import type { Writable } from 'svelte/store';
