@@ -9,6 +9,9 @@ export default defineConfig({
 			// Service worker registration strategy
 			registerType: 'prompt', // Show update prompt to user
 			injectRegister: null, // We'll handle registration manually
+			// Ensure SW is registered from root, not relative to current path
+			scope: '/',
+			base: '/',
 
 			// Workbox configuration
 			workbox: {
