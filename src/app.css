@@ -211,16 +211,16 @@
 }
 
 .reading-content h2 {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 600;
-  margin-top: 2.5rem;
+  margin-top: 3rem;
   margin-bottom: 1rem;
 }
 
 .reading-content h3 {
-  font-size: 1.125rem;
+  font-size: 1.375rem;
   font-weight: 600;
-  margin-top: 2rem;
+  margin-top: 2.5rem;
   margin-bottom: 1rem;
 }
 
@@ -1099,23 +1099,56 @@
 .reading-content table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.5rem 0;
+  margin: 2rem 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.reading-content thead {
+  border-bottom: 2px solid var(--accent-color);
 }
 
 .reading-content th,
 .reading-content td {
-  padding: 0.75rem;
+  padding: 0.75rem 1rem;
   border: 1px solid var(--border-color);
   text-align: left;
+  vertical-align: top;
 }
 
 .reading-content th {
-  background-color: var(--bg-secondary);
+  background-color: var(--accent-light);
   font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--text-primary);
 }
 
-.reading-content tr:nth-child(even) {
+.dark .reading-content th {
+  background-color: var(--bg-tertiary);
+}
+
+.reading-content tbody tr:nth-child(even) {
   background-color: var(--bg-secondary);
+}
+
+.reading-content tbody tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.dark .reading-content tbody tr:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Table caption styling */
+.reading-content table caption {
+  caption-side: bottom;
+  padding: 0.75rem 0;
+  font-size: 0.9375rem;
+  font-style: italic;
+  color: var(--text-secondary);
+  text-align: left;
 }
 
 /* ========================================== */
@@ -1280,8 +1313,9 @@
 }
 
 .reading-content figcaption {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
+  margin-top: 0.75rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
   color: var(--text-secondary);
   text-align: center;
 }
@@ -1327,13 +1361,13 @@
   }
 
   .reading-content h2 {
-    font-size: 1.25rem;
-    margin-top: 2rem;
+    font-size: 1.5rem;
+    margin-top: 2.5rem;
   }
 
   .reading-content h3 {
-    font-size: 1rem;
-    margin-top: 1.5rem;
+    font-size: 1.1875rem;
+    margin-top: 2rem;
   }
 
   /* Content blocks stack on mobile */
@@ -1383,6 +1417,94 @@
   /* Larger touch targets for navigation links */
   .nav-link {
     padding: 0.75rem 1rem;
+  }
+}
+
+/* ========================================== */
+/* SIDEBAR (Desktop sticky)                   */
+/* ========================================== */
+
+/* Scroll shadow indicators for sidebar navigation */
+@media (min-width: 1024px) {
+  aside nav {
+    /* Subtle scroll shadows to indicate more content */
+    background:
+      /* Top shadow */
+      linear-gradient(
+        to bottom,
+        var(--bg-secondary) 0%,
+        transparent 100%
+      ) top / 100% 40px no-repeat,
+      /* Bottom shadow */
+      linear-gradient(
+        to top,
+        var(--bg-secondary) 0%,
+        transparent 100%
+      ) bottom / 100% 40px no-repeat,
+      /* Top shadow cover */
+      linear-gradient(
+        to bottom,
+        white 0%,
+        white 100%
+      ) top / 100% 40px no-repeat,
+      /* Bottom shadow cover */
+      linear-gradient(
+        to top,
+        white 0%,
+        white 100%
+      ) bottom / 100% 40px no-repeat;
+    background-attachment: local, local, scroll, scroll;
+  }
+
+  .dark aside nav {
+    background:
+      linear-gradient(
+        to bottom,
+        var(--bg-tertiary) 0%,
+        transparent 100%
+      ) top / 100% 40px no-repeat,
+      linear-gradient(
+        to top,
+        var(--bg-tertiary) 0%,
+        transparent 100%
+      ) bottom / 100% 40px no-repeat,
+      linear-gradient(
+        to bottom,
+        rgb(17 24 39) 0%,
+        rgb(17 24 39) 100%
+      ) top / 100% 40px no-repeat,
+      linear-gradient(
+        to top,
+        rgb(17 24 39) 0%,
+        rgb(17 24 39) 100%
+      ) bottom / 100% 40px no-repeat;
+    background-attachment: local, local, scroll, scroll;
+  }
+
+  /* Smooth scrolling for sidebar */
+  aside {
+    scroll-behavior: smooth;
+  }
+
+  /* Subtle hover effect on sidebar section links */
+  aside nav a {
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  /* Active section indicator animation */
+  aside nav a[class*="bg-blue"] {
+    position: relative;
+  }
+
+  aside nav a[class*="bg-blue"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--accent-color);
+    border-radius: 0 2px 2px 0;
   }
 }
 
@@ -1743,28 +1865,42 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    margin: 12pt 0;
+    margin: 18pt 0;
     page-break-inside: avoid;
     font-size: 10pt;
+    line-height: 1.4;
   }
 
   thead {
     display: table-header-group;
+    border-bottom: 2pt solid #333 !important;
   }
 
   th, td {
     border: 1pt solid #666 !important;
-    padding: 6pt 9pt;
+    padding: 8pt 10pt;
     text-align: left;
+    vertical-align: top;
   }
 
   th {
     background-color: #e5e7eb !important;
     font-weight: 700;
+    font-size: 9pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
   }
 
   tr {
     page-break-inside: avoid;
+  }
+
+  caption {
+    caption-side: bottom;
+    padding: 9pt 0;
+    font-size: 10pt;
+    font-style: italic;
+    text-align: left;
   }
 
   /* ----------------------------------------
