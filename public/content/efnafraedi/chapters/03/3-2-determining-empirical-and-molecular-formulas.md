@@ -6,8 +6,7 @@ chapter: 3
 
 ## 3.2 Ákvörðun reynsluformúla og sameindaformúla
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla muntu geta:
 
@@ -54,7 +53,6 @@ Niðurstöður greiningarinnar benda til þess að efnasambandið sé 61,0% C, 1
 :::answer
 12,1% C, 16,1% O, 71,79% Cl
 :::
-:::
 
 #### Ákvörðun massaprósentu út frá sameinda- eða reynsluformúlum
 
@@ -89,7 +87,6 @@ Hver er massaprósenta járns í efnasambandinu Fe~2~O~3~, gefin upp með þremu
 
 :::answer
 69,9% Fe
-:::
 :::
 
 ### Ákvörðun reynsluformúla
@@ -162,12 +159,10 @@ Hver er reynsluformúla efnasambands ef sýni inniheldur 0,130 g af köfnunarefn
 :::answer
 N~2~O~5~
 :::
-:::
 
  
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Horfðu á stutta [myndbandið](http://openstax.org/l/16empforms) til að sjá fleiri dæmi um útreikninga á reynsluformúlum.
 :::
@@ -211,7 +206,6 @@ Hver er reynsluformúla efnasambands sem inniheldur 40,0% C, 6,71% H og 53,28% O
 
 :::answer
 CH~2~O
-:::
 :::
 
 ### Útreikningur á sameindaformúlum
@@ -279,5 +273,4 @@ Hver er sameindaformúla efnasambands með massaprósentuna 49,47% C, 5,201% H, 
 
 :::answer
 C~8~H~10~N~4~O~2~
-:::
 :::

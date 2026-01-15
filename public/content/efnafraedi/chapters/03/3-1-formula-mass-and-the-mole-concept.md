@@ -6,8 +6,7 @@ chapter: 3
 
 ## 3.1 Formúlumassi og mólhugtakið
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla muntu geta:
 
@@ -59,8 +58,6 @@ Parasetamól, C~8~H~9~NO~2~, er samgilt efnasamband og virka efnið í nokkrum v
 :::answer
 151,16 amu
 :::
-:::
-:::
 
 #### Formúlumassi fyrir jónaefni
 
@@ -94,8 +91,6 @@ Kalsíumfosfat, Ca~3~(PO~4~)~2~, er jónaefni og algengt kekkjavarnarefni sem b�
 
 :::answer
 310,18 amu
-:::
-:::
 :::
 
 ### Mólið
@@ -136,8 +131,7 @@ Mynd 3.6 Hvert sýni inniheldur 6,02 $\times$ 10^23^ sameindir eða formúlueini
 
 Mynd 3.7 Fjöldi sameinda í einum vatnsdropa er um það bil 100 milljörðum sinnum meiri en fjöldi fólks á jörðinni. (Heimild: „tanakawho"/Wikimedia commons)
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Mólið er notað í efnafræði til að tákna 6,022 $\times$ 10^23^ af einhverju, en það getur verið erfitt að skilja svo stóra tölu. Horfðu á þetta [myndband](http://openstax.org/l/16molevideo) og svaraðu síðan „Hugsaðu"-spurningunum sem fylgja. Kynntu þér mólið nánar með því að skoða upplýsingarnar undir „Kafaðu dýpra".
 :::
@@ -173,8 +167,6 @@ Beryllíum er léttur málmur sem notaður er til að búa til gagnsæja röntge
 :::answer
 0,360 mól
 :::
-:::
-:::
 
 
 
@@ -202,8 +194,6 @@ Hver er massi 2,561 móls af gulli?
 
 :::answer
 504,4 g
-:::
-:::
 :::
 
 
@@ -239,8 +229,6 @@ Gullgrafari sem skolar gull í á safnar 15,00 g af hreinu gulli. Hversu mörg A
 :::answer
 4,586 $\times$ 10^22^ Au-atóm
 :::
-:::
-:::
 
 
 
@@ -273,8 +261,6 @@ Hversu mörg mól af súkrósa, C~12~H~22~O~11~, eru í 25 g sýni af súkrósa?
 :::answer
 0,073 mól
 :::
-:::
-:::
 
 
 
@@ -302,8 +288,6 @@ Hver er massi 0,443 móla af hýdrasíni, N~2~H~4~?
 
 :::answer
 14,2 g
-:::
-:::
 :::
 
 
@@ -337,13 +321,10 @@ Hversu margar C~4~H~10~ sameindir eru í 9,213 g af þessu efnasambandi? Hversu 
 :::answer
 9,545 $\times$ 10^22^ sameindir C~4~H~10~; 9,545 $\times$ 10^23^ atóm H
 :::
-:::
-:::
 
 
 
-:::note
-### Hvernig vísindin tengjast
+:::how-science-connects
 
 #### Að telja taugaboðefnissameindir í heilanum
 

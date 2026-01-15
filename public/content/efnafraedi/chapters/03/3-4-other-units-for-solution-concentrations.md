@@ -6,8 +6,7 @@ chapter: 3
 
 ## 3.4 Aðrar einingar fyrir styrk lausna
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla muntu geta:
 
@@ -57,7 +56,6 @@ Flaska af flísahreinsi inniheldur 135 g af HCl og 775 g af vatni. Hver er massa
 :::answer
 14,8%
 :::
-:::
 
  
 
@@ -85,7 +83,6 @@ Hvaða rúmmál af þéttri HCl-lausn inniheldur 125 g af HCl?
 :::answer
 282 ml
 :::
-:::
 
 ### Rúmmálsprósenta
 
@@ -112,7 +109,6 @@ Vín er um það bil 12% etanól (CH~3~CH~2~OH) miðað við rúmmál. Etanól h
 
 :::answer
 1,5 mól etanól
-:::
 :::
 
 ### Massa-rúmmálsprósenta
@@ -168,5 +164,4 @@ $4.5\  \times \ 10^{- 6}\ \text{g}\  \times \ \frac{1\ \text{μg}}{10^{- 6}\ \te
 
 :::answer
 9,6 ppm, 9600 ppb
-:::
 :::

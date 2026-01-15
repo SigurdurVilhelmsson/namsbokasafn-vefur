@@ -6,8 +6,7 @@ chapter: 2
 
 ## 2.1 Fyrstu hugmyndir atómkenningarinnar
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla munt þú geta:
 
@@ -63,7 +62,6 @@ Upphafsefnin samanstanda af tveimur grænum kúlum og tveimur fjólubláum kúlu
 :::answer
 Upphafsefnin samanstanda af fjórum grænum kúlum og tveimur fjólubláum kúlum. Myndefnin samanstanda af fjórum grænum kúlum og tveimur fjólubláum kúlum. Þetta brýtur ekki í bága við neinar af kennisetningum Daltons: Atóm verða hvorki til né eyðast, heldur er þeim endurraðað í litlum heiltöluhlutföllum.
 :::
-:::
 
 Dalton þekkti til tilrauna franska efnafræðingsins Joseph Proust, sem sýndi fram á að *öll sýni af hreinu efnasambandi innihalda sömu frumefnin í sömu massahlutföllum*. Þessi staðhæfing er þekkt sem lögmálið um föst hlutföll eða lögmálið um fasta samsetningu. Sú tillaga að fjöldi atóma frumefnanna í tilteknu efnasambandi sé alltaf í sama hlutfalli er í samræmi við þessar athuganir. Til dæmis, þegar mismunandi sýni af ísóoktani (hluti af bensíni og einn af stöðlunum sem notaðir eru í oktanmælingakerfinu) eru greind, kemur í ljós að þau hafa massahlutfall kolefnis á móti vetni sem er 5,33:1, eins og sýnt er í töflu 2.1.
 
@@ -118,5 +116,4 @@ Sýni af efnasambandi X (glær, litlaus, eldfimur vökvi með áberandi lykt) er
 
 :::answer
 Í efnasambandi X er massahlutfall kolefnis á móti vetni 14,13 g C / 2,96 g H. Í efnasambandi Y er massahlutfall kolefnis á móti vetni 19,91 g C / 3,34 g H. Hlutfall þessara hlutfalla er (4,77 g C/g H) / (5,96 g C/g H) = 0,800 = 4/5. Þetta litla heiltöluhlutfall styður lögmálið um margfeldi hlutfalla. Þetta þýðir að X og Y eru mismunandi efnasambönd.
-:::
 :::

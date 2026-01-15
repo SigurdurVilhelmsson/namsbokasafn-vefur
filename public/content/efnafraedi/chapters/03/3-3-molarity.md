@@ -6,8 +6,7 @@ chapter: 3
 
 ## 3.3 Mólstyrkur
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla muntu geta:
 
@@ -56,7 +55,6 @@ Ein teskeið af borðsykri inniheldur um 0,01 mól af súkrósa. Hver er mólsty
 :::answer
 0,05 *M*
 :::
-:::
 
  
 
@@ -79,7 +77,6 @@ Hvert er rúmmálið (ml) af sykraða teinu sem lýst er í [dæmi 3.14](#fs-idm
 
 :::answer
 80 ml
-:::
 :::
 
  
@@ -112,7 +109,6 @@ Reiknaðu mólstyrk 6,52 g af CoCl~2~ (128,9 g/mól) sem er leyst upp í vatnsla
 :::answer
 0,674 *M*
 :::
-:::
 
  
 
@@ -139,7 +135,6 @@ Hversu mörg grömm af CaCl~2~ (110,98 g/mól) eru í 250,0 ml af 0,200*M* lausn
 
 :::answer
 5,55 g CaCl~2~
-:::
 :::
 
 Þegar útreikningar eru framkvæmdir í skrefum, eins og í [dæmi 3.17](#fs-idm104693104), er mikilvægt að forðast að námunda niðurstöður millireikninga, þar sem það getur leitt til námundunarvillna í lokaniðurstöðunni. Í [dæmi 3.17](#fs-idm104693104) væri mólmagn NaCl sem reiknað var út í fyrsta skrefi, 1,325 mól, réttilega námundað í 1,32 mól ef það ætti að vera gefið upp; þó, þrátt fyrir að síðasti tölustafurinn (5) sé ekki marktækur, verður að halda honum sem varðtölu í millireikningnum. Ef varðtölunni hefði ekki verið haldið, hefði lokareikningurinn fyrir massa NaCl verið 77,1 g, sem er 0,3 g munur.
@@ -176,7 +171,6 @@ Hvert er rúmmál 1,50 *M* KBr-lausnar sem inniheldur 66,0 g af KBr?
 :::answer
 0,370 L
 :::
-:::
 
 ### Þynning lausna
 
@@ -210,8 +204,7 @@ $C_{1}V_{1} = C_{2}V_{2}$
 
 þar sem *C* og *V* eru styrkur og rúmmál, í sömu röð.
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Notaðu [hermunina](http://openstax.org/l/16Phetsolvents) til að kanna sambandið milli magns uppleysts efnis, rúmmáls lausnar og styrks og til að staðfesta þynningarjöfnuna.
 :::
@@ -244,7 +237,6 @@ Hver er styrkur lausnarinnar sem fæst með því að þynna 25,0 ml af 2,04 *M*
 :::answer
 0,102 *M* CH~3~OH
 :::
-:::
 
  
 
@@ -274,7 +266,6 @@ Rúmmál 0,12 *M* lausnarinnar er 0,041 L (41 ml). Niðurstaðan er sanngjörn o
 :::answer
 3,76 L
 :::
-:::
 
  
 
@@ -303,5 +294,4 @@ Hvaða rúmmál af 0,575 *M* lausn af glúkósa, C~6~H~12~O~6~, er hægt að út
 
 :::answer
 0,261 L
-:::
 :::

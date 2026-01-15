@@ -6,8 +6,7 @@ chapter: 4
 
 ## 4.5 Magnbundin efnagreining
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla muntu geta:
 
@@ -82,7 +81,6 @@ $\text{2MnO}_{4}^{\text{−}}(aq) + 5\text{H}_{2}\text{C}_{2}\text{O}_{4}(aq) + 
 :::answer
 0,2648 *M*
 :::
-:::
 
 ### Þyngdarmælingagreining
 
@@ -128,7 +126,6 @@ $\text{Ag}^{\text{+}}(aq) + \text{Cl}^{\text{−}}(aq)\  \rightarrow \ \text{AgC
 :::answer
 23,76%
 :::
-:::
 
 Frumefnasamsetningu kolvetna og skyldra efnasambanda má ákvarða með þyngdarmælingaraðferð sem kallast brunagreining. Í brunagreiningu er vegið sýni af efnasambandinu hitað að háu hitastigi undir straumi af súrefnisgasi, sem leiðir til fullkomins bruna þess og myndar gasmyndefni með þekkt auðkenni. Fullkominn bruni kolvetna, til dæmis, mun skila koldíoxíði og vatni sem einu myndefnunum. Gasmyndefnin úr brunanum eru leidd í gegnum aðskilin, fyrirfram vegin söfnunartæki sem innihalda efnasambönd sem aðsoga sértækt hvert myndefni ([mynd 4.18](#CNX_Chem_04_05_combustion)). Massaaukning hvers tækis samsvarar massa aðsogaða myndefnisins og má nota í viðeigandi hlutfallaefnafræðilegum útreikningi til að leiða út massa viðkomandi frumefnis.
 
@@ -171,5 +168,4 @@ og reynsluformúla pólýetýlens er CH~2~.
 
 :::answer
 CH
-:::
 :::

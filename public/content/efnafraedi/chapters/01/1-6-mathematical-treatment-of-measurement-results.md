@@ -6,8 +6,7 @@ chapter: 1
 
 ## 1.6 Stærðfræðileg meðferð á niðurstöðum mælinga
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla muntu geta:
 
@@ -144,8 +143,6 @@ Umreiknaðu rúmmál upp á 9,345 qt í lítra.
 :::answer
 8,844 L
 :::
-:::
-:::
 
 Fyrir utan einfaldar einingaumbreytingar er hægt að nota þessa aðferð
 til að leysa flóknari verkefni sem fela í sér útreikninga. Burtséð frá
@@ -205,8 +202,6 @@ og 1 qt = 32 oz (nákvæmlega)?
 :::answer
 2,957 × 10^−2^ L
 :::
-:::
-:::
 
  
 
@@ -261,8 +256,6 @@ eldsneytiskostnaðurinn fyrir þessa ferð?
 
 :::answer
 \(a\) 51 mpg; (b) 62 \$
-:::
-:::
 :::
 
 ### Umreikningur á hitastigseiningum
@@ -393,8 +386,6 @@ Umreiknaðu 80,92 °C í K og °F.
 :::answer
 354,07 K, 177,7 °F
 :::
-:::
-:::
 
  
 
@@ -420,6 +411,4 @@ Umbreyttu 50 °F í °C og K.
 
 :::answer
 10 °C, 280 K
-:::
-:::
 :::

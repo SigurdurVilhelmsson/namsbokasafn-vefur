@@ -6,8 +6,7 @@ chapter: 2
 
 ## 2.3 Bygging atóma og táknmál
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla munt þú geta:
 
@@ -72,7 +71,6 @@ Jón platínu hefur massatöluna 195 og inniheldur 74 rafeindir. Hversu margar r
 :::answer
 78 róteindir; 117 nifteindir; hleðslan er 4+
 :::
-:::
 
 ### Efnatákn
 
@@ -108,8 +106,7 @@ Tafla 2.3
 
 Hefð er fyrir því að þau sem uppgötva nýtt frumefni gefi því nafn. Hins vegar er nafn nýja frumefnisins til bráðabirgða byggt á latneska orðinu/orðunum fyrir sætistölu þess, þar til formlegt nafn hefur verið viðurkennt af Alþjóðasambandi um hreina og hagnýta efnafræði (IUPAC). Til dæmis var frumefni 106 kallað unnilhexíum (Unh), frumefni 107 var kallað unnilseptíum (Uns) og frumefni 108 var kallað unniloktíum (Uno) í nokkur ár. Þessi frumefni eru nú nefnd eftir vísindamönnum (eða stundum stöðum); til dæmis er frumefni 106 nú þekkt sem *seaborgíum* (Sg) til heiðurs Glenn Seaborg, Nóbelsverðlaunahafa sem kom að uppgötvun nokkurra þungra frumefna. Frumefni 109 var nefnt til heiðurs Lise Meitner, sem uppgötvaði kjarnaklofnun, fyrirbæri sem átti eftir að breyta heiminum; Meitner lagði einnig sitt af mörkum til uppgötvunar nokkurra mikilvægra samsæta, sem fjallað er um hér á eftir.
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Farðu á þessa [síðu](http://openstax.org/l/16IUPAC) til að læra meira um IUPAC, Alþjóðasamband um hreina og hagnýta efnafræði, og skoðaðu lotukerfi þess.
 :::
@@ -155,8 +152,7 @@ Samsetning kjarna atóma mjög léttra frumefna
 
 Tafla 2.4
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Notaðu þennan [hermi](http://openstax.org/l/16PhetAtomBld) til að smíða atóm fyrstu 10 frumefnanna, sjáðu hvaða samsætur eru til, athugaðu stöðugleika kjarna og öðlastu reynslu af samsætutáknum.
 :::
@@ -195,7 +191,6 @@ Sýni af magnesíum inniheldur 78,70% af ^24^Mg atómum (massi 23,98 amu), 10,13
 :::answer
 24,31 amu
 :::
-:::
 
 Við getum líka gert afbrigði af þessari tegund útreikninga, eins og sýnt er í næsta dæmi.
 
@@ -230,12 +225,10 @@ Kopar sem finnst í náttúrunni samanstendur af ^63^Cu (massi 62,9296 amu) og ^
 :::answer
 69,15% Cu-63 og 30,85% Cu-65
 :::
-:::
 
  
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Farðu á þessa [síðu](http://openstax.org/l/16PhetAtomMass) til að búa til efnablöndur af helstu samsætum fyrstu 18 frumefnanna, öðlast reynslu af meðalatómmassa og kanna náttúruleg samsætuhlutföll með því að nota herminn Isotopes and Atomic Mass.
 :::
@@ -250,8 +243,7 @@ Hægt er að ákvarða tilvist og náttúrulega gnægð samsæta með tilraunum 
 
 Mynd 2.15 Greining á sirkoni í massagreini býr til massaróf með toppum sem sýna mismunandi samsætur Zr.
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Sjáðu [hreyfimynd](http://openstax.org/l/16MassSpec) sem útskýrir massagreiningu. Horfðu á þetta [myndband](http://openstax.org/l/16RSChemistry) frá Royal Society for Chemistry til að fá stutta lýsingu á grundvallaratriðum massagreiningar.
 :::

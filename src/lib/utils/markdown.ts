@@ -11,8 +11,7 @@ import rehypeSlug from 'rehype-slug';
 import rehypeKatex from 'rehype-katex';
 import rehypeStringify from 'rehype-stringify';
 import { visit } from 'unist-util-visit';
-import { findAndReplace } from 'mdast-util-find-and-replace';
-import type { Root, PhrasingContent } from 'mdast';
+import type { Root } from 'mdast';
 import type { Node, Data } from 'unist';
 import type { Element, ElementContent, RootContent } from 'hast';
 
@@ -34,7 +33,13 @@ type ContentBlockType =
 	| 'definition'
 	| 'key-concept'
 	| 'checkpoint'
-	| 'common-misconception';
+	| 'common-misconception'
+	| 'learning-objectives'
+	| 'link-to-material'
+	| 'chemistry-everyday'
+	| 'chapter-overview'
+	| 'scientist-spotlight'
+	| 'how-science-connects';
 
 // =============================================================================
 // DIRECTIVE CONFIGURATION
@@ -92,6 +97,30 @@ const DIRECTIVE_CONFIG: Record<
 	'common-misconception': {
 		className: 'content-block common-misconception',
 		blockType: 'common-misconception'
+	},
+	'learning-objectives': {
+		className: 'content-block learning-objectives',
+		blockType: 'learning-objectives'
+	},
+	'link-to-material': {
+		className: 'content-block link-to-material',
+		blockType: 'link-to-material'
+	},
+	'chemistry-everyday': {
+		className: 'content-block chemistry-everyday',
+		blockType: 'chemistry-everyday'
+	},
+	'chapter-overview': {
+		className: 'content-block chapter-overview',
+		blockType: 'chapter-overview'
+	},
+	'scientist-spotlight': {
+		className: 'content-block scientist-spotlight',
+		blockType: 'scientist-spotlight'
+	},
+	'how-science-connects': {
+		className: 'content-block how-science-connects',
+		blockType: 'how-science-connects'
 	}
 };
 
@@ -103,7 +132,13 @@ const BLOCK_TITLES: Record<ContentBlockType, string> = {
 	definition: 'Skilgreining',
 	'key-concept': 'Lykilhugtak',
 	checkpoint: 'Sjálfsmat',
-	'common-misconception': 'Algeng misskilningur'
+	'common-misconception': 'Algeng misskilningur',
+	'learning-objectives': 'Námsmarkmið',
+	'link-to-material': 'Tengill á námsefni',
+	'chemistry-everyday': 'Efnafræði í daglegu lífi',
+	'chapter-overview': 'Yfirlit kafla',
+	'scientist-spotlight': 'Nærmynd af efnafræðingi',
+	'how-science-connects': 'Hvernig vísindin tengjast'
 };
 
 /** SVG icons for each block type */
@@ -120,7 +155,19 @@ const BLOCK_ICONS: Record<ContentBlockType, string> = {
 	checkpoint:
 		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
 	'common-misconception':
-		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+	'learning-objectives':
+		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>',
+	'link-to-material':
+		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>',
+	'chemistry-everyday':
+		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>',
+	'chapter-overview':
+		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/></svg>',
+	'scientist-spotlight':
+		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>',
+	'how-science-connects':
+		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>'
 };
 
 // =============================================================================
@@ -128,33 +175,64 @@ const BLOCK_ICONS: Record<ContentBlockType, string> = {
 // =============================================================================
 
 /**
- * Custom remark plugin to handle subscript (~text~) and superscript (^text^) syntax
- * Must run BEFORE remarkGfm to prevent ~text~ from being parsed as strikethrough
+ * Remark plugin to convert Pandoc-style subscripts and superscripts
+ * Converts ~text~ to <sub> and ^text^ to <sup>
+ * Must run BEFORE remarkGfm to avoid ~ being treated as strikethrough
  */
-function remarkSubSuperscript() {
-	// Match ~subscript~ and ^superscript^ patterns
-	// Only allow alphanumeric, +, -, − (minus sign) to avoid matching across long text spans
-	// This handles chemical formulas like H~2~O, CO~2~, Na^+^, 10^−3^
-	const subscriptRegex = /~([A-Za-z0-9+\-−]+)~/g;
-	const superscriptRegex = /\^([A-Za-z0-9+\-−]+)\^/g;
-
+function remarkPandocSubSup() {
 	return (tree: Root) => {
-		findAndReplace(tree, [
-			[
-				subscriptRegex,
-				(_match: string, content: string): PhrasingContent => ({
-					type: 'html',
-					value: `<sub>${content}</sub>`
-				})
-			],
-			[
-				superscriptRegex,
-				(_match: string, content: string): PhrasingContent => ({
-					type: 'html',
-					value: `<sup>${content}</sup>`
-				})
-			]
-		]);
+		visit(tree, 'text', (node: { type: string; value: string }, index, parent) => {
+			if (!parent || index === undefined) return;
+
+			const text = node.value;
+			// Match ~subscript~ and ^superscript^ patterns
+			const pattern = /(~([^~\s]+)~|\^([^\^\s]+)\^)/g;
+			const matches = [...text.matchAll(pattern)];
+
+			if (matches.length === 0) return;
+
+			const newNodes: Node[] = [];
+			let lastIndex = 0;
+
+			for (const match of matches) {
+				const [fullMatch, , subscriptText, superscriptText] = match;
+				const matchIndex = match.index!;
+
+				// Add text before the match
+				if (matchIndex > lastIndex) {
+					newNodes.push({
+						type: 'text',
+						value: text.slice(lastIndex, matchIndex)
+					} as Node);
+				}
+
+				// Create sub or sup node
+				if (subscriptText) {
+					newNodes.push({
+						type: 'html',
+						value: `<sub>${subscriptText}</sub>`
+					} as Node);
+				} else if (superscriptText) {
+					newNodes.push({
+						type: 'html',
+						value: `<sup>${superscriptText}</sup>`
+					} as Node);
+				}
+
+				lastIndex = matchIndex + fullMatch.length;
+			}
+
+			// Add remaining text
+			if (lastIndex < text.length) {
+				newNodes.push({
+					type: 'text',
+					value: text.slice(lastIndex)
+				} as Node);
+			}
+
+			// Replace the original text node
+			(parent as { children: Node[] }).children.splice(index, 1, ...newNodes);
+		});
 	};
 }
 
@@ -186,10 +264,10 @@ function remarkCustomDirectives() {
 				// Store original children to wrap them
 				data.hProperties = {
 					className: config.className,
-					'data-block-type': blockType,
-					'data-title': title,
-					'data-icon': icon,
-					'data-term': term || undefined,
+					dataBlockType: blockType,
+					dataTitle: title,
+					dataIcon: icon,
+					dataTerm: term || undefined,
 					...additionalProps
 				};
 			} else {
@@ -272,34 +350,16 @@ function remarkCrossReferences() {
 // =============================================================================
 
 /**
- * Rehype plugin to remove orphan directive closing markers (:::)
- * remark-directive only needs one ::: to close nested containers, but the
- * markdown content has multiple ::: which become orphaned paragraph text
+ * Extract text content from an element node recursively
  */
-function rehypeRemoveOrphanDirectiveMarkers() {
-	return (tree: Node) => {
-		visit(tree, 'element', (node: Element, index, parent) => {
-			if (!parent || index === undefined) return;
-			if (node.tagName !== 'p') return;
-
-			// Check if paragraph only contains ::: text (possibly with whitespace)
-			const children = node.children || [];
-			if (children.length === 0) return;
-
-			const textContent = children
-				.filter((child): child is { type: 'text'; value: string } => child.type === 'text')
-				.map((child) => child.value)
-				.join('')
-				.trim();
-
-			// Remove paragraphs that only contain ::: markers
-			if (/^(:::\s*)+$/.test(textContent)) {
-				const parentEl = parent as { children: RootContent[] };
-				parentEl.children.splice(index, 1);
-				return index; // Return index to re-check this position
-			}
-		});
-	};
+function extractTextContent(node: Node): string {
+	if ('value' in node && typeof node.value === 'string') {
+		return node.value;
+	}
+	if ('children' in node && Array.isArray(node.children)) {
+		return (node.children as Node[]).map(extractTextContent).join('');
+	}
+	return '';
 }
 
 /**
@@ -318,28 +378,43 @@ function rehypeContentBlocks() {
 
 			if (!className.includes('content-block')) return;
 
-			// Note: hProperties uses hyphenated names, not camelCase
-			const blockType = props['data-block-type'] as ContentBlockType | undefined;
+			const blockType = props['dataBlockType'] as ContentBlockType | undefined;
 			if (!blockType) return;
 
-			const title = (props['data-title'] as string) || BLOCK_TITLES[blockType];
-			const icon = (props['data-icon'] as string) || BLOCK_ICONS[blockType];
-			const term = props['data-term'] as string | undefined;
+			let title = (props['dataTitle'] as string) || BLOCK_TITLES[blockType];
+			const icon = (props['dataIcon'] as string) || BLOCK_ICONS[blockType];
+			const term = props['dataTerm'] as string | undefined;
 
 			// Clean up data attributes from final HTML
-			delete props['data-block-type'];
-			delete props['data-title'];
-			delete props['data-icon'];
-			delete props['data-term'];
+			delete props['dataBlockType'];
+			delete props['dataTitle'];
+			delete props['dataIcon'];
+			delete props['dataTerm'];
+
+			// Store current children
+			let content = node.children || [];
+
+			// For example blocks, extract first heading as title
+			if (blockType === 'example' && content.length > 0) {
+				const firstChild = content[0] as Element;
+				if (
+					firstChild.type === 'element' &&
+					(firstChild.tagName === 'h3' || firstChild.tagName === 'h4')
+				) {
+					const headingText = extractTextContent(firstChild);
+					if (headingText.trim()) {
+						title = headingText.trim();
+						// Remove the heading from content
+						content = content.slice(1);
+					}
+				}
+			}
 
 			// Build the title text
 			let titleHtml = title;
 			if (blockType === 'definition' && term) {
 				titleHtml = `<span class="content-block-label">${title}:</span> ${term}`;
 			}
-
-			// Store current children
-			const content = node.children || [];
 
 			// Rebuild children with icon and content structure
 			node.children = [
@@ -602,29 +677,6 @@ function rehypeEquationWrapper() {
 }
 
 // =============================================================================
-// LATEX PREPROCESSING
-// =============================================================================
-
-/**
- * Preprocess LaTeX to fix commands not supported by KaTeX
- * - \mspace{Xmu} → appropriate KaTeX spacing
- */
-function preprocessLatex(content: string): string {
-	// Convert \mspace{Xmu} to KaTeX-compatible spacing
-	// \mspace is MathML spacing that Pandoc generates but KaTeX doesn't support
-	// 1mu = 1/18 em, so we map to closest KaTeX equivalents
-	return content.replace(/\\mspace\{(\d+)mu\}/g, (_match, mu) => {
-		const muValue = parseInt(mu, 10);
-		if (muValue <= 3) return '\\,'; // thin space (3mu)
-		if (muValue <= 4) return '\\:'; // medium space (4mu)
-		if (muValue <= 5) return '\\;'; // thick space (5mu)
-		if (muValue <= 9) return '\\;\\,'; // ~8mu
-		if (muValue <= 18) return '\\quad'; // quad (18mu)
-		return '\\qquad'; // double quad (36mu)
-	});
-}
-
-// =============================================================================
 // MARKDOWN PROCESSOR
 // =============================================================================
 
@@ -632,13 +684,10 @@ function preprocessLatex(content: string): string {
  * Process markdown content to HTML
  */
 export async function processMarkdown(content: string): Promise<string> {
-	// Preprocess LaTeX for KaTeX compatibility
-	const preprocessedContent = preprocessLatex(content);
-
 	const result = await unified()
 		.use(remarkParse)
-		.use(remarkSubSuperscript) // Handle ~subscript~ and ^superscript^ before GFM
-		.use(remarkGfm, { singleTilde: false }) // Only ~~ for strikethrough, ~ reserved for subscript
+		.use(remarkPandocSubSup) // Must be before remarkGfm!
+		.use(remarkGfm)
 		.use(remarkMath)
 		.use(remarkDirective)
 		.use(remarkCustomDirectives)
@@ -649,13 +698,12 @@ export async function processMarkdown(content: string): Promise<string> {
 			trust: true,
 			throwOnError: false
 		})
-		.use(rehypeRemoveOrphanDirectiveMarkers)
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
 		.use(rehypeSlug)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
-		.process(preprocessedContent);
+		.process(content);
 
 	return String(result);
 }
@@ -665,13 +713,10 @@ export async function processMarkdown(content: string): Promise<string> {
  * Note: This blocks the event loop - prefer async version
  */
 export function processMarkdownSync(content: string): string {
-	// Preprocess LaTeX for KaTeX compatibility
-	const preprocessedContent = preprocessLatex(content);
-
 	const result = unified()
 		.use(remarkParse)
-		.use(remarkSubSuperscript) // Handle ~subscript~ and ^superscript^ before GFM
-		.use(remarkGfm, { singleTilde: false }) // Only ~~ for strikethrough, ~ reserved for subscript
+		.use(remarkPandocSubSup) // Must be before remarkGfm!
+		.use(remarkGfm)
 		.use(remarkMath)
 		.use(remarkDirective)
 		.use(remarkCustomDirectives)
@@ -682,13 +727,12 @@ export function processMarkdownSync(content: string): string {
 			trust: true,
 			throwOnError: false
 		})
-		.use(rehypeRemoveOrphanDirectiveMarkers)
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
 		.use(rehypeSlug)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
-		.processSync(preprocessedContent);
+		.processSync(content);
 
 	return String(result);
 }

@@ -6,8 +6,7 @@ chapter: 2
 
 ## 2.5 Lotukerfið
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla munt þú geta:
 
@@ -50,8 +49,7 @@ Samkvæmt skilgreiningu IUPAC eru frumefni í hóp 12 ekki hliðarmálmar, þót
 
 Mynd 2.27 Lotukerfið flokkar frumefni með svipaða eiginleika í hópa.
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Smelltu á þennan [tengil](https://openstax.org/l/16Periodic) til að sjá gagnvirkt lotukerfi sem þú getur notað til að kanna eiginleika frumefnanna (inniheldur hlaðvörp og myndbönd um hvert frumefni). Þú gætir líka viljað prófa [þetta](https://openstax.org/l/16Periodic2) sem sýnir myndir af öllum frumefnunum.
 
@@ -100,7 +98,6 @@ Gefðu upp hópnafn fyrir hvert af eftirfarandi frumefnum:
 
 :::answer
 \(a\) eðalgas; (b) kalkógen; (c) jarðalkalímálmur; (d) alkalímálmur
-:::
 :::
 
 Eins og þú munt læra í frekara námi í efnafræði, hegða frumefni í hópum sér oft á nokkuð svipaðan hátt. Þetta er að hluta til vegna fjölda rafeinda á ysta hvolfi þeirra og svipaðrar tilhneigingar þeirra til að mynda tengi. Þessir sameiginlegu eiginleikar geta haft víðtækar afleiðingar í náttúru, vísindum og læknisfræði. Til dæmis, þegar Gertrude Elion og George Hitchens voru að rannsaka leiðir til að trufla frumu- og veiruafritun til að berjast gegn sjúkdómum, nýttu þau sér líkindin milli brennisteins og súrefnis (bæði í hóp 16) og getu þeirra til að tengjast á svipaðan hátt. Elion einbeitti sér að púrínríkjum, sem eru lykilþættir DNA og innihalda súrefni. Hún komst að því að með því að nota efnasambönd sem byggjast á brennisteini (kölluð púrín-hliðstæður) sem líkja eftir byggingu púrínríkja, myndu sameindir innan DNA tengjast hliðstæðunum frekar en „venjulegu" DNA-púrínríkjunum. Með því að breyta venjulegri DNA-tengingu og byggingu tókst Elion að trufla frumuafritun. Í grunninn virkaði aðferðin vegna líkindanna milli brennisteins og súrefnis. Uppgötvun hennar leiddi beint til mikilvægra meðferða við hvítblæði. Á heildina litið leiddi vinna Elion með George Hitchens ekki aðeins til fleiri meðferða, heldur breytti hún einnig allri aðferðafræði lyfjaþróunar. Með því að nota sérstök frumefni og efnasambönd til að miða á sérstaka þætti æxlisfrumna, veira og baktería, lögðu þau grunninn að mörgum af algengustu og mikilvægustu lyfjum nútímans, sem eru notuð til að hjálpa milljónum manna á hverju ári. Þau hlutu Nóbelsverðlaunin árið 1988.

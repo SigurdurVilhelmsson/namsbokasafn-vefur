@@ -6,8 +6,7 @@ chapter: 2
 
 ## 2.6 Jóna- og sameindaefni
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla munt þú geta:
 
@@ -54,7 +53,6 @@ Gefðu upp tákn og heiti jónarinnar með 34 róteindir og 36 rafeindir.
 :::answer
 Se^2−^, seleníðjónin
 :::
-:::
 
  
 
@@ -77,7 +75,6 @@ Staða köfnunarefnis í lotukerfinu (hópur 15) sýnir að það er málmleysin
 
 :::answer
 Al mun mynda katjón með hleðsluna 3+: Al^3+^, áljón. Kolefni mun mynda anjón með hleðsluna 4−: C^4−^, karbíðjón.
-:::
 :::
 
 Jónirnar sem við höfum rætt hingað til eru kallaðar einatóma jónir, það er að segja, þær eru jónir sem myndast úr aðeins einu atómi. Við finnum líka margar fjölatóma jónir. Þessar jónir, sem virka sem aðskildar einingar, eru rafmagnaðar sameindir (hópur tengdra atóma með heildarhleðslu). Sumar af mikilvægustu fjölatóma jónunum eru taldar upp í [töflu 2.5](#fs-idp278664880). Oxýanjónir eru fjölatóma jónir sem innihalda eitt eða fleiri súrefnisatóm. Á þessum tímapunkti í efnafræðináminu þínu ættir þú að leggja á minnið nöfn, formúlur og hleðslur algengustu fjölfrumeinda jónanna. Þar sem þú munt nota þær ítrekað munu þær fljótlega verða þér kunnugar.
@@ -132,8 +129,7 @@ Oft er hægt að þekkja jónaefni af eiginleikum þeirra. Jónaefni eru föst e
 
 Mynd 2.30 Natríumklóríð bráðnar við 801 °C og leiðir rafmagn þegar það er bráðið. (heimild: breyting á verki eftir Mark Blaser og Matt Evans)
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Horfðu á þetta [myndband](http://openstax.org/l/16moltensalt) til að sjá efnablöndu af söltum bráðna og leiða rafmagn.
 :::
@@ -162,7 +158,6 @@ Spáðu fyrir um formúlu jónaefnisins sem myndast milli natríumkatjónarinnar
 :::answer
 Na~2~S
 :::
-:::
 
 Mörg jónaefni innihalda fjölatóma jónir ([tafla 2.5](#fs-idp278664880)) sem katjón, anjón eða hvort tveggja. Eins og með einföld jónaefni verða þessi efnasambönd einnig að vera rafhlutlaus, svo hægt er að spá fyrir um formúlur þeirra með því að meðhöndla fjölfrumeinda jónirnar sem aðskildar einingar. Við notum sviga í formúlu til að gefa til kynna hóp atóma sem hegða sér sem eining. Til dæmis er formúlan fyrir kalsíumfosfat, eitt af steinefnunum í beinum okkar, Ca~3~(PO~4~)~2~. Þessi formúla gefur til kynna að það séu þrjár kalsíumjónir (Ca^2+^) fyrir hverja tvo fosfat $\left( \text{PO}_{4}^{3 -} \right)$ hópa. Hóparnir $\text{PO}_{4}^{3 -}$ eru aðskildar einingar sem hver samanstendur af einu fosfóratómi og fjórum súrefnisatómum og hafa heildarhleðsluna 3−. Efnasambandið er rafhlutlaust og formúla þess sýnir heildarfjölda þriggja Ca, tveggja P og átta O atóma.
 
@@ -183,7 +178,6 @@ Spáðu fyrir um formúlu jónaefnisins sem myndast milli litíumjónarinnar og 
 
 :::answer
 Li~2~O~2~
-:::
 :::
 
 Þar sem jónaefni er ekki samsett úr stökum, aðskildum sameindum er ekki hægt að tákna það rétt með *sameinda*formúlu. Þess í stað verður að tákna jónaefni með formúlu sem gefur til kynna *hlutfallslegan fjölda* jóna sem það inniheldur. Fyrir efnasambönd sem innihalda aðeins einfrumeinda jónir (eins og NaCl) og fyrir mörg efnasambönd sem innihalda fjölfrumeinda jónir (eins og CaSO~4~) eru þessar formúlur einfaldlega reynsluformúlurnar sem kynntar voru fyrr í þessum kafla. Hins vegar eru formúlur fyrir sum jónaefni sem innihalda fjölfrumeinda jónir ekki reynsluformúlur. Til dæmis er jónaefnið natríumoxalat samsett úr Na^+^ og $\text{C}_{2}\text{O}_{4}^{2 -}$ jónum í hlutfallinu 2:1 og formúla þess er skrifuð sem Na~2~C~2~O~4~. Neðanskriftirnar í þessari formúlu eru ekki lægstu mögulegu heiltölurnar, þar sem hægt er að deila í þær báðar með 2 til að fá reynsluformúluna NaCO~2~. Þetta er hins vegar ekki viðurkennd formúla fyrir natríumoxalat, þar sem hún táknar ekki nákvæmlega fjölatómajón efnasambandsins $\text{C}_{2}\text{O}_{4}^{2 -}.$
@@ -233,5 +227,4 @@ Notaðu lotukerfið til að spá fyrir um hvort eftirfarandi efnasambönd séu j
 
 :::answer
 \(a\) sameinda; (b) jónískt; (c) sameinda; (d) jónískt
-:::
 :::
