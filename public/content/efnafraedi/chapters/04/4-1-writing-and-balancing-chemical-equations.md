@@ -6,8 +6,7 @@ chapter: 4
 
 ## 4.1 Að skrifa og stilla efnajöfnur
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla muntu geta:
 
@@ -138,7 +137,6 @@ Skrifaðu stillta efnajöfnu fyrir niðurbrot ammóníumnítrats til að mynda n
 :::answer
 $2\text{NH}_{4}\text{NO}_{3}\  \rightarrow \ 2\text{N}_{2} + \text{O}_{2} + 4\text{H}_{2}\text{O}$
 :::
-:::
 
 Stundum er hentugt að nota brot í stað heiltalna sem millistuðla þegar við stillum efnajöfnur. Þegar jafnvægi er náð má síðan margfalda alla stuðla jöfnunnar með heilli tölu til að breyta brotunum í heiltölur án þess að raska jafnvægi atómanna. Skoðum til dæmis efnahvarf etans (C~2~H~6~) við súrefni sem myndar H~2~O og CO~2~, táknað með óstilltu efnajöfnunni:
 
@@ -164,8 +162,7 @@ eru stuðlarnir ekki lægstu mögulegu heiltölurnar sem tákna hlutfallslegan f
 
 $\text{N}_{2} + 3\text{H}_{2}\  \rightarrow \ 2\text{NH}_{3}$
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Notaðu þetta gagnvirka [kennsluefni](http://openstax.org/l/16BalanceEq) til að æfa þig meira í að stilla efnajöfnur.
 :::
@@ -247,5 +244,4 @@ Skrifaðu stilltar sameinda-, heildarjóna- og nettójónajöfnur fyrir þetta f
 $2\text{NaCl}(aq) + 2\text{H}_{2}\text{O}(l)\  \rightarrow \ 2\text{NaOH}(aq) + \text{H}_{2}(g) + \text{Cl}_{2}(g)\quad\quad\left( \text{molecular} \right)$\
 $2\text{Na}^{\text{+}}(aq) + 2\text{Cl}^{\text{−}}(aq) + 2\text{H}_{2}\text{O}(l)\  \rightarrow \ 2\text{Na}^{\text{+}}(aq) + 2\text{OH}^{\text{−}}(aq) + \text{H}_{2}(g) + \text{Cl}_{2}(g)\quad\quad\left( \text{complete ionic} \right)$\
 $2\text{Cl}^{\text{−}}(aq) + 2\text{H}_{2}\text{O}(l)\  \rightarrow \ 2\text{OH}^{\text{−}}(aq) + \text{H}_{2}(g) + \text{Cl}_{2}(g)\quad\quad\text{(net ionic)}$
-:::
 :::

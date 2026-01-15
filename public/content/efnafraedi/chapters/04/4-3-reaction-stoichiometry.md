@@ -6,8 +6,7 @@ chapter: 4
 
 ## 4.3 Hlutfallaefnafræði hvarfa
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla muntu geta:
 
@@ -65,7 +64,6 @@ Hversu mörg mól af Ca(OH)~2~ þarf til að hvarfast við 1,36 mól af H~3~PO~4
 :::answer
 2,04 mól
 :::
-:::
 
  
 
@@ -102,7 +100,6 @@ $\left( \text{NH}_{4} \right)_{2}\text{SO}_{4} + \text{Ca}\left( \text{OH} \righ
 :::answer
 4.8 $\times$ 10^24^ NH~3~ sameindir
 :::
-:::
 
 Þessi dæmi sýna hversu auðvelt er að tengja saman magn efna sem taka þátt í efnahvarfi með þekktri hlutfallaefnafræði. Hins vegar er ekki auðvelt verkefni að mæla beint fjölda atóma og sameinda og hagnýt notkun hlutfallaefnafræði krefst þess að við notum þann eiginleika sem auðveldara er að mæla, massa.
 
@@ -128,7 +125,6 @@ Hvaða massa af gallíumoxíði, Ga~2~O~3~, er hægt að útbúa úr 29,0 g af g
 
 :::answer
 39,0 g
-:::
 :::
 
  
@@ -156,7 +152,6 @@ Hvaða massa af CO þarf til að hvarfast við 25,13 g af Fe~2~O~3~ samkvæmt j�
 :::answer
 13,22 g
 :::
-:::
 
 Þessi dæmi sýna aðeins nokkur tilvik útreikninga í hlutfallaefnafræði efnahvarfa. Fjölmörg afbrigði af upphafs- og lokaútreikningaskrefum eru möguleg eftir því hvaða tilteknu stærðir eru gefnar og hverra er leitað (rúmmál, styrkur lausna og svo framvegis). Burtséð frá smáatriðum eiga allir þessir útreikningar sameiginlegan grundvallarþátt: notkun hlutfallsstuðla sem eru fengnir úr stilltum efnajöfnum. [Mynd 4.11](#CNX_Chem_04_03_flowchart) sýnir almennt yfirlit yfir hin ýmsu skref sem tengjast mörgum útreikningum í hlutfallaefnafræði efnahvarfa.
 
@@ -166,8 +161,7 @@ Hvaða massa af CO þarf til að hvarfast við 25,13 g af Fe~2~O~3~ samkvæmt j�
 
 Mynd 4.11 Flæðiritið sýnir hin ýmsu skref sem koma við sögu í flestum útreikningum í hlutfallaefnafræði efnahvarfa.
 
-:::note
-### Efnafræði í daglegu lífi: Loftpúðar
+:::chemistry-everyday: Loftpúðar
 
 Loftpúðar ([mynd 4.12](#CNX_Chem_04_03_airbag)) eru öryggisbúnaður sem hefur verið í flestum bifreiðum frá tíunda áratug síðustu aldar. Til að loftpúði virki á skilvirkan hátt þarf hann að blásast hratt upp með viðeigandi magni (rúmmáli) af gasi þegar ökutækið lendir í árekstri. Þessari kröfu er fullnægt í mörgum loftpúðakerfum bifreiða með notkun sprengifimra efnahvarfa, en algengt val er niðurbrot natríumazíðs, NaN~3~. Þegar skynjarar í ökutækinu nema árekstur er straumi hleypt í gegnum vandlega mælt magn af NaN~3~ til að koma niðurbroti þess af stað:
 

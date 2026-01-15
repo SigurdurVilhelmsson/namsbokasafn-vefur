@@ -6,8 +6,7 @@ chapter: 4
 
 ## 4.4 Heimtur hvarfa
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla muntu geta:
 
@@ -54,8 +53,7 @@ Klórinn mun klárast alveg þegar 4 mól af HCl hafa myndast. Þar sem nægileg
 
 Mynd 4.14 Þegar H~2~ og Cl~2~ er blandað saman í magni sem ekki er í réttum hlutföllum, mun annað þessara hvarfefna takmarka magn HCl sem hægt er að framleiða. Þessi mynd sýnir hvarf þar sem vetni er til staðar í umframmagni og klór er takmarkandi hvarfefni.
 
-:::note
-### Tengill á námsefni
+:::link-to-material
 
 Skoðaðu þessa gagnvirku [hermun](http://openstax.org/l/16reactantprod) sem sýnir hugtökin takmarkandi og umfram hvarfefni.
 :::
@@ -108,7 +106,6 @@ Hvert er takmarkandi hvarfefnið þegar 5,00 g af H~2~ og 10,0 g af O~2~ hvarfas
 :::answer
 O~2~
 :::
-:::
 
 ### Prósentuheimtur
 
@@ -150,12 +147,10 @@ $\text{CCl}_{4} + 2\text{HF}\  \rightarrow \ \text{CF}_{2}\text{Cl}_{2} + 2\text
 :::answer
 48,3%
 :::
-:::
 
  
 
-:::note
-### Hvernig vísindi tengjast: Græn efnafræði og atómhagkvæmni
+:::how-science-connects: Græn efnafræði og atómhagkvæmni
 
 Markviss hönnun efnaafurða og ferla sem lágmarkar notkun efna sem hættuleg eru umhverfinu og myndun úrgangs er þekkt sem *græn efnafræði*. Græn efnafræði er hugmyndafræðileg nálgun sem er beitt á mörgum sviðum vísinda og tækni og framkvæmd hennar er tekin saman í leiðbeiningum sem kallast „Tólf meginreglur grænnar efnafræði" (sjá nánar á þessari [vefsíðu](http://openstax.org/l/16greenchem)). Ein af 12 meginreglunum miðar sérstaklega að því að hámarka skilvirkni ferla við framleiðslu efnaafurða. *Atómhagkvæmni* ferlis er mælikvarði á þessa skilvirkni, skilgreind sem massaprósenta lokaafurðar framleiðsluferlis miðað við massa *allra* hvarfefna sem notuð eru:
 

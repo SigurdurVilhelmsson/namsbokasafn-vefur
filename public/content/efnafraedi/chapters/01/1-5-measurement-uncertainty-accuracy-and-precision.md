@@ -6,8 +6,7 @@ chapter: 1
 
 ## 1.5 Óvissa, hittni og nákvæmni í mælingum
 
-:::note
-### Námsmarkmið
+:::learning-objectives
 
 Í lok þessa kafla muntu geta:
 
@@ -213,8 +212,6 @@ Námundaðu eftirfarandi að tilgreindum fjölda markverðra stafa:
 :::answer
 \(a\) 0,42; (b) 0,00387; (c) 421,2; (d) 28.684
 :::
-:::
-:::
 
  
 
@@ -253,8 +250,6 @@ Svarið er 65 g (námundað að einingarsæti; engir aukastafir)
 :::answer
 \(a\) 2,64 ml; (b) 0,658 m
 :::
-:::
-:::
 
  
 
@@ -287,8 +282,6 @@ námunduð að sama fjölda tölustafa og talan með fæsta markverða stafi
 :::answer
 \(a\) 0,747 cm^2^ (b) 0,9884 m/s
 :::
-:::
-:::
 
 Í öllum þessum tæknilegu atriðum er mikilvægt að hafa í huga ástæðuna
 fyrir þessum reglum um markverða stafi og námundun -- að tákna nákvæmni
@@ -316,8 +309,6 @@ Hver er eðlismassi vökva með massann 31,1415 g og rúmmálið 30,13 cm^3^?
 
 :::answer
 1,034 g/ml
-:::
-:::
 :::
 
  
@@ -374,8 +365,6 @@ síðan sökkt í mæliglas, með þeim niðurstöðum sem sýndar eru. ![This d
 eðlismassinn er mjög nálægt þeim eðlismassa sem gefinn er fyrir gull í
 [töflu
 1.4](http://openstax.org/books/chemistry-2e/pages/1-4-measurements#fs-idm45639696).
-:::
-:::
 :::
 
 ### Hittni og nákvæmni
