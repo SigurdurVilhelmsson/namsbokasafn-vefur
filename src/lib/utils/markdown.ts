@@ -462,6 +462,86 @@ function rehypeShiftHeadings() {
 	};
 }
 
+/**
+ * Rehype plugin to wrap images with their captions into figure elements
+ * Detects patterns like:
+ *   <p><img ...></p>
+ *   <p>Mynd 1.28 Caption text...</p>
+ * And converts them to:
+ *   <figure>
+ *     <img ...>
+ *     <figcaption>Mynd 1.28 Caption text...</figcaption>
+ *   </figure>
+ */
+function rehypeFigureCaptions() {
+	// Pattern to match Icelandic figure captions: "Mynd X.Y" or "Mynd X.Y."
+	const CAPTION_PATTERN = /^Mynd\s+\d+\.\d+/;
+
+	return (tree: Node) => {
+		visit(tree, 'element', (node: Element, index, parent) => {
+			if (!parent || index === undefined) return;
+
+			const parentEl = parent as Element;
+			if (!parentEl.children) return;
+
+			// Check if this is a paragraph containing only an image
+			if (node.tagName !== 'p') return;
+
+			const children = node.children || [];
+
+			// Find img elements in this paragraph
+			const imgElements = children.filter((child): child is Element =>
+				child.type === 'element' && (child as Element).tagName === 'img'
+			);
+
+			// Check if paragraph contains only an image (and optional whitespace)
+			const nonWhitespaceChildren = children.filter((child) => {
+				if (child.type === 'text') {
+					return (child as { value: string }).value.trim().length > 0;
+				}
+				return child.type === 'element';
+			});
+
+			if (imgElements.length !== 1 || nonWhitespaceChildren.length !== 1) return;
+
+			const imgNode = imgElements[0];
+
+			// Check if next sibling is a paragraph that looks like a caption
+			const nextIndex = index + 1;
+			if (nextIndex >= parentEl.children.length) return;
+
+			const nextSibling = parentEl.children[nextIndex] as Element;
+			if (nextSibling.type !== 'element' || nextSibling.tagName !== 'p') return;
+
+			// Extract text content of the next paragraph to check if it's a caption
+			const captionText = extractTextContent(nextSibling);
+			if (!CAPTION_PATTERN.test(captionText.trim())) return;
+
+			// Create the figure element
+			const figureElement: Element = {
+				type: 'element',
+				tagName: 'figure',
+				properties: {},
+				children: [
+					imgNode,
+					{
+						type: 'element',
+						tagName: 'figcaption',
+						properties: {},
+						children: nextSibling.children || []
+					} as Element
+				]
+			};
+
+			// Replace the image paragraph with the figure
+			parentEl.children[index] = figureElement as ElementContent;
+
+			// Remove the caption paragraph (now incorporated into figcaption)
+			parentEl.children.splice(nextIndex, 1);
+		});
+	};
+}
+
 // =============================================================================
 // EQUATION ACCESSIBILITY
 // =============================================================================
@@ -698,6 +778,7 @@ export async function processMarkdown(content: string): Promise<string> {
 			trust: true,
 			throwOnError: false
 		})
+		.use(rehypeFigureCaptions) // Wrap images + captions into figure elements
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
 		.use(rehypeSlug)
@@ -727,6 +808,7 @@ export function processMarkdownSync(content: string): string {
 			trust: true,
 			throwOnError: false
 		})
+		.use(rehypeFigureCaptions) // Wrap images + captions into figure elements
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
 		.use(rehypeSlug)
