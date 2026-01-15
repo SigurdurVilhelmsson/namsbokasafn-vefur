@@ -101,6 +101,7 @@
     lg:h-[calc(100vh-7rem)]
     {$sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
     lg:shadow-none
+    lg:border-r lg:border-gray-200 dark:lg:border-gray-700
   "
 >
 	<div class="flex h-full flex-col">
