@@ -94,6 +94,8 @@ Nauðsynlegum fasaskiptum í þyngdarmælingagreiningu má ná fram með ýmsum 
 
 Mynd 4.17 Hægt er að fjarlægja botnfall úr hvarfblöndu með síun.
 
+:::
+
 :::example
 ### Dæmi 4.15: Þyngdarmælingagreining
 
@@ -135,6 +137,8 @@ Frumefnasamsetningu kolvetna og skyldra efnasambanda má ákvarða með þyngdar
 
 Mynd 4.18 Þessi skýringarmynd sýnir grunnhluta brunagreiningartækis til að ákvarða kolefnis- og vetnisinnihald sýnis.
 
+:::
+
 :::example
 ### Dæmi 4.16: Brunagreining
 
@@ -168,4 +172,6 @@ og reynsluformúla pólýetýlens er CH~2~.
 
 :::answer
 CH
+:::
+
 :::

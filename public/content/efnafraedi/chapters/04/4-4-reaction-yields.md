@@ -115,6 +115,8 @@ $\text{percent yield} = \ \frac{\text{actual yield}}{\text{theoretical yield}}\ 
 
 Raunheimtur og fræðilegar heimtur má gefa upp sem massa eða mólmagn (eða annan viðeigandi eiginleika, t.d. rúmmál ef myndefnið er gas). Svo lengi sem báðar heimtur eru gefnar upp með sömu einingum falla þær út þegar prósentuheimtur eru reiknaðar.
 
+:::
+
 :::example
 ### Dæmi 4.13: Útreikningur á prósentuheimtum
 
@@ -149,6 +151,8 @@ $\text{CCl}_{4} + 2\text{HF}\  \rightarrow \ \text{CF}_{2}\text{Cl}_{2} + 2\text
 :::
 
  
+
+:::
 
 :::how-science-connects: Græn efnafræði og atómhagkvæmni
 

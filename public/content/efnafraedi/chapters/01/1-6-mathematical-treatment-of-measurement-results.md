@@ -135,6 +135,8 @@ og skilur eftir únsur.
 
 ![None](./images/media/rId33.png)
 
+:::
+
 :::practice-problem
 #### Kannaðu þekkingu þína
 
@@ -152,6 +154,8 @@ að *einingar* þeirra styttist út og/eða sameinist á viðeigandi hátt til
 að gefa þá einingu sem óskað er eftir í niðurstöðunni. Eftir því sem þú
 heldur áfram í efnafræðináminu muntu fá mörg tækifæri til að beita
 þessari aðferð.
+
+:::
 
 :::example
 ### Dæmi 1.9
@@ -193,6 +197,8 @@ umreikningsstuðla í röð á eftirfarandi hátt:
 
 $\frac{\text{9.26}\ \text{lb}}{\text{4.00}\ \text{qt}}\  \times \ \frac{\text{453.59 g}}{1\ \text{lb}}\  \times \ \frac{\text{1.0567}\ \text{qt}}{1\ \text{L}}\  \times \ \frac{1\ \text{L}}{\text{1000 mL}}\  = \text{1.11 g/mL}$
 
+:::
+
 :::practice-problem
 #### Kannaðu þekkingu þína
 
@@ -204,6 +210,8 @@ og 1 qt = 32 oz (nákvæmlega)?
 :::
 
  
+
+:::
 
 :::example
 ### Dæmi 1.10
@@ -241,6 +249,8 @@ $\frac{1250\ \text{km}}{213\ \text{L}}\  \times \ \frac{\text{0.62137 mi}}{1\ \t
 \(b\) Með því að nota áður útreiknað rúmmál í gallonum fáum við:
 
 $56.3\ \text{gal}\  \times \ \frac{\text{\$3.80}}{1\ \text{gal}} = \text{\$214}$
+
+:::
 
 :::practice-problem
 #### Kannaðu þekkingu þína
@@ -362,6 +372,8 @@ vísindi og er sá kvarði sem valinn er í óvísindalegu samhengi í næstum
 Bahamaeyjar, Belís, Cayman-eyjar og Palá) nota enn Fahrenheit fyrir
 veður, læknisfræði og matreiðslu.
 
+:::
+
 :::example
 ### Dæmi 1.11
 
@@ -378,6 +390,8 @@ $\text{K} = \text{°C} + 273.15 = 37.0 + 273.2 = \text{310.2 K}$
 
 $\text{°F} = \frac{9}{5}\text{°C} + 32.0 = \left( \frac{9}{5}\  \times \ 37.0 \right) + 32.0 = 66.6 + 32.0 = \text{98.6 °F}$
 
+:::
+
 :::practice-problem
 #### Kannaðu þekkingu þína
 
@@ -388,6 +402,8 @@ Umreiknaðu 80,92 °C í K og °F.
 :::
 
  
+
+:::
 
 :::example
 ### Dæmi 1.12
@@ -404,6 +420,8 @@ $\text{°C} = \ \frac{5}{9}\text{(°F} - \text{32)} = \ \frac{5}{9}(450 - 32) = 
 
 $\text{K} = \text{°C} + 273.15 = \frac{5}{9}\text{(°F} - \text{32)} = \frac{5}{9}(450 - 32) + 273.15 = 505.4\ \text{K}\  \rightarrow 5.1 \times 10^{2}\text{K}$
 
+:::
+
 :::practice-problem
 #### Kannaðu þekkingu þína
 
@@ -411,4 +429,6 @@ Umbreyttu 50 °F í °C og K.
 
 :::answer
 10 °C, 280 K
+:::
+
 :::

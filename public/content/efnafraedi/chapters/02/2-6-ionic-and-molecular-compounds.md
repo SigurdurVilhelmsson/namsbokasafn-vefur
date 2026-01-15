@@ -56,6 +56,8 @@ Se^2−^, seleníðjónin
 
  
 
+:::
+
 :::example
 ### Dæmi 2.9: Myndun jóna
 
@@ -129,6 +131,8 @@ Oft er hægt að þekkja jónaefni af eiginleikum þeirra. Jónaefni eru föst e
 
 Mynd 2.30 Natríumklóríð bráðnar við 801 °C og leiðir rafmagn þegar það er bráðið. (heimild: breyting á verki eftir Mark Blaser og Matt Evans)
 
+:::
+
 :::link-to-material
 
 Horfðu á þetta [myndband](http://openstax.org/l/16moltensalt) til að sjá efnablöndu af söltum bráðna og leiða rafmagn.
@@ -161,6 +165,8 @@ Na~2~S
 
 Mörg jónaefni innihalda fjölatóma jónir ([tafla 2.5](#fs-idp278664880)) sem katjón, anjón eða hvort tveggja. Eins og með einföld jónaefni verða þessi efnasambönd einnig að vera rafhlutlaus, svo hægt er að spá fyrir um formúlur þeirra með því að meðhöndla fjölfrumeinda jónirnar sem aðskildar einingar. Við notum sviga í formúlu til að gefa til kynna hóp atóma sem hegða sér sem eining. Til dæmis er formúlan fyrir kalsíumfosfat, eitt af steinefnunum í beinum okkar, Ca~3~(PO~4~)~2~. Þessi formúla gefur til kynna að það séu þrjár kalsíumjónir (Ca^2+^) fyrir hverja tvo fosfat $\left( \text{PO}_{4}^{3 -} \right)$ hópa. Hóparnir $\text{PO}_{4}^{3 -}$ eru aðskildar einingar sem hver samanstendur af einu fosfóratómi og fjórum súrefnisatómum og hafa heildarhleðsluna 3−. Efnasambandið er rafhlutlaust og formúla þess sýnir heildarfjölda þriggja Ca, tveggja P og átta O atóma.
 
+:::
+
 :::example
 ### Dæmi 2.11: Að spá fyrir um formúlu efnasambands með fjölfrumeinda anjón
 
@@ -187,6 +193,8 @@ Li~2~O~2~
 Mörg efnasambönd innihalda ekki jónir heldur samanstanda eingöngu af stökum, hlutlausum sameindum. Þessi sameindaefni (samgild efnasambönd) verða til þegar frumeindir deila rafeindum með sér, frekar en að flytja þær (fá eða missa). Samgild tengi eru mikilvægt og umfangsmikið hugtak í efnafræði og verður fjallað ítarlega um það í síðari kafla þessarar bókar. Við getum oft greint sameindaefnasambönd á grundvelli eðliseiginleika þeirra. Við venjulegar aðstæður eru sameindaefnasambönd oft til sem lofttegundir, vökvar með lágt suðumark og föst efni með lágt bræðslumark, þótt margar mikilvægar undantekningar séu til.
 
 Á meðan jónaefni myndast venjulega þegar málmur og málmleysingi sameinast, myndast samgild efnasambönd venjulega við samsetningu málmleysingja. Þannig getur lotukerfið hjálpað okkur að þekkja mörg þeirra efnasambanda sem eru samgild. Þó að við getum notað staðsetningu frumefna efnasambands í lotukerfinu til að spá fyrir um hvort það sé jónískt eða samgilt á þessu stigi í efnafræðinámi okkar, ættir þú að vera meðvitaður um að þetta er mjög einfölduð nálgun sem tekur ekki tillit til fjölda áhugaverðra undantekninga. Það eru grá svæði milli jónaefna og sameindaefnasambanda og þú munt læra meira um þau síðar.
+
+:::
 
 :::example
 ### Dæmi 2.12: Að spá fyrir um gerð tengja í efnasamböndum
@@ -227,4 +235,6 @@ Notaðu lotukerfið til að spá fyrir um hvort eftirfarandi efnasambönd séu j
 
 :::answer
 \(a\) sameinda; (b) jónískt; (c) sameinda; (d) jónískt
+:::
+
 :::

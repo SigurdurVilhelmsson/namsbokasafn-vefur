@@ -85,6 +85,8 @@ Sameindaformúla, C~8~H~16~O~4~; reynsluformúla, C~2~H~4~O
 
  
 
+:::
+
 :::link-to-material
 
 Þú getur kannað [sameindabyggingu](http://openstax.org/l/16molbuilding) með því að nota hermilíkan á netinu.

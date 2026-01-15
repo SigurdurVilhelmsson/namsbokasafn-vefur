@@ -162,6 +162,8 @@ eru stuðlarnir ekki lægstu mögulegu heiltölurnar sem tákna hlutfallslegan f
 
 $\text{N}_{2} + 3\text{H}_{2}\  \rightarrow \ 2\text{NH}_{3}$
 
+:::
+
 :::link-to-material
 
 Notaðu þetta gagnvirka [kennsluefni](http://openstax.org/l/16BalanceEq) til að æfa þig meira í að stilla efnajöfnur.
@@ -244,4 +246,6 @@ Skrifaðu stilltar sameinda-, heildarjóna- og nettójónajöfnur fyrir þetta f
 $2\text{NaCl}(aq) + 2\text{H}_{2}\text{O}(l)\  \rightarrow \ 2\text{NaOH}(aq) + \text{H}_{2}(g) + \text{Cl}_{2}(g)\quad\quad\left( \text{molecular} \right)$\
 $2\text{Na}^{\text{+}}(aq) + 2\text{Cl}^{\text{−}}(aq) + 2\text{H}_{2}\text{O}(l)\  \rightarrow \ 2\text{Na}^{\text{+}}(aq) + 2\text{OH}^{\text{−}}(aq) + \text{H}_{2}(g) + \text{Cl}_{2}(g)\quad\quad\left( \text{complete ionic} \right)$\
 $2\text{Cl}^{\text{−}}(aq) + 2\text{H}_{2}\text{O}(l)\  \rightarrow \ 2\text{OH}^{\text{−}}(aq) + \text{H}_{2}(g) + \text{Cl}_{2}(g)\quad\quad\text{(net ionic)}$
+:::
+
 :::

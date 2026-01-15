@@ -87,6 +87,8 @@ $$\frac{\frac{1,116 \text{ g Cl}}{1 \text{ g Cu}}}{\frac{0,558 \text{ g Cl}}{1 \
 
 **Mynd 2.5** Í samanburði við koparklórefnasambandið í (a), þar sem kopar er táknaður með brúnum kúlum og klór með grænum kúlum, hefur koparklórefnasambandið í (b) tvöfalt fleiri klóratóm á hvert koparatóm. (heimild a: breyting á verki eftir „Benjah-bmm27"/Wikimedia Commons; heimild b: breyting á verki eftir „Walkerma"/Wikimedia Commons)
 
+:::
+
 :::example
 ### Dæmi 2.2: Lögmálin um föst og margföld hlutföll
 
@@ -116,4 +118,6 @@ Sýni af efnasambandi X (glær, litlaus, eldfimur vökvi með áberandi lykt) er
 
 :::answer
 Í efnasambandi X er massahlutfall kolefnis á móti vetni 14,13 g C / 2,96 g H. Í efnasambandi Y er massahlutfall kolefnis á móti vetni 19,91 g C / 3,34 g H. Hlutfall þessara hlutfalla er (4,77 g C/g H) / (5,96 g C/g H) = 0,800 = 4/5. Þetta litla heiltöluhlutfall styður lögmálið um margfeldi hlutfalla. Þetta þýðir að X og Y eru mismunandi efnasambönd.
+:::
+
 :::
