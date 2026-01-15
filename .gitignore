@@ -33,3 +33,4 @@ coverage
 .svelte-kit
 build
 static/content
+dev-dist/
