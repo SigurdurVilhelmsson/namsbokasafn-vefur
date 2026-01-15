@@ -58,6 +58,8 @@ Ein teskeið af borðsykri inniheldur um 0,01 mól af súkrósa. Hver er mólsty
 
  
 
+:::
+
 :::example
 ### Dæmi 3.15: Útleiðsla á mólum og rúmmáli úr mólstyrk
 
@@ -80,6 +82,8 @@ Hvert er rúmmálið (ml) af sykraða teinu sem lýst er í [dæmi 3.14](#fs-idm
 :::
 
  
+
+:::
 
 :::example
 ### Dæmi 3.16: Útreikningur á mólstyrk út frá massa uppleysts efnis
@@ -112,6 +116,8 @@ Reiknaðu mólstyrk 6,52 g af CoCl~2~ (128,9 g/mól) sem er leyst upp í vatnsla
 
  
 
+:::
+
 :::example
 ### Dæmi 3.17: Ákvörðun á massa uppleysts efnis í tilteknu rúmmáli lausnar
 
@@ -140,6 +146,8 @@ Hversu mörg grömm af CaCl~2~ (110,98 g/mól) eru í 250,0 ml af 0,200*M* lausn
 Þegar útreikningar eru framkvæmdir í skrefum, eins og í [dæmi 3.17](#fs-idm104693104), er mikilvægt að forðast að námunda niðurstöður millireikninga, þar sem það getur leitt til námundunarvillna í lokaniðurstöðunni. Í [dæmi 3.17](#fs-idm104693104) væri mólmagn NaCl sem reiknað var út í fyrsta skrefi, 1,325 mól, réttilega námundað í 1,32 mól ef það ætti að vera gefið upp; þó, þrátt fyrir að síðasti tölustafurinn (5) sé ekki marktækur, verður að halda honum sem varðtölu í millireikningnum. Ef varðtölunni hefði ekki verið haldið, hefði lokareikningurinn fyrir massa NaCl verið 77,1 g, sem er 0,3 g munur.
 
 Auk þess að halda varðtölu fyrir millireikninga er einnig hægt að forðast námundunarvillur með því að framkvæma útreikninga í einu skrefi (sjá [dæmi 3.18](#fs-idm88061984)). Þetta útilokar milliskref þannig að aðeins lokaniðurstaðan er námunduð.
+
+:::
 
 :::example
 ### Dæmi 3.18: Ákvörðun á rúmmáli lausnar sem inniheldur tiltekinn massa uppleysts efnis
@@ -204,6 +212,8 @@ $C_{1}V_{1} = C_{2}V_{2}$
 
 þar sem *C* og *V* eru styrkur og rúmmál, í sömu röð.
 
+:::
+
 :::link-to-material
 
 Notaðu [hermunina](http://openstax.org/l/16Phetsolvents) til að kanna sambandið milli magns uppleysts efnis, rúmmáls lausnar og styrks og til að staðfesta þynningarjöfnuna.
@@ -240,6 +250,8 @@ Hver er styrkur lausnarinnar sem fæst með því að þynna 25,0 ml af 2,04 *M*
 
  
 
+:::
+
 :::example
 ### Dæmi 3.20: Rúmmál þynntrar lausnar
 
@@ -269,6 +281,8 @@ Rúmmál 0,12 *M* lausnarinnar er 0,041 L (41 ml). Niðurstaðan er sanngjörn o
 
  
 
+:::
+
 :::example
 ### Dæmi 3.21: Rúmmál óþynntrar lausnar sem þarf til þynningar
 
@@ -294,4 +308,6 @@ Hvaða rúmmál af 0,575 *M* lausn af glúkósa, C~6~H~12~O~6~, er hægt að út
 
 :::answer
 0,261 L
+:::
+
 :::

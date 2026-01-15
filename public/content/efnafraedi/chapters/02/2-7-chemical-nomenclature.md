@@ -163,6 +163,8 @@ Skrifaðu formúlur eftirfarandi jónaefna:
 
  
 
+:::
+
 :::chemistry-everyday: Erin Brockovich og krómmengun
 
 Í upphafi tíunda áratugarins uppgötvaði lögfræðiritarinn Erin Brockovich ([mynd 2.32](#CNX_Chem_02_07_ErinBrocko)) háa tíðni alvarlegra veikinda í smábænum Hinckley í Kaliforníu. Rannsókn hennar tengdi að lokum veikindin við grunnvatn sem var mengað af Cr(VI) sem Pacific Gas & Electric (PG&E) notaði til að berjast gegn tæringu í nálægri jarðgasleiðslu. Eins og fram kom í kvikmyndinni *Erin Brockovich* (sem Julia Roberts vann Óskarsverðlaun fyrir), stefndu Erin og lögfræðingurinn Edward Masry PG&E fyrir að menga vatnið nálægt Hinckley árið 1993. Sáttin sem þau unnu árið 1996 -- 333 milljónir dala -- var hæsta upphæð sem nokkru sinni hafði verið veitt í beinni málsókn í Bandaríkjunum á þeim tíma.
@@ -246,6 +248,8 @@ Skrifaðu efnaformúlur fyrir eftirfarandi efnasambönd:
 :::
 
  
+
+:::
 
 :::link-to-material
 

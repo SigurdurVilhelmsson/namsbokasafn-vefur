@@ -106,6 +106,8 @@ Tafla 2.3
 
 Hefð er fyrir því að þau sem uppgötva nýtt frumefni gefi því nafn. Hins vegar er nafn nýja frumefnisins til bráðabirgða byggt á latneska orðinu/orðunum fyrir sætistölu þess, þar til formlegt nafn hefur verið viðurkennt af Alþjóðasambandi um hreina og hagnýta efnafræði (IUPAC). Til dæmis var frumefni 106 kallað unnilhexíum (Unh), frumefni 107 var kallað unnilseptíum (Uns) og frumefni 108 var kallað unniloktíum (Uno) í nokkur ár. Þessi frumefni eru nú nefnd eftir vísindamönnum (eða stundum stöðum); til dæmis er frumefni 106 nú þekkt sem *seaborgíum* (Sg) til heiðurs Glenn Seaborg, Nóbelsverðlaunahafa sem kom að uppgötvun nokkurra þungra frumefna. Frumefni 109 var nefnt til heiðurs Lise Meitner, sem uppgötvaði kjarnaklofnun, fyrirbæri sem átti eftir að breyta heiminum; Meitner lagði einnig sitt af mörkum til uppgötvunar nokkurra mikilvægra samsæta, sem fjallað er um hér á eftir.
 
+:::
+
 :::link-to-material
 
 Farðu á þessa [síðu](http://openstax.org/l/16IUPAC) til að læra meira um IUPAC, Alþjóðasamband um hreina og hagnýta efnafræði, og skoðaðu lotukerfi þess.
@@ -194,6 +196,8 @@ Sýni af magnesíum inniheldur 78,70% af ^24^Mg atómum (massi 23,98 amu), 10,13
 
 Við getum líka gert afbrigði af þessari tegund útreikninga, eins og sýnt er í næsta dæmi.
 
+:::
+
 :::example
 ### Dæmi 2.5: Útreikningur á hlutfallslegri gnægð
 
@@ -227,6 +231,8 @@ Kopar sem finnst í náttúrunni samanstendur af ^63^Cu (massi 62,9296 amu) og ^
 :::
 
  
+
+:::
 
 :::link-to-material
 

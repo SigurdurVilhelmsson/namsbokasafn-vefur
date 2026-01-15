@@ -196,6 +196,8 @@ felldur brott er 5 og tölustafurinn sem haldið er er slétt tala)
 \(d\) 0,90275 er námundað „upp" í 0,9028 (tölustafurinn sem er felldur
 brott er 5 og tölustafurinn sem haldið er er slétt tala)
 
+:::
+
 :::practice-problem
 #### Kannaðu þekkingu þína
 
@@ -214,6 +216,8 @@ Námundaðu eftirfarandi að tilgreindum fjölda markverðra stafa:
 :::
 
  
+
+:::
 
 :::example
 ### Dæmi 1.4
@@ -240,6 +244,8 @@ Svarið er 65 g (námundað að einingarsæti; engir aukastafir)
 
 ![Figure A shows 1.0023 being added to 4.383 to yield the answer 5.385. 1.0023 goes to the ten thousandths place, but 4.383 goes to the thousandths place, making it the less precise of the two numbers. Therefore the answer, 5.3853, should be rounded to the thousandths, to yield 5.385. Figure B shows 486 grams minus 421.23 grams, which yields the answer 64.77 grams. This answer should be round to the ones place, making the answer 65 grams.](./images/media/rId57.jpg)
 
+:::
+
 :::practice-problem
 #### Kannaðu þekkingu þína
 
@@ -252,6 +258,8 @@ Svarið er 65 g (námundað að einingarsæti; engir aukastafir)
 :::
 
  
+
+:::
 
 :::example
 ### Dæmi 1.5
@@ -272,6 +280,8 @@ námunduð að sama fjölda tölustafa og talan með fæsta markverða stafi
 
 ![None](./images/media/rId66.png)
 
+:::
+
 :::practice-problem
 #### Kannaðu þekkingu þína
 
@@ -289,6 +299,8 @@ gildanna sem gefin eru upp rétt og tryggja að útreiknuð niðurstaða sé
 ekki sett fram sem nákvæmari en ónákvæmasta gildið sem notað var í
 útreikningnum.
 
+:::
+
 :::example
 ### Dæmi 1.6
 
@@ -302,6 +314,8 @@ lítrum.
 
 ![None](./images/media/rId71.png)
 
+:::
+
 :::practice-problem
 #### Kannaðu þekkingu þína
 
@@ -312,6 +326,8 @@ Hver er eðlismassi vökva með massann 31,1415 g og rúmmálið 30,13 cm^3^?
 :::
 
  
+
+:::
 
 :::example
 ### Dæmi 1.7
@@ -348,6 +364,8 @@ og deilingu)
 er eðlismassi járns 7,9 g/cm^3^, sem er mjög nálægt eðlismassa
 steypustyrktarjárns, sem styður þá staðreynd að steypustyrktarjárn er að
 mestu leyti járn.
+
+:::
 
 :::practice-problem
 #### Kannaðu þekkingu þína
@@ -416,3 +434,5 @@ nákvæmni (rúmmál sveiflast um meira en 4 ml). Að lokum getur hún skráð
 að skammtari nr. 3 virki vel og skammti hóstasaft með bæði hittni (öll
 rúmmál innan 0,1 ml frá markrúmmáli) og nákvæmni (rúmmál víkja ekki
 meira en 0,2 ml frá hvert öðru).
+
+:::

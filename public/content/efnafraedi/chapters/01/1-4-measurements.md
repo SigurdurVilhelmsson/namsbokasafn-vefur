@@ -278,6 +278,8 @@ $\text{density} = \ \frac{\text{mass}}{\text{volume}}\  = \ \frac{\text{90.7 g}}
 (Við munum ræða ástæðuna fyrir því að námunda að fyrsta aukastaf í næsta
 kafla.)
 
+:::
+
 :::practice-problem
 #### Kannaðu þekkingu þína
 
@@ -289,6 +291,8 @@ hver er eðlismassi kopars með tveimur aukastöfum?
 
 :::answer
 \(a\) 0,599 cm^3^; (b) 8,91 g/cm^3^
+:::
+
 :::
 
 :::link-to-material
@@ -340,6 +344,8 @@ og
 [1.43](http://openstax.org/books/chemistry-2e/pages/1-exercises#fs-idm160286704)
 í lok kaflans).
 
+:::
+
 :::practice-problem
 #### Kannaðu þekkingu þína
 
@@ -348,4 +354,6 @@ aðferðinni með tilfærslu vatns.
 
 :::answer
 0,230 g/mL
+:::
+
 :::

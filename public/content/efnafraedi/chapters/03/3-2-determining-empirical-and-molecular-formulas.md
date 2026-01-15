@@ -62,6 +62,8 @@ Massaprósenta er einnig gagnleg til að meta hlutfallslegt magn tiltekins frume
 
 Sömu aðferð má beita þegar litið er á par af sameindum, tylft sameinda eða mól af sameindum o.s.frv. Síðastnefnda magnið er hentugast og myndi einfaldlega fela í sér notkun mólmassa í stað atóm- og formúlumassa, eins og sýnt er í [dæmi 3.10](#fs-idm162294688). Svo lengi sem sameinda- eða reynsluformúla viðkomandi efnasambands er þekkt er hægt að leiða massaprósentuna út frá atóm- eða mólmössum frumefna efnasambandsins.
 
+:::
+
 :::example
 ### Dæmi 3.10: Ákvörðun massaprósentu út frá sameindaformúlu
 
@@ -123,6 +125,8 @@ $\text{Cl}_{0.150}\text{O}_{0.525} = \text{Cl}_{\ \frac{0.150}{0.150}\ }\ \text{
 
 Mynd 3.11 Hægt er að leiða reynsluformúlu efnasambands út frá massa allra frumefna í sýninu.
 
+:::
+
 :::example
 ### Dæmi 3.11: Ákvörðun reynsluformúlu efnasambands út frá massa frumefna þess
 
@@ -161,6 +165,8 @@ N~2~O~5~
 :::
 
  
+
+:::
 
 :::link-to-material
 
@@ -230,6 +236,8 @@ $\text{(CH}_{\text{2}}\text{O)}_{\text{6}} = \text{C}_{\text{6}}\text{H}_{\text{
 
 Athugið að hægt er að nota sömu aðferð þegar mólmassi (g/mól) er notaður í stað sameindamassa (u). Í þessu tilfelli er litið á *eitt mól* af reynsluformúlueiningum og sameindum, öfugt við stakar einingar og sameindir.
 
+:::
+
 :::example
 ### Dæmi 3.13: Ákvörðun sameindaformúlu fyrir nikótín
 
@@ -273,4 +281,6 @@ Hver er sameindaformúla efnasambands með massaprósentuna 49,47% C, 5,201% H, 
 
 :::answer
 C~8~H~10~N~4~O~2~
+:::
+
 :::

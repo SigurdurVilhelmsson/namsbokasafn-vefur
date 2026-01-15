@@ -67,6 +67,8 @@ Hversu mörg mól af Ca(OH)~2~ þarf til að hvarfast við 1,36 mól af H~3~PO~4
 
  
 
+:::
+
 :::example
 ### Dæmi 4.9: Fjöldi myndefnissameinda sem myndast við efnahvarf
 
@@ -103,6 +105,8 @@ $\left( \text{NH}_{4} \right)_{2}\text{SO}_{4} + \text{Ca}\left( \text{OH} \righ
 
 Þessi dæmi sýna hversu auðvelt er að tengja saman magn efna sem taka þátt í efnahvarfi með þekktri hlutfallaefnafræði. Hins vegar er ekki auðvelt verkefni að mæla beint fjölda atóma og sameinda og hagnýt notkun hlutfallaefnafræði krefst þess að við notum þann eiginleika sem auðveldara er að mæla, massa.
 
+:::
+
 :::example
 ### Dæmi 4.10: Tengsl milli massa hvarfefna og myndefna
 
@@ -128,6 +132,8 @@ Hvaða massa af gallíumoxíði, Ga~2~O~3~, er hægt að útbúa úr 29,0 g af g
 :::
 
  
+
+:::
 
 :::example
 ### Dæmi 4.11: Tengsl milli massa hvarfefna
@@ -160,6 +166,8 @@ Hvaða massa af CO þarf til að hvarfast við 25,13 g af Fe~2~O~3~ samkvæmt j�
 
 
 Mynd 4.11 Flæðiritið sýnir hin ýmsu skref sem koma við sögu í flestum útreikningum í hlutfallaefnafræði efnahvarfa.
+
+:::
 
 :::chemistry-everyday: Loftpúðar
 

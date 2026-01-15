@@ -165,6 +165,8 @@ $\text{Mg}\text{(OH)}_{2}(s) + 2\text{HCl}(aq)\  \rightarrow \ \text{MgCl}_{2}(a
 
 Athugið að auk vatns myndar þetta efnahvarf salt, magnesíumklóríð.
 
+:::
+
 :::example
 ### Dæmi 4.4: Að skrifa jöfnur fyrir sýru-basa efnahvörf
 
@@ -197,6 +199,8 @@ $\text{H}_{3}\text{O}^{\text{+}}(aq) + \text{OH}^{\text{−}}(aq)\  \rightarrow 
 :::
 
  
+
+:::
 
 :::chemistry-everyday: Sýrubindandi lyf
 
@@ -338,6 +342,8 @@ Nokkrir undirflokkar oxunar-afoxunarhvarfa eru þekktir, þar á meðal brunahv�
 
 $10\text{Al}(s) + 6\text{NH}_{4}\text{ClO}_{4}(s)\  \rightarrow \ 4\text{Al}_{2}\text{O}_{3}(s) + 2\text{AlCl}_{3}(s) + 12\text{H}_{2}\text{O}(g) + 3\text{N}_{2}(g)$
 
+:::
+
 :::link-to-material
 
 Horfðu á stutt [myndband](http://openstax.org/l/16hybridrocket) sem sýnir prufukeyrslu á smækkaðri frumgerð blendings eldflaugahreyfils sem áætlað er að nota í nýja Space Launch System sem NASA er að þróa. Fyrstu hreyflarnir sem fara í gang á\
@@ -433,6 +439,8 @@ c.  Einfaldaðu jöfnuna með því að fjarlægja allar óþarfa vatnssameindir
 
 Krafan um „hleðslujafnvægi" er bara sérstök tegund af „massajafnvægi" þar sem umræddar agnir eru rafeindir. Jafna verður að sýna jafnan fjölda rafeinda beggja vegna við hvarfefni og myndefni og því verður að jafna bæði atóm og hleðslur.
 
+:::
+
 :::example
 ### Dæmi 4.7: Jöfnun oxunar-afoxunarhvarfa í súrri lausn
 
@@ -520,4 +528,6 @@ Lokaathugun á jafnvægi atóma og hleðslu staðfestir að jafnan er stillt.
 
 :::answer
 $3\text{Cl}_{2}(aq) + 6\text{OH}^{\text{−}}(aq)\  \rightarrow \ 5\text{Cl}^{\text{−}}(aq) + \text{ClO}_{3}^{\text{−}}(aq) + 3\text{H}_{2}\text{O}(l)$
+:::
+
 :::

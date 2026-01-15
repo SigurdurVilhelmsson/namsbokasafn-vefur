@@ -59,6 +59,8 @@ Flaska af flísahreinsi inniheldur 135 g af HCl og 775 g af vatni. Hver er massa
 
  
 
+:::
+
 :::example
 ### Dæmi 3.23: Útreikningar með massaprósentu
 
@@ -89,6 +91,8 @@ Hvaða rúmmál af þéttri HCl-lausn inniheldur 125 g af HCl?
 Rúmmál vökva af mjög mismunandi stærðargráðum eru auðveldlega mæld með algengum og tiltölulega ódýrum rannsóknarstofubúnaði. Styrkur lausnar sem myndast við að leysa upp leyst efni í fljótandi formi í fljótandi leysi er því oft gefinn upp sem rúmmálsprósenta, %vol eða (v/v)%:
 
 $\text{volume percentage} = \ \frac{\text{volume solute}}{\text{volume solution}}\  \times \ 100\%$
+
+:::
 
 :::example
 ### Dæmi 3.24: Útreikningar með rúmmálsprósentu
@@ -137,6 +141,8 @@ Bæði ppm og ppb eru hentugar einingar til að gefa upp styrk mengunarefna og a
 
 Mynd 3.19 (a) Á sumum svæðum getur snefilstyrkur mengunarefna gert ósíað kranavatn óhæft til drykkjar og matargerðar. (b) Vatnssíur í leiðslum draga úr styrk leystra efna í kranavatni. (Heimild a: breytt útgáfa af verki eftir Jenn Durfey; heimild b: breytt útgáfa af verki eftir „vastateparkstaff"/Wikimedia commons)
 
+:::
+
 :::example
 ### Dæmi 3.25: Útreikningur á styrk í milljónustu hlutum og milljarðshlutum
 
@@ -164,4 +170,6 @@ $4.5\  \times \ 10^{- 6}\ \text{g}\  \times \ \frac{1\ \text{μg}}{10^{- 6}\ \te
 
 :::answer
 9,6 ppm, 9600 ppb
+:::
+
 :::
