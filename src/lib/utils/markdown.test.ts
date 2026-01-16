@@ -422,6 +422,19 @@ continued on second line.`;
 			expect(html).toContain('<figure>');
 			expect(html).toContain('<figcaption>');
 		});
+
+		it('should handle subscripts in captions', async () => {
+			const md = `![Alt text](./images/test.jpg)
+
+Mynd 2.17 Caption with S~8~ and H~2~O subscripts.`;
+
+			const html = await processMarkdown(md);
+			expect(html).toContain('<figure>');
+			expect(html).toContain('<figcaption>');
+			expect(html).toContain('<sub>8</sub>');
+			expect(html).toContain('<sub>2</sub>');
+			expect(html).not.toContain('<del>');
+		});
 	});
 
 	describe('edge cases', () => {
