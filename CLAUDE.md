@@ -93,6 +93,22 @@ The flashcard system uses SM-2 spaced repetition in `src/lib/utils/srs.ts`:
 
 Static site deployed to Linode via GitHub Actions. Output goes to `build/` directory. No backend - all state is client-side in localStorage.
 
+## Two-Repository Workflow
+
+This project works together with `namsbokasafn-efni` (content repository). When fixing bugs:
+
+### Content Problems → Fix in namsbokasafn-efni
+- **Prepared content**: Fix issues in `books/*/05-publication/mt-preview/`
+- **Processing pipeline**: Fix the root cause in `tools/` scripts so problems don't recur
+- Then sync content here using `node scripts/sync-content.js --source ../namsbokasafn-efni`
+
+### Website/Rendering Bugs → Fix here (namsbokasafn-vefur)
+- Markdown processing issues in `src/lib/utils/markdown.ts`
+- Component rendering in `src/lib/components/`
+- Styling in CSS files
+
+**Important**: Avoid adding workarounds here that compensate for content problems. Fix content at the source in namsbokasafn-efni. Always verify changes render correctly in both repositories.
+
 ## Migration Note
 
 This project was migrated from React to SvelteKit in January 2025. The original React implementation is preserved in the `archive/react-v1` branch for reference.
