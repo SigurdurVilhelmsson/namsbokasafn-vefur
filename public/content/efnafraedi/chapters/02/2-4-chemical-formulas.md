@@ -12,6 +12,7 @@ chapter: 2
 
 -   Sýnt samsetningu sameinda með sameindaformúlum og reynsluformúlum
 -   Sýnt tengiskipan atóma innan sameinda með byggingarformúlum
+
 :::
 
 Sameindaformúla er framsetning á sameind sem notar efnatákn til að gefa til kynna tegundir atóma og síðan lágstafi til að sýna fjölda atóma af hverri tegund í sameindinni. (Lágstafur er aðeins notaður þegar fleiri en eitt atóm af tiltekinni tegund er til staðar.) Sameindaformúlur eru einnig notaðar sem skammstafanir fyrir nöfn efnasambanda.
@@ -19,7 +20,7 @@ Sameindaformúla er framsetning á sameind sem notar efnatákn til að gefa til 
 Byggingarformúla efnasambands gefur sömu upplýsingar og sameindaformúla þess (tegundir og fjölda atóma í sameindinni) en sýnir einnig hvernig atómin eru tengd saman í sameindinni. Byggingarformúla metans inniheldur tákn fyrir eitt C-atóm og fjögur H-atóm, sem gefur til kynna fjölda atóma í sameindinni ([mynd 2.16](#CNX_Chem_02_04_MethaneRep)). Línurnar tákna tengi sem halda atómunum saman. (Efnatengi er aðdráttarkraftur milli atóma eða jóna sem heldur þeim saman í sameind eða kristal.) Við munum ræða efnatengi og sjá hvernig hægt er að spá fyrir um röðun atóma í sameind síðar. Í bili er nóg að vita að línurnar gefa til kynna hvernig atómin eru tengd saman í sameind. Kúlu-og-pinnalíkan sýnir rúmfræðilega röðun atómanna þar sem stærð atómanna er ekki í réttum skala og rúmfyllulíkan sýnir hlutfallslegar stærðir atómanna.
 
 
-![Figure A shows C H subscript 4. Figure B shows a carbon atom that is bonded to four hydrogen atoms at right angles: one above, one to the left, one to the right, and one below. Figure C shows a 3-D, ball-and-stick model of the carbon atom bonded to four hydrogen atoms. Figure D shows a space-filling model of a carbon atom with hydrogen atoms partially embedded into the surface of the carbon atom.](./images/media/rId23.jpg)
+![Figure A shows C H subscript 4. Figure B shows a carbon atom that is bonded to four hydrogen atoms at right angles: one above, one to the left, one to the right, and one below. Figure C shows a 3-D, ball-and-stick model of the carbon atom bonded to four hydrogen atoms. Figure D shows a space-filling model of a carbon atom with hydrogen atoms partially embedded into the surface of the carbon atom.](./images/media/2-4-chemical-formulas-rId23.jpg)
 
 
 Mynd 2.16 Hægt er að tákna metansameind sem (a) sameindaformúlu, (b) byggingarformúlu, (c) kúlu-og-pinnalíkan og (d) rúmfyllulíkan. Kolefnis- og vetnisatóm eru táknuð með svörtum og hvítum kúlum.
@@ -72,6 +73,7 @@ Sameindir glúkósa (blóðsykurs) innihalda 6 kolefnisatóm, 12 vetnisatóm og 
 **Lausn**
 
 Sameindaformúlan er C~6~H~12~O~6~ vegna þess að ein sameind inniheldur í raun 6 C, 12 H og 6 O atóm. Einfaldasta heiltöluhlutfall C, H og O atóma í glúkósa er 1:2:1, þannig að reynsluformúlan er CH~2~O.
+
 :::
 
 :::practice-problem
@@ -81,6 +83,7 @@ Sameind metaldehýðs (skordýraeitur notað gegn sniglum) inniheldur 8 kolefnis
 
 :::answer
 Sameindaformúla, C~8~H~16~O~4~; reynsluformúla, C~2~H~4~O
+
 :::
 
  
@@ -90,6 +93,7 @@ Sameindaformúla, C~8~H~16~O~4~; reynsluformúla, C~2~H~4~O
 :::link-to-material
 
 Þú getur kannað [sameindabyggingu](http://openstax.org/l/16molbuilding) með því að nota hermilíkan á netinu.
+
 :::
 
  
@@ -109,14 +113,13 @@ Mynd 2.22 Paula Hammond var frumkvöðull í nýrri tækni til að móta efnafr�
 Paula Hammond gerir einmitt það til að leysa krefjandi vandamál, allt frá krabbameini til orkunotkunar. Hún er deildarforseti efnaverkfræðideildar við Massachusetts Institute of Technology og leiðir rannsóknarteymi sem einbeitir sér að því að setja saman einstakar sameindabyggingar. Þau hafa búið til burðarefni fyrir krabbameinslyf -- húðun á stærð við nanóagnir sem gerir lyfjum kleift að ferðast inn í æxli án þess að varnir þess hafi áhrif á þau -- sem geta skilað lyfjum beint inn í krabbameinsæxli. Þau byggja þessar „laumu"sameindir lag fyrir lag; með því að nota ákveðna eiginleika rafmagns og efnafræðilegrar hegðunar geta þau „stillt" húðunina til að takast á við tiltekin krabbamein og aðrar breytur. Þessi nákvæmnisaðferð er nauðsynleg til að meðhöndla krabbamein á skilvirkari hátt og með minni skaða fyrir sjúklinginn. Fyrirtækið sem Hammond stofnaði notar svipaða tækni til að losa lyf í augu sjúklinga með ský á auga, auk þess að bæta sáragræðslu.
 
 Þótt rannsóknarteymi Hammond sé skipað viðurkenndum og leiðandi sérfræðingum eins og henni sjálfri, gegna nemendur vissulega hlutverki. Rannsóknarstofur háskóla eru yfirleitt fullar af doktorsnemum, framhaldsnemum og jafnvel grunnnemum sem taka þátt í vinnunni. Og þannig styðja efnafræðingar og efnaverkfræðingar sem nota þekkingu sína til að leysa vandamál einnig við næstu kynslóð skapara og lausnamiðaðra einstaklinga.
-:::
 
 Það er mikilvægt að vera meðvitaður um að það getur verið mögulegt fyrir sömu atóm að raðast á mismunandi vegu: Efnasambönd með sömu sameindaformúlu geta haft mismunandi tengsl milli atóma og þar af leiðandi mismunandi byggingu. Gæti til dæmis verið annað efnasamband með sömu formúlu og ediksýra, C~2~H~4~O~2~? Og ef svo er, hver væri þá bygging sameinda þess?
 
 Ef þú spáðir því að annað efnasamband með formúluna C~2~H~4~O~2~ gæti verið til, þá sýndir þú góða efnafræðilega innsýn og hefur rétt fyrir þér. Tvö C atóm, fjögur H atóm og tvö O atóm geta einnig raðast saman og myndað metýlformat, sem er notað í framleiðslu, sem skordýraeitur og í fljótþornandi áferðarefni. Sameindir metýlformats hafa eitt súrefnisatómið á milli kolefnisatómanna tveggja, sem er frábrugðið fyrirkomulaginu í sameindum ediksýru. Ediksýra og metýlformat eru dæmi um hverfur (ísómerur) -- efnasambönd með sömu efnaformúlu en mismunandi sameindabyggingu ([mynd 2.23](#CNX_Chem_02_04_Isomers)). Athugið að þessi litli munur á röðun atómanna hefur mikil áhrif á efnaeiginleika þeirra. Þú myndir örugglega ekki vilja nota lausn af metýlformati í staðinn fyrir lausn af ediksýru (ediki) þegar þú býrð til salatsósu..
 
 
-![Figure A shows a structural diagram of acetic acid, C subscript 2 H subscript 4 O subscript 2. Acetic acid contains two carbon atoms connected by a single bond. The left carbon atom forms single bonds with three hydrogen atoms. The carbon on the right forms a double bond with an oxygen atom. The right carbon atom also forms a single bond to an oxygen atom which forms a single bond with a hydrogen atom. Figure B shows a structural diagram of methyl formate, C subscript 2 H subscript 4 O subscript 2. This molecule contains a carbon atom which forms single bonds with three hydrogen atoms, and a single bond with an oxygen atom. The oxygen atom forms a single bond with another carbon atom which forms a double bond with another oxygen atom and a single bond with a hydrogen atom.](./images/media/rId59.jpg)
+![Figure A shows a structural diagram of acetic acid, C subscript 2 H subscript 4 O subscript 2. Acetic acid contains two carbon atoms connected by a single bond. The left carbon atom forms single bonds with three hydrogen atoms. The carbon on the right forms a double bond with an oxygen atom. The right carbon atom also forms a single bond to an oxygen atom which forms a single bond with a hydrogen atom. Figure B shows a structural diagram of methyl formate, C subscript 2 H subscript 4 O subscript 2. This molecule contains a carbon atom which forms single bonds with three hydrogen atoms, and a single bond with an oxygen atom. The oxygen atom forms a single bond with another carbon atom which forms a double bond with another oxygen atom and a single bond with a hydrogen atom.](./images/media/2-4-chemical-formulas-rId59.jpg)
 
 
 Mynd 2.23 Sameindir (a) ediksýru og metýlformats (b) eru byggingarhverfur; þær hafa sömu formúlu (C~2~H~4~O~2~) en mismunandi byggingu (og þar af leiðandi ólíka efnafræðilega eiginleika).
@@ -129,7 +132,10 @@ Til eru margar gerðir hverfa ([mynd 2.24](#CNX_Chem_02_04_Isomers2)). Ediksýra
 
 Mynd 2.24 Sameindir karvóns eru rúmhverfur; þær eru aðeins ólíkar að því leyti hvernig atómin raðast í rúmi. (heimild neðst til vinstri: breytt útgáfa af verki eftir „Miansari66"/Wikimedia Commons; heimild neðst til hægri: breytt útgáfa af verki eftir Forest & Kim Starr)
 
+:::
+
 :::link-to-material
 
 Smelltu á þennan [tengil](http://openstax.org/l/16isomers) til að sjá útskýringu á hverfum, rúmhverfum og hvers vegna þær hafa ólíka lykt (veldu myndbandið sem heitir „Mirror Molecule: Carvone").
+
 :::

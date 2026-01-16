@@ -12,12 +12,13 @@ chapter: 4
 
 -   Búið til efnajöfnur út frá lýsingum á efnahvörfum.
 -   Skrifað og stillt sameindajöfnur, heildarjónajöfnur og nettójónajöfnur.
+
 :::
 
 Í fyrri kafla þessarar bókar var kynnt notkun tákna fyrir frumefni til að tákna einstök atóm. Þegar atóm fá eða missa rafeindir til að mynda jónir, eða sameinast öðrum atómum til að mynda sameindir, er táknum þeirra breytt eða þau sameinuð til að búa til efnaformúlur sem tákna þessar eindir á viðeigandi hátt. Að útvíkka þessa táknfræði til að tákna bæði auðkenni og hlutfallslegt magn efna sem gangast undir efna- (eða eðlis-) breytingu felur í sér að skrifa og stilla efnajöfnu. Tökum sem dæmi hvarfið milli einnar metansameindar (CH~4~) og tveggja tvíatóma súrefnissameinda (O~2~) til að mynda eina koldíoxíðsameind (CO~2~) og tvær vatnssameindir (H~2~O). Efnajafnan sem táknar þetta ferli er sýnd á efri helmingi [myndar 4.2](#CNX_Chem_04_01_rxn2), með rúmfyllandi sameindalíkönum á neðri helmingi myndarinnar.
 
 
-![This figure shows a balanced chemical equation followed below by a representation of the equation using space-filling models. The equation reads C H subscript 4 plus 2 O subscript 2 arrow C O subscript 2 plus 2 H subscript 2 O. Under the C H subscript 4, the molecule is shown with a central black sphere, representing a C atom, to which 4 smaller white spheres, representing H atoms, are distributed evenly around. All four H atoms are bonded to the central black C atom. This is followed by a plus sign. Under the 2 O subscript 2, two molecules are shown. The molecules are each composed of two red spheres bonded together. The red spheres represent O atoms. To the right of an arrow and under the C O subscript 2, appears a single molecule with a black central sphere with two red spheres bonded to the left and right. Following a plus sign and under the 2 H subscript 2 O, are two molecules, each with a central red sphere and two smaller white spheres attached to the lower right and lower left sides of the central red sphere. Note that in space filling models of molecules, spheres appear slightly compressed in regions where there is a bond between two atoms.](./images/media/rId22.jpg)
+![This figure shows a balanced chemical equation followed below by a representation of the equation using space-filling models. The equation reads C H subscript 4 plus 2 O subscript 2 arrow C O subscript 2 plus 2 H subscript 2 O. Under the C H subscript 4, the molecule is shown with a central black sphere, representing a C atom, to which 4 smaller white spheres, representing H atoms, are distributed evenly around. All four H atoms are bonded to the central black C atom. This is followed by a plus sign. Under the 2 O subscript 2, two molecules are shown. The molecules are each composed of two red spheres bonded together. The red spheres represent O atoms. To the right of an arrow and under the C O subscript 2, appears a single molecule with a black central sphere with two red spheres bonded to the left and right. Following a plus sign and under the 2 H subscript 2 O, are two molecules, each with a central red sphere and two smaller white spheres attached to the lower right and lower left sides of the central red sphere. Note that in space filling models of molecules, spheres appear slightly compressed in regions where there is a bond between two atoms.](./images/media/4-1-writing-and-balancing-chemical-equations-rId22.jpg)
 
 
 Mynd 4.2 Hvarfið milli metans og súrefnis til að mynda koldíoxíð og vatn (sýnt neðst) má tákna með efnajöfnu með formúlum (efst).
@@ -36,7 +37,7 @@ Algengt er að nota lægstu mögulegu heiltölustuðlana í efnajöfnu, eins og 
 -   *Eitt mól* af metansameindum og *2 mól* af súrefnissameindum hvarfast og mynda *1 mól* af koldíoxíðsameindum og *2 mól* af vatnssameindum.
 
 
-![This image has a left side, labeled, "Mixture before reaction" separated by a vertical dashed line from right side labeled, "Mixture after reaction." On the left side of the figure, two types of molecules are illustrated with space-filling models. Six of the molecules have only two red spheres bonded together. Three of the molecules have four small white spheres evenly distributed about and bonded to a central, larger black sphere. On the right side of the dashed vertical line, two types of molecules which are different from those on the left side are shown. Six of the molecules have a central red sphere to which smaller white spheres are bonded. The white spheres are not opposite each other on the red atoms, giving the molecule a bent shape or appearance. The second molecule type has a central black sphere to which two red spheres are attached on opposite sides, resulting in a linear shape or appearance. Note that in space filling models of molecules, spheres appear slightly compressed in regions where there is a bond between two atoms. On each side of the dashed line, twelve red, three black, and twelve white spheres are present.](./images/media/rId29.jpg)
+![This image has a left side, labeled, "Mixture before reaction" separated by a vertical dashed line from right side labeled, "Mixture after reaction." On the left side of the figure, two types of molecules are illustrated with space-filling models. Six of the molecules have only two red spheres bonded together. Three of the molecules have four small white spheres evenly distributed about and bonded to a central, larger black sphere. On the right side of the dashed vertical line, two types of molecules which are different from those on the left side are shown. Six of the molecules have a central red sphere to which smaller white spheres are bonded. The white spheres are not opposite each other on the red atoms, giving the molecule a bent shape or appearance. The second molecule type has a central black sphere to which two red spheres are attached on opposite sides, resulting in a linear shape or appearance. Note that in space filling models of molecules, spheres appear slightly compressed in regions where there is a bond between two atoms. On each side of the dashed line, twelve red, three black, and twelve white spheres are present.](./images/media/4-1-writing-and-balancing-chemical-equations-rId29.jpg)
 
 
 Mynd 4.3 Óháð raunverulegum fjölda sameinda sem koma við sögu eru hlutföllin milli fjölda sameinda hverrar tegundar sem hvarfast (hvarfefnin) og sameinda hverrar tegundar sem myndast (myndefnin) þau sömu og eru gefin upp í efnajöfnunni.
@@ -127,6 +128,7 @@ $2\text{N}_{2} + 5\text{O}_{2}\  \rightarrow \ 2\text{N}_{2}\text{O}_{5}$
 | O | 5 $\times$ 2 = 10 | 2 $\times$ 5 = 10 | 10 = 10, já |
 
 Fjöldi N- og O-atóma báðum megin í jöfnunni er nú jafn og því er jafnan stillt.
+
 :::
 
 :::practice-problem
@@ -136,7 +138,6 @@ Skrifaðu stillta efnajöfnu fyrir niðurbrot ammóníumnítrats til að mynda n
 
 :::answer
 $2\text{NH}_{4}\text{NO}_{3}\  \rightarrow \ 2\text{N}_{2} + \text{O}_{2} + 4\text{H}_{2}\text{O}$
-:::
 
 Stundum er hentugt að nota brot í stað heiltalna sem millistuðla þegar við stillum efnajöfnur. Þegar jafnvægi er náð má síðan margfalda alla stuðla jöfnunnar með heilli tölu til að breyta brotunum í heiltölur án þess að raska jafnvægi atómanna. Skoðum til dæmis efnahvarf etans (C~2~H~6~) við súrefni sem myndar H~2~O og CO~2~, táknað með óstilltu efnajöfnunni:
 
@@ -164,9 +165,12 @@ $\text{N}_{2} + 3\text{H}_{2}\  \rightarrow \ 2\text{NH}_{3}$
 
 :::
 
+:::
+
 :::link-to-material
 
 Notaðu þetta gagnvirka [kennsluefni](http://openstax.org/l/16BalanceEq) til að æfa þig meira í að stilla efnajöfnur.
+
 :::
 
 ### Viðbótarupplýsingar í efnajöfnum
@@ -191,7 +195,7 @@ $\text{CaCl}_{2}(aq) + 2\text{AgNO}_{3}(aq)\  \rightarrow \ \text{Ca}\left( \tex
 
 Þessi stillta jafna, sem er fengin á venjulegan hátt, er kölluð sameindajafna vegna þess að hún sýnir ekki berum orðum þær jónir sem eru til staðar í lausninni. Þegar jónaefni leysast upp í vatni geta þau *sundrast* í jónirnar sem þau eru mynduð úr, sem dreifast síðan einsleitt um lausnina (ítarleg umfjöllun um þetta mikilvæga ferli er í kaflanum um lausnir). Jónaefni sem eru leyst upp í vatni eru því frekar táknuð sem aðskildar jónir, í þessu tilfelli:
 
-![None](./images/media/rId68.jpg)
+![None](./images/media/4-1-writing-and-balancing-chemical-equations-rId68.png)
 
 Ólíkt þessum þremur jónaefnum leysist AgCl ekki upp í vatni að neinu marki, eins og hamtákn þess, *s*, gefur til kynna.
 
@@ -231,6 +235,7 @@ $\text{CO}_{2}(aq) + 2\text{Na}^{\text{+}}(aq) + 2\text{OH}^{\text{−}}(aq)\  \
 Að lokum skaltu finna meðjónina/jónirnar, í þessu tilfelli Na^+^(*aq*), og fjarlægja hana úr báðum hliðum jöfnunnar til að fá nettójónajöfnuna:
 
 ![None](./images/media/rId84.jpg)
+
 :::
 
 :::practice-problem
@@ -246,6 +251,7 @@ Skrifaðu stilltar sameinda-, heildarjóna- og nettójónajöfnur fyrir þetta f
 $2\text{NaCl}(aq) + 2\text{H}_{2}\text{O}(l)\  \rightarrow \ 2\text{NaOH}(aq) + \text{H}_{2}(g) + \text{Cl}_{2}(g)\quad\quad\left( \text{molecular} \right)$\
 $2\text{Na}^{\text{+}}(aq) + 2\text{Cl}^{\text{−}}(aq) + 2\text{H}_{2}\text{O}(l)\  \rightarrow \ 2\text{Na}^{\text{+}}(aq) + 2\text{OH}^{\text{−}}(aq) + \text{H}_{2}(g) + \text{Cl}_{2}(g)\quad\quad\left( \text{complete ionic} \right)$\
 $2\text{Cl}^{\text{−}}(aq) + 2\text{H}_{2}\text{O}(l)\  \rightarrow \ 2\text{OH}^{\text{−}}(aq) + \text{H}_{2}(g) + \text{Cl}_{2}(g)\quad\quad\text{(net ionic)}$
+
 :::
 
 :::

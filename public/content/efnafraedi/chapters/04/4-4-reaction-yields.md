@@ -13,6 +13,7 @@ chapter: 4
 -   Útskýrt hugtökin fræðilegar heimtur og takmarkandi hvarfefni.
 -   Leitt út fræðilegar heimtur fyrir efnahvarf við tilgreindar aðstæður.
 -   Reiknað prósentuheimtur fyrir efnahvarf.
+
 :::
 
 Hlutfallslegt magn hvarfefna og myndefna sem sýnt er í stilltri efnajöfnu er oft kallað *hlutfallaefnafræðilegt magn*. Öll dæmin í fyrri kafla snerust um hlutfallaefnafræðilegt magn hvarfefna. Til dæmis, þegar reiknað var út magn myndefnis sem myndaðist úr tilteknu magni hvarfefnis, var gert ráð fyrir að öll önnur nauðsynleg hvarfefni væru til staðar í hlutfallaefnafræðilegu magni (eða meira). Í þessari einingu er fjallað um raunhæfari aðstæður þar sem hvarfefni eru ekki til staðar í hlutfallaefnafræðilegu magni.
@@ -48,7 +49,7 @@ $\text{mol HCl produced} = \text{2 mol}\ \text{Cl}_{2}\  \times \ \frac{\text{2 
 Klórinn mun klárast alveg þegar 4 mól af HCl hafa myndast. Þar sem nægilegt vetni var til staðar til að gefa 6 mól af HCl, verður óhvarfað vetni eftir þegar þessu hvarfi er lokið. Klór er því takmarkandi hvarfefni og vetni er umfram hvarfefnið ([mynd 4.14](#CNX_Chem_04_04_limiting)).
 
 
-![The figure shows a space-filling molecular models reacting. There is a reaction arrow pointing to the right in the middle. To the left of the reaction arrow there are three molecules each consisting of two green spheres bonded together. There are also five molecules each consisting of two smaller, white spheres bonded together. Above these molecules is the label, "Before reaction," and below these molecules is the label, "6 H subscript 2 and 4 C l subscript 2." To the right of the reaction arrow, there are eight molecules each consisting of one green sphere bonded to a smaller white sphere. There are also two molecules each consisting of two white spheres bonded together. Above these molecules is the label, "After reaction," and below these molecules is the label, "8 H C l and 2 H subscript 2."](./images/media/rId31.jpg)
+![The figure shows a space-filling molecular models reacting. There is a reaction arrow pointing to the right in the middle. To the left of the reaction arrow there are three molecules each consisting of two green spheres bonded together. There are also five molecules each consisting of two smaller, white spheres bonded together. Above these molecules is the label, "Before reaction," and below these molecules is the label, "6 H subscript 2 and 4 C l subscript 2." To the right of the reaction arrow, there are eight molecules each consisting of one green sphere bonded to a smaller white sphere. There are also two molecules each consisting of two white spheres bonded together. Above these molecules is the label, "After reaction," and below these molecules is the label, "8 H C l and 2 H subscript 2."](./images/media/4-4-reaction-yields-rId31.jpg)
 
 
 Mynd 4.14 Þegar H~2~ og Cl~2~ er blandað saman í magni sem ekki er í réttum hlutföllum, mun annað þessara hvarfefna takmarka magn HCl sem hægt er að framleiða. Þessi mynd sýnir hvarf þar sem vetni er til staðar í umframmagni og klór er takmarkandi hvarfefni.
@@ -56,6 +57,7 @@ Mynd 4.14 Þegar H~2~ og Cl~2~ er blandað saman í magni sem ekki er í réttum
 :::link-to-material
 
 Skoðaðu þessa gagnvirku [hermun](http://openstax.org/l/16reactantprod) sem sýnir hugtökin takmarkandi og umfram hvarfefni.
+
 :::
 
  
@@ -96,6 +98,7 @@ $\text{mol}\ \text{Si}_{3}\,\text{N}_{4}\ \text{produced} = \text{0.0712 mol Si}
 $\text{mol}\ \text{Si}_{3}\,\text{N}_{4}\ \text{produced} = \text{0.0535 mol}\ \text{N}_{2}\  \times \ \frac{\text{1 mol}\ \text{Si}_{3}\,\text{N}_{4}}{\text{2 mol}\ \text{N}_{2}}\  = \text{0.0268 mol}\ \text{Si}_{3}\,\text{N}_{4}$
 
 Þar sem kísill gefur minna magn af myndefni er hann takmarkandi hvarfefnið.
+
 :::
 
 :::practice-problem
@@ -105,6 +108,7 @@ Hvert er takmarkandi hvarfefnið þegar 5,00 g af H~2~ og 10,0 g af O~2~ hvarfas
 
 :::answer
 O~2~
+
 :::
 
 ### Prósentuheimtur
@@ -137,6 +141,7 @@ Með því að nota þessar fræðilegu heimtur og uppgefið gildi fyrir raunhei
 $\text{percent yield} = \left( \frac{\text{actual yield}}{\text{theoretical yield}} \right)\  \times \ 100$
 
 ![None](./images/media/rId55.jpg)
+
 :::
 
 :::practice-problem
@@ -148,13 +153,15 @@ $\text{CCl}_{4} + 2\text{HF}\  \rightarrow \ \text{CF}_{2}\text{Cl}_{2} + 2\text
 
 :::answer
 48,3%
+
 :::
 
  
 
 :::
 
-:::how-science-connects: Græn efnafræði og atómhagkvæmni
+:::note
+### Hvernig vísindi tengjast: Græn efnafræði og atómhagkvæmni
 
 Markviss hönnun efnaafurða og ferla sem lágmarkar notkun efna sem hættuleg eru umhverfinu og myndun úrgangs er þekkt sem *græn efnafræði*. Græn efnafræði er hugmyndafræðileg nálgun sem er beitt á mörgum sviðum vísinda og tækni og framkvæmd hennar er tekin saman í leiðbeiningum sem kallast „Tólf meginreglur grænnar efnafræði" (sjá nánar á þessari [vefsíðu](http://openstax.org/l/16greenchem)). Ein af 12 meginreglunum miðar sérstaklega að því að hámarka skilvirkni ferla við framleiðslu efnaafurða. *Atómhagkvæmni* ferlis er mælikvarði á þessa skilvirkni, skilgreind sem massaprósenta lokaafurðar framleiðsluferlis miðað við massa *allra* hvarfefna sem notuð eru:
 
@@ -162,11 +169,12 @@ $\text{atom economy} = \ \frac{\text{mass of product}}{\text{mass of reactants}}
 
 Þótt skilgreiningin á atómhagkvæmni virðist við fyrstu sýn mjög svipuð og fyrir prósentuheimtur, hafðu í huga að þessi eiginleiki táknar mun á *fræðilegri* skilvirkni *mismunandi* efnaferla. Prósentuheimtur tiltekins efnaferlis meta aftur á móti skilvirkni ferlis með því að bera saman heimtur myndefnis sem raunverulega fæst við hámarksheimtur sem spáð er fyrir um með hlutfallaefnafræði.
 
-Framleiðsla á hinu algenga lausasölulyfi íbúprófeni sýnir vel árangur grænnar efnafræðilegrar nálgunar ([mynd 4.15](#CNX_Chem_04_04_GreenChem)). Íbúprófen var fyrst markaðssett snemma á sjöunda áratugnum og var framleitt með sex þrepa framleiðsluferli sem krafðist 514 g af hvarfefnum til að framleiða hvert mól (206 g) af íbúprófeni, sem er atómhagkvæmni upp á 40%. Á tíunda áratugnum þróaði BHC Company (nú BASF Corporation) annað ferli sem krefst aðeins þriggja þrepa og hefur atómhagkvæmni upp á \~80%, næstum tvöfalt meiri en upprunalega ferlið. BHC-ferlið myndar verulega minni efnaúrgang; notar minna hættuleg og endurvinnanleg efni; og veitir framleiðandanum (og þar með neytandanum) verulegan kostnaðarsparnað. Til viðurkenningar á jákvæðum umhverfisáhrifum BHC-ferlisins hlaut fyrirtækið Greener Synthetic Pathways verðlaunin frá Umhverfisverndarstofnun Bandaríkjanna árið 1997.
+Framleiðsla á hinu algenga lausasölulyfi íbúprófeni sýnir vel árangur grænnar efnafræðilegrar nálgunar ([mynd 4.15](#CNX_Chem_04_04_GreenChem)). Íbúprófen var fyrst markaðssett snemma á sjöunda áratugnum og var framleitt með sex þrepa framleiðsluferli sem krafðist 514 g af hvarfefnum til að framleiða hvert mól (206 g) af íbúprófeni, sem er atómhagkvæmni upp á 40%. Á tíunda áratugnum þróaði BHC Company (nú BASF Corporation) annað ferli sem krefst aðeins þriggja þrepa og hefur atómhagkvæmni upp á ~80%, næstum tvöfalt meiri en upprunalega ferlið. BHC-ferlið myndar verulega minni efnaúrgang; notar minna hættuleg og endurvinnanleg efni; og veitir framleiðandanum (og þar með neytandanum) verulegan kostnaðarsparnað. Til viðurkenningar á jákvæðum umhverfisáhrifum BHC-ferlisins hlaut fyrirtækið Greener Synthetic Pathways verðlaunin frá Umhverfisverndarstofnun Bandaríkjanna árið 1997.
 
 
 ![This figure is labeled, "a," and, "b." Part a shows an open bottle of ibuprofen and a small pile of ibuprofen tablets beside it. Part b shows a reaction along with line structures. The first line structure looks like a diagonal line pointing down and to the right, then up and to the right and then down and to the right. At this point it connects to a hexagon with alternating double bonds. At the first trough there is a line that points straight down. From this structure, there is an arrow pointing downward. The arrow is labeled, "H F," on the left and "( C H subscript 3 C O ) subscript 2 O," on the right. The next line structure looks exactly like the first line structure, but it has a line angled down and to the right from the lower right point of the hexagon. This line is connected to another line which points straight down. Where these two lines meet, there is a double bond to an O atom. There is another arrow pointing downward, and it is labeled, "H subscript 2, Raney N i." The next structure looks very similar to the second, previous structure, except in place of the double bonded O, there is a singly bonded O H group. There is a final reaction arrow pointing downward, and it is labeled, "C O, \[ P d \]." The final structure is similar to the third, previous structure except in place of the O H group, there is another line that points down and to the right to an O H group. At these two lines, there is a double bonded O.](./images/media/rId64.jpg)
 
 
 Mynd 4.15 (a) Íbúprófen er vinsælt lausasöluverkjalyf sem er almennt selt í 200 mg töflum. (b) BHC-ferlið til að framleiða íbúprófen krefst aðeins þriggja þrepa og sýnir glæsilega atómhagkvæmni. (heimild a: breyting á verki eftir Derrick Coetzee)
+
 :::

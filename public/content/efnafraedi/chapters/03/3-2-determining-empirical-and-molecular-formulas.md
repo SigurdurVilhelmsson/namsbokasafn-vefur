@@ -13,6 +13,7 @@ chapter: 3
 -   Reiknað massaprósentu efnasambands
 -   Ákvarðað reynsluformúlu efnasambands
 -   Ákvarðað sameindaformúlu efnasambands
+
 :::
 
 Í fyrri kafla var fjallað um sambandið milli heildarmassa efnis og fjölda atóma eða sameinda sem það inniheldur (mól). Ef efnaformúla efnisins er þekkt er hægt að ákvarða magn efnisins (mól) út frá massa þess og öfugt. En hvað ef efnaformúla efnis er óþekkt? Í þessum kafla verður sömu meginreglum beitt til að leiða út efnaformúlur óþekktra efna út frá tilraunamælingum á massa.
@@ -43,6 +44,7 @@ Til að reikna út massaprósentu skal deila massa hvers frumefnis, sem fenginn 
 ![None](./images/media/rId26.jpg)
 
 Niðurstöður greiningarinnar benda til þess að efnasambandið sé 61,0% C, 15,4% H og 23,7% N miðað við massa.
+
 :::
 
 :::practice-problem
@@ -52,6 +54,7 @@ Niðurstöður greiningarinnar benda til þess að efnasambandið sé 61,0% C, 1
 
 :::answer
 12,1% C, 16,1% O, 71,79% Cl
+
 :::
 
 #### Ákvörðun massaprósentu út frá sameinda- eða reynsluformúlum
@@ -80,6 +83,7 @@ Til að reikna út massaprósentuna þarf að vita massa C, H og O í þekktum m
 ![None](./images/media/rId44.jpg)
 
 Athugið að þegar þessar prósentur eru lagðar saman og námundaðar á viðeigandi hátt er summan 100,00%.
+
 :::
 
 :::practice-problem
@@ -89,13 +93,14 @@ Hver er massaprósenta járns í efnasambandinu Fe~2~O~3~, gefin upp með þremu
 
 :::answer
 69,9% Fe
+
 :::
 
 ### Ákvörðun reynsluformúla
 
 Eins og áður hefur komið fram er algengasta aðferðin til að ákvarða efnaformúlu efnasambands að mæla fyrst massa frumefnanna sem það er gert úr. Hins vegar er mikilvægt að hafa í huga að efnaformúlur tákna hlutfallslegan *fjölda* atóma í efninu, ekki massa þeirra. Þess vegna verður að nota allar tilraunagögn sem fela í sér massa til að finna út samsvarandi fjölda atóma í efnasambandinu. Þetta er gert með því að nota mólmassa til að breyta massa hvers frumefnis í fjölda móla. Þessi mólmagn eru notuð til að reikna út heiltöluhlutföll sem hægt er að nota til að leiða út reynsluformúlu efnisins. Ímyndum okkur sýni af efnasambandi sem inniheldur 1,71 g af C og 0,287 g af H. Samsvarandi fjöldi atóma (í mólum) er:
 
-![None](./images/media/rId54.jpg)
+![None](./images/media/3-2-determining-empirical-and-molecular-formulas-rId54.png)
 
 Þannig má tákna þetta efnasamband með formúlunni C~0,142~H~0,284~. Samkvæmt venju innihalda formúlur heiltölulágstafi, sem hægt er að ná með því að deila hverjum lágstaf með minni lágstafnum:
 
@@ -120,7 +125,7 @@ $\text{Cl}_{0.150}\text{O}_{0.525} = \text{Cl}_{\ \frac{0.150}{0.150}\ }\ \text{
 [Mynd 3.11](#CNX_Chem_03_03_empform) sýnir þetta ferli á flæðiriti fyrir efni sem inniheldur frumefnin A og X.
 
 
-![A flow chart is shown that is composed of six boxes, two of which are connected together by a right facing arrow and located above two more that are also connected by a right-facing arrow. These two rows of boxes are connected vertically by a line that leads to a right-facing arrow and the last two boxes, connected by a final right facing arrow. The first two upper boxes have the phrases, "Mass of A atoms" and "Moles of A atoms" respectively, while the arrow that connects them has the phrase, "Divide by molar mass," written below it. The second two bottom boxes have the phrases, "Mass of X atoms" and "Moles of X atoms" respectively, while the arrow that connects them has the phrase, "Divide by molar mass" written below it. The arrow that connects the upper and lower boxes to the last two boxes has the phrase "Divide by lowest number of moles" written below it. The last two boxes have the phrases, "A to X mole ratio" and "Empirical formula" respectively, while the arrow that connects them has the phrase, "Convert ratio to lowest whole numbers" written below it.](./images/media/rId60.jpg)
+![A flow chart is shown that is composed of six boxes, two of which are connected together by a right facing arrow and located above two more that are also connected by a right-facing arrow. These two rows of boxes are connected vertically by a line that leads to a right-facing arrow and the last two boxes, connected by a final right facing arrow. The first two upper boxes have the phrases, "Mass of A atoms" and "Moles of A atoms" respectively, while the arrow that connects them has the phrase, "Divide by molar mass," written below it. The second two bottom boxes have the phrases, "Mass of X atoms" and "Moles of X atoms" respectively, while the arrow that connects them has the phrase, "Divide by molar mass" written below it. The arrow that connects the upper and lower boxes to the last two boxes has the phrase "Divide by lowest number of moles" written below it. The last two boxes have the phrases, "A to X mole ratio" and "Empirical formula" respectively, while the arrow that connects them has the phrase, "Convert ratio to lowest whole numbers" written below it.](./images/media/3-2-determining-empirical-and-molecular-formulas-rId60.jpg)
 
 
 Mynd 3.11 Hægt er að leiða reynsluformúlu efnasambands út frá massa allra frumefna í sýninu.
@@ -133,7 +138,7 @@ Mynd 3.11 Hægt er að leiða reynsluformúlu efnasambands út frá massa allra 
 Sýni af svarta steinefninu hematíti ([mynd 3.12](#CNX_Chem_03_03_hematite)), járnoxíði sem finnst í mörgum járngrýtum, inniheldur 34,97 g af járni og 15,03 g af súrefni. Hver er reynsluformúla hematíts?
 
 
-![Two rounded, smooth black stones are shown.](./images/media/rId64.jpg)
+![Two rounded, smooth black stones are shown.](./images/media/3-2-determining-empirical-and-molecular-formulas-rId64.jpg)
 
 
 Mynd 3.12 Hematít er járnoxíð sem er notað í skartgripi. (heimild: Mauro Cateb)
@@ -153,6 +158,7 @@ Hlutfallið er 1,000 mól af járni á móti 1,500 mólum af súrefni (Fe~1~O~1,
 $2\left( \text{Fe}_{1}\text{O}_{1.5} \right)\  = \ \text{Fe}_{2}\text{O}_{3}$
 
 Reynsluformúlan er Fe~2~O~3~.
+
 :::
 
 :::practice-problem
@@ -162,6 +168,7 @@ Hver er reynsluformúla efnasambands ef sýni inniheldur 0,130 g af köfnunarefn
 
 :::answer
 N~2~O~5~
+
 :::
 
  
@@ -171,6 +178,7 @@ N~2~O~5~
 :::link-to-material
 
 Horfðu á stutta [myndbandið](http://openstax.org/l/16empforms) til að sjá fleiri dæmi um útreikninga á reynsluformúlum.
+
 :::
 
 #### Útreikningur á reynsluformúlum út frá prósentusamsetningu
@@ -183,7 +191,7 @@ Að lokum, varðandi útreikning á reynsluformúlum, skulum við skoða tilvik 
 Við gerjun á korni til framleiðslu á etanóli myndast gas með prósentusamsetninguna 27,29% C og 72,71% O ([mynd 3.13](#CNX_Chem_03_03_BrewTank)). Hver er reynsluformúla þessa gass?
 
 
-![A picture is shown of four copper-colored industrial containers with a large pipe connecting to the top of each one.](./images/media/rId81.jpg)
+![A picture is shown of four copper-colored industrial containers with a large pipe connecting to the top of each one.](./images/media/3-2-determining-empirical-and-molecular-formulas-rId81.jpg)
 
 
 Mynd 3.13 Kolefnisoxíð er fjarlægt úr þessum gerjunartönkum í gegnum stóru koparrörin efst. (heimild: „Dual Freq"/Wikimedia Commons)
@@ -203,6 +211,7 @@ Stuðlar fyrir bráðabirgðareynsluformúluna eru fengnir með því að deila 
 ![None](./images/media/rId93.jpg)
 
 Þar sem hlutfallið sem fæst er eitt kolefnisatóm á móti tveimur súrefnisatómum er reynsluformúlan CO~2~.
+
 :::
 
 :::practice-problem
@@ -212,6 +221,7 @@ Hver er reynsluformúla efnasambands sem inniheldur 40,0% C, 6,71% H og 53,28% O
 
 :::answer
 CH~2~O
+
 :::
 
 ### Útreikningur á sameindaformúlum
@@ -272,6 +282,7 @@ $\ \frac{162.3\ \text{g/mol}}{81.13\ \frac{\text{g}}{\text{formula unit}}\ }\  =
 Að lokum skal leiða út sameindaformúlu nikótíns út frá reynsluformúlunni með því að margfalda hvern neðanáskrifaðan vísi með tveimur:
 
 $\text{(C}_{\text{5}}\text{H}_{\text{7}}\text{N)}_{\text{2}} = \text{C}_{\text{10}}\text{H}_{\text{14}}\text{N}_{\text{2}}$
+
 :::
 
 :::practice-problem
@@ -281,6 +292,7 @@ Hver er sameindaformúla efnasambands með massaprósentuna 49,47% C, 5,201% H, 
 
 :::answer
 C~8~H~10~N~4~O~2~
+
 :::
 
 :::

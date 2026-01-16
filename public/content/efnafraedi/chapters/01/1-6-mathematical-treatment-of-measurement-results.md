@@ -14,6 +14,7 @@ chapter: 1
     sem fela í sér stærðir
 -   Notað einingagreiningu til að breyta einingum fyrir tiltekinn
     eiginleika og í útreikninga sem fela í sér tvo eða fleiri eiginleika
+
 :::
 
 Oft er það svo að stærð sem vekur áhuga er ekki auðvelt (eða jafnvel
@@ -144,7 +145,6 @@ Umreiknaðu rúmmál upp á 9,345 qt í lítra.
 
 :::answer
 8,844 L
-:::
 
 Fyrir utan einfaldar einingaumbreytingar er hægt að nota þessa aðferð
 til að leysa flóknari verkefni sem fela í sér útreikninga. Burtséð frá
@@ -154,6 +154,8 @@ að *einingar* þeirra styttist út og/eða sameinist á viðeigandi hátt til
 að gefa þá einingu sem óskað er eftir í niðurstöðunni. Eftir því sem þú
 heldur áfram í efnafræðináminu muntu fá mörg tækifæri til að beita
 þessari aðferð.
+
+:::
 
 :::
 
@@ -207,6 +209,7 @@ og 1 qt = 32 oz (nákvæmlega)?
 
 :::answer
 2,957 × 10^−2^ L
+
 :::
 
  
@@ -266,6 +269,7 @@ eldsneytiskostnaðurinn fyrir þessa ferð?
 
 :::answer
 \(a\) 51 mpg; (b) 62 \$
+
 :::
 
 ### Umreikningur á hitastigseiningum
@@ -399,6 +403,7 @@ Umreiknaðu 80,92 °C í K og °F.
 
 :::answer
 354,07 K, 177,7 °F
+
 :::
 
  
@@ -429,6 +434,7 @@ Umbreyttu 50 °F í °C og K.
 
 :::answer
 10 °C, 280 K
+
 :::
 
 :::

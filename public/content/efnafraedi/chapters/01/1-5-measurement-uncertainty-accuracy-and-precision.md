@@ -14,6 +14,7 @@ chapter: 1
 -   Greint á milli nákvæmra og ónákvæmra talna
 -   Sýnt óvissu í stærðum á réttan hátt með markverðum stöfum
 -   Beitt réttum námundunarreglum á útreiknaðar stærðir
+
 :::
 
 Talning er eina mælingin sem er laus við óvissu, að því gefnu að fjöldi
@@ -85,7 +86,7 @@ Byrjaðu á fyrsta tölustafnum sem ekki er núll vinstra megin, teldu
 fjöldi markverðra stafa í mælingunni nema síðasti tölustafurinn sé núll
 á eftir sem liggur vinstra megin við kommu.
 
-![The left diagram uses the example of 1267 meters. The number 1 is the first nonzero figure on the left. 1267 has 4 significant figures in total. The right diagram uses the example of 55.0 grams. The number 5 in the tens place is the first nonzero figure on the left. 55.0 has 3 significant figures. Note that the 0 is to the right of the decimal point and therefore is a significant figure.](./images/media/rId33.png)
+![The left diagram uses the example of 1267 meters. The number 1 is the first nonzero figure on the left. 1267 has 4 significant figures in total. The right diagram uses the example of 55.0 grams. The number 5 in the tens place is the first nonzero figure on the left. 55.0 has 3 significant figures. Note that the 0 is to the right of the decimal point and therefore is a significant figure.](./images/media/1-5-rId33.png)
 
 Núll á milli eru afleiðing mælinga og eru því alltaf markverð. Núll á
 undan eru hins vegar aldrei markverð --- þau segja okkur aðeins hvar
@@ -213,6 +214,7 @@ Námundaðu eftirfarandi að tilgreindum fjölda markverðra stafa:
 
 :::answer
 \(a\) 0,42; (b) 0,00387; (c) 421,2; (d) 28.684
+
 :::
 
  
@@ -255,6 +257,7 @@ Svarið er 65 g (námundað að einingarsæti; engir aukastafir)
 
 :::answer
 \(a\) 2,64 ml; (b) 0,658 m
+
 :::
 
  
@@ -291,13 +294,14 @@ námunduð að sama fjölda tölustafa og talan með fæsta markverða stafi
 
 :::answer
 \(a\) 0,747 cm^2^ (b) 0,9884 m/s
-:::
 
 Í öllum þessum tæknilegu atriðum er mikilvægt að hafa í huga ástæðuna
 fyrir þessum reglum um markverða stafi og námundun -- að tákna nákvæmni
 gildanna sem gefin eru upp rétt og tryggja að útreiknuð niðurstaða sé
 ekki sett fram sem nákvæmari en ónákvæmasta gildið sem notað var í
 útreikningnum.
+
+:::
 
 :::
 
@@ -323,6 +327,7 @@ Hver er eðlismassi vökva með massann 31,1415 g og rúmmálið 30,13 cm^3^?
 
 :::answer
 1,034 g/ml
+
 :::
 
  
@@ -383,6 +388,7 @@ síðan sökkt í mæliglas, með þeim niðurstöðum sem sýndar eru. ![This d
 eðlismassinn er mjög nálægt þeim eðlismassa sem gefinn er fyrir gull í
 [töflu
 1.4](http://openstax.org/books/chemistry-2e/pages/1-4-measurements#fs-idm45639696).
+
 :::
 
 ### Hittni og nákvæmni

@@ -16,6 +16,7 @@ chapter: 1
     hitastigs og tíma
 -   Framkvæmt einfalda útreikninga og umbreytingar á einingum í
     metrakerfinu og öðrum einingakerfum
+
 :::
 
 Mælingar veita stóran hluta þeirra upplýsinga sem liggja til grundvallar
@@ -105,6 +106,7 @@ Tafla 1.3
 Þarftu upprifjun eða meiri æfingu með staðalform? Farðu á [þessa
 síðu](http://openstax.org/l/16notation) til að fara yfir grunnatriði
 staðalforms.
+
 :::
 
 ### SI-grunneiningar
@@ -291,6 +293,7 @@ hver er eðlismassi kopars með tveimur aukastöfum?
 
 :::answer
 \(a\) 0,599 cm^3^; (b) 8,91 g/cm^3^
+
 :::
 
 :::
@@ -300,6 +303,7 @@ hver er eðlismassi kopars með tveimur aukastöfum?
 Til að læra meira um sambandið milli massa, rúmmáls og eðlismassa skaltu
 nota þennan [gagnvirka hermi](http://openstax.org/l/16phetmasvolden) til
 að kanna eðlismassa mismunandi efna.
+
 :::
 
 :::example
@@ -354,6 +358,7 @@ aðferðinni með tilfærslu vatns.
 
 :::answer
 0,230 g/mL
+
 :::
 
 :::

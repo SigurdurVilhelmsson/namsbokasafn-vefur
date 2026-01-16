@@ -15,6 +15,7 @@ chapter: 4
 -   Þekkt algengar sýrur og basa
 -   Spáð fyrir um leysni algengra ólífrænna efnasambanda með því að nota leysnireglur
 -   Reiknað oxunartölur frumefna í efnasamböndum
+
 :::
 
 Fólk hefur samskipti sín á milli á margvíslegan og flókinn hátt og við flokkum þessi samskipti eftir algengum hegðunarmynstrum. Þegar tveir einstaklingar skiptast á upplýsingum segjum við að þeir séu í samskiptum. Þegar þeir skiptast á höggum með hnefum eða fótum segjum við að þeir séu að slást. Vísindamönnum hefur sömuleiðis þótt hentugt (eða jafnvel nauðsynlegt), þegar þeir standa frammi fyrir fjölbreyttri víxlverkun milli hreinna efna, að flokka efnahvörf með því að greina algeng mynstur hvarfgirni. Í þessum hluta verður kynning á þremur af algengustu gerðum efnahvarfa: útfellingu, sýru-basa og oxun-afoxun.
@@ -83,6 +84,7 @@ $\text{Ag}^{\text{+}}(aq) + \text{Cl}^{\text{−}}(aq)\  \rightarrow \ \text{AgC
 \(c\) Mögulegu myndefnin tvö fyrir þessa samsetningu eru PbCO~3~ og NH~4~NO~3~. Leiðbeiningarnar um leysni gefa til kynna að PbCO~3~ sé torleyst og því er búist við útfellingarhvarfi. Nettójónajafnan fyrir þetta hvarf, sem er leidd út á þann hátt sem lýst er í fyrri einingu, er
 
 $\text{Pb}^{2 +}(aq) + \text{CO}_{3}^{2 -}(aq)\  \rightarrow \ \text{PbCO}_{3}(s)$
+
 :::
 
 :::practice-problem
@@ -92,6 +94,7 @@ Hvaða lausn væri hægt að nota til að fella út baríumjónina, Ba^2+^, í v
 
 :::answer
 natríumsúlfat, BaSO~4~
+
 :::
 
 ### Sýru-basa hvörf
@@ -150,7 +153,7 @@ $\text{NH}_{3}(aq) + \text{H}_{2}\text{O}(l) \rightleftharpoons \text{NH}_{4}^{\
 Þetta er, samkvæmt skilgreiningu, sýru-basa hvarf, í þessu tilviki felur það í sér flutning H^+^ jóna frá vatnssameindum yfir á ammóníaksameindir. Við venjulegar aðstæður er aðeins um 1% af uppleystu ammóníaki til staðar sem $\text{NH}_{4}^{+}$ jónir.
 
 
-![This photograph shows a large agricultural tractor in a field pulling a field sprayer and a large, white cylindrical tank which is labeled "Caution Ammonia."](./images/media/rId64.jpg)
+![This photograph shows a large agricultural tractor in a field pulling a field sprayer and a large, white cylindrical tank which is labeled "Caution Ammonia."](./images/media/4-2-classifying-chemical-reactions-rId64.jpg)
 
 
 Mynd 4.7 Ammóníak er veikur basi sem notaður er í margvíslegum tilgangi. (a) Hreint ammóníak er almennt notað sem landbúnaðaráburður. (b) Þynntar lausnir af ammóníaki eru áhrifarík heimilishreinsiefni. (Heimild a: breytt útgáfa af verki eftir National Resources Conservation Service; heimild b: breytt útgáfa af verki eftir pat00139)
@@ -187,6 +190,7 @@ Tvöföld ör á vel við í þessari jöfnu því hún gefur til kynna að HOCl
 \(b\) Hvarfefnin tvö eru gefin, Ba(OH)~2~ og HNO~3~. Þar sem þetta er hlutleysingarhvarf verða myndefnin tvö vatn og salt, sem samanstendur af katjón jóníska hýdroxíðsins (Ba^2+^) og anjóninni sem myndast þegar sýran flytur vetnisjón sína $\left( \text{NO}_{3}^{\text{−}} \right).$
 
 $\text{Ba}\text{(OH)}_{2}(aq) + 2\text{HNO}_{3}(aq)\  \rightarrow \ \text{Ba}\left( \text{NO}_{3} \right)_{2}(aq) + 2\text{H}_{2}\text{O}(l)$
+
 :::
 
 :::practice-problem
@@ -196,6 +200,7 @@ Skrifaðu nettó jónajöfnuna sem táknar hlutleysingu á hvaða sterkri sýru 
 
 :::answer
 $\text{H}_{3}\text{O}^{\text{+}}(aq) + \text{OH}^{\text{−}}(aq)\  \rightarrow \ 2\text{H}_{2}\text{O}(l)$
+
 :::
 
  
@@ -219,9 +224,10 @@ Hýdroxíðjónirnar sem myndast í þessu jafnvægi hvarfast síðan við hýdr
 $\text{H}_{3}\text{O}^{\text{+}} + \text{OH}^{\text{−}}\  \rightleftharpoons \ 2\text{H}_{2}\text{O}(l)$
 
 Þetta efnahvarf framleiðir ekki koldíoxíð, en sýrubindandi lyf sem innihalda magnesíum geta haft hægðalosandi áhrif. Nokkur sýrubindandi lyf hafa álhýdroxíð, Al(OH)~3~, sem virkt efni. Álhýdroxíðið hefur tilhneigingu til að valda hægðatregðu og sum sýrubindandi lyf nota álhýdroxíð ásamt magnesíumhýdroxíði til að vega upp á móti aukaverkunum efnanna tveggja.
-:::
 
  
+
+:::
 
 :::chemistry-everyday: Matreiðsluþættir efnafræðinnar
 
@@ -236,13 +242,15 @@ Margir setja gjarnan sítrónusafa eða edik, sem hvort tveggja eru sýrur, á e
 Mynd 4.8 Hlutleysing á sér stað milli sítrónusýru í sítrónum eða ediksýru í ediki og basanna í fiskholdinu.
 
 Súrsun er aðferð sem notuð er til að varðveita grænmeti með því að nýta náttúrulega framleitt súrt umhverfi. Grænmetið, til dæmis gúrka, er sett í lokaða krukku og látið liggja í saltlegi. Saltlögurinn ýtir undir vöxt gagnlegra baktería en hamlar vexti skaðlegra baktería. Gagnlegu bakteríurnar nærast á sterkju í gúrkunni og framleiða mjólkursýru sem úrgangsefni í ferli sem kallast gerjun. Mjólkursýran eykur að lokum sýrustig saltlagarins svo mikið að allar skaðlegar bakteríur, sem þurfa basískt umhverfi, drepast. Án skaðlegra baktería sem éta gúrkurnar geymast þær mun lengur en ella. Aukaafurð súrsunarferlisins breytir bragði grænmetisins og sýran gerir það súrt á bragðið.
-:::
 
  
+
+:::
 
 :::link-to-material
 
 Skoðaðu smásæja [sýn](http://openstax.org/l/16AcidsBases) á sterkar og veikar sýrur og basa.
+
 :::
 
 ### Oxunar-afoxunarhvörf
@@ -313,6 +321,7 @@ Samkvæmt leiðbeiningu 2 er oxunartala natríums +1
 Ef gert er ráð fyrir venjulegri oxunartölu fyrir súrefni (−2 samkvæmt leiðbeiningu 3) er oxunartala brennisteins reiknuð eins og leiðbeining 4 segir til um:
 
 ![None](./images/media/rId118.jpg)
+
 :::
 
 :::practice-problem
@@ -330,7 +339,6 @@ Ef gert er ráð fyrir venjulegri oxunartölu fyrir súrefni (−2 samkvæmt lei
 
 :::answer
 \(a\) N, +5; (b) Al, +3; (c) N, −3; (d) P, +5
-:::
 
 Með því að nota hugtakið oxunartala hefur verið sett fram altæk skilgreining á oxunar-afoxunarhvarfi. Oxunar-afoxunarhvörf (redox) eru hvörf þar sem eitt eða fleiri frumefni sem taka þátt verða fyrir breytingu á oxunartölu. (Þótt langflest oxunar-afoxunarhvörf feli í sér breytingar á oxunartölu fyrir tvö eða fleiri frumefni, þá eru nokkrar áhugaverðar undantekningar frá þessari reglu, [sjá dæmi 4.6](#fs-idp180799104).) Skilgreiningar á viðbótarferlum þessa hvarfaflokks eru endurskoðaðar á sama hátt og sýnt er hér:
 
@@ -344,11 +352,12 @@ $10\text{Al}(s) + 6\text{NH}_{4}\text{ClO}_{4}(s)\  \rightarrow \ 4\text{Al}_{2}
 
 :::
 
+:::
+
 :::link-to-material
 
 Horfðu á stutt [myndband](http://openstax.org/l/16hybridrocket) sem sýnir prufukeyrslu á smækkaðri frumgerð blendings eldflaugahreyfils sem áætlað er að nota í nýja Space Launch System sem NASA er að þróa. Fyrstu hreyflarnir sem fara í gang á\
 3 s (grænn logi) nota blöndu af fljótandi eldsneyti/oxara og seinni, öflugri vélarnar sem kveikt er á við 4 s (gulur logi) nota fasta efnablöndu.
-:::
 
 Einföld útskiptahvörf eru oxunar-afoxunarhvörf þar sem jón í lausn er hrakin burt (eða henni skipt út) með oxun málmfrumefnis. Eitt algengt dæmi um þessa tegund hvarfs er oxun tiltekinna málma með sýru:
 
@@ -365,6 +374,8 @@ $\text{Cu}(s) + 2\text{AgNO}_{3}(aq)\  \rightarrow \ \text{Cu}\ \left( \text{NO}
 
 
 Mynd 4.9 (a) Koparvír er sýndur við hliðina á lausn sem inniheldur silfur(I)jónir. (b) Útskipting uppleystra silfurjóna með koparjónum leiðir til (c) uppsöfnunar á gráleitum silfurmálmi á vírnum og myndunar á bláum lit í lausninni vegna uppleystra koparjóna. (Heimild: breytt útgáfa af verki eftir Mark Ott)
+
+:::
 
 :::example
 ### Dæmi 4.6: Lýsing á oxunar-afoxunarhvörfum
@@ -394,6 +405,7 @@ Oxunar-afoxunarhvörf eru skilgreind sem slík ef eitt eða fleiri frumefni gang
 \(d\) Þetta er ekki oxunar-afoxunarhvarf þar sem oxunartölur allra frumefna eru óbreyttar.
 
 \(e\) Þetta er oxunar-afoxunarhvarf (bruni). Kolefni oxast og oxunartala þess hækkar úr −2 í C~2~H~4~(*g*) í +4 í CO~2~(*g*). Afoxarinn (eldsneytið) er C~2~H~4~(*g*). Súrefni er afoxað og oxunartala þess lækkar úr 0 í O~2~(*g*) í −2 í H~2~O(*l*). Oxarinn er O~2~(*g*).
+
 :::
 
 :::practice-problem
@@ -407,6 +419,7 @@ Er þetta oxunar-afoxunarhvarf? Ef svo er, gefðu þá nákvæmara heiti á hvar
 
 :::answer
 Já, einnar skiptingar hvarf. Sn(*s*) er afoxarinn, HCl(*g*) er oxarinn.
+
 :::
 
 #### Að stilla oxunar-afoxunarhvörf með hálfhvarfsaðferðinni
@@ -519,6 +532,7 @@ Lokaathugun á jafnvægi atóma og hleðslu staðfestir að jafnan er stillt.
 | O | 7 | 7 |
 | H | 14 | 14 |
 | hleðsla | 24+ | 24+ |
+
 :::
 
 :::practice-problem
@@ -528,6 +542,7 @@ Lokaathugun á jafnvægi atóma og hleðslu staðfestir að jafnan er stillt.
 
 :::answer
 $3\text{Cl}_{2}(aq) + 6\text{OH}^{\text{−}}(aq)\  \rightarrow \ 5\text{Cl}^{\text{−}}(aq) + \text{ClO}_{3}^{\text{−}}(aq) + 3\text{H}_{2}\text{O}(l)$
+
 :::
 
 :::

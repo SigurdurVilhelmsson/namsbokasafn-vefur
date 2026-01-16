@@ -13,6 +13,7 @@ chapter: 3
 -   Reiknað formúlumassa fyrir samgild og jónísk efnasambönd
 -   Skilgreint magnseininguna mól og skylda stærð, tölu Avogadrosar
 -   Útskýrt sambandið milli massa, móla og fjölda atóma eða sameinda og framkvæmt útreikninga til að leiða þessar stærðir hverja af annarri
+
 :::
 
 Margir halda því fram að nútímaefnafræði hafi hafist þegar vísindamenn fóru að kanna magnbundna þætti efnafræðinnar jafnt og þá þáttbundnu. Til dæmis var atómkenning Daltons tilraun til að útskýra niðurstöður mælinga sem gerðu honum kleift að reikna út hlutfallslegan massa frumefna sem sameinuðust í ýmsum efnasamböndum. Skilningur á sambandi milli massa atóma og efnaformúla efnasambanda gerir okkur kleift að lýsa samsetningu efna á magnbundinn hátt.
@@ -34,7 +35,7 @@ Mynd 3.2 Meðalmassi klóróformsameindar, CHCl~3~, er 119,37 amu, sem er summa 
 Sömuleiðis er sameindamassi aspirínsameindar, C~9~H~8~O~4~, summa atómmassa níu kolefnisatóma, átta vetnisatóma og fjögurra súrefnisatóma, sem nemur 180,15 amu ([mynd 3.3](#CNX_Chem_03_01_aspirin)).
 
 
-![A table and diagram are shown. The table is made up of six columns and five rows. The header row reads: "Element," "Quantity," a blank space, "Average atomic mass (a m u)," a blank space, and "Subtotal (a m u)." The first column contains the symbols "C," "H," "O," and a merged cell. The merged cell runs the length of the first five columns. The second column contains the numbers "9," "8," and "4" as well as the merged, cell. The third column contains the multiplication symbol in each cell except for the last, merged cell. The fourth column contains the numbers "12.01," "1.008," and "16.00" as well as the merged cell. The fifth column contains the symbol "=" in each cell except for the last, merged cell. The sixth column contains the values: "108.09," "8.064," "64.00," and "180.15." There is a thick black line below the number 64.00. The merged cell under the first five columns reads "Molecular mass." To the left of the table is a diagram of a molecule. Six black spheres are located in a six-sided ring and connected by alternating double and single black bonds. Attached to each of the four black spheres is one smaller white sphere. Attached to the farthest right black sphere is a red sphere, connected to two more black spheres, all in a row. Attached to the last black sphere of that row are two more white spheres. Attached to the first black sphere of that row is another red sphere. A black sphere, attached to two red spheres and a white sphere is attached to the black sphere on the top right of the six-sided ring.](./images/media/rId26.jpg)
+![A table and diagram are shown. The table is made up of six columns and five rows. The header row reads: "Element," "Quantity," a blank space, "Average atomic mass (a m u)," a blank space, and "Subtotal (a m u)." The first column contains the symbols "C," "H," "O," and a merged cell. The merged cell runs the length of the first five columns. The second column contains the numbers "9," "8," and "4" as well as the merged, cell. The third column contains the multiplication symbol in each cell except for the last, merged cell. The fourth column contains the numbers "12.01," "1.008," and "16.00" as well as the merged cell. The fifth column contains the symbol "=" in each cell except for the last, merged cell. The sixth column contains the values: "108.09," "8.064," "64.00," and "180.15." There is a thick black line below the number 64.00. The merged cell under the first five columns reads "Molecular mass." To the left of the table is a diagram of a molecule. Six black spheres are located in a six-sided ring and connected by alternating double and single black bonds. Attached to each of the four black spheres is one smaller white sphere. Attached to the farthest right black sphere is a red sphere, connected to two more black spheres, all in a row. Attached to the last black sphere of that row are two more white spheres. Attached to the first black sphere of that row is another red sphere. A black sphere, attached to two red spheres and a white sphere is attached to the black sphere on the top right of the six-sided ring.](./images/media/3-1-formula-mass-and-the-mole-concept-rId26.jpg)
 
 
 Mynd 3.3 Meðalmassi aspirínsameindar er 180,15 amu. Líkanið sýnir sameindabyggingu aspiríns, C~9~H~8~O~4~.
@@ -48,7 +49,7 @@ Mynd 3.3 Meðalmassi aspirínsameindar er 180,15 amu. Líkanið sýnir sameindab
 
 **Lausn**
 
-Sameindir þessa efnasambands eru samsettar úr 13 kolefnisatómum, 18 vetnisatómum og 2 súrefnisatómum. Samkvæmt aðferðinni sem lýst er hér að ofan er meðalsameindamassi þessa efnasambands því: ![A table is shown that is made up of six columns and five rows. The header row reads: "Element," "Quantity," a blank space, "Average atomic mass (a m u)," a blank space, and "Subtotal (a m u)." The first column contains the symbols "C," "H," "O," and a merged cell. The merged cell runs the length of the first five columns. The second column contains the numbers "13," "8," and "2" as well as the merged cell. The third column contains the multiplication symbol in each cell except for the last, merged cell. The fourth column contains the numbers "12.01," "1.008," and "16.00" as well as the merged cell. The fifth column contains the symbol "=" in each cell except for the last, merged cell. The sixth column contains the values "156.13," "18.114," "32.00," and "206.27." There is a thick black line below the number 32.00. The merged cell under the first five columns reads "Molecular mass." To the right is a ball-and-stick model of the structure. At the center, it shows six black spheres arranged in a six-sided ring with alternating double bonds. The two black spheres at the top and bottom of the six-sided ring are each bonded to one, smaller, white sphere. The black sphere on the left side of the six-sided ring is connect to another black sphere. This sphere is connected to two smaller, white spheres and another black sphere. This black sphere is connected to one, smaller white sphere, and two other black spheres. Each of these last two black spheres is connected to two smaller, white spheres. The black sphere on the right side of the six-sided ring is connected to another black sphere. This black sphere is connected to one smaller, white sphere and two other black spheres. The black sphere that is connected to it and is situated to the top right is connected to two smaller, white spheres. The black sphere connected towards the bottom right is connected to two red spheres. It forms a double bond with one of these red spheres and the other red sphere is connected to a smaller, white sphere.](./images/media/rId30.jpg)
+Sameindir þessa efnasambands eru samsettar úr 13 kolefnisatómum, 18 vetnisatómum og 2 súrefnisatómum. Samkvæmt aðferðinni sem lýst er hér að ofan er meðalsameindamassi þessa efnasambands því: ![A table is shown that is made up of six columns and five rows. The header row reads: "Element," "Quantity," a blank space, "Average atomic mass (a m u)," a blank space, and "Subtotal (a m u)." The first column contains the symbols "C," "H," "O," and a merged cell. The merged cell runs the length of the first five columns. The second column contains the numbers "13," "8," and "2" as well as the merged cell. The third column contains the multiplication symbol in each cell except for the last, merged cell. The fourth column contains the numbers "12.01," "1.008," and "16.00" as well as the merged cell. The fifth column contains the symbol "=" in each cell except for the last, merged cell. The sixth column contains the values "156.13," "18.114," "32.00," and "206.27." There is a thick black line below the number 32.00. The merged cell under the first five columns reads "Molecular mass." To the right is a ball-and-stick model of the structure. At the center, it shows six black spheres arranged in a six-sided ring with alternating double bonds. The two black spheres at the top and bottom of the six-sided ring are each bonded to one, smaller, white sphere. The black sphere on the left side of the six-sided ring is connect to another black sphere. This sphere is connected to two smaller, white spheres and another black sphere. This black sphere is connected to one, smaller white sphere, and two other black spheres. Each of these last two black spheres is connected to two smaller, white spheres. The black sphere on the right side of the six-sided ring is connected to another black sphere. This black sphere is connected to one smaller, white sphere and two other black spheres. The black sphere that is connected to it and is situated to the top right is connected to two smaller, white spheres. The black sphere connected towards the bottom right is connected to two red spheres. It forms a double bond with one of these red spheres and the other red sphere is connected to a smaller, white sphere.](./images/media/3-1-formula-mass-and-the-mole-concept-rId30.jpg)
 
 :::
 
@@ -59,6 +60,7 @@ Parasetamól, C~8~H~9~NO~2~, er samgilt efnasamband og virka efnið í nokkrum v
 
 :::answer
 151,16 amu
+
 :::
 
 #### Formúlumassi fyrir jónaefni
@@ -97,6 +99,7 @@ Kalsíumfosfat, Ca~3~(PO~4~)~2~, er jónaefni og algengt kekkjavarnarefni sem b�
 
 :::answer
 310,18 amu
+
 :::
 
 ### Mólið
@@ -108,7 +111,7 @@ Einkenni efnis ræðst ekki aðeins af gerð atóma eða jóna sem það innihel
 Í samræmi við skilgreiningu sína sem magneining inniheldur 1 mól af hvaða frumefni sem er sama fjölda atóma og 1 mól af hvaða öðru frumefni sem er. Massar 1 móls af mismunandi frumefnum eru hins vegar ólíkir, þar sem massar einstakra atóma eru verulega mismunandi. Mólmassi frumefnis (eða efnasambands) er massi í grömmum af 1 móli af því efni, eiginleiki sem er gefinn upp í einingunni grömm á mól (g/mól) (sjá [mynd 3.5](#CNX_Chem_03_02_moles)).
 
 
-![This figure contains eight different substances displayed on white circles. The amount of each substance is visibly different.](./images/media/rId55.jpg)
+![This figure contains eight different substances displayed on white circles. The amount of each substance is visibly different.](./images/media/3-1-formula-mass-and-the-mole-concept-rId55.jpg)
 
 
 Mynd 3.5 Hvert sýni inniheldur 6,022 $\times$ 10^23^ atóm --- 1,00 mól af atómum. Frá vinstri til hægri (efri röð): 65,4 g sink, 12,0 g kolefni, 24,3 g magnesíum og 63,5 g kopar. Frá vinstri til hægri (neðri röð): 32,1 g brennisteinn, 28,1 g kísill, 207 g blý og 118,7 g tin. (heimild: breyting á vinnu eftir Mark Ott)
@@ -116,7 +119,7 @@ Mynd 3.5 Hvert sýni inniheldur 6,022 $\times$ 10^23^ atóm --- 1,00 mól af at�
 Mólmassi hvers efnis er tölulega jafngildur atóm- eða formúluþyngd þess í amu. Samkvæmt skilgreiningu á amu vegur eitt ^12^C atóm 12 amu (atómmassi þess er 12 amu). Eitt mól af ^12^C vegur 12 g (mólmassi þess er 12 g/mól). Þetta samband gildir fyrir öll frumefni, þar sem atómmassar þeirra eru mældir miðað við amu-viðmiðunarefnið, ^12^C. Með því að útvíkka þessa meginreglu er mólmassi efnasambands í grömmum sömuleiðis tölulega jafngildur formúlumassa þess í amu ([mynd 3.6](#CNX_Chem_03_02_compound)).
 
 
-![This photo shows two vials filled with a colorless liquid. It also shows two bowls: one filled with an off-white powder and one filled with a bright red powder.](./images/media/rId59.jpg)
+![This photo shows two vials filled with a colorless liquid. It also shows two bowls: one filled with an off-white powder and one filled with a bright red powder.](./images/media/3-1-formula-mass-and-the-mole-concept-rId59.jpg)
 
 
 Mynd 3.6 Hvert sýni inniheldur 6,02 $\times$ 10^23^ sameindir eða formúlueiningar --- 1,00 mól af efnasambandinu eða frumefninu. Réttsælis frá efra vinstra horni: 130,2 g af C~8~H~17~OH (1-oktanól, formúlumassi 130,2 amu), 454,4 g af HgI~2~ (kvikasilfurs(II)joðíð, formúlumassi 454,4 amu), 32,0 g af CH~3~OH (metanól, formúlumassi 32,0 amu) og 256,5 g af S~8~ (brennisteinn, formúlumassi 256,5 amu). (heimild: Sahar Atwa)
@@ -129,10 +132,10 @@ Mynd 3.6 Hvert sýni inniheldur 6,02 $\times$ 10^23^ sameindir eða formúlueini
 | Na | 22,99 | 22,99 | 6,022 $\times$ 10^23^ |
 | Cl | 35,45 | 35,45 | 6,022 $\times$ 10^23^ |
 
-Þótt atómmassi og mólmassi séu tölulega jafngildir, hafðu í huga að þeir eru mjög ólíkir hvað varðar stærðargráðu, eins og sést á miklum mun á stærð viðkomandi eininga (amu á móti g). Til að átta sig á stærðargráðu mólsins má íhuga lítinn vatnsdropa sem vegur um 0,03 g (sjá [mynd 3.7](#CNX_Chem_03_02_water)). Þótt þetta sé aðeins örlítið brot af einu móli af vatni (\~18 g) inniheldur það fleiri vatnssameindir en hægt er að ímynda sér. Ef sameindunum væri dreift jafnt á um það bil sjö milljarða manna á jörðinni myndi hver einstaklingur fá meira en 100 milljarða sameinda.
+Þótt atómmassi og mólmassi séu tölulega jafngildir, hafðu í huga að þeir eru mjög ólíkir hvað varðar stærðargráðu, eins og sést á miklum mun á stærð viðkomandi eininga (amu á móti g). Til að átta sig á stærðargráðu mólsins má íhuga lítinn vatnsdropa sem vegur um 0,03 g (sjá [mynd 3.7](#CNX_Chem_03_02_water)). Þótt þetta sé aðeins örlítið brot af einu móli af vatni (~18 g) inniheldur það fleiri vatnssameindir en hægt er að ímynda sér. Ef sameindunum væri dreift jafnt á um það bil sjö milljarða manna á jörðinni myndi hver einstaklingur fá meira en 100 milljarða sameinda.
 
 
-![A close-up photo of a water droplet on a leaf is shown. The water droplet is not perfectly spherical.](./images/media/rId64.jpg)
+![A close-up photo of a water droplet on a leaf is shown. The water droplet is not perfectly spherical.](./images/media/3-1-formula-mass-and-the-mole-concept-rId64.jpg)
 
 
 Mynd 3.7 Fjöldi sameinda í einum vatnsdropa er um það bil 100 milljörðum sinnum meiri en fjöldi fólks á jörðinni. (Heimild: „tanakawho"/Wikimedia commons)
@@ -142,9 +145,10 @@ Mynd 3.7 Fjöldi sameinda í einum vatnsdropa er um það bil 100 milljörðum s
 :::link-to-material
 
 Mólið er notað í efnafræði til að tákna 6,022 $\times$ 10^23^ af einhverju, en það getur verið erfitt að skilja svo stóra tölu. Horfðu á þetta [myndband](http://openstax.org/l/16molevideo) og svaraðu síðan „Hugsaðu"-spurningunum sem fylgja. Kynntu þér mólið nánar með því að skoða upplýsingarnar undir „Kafaðu dýpra".
-:::
 
 Sambandið milli formúlumassa, mólsins og tölu Avogadros er hægt að nota til að reikna út ýmis magn sem lýsa samsetningu efna og efnasambanda, eins og sýnt er í næstu dæmum.
+
+:::
 
 :::example
 ### Dæmi 3.3
@@ -159,7 +163,7 @@ Massi K er gefinn og beðið er um samsvarandi magn af K í mólum. Samkvæmt lo
 
 Mólmagn efnis má reikna með því að deila massa þess (g) með mólmassa þess (g/mól):
 
-![A diagram of two boxes connected by a right-facing arrow is shown. The box on the left contains the phrase, "Mass of K atoms ( g )" while the one on the right contains the phrase, "Moles of K atoms ( mol )." There is a phrase under the arrow that says, "Divide by molar mass (g / mol)."](./images/media/rId70.jpg)
+![A diagram of two boxes connected by a right-facing arrow is shown. The box on the left contains the phrase, "Mass of K atoms ( g )" while the one on the right contains the phrase, "Moles of K atoms ( mol )." There is a phrase under the arrow that says, "Divide by molar mass (g / mol)."](./images/media/3-1-formula-mass-and-the-mole-concept-rId70.jpg)
 
 Þáttamerkingaraðferðin styður þessa stærðfræðilegu nálgun þar sem einingin „g" styttist út og svarið hefur eininguna „mól":
 
@@ -176,6 +180,7 @@ Beryllíum er léttur málmur sem notaður er til að búa til gagnsæja röntge
 
 :::answer
 0,360 mól
+
 :::
 
 
@@ -191,7 +196,7 @@ Einn lítri af lofti inniheldur 9,2 $\times$ 10^−4^ mól af argoni. Hver er ma
 
 **Lausn**
 
-Mólmagn Ar er gefið og það á að nota til að finna samsvarandi massa í grömmum. Þar sem magn Ar er minna en 1 mól verður massinn minni en massi 1 móls af Ar, sem er um 40 g. Mólmagnið sem um ræðir er um það bil einn þúsundasti (\~10^−3^) úr móli og því ætti samsvarandi massi að vera um það bil einn þúsundasti af mólmassanum (\~0,04 g): ![A diagram of two boxes connected by a right-facing arrow is shown. The box on the left contains the phrase, "Moles of A r atoms ( mol )" while the one on the right contains the phrase, "Mass of A r atoms ( g )." There is a phrase under the arrow that says "Multiply by molar mass ( g / mol )."](./images/media/rId77.jpg)
+Mólmagn Ar er gefið og það á að nota til að finna samsvarandi massa í grömmum. Þar sem magn Ar er minna en 1 mól verður massinn minni en massi 1 móls af Ar, sem er um 40 g. Mólmagnið sem um ræðir er um það bil einn þúsundasti (~10^−3^) úr móli og því ætti samsvarandi massi að vera um það bil einn þúsundasti af mólmassanum (~0,04 g): ![A diagram of two boxes connected by a right-facing arrow is shown. The box on the left contains the phrase, "Moles of A r atoms ( mol )" while the one on the right contains the phrase, "Mass of A r atoms ( g )." There is a phrase under the arrow that says "Multiply by molar mass ( g / mol )."](./images/media/rId77.jpg)
 
 Í þessu tilfelli segir rökfræðin (og þáttamerkingaraðferðin styður) að margfalda gefið magn (mól) með mólmassanum (g/mól):
 
@@ -208,6 +213,7 @@ Hver er massi 2,561 móls af gulli?
 
 :::answer
 504,4 g
+
 :::
 
 
@@ -229,9 +235,9 @@ Mynd 3.8 Koparvír er samsettur úr mörgum, mörgum atómum af Cu. (Heimild: Em
 
 **Lausn**
 
-Fjölda Cu-atóma í vírnum má á þægilegan hátt leiða út frá massa hans með tveggja þrepa útreikningi: fyrst er mólmagn Cu reiknað og síðan er tala Avogadrosar (*N~A~*) notuð til að breyta þessu mólmagni í fjölda Cu-atóma: ![A diagram of three boxes connected by a right-facing arrow in between each is shown. The box on the left contains the phrase, "Mass of C u atoms ( g )," the middle box reads, "Moles of C u atoms ( mol )," while the one on the right contains the phrase, "Number of C u atoms." There is a phrase under the left arrow that says "Divide by molar mass (g / mol)," and under the right arrow it states, "Multiply by Avogadro's number ( mol superscript negative one )."](./images/media/rId88.jpg)
+Fjölda Cu-atóma í vírnum má á þægilegan hátt leiða út frá massa hans með tveggja þrepa útreikningi: fyrst er mólmagn Cu reiknað og síðan er tala Avogadrosar (*N~A~*) notuð til að breyta þessu mólmagni í fjölda Cu-atóma: ![A diagram of three boxes connected by a right-facing arrow in between each is shown. The box on the left contains the phrase, "Mass of C u atoms ( g )," the middle box reads, "Moles of C u atoms ( mol )," while the one on the right contains the phrase, "Number of C u atoms." There is a phrase under the left arrow that says "Divide by molar mass (g / mol)," and under the right arrow it states, "Multiply by Avogadro's number ( mol superscript negative one )."](./images/media/3-1-formula-mass-and-the-mole-concept-rId88.jpg)
 
-Þar sem uppgefinn massi sýnisins (5,00 g) er aðeins minni en einn tíundi af massa 1 móls af Cu (\~64 g), væri sanngjarnt mat á fjölda atóma í sýninu í kringum einn tíunda af *N~A~*, eða um það bil 10^22^ Cu-atóm. Tveggja þrepa útreikningurinn gefur:
+Þar sem uppgefinn massi sýnisins (5,00 g) er aðeins minni en einn tíundi af massa 1 móls af Cu (~64 g), væri sanngjarnt mat á fjölda atóma í sýninu í kringum einn tíunda af *N~A~*, eða um það bil 10^22^ Cu-atóm. Tveggja þrepa útreikningurinn gefur:
 
 $5.00\ \text{g}\ \text{Cu}\ \left( \frac{\text{mol}\ \text{Cu}}{63.55\ \text{g Cu}} \right)\left( \frac{6.022\  \times \ 10^{23}\ \text{Cu atoms}}{\text{mol Cu}} \right)\  = \ 4.74\  \times \ 10^{22}\text{Cu atoms}$
 
@@ -246,6 +252,7 @@ Gullgrafari sem skolar gull í á safnar 15,00 g af hreinu gulli. Hversu mörg A
 
 :::answer
 4,586 $\times$ 10^22^ Au-atóm
+
 :::
 
 
@@ -267,7 +274,7 @@ Mólmassi glýsíns er nauðsynlegur fyrir þennan útreikning og hann er reikna
 
 ![A table is shown that is made up of six columns and six rows. The header row reads: "Element," "Quantity (mol element / mol compound," a blank space, "Molar mass (g / mol element)," a blank space, and "Subtotal (a m u)." The first column contains the symbols "C," "H," "O," "N," and a merged cell. The merged cell runs the width of the first five columns. The second column contains the numbers "2," "5," "2," and "1" as well as the merged cell. The third column contains the multiplication symbol in each cell except for the last, merged cell. The fourth column contains the numbers "12.01," "1.008," "16.00," and "14.007" as well as the merged cell. The fifth column contains the symbol "=" in each cell except for the last, merged cell. The sixth column contains the values "24.02," "5.040," "32.00," "14.007," and "75.07." There is a thick black line under the number 14.007. The merged cell under the first five columns reads "Molar mass (g / mol compound). There is a ball-and-stick drawing to the right of this table. It shows a black sphere that forms a double bond with a slightly smaller red sphere, a single bond with another red sphere, and a single bond with another black sphere. The red sphere that forms a single bond with the black sphere also forms a single bond with a smaller, white sphere. The second black sphere forms a single bond with a smaller, white sphere and a smaller blue sphere. The blue sphere forms a single bond with two smaller, white spheres each.](./images/media/rId99.jpg)
 
-Uppgefinn massi glýsíns (\~28 g) er aðeins meira en þriðjungur af mólmassanum (\~75 g/mól), þannig að búist er við að útreiknuð niðurstaða verði aðeins meiri en þriðjungur úr móli (\~0,33 mól). Með því að deila massa efnasambandsins með mólmassa þess fæst:
+Uppgefinn massi glýsíns (~28 g) er aðeins meira en þriðjungur af mólmassanum (~75 g/mól), þannig að búist er við að útreiknuð niðurstaða verði aðeins meiri en þriðjungur úr móli (~0,33 mól). Með því að deila massa efnasambandsins með mólmassa þess fæst:
 
 $28.35\ \text{g}\ \text{glycine}\ \left( \frac{\text{mol glycine}}{75.07\ \text{g glycine}} \right)\  = \ 0.378\ \text{mol glycine}$
 
@@ -282,6 +289,7 @@ Hversu mörg mól af súkrósa, C~12~H~22~O~11~, eru í 25 g sýni af súkrósa?
 
 :::answer
 0,073 mól
+
 :::
 
 
@@ -299,7 +307,7 @@ C-vítamín er samgilt efnasamband með sameindaformúluna C~6~H~8~O~6~. Ráðla
 
 Eins og fyrir frumefni er hægt að leiða massa efnasambands út frá mólmagni þess eins og sýnt er: ![A diagram of two boxes connected by a right-facing arrow is shown. The box on the left contains the phrase, "Moles of vitamin C ( mol )" while the one the right contains the phrase, "Mass of vitamin C ( g )". There is a phrase under the arrow that says "Multiply by molar mass (g / mol)."](./images/media/rId106.jpg)
 
-Mólmassi þessa efnasambands er reiknaður 176,124 g/mól. Uppgefinn fjöldi móla er mjög lítið brot af móli (\~10^−4^ eða einn tíuþúsundasti); því er búist við að samsvarandi massi sé um einn tíuþúsundasti af mólmassanum (\~0,02 g). Útreikningurinn gefur:
+Mólmassi þessa efnasambands er reiknaður 176,124 g/mól. Uppgefinn fjöldi móla er mjög lítið brot af móli (~10^−4^ eða einn tíuþúsundasti); því er búist við að samsvarandi massi sé um einn tíuþúsundasti af mólmassanum (~0,02 g). Útreikningurinn gefur:
 
 $1.42\  \times \ 10^{- 4}\ \text{mol}\ \text{vitamin C}\ \left( \frac{176.124\ \text{g vitamin C}}{\text{mol}\ \text{vitamin C}} \right)\  = \ 0.0250\ \text{g vitamin C}$
 
@@ -314,6 +322,7 @@ Hver er massi 0,443 móla af hýdrasíni, N~2~H~4~?
 
 :::answer
 14,2 g
+
 :::
 
 
@@ -350,6 +359,7 @@ Hversu margar C~4~H~10~ sameindir eru í 9,213 g af þessu efnasambandi? Hversu 
 
 :::answer
 9,545 $\times$ 10^22^ sameindir C~4~H~10~; 9,545 $\times$ 10^23^ atóm H
+
 :::
 
 
@@ -383,4 +393,5 @@ Nýlega hafa orðið verulegar framfarir í beinum mælingum á fjölda dópamí
 1\.
 
 Omiatek, Donna M., Amanda J. Bressler, Ann-Sofie Cans, Anne M. Andrews, Michael L. Heien og Andrew G. Ewing. „The Real Catecholamine Content of Secretory Vesicles in the CNS Revealed by Electrochemical Cytometry." *Scientific Report* 3 (2013): 1447, sótt 14. janúar 2015, doi:10.1038/srep01447.
+
 :::
