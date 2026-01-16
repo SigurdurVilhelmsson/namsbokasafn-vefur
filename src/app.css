@@ -390,14 +390,14 @@
 }
 
 .content-block.note p {
-  color: #1e40af;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.note p {
-  color: #bfdbfe;
+  color: var(--text-primary);
 }
 
 /* Warning block - Amber theme */
@@ -428,14 +428,14 @@
 }
 
 .content-block.warning p {
-  color: #92400e;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.warning p {
-  color: #fde68a;
+  color: var(--text-primary);
 }
 
 /* Example block - Gray theme */
@@ -466,14 +466,14 @@
 }
 
 .content-block.example p {
-  color: #374151;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.example p {
-  color: #d1d5db;
+  color: var(--text-primary);
 }
 
 /* Definition block - Purple theme */
@@ -504,14 +504,14 @@
 }
 
 .content-block.definition p {
-  color: #6b21a8;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.definition p {
-  color: #e9d5ff;
+  color: var(--text-primary);
 }
 
 /* Key Concept block - Teal theme */
@@ -542,14 +542,14 @@
 }
 
 .content-block.key-concept p {
-  color: #155e75;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.key-concept p {
-  color: #a5f3fc;
+  color: var(--text-primary);
 }
 
 /* Checkpoint block - Green theme */
@@ -580,14 +580,14 @@
 }
 
 .content-block.checkpoint p {
-  color: #166534;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.checkpoint p {
-  color: #bbf7d0;
+  color: var(--text-primary);
 }
 
 /* Common Misconception block - Red theme */
@@ -618,14 +618,14 @@
 }
 
 .content-block.common-misconception p {
-  color: #991b1b;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.common-misconception p {
-  color: #fecaca;
+  color: var(--text-primary);
 }
 
 /* Learning Objectives block - Accent/Teal theme */
@@ -657,14 +657,14 @@
 }
 
 .content-block.learning-objectives p {
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.learning-objectives p {
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
 
 .content-block.learning-objectives ul {
@@ -675,7 +675,7 @@
 }
 
 .content-block.learning-objectives li {
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   margin-bottom: 0.5rem;
   list-style: disc;
@@ -709,14 +709,14 @@
 }
 
 .content-block.link-to-material p {
-  color: #4338ca;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.link-to-material p {
-  color: #c7d2fe;
+  color: var(--text-primary);
 }
 
 /* Chemistry Everyday block - Orange theme */
@@ -747,14 +747,14 @@
 }
 
 .content-block.chemistry-everyday p {
-  color: #c2410c;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.chemistry-everyday p {
-  color: #fed7aa;
+  color: var(--text-primary);
 }
 
 /* Chapter Overview block - Slate/Gray theme */
@@ -785,14 +785,14 @@
 }
 
 .content-block.chapter-overview p {
-  color: #475569;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.chapter-overview p {
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 /* Scientist Spotlight block - Pink/Rose theme */
@@ -823,14 +823,14 @@
 }
 
 .content-block.scientist-spotlight p {
-  color: #9f1239;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.scientist-spotlight p {
-  color: #fecdd3;
+  color: var(--text-primary);
 }
 
 /* How Science Connects block - Emerald/Green theme */
@@ -861,14 +861,14 @@
 }
 
 .content-block.how-science-connects p {
-  color: #047857;
+  color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
 .dark .content-block.how-science-connects p {
-  color: #a7f3d0;
+  color: var(--text-primary);
 }
 
 /* Icon wrapper */
@@ -1315,9 +1315,19 @@
 .reading-content figcaption {
   margin-top: 0.75rem;
   font-size: 0.9375rem;
+  font-style: italic;
   line-height: 1.5;
-  color: var(--text-secondary);
+  color: var(--figcaption-color, #5a6673);
   text-align: center;
+}
+
+.dark .reading-content figcaption {
+  color: var(--figcaption-color, #9ca3af);
+}
+
+.reading-content figcaption .figure-label {
+  font-style: normal;
+  font-weight: 600;
 }
 
 /* ========================================== */
