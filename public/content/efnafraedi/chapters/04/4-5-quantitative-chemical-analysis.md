@@ -12,6 +12,7 @@ chapter: 4
 
 -   Lýst grundvallarþáttum títrunar og þyngdarmælingagreiningar.
 -   Framkvæmt útreikninga í hlutfallaefnafræði með dæmigerðum gögnum úr títrun og þyngdarmælingagreiningu.
+
 :::
 
 Á 18. öld var styrkur (í raun mólstyrkur) edikssýna ákvarðaður með því að skrá magn kalíumkarbónats, K~2~CO~3~, sem þurfti að bæta við, smátt og smátt, þar til það hætti að freyða. Því meiri þyngd kalíumkarbónats sem bætt var við til að ná þeim punkti þar sem freyðingunni lauk, því sterkara var edikið.
@@ -67,6 +68,7 @@ Með því að nota þessa útgáfu af mólstyrkseiningunni styttist útreikning
 
 $\frac{35.23\ \text{mL NaOH}\  \times \ \frac{0.250\ \text{mmol NaOH}}{\text{mL NaOH}}\  \times \ \frac{1\ \text{mmol HCl}}{1\ \text{mmol NaOH}}}{50.00\ \text{mL solution}}\  = 0.176\ M\ \text{HCl}$
 
+
 :::
 
 :::practice-problem
@@ -80,6 +82,7 @@ $\text{2MnO}_{4}^{\text{−}}(aq) + 5\text{H}_{2}\text{C}_{2}\text{O}_{4}(aq) + 
 
 :::answer
 0,2648 *M*
+
 :::
 
 ### Þyngdarmælingagreining
@@ -116,6 +119,7 @@ $0.6168\ \text{g BaSO}_{4}\  \times \ \frac{1\ \text{mol BaSO}_{4}}{233.43\ \tex
 Styrkur MgSO~4~ í sýnisblöndunni er þá reiknaður sem
 
 ![None](./images/media/rId62.jpg)
+
 :::
 
 :::practice-problem
@@ -127,7 +131,6 @@ $\text{Ag}^{\text{+}}(aq) + \text{Cl}^{\text{−}}(aq)\  \rightarrow \ \text{AgC
 
 :::answer
 23,76%
-:::
 
 Frumefnasamsetningu kolvetna og skyldra efnasambanda má ákvarða með þyngdarmælingaraðferð sem kallast brunagreining. Í brunagreiningu er vegið sýni af efnasambandinu hitað að háu hitastigi undir straumi af súrefnisgasi, sem leiðir til fullkomins bruna þess og myndar gasmyndefni með þekkt auðkenni. Fullkominn bruni kolvetna, til dæmis, mun skila koldíoxíði og vatni sem einu myndefnunum. Gasmyndefnin úr brunanum eru leidd í gegnum aðskilin, fyrirfram vegin söfnunartæki sem innihalda efnasambönd sem aðsoga sértækt hvert myndefni ([mynd 4.18](#CNX_Chem_04_05_combustion)). Massaaukning hvers tækis samsvarar massa aðsogaða myndefnisins og má nota í viðeigandi hlutfallaefnafræðilegum útreikningi til að leiða út massa viðkomandi frumefnis.
 
@@ -136,6 +139,8 @@ Frumefnasamsetningu kolvetna og skyldra efnasambanda má ákvarða með þyngdar
 
 
 Mynd 4.18 Þessi skýringarmynd sýnir grunnhluta brunagreiningartækis til að ákvarða kolefnis- og vetnisinnihald sýnis.
+
+:::
 
 :::
 
@@ -163,6 +168,7 @@ Reynsluformúla efnasambandsins er síðan leidd út með því að finna minnst
 $\frac{\text{mol H}}{\text{mol C}}\  = \ \frac{1.79\  \times \ 10^{- 4}\ \text{mol H}}{8.95\  \times \ 10^{- 5}\ \text{mol C}}\  = \ \frac{2\ \text{mol H}}{1\ \text{mol C}}$
 
 og reynsluformúla pólýetýlens er CH~2~.
+
 :::
 
 :::practice-problem
@@ -172,6 +178,7 @@ og reynsluformúla pólýetýlens er CH~2~.
 
 :::answer
 CH
+
 :::
 
 :::

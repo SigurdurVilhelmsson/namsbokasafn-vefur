@@ -17,6 +17,7 @@ chapter: 1
 -   Flokkað efni sem frumefni, efnasamband, einsleita efnablöndu eða
     misleita efnablöndu með tilliti til efnishams og samsetningar
 -   Skilgreint og gefið dæmi um atóm og sameindir
+
 :::
 
 Efni er skilgreint sem allt sem tekur pláss og hefur massa, og það er
@@ -63,7 +64,6 @@ ljós, sem aftur veldur því að á þeim stað birtist tiltekinn litur.
 Samsetning þessara örsmáu litapunkta myndar myndina sem þú sérð. Horfðu
 á þetta [myndband](http://openstax.org/l/16plasma) til að læra meira um
 rafgas og hvar þú finnur það.
-:::
 
 Sum sýni af efni virðast hafa eiginleika fastra efna, vökva og/eða gasa
 á sama tíma. Þetta getur gerst þegar sýnið er samsett úr mörgum litlum
@@ -107,7 +107,7 @@ brennisteinssýra), sem geta framleitt rafmagn, breytast í önnur efni
 magn efnis breytist.
 
 
-![Diagram A shows a beer bottle containing pre-beer and sugar. An arrow points from this bottle to a second bottle. This second bottle contains the same volume of liquid, however, the sugar has been converted into ethanol and carbonation as beer was made. Diagram B shows a car battery that contains sheets of P B and P B O subscript 2 along with H subscript 2 S O subscript 4. After the battery is used, it contains an equal mass of P B S O subscript 4 and H subscript 2 O.](./images/media/rId39.jpg)
+![Diagram A shows a beer bottle containing pre-beer and sugar. An arrow points from this bottle to a second bottle. This second bottle contains the same volume of liquid, however, the sugar has been converted into ethanol and carbonation as beer was made. Diagram B shows a car battery that contains sheets of P B and P B O subscript 2 along with H subscript 2 S O subscript 4. After the battery is used, it contains an equal mass of P B S O subscript 4 and H subscript 2 O.](./images/media/1-2-rId39.jpg)
 
 
 Mynd 1.8 (a) Massi hráefna í bjór er sá sami og massi bjórsins sem
@@ -122,6 +122,8 @@ er við tiltekna umbreytingu. Til dæmis, þegar þú borðar, meltir og
 tileinkar þér mat, varðveitist allt efnið í upprunalega matnum. En þar
 sem hluti efnisins verður hluti af líkama þínum og mikið er skilið út
 sem ýmiss konar úrgangur, er erfitt að sannreyna það með mælingum.
+
+:::
 
 ### Flokkun efnis
 
@@ -170,7 +172,6 @@ Mörg efnasambönd brotna niður þegar þau eru hituð. Þessi
 kvikasilfursoxíðs, HgO. Þú getur einnig skoðað dæmi um [ljóshvatað
 niðurbrot silfurklóríðs](http://openstax.org/l/16silvchloride) (AgCl),
 sem er grundvöllur eldri ljósmyndunar.
-:::
 
 Eiginleikar samsettra frumefna eru frábrugðnir eiginleikum þeirra í
 frjálsu eða ósamsettu ástandi. Til dæmis er hvítur kristallaður sykur
@@ -209,7 +210,7 @@ minna af sykri, bragðefnum eða öðrum efnisþáttum en samt verið
 hlynsíróp, bensín og lausn af salti í vatni.
 
 
-![Diagram A shows a glass containing a red liquid with a layer of yellow oil floating on the surface of the red liquid. A zoom in box is magnifying a portion of the red liquid that contains some of the yellow oil. The zoomed in image shows that oil is forming round droplets within the red liquid. Diagram B shows a photo of Gatorade G 2. A zoom in box is magnifying a portion of the Gatorade, which is uniformly red.](./images/media/rId57.jpg)
+![Diagram A shows a glass containing a red liquid with a layer of yellow oil floating on the surface of the red liquid. A zoom in box is magnifying a portion of the red liquid that contains some of the yellow oil. The zoomed in image shows that oil is forming round droplets within the red liquid. Diagram B shows a photo of Gatorade G 2. A zoom in box is magnifying a portion of the Gatorade, which is uniformly red.](./images/media/1-2-rId57.jpg)
 
 
 Mynd 1.10 (a) Salatsósa úr olíu og ediki er misleit efnablanda vegna
@@ -258,6 +259,8 @@ Efnasamsetning jarðar
 | títan | Ti | 0,58 | allt annað | \- | 0,47 |
 
 Tafla 1.1
+
+:::
 
 ### Atóm og sameindir
 
@@ -401,9 +404,10 @@ efnarafalsbílar verið framtíðin.
 
 Mynd 1.16 Efnarafall framleiðir raforku úr vetni og súrefni með
 rafefnafræðilegu ferli og myndar aðeins vatn sem úrgangsefni.
-:::
 
  
+
+:::
 
 :::chemistry-everyday
 
@@ -433,4 +437,5 @@ pólýakrýlónítríli.
 
 Mynd 1.17 Næstum þriðjungur náttúrulegra frumefna er notaður til að
 framleiða farsíma. (heimild: breytt útgáfa af verki eftir John Taylor)
+
 :::

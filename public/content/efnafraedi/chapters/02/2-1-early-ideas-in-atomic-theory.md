@@ -12,6 +12,7 @@ chapter: 2
 
 -   Sett fram kennisetningar atómkenningar Daltons
 -   Notað kennisetningar atómkenningar Daltons til að útskýra lögmálið um föst massahlutföll og lögmálið um margföld hlutföll
+
 :::
 
 Elstu heimildir um umræður um grunnbyggingu efnis koma frá forngrískum heimspekingum, vísindamönnum þeirra tíma. Á fimmtu öld f.Kr. héldu Levkippos og Demókrítos því fram að allt efni væri samsett úr litlum, endanlegum eindum sem þeir kölluðu *atomos*, hugtak sem er dregið af gríska orðinu yfir „ódeilanlegt". Þeir hugsuðu sér atóm sem hreyfanlegar agnir sem voru mismunandi að lögun og stærð og sem gætu tengst saman. Seinna komust Aristóteles og aðrir að þeirri niðurstöðu að efni samanstæði af ýmsum samsetningum fjögurra „frumefna" -- elds, jarðar, lofts og vatns -- og væri hægt að skipta því óendanlega. Athyglisvert er að þessir heimspekingar hugsuðu um atóm og „frumefni" sem heimspekileg hugtök, en íhuguðu greinilega aldrei að gera tilraunir til að prófa hugmyndir sínar.
@@ -34,7 +35,7 @@ Sýn Aristótelesar á samsetningu efnis var ríkjandi í yfir tvö þúsund ár
 
 5.  Atóm verða hvorki til né eyðast við efnabreytingu, heldur endurraðast þau til að mynda efni sem eru frábrugðin þeim sem voru til staðar fyrir breytinguna (mynd 2.4).
 
-![The left stoppered bottle contains copper and oxygen. There is a callout which shows that copper is made up of many sphere-shaped atoms. The atoms are densely organized. The open space of the bottle contains oxygen gas, which is made up of bonded pairs of oxygen atoms that are evenly spaced. The right stoppered bottle shows the compound copper two oxide, which is a black, powdery substance. A callout from the powder shows a molecule of copper two oxide, which contains copper atoms that are clustered together with an equal number of oxygen atoms.](./images/media/rId32.jpg)
+![The left stoppered bottle contains copper and oxygen. There is a callout which shows that copper is made up of many sphere-shaped atoms. The atoms are densely organized. The open space of the bottle contains oxygen gas, which is made up of bonded pairs of oxygen atoms that are evenly spaced. The right stoppered bottle shows the compound copper two oxide, which is a black, powdery substance. A callout from the powder shows a molecule of copper two oxide, which contains copper atoms that are clustered together with an equal number of oxygen atoms.](./images/media/2-1-early-ideas-in-atomic-theory-rId32.jpg)
 
 **Mynd 2.4** Þegar frumefnin kopar (glansandi, rauðbrúnt fast efni, sýnt hér sem brúnar kúlur) og súrefni (tært og litlaust gas, sýnt hér sem rauðar kúlur) hvarfast, raðast atóm þeirra aftur og mynda efnasamband sem inniheldur kopar og súrefni (duftkennt, svart fast efni). (kredit kopar: breyting á verki af http://images-of-elements.com/copper.php)
 
@@ -45,11 +46,12 @@ Atómkenning Daltons gefur smásæja skýringu á mörgum stórsæjum eiginleiku
 
 Á eftirfarandi teikningu tákna grænu kúlurnar atóm ákveðins frumefnis. Fjólubláu kúlurnar tákna atóm af öðru frumefni. Ef kúlurnar snertast eru þær hluti af einni einingu efnasambands. Brýtur eftirfarandi efnabreyting, sem táknuð er með þessum táknum, í bága við einhverjar af hugmyndum atómkenningar Daltons? Ef svo er, hverja?
 
-![This equation shows that the starting materials of the reaction are two bonded, green spheres, which are being combined with two smaller, bonded purple spheres. The product of the change is one purple sphere that is bonded to one green sphere.](./images/media/rId36.jpg)
+![This equation shows that the starting materials of the reaction are two bonded, green spheres, which are being combined with two smaller, bonded purple spheres. The product of the change is one purple sphere that is bonded to one green sphere.](./images/media/2-1-early-ideas-in-atomic-theory-rId36.jpg)
 
 **Lausn**
 
 Upphafsefnin samanstanda af tveimur grænum kúlum og tveimur fjólubláum kúlum. Myndefnin samanstanda af aðeins einni grænni kúlu og einni fjólublárri kúlu. Þetta brýtur í bága við kennisetningu Daltons um að atóm verði hvorki til né eyðist við efnabreytingu, heldur sé þeim aðeins endurraðað. (Í þessu tilviki virðist atómum hafa verið eytt.)
+
 :::
 
 :::practice-problem
@@ -57,11 +59,10 @@ Upphafsefnin samanstanda af tveimur grænum kúlum og tveimur fjólubláum kúlu
 
 Á eftirfarandi teikningu tákna grænu kúlurnar atóm ákveðins frumefnis. Fjólubláu kúlurnar tákna atóm af öðru frumefni. Ef kúlurnar snertast eru þær hluti af einni einingu efnasambands. Brýtur eftirfarandi efnabreyting, sem táknuð er með þessum táknum, í bága við einhverjar af hugmyndum atómkenningar Daltons? Ef svo er, hverja?
 
-![This equation shows that the starting materials of the reaction are two sets of bonded, green spheres which are each being combined with two smaller, bonded purple spheres. The products of the change are two molecules that each contain one purple sphere bonded between two green spheres.](./images/media/rId40.jpg)
+![This equation shows that the starting materials of the reaction are two sets of bonded, green spheres which are each being combined with two smaller, bonded purple spheres. The products of the change are two molecules that each contain one purple sphere bonded between two green spheres.](./images/media/2-1-early-ideas-in-atomic-theory-rId40.jpg)
 
 :::answer
 Upphafsefnin samanstanda af fjórum grænum kúlum og tveimur fjólubláum kúlum. Myndefnin samanstanda af fjórum grænum kúlum og tveimur fjólubláum kúlum. Þetta brýtur ekki í bága við neinar af kennisetningum Daltons: Atóm verða hvorki til né eyðast, heldur er þeim endurraðað í litlum heiltöluhlutföllum.
-:::
 
 Dalton þekkti til tilrauna franska efnafræðingsins Joseph Proust, sem sýndi fram á að *öll sýni af hreinu efnasambandi innihalda sömu frumefnin í sömu massahlutföllum*. Þessi staðhæfing er þekkt sem lögmálið um föst hlutföll eða lögmálið um fasta samsetningu. Sú tillaga að fjöldi atóma frumefnanna í tilteknu efnasambandi sé alltaf í sama hlutfalli er í samræmi við þessar athuganir. Til dæmis, þegar mismunandi sýni af ísóoktani (hluti af bensíni og einn af stöðlunum sem notaðir eru í oktanmælingakerfinu) eru greind, kemur í ljós að þau hafa massahlutfall kolefnis á móti vetni sem er 5,33:1, eins og sýnt er í töflu 2.1.
 
@@ -89,6 +90,8 @@ $$\frac{\frac{1,116 \text{ g Cl}}{1 \text{ g Cu}}}{\frac{0,558 \text{ g Cl}}{1 \
 
 :::
 
+:::
+
 :::example
 ### Dæmi 2.2: Lögmálin um föst og margföld hlutföll
 
@@ -109,6 +112,7 @@ Hlutfall þessara hlutfalla er:
 $$\frac{\frac{1,33 \text{ g O}}{1 \text{ g C}}}{\frac{2,67 \text{ g O}}{1 \text{ g C}}} = \frac{1}{2}$$
 
 Þetta styður lögmálið um margfeldi hlutfalla. Þetta þýðir að A og B eru mismunandi efnasambönd, þar sem A hefur helmingi minna súrefni á hvert magn af kolefni (eða tvöfalt meira kolefni á hvert magn af súrefni) en B. Hugsanlegt par efnasambanda sem myndi passa við þetta samband væri A = CO og B = CO₂.
+
 :::
 
 :::practice-problem
@@ -118,6 +122,7 @@ Sýni af efnasambandi X (glær, litlaus, eldfimur vökvi með áberandi lykt) er
 
 :::answer
 Í efnasambandi X er massahlutfall kolefnis á móti vetni 14,13 g C / 2,96 g H. Í efnasambandi Y er massahlutfall kolefnis á móti vetni 19,91 g C / 3,34 g H. Hlutfall þessara hlutfalla er (4,77 g C/g H) / (5,96 g C/g H) = 0,800 = 4/5. Þetta litla heiltöluhlutfall styður lögmálið um margfeldi hlutfalla. Þetta þýðir að X og Y eru mismunandi efnasambönd.
+
 :::
 
 :::
