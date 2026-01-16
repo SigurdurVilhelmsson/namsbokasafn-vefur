@@ -463,6 +463,47 @@ function rehypeShiftHeadings() {
 }
 
 /**
+ * Process caption children to wrap "Mynd X.Y" label in <strong> tag
+ */
+function processCaptionLabel(children: ElementContent[]): ElementContent[] {
+	const LABEL_PATTERN = /^(Mynd\s+\d+\.\d+)\s*/;
+
+	if (children.length === 0) return children;
+
+	const firstChild = children[0];
+
+	// Only process if first child is a text node
+	if (firstChild.type !== 'text') return children;
+
+	const textNode = firstChild as { type: 'text'; value: string };
+	const match = textNode.value.match(LABEL_PATTERN);
+
+	if (!match) return children;
+
+	const label = match[1];
+	const rest = textNode.value.slice(match[0].length);
+
+	const newChildren: ElementContent[] = [
+		{
+			type: 'element',
+			tagName: 'strong',
+			properties: { className: 'figure-label' },
+			children: [{ type: 'text', value: label }]
+		} as Element
+	];
+
+	// Add remaining text if any
+	if (rest) {
+		newChildren.push({ type: 'text', value: ' ' + rest } as ElementContent);
+	}
+
+	// Add remaining original children
+	newChildren.push(...children.slice(1));
+
+	return newChildren;
+}
+
+/**
  * Rehype plugin to wrap images with their captions into figure elements
  * Detects patterns like:
  *   <p><img ...></p>
@@ -470,7 +511,7 @@ function rehypeShiftHeadings() {
  * And converts them to:
  *   <figure>
  *     <img ...>
- *     <figcaption>Mynd 1.28 Caption text...</figcaption>
+ *     <figcaption><strong>Mynd 1.28</strong> Caption text...</figcaption>
  *   </figure>
  */
 function rehypeFigureCaptions() {
@@ -506,16 +547,41 @@ function rehypeFigureCaptions() {
 
 			const imgNode = imgElements[0];
 
-			// Check if next sibling is a paragraph that looks like a caption
-			const nextIndex = index + 1;
-			if (nextIndex >= parentEl.children.length) return;
+			// Find the next sibling paragraph, skipping whitespace text nodes
+			let captionIndex = -1;
+			let captionNode: Element | null = null;
 
-			const nextSibling = parentEl.children[nextIndex] as Element;
-			if (nextSibling.type !== 'element' || nextSibling.tagName !== 'p') return;
+			for (let i = index + 1; i < parentEl.children.length; i++) {
+				const sibling = parentEl.children[i];
 
-			// Extract text content of the next paragraph to check if it's a caption
-			const captionText = extractTextContent(nextSibling);
-			if (!CAPTION_PATTERN.test(captionText.trim())) return;
+				// Skip whitespace-only text nodes
+				if (sibling.type === 'text') {
+					const textValue = (sibling as { value: string }).value;
+					if (textValue.trim().length === 0) continue;
+					// Non-whitespace text node means no caption follows
+					break;
+				}
+
+				// Found an element - check if it's a caption paragraph
+				if (sibling.type === 'element') {
+					const siblingEl = sibling as Element;
+					if (siblingEl.tagName === 'p') {
+						const captionText = extractTextContent(siblingEl);
+						if (CAPTION_PATTERN.test(captionText.trim())) {
+							captionIndex = i;
+							captionNode = siblingEl;
+						}
+					}
+					// Stop after first element (paragraph or otherwise)
+					break;
+				}
+			}
+
+			// No caption found
+			if (captionIndex === -1 || !captionNode) return;
+
+			// Process caption children to wrap "Mynd X.Y" in <strong>
+			const processedCaptionChildren = processCaptionLabel(captionNode.children || []);
 
 			// Create the figure element
 			const figureElement: Element = {
@@ -528,7 +594,7 @@ function rehypeFigureCaptions() {
 						type: 'element',
 						tagName: 'figcaption',
 						properties: {},
-						children: nextSibling.children || []
+						children: processedCaptionChildren
 					} as Element
 				]
 			};
@@ -536,8 +602,11 @@ function rehypeFigureCaptions() {
 			// Replace the image paragraph with the figure
 			parentEl.children[index] = figureElement as ElementContent;
 
-			// Remove the caption paragraph (now incorporated into figcaption)
-			parentEl.children.splice(nextIndex, 1);
+			// Remove whitespace nodes between image and caption, then the caption itself
+			// Work backwards to avoid index shifting issues
+			for (let i = captionIndex; i > index; i--) {
+				parentEl.children.splice(i, 1);
+			}
 		});
 	};
 }

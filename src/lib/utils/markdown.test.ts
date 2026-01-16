@@ -378,6 +378,52 @@ See [ref:eq:1] for details.
 		});
 	});
 
+	describe('figure captions', () => {
+		it('should wrap image + caption into figure element', async () => {
+			const md = `![Alt text](./images/test.jpg)
+
+Mynd 1.3 This is the caption text.`;
+
+			const html = await processMarkdown(md);
+			expect(html).toContain('<figure>');
+			expect(html).toContain('<figcaption>');
+			expect(html).toContain('<strong class="figure-label">Mynd 1.3</strong>');
+			expect(html).toContain('This is the caption text.');
+		});
+
+		it('should handle extra blank lines between image and caption', async () => {
+			const md = `![Alt text](./images/test.jpg)
+
+
+Mynd 1.3 This is the caption text.`;
+
+			const html = await processMarkdown(md);
+			expect(html).toContain('<figure>');
+			expect(html).toContain('<figcaption>');
+		});
+
+		it('should not wrap image without Mynd caption', async () => {
+			const md = `![Alt text](./images/test.jpg)
+
+Just a regular paragraph.`;
+
+			const html = await processMarkdown(md);
+			expect(html).not.toContain('<figure>');
+			expect(html).toContain('<p><img');
+		});
+
+		it('should handle multi-line captions', async () => {
+			const md = `![Alt text](./images/test.jpg)
+
+Mynd 1.3 First line of caption
+continued on second line.`;
+
+			const html = await processMarkdown(md);
+			expect(html).toContain('<figure>');
+			expect(html).toContain('<figcaption>');
+		});
+	});
+
 	describe('edge cases', () => {
 		it('should handle empty input', async () => {
 			const html = await processMarkdown('');
