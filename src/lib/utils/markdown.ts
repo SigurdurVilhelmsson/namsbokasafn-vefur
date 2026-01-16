@@ -836,7 +836,7 @@ export async function processMarkdown(content: string): Promise<string> {
 	const result = await unified()
 		.use(remarkParse)
 		.use(remarkPandocSubSup) // Must be before remarkGfm!
-		.use(remarkGfm)
+		.use(remarkGfm, { singleTilde: false })
 		.use(remarkMath)
 		.use(remarkDirective)
 		.use(remarkCustomDirectives)
@@ -866,7 +866,7 @@ export function processMarkdownSync(content: string): string {
 	const result = unified()
 		.use(remarkParse)
 		.use(remarkPandocSubSup) // Must be before remarkGfm!
-		.use(remarkGfm)
+		.use(remarkGfm, { singleTilde: false })
 		.use(remarkMath)
 		.use(remarkDirective)
 		.use(remarkCustomDirectives)
