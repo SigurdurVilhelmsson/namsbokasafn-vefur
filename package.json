@@ -44,6 +44,9 @@
     "vitest": "^4.0.17",
     "workbox-window": "^7.4.0"
   },
+  "overrides": {
+    "cookie": "^0.7.0"
+  },
   "dependencies": {
     "date-fns": "^4.1.0",
     "fuse.js": "^7.0.0",
