@@ -75,7 +75,7 @@ Scaffold directory structure and template files for a new translated book.
    ```
 
 5. **Create cover image placeholder**
-   - Note: Add SVG cover to `static/covers/$ARGUMENTS.slug.svg`
+   - Note: Add SVG cover to `public/covers/$ARGUMENTS.slug.svg`
 
 6. **Update README.md**
    - Add row to "Tiltækar bækur" table with status "Væntanlegt"
