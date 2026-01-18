@@ -396,7 +396,7 @@ Math equation: $E = mc^2$
 ![Image caption](images/figure-1.png)
 ```
 
-See [MARKDOWN-GUIDE.md](./MARKDOWN-GUIDE.md) for full formatting reference.
+See [Content Format](../reference/content-format.md) for full formatting reference.
 
 ---
 

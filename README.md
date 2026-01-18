@@ -136,36 +136,7 @@ namsbokasafn-vefur/
 
 ## Bæta við nýrri bók
 
-### 1. Bættu við stillingu í `src/routes/[bookSlug]/+layout.ts`
-
-```typescript
-const BOOKS: Record<string, BookConfig> = {
-  liffraedi: {
-    id: 'liffraedi',
-    slug: 'liffraedi',
-    title: 'Líffræði',
-    subtitle: 'Þýðing á OpenStax Biology 2e',
-    description: 'Kennslubók í líffræði...',
-    // ... remaining config
-  }
-};
-```
-
-### 2. Búðu til efnismöppu
-
-```
-public/content/liffraedi/
-├── toc.json
-├── glossary.json
-└── chapters/
-    └── 01-introduction/
-        ├── 1-1-section.md
-        └── images/
-```
-
-### 3. Búðu til forsíðumynd
-
-Bættu við SVG eða PNG mynd í `static/covers/liffraedi.svg`
+Sjá [docs/guides/adding-books.md](docs/guides/adding-books.md) fyrir ítarlegar leiðbeiningar um að bæta við nýrri þýddri bók.
 
 ---
 
