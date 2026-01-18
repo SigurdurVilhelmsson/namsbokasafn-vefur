@@ -144,7 +144,15 @@ Reference them in markdown with relative paths:
 
 The content loader automatically transforms these to absolute paths.
 
-## 6. Test Locally
+## 6. Create Cover Image
+
+Add an SVG cover image to `public/covers/{bookSlug}.svg`.
+
+Existing covers can be used as templates:
+- `public/covers/efnafraedi.svg`
+- `public/covers/liffraedi.svg`
+
+## 7. Test Locally
 
 ```bash
 npm run dev
@@ -152,7 +160,7 @@ npm run dev
 
 Navigate to `http://localhost:5173/{bookSlug}` to test the new book.
 
-## 7. Sync from Content Repository
+## 8. Sync from Content Repository
 
 If using the two-repository workflow with `namsbokasafn-efni`:
 
