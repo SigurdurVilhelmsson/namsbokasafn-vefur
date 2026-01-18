@@ -15,7 +15,7 @@ graph TB
         HTML[index.html]
         JS[JavaScript Bundles]
         CSS[Tailwind CSS]
-        Content[/static/content/]
+        Content[/content/ from public/]
     end
 
     subgraph "Content Structure"
@@ -332,7 +332,7 @@ export default {
 1. Add configuration to `src/routes/[bookSlug]/+layout.ts`
 2. Create content directory: `public/content/{bookSlug}/`
 3. Add `toc.json`, `glossary.json`, and chapter content
-4. Add cover image to `static/covers/`
+4. Add cover image to `public/covers/`
 
 ### Adding a New Feature
 

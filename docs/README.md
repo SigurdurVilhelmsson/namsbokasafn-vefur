@@ -4,7 +4,7 @@
 
 | Document | Description |
 |----------|-------------|
-| [Development](guides/deployment.md) | Production deployment to Linode |
+| [Deployment](guides/deployment.md) | Production deployment to Linode |
 | [Contributing](guides/contributing.md) | Contribution guidelines |
 | [Adding Books](guides/adding-books.md) | How to add a new book |
 
