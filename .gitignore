@@ -34,3 +34,6 @@ coverage
 build
 static/content
 dev-dist/
+
+# Generated docs
+docs/_generated/

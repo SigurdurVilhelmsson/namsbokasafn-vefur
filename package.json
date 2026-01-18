@@ -20,7 +20,8 @@
     "validate-content": "node scripts/validate-content.js",
     "lint-content": "npm run prepare-content && node scripts/validate-content.js",
     "clean": "rm -rf build .svelte-kit static/content",
-    "sync-content": "node scripts/sync-content.js"
+    "sync-content": "node scripts/sync-content.js",
+    "docs:generate": "node scripts/generate-component-inventory.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
