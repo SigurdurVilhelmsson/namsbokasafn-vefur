@@ -37,3 +37,4 @@ dev-dist/
 
 # Generated docs
 docs/_generated/
+CHANGELOG-AUTO.md
