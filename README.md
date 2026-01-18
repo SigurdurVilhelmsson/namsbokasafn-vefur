@@ -17,7 +17,7 @@ Opnar kennslubækur á íslensku - gagnvirkur veflesari fyrir íslenskar þýði
 
 | Bók | Staða | Framvinda |
 |-----|-------|-----------|
-| **Efnafræði** (Chemistry 2e) | Í boði | 2 af 21 köflum |
+| **Efnafræði** (Chemistry 2e) | Í boði | 4 af 21 köflum |
 | **Líffræði** (Biology 2e) | Væntanlegt | - |
 
 ### Helstu eiginleikar
