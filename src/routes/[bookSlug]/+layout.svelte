@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
 	import { settings, fontSize, fontFamily, lineHeight, lineWidth } from '$lib/stores';
 	import { referenceStore } from '$lib/stores/reference';
 	import Header from '$lib/components/layout/Header.svelte';
@@ -10,9 +11,21 @@
 	import FocusModeNav from '$lib/components/layout/FocusModeNav.svelte';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import { keyboardShortcuts } from '$lib/actions/keyboardShortcuts';
+	import { trackPageView } from '$lib/utils/api';
 	import type { LayoutData } from './$types';
 
 	export let data: LayoutData;
+
+	// Track page views when route changes
+	let previousPath = '';
+	$: {
+		const currentPath = $page.url.pathname;
+		if (currentPath !== previousPath) {
+			previousPath = currentPath;
+			const { bookSlug, chapterSlug, sectionSlug } = $page.params;
+			trackPageView(bookSlug, chapterSlug, sectionSlug);
+		}
+	}
 
 	let focusMode = false;
 	let showShortcutsModal = false;
