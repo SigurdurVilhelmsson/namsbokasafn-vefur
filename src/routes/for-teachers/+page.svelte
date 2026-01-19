@@ -34,6 +34,7 @@
         <ul>
           <li><a href="#access">Aðgangur að efni</a></li>
           <li><a href="#content-status">Staða efnis</a></li>
+          <li><a href="#known-issues">Þekkt vandamál</a></li>
           <li><a href="#quality">Gæði þýðinga</a></li>
           <li><a href="#feedback">Tilkynna villur</a></li>
           <li><a href="#support">Stuðningur</a></li>
@@ -127,6 +128,49 @@
 
         <div class="highlight-box warning">
           <p><strong>Athugið:</strong> Kaflar merktir sem "Vélþýtt" hafa ekki verið yfirfarnir af mönnum. Þeir geta innihaldið þýðingarvillur. Vinsamlegast tilkynna villur gegnum endurgjafar eyðublaðið.</p>
+        </div>
+      </section>
+
+      <!-- Section: Known Issues -->
+      <section class="section" id="known-issues">
+        <h2>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          Þekkt vandamál
+        </h2>
+
+        <p>Hér eru helstu takmörkunum sem nemendur og kennarar gætu rekist á meðan á tilraunaverkefninu stendur:</p>
+
+        <h3>Myndir og skýringarmyndir</h3>
+        <ul>
+          <li><strong>Myndir á ensku:</strong> Flestar skýringarmyndir eru enn á ensku, þar með talið myndir með texta og merkilappum.</li>
+          <li><strong>Myndir af töflum:</strong> Sumar töflur eru sem myndir og texti í þeim er ekki þýddur.</li>
+          <li><strong>Myndatextar:</strong> Myndatextar undir myndum eru þýddir en texti innan mynda er ekki.</li>
+        </ul>
+
+        <h3>Stærðfræðijöfnur</h3>
+        <ul>
+          <li><strong>Birtingarvandamál:</strong> Sumar jöfnur geta birst rangt í eldri vöfrum. Mælt er með nýlegum Chrome, Firefox eða Safari.</li>
+          <li><strong>Stærð jafna:</strong> Á smáskjám geta sumar jöfnur verið erfiðar að lesa. Snúið tækinu í lárétt.</li>
+        </ul>
+
+        <h3>Tenglar og tilvísanir</h3>
+        <ul>
+          <li><strong>Innri tenglar:</strong> Sumir tenglar á aðra hluta bókarinnar virka kannski ekki ef sá hluti er ekki enn þýddur.</li>
+          <li><strong>Ytri tenglar:</strong> Tenglar á ytri síður (t.d. Wikipedia) vísa á enskar síður.</li>
+        </ul>
+
+        <h3>Efni sem vantar</h3>
+        <ul>
+          <li><strong>Kafli 1:</strong> Vantar inngangskafla og æfingar (væntanlegt).</li>
+          <li><strong>Kaflar 5-21:</strong> Ekki þýddir enn, en væntanlegir á næstu mánuðum.</li>
+        </ul>
+
+        <div class="highlight-box">
+          <p><strong>Ef þú finnur vandamál:</strong> Vinsamlegast <a href="/feedback">sendu okkur línu</a> svo við getum lagfært það. Allar ábendingar eru vel þegnar!</p>
         </div>
       </section>
 

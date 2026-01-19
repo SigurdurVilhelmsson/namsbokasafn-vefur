@@ -7,6 +7,7 @@
 	import { browser } from '$app/environment';
 	import { migrateStorageKeys } from '$lib/utils/storageMigration';
 	import PWAUpdater from '$lib/components/PWAUpdater.svelte';
+	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 	import '../app.css';
 
 	// Run storage migration on startup
@@ -31,3 +32,6 @@
 
 <!-- PWA update prompt -->
 <PWAUpdater />
+
+<!-- Offline indicator -->
+<OfflineIndicator />

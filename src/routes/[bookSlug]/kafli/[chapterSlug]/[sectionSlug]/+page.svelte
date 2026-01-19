@@ -10,6 +10,7 @@
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
 	import TextHighlighter from '$lib/components/TextHighlighter.svelte';
 	import AnnotationSidebar from '$lib/components/AnnotationSidebar.svelte';
+	import PilotBanner from '$lib/components/PilotBanner.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
 
 	export let data: PageData;
@@ -67,6 +68,9 @@
 </svelte:head>
 
 <article class="max-w-3xl mx-auto px-1 sm:px-0">
+	<!-- Pilot status banner -->
+	<PilotBanner chapterNumber={data.chapterNumber} />
+
 	<!-- Reading progress bar -->
 	<div class="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2">
 		<div class="flex items-center gap-2 sm:gap-3">
