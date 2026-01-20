@@ -68,7 +68,12 @@
       "Bash(git stash:*)",
       "Bash(chmod:*)",
       "Bash(/tmp/transform-directives.sh)",
-      "Bash(/tmp/transform-directives-v2.sh)"
+      "Bash(/tmp/transform-directives-v2.sh)",
+      "WebFetch(domain:openstax.org)",
+      "Bash(node tools/process-chapter.js:*)",
+      "Bash(node tools/fix-figure-captions.js:*)",
+      "Bash(npm run dev:*)",
+      "Bash(node scripts/sync-content.js:*)"
     ]
   }
 }
