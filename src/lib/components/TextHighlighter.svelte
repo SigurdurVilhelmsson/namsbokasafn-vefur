@@ -56,7 +56,7 @@
 	function restoreHighlights() {
 		if (!containerElement) return;
 
-		const annotations = annotationStore.getAnnotationsForSection(chapterSlug, sectionSlug);
+		const annotations = annotationStore.getAnnotationsForSection(bookSlug, chapterSlug, sectionSlug);
 
 		for (const annotation of annotations) {
 			restoreSingleHighlight(annotation);
