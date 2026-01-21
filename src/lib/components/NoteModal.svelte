@@ -118,7 +118,7 @@
 							aria-label={label}
 							aria-pressed={color === c}
 							title={label}
-						/>
+						></button>
 					{/each}
 				</div>
 			</div>
@@ -137,7 +137,7 @@
 					id="annotation-note"
 					placeholder="Skrifadu athugasemd her..."
 					class="min-h-[100px] w-full resize-y rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 p-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-				/>
+				></textarea>
 				<p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
 					Yttu a Ctrl+Enter til ad vista
 				</p>
