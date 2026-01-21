@@ -92,7 +92,7 @@
 					class="h-6 w-6 rounded-full {bg} transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
 					aria-label="Yfirstrika med {label.toLowerCase()}"
 					title={label}
-				/>
+				></button>
 			{/each}
 		</div>
 

@@ -109,15 +109,17 @@ function createAnnotationStore() {
 		},
 
 		// Get annotations for a specific section
-		getAnnotationsForSection: (chapterSlug: string, sectionSlug: string): Annotation[] => {
+		getAnnotationsForSection: (bookSlug: string, chapterSlug: string, sectionSlug: string): Annotation[] => {
 			return get({ subscribe }).annotations.filter(
-				(ann) => ann.chapterSlug === chapterSlug && ann.sectionSlug === sectionSlug
+				(ann) => ann.bookSlug === bookSlug && ann.chapterSlug === chapterSlug && ann.sectionSlug === sectionSlug
 			);
 		},
 
 		// Get annotations for a specific chapter
-		getAnnotationsForChapter: (chapterSlug: string): Annotation[] => {
-			return get({ subscribe }).annotations.filter((ann) => ann.chapterSlug === chapterSlug);
+		getAnnotationsForChapter: (bookSlug: string, chapterSlug: string): Annotation[] => {
+			return get({ subscribe }).annotations.filter(
+				(ann) => ann.bookSlug === bookSlug && ann.chapterSlug === chapterSlug
+			);
 		},
 
 		// Get annotations for a specific book
