@@ -27,13 +27,15 @@ interface ReaderState {
 	currentChapter: string | null;
 	currentSection: string | null;
 	bookmarks: string[];
+	scrollProgress: number; // 0-100 percentage of current section scrolled
 }
 
 const defaultState: ReaderState = {
 	progress: {},
 	currentChapter: null,
 	currentSection: null,
-	bookmarks: []
+	bookmarks: [],
+	scrollProgress: 0
 };
 
 function loadState(): ReaderState {
@@ -157,7 +159,15 @@ function createReaderStore() {
 			}
 		},
 
-		reset: () => set(defaultState)
+		reset: () => set(defaultState),
+
+		// Update scroll progress (0-100)
+		setScrollProgress: (progress: number) => {
+			update((state) => ({
+				...state,
+				scrollProgress: Math.max(0, Math.min(100, progress))
+			}));
+		}
 	};
 }
 
@@ -172,6 +182,8 @@ export const currentLocation = derived(reader, ($reader) => ({
 export const bookmarks = derived(reader, ($reader) => $reader.bookmarks);
 
 export const readingProgress = derived(reader, ($reader) => $reader.progress);
+
+export const scrollProgress = derived(reader, ($reader) => $reader.scrollProgress);
 
 /**
  * Pure function to check if a section is read.

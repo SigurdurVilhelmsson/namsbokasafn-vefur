@@ -50,6 +50,7 @@ interface SettingsState {
 	lineWidth: LineWidth;
 	sidebarOpen: boolean;
 	shortcutPreferences: ShortcutPreferences;
+	soundEffects: boolean;
 }
 
 const STORAGE_KEY = 'namsbokasafn:settings';
@@ -61,7 +62,8 @@ const defaultSettings: SettingsState = {
 	lineHeight: 'normal',
 	lineWidth: 'medium',
 	sidebarOpen: false,
-	shortcutPreferences: {}
+	shortcutPreferences: {},
+	soundEffects: false
 };
 
 function loadSettings(): SettingsState {
@@ -142,6 +144,10 @@ function createSettingsStore() {
 
 		resetAllShortcuts: () => update((s) => ({ ...s, shortcutPreferences: {} })),
 
+		// Sound effects methods
+		setSoundEffects: (enabled: boolean) => update((s) => ({ ...s, soundEffects: enabled })),
+		toggleSoundEffects: () => update((s) => ({ ...s, soundEffects: !s.soundEffects })),
+
 		getShortcut: (action: ShortcutAction): string => {
 			const state = get({ subscribe });
 			return state.shortcutPreferences[action] || DEFAULT_SHORTCUTS[action];
@@ -160,3 +166,4 @@ export const fontFamily = derived(settings, ($settings) => $settings.fontFamily)
 export const lineHeight = derived(settings, ($settings) => $settings.lineHeight);
 export const lineWidth = derived(settings, ($settings) => $settings.lineWidth);
 export const sidebarOpen = derived(settings, ($settings) => $settings.sidebarOpen);
+export const soundEffects = derived(settings, ($settings) => $settings.soundEffects);

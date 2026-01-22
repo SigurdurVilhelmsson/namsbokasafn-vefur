@@ -16,15 +16,70 @@
 	export let data: PageData;
 
 	let showAnnotationSidebar = false;
+	let shareSuccess = false;
+	let shareTimeout: ReturnType<typeof setTimeout>;
+	let showCompletionAnimation = false;
+	let completionTimeout: ReturnType<typeof setTimeout>;
+
+	// Print the current section
+	function handlePrint() {
+		window.print();
+	}
+
+	// Share the current section URL
+	async function handleShare() {
+		const url = window.location.href;
+		const title = `${data.section.section} ${data.section.title} | Námsbókasafn`;
+
+		// Try native share API first (mobile)
+		if (navigator.share) {
+			try {
+				await navigator.share({ title, url });
+				return;
+			} catch (err) {
+				// User cancelled or error - fall through to clipboard
+			}
+		}
+
+		// Fall back to clipboard copy
+		try {
+			await navigator.clipboard.writeText(url);
+			shareSuccess = true;
+			clearTimeout(shareTimeout);
+			shareTimeout = setTimeout(() => {
+				shareSuccess = false;
+			}, 2000);
+		} catch (err) {
+			console.error('Could not copy to clipboard:', err);
+		}
+	}
 
 	// Subscribe to reader state for reactivity
 	$: progress = $reader.progress;
 	$: bookmarks = $reader.bookmarks;
 
+	// Track scroll progress
+	function handleScroll() {
+		const scrollTop = window.scrollY;
+		const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+		if (docHeight > 0) {
+			const progress = Math.round((scrollTop / docHeight) * 100);
+			reader.setScrollProgress(progress);
+		}
+	}
+
 	// Mark section as read and start analytics session
 	onMount(() => {
 		reader.setCurrentLocation(data.chapterSlug, data.sectionSlug);
+		reader.setScrollProgress(0); // Reset scroll progress
 		analyticsStore.startReadingSession(data.bookSlug, data.chapterSlug, data.sectionSlug);
+
+		// Add scroll listener
+		window.addEventListener('scroll', handleScroll, { passive: true });
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
 	});
 
 	// End analytics session when leaving
@@ -33,7 +88,17 @@
 	});
 
 	function markAsRead() {
+		const wasAlreadyRead = isSectionRead(progress, data.chapterSlug, data.sectionSlug);
 		reader.markAsRead(data.chapterSlug, data.sectionSlug);
+
+		// Show celebration animation only if this is the first time marking as read
+		if (!wasAlreadyRead) {
+			showCompletionAnimation = true;
+			clearTimeout(completionTimeout);
+			completionTimeout = setTimeout(() => {
+				showCompletionAnimation = false;
+			}, 2000);
+		}
 	}
 
 	// Reactive checks using subscribed state
@@ -96,6 +161,36 @@
 			{/if}
 		</div>
 		<div class="flex items-center gap-1 sm:gap-2">
+			<!-- Print button -->
+			<button
+				on:click={handlePrint}
+				class="p-2 rounded-lg transition-colors text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200"
+				aria-label="Prenta kafla"
+				title="Prenta"
+			>
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+				</svg>
+			</button>
+			<!-- Share button -->
+			<button
+				on:click={handleShare}
+				class="p-2 rounded-lg transition-colors {shareSuccess
+					? 'text-green-500 bg-green-50 dark:bg-green-900/20'
+					: 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-500'}"
+				aria-label={shareSuccess ? 'Hlekkur afritaður' : 'Deila kafla'}
+				title={shareSuccess ? 'Hlekkur afritaður!' : 'Deila'}
+			>
+				{#if shareSuccess}
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+					</svg>
+				{:else}
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+					</svg>
+				{/if}
+			</button>
 			<!-- Annotations button -->
 			<button
 				on:click={() => (showAnnotationSidebar = true)}
@@ -231,6 +326,54 @@
 <!-- Navigation buttons -->
 <NavigationButtons navigation={data.navigation} bookSlug={data.bookSlug} />
 
+<!-- Section Completion Animation -->
+{#if showCompletionAnimation}
+	<div
+		class="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
+		aria-hidden="true"
+	>
+		<!-- Floating particles with predefined positions -->
+		<div class="completion-particle particle-1">
+			<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+				<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+			</svg>
+		</div>
+		<div class="completion-particle particle-2">
+			<div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+		</div>
+		<div class="completion-particle particle-3">
+			<div class="w-3 h-3 rounded-full bg-teal-400"></div>
+		</div>
+		<div class="completion-particle particle-4">
+			<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+				<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+			</svg>
+		</div>
+		<div class="completion-particle particle-5">
+			<div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+		</div>
+		<div class="completion-particle particle-6">
+			<div class="w-3 h-3 rounded-full bg-teal-400"></div>
+		</div>
+		<div class="completion-particle particle-7">
+			<svg class="w-3 h-3 text-teal-500" fill="currentColor" viewBox="0 0 20 20">
+				<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+			</svg>
+		</div>
+		<div class="completion-particle particle-8">
+			<div class="w-2 h-2 rounded-full bg-green-400"></div>
+		</div>
+
+		<!-- Central message -->
+		<div class="completion-message bg-emerald-500 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2">
+			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+			</svg>
+			<span class="font-semibold">Vel gert!</span>
+		</div>
+	</div>
+{/if}
+
 <!-- Annotation Sidebar -->
 <AnnotationSidebar
 	isOpen={showAnnotationSidebar}
@@ -239,3 +382,88 @@
 	currentChapter={data.chapterSlug}
 	currentSection={data.sectionSlug}
 />
+
+<style>
+	/* Completion animation particles */
+	.completion-particle {
+		position: absolute;
+		opacity: 0;
+	}
+
+	.particle-1 { animation: burst-up-right 1.2s ease-out 0s forwards; }
+	.particle-2 { animation: burst-up 1.2s ease-out 0.05s forwards; }
+	.particle-3 { animation: burst-up-left 1.2s ease-out 0.1s forwards; }
+	.particle-4 { animation: burst-right 1.2s ease-out 0.15s forwards; }
+	.particle-5 { animation: burst-left 1.2s ease-out 0.2s forwards; }
+	.particle-6 { animation: burst-down-right 1.2s ease-out 0.25s forwards; }
+	.particle-7 { animation: burst-down 1.2s ease-out 0.3s forwards; }
+	.particle-8 { animation: burst-down-left 1.2s ease-out 0.35s forwards; }
+
+	@keyframes burst-up {
+		0% { opacity: 1; transform: translate(0, 0) scale(0); }
+		20% { opacity: 1; transform: translate(0, 0) scale(1); }
+		100% { opacity: 0; transform: translate(0, -100px) scale(0.3); }
+	}
+	@keyframes burst-up-right {
+		0% { opacity: 1; transform: translate(0, 0) scale(0); }
+		20% { opacity: 1; transform: translate(0, 0) scale(1); }
+		100% { opacity: 0; transform: translate(70px, -70px) scale(0.3); }
+	}
+	@keyframes burst-up-left {
+		0% { opacity: 1; transform: translate(0, 0) scale(0); }
+		20% { opacity: 1; transform: translate(0, 0) scale(1); }
+		100% { opacity: 0; transform: translate(-70px, -70px) scale(0.3); }
+	}
+	@keyframes burst-right {
+		0% { opacity: 1; transform: translate(0, 0) scale(0); }
+		20% { opacity: 1; transform: translate(0, 0) scale(1); }
+		100% { opacity: 0; transform: translate(100px, 0) scale(0.3); }
+	}
+	@keyframes burst-left {
+		0% { opacity: 1; transform: translate(0, 0) scale(0); }
+		20% { opacity: 1; transform: translate(0, 0) scale(1); }
+		100% { opacity: 0; transform: translate(-100px, 0) scale(0.3); }
+	}
+	@keyframes burst-down {
+		0% { opacity: 1; transform: translate(0, 0) scale(0); }
+		20% { opacity: 1; transform: translate(0, 0) scale(1); }
+		100% { opacity: 0; transform: translate(0, 80px) scale(0.3); }
+	}
+	@keyframes burst-down-right {
+		0% { opacity: 1; transform: translate(0, 0) scale(0); }
+		20% { opacity: 1; transform: translate(0, 0) scale(1); }
+		100% { opacity: 0; transform: translate(70px, 50px) scale(0.3); }
+	}
+	@keyframes burst-down-left {
+		0% { opacity: 1; transform: translate(0, 0) scale(0); }
+		20% { opacity: 1; transform: translate(0, 0) scale(1); }
+		100% { opacity: 0; transform: translate(-70px, 50px) scale(0.3); }
+	}
+
+	/* Central completion message */
+	.completion-message {
+		animation: message-pop 2s ease-out forwards;
+	}
+
+	@keyframes message-pop {
+		0% {
+			opacity: 0;
+			transform: scale(0.5);
+		}
+		15% {
+			opacity: 1;
+			transform: scale(1.1);
+		}
+		25% {
+			transform: scale(1);
+		}
+		80% {
+			opacity: 1;
+			transform: scale(1);
+		}
+		100% {
+			opacity: 0;
+			transform: scale(0.9);
+		}
+	}
+</style>

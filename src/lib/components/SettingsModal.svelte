@@ -10,6 +10,7 @@
 		fontFamily,
 		lineHeight,
 		lineWidth,
+		soundEffects,
 		type FontSize,
 		type FontFamily,
 		type LineHeight,
@@ -122,22 +123,75 @@
 			<!-- Content -->
 			<div class="max-h-[70vh] overflow-y-auto px-6 py-6">
 				<div class="space-y-8">
-					<!-- Font Size -->
+					<!-- Font Size Slider -->
 					<div>
-						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
-							Leturstærð
-						</label>
-						<div class="grid grid-cols-2 gap-2 sm:flex">
-							{#each fontSizes as size}
-								<button
-									on:click={() => settings.setFontSize(size.value)}
-									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$fontSize === size.value
-										? 'bg-[var(--accent-color)] text-white shadow-sm'
-										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
-								>
-									{size.label}
-								</button>
-							{/each}
+						<div class="mb-3 flex items-center justify-between">
+							<label for="font-size-slider" class="text-sm font-medium text-[var(--text-primary)]">
+								Leturstærð
+							</label>
+							<span class="text-sm text-[var(--accent-color)] font-medium">
+								{fontSizes.find(s => s.value === $fontSize)?.label}
+							</span>
+						</div>
+						<div class="relative">
+							<!-- Slider track labels -->
+							<div class="flex justify-between mb-2 px-1">
+								{#each fontSizes as size, i}
+									<button
+										on:click={() => settings.setFontSize(size.value)}
+										class="text-xs transition-colors {$fontSize === size.value
+											? 'text-[var(--accent-color)] font-semibold'
+											: 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}"
+										style="font-size: {10 + i * 2}px"
+										aria-label="Stilla leturstærð á {size.label}"
+									>
+										Aa
+									</button>
+								{/each}
+							</div>
+							<!-- Custom slider -->
+							<input
+								id="font-size-slider"
+								type="range"
+								min="0"
+								max="3"
+								step="1"
+								value={fontSizes.findIndex(s => s.value === $fontSize)}
+								on:input={(e) => {
+									const index = parseInt(e.currentTarget.value);
+									settings.setFontSize(fontSizes[index].value);
+								}}
+								class="w-full h-2 bg-[var(--bg-tertiary)] rounded-lg appearance-none cursor-pointer accent-[var(--accent-color)]
+									[&::-webkit-slider-thumb]:appearance-none
+									[&::-webkit-slider-thumb]:w-5
+									[&::-webkit-slider-thumb]:h-5
+									[&::-webkit-slider-thumb]:rounded-full
+									[&::-webkit-slider-thumb]:bg-[var(--accent-color)]
+									[&::-webkit-slider-thumb]:shadow-md
+									[&::-webkit-slider-thumb]:cursor-pointer
+									[&::-webkit-slider-thumb]:transition-transform
+									[&::-webkit-slider-thumb]:hover:scale-110
+									[&::-moz-range-thumb]:w-5
+									[&::-moz-range-thumb]:h-5
+									[&::-moz-range-thumb]:rounded-full
+									[&::-moz-range-thumb]:bg-[var(--accent-color)]
+									[&::-moz-range-thumb]:border-0
+									[&::-moz-range-thumb]:shadow-md
+									[&::-moz-range-thumb]:cursor-pointer"
+								aria-label="Leturstærð"
+								aria-valuemin="0"
+								aria-valuemax="3"
+								aria-valuenow={fontSizes.findIndex(s => s.value === $fontSize)}
+								aria-valuetext={fontSizes.find(s => s.value === $fontSize)?.label}
+							/>
+							<!-- Tick marks under slider -->
+							<div class="flex justify-between mt-1 px-1">
+								{#each fontSizes as size}
+									<div
+										class="w-1 h-1 rounded-full {$fontSize === size.value ? 'bg-[var(--accent-color)]' : 'bg-[var(--border-color)]'}"
+									></div>
+								{/each}
+							</div>
 						</div>
 					</div>
 
@@ -208,6 +262,36 @@
 									{width.label}
 								</button>
 							{/each}
+						</div>
+					</div>
+
+					<!-- Sound Effects -->
+					<div>
+						<div class="flex items-center justify-between">
+							<div>
+								<label for="sound-effects-toggle" class="text-sm font-medium text-[var(--text-primary)]">
+									Hljóðmerki
+								</label>
+								<p class="text-xs text-[var(--text-secondary)] mt-0.5">
+									Spila hljóð þegar þú æfir minniskort
+								</p>
+							</div>
+							<button
+								id="sound-effects-toggle"
+								role="switch"
+								aria-checked={$soundEffects}
+								aria-label={$soundEffects ? 'Slökkva á hljóðmerkjum' : 'Kveikja á hljóðmerkjum'}
+								on:click={() => settings.toggleSoundEffects()}
+								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$soundEffects
+									? 'bg-[var(--accent-color)]'
+									: 'bg-gray-300 dark:bg-gray-600'}"
+							>
+								<span
+									class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {$soundEffects
+										? 'translate-x-6'
+										: 'translate-x-1'}"
+								></span>
+							</button>
 						</div>
 					</div>
 

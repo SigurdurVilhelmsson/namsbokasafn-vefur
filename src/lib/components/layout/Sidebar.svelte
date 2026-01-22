@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { settings, sidebarOpen, reader } from '$lib/stores';
-	import { isSectionRead, calcChapterProgress } from '$lib/stores/reader';
+	import { isSectionRead, calcChapterProgress, scrollProgress } from '$lib/stores/reader';
 	import { onMount } from 'svelte';
 	import type { TableOfContents, Chapter } from '$lib/types/content';
 	import { loadTableOfContents, getChapterPath, getSectionPath, findChapterBySlug } from '$lib/utils/contentLoader';
@@ -189,7 +189,27 @@
 														</svg>
 													</span>
 												{:else if isCurrent}
-													<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/50">
+													<!-- Scroll progress ring for current section -->
+													<span class="relative flex h-6 w-6 shrink-0 items-center justify-center">
+														<svg class="absolute w-6 h-6 -rotate-90" viewBox="0 0 24 24">
+															<circle
+																cx="12" cy="12" r="10"
+																fill="none"
+																stroke="currentColor"
+																stroke-width="2"
+																class="text-blue-100 dark:text-blue-900/50"
+															/>
+															<circle
+																cx="12" cy="12" r="10"
+																fill="none"
+																stroke="currentColor"
+																stroke-width="2"
+																stroke-dasharray="62.83"
+																stroke-dashoffset={62.83 - (62.83 * $scrollProgress / 100)}
+																stroke-linecap="round"
+																class="text-blue-500 dark:text-blue-400 transition-[stroke-dashoffset] duration-150"
+															/>
+														</svg>
 														<span class="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400"></span>
 													</span>
 												{:else}
