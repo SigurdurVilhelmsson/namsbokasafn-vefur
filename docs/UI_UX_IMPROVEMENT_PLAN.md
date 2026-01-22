@@ -31,14 +31,14 @@ This document outlines a comprehensive UI/UX improvement plan for Námsbókasafn
 
 These can be implemented rapidly with significant user benefit:
 
-- [ ] **QW-1:** Add reading position indicator in sidebar (current position within chapter)
-- [ ] **QW-2:** "Copy citation" button for equations and figures
-- [ ] **QW-3:** Keyboard shortcut overlay (toggle with `?`) showing all available shortcuts
-- [ ] **QW-4:** Sound effects for flashcard success (optional, in settings)
-- [ ] **QW-5:** Section completion animation (confetti or subtle celebration)
-- [ ] **QW-6:** Print-friendly button per section (already have print CSS, just need UI trigger)
-- [ ] **QW-7:** Share button for sections (generate shareable link)
-- [ ] **QW-8:** Font size slider instead of dropdown (more intuitive)
+- [x] **QW-1:** Add reading position indicator in sidebar (current position within chapter)
+- [x] **QW-2:** "Copy citation" button for equations and figures
+- [x] **QW-3:** Keyboard shortcut overlay (toggle with `?`) showing all available shortcuts
+- [x] **QW-4:** Sound effects for flashcard success (optional, in settings)
+- [x] **QW-5:** Section completion animation (confetti or subtle celebration)
+- [x] **QW-6:** Print-friendly button per section (already have print CSS, just need UI trigger)
+- [x] **QW-7:** Share button for sections (generate shareable link)
+- [x] **QW-8:** Font size slider instead of dropdown (more intuitive)
 
 ---
 
@@ -308,6 +308,15 @@ These can be implemented rapidly with significant user benefit:
 ### 2026-01-22
 - Initial plan created from UI/UX review
 - Starting implementation with Quick Wins
+- **Completed all 8 Quick Wins:**
+  - QW-1: Circular progress ring in sidebar showing scroll position
+  - QW-2: Copy citation buttons for equations (markdown.ts, equations.ts) and figures (FigureViewer.svelte)
+  - QW-3: Verified existing KeyboardShortcutsModal works with `?` key
+  - QW-4: Web Audio API sounds for flashcard interactions (sounds.ts)
+  - QW-5: Particle animation on section completion
+  - QW-6: Print button in section header
+  - QW-7: Share button with Web Share API and clipboard fallback
+  - QW-8: Visual font size slider with Aa previews in SettingsModal
 
 ---
 
