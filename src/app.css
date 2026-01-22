@@ -175,10 +175,15 @@
   }
 }
 
-/* Focus styles */
+/* Focus styles - Enhanced for better visibility on busy backgrounds */
 *:focus-visible {
   outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px rgba(26, 125, 92, 0.2);
+}
+
+.dark *:focus-visible {
+  box-shadow: 0 0 0 4px rgba(110, 231, 183, 0.2);
 }
 
 /* Reading content styles */
@@ -416,7 +421,7 @@
 }
 
 .dark .content-block.warning .content-block-title {
-  color: #fcd34d;
+  color: #fde68a; /* Improved contrast: yellow-200 instead of yellow-400 */
 }
 
 .content-block.warning .content-block-icon {

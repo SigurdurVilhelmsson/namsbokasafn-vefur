@@ -10,6 +10,7 @@
 	import { calcChapterProgress } from '$lib/stores/reader';
 	import DownloadBookButton from '$lib/components/DownloadBookButton.svelte';
 	import ErrorMessage from '$lib/components/ErrorMessage.svelte';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	export let data: PageData;
 
@@ -66,9 +67,10 @@
 	</div>
 
 	{#if loading}
-		<div class="flex items-center justify-center py-12">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-			<span class="ml-3 text-gray-600 dark:text-gray-300">Hleður...</span>
+		<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+			{#each Array(6) as _}
+				<Skeleton variant="card" />
+			{/each}
 		</div>
 	{:else if error}
 		<ErrorMessage

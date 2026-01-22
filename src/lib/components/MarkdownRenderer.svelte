@@ -8,6 +8,7 @@
 	import { equations } from '$lib/actions/equations';
 	import { figureViewer } from '$lib/actions/figureViewer';
 	import { crossReferences } from '$lib/actions/crossReferences';
+	import Skeleton from './Skeleton.svelte';
 
 	// Import KaTeX CSS
 	import 'katex/dist/katex.min.css';
@@ -48,10 +49,7 @@
 </script>
 
 {#if loading}
-	<div class="flex items-center justify-center py-8">
-		<div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-		<span class="ml-2 text-gray-600 dark:text-gray-300">Hleður efni...</span>
-	</div>
+	<Skeleton variant="content" />
 {:else if error}
 	<div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 my-4">
 		<p class="text-red-600 dark:text-red-400">{error}</p>

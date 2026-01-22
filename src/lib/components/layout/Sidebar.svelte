@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import type { TableOfContents, Chapter } from '$lib/types/content';
 	import { loadTableOfContents, getChapterPath, getSectionPath, findChapterBySlug } from '$lib/utils/contentLoader';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	export let bookSlug: string = '';
 	export let hasPeriodicTable: boolean = false;
@@ -122,7 +123,7 @@
 		<!-- Sidebar content -->
 		<nav class="flex-1 overflow-y-auto py-4" aria-label="Efnisyfirlit">
 			{#if !toc}
-				<p class="text-gray-500 dark:text-gray-300 px-4">Hleður efnisyfirlit...</p>
+				<Skeleton variant="sidebar" />
 			{:else}
 				<ul class="space-y-1 px-2">
 					{#each toc.chapters as chapter (chapter.number)}
@@ -175,6 +176,7 @@
 										{@const sectionPath = getSectionPath(section)}
 										{@const isCurrent = isCurrentChapter && (sectionParam === sectionPath || sectionParam === section.slug)}
 										{@const isReadSection = isRead(chapterPath, sectionPath)}
+										{@const readingTime = section.metadata?.readingTime}
 										<li>
 											<a
 												href="/{bookSlug}/kafli/{chapterPath}/{sectionPath}"
@@ -217,7 +219,17 @@
 														<span class="h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-500"></span>
 													</span>
 												{/if}
-												<span class="text-sm">{section.number} {section.title}</span>
+												<div class="flex-1 min-w-0">
+													<span class="text-sm block truncate">{section.number} {section.title}</span>
+													{#if readingTime && !isReadSection}
+														<span class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 mt-0.5">
+															<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+															</svg>
+															{readingTime} mín
+														</span>
+													{/if}
+												</div>
 											</a>
 										</li>
 									{/each}

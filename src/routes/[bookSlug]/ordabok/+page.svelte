@@ -5,6 +5,7 @@
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import type { Glossary, GlossaryTerm } from '$lib/types/content';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	export let data: PageData;
 
@@ -60,9 +61,10 @@
 	</h1>
 
 	{#if loading}
-		<div class="flex items-center justify-center py-12">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-			<span class="ml-3 text-gray-600 dark:text-gray-300">Hleður...</span>
+		<div class="space-y-4">
+			{#each Array(8) as _}
+				<Skeleton variant="list-item" />
+			{/each}
 		</div>
 	{:else if error}
 		<div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4">

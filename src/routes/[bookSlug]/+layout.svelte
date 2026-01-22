@@ -9,6 +9,7 @@
 	import Header from '$lib/components/layout/Header.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import FocusModeNav from '$lib/components/layout/FocusModeNav.svelte';
+	import MobileBottomNav from '$lib/components/layout/MobileBottomNav.svelte';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import { keyboardShortcuts } from '$lib/actions/keyboardShortcuts';
 	import { trackPageView } from '$lib/utils/api';
@@ -98,7 +99,8 @@
 			id="main-content"
 			class="flex-1 overflow-x-hidden {focusMode ? '' : 'lg:ml-80'}"
 		>
-			<div class="mx-auto max-w-7xl px-4 py-6">
+			<!-- Add bottom padding on mobile for the bottom nav bar -->
+			<div class="mx-auto max-w-7xl px-4 py-6 pb-24 lg:pb-6">
 				<slot />
 			</div>
 		</main>
@@ -107,6 +109,11 @@
 	<!-- Focus mode floating navigation -->
 	{#if focusMode}
 		<FocusModeNav {bookSlug} onExitFocusMode={toggleFocusMode} />
+	{/if}
+
+	<!-- Mobile bottom navigation - hidden in focus mode -->
+	{#if !focusMode}
+		<MobileBottomNav {bookSlug} hasPeriodicTable={data.book?.features?.periodicTable ?? false} />
 	{/if}
 </div>
 

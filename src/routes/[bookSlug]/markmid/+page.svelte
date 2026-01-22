@@ -12,6 +12,7 @@
 		type ConfidenceLevel
 	} from '$lib/stores/objectives';
 	import { loadTableOfContents, findChapterBySlug, findSectionBySlug } from '$lib/utils/contentLoader';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	export let data: PageData;
 
@@ -135,9 +136,9 @@
 	</div>
 
 	{#if loading}
-		<div class="flex items-center justify-center py-12">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-			<span class="ml-3 text-gray-600 dark:text-gray-300">Hleður...</span>
+		<div class="space-y-4">
+			<Skeleton variant="card" />
+			<Skeleton variant="card" />
 		</div>
 	{:else}
 		<!-- Progress Overview -->

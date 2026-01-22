@@ -22,12 +22,23 @@ export interface ReadingProgress {
 	[sectionId: string]: SectionProgress;
 }
 
+export interface ScrollPosition {
+	scrollY: number; // Absolute scroll position in pixels
+	percentage: number; // 0-100 percentage of document scrolled
+	timestamp: string; // When this position was saved
+}
+
+export interface ScrollPositions {
+	[sectionId: string]: ScrollPosition;
+}
+
 interface ReaderState {
 	progress: ReadingProgress;
 	currentChapter: string | null;
 	currentSection: string | null;
 	bookmarks: string[];
 	scrollProgress: number; // 0-100 percentage of current section scrolled
+	scrollPositions: ScrollPositions; // Per-section scroll positions for persistence
 }
 
 const defaultState: ReaderState = {
@@ -35,7 +46,8 @@ const defaultState: ReaderState = {
 	currentChapter: null,
 	currentSection: null,
 	bookmarks: [],
-	scrollProgress: 0
+	scrollProgress: 0,
+	scrollPositions: {}
 };
 
 function loadState(): ReaderState {
@@ -167,6 +179,43 @@ function createReaderStore() {
 				...state,
 				scrollProgress: Math.max(0, Math.min(100, progress))
 			}));
+		},
+
+		// Save scroll position for a section (for reading position persistence)
+		saveScrollPosition: (chapterSlug: string, sectionSlug: string, scrollY: number, percentage: number) => {
+			const sectionId = createSectionKey(chapterSlug, sectionSlug);
+			// Only save if user has scrolled past the first 5% (to avoid saving initial positions)
+			if (percentage < 5) return;
+
+			update((state) => ({
+				...state,
+				scrollPositions: {
+					...state.scrollPositions,
+					[sectionId]: {
+						scrollY,
+						percentage,
+						timestamp: getCurrentTimestamp()
+					}
+				}
+			}));
+		},
+
+		// Get saved scroll position for a section
+		getScrollPosition: (chapterSlug: string, sectionSlug: string): ScrollPosition | null => {
+			const sectionId = createSectionKey(chapterSlug, sectionSlug);
+			return get({ subscribe }).scrollPositions[sectionId] || null;
+		},
+
+		// Clear scroll position for a section (e.g., when user completes reading)
+		clearScrollPosition: (chapterSlug: string, sectionSlug: string) => {
+			const sectionId = createSectionKey(chapterSlug, sectionSlug);
+			update((state) => {
+				const { [sectionId]: _, ...rest } = state.scrollPositions;
+				return {
+					...state,
+					scrollPositions: rest
+				};
+			});
 		}
 	};
 }
@@ -184,6 +233,8 @@ export const bookmarks = derived(reader, ($reader) => $reader.bookmarks);
 export const readingProgress = derived(reader, ($reader) => $reader.progress);
 
 export const scrollProgress = derived(reader, ($reader) => $reader.scrollProgress);
+
+export const scrollPositions = derived(reader, ($reader) => $reader.scrollPositions);
 
 /**
  * Pure function to check if a section is read.
@@ -226,4 +277,17 @@ export function isSectionBookmarked(
 ): boolean {
 	const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
 	return bookmarks.includes(bookmarkId);
+}
+
+/**
+ * Pure function to get saved scroll position for a section.
+ * Use with $reader.scrollPositions for reactivity: getSavedScrollPosition($reader.scrollPositions, chapter, section)
+ */
+export function getSavedScrollPosition(
+	scrollPositions: ScrollPositions,
+	chapterSlug: string,
+	sectionSlug: string
+): ScrollPosition | null {
+	const sectionId = createSectionKey(chapterSlug, sectionSlug);
+	return scrollPositions[sectionId] || null;
 }

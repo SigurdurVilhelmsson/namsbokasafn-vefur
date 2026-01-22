@@ -7,6 +7,7 @@
 	import type { TableOfContents, Chapter, Section } from '$lib/types/content';
 	import { reader, bookmarks } from '$lib/stores/reader';
 	import { loadTableOfContents, findSectionBySlug } from '$lib/utils/contentLoader';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	export let data: PageData;
 
@@ -125,9 +126,33 @@
 	</div>
 
 	{#if loading}
-		<div class="flex items-center justify-center py-12">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-			<span class="ml-3 text-gray-600 dark:text-gray-300">Hleður...</span>
+		<div class="space-y-6">
+			<!-- Skeleton for chapter groups -->
+			{#each Array(2) as _}
+				<div>
+					<!-- Chapter header skeleton -->
+					<div class="flex items-center gap-2 mb-3">
+						<Skeleton variant="text" class="w-6 h-6 rounded" />
+						<Skeleton variant="text" class="w-32 h-4" />
+					</div>
+					<!-- Bookmark items skeleton -->
+					<div class="space-y-2">
+						{#each Array(3) as _}
+							<div class="flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+								<Skeleton variant="text" class="w-5 h-5 flex-shrink-0" />
+								<div class="flex-1 space-y-2">
+									<Skeleton variant="text" class="w-48 h-5" />
+									<Skeleton variant="text" class="w-32 h-4" />
+								</div>
+								<div class="flex gap-2">
+									<Skeleton variant="text" class="w-9 h-9 rounded-lg" />
+									<Skeleton variant="text" class="w-9 h-9 rounded-lg" />
+								</div>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/each}
 		</div>
 	{:else if error}
 		<div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
