@@ -16,13 +16,13 @@ This document outlines a comprehensive UI/UX improvement plan for Námsbókasafn
 
 | Priority | Effort | Impact | Recommendation | Status |
 |----------|--------|--------|----------------|--------|
-| High | Low | High | ARIA live regions, focus halos | Pending |
-| High | Medium | High | Reading position persistence | Pending |
-| High | Medium | High | Mobile bottom navigation | Pending |
-| Medium | Low | Medium | Reading time estimates | Pending |
-| Medium | Medium | High | Flashcard-to-highlight connection | Pending |
+| High | Low | High | ARIA live regions, focus halos | ✅ Completed |
+| High | Medium | High | Reading position persistence | ✅ Completed |
+| High | Medium | High | Mobile bottom navigation | ✅ Completed |
+| Medium | Low | Medium | Reading time estimates | ✅ Completed |
+| Medium | Medium | High | Flashcard-to-highlight connection | ✅ Completed |
 | Medium | High | High | Learning analytics dashboard | Pending |
-| Low | Low | Medium | Skeleton loading states | Pending |
+| Low | Low | Medium | Skeleton loading states | ✅ Completed |
 | Low | Medium | Medium | Bionic reading mode | Pending |
 
 ---
@@ -58,13 +58,13 @@ These can be implemented rapidly with significant user benefit:
 }
 ```
 
-**Status:** Pending
+**Status:** ✅ Completed - Enhanced focus styles with box-shadow halo for both light and dark modes
 
 ### 1.2 Color Contrast in Content Blocks
 **Location:** `src/app.css:366-872`
 **Issue:** Some content block title colors in dark mode may not meet WCAG AA (4.5:1)
 
-**Status:** Pending - Needs contrast audit
+**Status:** ✅ Completed - Audited dark mode colors, improved warning block title contrast (yellow-200 instead of yellow-400)
 
 ### 1.3 ARIA Live Regions
 **Impact:** Screen reader users miss dynamic updates
@@ -74,7 +74,9 @@ These can be implemented rapidly with significant user benefit:
 - Progress updates: Wrap progress counters in live region
 - Search results count announcement
 
-**Status:** Pending
+**Status:** ✅ Completed - Added aria-live regions to:
+- `FlashcardStudy.svelte`: Progress indicator, card flip state announcements, session completion
+- `SearchModal.svelte`: Search results count announcements
 
 ### 1.4 Keyboard Trap in Modals
 **Location:** `SearchModal.svelte`, `SettingsModal.svelte`
@@ -95,7 +97,12 @@ These can be implemented rapidly with significant user benefit:
 - Restore on return navigation
 - Show "Continue where you left off" prompt
 
-**Status:** Pending
+**Status:** ✅ Completed
+- Added `scrollPositions` map to reader store with per-section scroll tracking
+- Saves scroll position (pixels + percentage) when navigating away via `beforeNavigate`
+- Shows "Haltu áfram að lesa" prompt when returning to a section with saved position (>10%)
+- User can click "Halda áfram" to smooth-scroll to saved position or dismiss to start fresh
+- Auto-hides prompt after 8 seconds
 
 ### 2.2 Estimated Reading Time
 **Location:** Section headers
@@ -106,7 +113,11 @@ These can be implemented rapidly with significant user benefit:
 <span class="reading-time">~{Math.ceil(wordCount / 200)} mín</span>
 ```
 
-**Status:** Pending
+**Status:** ✅ Completed (already implemented, enhanced)
+- Reading time calculation already existed at 180 WPM in `contentLoader.ts`
+- Enhanced section header display with clock icon and "lestími" label
+- Added reading time to sidebar section links (shows for unread sections)
+- TOC already includes pre-computed reading times in section metadata
 
 ### 2.3 Reading Mode Improvements
 **Focus mode enhancements:**
@@ -136,7 +147,23 @@ These can be implemented rapidly with significant user benefit:
 3. Card creation from highlights
 4. Audio support for pronunciation
 
-**Status:** Pending
+**Status:** Partially Completed
+- ✅ Card creation from highlights implemented (see 3.1.1)
+
+### 3.1.1 Flashcard-to-Highlight Connection
+**Location:** `TextHighlighter.svelte`, `FlashcardModal.svelte`
+
+**Implementation:**
+- Created `FlashcardModal.svelte` component for creating flashcards from selected text
+- Updated `TextHighlighter.svelte` to show modal when "Minniskort" button clicked
+- Features:
+  - Selected text becomes the "front" (question) of the card
+  - User enters the "back" (answer)
+  - Deck selection or creation of new deck
+  - Source attribution (book > chapter > section)
+  - Ctrl+Enter keyboard shortcut to save
+
+**Status:** ✅ Completed
 
 ### 3.2 Progress Visualization
 **Current:** Simple percentage in sidebar
@@ -264,7 +291,14 @@ These can be implemented rapidly with significant user benefit:
 </nav>
 ```
 
-**Status:** Pending
+**Status:** ✅ Completed
+- Created `MobileBottomNav.svelte` component with 4-5 navigation tabs
+- Tabs: Heim (Home), Kort (Flashcards), Orðasafn (Glossary), Lotukerfi (Periodic Table - conditional), Valmynd (Menu)
+- Fixed to bottom with safe-area padding for iPhone notch
+- Hidden on desktop (lg: breakpoint), hidden in focus mode
+- Active state highlighting with accent color
+- Minimum 64px touch targets
+- Added bottom padding (pb-24) to main content to prevent overlap
 
 ---
 
@@ -274,7 +308,17 @@ These can be implemented rapidly with significant user benefit:
 **Current:** Text-based loading messages
 **Recommendation:** Skeleton screens matching content structure
 
-**Status:** Pending
+**Status:** ✅ Completed
+- Created `Skeleton.svelte` component with multiple variants: text, heading, paragraph, card, sidebar, content, list-item, chapter
+- Shimmer animation for visual feedback during loading
+- Integrated skeleton loaders into:
+  - `Sidebar.svelte`: TOC loading state
+  - `MarkdownRenderer.svelte`: Content loading state
+  - Book home page: Chapter grid cards
+  - Glossary page: Term list items
+  - Objectives page: Learning objective cards
+  - Analytics page: Stats grid
+  - Bookmarks page: Grouped bookmark list
 
 ### 7.2 Prefetching
 **Recommendation:** Prefetch next section when scroll > 80%
@@ -317,6 +361,52 @@ These can be implemented rapidly with significant user benefit:
   - QW-6: Print button in section header
   - QW-7: Share button with Web Share API and clipboard fallback
   - QW-8: Visual font size slider with Aa previews in SettingsModal
+- **Completed Critical Accessibility Improvements (1.1-1.3):**
+  - 1.1: Enhanced focus indicators with box-shadow halo effect for better visibility on busy backgrounds (both light and dark modes)
+  - 1.2: Audited color contrast in content blocks, improved warning block title from yellow-400 to yellow-200 for better dark mode contrast
+  - 1.3: Added ARIA live regions for screen reader support:
+    - FlashcardStudy.svelte: Progress indicator, card flip announcements with full question/answer text, session completion
+    - SearchModal.svelte: Search results count announcements
+- **Completed Reading Position Persistence (2.1):**
+  - Extended reader store with `scrollPositions` map for per-section position tracking
+  - Added `saveScrollPosition`, `getScrollPosition`, `clearScrollPosition` methods
+  - Section page now saves position via `beforeNavigate` hook when user leaves
+  - On return visit, shows "Haltu áfram að lesa" prompt if user was >10% through the section
+  - Smooth-scroll restoration with option to dismiss and start fresh
+  - Prompt auto-dismisses after 8 seconds
+- **Completed Mobile Bottom Navigation (6.3):**
+  - Created `MobileBottomNav.svelte` component
+  - 4-5 tab navigation: Heim, Kort, Orðasafn, Lotukerfi (conditional), Valmynd
+  - Fixed bottom position with iPhone safe-area support
+  - Responsive: hidden on lg: screens, hidden in focus mode
+  - Active tab highlighting with accent color
+  - Proper touch targets (min 64px width)
+  - Added pb-24 padding to main content on mobile to prevent content overlap
+- **Enhanced Reading Time Estimates (2.2):**
+  - Reading time calculation already existed (180 WPM)
+  - Enhanced section header: added clock icon and "lestími" label
+  - Added reading time to sidebar section links for study planning
+  - Shows only for unread sections to reduce visual clutter
+- **Implemented Flashcard-to-Highlight Connection (3.1.1):**
+  - Created `FlashcardModal.svelte` component
+  - Modal allows creating flashcards directly from highlighted text
+  - Selected text becomes "front" (question), user enters "back" (answer)
+  - Deck selection with option to create new decks on the fly
+  - Source attribution links card back to original section
+  - Integrated into `TextHighlighter.svelte` selection popup
+  - Keyboard shortcuts: Ctrl+Enter to save, Escape to close
+- **Implemented Skeleton Loading States (7.1):**
+  - Created reusable `Skeleton.svelte` component with multiple variants
+  - Variants: text, heading, paragraph, card, sidebar, content, list-item, chapter
+  - CSS shimmer animation for visual loading feedback
+  - Replaced all "Hleður..." text spinners across the application:
+    - Sidebar TOC loading
+    - MarkdownRenderer content loading
+    - Book home chapter grid
+    - Glossary term list
+    - Learning objectives cards
+    - Analytics stats grid
+    - Bookmarks grouped list
 
 ---
 

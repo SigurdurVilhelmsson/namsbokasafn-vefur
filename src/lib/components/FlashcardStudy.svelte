@@ -73,7 +73,7 @@
 <div class="flashcard-study">
   <div class="study-header">
     <h2>Minniskort</h2>
-    <div class="progress-indicator">
+    <div class="progress-indicator" aria-live="polite" aria-atomic="true">
       <span class="progress-text">
         {$studyProgress.current} / {$studyProgress.total}
       </span>
@@ -87,7 +87,7 @@
   </div>
 
   {#if $studyProgress.isComplete}
-    <div class="complete-message" in:fade>
+    <div class="complete-message" in:fade role="status" aria-live="polite">
       <div class="complete-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -101,6 +101,10 @@
       </button>
     </div>
   {:else if $currentCard}
+    <!-- Screen reader announcement for card state -->
+    <div class="sr-only" aria-live="polite" aria-atomic="true">
+      {isFlipped ? `Svar: ${$currentCard.back}` : `Spurning: ${$currentCard.front}`}
+    </div>
     <div
       class="flashcard"
       class:flipped={isFlipped}
@@ -108,14 +112,14 @@
       on:keydown={handleKeydown}
       role="button"
       tabindex="0"
-      aria-label={isFlipped ? 'Svar' : 'Spurning'}
+      aria-label={isFlipped ? 'Svar - smelltu til að snúa aftur' : 'Spurning - smelltu til að sjá svar'}
     >
       <div class="flashcard-inner">
-        <div class="flashcard-front">
+        <div class="flashcard-front" aria-hidden={isFlipped}>
           <p>{$currentCard.front}</p>
           <span class="hint">Smelltu til að snúa</span>
         </div>
-        <div class="flashcard-back">
+        <div class="flashcard-back" aria-hidden={!isFlipped}>
           <p>{$currentCard.back}</p>
         </div>
       </div>
@@ -400,5 +404,18 @@
     text-align: center;
     padding: 3rem;
     color: var(--text-secondary);
+  }
+
+  /* Screen reader only - visually hidden but accessible */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 </style>

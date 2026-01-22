@@ -12,6 +12,7 @@
 	import { glossaryStore } from '$lib/stores/glossary';
 	import SelectionPopup from './SelectionPopup.svelte';
 	import NoteModal from './NoteModal.svelte';
+	import FlashcardModal from './FlashcardModal.svelte';
 	import GlossaryTooltip from './GlossaryTooltip.svelte';
 	import type { HighlightColor, TextRange, TextSelection, Annotation } from '$lib/types/annotation';
 	import { isLegacyTextRange } from '$lib/types/annotation';
@@ -25,6 +26,7 @@
 	let containerElement: HTMLDivElement;
 	let selection: TextSelection | null = null;
 	let showNoteModal = false;
+	let showFlashcardModal = false;
 	let showGlossaryTooltip = false;
 	let glossaryTerm: GlossaryTerm | null = null;
 	let glossaryPosition: { x: number; y: number } = { x: 0, y: 0 };
@@ -32,6 +34,9 @@
 		text: string;
 		range: TextRange;
 		color: HighlightColor;
+	} | null = null;
+	let pendingFlashcard: {
+		text: string;
 	} | null = null;
 
 	// Track restored highlights by annotation ID for click handling
@@ -369,13 +374,33 @@
 
 	/**
 	 * Handle create flashcard action
-	 * For now, this just creates a highlight - flashcard modal can be added later
 	 */
 	function handleCreateFlashcard() {
 		if (!selection) return;
 
-		// For now, just close the popup
-		// TODO: Integrate with flashcard modal when implemented
+		pendingFlashcard = {
+			text: selection.text
+		};
+
+		showFlashcardModal = true;
+	}
+
+	/**
+	 * Handle flashcard save
+	 */
+	function handleSaveFlashcard() {
+		pendingFlashcard = null;
+		showFlashcardModal = false;
+		window.getSelection()?.removeAllRanges();
+		selection = null;
+	}
+
+	/**
+	 * Close flashcard modal
+	 */
+	function handleCloseFlashcardModal() {
+		showFlashcardModal = false;
+		pendingFlashcard = null;
 		selection = null;
 		window.getSelection()?.removeAllRanges();
 	}
@@ -446,6 +471,16 @@
 		selectedText={pendingHighlight.text}
 		onSave={handleSaveNote}
 		onClose={handleCloseNoteModal}
+	/>
+{/if}
+
+<!-- Flashcard modal -->
+{#if showFlashcardModal && pendingFlashcard}
+	<FlashcardModal
+		selectedText={pendingFlashcard.text}
+		source="{bookSlug} > {chapterSlug} > {sectionSlug}"
+		onSave={handleSaveFlashcard}
+		onClose={handleCloseFlashcardModal}
 	/>
 {/if}
 

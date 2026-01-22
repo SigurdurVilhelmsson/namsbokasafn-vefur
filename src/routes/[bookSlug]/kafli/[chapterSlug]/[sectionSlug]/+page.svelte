@@ -2,16 +2,19 @@
   Section View Page - Renders a book section with markdown content
 -->
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
+	import { beforeNavigate } from '$app/navigation';
+	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
-	import { isSectionRead, isSectionBookmarked } from '$lib/stores/reader';
+	import { isSectionRead, isSectionBookmarked, getSavedScrollPosition, type ScrollPositions } from '$lib/stores/reader';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
 	import TextHighlighter from '$lib/components/TextHighlighter.svelte';
 	import AnnotationSidebar from '$lib/components/AnnotationSidebar.svelte';
 	import PilotBanner from '$lib/components/PilotBanner.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
+	import { fade, fly } from 'svelte/transition';
 
 	export let data: PageData;
 
@@ -20,6 +23,9 @@
 	let shareTimeout: ReturnType<typeof setTimeout>;
 	let showCompletionAnimation = false;
 	let completionTimeout: ReturnType<typeof setTimeout>;
+	let showContinuePrompt = false;
+	let savedPosition: { scrollY: number; percentage: number } | null = null;
+	let continuePromptTimeout: ReturnType<typeof setTimeout>;
 
 	// Print the current section
 	function handlePrint() {
@@ -69,23 +75,64 @@
 	}
 
 	// Mark section as read and start analytics session
-	onMount(() => {
+	onMount(async () => {
 		reader.setCurrentLocation(data.chapterSlug, data.sectionSlug);
 		reader.setScrollProgress(0); // Reset scroll progress
 		analyticsStore.startReadingSession(data.bookSlug, data.chapterSlug, data.sectionSlug);
+
+		// Check for saved scroll position
+		const saved = reader.getScrollPosition(data.chapterSlug, data.sectionSlug);
+		if (saved && saved.percentage > 10) {
+			// Only show prompt if user was past 10% of the document
+			savedPosition = { scrollY: saved.scrollY, percentage: saved.percentage };
+			showContinuePrompt = true;
+			// Auto-hide the prompt after 8 seconds
+			continuePromptTimeout = setTimeout(() => {
+				showContinuePrompt = false;
+			}, 8000);
+		}
 
 		// Add scroll listener
 		window.addEventListener('scroll', handleScroll, { passive: true });
 
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
+			clearTimeout(continuePromptTimeout);
 		};
+	});
+
+	// Save scroll position before navigating away
+	beforeNavigate(() => {
+		if (browser) {
+			const scrollTop = window.scrollY;
+			const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+			const percentage = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+			reader.saveScrollPosition(data.chapterSlug, data.sectionSlug, scrollTop, percentage);
+		}
 	});
 
 	// End analytics session when leaving
 	onDestroy(() => {
 		analyticsStore.endReadingSession();
+		clearTimeout(continuePromptTimeout);
 	});
+
+	// Handle "Continue where you left off" action
+	function handleContinueReading() {
+		if (savedPosition) {
+			window.scrollTo({ top: savedPosition.scrollY, behavior: 'smooth' });
+		}
+		showContinuePrompt = false;
+		clearTimeout(continuePromptTimeout);
+	}
+
+	// Dismiss the continue prompt
+	function dismissContinuePrompt() {
+		showContinuePrompt = false;
+		clearTimeout(continuePromptTimeout);
+		// Clear the saved position since user chose not to continue
+		reader.clearScrollPosition(data.chapterSlug, data.sectionSlug);
+	}
 
 	function markAsRead() {
 		const wasAlreadyRead = isSectionRead(progress, data.chapterSlug, data.sectionSlug);
@@ -133,6 +180,48 @@
 </svelte:head>
 
 <article class="max-w-3xl mx-auto px-1 sm:px-0">
+	<!-- Continue where you left off prompt -->
+	{#if showContinuePrompt && savedPosition}
+		<div
+			class="mb-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+			role="alert"
+			aria-live="polite"
+			transition:fly={{ y: -20, duration: 300 }}
+		>
+			<div class="flex items-center gap-3">
+				<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
+					<svg class="w-5 h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+					</svg>
+				</div>
+				<div>
+					<p class="font-medium text-blue-900 dark:text-blue-100">Haltu áfram að lesa</p>
+					<p class="text-sm text-blue-700 dark:text-blue-300">
+						Þú varst komin(n) {savedPosition.percentage}% í gegnum þennan kafla
+					</p>
+				</div>
+			</div>
+			<div class="flex items-center gap-2 w-full sm:w-auto">
+				<button
+					on:click={handleContinueReading}
+					class="flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+				>
+					Halda áfram
+				</button>
+				<button
+					on:click={dismissContinuePrompt}
+					class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 rounded-lg transition-colors"
+					aria-label="Hunsa"
+					title="Byrja frá byrjun"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+					</svg>
+				</button>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Pilot status banner -->
 	<PilotBanner chapterNumber={data.chapterNumber} />
 
@@ -140,8 +229,11 @@
 	<div class="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2">
 		<div class="flex items-center gap-2 sm:gap-3">
 			{#if data.section.readingTime}
-				<span class="text-xs sm:text-sm text-gray-500 dark:text-gray-300">
-					~{data.section.readingTime} mín
+				<span class="inline-flex items-center gap-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+					<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					<span>~{data.section.readingTime} mín lestími</span>
 				</span>
 			{/if}
 			{#if data.section.difficulty}

@@ -8,6 +8,7 @@
 	import { analyticsStore, streakInfo, todayStats } from '$lib/stores/analytics';
 	import { loadTableOfContents, findSectionBySlug } from '$lib/utils/contentLoader';
 	import { getTodayDateString } from '$lib/utils/storeHelpers';
+	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	export let data: PageData;
 
@@ -190,10 +191,12 @@
 	</div>
 
 	{#if loading}
-		<div class="flex items-center justify-center py-12">
-			<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-			<span class="ml-3 text-gray-600 dark:text-gray-300">Hleður...</span>
+		<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+			{#each Array(4) as _}
+				<Skeleton variant="card" className="p-4" />
+			{/each}
 		</div>
+		<Skeleton variant="card" className="mb-8" />
 	{:else}
 		<!-- Overview Cards -->
 		<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

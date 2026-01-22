@@ -380,7 +380,16 @@
 						</p>
 					{/if}
 
-					<!-- Results -->
+					<!-- Results with ARIA live region for screen reader announcements -->
+					<div class="sr-only" aria-live="polite" aria-atomic="true">
+						{#if loading}
+							Leitar...
+						{:else if query.length >= 2 && results.length === 0}
+							Engar niðurstöður fundust fyrir {query}
+						{:else if results.length > 0}
+							{results.length} {results.length === 1 ? 'niðurstaða' : 'niðurstöður'} fundust
+						{/if}
+					</div>
 					{#if query.length >= 2 && !loading && results.length === 0}
 						<p class="text-center text-sm text-[var(--text-secondary)]">
 							Engar niðurstöður fundust fyrir &quot;{query}&quot;
