@@ -92,22 +92,22 @@ function closeZoomModal(state: EquationState): void {
 }
 
 /**
- * Copies LaTeX to clipboard
+ * Copies text to clipboard and shows feedback
  */
-async function copyLatex(latex: string, button: HTMLButtonElement): Promise<void> {
-	if (!latex) return;
+async function copyToClipboard(text: string, button: HTMLButtonElement, successText = '✓ Afritað'): Promise<void> {
+	if (!text) return;
 
 	try {
-		await navigator.clipboard.writeText(latex);
+		await navigator.clipboard.writeText(text);
 		const originalText = button.textContent;
-		button.textContent = '✓ Afritað';
+		button.textContent = successText;
 		setTimeout(() => {
 			button.textContent = originalText;
 		}, 2000);
 	} catch {
 		// Fallback for older browsers
 		const textArea = document.createElement('textarea');
-		textArea.value = latex;
+		textArea.value = text;
 		textArea.style.position = 'fixed';
 		textArea.style.left = '-9999px';
 		document.body.appendChild(textArea);
@@ -116,11 +116,35 @@ async function copyLatex(latex: string, button: HTMLButtonElement): Promise<void
 		document.body.removeChild(textArea);
 
 		const originalText = button.textContent;
-		button.textContent = '✓ Afritað';
+		button.textContent = successText;
 		setTimeout(() => {
 			button.textContent = originalText;
 		}, 2000);
 	}
+}
+
+/**
+ * Copies LaTeX to clipboard
+ */
+async function copyLatex(latex: string, button: HTMLButtonElement): Promise<void> {
+	await copyToClipboard(latex, button);
+}
+
+/**
+ * Copies citation to clipboard
+ */
+async function copyCitation(wrapper: HTMLElement, button: HTMLButtonElement): Promise<void> {
+	const equationNumber = wrapper.getAttribute('data-equation-number') || '';
+	const chapterNumber = wrapper.getAttribute('data-chapter-number') || '';
+
+	let citation = 'Jafna';
+	if (chapterNumber && equationNumber) {
+		citation = `Jafna ${chapterNumber}.${equationNumber}`;
+	} else if (equationNumber) {
+		citation = `Jafna ${equationNumber}`;
+	}
+
+	await copyToClipboard(citation, button, '✓');
 }
 
 /**
@@ -136,12 +160,21 @@ export function equations(node: HTMLElement) {
 	function handleClick(event: Event) {
 		const target = event.target as HTMLElement;
 
-		// Handle copy button
+		// Handle copy LaTeX button
 		if (target.matches('[data-action="copy-latex"]')) {
 			const wrapper = target.closest('.equation-wrapper');
 			if (wrapper) {
 				const latex = wrapper.getAttribute('data-latex') || '';
 				copyLatex(latex, target as HTMLButtonElement);
+			}
+			return;
+		}
+
+		// Handle copy citation button
+		if (target.matches('[data-action="copy-citation"]')) {
+			const wrapper = target.closest('.equation-wrapper') as HTMLElement;
+			if (wrapper) {
+				copyCitation(wrapper, target as HTMLButtonElement);
 			}
 			return;
 		}

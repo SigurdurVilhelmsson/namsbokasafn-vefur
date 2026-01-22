@@ -16,6 +16,7 @@
   import { onMount } from 'svelte';
   import { fade } from 'svelte/transition';
   import type { DifficultyRating } from '$lib/types/flashcard';
+  import { playFlipSound, playSuccessSound, playEasySound, playAgainSound, playCompletionSound } from '$lib/utils/sounds';
 
   export let deckId: string = 'sample';
 
@@ -27,12 +28,29 @@
 
   function handleFlip() {
     isFlipped = !isFlipped;
+    playFlipSound();
   }
 
   function handleRate(rating: DifficultyRating) {
     if ($currentCard) {
+      // Play appropriate sound based on rating
+      if (rating === 'again') {
+        playAgainSound();
+      } else if (rating === 'easy') {
+        playEasySound();
+      } else {
+        playSuccessSound();
+      }
+
       flashcardStore.rateCard($currentCard.id, rating);
       isFlipped = false;
+
+      // Check if this completes the session
+      setTimeout(() => {
+        if ($studyProgress.isComplete) {
+          playCompletionSound();
+        }
+      }, 100);
     }
   }
 

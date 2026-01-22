@@ -743,6 +743,18 @@ function createEquationWrapper(katexNode: Element, latex: string): Element {
 						type: 'element',
 						tagName: 'button',
 						properties: {
+							className: 'equation-citation-btn',
+							type: 'button',
+							title: 'Afrita tilvísun',
+							'aria-label': 'Afrita tilvísun í jöfnu',
+							'data-action': 'copy-citation'
+						},
+						children: [{ type: 'text', value: '📋' }]
+					},
+					{
+						type: 'element',
+						tagName: 'button',
+						properties: {
 							className: 'equation-zoom-btn',
 							type: 'button',
 							title: 'Stækka',
