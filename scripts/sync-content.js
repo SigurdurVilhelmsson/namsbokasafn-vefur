@@ -94,7 +94,8 @@ Source structure:
     books/{bookSlug}/05-publication/faithful/   (preferred)
     books/{bookSlug}/05-publication/mt-preview/ (fallback)
 
-  Each publication directory must contain a toc.json file.
+  Each publication directory must contain a chapters/ directory.
+  toc.json is auto-generated after sync based on actual content.
 `);
 }
 
@@ -114,17 +115,18 @@ function getPublicationPath(sourceDir, bookSlug) {
 
 	for (const variant of PUBLICATION_VARIANTS) {
 		const variantPath = resolve(bookDir, variant);
-		const tocPath = resolve(variantPath, 'toc.json');
+		const chaptersPath = resolve(variantPath, 'chapters');
 
-		if (existsSync(variantPath) && existsSync(tocPath)) {
-			// Check that toc.json has a non-empty chapters array
-			try {
-				const toc = JSON.parse(readFileSync(tocPath, 'utf-8'));
-				if (Array.isArray(toc.chapters) && toc.chapters.length > 0) {
-					return { path: variantPath, variant };
-				}
-			} catch {
-				// Invalid JSON, skip this variant
+		// Check that variant has a chapters directory with actual chapter subdirectories
+		if (existsSync(variantPath) && existsSync(chaptersPath) && statSync(chaptersPath).isDirectory()) {
+			// Check for numbered chapter directories (01/, 02/, etc.)
+			const chapterDirs = readdirSync(chaptersPath).filter((name) => {
+				const fullPath = resolve(chaptersPath, name);
+				return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name);
+			});
+
+			if (chapterDirs.length > 0) {
+				return { path: variantPath, variant };
 			}
 		}
 	}
@@ -189,6 +191,19 @@ function syncBook(sourceDir, bookSlug, dryRun) {
 		return false;
 	}
 
+	// Regenerate toc.json based on actual content
+	if (!dryRun) {
+		console.log(`  Regenerating toc.json...`);
+		try {
+			execSync(`node scripts/generate-toc.js ${bookSlug}`, {
+				cwd: projectRoot,
+				stdio: 'inherit'
+			});
+		} catch (error) {
+			console.error(`  Warning: Failed to regenerate toc.json: ${error.message}`);
+		}
+	}
+
 	return true;
 }
 
@@ -219,6 +234,17 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 
 		// Copy source to destination
 		execSync(`cp -r "${publication.path}" "${bookDest}"`, { stdio: 'inherit' });
+
+		// Regenerate toc.json based on actual content
+		console.log(`  Regenerating toc.json...`);
+		try {
+			execSync(`node scripts/generate-toc.js ${bookSlug}`, {
+				cwd: projectRoot,
+				stdio: 'inherit'
+			});
+		} catch (error) {
+			console.error(`  Warning: Failed to regenerate toc.json: ${error.message}`);
+		}
 
 		console.log(`    Done.`);
 		return true;
