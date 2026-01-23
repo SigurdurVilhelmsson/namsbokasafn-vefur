@@ -31,17 +31,28 @@ const VALID_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'];
 const VALID_SECTION_TYPES = ['glossary', 'exercises', 'summary', 'equations', 'answer-key', 'content'];
 
 const DIRECTIVE_NAMES = [
+	// Practice problems and exercises
 	'practice-problem',
 	'answer',
+	'svar', // Icelandic alias for 'answer'
 	'explanation',
 	'hint',
+	// Educational content blocks
 	'note',
 	'warning',
 	'example',
 	'definition',
 	'key-concept',
 	'checkpoint',
-	'common-misconception'
+	'common-misconception',
+	// Chapter structure
+	'learning-objectives',
+	'chapter-overview',
+	// Special content types
+	'link-to-material',
+	'chemistry-everyday',
+	'scientist-spotlight',
+	'how-science-connects'
 ];
 
 const CROSS_REF_TYPES = ['sec', 'eq', 'fig', 'tbl', 'def'];
@@ -340,7 +351,10 @@ function validateFrontmatter(filePath, content, tocSection = null, tocChapter = 
 		error(filePath, 1, 'Missing or invalid "title" field in frontmatter');
 	}
 
-	if (metadata.section === undefined) {
+	// Don't require section for special section types (exercises, summary, glossary, equations)
+	const specialTypes = ['glossary', 'equations', 'summary', 'exercises', 'answer-key'];
+	const isSpecialType = tocSection && specialTypes.includes(tocSection.type);
+	if (metadata.section === undefined && !isSpecialType) {
 		warning(filePath, 1, 'Missing "section" field in frontmatter');
 	}
 
@@ -365,7 +379,9 @@ function validateFrontmatter(filePath, content, tocSection = null, tocChapter = 
 	if (tocSection && tocChapter) {
 		const tocSectionNum = String(tocSection.number);
 		const fmSectionNum = String(metadata.section);
-		if (metadata.section !== undefined && tocSectionNum !== fmSectionNum) {
+		// Allow intro sections to map to X.0 numbers
+		const isIntroMatch = fmSectionNum === 'intro' && tocSectionNum.endsWith('.0');
+		if (metadata.section !== undefined && tocSectionNum !== fmSectionNum && !isIntroMatch) {
 			warning(filePath, 1, `Section number mismatch: TOC="${tocSectionNum}", frontmatter="${fmSectionNum}"`);
 		}
 
@@ -396,7 +412,8 @@ function validateDirectives(filePath, content) {
 			}
 
 			// Check required attributes
-			if (directiveName === 'practice-problem' && (!attrs || !attrs.includes('id='))) {
+			// Practice-problems can have IDs in two formats: id="..." or {#id}
+			if (directiveName === 'practice-problem' && (!attrs || (!attrs.includes('id=') && !attrs.includes('#')))) {
 				warning(filePath, lineNum, ':::practice-problem should have an id attribute');
 			}
 
@@ -451,10 +468,15 @@ function validateCrossReferences(filePath, content) {
 /**
  * Validate glossary
  */
-function validateGlossary(bookSlug) {
+function validateGlossary(bookSlug, toc) {
 	const glossaryPath = join(contentDir, bookSlug, 'glossary.json');
+
+	// Skip glossary check for placeholder books without chapters
+	const hasChapters = toc && toc.chapters && toc.chapters.length > 0;
 	if (!existsSync(glossaryPath)) {
-		warning(glossaryPath, 0, 'Glossary file not found');
+		if (hasChapters) {
+			warning(glossaryPath, 0, 'Glossary file not found');
+		}
 		return;
 	}
 
@@ -540,7 +562,7 @@ function validateBook(bookSlug) {
 	}
 
 	// Validate glossary
-	validateGlossary(bookSlug);
+	validateGlossary(bookSlug, toc);
 }
 
 /**
