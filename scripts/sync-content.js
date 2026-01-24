@@ -3,14 +3,14 @@
  * Sync content from namsbokasafn-efni repository
  *
  * This script syncs book content from the content preparation repository
- * to the web application's public/content directory.
+ * to the web application's static/content directory.
  *
  * Source structure (namsbokasafn-efni):
  *   books/{bookSlug}/05-publication/faithful/   <- preferred source
  *   books/{bookSlug}/05-publication/mt-preview/ <- fallback source
  *
  * Destination structure (namsbokasafn-vefur):
- *   public/content/{bookSlug}/
+ *   static/content/{bookSlug}/
  *
  * Usage:
  *   node scripts/sync-content.js                    # Sync all books
@@ -32,7 +32,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
-const destDir = resolve(projectRoot, 'public', 'content');
+const destDir = resolve(projectRoot, 'static', 'content');
 
 // Default source: sibling directory
 const DEFAULT_SOURCE = resolve(projectRoot, '..', 'namsbokasafn-efni');

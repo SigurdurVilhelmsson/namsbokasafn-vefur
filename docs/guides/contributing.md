@@ -76,7 +76,7 @@ The application will be available at `http://localhost:5173`.
 
 ### Environment Configuration
 
-No environment variables are required for development. The application uses static content from `/public/content/`.
+No environment variables are required for development. The application uses static content from `/static/content/`.
 
 ---
 
@@ -319,7 +319,7 @@ describe('Button', () => {
 2. **Create content directory**:
 
 ```
-public/content/new-book/
+static/content/new-book/
 ├── toc.json           # Table of contents
 ├── glossary.json      # Glossary terms
 └── chapters/

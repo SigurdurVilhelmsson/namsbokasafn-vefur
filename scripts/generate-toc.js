@@ -3,7 +3,7 @@
  * Generate toc.json by scanning chapter directories
  *
  * This script auto-generates toc.json based on what chapters and sections
- * actually exist in public/content/{bookSlug}/chapters/.
+ * actually exist in static/content/{bookSlug}/chapters/.
  *
  * It reads:
  * - Markdown frontmatter for section titles and numbers
@@ -23,7 +23,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
-const contentDir = resolve(projectRoot, 'public', 'content');
+const contentDir = resolve(projectRoot, 'static', 'content');
 const DEFAULT_EFNI_PATH = resolve(projectRoot, '..', 'namsbokasafn-efni');
 
 // Parse command line arguments
@@ -381,7 +381,7 @@ function main() {
 	const availableBooks = getContentBooks();
 
 	if (availableBooks.length === 0) {
-		console.error('No books found in public/content/');
+		console.error('No books found in static/content/');
 		process.exit(1);
 	}
 

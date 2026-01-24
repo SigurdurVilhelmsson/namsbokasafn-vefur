@@ -31,7 +31,7 @@ npm run format           # Prettier formatting
 - `annotation.ts`: Text highlights and notes with export capability
 
 ### Content Loading
-- Static content served from `public/content/{bookSlug}/` (copied to `static/content/` at build time)
+- Static content served from `static/content/{bookSlug}/`
 - Each book has: `toc.json` (table of contents), `glossary.json`, and `chapters/{chapterSlug}/{sectionSlug}.md`
 - Markdown files use YAML-like frontmatter for metadata
 - Custom directives: `:::practice-problem`, `:::note`, `:::warning`, `:::example`

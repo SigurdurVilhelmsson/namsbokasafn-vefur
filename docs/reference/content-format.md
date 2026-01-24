@@ -582,7 +582,7 @@ The `alt` text becomes a caption below the image:
 
 Images should be placed in:
 ```
-/public/content/chapters/{chapter-slug}/images/
+/static/content/chapters/{chapter-slug}/images/
 ```
 
 Then reference them as:

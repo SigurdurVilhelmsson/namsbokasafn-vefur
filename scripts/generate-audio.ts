@@ -27,7 +27,7 @@ const CONFIG = {
   ttsServerUrl: process.env.TIRO_TTS_URL || "http://localhost:8080",
 
   // Content directory
-  contentDir: "public/content",
+  contentDir: "static/content",
 
   // Available voices (from Tiro TTS)
   voices: {

@@ -30,7 +30,7 @@ The project uses a bilingual approach:
    - Chapter titles and section headings (in content files)
    - Glossary terms and definitions
    - Learning objectives
-   - Example: Files in `public/content/`
+   - Example: Files in `static/content/`
 
 4. **aria-label and title Attributes**
    - Accessibility labels shown to Icelandic users

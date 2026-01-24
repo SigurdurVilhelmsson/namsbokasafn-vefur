@@ -4,7 +4,7 @@ This document provides detailed information about the licensing of educational c
 
 ## Overview
 
-The educational content located in the `public/content/` directory is licensed under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.
+The educational content located in the `static/content/` directory is licensed under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.
 
 ## Original Work Attribution
 

@@ -3,7 +3,7 @@ name: review-tags
 description: Audit existing tags in a chemistry content file for consistency and correctness
 arguments:
   - name: file
-    description: Path to the markdown file to review (e.g., public/content/efnafraedi/chapters/1/1.md)
+    description: Path to the markdown file to review (e.g., static/content/efnafraedi/chapters/1/1.md)
     required: true
 ---
 
