@@ -6,6 +6,7 @@
  */
 
 import { browser } from '$app/environment';
+import { goto } from '$app/navigation';
 import { referenceStore, type ReferenceType, type ReferenceItem, getReferenceUrl } from '$lib/stores/reference';
 
 export interface CrossReferenceOptions {
@@ -210,7 +211,8 @@ export function crossReferences(node: HTMLElement, options: CrossReferenceOption
 		if (ref) {
 			event.preventDefault();
 			const url = getReferenceUrl(bookSlug, ref);
-			window.location.href = url;
+			// Use SvelteKit's goto for client-side navigation
+			goto(url);
 		}
 	}
 

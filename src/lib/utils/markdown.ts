@@ -60,6 +60,11 @@ const DIRECTIVE_CONFIG: Record<
 		className: 'practice-problem-container',
 		additionalProps: (attrs) => ({ 'data-problem-id': attrs.id || undefined })
 	},
+	// Icelandic alias for practice-problem (æfingadæmi = practice exercise)
+	'æfingadæmi': {
+		className: 'practice-problem-container',
+		additionalProps: (attrs) => ({ 'data-problem-id': attrs.id || undefined })
+	},
 	answer: {
 		className: 'practice-answer-container'
 	},
@@ -841,6 +846,51 @@ function rehypeEquationWrapper() {
 }
 
 // =============================================================================
+// PREPROCESSING
+// =============================================================================
+
+/**
+ * Icelandic to English directive name mapping
+ * remark-directive only supports ASCII characters in directive names
+ */
+const ICELANDIC_DIRECTIVE_MAP: Record<string, string> = {
+	'æfingadæmi': 'practice-problem',
+	'svar': 'answer'
+};
+
+/**
+ * Convert Icelandic directive names to their English equivalents
+ * This is needed because remark-directive only supports ASCII in directive names
+ */
+function normalizeDirectiveNames(content: string): string {
+	// Match :::directivename at the start of a line
+	return content.replace(/^(:::)(æfingadæmi|svar)/gm, (match, prefix, name) => {
+		const englishName = ICELANDIC_DIRECTIVE_MAP[name];
+		return englishName ? `${prefix}${englishName}` : match;
+	});
+}
+
+/**
+ * Unescape markdown link brackets that were incorrectly escaped
+ * Some content pipelines escape [ and ] as \[ and \] which breaks links
+ */
+function unescapeBrackets(content: string): string {
+	// Only unescape brackets that are part of markdown link syntax
+	// Pattern: \[text\](url) -> [text](url)
+	return content.replace(/\\(\[|\])/g, '$1');
+}
+
+/**
+ * Apply all preprocessing steps to content before markdown parsing
+ */
+function preprocessContent(content: string): string {
+	let result = content;
+	result = normalizeDirectiveNames(result);
+	result = unescapeBrackets(result);
+	return result;
+}
+
+// =============================================================================
 // MARKDOWN PROCESSOR
 // =============================================================================
 
@@ -848,6 +898,9 @@ function rehypeEquationWrapper() {
  * Process markdown content to HTML
  */
 export async function processMarkdown(content: string): Promise<string> {
+	// Preprocess: normalize directives and fix escaped brackets
+	const preprocessed = preprocessContent(content);
+
 	const result = await unified()
 		.use(remarkParse)
 		.use(remarkPandocSubSup) // Must be before remarkGfm!
@@ -868,7 +921,7 @@ export async function processMarkdown(content: string): Promise<string> {
 		.use(rehypeSlug)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
-		.process(content);
+		.process(preprocessed);
 
 	return String(result);
 }
@@ -878,6 +931,9 @@ export async function processMarkdown(content: string): Promise<string> {
  * Note: This blocks the event loop - prefer async version
  */
 export function processMarkdownSync(content: string): string {
+	// Preprocess: normalize directives and fix escaped brackets
+	const preprocessed = preprocessContent(content);
+
 	const result = unified()
 		.use(remarkParse)
 		.use(remarkPandocSubSup) // Must be before remarkGfm!
@@ -898,7 +954,7 @@ export function processMarkdownSync(content: string): string {
 		.use(rehypeSlug)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
-		.processSync(content);
+		.processSync(preprocessed);
 
 	return String(result);
 }
