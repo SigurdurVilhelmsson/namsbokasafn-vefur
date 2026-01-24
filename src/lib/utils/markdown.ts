@@ -471,6 +471,111 @@ function rehypeShiftHeadings() {
 }
 
 /**
+ * Rehype plugin to process table attributes from marker comments
+ * Looks for <!-- TABLE_ATTRS: id="..." summary="..." --> before tables
+ */
+function rehypeTableAttributes() {
+	return (tree: Node) => {
+		visit(tree, 'element', (node: Element, index, parent) => {
+			if (!parent || index === undefined || node.tagName !== 'table') return;
+
+			const parentEl = parent as Element;
+
+			// Look for preceding comment node with TABLE_ATTRS
+			for (let i = index - 1; i >= 0; i--) {
+				const sibling = parentEl.children[i];
+
+				// Skip whitespace text nodes
+				if (sibling.type === 'text') {
+					const textValue = (sibling as { value: string }).value;
+					if (textValue.trim().length === 0) continue;
+					break;  // Non-whitespace text - stop looking
+				}
+
+				// Found a raw/comment node
+				if (sibling.type === 'raw' || sibling.type === 'comment') {
+					const value = (sibling as { value: string }).value || '';
+					const match = value.match(/TABLE_ATTRS:\s*(.*?)\s*-->/);
+
+					if (match) {
+						const attrString = match[1];
+
+						// Parse id and summary
+						const idMatch = attrString.match(/id="([^"]*)"/);
+						const summaryMatch = attrString.match(/summary="([^"]*)"/);
+
+						if (idMatch) {
+							node.properties = node.properties || {};
+							node.properties.id = idMatch[1];
+						}
+
+						if (summaryMatch) {
+							node.properties = node.properties || {};
+							// Use aria-describedby pattern for accessibility
+							node.properties['aria-label'] = summaryMatch[1];
+						}
+
+						// Remove the marker comment
+						parentEl.children.splice(i, 1);
+					}
+					break;
+				}
+
+				// Any other element type - stop looking
+				if (sibling.type === 'element') break;
+			}
+		});
+	};
+}
+
+/**
+ * Rehype plugin to apply Pandoc-style IDs from data attributes to elements
+ * Processes data-pandoc-id, data-term-id, data-caption-id
+ */
+function rehypePandocIds() {
+	return (tree: Node) => {
+		visit(tree, 'element', (node: Element) => {
+			const props = node.properties;
+			if (!props) return;
+
+			// Process data-pandoc-id on images
+			if (props['dataPandocId']) {
+				props.id = props['dataPandocId'];
+				delete props['dataPandocId'];
+			}
+
+			// Process data-pandoc-class on images
+			if (props['dataPandocClass']) {
+				const existingClass = Array.isArray(props.className)
+					? props.className.join(' ')
+					: (typeof props.className === 'string' ? props.className : '');
+				const newClasses = (props['dataPandocClass'] as string).split(' ');
+				props.className = existingClass ? `${existingClass} ${newClasses.join(' ')}` : newClasses.join(' ');
+				delete props['dataPandocClass'];
+			}
+
+			// Process data-term-id on strong elements (glossary terms)
+			if (node.tagName === 'strong' && props['dataTermId']) {
+				props.id = props['dataTermId'];
+				props.className = props.className
+					? `${props.className} glossary-term`
+					: 'glossary-term';
+				delete props['dataTermId'];
+			}
+
+			// Process data-caption-id on em elements (figure captions)
+			if (node.tagName === 'em' && props['dataCaptionId']) {
+				props.id = props['dataCaptionId'];
+				props.className = props.className
+					? `${props.className} figure-caption-id`
+					: 'figure-caption-id';
+				delete props['dataCaptionId'];
+			}
+		});
+	};
+}
+
+/**
  * Process caption children to wrap "Mynd X.Y" label in <strong> tag
  */
 function processCaptionLabel(children: ElementContent[]): ElementContent[] {
@@ -858,6 +963,57 @@ const ICELANDIC_DIRECTIVE_MAP: Record<string, string> = {
 	'svar': 'answer'
 };
 
+// =============================================================================
+// PANDOC ATTRIBUTE PROCESSING
+// =============================================================================
+
+/**
+ * Parse Pandoc-style attribute string like {#id .class key="value"}
+ * Returns object with id, classes array, and other key-value pairs
+ */
+function parsePandocAttributes(attrString: string): {
+	id?: string;
+	classes: string[];
+	attrs: Record<string, string>;
+} {
+	const result = { id: undefined as string | undefined, classes: [] as string[], attrs: {} as Record<string, string> };
+
+	if (!attrString || !attrString.startsWith('{') || !attrString.endsWith('}')) {
+		return result;
+	}
+
+	const inner = attrString.slice(1, -1).trim();
+	if (!inner) return result;
+
+	// Match patterns: #id, .class, key="value"
+	const patterns = [
+		/#([\w-]+)/g,           // ID: #foo
+		/\.([\w-]+)/g,          // Class: .foo
+		/([\w-]+)="([^"]*)"/g   // Key-value: key="value"
+	];
+
+	// Extract IDs
+	let match;
+	const idPattern = /#([\w-]+)/g;
+	while ((match = idPattern.exec(inner)) !== null) {
+		result.id = match[1];  // Take last ID if multiple
+	}
+
+	// Extract classes
+	const classPattern = /\.([\w-]+)/g;
+	while ((match = classPattern.exec(inner)) !== null) {
+		result.classes.push(match[1]);
+	}
+
+	// Extract key-value pairs
+	const kvPattern = /([\w-]+)="([^"]*)"/g;
+	while ((match = kvPattern.exec(inner)) !== null) {
+		result.attrs[match[1]] = match[2];
+	}
+
+	return result;
+}
+
 /**
  * Convert Icelandic directive names to their English equivalents
  * This is needed because remark-directive only supports ASCII in directive names
@@ -881,12 +1037,113 @@ function unescapeBrackets(content: string): string {
 }
 
 /**
+ * Process Pandoc-style attributes on images
+ * Converts: ![alt](url){#id .class} → ![alt](url){data-id="id" data-class="class"}
+ * This preprocessing makes it easier for the rehype plugin to extract attributes
+ */
+function preprocessImageAttributes(content: string): string {
+	// Pattern: ![alt](url){...attributes...}
+	const imgAttrPattern = /!\[([^\]]*)\]\(([^)]+)\)\{([^}]+)\}/g;
+
+	return content.replace(imgAttrPattern, (match, alt, url, attrs) => {
+		const parsed = parsePandocAttributes(`{${attrs}}`);
+		const parts = [`![${alt}](${url})`];
+
+		// Build data attributes string for rehype to process
+		const dataAttrs: string[] = [];
+		if (parsed.id) dataAttrs.push(`data-pandoc-id="${parsed.id}"`);
+		if (parsed.classes.length > 0) dataAttrs.push(`data-pandoc-class="${parsed.classes.join(' ')}"`);
+		for (const [key, value] of Object.entries(parsed.attrs)) {
+			dataAttrs.push(`data-pandoc-${key}="${value}"`);
+		}
+
+		if (dataAttrs.length > 0) {
+			// Use HTML img tag to preserve attributes
+			return `<img src="${url}" alt="${alt}" ${dataAttrs.join(' ')} />`;
+		}
+
+		return match;
+	});
+}
+
+/**
+ * Process Pandoc-style attributes on inline elements (bold, italic)
+ * Converts: **term**{#id} → <strong data-pandoc-id="id">term</strong>
+ * Converts: *caption*{#id} → <em data-pandoc-id="id">caption</em>
+ */
+function preprocessInlineAttributes(content: string): string {
+	// Bold with attributes: **text**{...}
+	const boldPattern = /\*\*([^*]+)\*\*\{([^}]+)\}/g;
+	content = content.replace(boldPattern, (match, text, attrs) => {
+		const parsed = parsePandocAttributes(`{${attrs}}`);
+		const dataAttrs: string[] = [];
+		if (parsed.id) dataAttrs.push(`data-term-id="${parsed.id}"`);
+		if (parsed.classes.length > 0) dataAttrs.push(`class="${parsed.classes.join(' ')}"`);
+
+		return `<strong ${dataAttrs.join(' ')}>${text}</strong>`;
+	});
+
+	// Italic with attributes: *text*{...} (often figure captions)
+	const italicPattern = /(?<!\*)\*([^*\n]+)\*\{([^}]+)\}/g;
+	content = content.replace(italicPattern, (match, text, attrs) => {
+		const parsed = parsePandocAttributes(`{${attrs}}`);
+		const dataAttrs: string[] = [];
+		if (parsed.id) dataAttrs.push(`data-caption-id="${parsed.id}"`);
+		if (parsed.classes.length > 0) dataAttrs.push(`class="${parsed.classes.join(' ')}"`);
+
+		return `<em ${dataAttrs.join(' ')}>${text}</em>`;
+	});
+
+	return content;
+}
+
+/**
+ * Process Pandoc-style attributes on tables
+ * Converts: |table|\n{id="..." summary="..."} → adds data attributes
+ */
+function preprocessTableAttributes(content: string): string {
+	// Pattern: table followed by {id="..." ...} on next line
+	// We mark these for the rehype plugin to pick up
+	const tableAttrPattern = /(\|[^\n]+\|\n)\s*\{([^}]+)\}/g;
+
+	return content.replace(tableAttrPattern, (match, table, attrs) => {
+		const parsed = parsePandocAttributes(`{${attrs}}`);
+
+		// Create a marker comment that rehype can process
+		let marker = `<!-- TABLE_ATTRS:`;
+		if (parsed.id || parsed.attrs.id) marker += ` id="${parsed.id || parsed.attrs.id}"`;
+		if (parsed.attrs.summary) marker += ` summary="${parsed.attrs.summary}"`;
+		marker += ` -->`;
+
+		return `${marker}\n${table}`;
+	});
+}
+
+/**
+ * Style unprocessed equation placeholders [[EQ:N]] as warnings
+ * These should have been replaced by apply-equations.js but may remain if equations file was missing
+ */
+function markUnprocessedEquations(content: string): string {
+	// Pattern: [[EQ:N]] placeholders that weren't replaced
+	const eqPattern = /\[\[EQ:(\d+)\]\]/g;
+
+	return content.replace(eqPattern, (match, num) => {
+		// Replace with a warning span that will be visible
+		return `<span class="equation-placeholder-warning" title="Jafna ${num} vantar - [[EQ:${num}]]">[Jafna ${num}]</span>`;
+	});
+}
+
+/**
  * Apply all preprocessing steps to content before markdown parsing
  */
 function preprocessContent(content: string): string {
 	let result = content;
 	result = normalizeDirectiveNames(result);
 	result = unescapeBrackets(result);
+	result = preprocessImageAttributes(result);
+	result = preprocessInlineAttributes(result);
+	result = preprocessTableAttributes(result);
+	result = markUnprocessedEquations(result);
 	return result;
 }
 
@@ -918,6 +1175,8 @@ export async function processMarkdown(content: string): Promise<string> {
 		.use(rehypeFigureCaptions) // Wrap images + captions into figure elements
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
+		.use(rehypePandocIds) // Process Pandoc-style IDs from data attributes
+		.use(rehypeTableAttributes) // Process table accessibility attributes
 		.use(rehypeSlug)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
@@ -951,6 +1210,8 @@ export function processMarkdownSync(content: string): string {
 		.use(rehypeFigureCaptions) // Wrap images + captions into figure elements
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
+		.use(rehypePandocIds) // Process Pandoc-style IDs from data attributes
+		.use(rehypeTableAttributes) // Process table accessibility attributes
 		.use(rehypeSlug)
 		.use(rehypeShiftHeadings)
 		.use(rehypeStringify, { allowDangerousHtml: true })
