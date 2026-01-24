@@ -29,7 +29,7 @@ SOFTWARE.
 
 ## 2. Educational Content - Creative Commons Attribution 4.0 International
 
-The educational content in the `public/content/` directory is an Icelandic
+The educational content in the `static/content/` directory is an Icelandic
 translation and adaptation of "Chemistry 2e" by OpenStax, originally available at:
 https://openstax.org/details/books/chemistry-2e
 

@@ -18,7 +18,7 @@ Scaffold directory structure and template files for a new translated book.
 
 1. **Create content directory**
    ```
-   public/content/$ARGUMENTS.slug/
+   static/content/$ARGUMENTS.slug/
    ├── toc.json
    ├── glossary.json
    └── chapters/

@@ -4,10 +4,10 @@ This guide explains how to add a new translated book to Námsbókasafn.
 
 ## 1. Create Content Directory
 
-Create a directory structure under `public/content/{bookSlug}/`:
+Create a directory structure under `static/content/{bookSlug}/`:
 
 ```
-public/content/liffraedi/
+static/content/liffraedi/
 ├── toc.json              # Table of contents with attribution
 ├── glossary.json         # Terms and definitions (optional)
 └── chapters/
@@ -19,7 +19,7 @@ public/content/liffraedi/
 
 ## 2. Create Table of Contents
 
-Create `public/content/{bookSlug}/toc.json`:
+Create `static/content/{bookSlug}/toc.json`:
 
 ```json
 {
@@ -113,7 +113,7 @@ Innihald dæmis...
 
 ## 4. Create Glossary (Optional)
 
-Create `public/content/{bookSlug}/glossary.json`:
+Create `static/content/{bookSlug}/glossary.json`:
 
 ```json
 {
@@ -134,7 +134,7 @@ Create `public/content/{bookSlug}/glossary.json`:
 
 ## 5. Add Images
 
-Place chapter images in `public/content/{bookSlug}/chapters/{chapterNum}/images/`.
+Place chapter images in `static/content/{bookSlug}/chapters/{chapterNum}/images/`.
 
 Reference them in markdown with relative paths:
 
@@ -146,11 +146,11 @@ The content loader automatically transforms these to absolute paths.
 
 ## 6. Create Cover Image
 
-Add an SVG cover image to `public/covers/{bookSlug}.svg`.
+Add an SVG cover image to `static/covers/{bookSlug}.svg`.
 
 Existing covers can be used as templates:
-- `public/covers/efnafraedi.svg`
-- `public/covers/liffraedi.svg`
+- `static/covers/efnafraedi.svg`
+- `static/covers/liffraedi.svg`
 
 ## 7. Test Locally
 

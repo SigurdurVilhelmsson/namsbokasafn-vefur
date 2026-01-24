@@ -99,7 +99,7 @@ npx tsx scripts/generate-audio.ts --voice=Alfur
 Audio files are saved alongside markdown files:
 
 ```
-public/content/efnafraedi/chapters/
+static/content/efnafraedi/chapters/
   01-grunnhugmyndir/
     1-1-efnafraedi-i-samhengi.md
     1-1-efnafraedi-i-samhengi.mp3  ← generated

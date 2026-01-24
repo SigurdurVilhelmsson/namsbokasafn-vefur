@@ -330,9 +330,9 @@ export default {
 ### Adding a New Book
 
 1. Add configuration to `src/routes/[bookSlug]/+layout.ts`
-2. Create content directory: `public/content/{bookSlug}/`
+2. Create content directory: `static/content/{bookSlug}/`
 3. Add `toc.json`, `glossary.json`, and chapter content
-4. Add cover image to `public/covers/`
+4. Add cover image to `static/covers/`
 
 ### Adding a New Feature
 

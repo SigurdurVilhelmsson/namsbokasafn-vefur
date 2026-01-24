@@ -13,7 +13,7 @@
  * - Deterministic cross-reference numbering (equations, figures, tables)
  *
  * Usage: node scripts/process-content.js
- * Run after copy-content.js
+ * Run after sync-content.js
  */
 
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'fs';
@@ -206,7 +206,7 @@ function parseDifficulty(value) {
 function getBooks() {
 	if (!existsSync(contentDir)) {
 		console.error(`Content directory not found: ${contentDir}`);
-		console.error('Run "npm run copy-content" first');
+		console.error('Run "npm run sync-content" first');
 		process.exit(1);
 	}
 

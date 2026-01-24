@@ -1,6 +1,6 @@
 ---
 name: chemistry-reader-tags
-description: Apply custom markdown tags when working on chemistry educational content, markdown files in public/content/, or when asked to tag, format, or structure chemistry textbook material
+description: Apply custom markdown tags when working on chemistry educational content, markdown files in static/content/, or when asked to tag, format, or structure chemistry textbook material
 ---
 
 # Chemistry Reader Markdown Tags
@@ -9,7 +9,7 @@ This skill provides guidance for applying custom markdown directives to Icelandi
 
 ## When to Invoke This Skill
 
-- Editing or creating markdown files in `public/content/`
+- Editing or creating markdown files in `static/content/`
 - Translating chemistry textbook content
 - Asked to "tag", "format", or "structure" educational chemistry content
 - Reviewing content for proper markup

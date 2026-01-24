@@ -3,7 +3,7 @@ name: tag-chapter
 description: Review and apply Chemistry Reader markdown tags to a chapter file
 arguments:
   - name: file
-    description: Path to the markdown file to tag (e.g., public/content/efnafraedi/chapters/1/1.md)
+    description: Path to the markdown file to tag (e.g., static/content/efnafraedi/chapters/1/1.md)
     required: true
 ---
 

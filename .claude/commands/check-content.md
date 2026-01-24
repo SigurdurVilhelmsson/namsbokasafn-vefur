@@ -14,7 +14,7 @@ Validate book content files for structural correctness and consistency.
 ## Checks to Perform
 
 ### 1. Directory Structure
-For each book in `public/content/`:
+For each book in `static/content/`:
 - [ ] Has `toc.json`
 - [ ] Has `glossary.json` (can be empty `{"terms": []}`)
 - [ ] Has `chapters/` directory

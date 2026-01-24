@@ -72,15 +72,14 @@ npm run preview
 
 ```
 namsbokasafn-vefur/
-├── public/
-│   └── content/
-│       └── efnafraedi/               # Efni efnafræðibókar
-│           ├── toc.json              # Efnisyfirlit
-│           ├── glossary.json         # Orðasafn
-│           └── chapters/             # Kaflar
-│               ├── 01-grunnhugmyndir/
-│               └── 02-atom-og-sameindir/
 ├── static/
+│   ├── content/
+│   │   └── efnafraedi/               # Efni efnafræðibókar
+│   │       ├── toc.json              # Efnisyfirlit
+│   │       ├── glossary.json         # Orðasafn
+│   │       └── chapters/             # Kaflar
+│   │           ├── 01/
+│   │           └── 02/
 │   ├── covers/                       # Forsíðumyndir fyrir bækur
 │   │   ├── efnafraedi.svg
 │   │   └── liffraedi.svg
@@ -181,7 +180,7 @@ npm run format           # Prettier
    - Sjá [LICENSE](./LICENSE)
 
 2. **Educational Content (CC BY 4.0)**
-   - Allt efni í `public/content/`
+   - Allt efni í `static/content/`
    - Sjá [CONTENT-LICENSE.md](./CONTENT-LICENSE.md)
 
 ### Content Attribution
