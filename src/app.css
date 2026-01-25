@@ -944,6 +944,59 @@
 }
 
 /* ========================================== */
+/* END-OF-CHAPTER EXERCISES (OpenStax style) */
+/* ========================================== */
+
+/* Minimal styling - just numbered list format */
+.eoc-exercise {
+  display: block;
+  margin: 1.25rem 0;
+  padding-left: 3rem;
+  position: relative;
+}
+
+/* Exercise number displayed before content */
+.eoc-exercise::before {
+  content: attr(data-exercise-number) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 2.5rem;
+  text-align: right;
+  padding-right: 0.5rem;
+}
+
+/* Link to answer for odd-numbered exercises */
+.eoc-exercise[data-has-answer="true"]::after {
+  content: " [Svar]";
+  font-size: 0.875rem;
+  color: var(--accent-color);
+  cursor: pointer;
+}
+
+/* Answer entry - minimal styling */
+.answer-entry {
+  display: block;
+  margin: 1rem 0;
+  padding-left: 3rem;
+  position: relative;
+}
+
+.answer-entry::before {
+  content: attr(data-exercise-number) ".";
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 2.5rem;
+  text-align: right;
+  padding-right: 0.5rem;
+}
+
+/* ========================================== */
 /* EQUATION WRAPPER                          */
 /* ========================================== */
 
