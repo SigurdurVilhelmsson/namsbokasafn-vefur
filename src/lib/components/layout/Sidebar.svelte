@@ -3,7 +3,7 @@
 	import { settings, sidebarOpen, reader } from '$lib/stores';
 	import { isSectionRead, calcChapterProgress, scrollProgress } from '$lib/stores/reader';
 	import { onMount } from 'svelte';
-	import type { TableOfContents, Chapter } from '$lib/types/content';
+	import type { TableOfContents, Chapter, Appendix } from '$lib/types/content';
 	import { loadTableOfContents, getChapterPath, getSectionPath, findChapterBySlug } from '$lib/utils/contentLoader';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
@@ -12,6 +12,8 @@
 
 	let toc: TableOfContents | null = null;
 	let manuallyToggledChapters: Set<number> = new Set();
+	let appendicesExpanded = false;
+	let answerKeyExpanded = false;
 
 	// Get current route params
 	$: chapterParam = $page.params.chapterSlug;
@@ -172,7 +174,7 @@
 							<!-- Sections -->
 							{#if expanded}
 								<ul id="chapter-{chapter.number}-sections" class="mt-1 space-y-1">
-									{#each chapter.sections as section (section.number)}
+									{#each chapter.sections as section (section.file)}
 										{@const sectionPath = getSectionPath(section)}
 										{@const isCurrent = isCurrentChapter && (sectionParam === sectionPath || sectionParam === section.slug)}
 										{@const isReadSection = isRead(chapterPath, sectionPath)}
@@ -238,6 +240,95 @@
 						</li>
 					{/each}
 				</ul>
+
+				<!-- Appendices section -->
+				{#if toc.appendices && toc.appendices.length > 0}
+					<div class="mt-4 px-2">
+						<button
+							on:click={() => appendicesExpanded = !appendicesExpanded}
+							aria-expanded={appendicesExpanded}
+							aria-controls="appendices-list"
+							class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+						>
+							<span class="flex items-center gap-2">
+								{#if appendicesExpanded}
+									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+									</svg>
+								{:else}
+									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+									</svg>
+								{/if}
+								<span>Viðaukar</span>
+							</span>
+						</button>
+
+						{#if appendicesExpanded}
+							<ul id="appendices-list" class="mt-1 space-y-1">
+								{#each toc.appendices as appendix (appendix.letter)}
+									{@const href = appendix.isInteractive && appendix.componentPath
+										? `/${bookSlug}${appendix.componentPath}`
+										: `/${bookSlug}/vidauki/${appendix.letter}`}
+									<li>
+										<a
+											{href}
+											class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+										>
+											<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-600 dark:text-gray-300">
+												{appendix.letter}
+											</span>
+											<span class="text-sm">{appendix.title}</span>
+										</a>
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</div>
+				{/if}
+
+				<!-- Answer Key section -->
+				{#if toc.answerKey && toc.answerKey.length > 0}
+					<div class="mt-4 px-2">
+						<button
+							on:click={() => answerKeyExpanded = !answerKeyExpanded}
+							aria-expanded={answerKeyExpanded}
+							aria-controls="answer-key-list"
+							class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+						>
+							<span class="flex items-center gap-2">
+								{#if answerKeyExpanded}
+									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+									</svg>
+								{:else}
+									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+									</svg>
+								{/if}
+								<span>Svarlykill</span>
+							</span>
+						</button>
+
+						{#if answerKeyExpanded}
+							<ul id="answer-key-list" class="mt-1 space-y-1">
+								{#each toc.answerKey as entry (entry.chapter)}
+									<li>
+										<a
+											href="/{bookSlug}/svarlykill/{entry.chapter}"
+											class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+										>
+											<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-600 dark:text-gray-300">
+												{entry.chapter}
+											</span>
+											<span class="text-sm">{entry.title}</span>
+										</a>
+									</li>
+								{/each}
+							</ul>
+						{/if}
+					</div>
+				{/if}
 
 				<!-- Study tools section -->
 				<div class="mt-6 space-y-1 border-t border-gray-100 dark:border-gray-800 px-2 pt-4">

@@ -54,6 +54,13 @@ export interface Appendix {
   componentPath?: string;   // Path to component if isInteractive (e.g., "/lotukerfi")
 }
 
+// Answer key entry (per-chapter, separate from chapter sections)
+export interface AnswerKeyEntry {
+  chapter: number;
+  title: string;   // e.g., "Kafli 1" or chapter title
+  file: string;    // e.g., "answer-key/1.md" or "01/1-answer-key.md"
+}
+
 // Precomputed reference for deterministic numbering
 export interface PrecomputedReference {
   type: 'sec' | 'eq' | 'fig' | 'tbl' | 'def';
@@ -75,6 +82,8 @@ export interface TableOfContents {
   chapters: Chapter[];
   // Appendices (A-M for Chemistry 2e)
   appendices?: Appendix[];
+  // Answer key entries (per-chapter, OpenStax style)
+  answerKey?: AnswerKeyEntry[];
   // Precomputed cross-reference index (from build-time processing)
   references?: { [key: string]: PrecomputedReference };
 }
@@ -96,6 +105,7 @@ export interface SectionContent {
   title: string;
   section: string;
   chapter: number;
+  type?: SectionType;
   objectives?: string[];
   source?: SourceAttribution;
   content: string;

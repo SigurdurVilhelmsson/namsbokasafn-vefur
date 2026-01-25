@@ -8,6 +8,7 @@
 	import { equations } from '$lib/actions/equations';
 	import { figureViewer } from '$lib/actions/figureViewer';
 	import { crossReferences } from '$lib/actions/crossReferences';
+	import { answerLinks } from '$lib/actions/answerLinks';
 	import Skeleton from './Skeleton.svelte';
 
 	// Import KaTeX CSS
@@ -18,6 +19,7 @@
 	export let chapterSlug: string = '';
 	export let sectionSlug: string = '';
 	export let chapterNumber: number = 1;
+	export let sectionType: string = '';
 
 	let html = '';
 	let loading = true;
@@ -61,6 +63,7 @@
 		use:equations
 		use:figureViewer
 		use:crossReferences={{ bookSlug, chapterSlug, sectionSlug, chapterNumber, content }}
+		use:answerLinks={{ bookSlug, chapterSlug, sectionSlug, sectionType, chapterNumber }}
 	>
 		{@html html}
 	</div>

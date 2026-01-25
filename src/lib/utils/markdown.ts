@@ -65,6 +65,15 @@ const DIRECTIVE_CONFIG: Record<
 		className: 'practice-problem-container',
 		additionalProps: (attrs) => ({ 'data-problem-id': attrs.id || undefined })
 	},
+	// End-of-chapter exercise - minimal styling with running numbers (OpenStax style)
+	exercise: {
+		className: 'eoc-exercise',
+		additionalProps: (attrs) => ({
+			id: attrs.id || undefined,  // Actual id for anchor navigation
+			'data-exercise-id': attrs.id || undefined,
+			'data-exercise-number': attrs.number || undefined
+		})
+	},
 	answer: {
 		className: 'practice-answer-container'
 	},
@@ -81,6 +90,7 @@ const DIRECTIVE_CONFIG: Record<
 	'answer-entry': {
 		className: 'answer-entry',
 		additionalProps: (attrs) => ({
+			id: attrs.id || undefined,  // Actual id for anchor navigation
 			'data-exercise-id': attrs.id || undefined,
 			'data-exercise-number': attrs.number || undefined
 		})
