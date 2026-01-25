@@ -21,26 +21,7 @@ export interface AnswerLinksOptions {
 	chapterSlug: string;
 	sectionSlug: string;
 	sectionType?: string;  // 'exercises' or 'answer-key'
-}
-
-/**
- * Get the counterpart section slug for navigation
- * exercises -> answer-key, answer-key -> exercises
- */
-function getCounterpartSlug(sectionSlug: string, sectionType?: string): string | null {
-	if (sectionType === 'exercises' || sectionSlug.includes('exercises') || sectionSlug.includes('aefingar')) {
-		// Navigate from exercises to answer-key
-		return sectionSlug
-			.replace('exercises', 'answer-key')
-			.replace('aefingar', 'svarlykill');
-	}
-	if (sectionType === 'answer-key' || sectionSlug.includes('answer-key') || sectionSlug.includes('svarlykill')) {
-		// Navigate from answer-key to exercises
-		return sectionSlug
-			.replace('answer-key', 'exercises')
-			.replace('svarlykill', 'aefingar');
-	}
-	return null;
+	chapterNumber?: number;  // Chapter number for answer key URLs
 }
 
 /**
@@ -58,6 +39,19 @@ function createLinkButton(text: string, ariaLabel: string, onClick: () => void):
 	`;
 	button.addEventListener('click', onClick);
 	return button;
+}
+
+/**
+ * Create an exercise number link element (OpenStax style)
+ * The number itself becomes a clickable link to the answer
+ */
+function createNumberLink(number: string, ariaLabel: string, href: string): HTMLAnchorElement {
+	const link = document.createElement('a');
+	link.className = 'exercise-number-link';
+	link.href = href;
+	link.setAttribute('aria-label', ariaLabel);
+	link.textContent = `${number}.`;
+	return link;
 }
 
 /**
@@ -124,18 +118,43 @@ function addStyles() {
 			}
 		}
 
-		/* Answer entry styling */
-		.answer-entry {
-			padding: 1rem;
-			margin: 1rem 0;
-			border-left: 4px solid #10b981;
-			background-color: #ecfdf5;
-			border-radius: 0 0.5rem 0.5rem 0;
+		/* Inline answer link (OpenStax style) */
+		.answer-link-inline {
+			display: inline-flex;
+			padding: 0.125rem 0.5rem;
+			font-size: 0.75rem;
+			margin-left: 0.5rem;
+			margin-top: 0;
 		}
 
-		:global(.dark) .answer-entry {
-			background-color: rgba(16, 185, 129, 0.1);
-			border-color: #059669;
+		/* Exercise number as link (OpenStax style) */
+		.exercise-number-link {
+			position: absolute;
+			left: 0;
+			top: 0;
+			font-weight: 700;
+			color: var(--accent-color, #3b82f6);
+			min-width: 2.5rem;
+			text-align: right;
+			padding-right: 0.5rem;
+			text-decoration: none;
+			cursor: pointer;
+			transition: color 0.15s ease;
+		}
+
+		.exercise-number-link:hover {
+			color: var(--accent-hover, #2563eb);
+			text-decoration: underline;
+		}
+
+		/* Hide the pseudo-element when we have a number link */
+		.eoc-exercise.has-answer-link::before {
+			display: none;
+		}
+
+		/* Answer entry number as link back to exercise */
+		.answer-entry.has-exercise-link::before {
+			display: none;
 		}
 
 		/* Glossary entry styling */
@@ -177,8 +196,7 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 		return { destroy: () => {} };
 	}
 
-	const { bookSlug, chapterSlug, sectionSlug, sectionType } = options;
-	const counterpartSlug = getCounterpartSlug(sectionSlug, sectionType);
+	const { bookSlug, chapterSlug, sectionSlug, sectionType, chapterNumber } = options;
 	const buttons: HTMLButtonElement[] = [];
 
 	// Add styles
@@ -193,56 +211,112 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 		sectionSlug.includes('answer-key') ||
 		sectionSlug.includes('svarlykill');
 
+	// Track created link elements for cleanup
+	const links: HTMLAnchorElement[] = [];
+
+	// Determine the exercises section slug for linking back from answer key
+	const exercisesSectionSlug = sectionSlug
+		.replace('answer-key', 'exercises')
+		.replace('svarlykill', 'aefingar');
+
 	// Find exercise/answer containers
-	if (isExercisePage && counterpartSlug) {
-		// On exercises page - add "See answer" links
-		const problems = node.querySelectorAll<HTMLElement>('.practice-problem-container');
+	if (isExercisePage && chapterNumber) {
+		// On exercises page - add "See answer" links to odd-numbered exercises
+		// Answer keys are now at /svarlykill/[chapter] route
+		const exercises = node.querySelectorAll<HTMLElement>('.practice-problem-container, .eoc-exercise');
 
-		problems.forEach((problem) => {
-			const problemId = problem.dataset.problemId;
-			if (!problemId) return;
+		exercises.forEach((exercise) => {
+			// Get exercise ID and number
+			const exerciseId = exercise.dataset.problemId || exercise.id || exercise.dataset.exerciseId;
+			const exerciseNum = exercise.dataset.exerciseNumber;
+			if (!exerciseId) return;
 
-			const button = createLinkButton(
-				'Sjá svar',
-				'Fara í svar við þessari æfingu',
-				() => {
-					const url = `/${bookSlug}/kafli/${chapterSlug}/${counterpartSlug}#${problemId}`;
-					goto(url);
+			// Only odd-numbered exercises have answers in OpenStax
+			const num = parseInt(exerciseNum || '0', 10);
+			if (num > 0 && num % 2 === 0) return; // Skip even numbers
+
+			// For eoc-exercise, make the number itself a link (OpenStax style)
+			// Link to the new answer key route: /svarlykill/[chapter]#[exerciseId]
+			if (exercise.classList.contains('eoc-exercise') && exerciseNum) {
+				const url = `/${bookSlug}/svarlykill/${chapterNumber}#${exerciseId}`;
+				const numberLink = createNumberLink(
+					exerciseNum,
+					`Fara í svar við æfingu ${exerciseNum}`,
+					url
+				);
+
+				// Add class to hide the ::before pseudo-element
+				exercise.classList.add('has-answer-link');
+
+				// Prepend the number link to the exercise
+				exercise.insertBefore(numberLink, exercise.firstChild);
+				links.push(numberLink);
+			} else {
+				// For practice-problem-container, use button in footer
+				const button = createLinkButton(
+					'Svar',
+					'Fara í svar við þessari æfingu',
+					() => {
+						const url = `/${bookSlug}/svarlykill/${chapterNumber}#${exerciseId}`;
+						goto(url);
+					}
+				);
+
+				let footer = exercise.querySelector('.practice-problem-footer');
+				if (!footer) {
+					footer = document.createElement('div');
+					footer.className = 'practice-problem-footer';
+					exercise.appendChild(footer);
 				}
-			);
-
-			// Find or create a footer area for the button
-			let footer = problem.querySelector('.practice-problem-footer');
-			if (!footer) {
-				footer = document.createElement('div');
-				footer.className = 'practice-problem-footer';
-				problem.appendChild(footer);
+				footer.appendChild(button);
+				buttons.push(button);
 			}
-			footer.appendChild(button);
-			buttons.push(button);
 		});
 	}
 
-	if (isAnswerKeyPage && counterpartSlug) {
-		// On answer-key page - add "See exercise" links
+	if (isAnswerKeyPage && chapterSlug) {
+		// On answer-key page - make numbers link back to exercises
+		// Link back to /kafli/[chapterSlug]/[exercises-slug]#[exerciseId]
 		const answers = node.querySelectorAll<HTMLElement>('.answer-entry');
 
 		answers.forEach((answer) => {
-			const exerciseId = answer.dataset.exerciseId;
+			const exerciseId = answer.dataset.exerciseId || answer.id;
+			const exerciseNum = answer.dataset.exerciseNumber;
 			if (!exerciseId) return;
 
-			const button = createLinkButton(
-				'Sjá æfingu',
-				'Fara í æfinguna sem þetta svar tilheyrir',
-				() => {
-					const url = `/${bookSlug}/kafli/${chapterSlug}/${counterpartSlug}#${exerciseId}`;
-					goto(url);
-				}
-			);
+			// Make the number itself a link back to the exercise (OpenStax style)
+			// Exercises are at /kafli/[chapterSlug]/[chapter]-exercises
+			if (exerciseNum) {
+				const exercisesSlug = chapterNumber ? `${chapterNumber}-exercises` : exercisesSectionSlug;
+				const url = `/${bookSlug}/kafli/${chapterSlug}/${exercisesSlug}#${exerciseId}`;
+				const numberLink = createNumberLink(
+					exerciseNum,
+					`Fara í æfingu ${exerciseNum}`,
+					url
+				);
 
-			// Insert button at the start of the answer entry
-			answer.insertBefore(button, answer.firstChild);
-			buttons.push(button);
+				// Add class to hide the ::before pseudo-element
+				answer.classList.add('has-exercise-link');
+
+				// Prepend the number link to the answer
+				answer.insertBefore(numberLink, answer.firstChild);
+				links.push(numberLink);
+			} else {
+				// Fallback to button if no number
+				const button = createLinkButton(
+					'Æfing',
+					'Fara í æfinguna sem þetta svar tilheyrir',
+					() => {
+						const exercisesSlug = chapterNumber ? `${chapterNumber}-exercises` : exercisesSectionSlug;
+						const url = `/${bookSlug}/kafli/${chapterSlug}/${exercisesSlug}#${exerciseId}`;
+						goto(url);
+					}
+				);
+
+				button.classList.add('answer-link-inline');
+				answer.appendChild(button);
+				buttons.push(button);
+			}
 		});
 	}
 
@@ -273,6 +347,12 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 			// Clean up buttons
 			buttons.forEach((button) => {
 				button.remove();
+			});
+			// Clean up links
+			links.forEach((link) => {
+				// Remove the has-answer-link class from parent before removing link
+				link.parentElement?.classList.remove('has-answer-link', 'has-exercise-link');
+				link.remove();
 			});
 		}
 	};
