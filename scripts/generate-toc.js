@@ -114,6 +114,9 @@ function getSectionType(filename) {
 	if (name.includes('exercises') || name.includes('aefingar') || name.endsWith('-exercises')) {
 		return 'exercises';
 	}
+	if (name.includes('answer-key') || name.includes('svarlykill')) {
+		return 'answer-key';
+	}
 	if (name.includes('introduction') || name.match(/-0-/)) {
 		return 'introduction';
 	}
@@ -155,7 +158,7 @@ function sortSections(sections) {
 		}
 
 		// Special sections at the end, in standard OpenStax order
-		const typeOrder = ['glossary', 'equations', 'summary', 'exercises'];
+		const typeOrder = ['glossary', 'equations', 'summary', 'exercises', 'answer-key'];
 		const aOrder = a.type ? typeOrder.indexOf(a.type) : -1;
 		const bOrder = b.type ? typeOrder.indexOf(b.type) : -1;
 
@@ -197,6 +200,53 @@ function loadExistingToc(bookPath) {
 	} catch {
 		return null;
 	}
+}
+
+// Scan appendix directory and generate appendix entries
+function scanAppendices(bookPath) {
+	const appendixDir = resolve(bookPath, 'chapters', 'appendix');
+
+	if (!existsSync(appendixDir)) {
+		return [];
+	}
+
+	const appendixFiles = readdirSync(appendixDir)
+		.filter((f) => f.endsWith('.md'))
+		.sort();
+
+	const appendices = [];
+
+	for (const file of appendixFiles) {
+		const filePath = resolve(appendixDir, file);
+		const content = readFileSync(filePath, 'utf-8');
+		const frontmatter = parseFrontmatter(content);
+
+		// Extract letter from filename (e.g., "A-periodic-table.md" -> "A")
+		const letterMatch = basename(file, '.md').match(/^([A-M])-/i);
+		const letter = letterMatch ? letterMatch[1].toUpperCase() : null;
+
+		if (!letter) {
+			console.warn(`    Warning: Could not extract appendix letter from: ${file}`);
+			continue;
+		}
+
+		const appendix = {
+			letter,
+			title: frontmatter.title || `Viðauki ${letter}`,
+			file
+		};
+
+		// Check if this appendix should link to an interactive component
+		if (frontmatter.isInteractive === 'true' || frontmatter.componentPath) {
+			appendix.isInteractive = true;
+			appendix.componentPath = frontmatter.componentPath || null;
+		}
+
+		appendices.push(appendix);
+	}
+
+	// Sort by letter
+	return appendices.sort((a, b) => a.letter.localeCompare(b.letter));
 }
 
 // Load book metadata from efni repo toc.json
@@ -318,12 +368,17 @@ function generateToc(bookSlug, options) {
 		}
 
 		const finalSections = sortedSections.map((s) => {
+			// Special sections (intro, glossary, etc.) use empty string for number
+			// to match OpenStax structure where these are unnumbered
+			const specialTypes = ['introduction', 'glossary', 'equations', 'summary', 'exercises', 'answer-key'];
+			const isSpecial = s.type && specialTypes.includes(s.type);
+
 			const entry = {
-				number: s.number || `${chapterNum}.${nextNum++}`,
+				number: isSpecial ? '' : (s.number || `${chapterNum}.${nextNum++}`),
 				title: s.title,
 				file: s.file
 			};
-			if (s.type && s.type !== 'introduction') {
+			if (s.type) {
 				entry.type = s.type;
 			}
 			return entry;
@@ -346,6 +401,13 @@ function generateToc(bookSlug, options) {
 		});
 
 		console.log(`    Chapter ${chapterNum}: ${chapterTitle} (${finalSections.length} sections)`);
+	}
+
+	// Scan for appendices
+	const appendices = scanAppendices(bookPath);
+	if (appendices.length > 0) {
+		toc.appendices = appendices;
+		console.log(`  Found ${appendices.length} appendix/appendices`);
 	}
 
 	return toc;

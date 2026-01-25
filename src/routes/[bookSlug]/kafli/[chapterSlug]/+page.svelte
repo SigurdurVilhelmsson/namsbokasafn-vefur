@@ -34,6 +34,8 @@
 	// Get section type icon
 	function getSectionIcon(type?: string): string {
 		switch (type) {
+			case 'introduction':
+				return 'In';
 			case 'glossary':
 				return 'Aa';
 			case 'equations':
@@ -47,6 +49,14 @@
 			default:
 				return '';
 		}
+	}
+
+	// Get display number for section (empty string for special sections)
+	function getDisplayNumber(section: Section): string {
+		if (!section.number || section.number === '') {
+			return '';
+		}
+		return section.number;
 	}
 </script>
 
@@ -129,7 +139,11 @@
 						<!-- Section info -->
 						<div class="flex-1 min-w-0">
 							<h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
-								{section.number} {section.title}
+								{#if getDisplayNumber(section)}
+									{getDisplayNumber(section)} {section.title}
+								{:else}
+									{section.title}
+								{/if}
 							</h3>
 						</div>
 

@@ -2,7 +2,7 @@
  * Content loading utilities with in-memory caching
  */
 
-import type { TableOfContents, SectionContent, DifficultyLevel, SectionMetadata } from '$lib/types/content';
+import type { TableOfContents, SectionContent, DifficultyLevel, SectionMetadata, Appendix } from '$lib/types/content';
 import { browser } from '$app/environment';
 
 const WORDS_PER_MINUTE = 180;
@@ -343,9 +343,23 @@ export function getChapterPath(chapter: { number: number; slug?: string }): stri
 /**
  * Get URL path segment for a section (number with hyphen)
  * Example: "2.1" → "2-1", "1.10" → "1-10"
+ * For unnumbered sections (intro, EOC pages), uses file basename
  */
-export function getSectionPath(section: { number: string; slug?: string }): string {
-  return section.number.replace('.', '-');
+export function getSectionPath(section: { number: string; slug?: string; file?: string; type?: string }): string {
+  // For numbered sections, use the number
+  if (section.number && section.number !== '') {
+    return section.number.replace('.', '-');
+  }
+
+  // For unnumbered sections (intro, glossary, etc.), derive from filename
+  // e.g., "1-0-introduction.md" → "1-0-introduction"
+  // e.g., "1-key-terms.md" → "1-key-terms"
+  if (section.file) {
+    return section.file.replace(/\.md$/, '');
+  }
+
+  // Fallback to slug if available
+  return section.slug || '';
 }
 
 /**
@@ -399,5 +413,107 @@ export function findSectionBySlug(toc: TableOfContents, chapterPath: string, sec
   section = chapter.sections.find((s) => s.number === sectionNumber);
   if (section) return { chapter, section };
 
+  // For unnumbered sections (intro, EOC pages), try matching by file basename
+  // e.g., sectionPath "1-0-introduction" matches file "1-0-introduction.md"
+  section = chapter.sections.find((s) => {
+    if (s.number === '' && s.file) {
+      const fileBasename = s.file.replace(/\.md$/, '');
+      return fileBasename === sectionPath;
+    }
+    return false;
+  });
+  if (section) return { chapter, section };
+
   return null;
+}
+
+// ============================================
+// Appendix helpers
+// ============================================
+
+/**
+ * Get URL path segment for an appendix
+ * Example: appendix with letter "A" → "A"
+ */
+export function getAppendixPath(appendix: Appendix): string {
+  return appendix.letter;
+}
+
+/**
+ * Find appendix by letter
+ */
+export function findAppendixByLetter(toc: TableOfContents, letter: string): Appendix | undefined {
+  if (!toc.appendices) return undefined;
+  return toc.appendices.find((a) => a.letter.toUpperCase() === letter.toUpperCase());
+}
+
+/**
+ * Load appendix content
+ */
+export async function loadAppendixContent(
+  bookSlug: string,
+  appendixFile: string,
+  fetchFn: typeof fetch = fetch
+): Promise<SectionContent> {
+  const cacheKey = `${bookSlug}/appendix/${appendixFile}`;
+
+  // Check cache first (browser only)
+  if (browser) {
+    const cached = sectionCache.get(cacheKey);
+    if (cached) {
+      return cached;
+    }
+  }
+
+  let response: Response;
+  try {
+    response = await fetchFn(`/content/${bookSlug}/chapters/appendix/${appendixFile}`);
+  } catch (e) {
+    const isOffline = checkOffline();
+    throw new ContentLoadError(
+      isOffline
+        ? 'Gat ekki hlaðið viðauka. Þú ert án nettengingar.'
+        : `Gat ekki hlaðið viðauka: ${appendixFile}`,
+      0,
+      isOffline
+    );
+  }
+
+  if (!response.ok) {
+    const isOffline = checkOffline();
+    throw new ContentLoadError(
+      isOffline
+        ? 'Gat ekki hlaðið viðauka. Þú ert án nettengingar.'
+        : `Gat ekki hlaðið viðauka: ${appendixFile}`,
+      response.status,
+      isOffline
+    );
+  }
+
+  const markdown = await response.text();
+  const basePath = `/content/${bookSlug}/chapters/appendix`;
+
+  const { metadata, content } = parseFrontmatter(markdown);
+  const transformedContent = content.replace(
+    /!\[([^\]]*)\]\(\.?\/?\/?images\//g,
+    `![$1](${basePath}/images/`
+  );
+
+  const readingTime = calculateReadingTime(transformedContent);
+
+  const sectionContent: SectionContent = {
+    title: typeof metadata.title === 'string' ? metadata.title : '',
+    section: '',  // Appendices don't have section numbers
+    chapter: 0,   // Appendices don't belong to chapters
+    objectives: Array.isArray(metadata.objectives) ? metadata.objectives : [],
+    content: transformedContent,
+    readingTime
+  };
+
+  // Cache the result (browser only)
+  if (browser) {
+    sectionCache.set(cacheKey, sectionContent);
+  }
+
+  return sectionContent;
 }
