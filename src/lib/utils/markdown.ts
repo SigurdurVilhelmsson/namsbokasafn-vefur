@@ -77,6 +77,30 @@ const DIRECTIVE_CONFIG: Record<
 	hint: {
 		className: 'practice-hint-container'
 	},
+	// Answer key entry - for separate answer key pages
+	'answer-entry': {
+		className: 'answer-entry',
+		additionalProps: (attrs) => ({
+			'data-exercise-id': attrs.id || undefined,
+			'data-exercise-number': attrs.number || undefined
+		})
+	},
+	// Key term entry - for key terms page
+	'glossary-entry': {
+		className: 'glossary-entry',
+		additionalProps: (attrs) => ({
+			'data-term': attrs.term || undefined,
+			'data-term-id': attrs.id || undefined
+		})
+	},
+	// Key equation entry - for key equations page
+	'key-equation': {
+		className: 'key-equation-entry',
+		additionalProps: (attrs) => ({
+			'data-equation-id': attrs.id || undefined,
+			'data-equation-number': attrs.number || undefined
+		})
+	},
 	note: {
 		className: 'content-block note',
 		blockType: 'note'

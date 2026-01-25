@@ -29,11 +29,11 @@ export interface SectionMetadata {
 
 // Section within a chapter
 export interface Section {
-  number: string;
+  number: string;  // Empty string "" for unnumbered sections (intro, EOC pages)
   title: string;
   slug?: string;  // Optional in v2 - derived from number if not present
   file: string;
-  type?: string;
+  type?: SectionType;  // Special section type for rendering/navigation
   metadata?: SectionMetadata;
 }
 
@@ -43,6 +43,15 @@ export interface Chapter {
   title: string;
   slug?: string;  // Optional in v2 - derived from number if not present
   sections: Section[];
+}
+
+// Appendix entry (A-M for Chemistry 2e)
+export interface Appendix {
+  letter: string;  // A, B, C, ... M
+  title: string;
+  file: string;    // e.g., "A-periodic-table.md"
+  isInteractive?: boolean;  // True for appendices rendered as interactive components
+  componentPath?: string;   // Path to component if isInteractive (e.g., "/lotukerfi")
 }
 
 // Precomputed reference for deterministic numbering
@@ -64,12 +73,23 @@ export interface TableOfContents {
   attribution?: SourceAttribution;
   source?: SourceAttribution;
   chapters: Chapter[];
+  // Appendices (A-M for Chemistry 2e)
+  appendices?: Appendix[];
   // Precomputed cross-reference index (from build-time processing)
   references?: { [key: string]: PrecomputedReference };
 }
 
 // Difficulty levels for content
 export type DifficultyLevel = 'beginner' | 'intermediate' | 'advanced';
+
+// Section types for special end-of-chapter pages and other content types
+export type SectionType =
+  | 'introduction'   // Chapter introduction (unnumbered)
+  | 'glossary'       // Key terms / Lykilhugtök
+  | 'equations'      // Key equations / Lykilformúlur
+  | 'summary'        // Chapter summary / Samantekt
+  | 'exercises'      // Practice exercises / Æfingar
+  | 'answer-key';    // Answer key / Svarlykill (separate from exercises)
 
 // Section content with metadata
 export interface SectionContent {
