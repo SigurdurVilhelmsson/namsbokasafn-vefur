@@ -132,21 +132,21 @@
 				<div>
 					<!-- Chapter header skeleton -->
 					<div class="flex items-center gap-2 mb-3">
-						<Skeleton variant="text" class="w-6 h-6 rounded" />
-						<Skeleton variant="text" class="w-32 h-4" />
+						<Skeleton variant="text" className="w-6 h-6 rounded" />
+						<Skeleton variant="text" className="w-32 h-4" />
 					</div>
 					<!-- Bookmark items skeleton -->
 					<div class="space-y-2">
 						{#each Array(3) as _}
 							<div class="flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-								<Skeleton variant="text" class="w-5 h-5 flex-shrink-0" />
+								<Skeleton variant="text" className="w-5 h-5 flex-shrink-0" />
 								<div class="flex-1 space-y-2">
-									<Skeleton variant="text" class="w-48 h-5" />
-									<Skeleton variant="text" class="w-32 h-4" />
+									<Skeleton variant="text" className="w-48 h-5" />
+									<Skeleton variant="text" className="w-32 h-4" />
 								</div>
 								<div class="flex gap-2">
-									<Skeleton variant="text" class="w-9 h-9 rounded-lg" />
-									<Skeleton variant="text" class="w-9 h-9 rounded-lg" />
+									<Skeleton variant="text" className="w-9 h-9 rounded-lg" />
+									<Skeleton variant="text" className="w-9 h-9 rounded-lg" />
 								</div>
 							</div>
 						{/each}

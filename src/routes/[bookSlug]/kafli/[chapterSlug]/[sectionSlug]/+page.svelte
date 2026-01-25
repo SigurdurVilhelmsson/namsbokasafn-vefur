@@ -75,7 +75,7 @@
 	}
 
 	// Mark section as read and start analytics session
-	onMount(async () => {
+	onMount(() => {
 		reader.setCurrentLocation(data.chapterSlug, data.sectionSlug);
 		reader.setScrollProgress(0); // Reset scroll progress
 		analyticsStore.startReadingSession(data.bookSlug, data.chapterSlug, data.sectionSlug);
@@ -385,6 +385,7 @@
 			chapterSlug={data.chapterSlug}
 			sectionSlug={data.sectionSlug}
 			chapterNumber={data.chapterNumber}
+			sectionType={data.section.type || ''}
 		/>
 	</TextHighlighter>
 
