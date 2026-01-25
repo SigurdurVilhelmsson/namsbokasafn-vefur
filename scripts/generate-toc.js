@@ -410,6 +410,27 @@ function generateToc(bookSlug, options) {
 		console.log(`  Found ${appendices.length} appendix/appendices`);
 	}
 
+	// Extract answer-key sections from chapters into separate answerKey array
+	const answerKey = [];
+	for (const chapter of toc.chapters) {
+		const answerKeySection = chapter.sections.find(s => s.type === 'answer-key');
+		if (answerKeySection) {
+			// File path points to actual location in chapter folder
+			const chapterPadded = chapter.number.toString().padStart(2, '0');
+			answerKey.push({
+				chapter: chapter.number,
+				title: `Kafli ${chapter.number}`,
+				file: `${chapterPadded}/${answerKeySection.file}`
+			});
+			// Remove answer-key from chapter sections
+			chapter.sections = chapter.sections.filter(s => s.type !== 'answer-key');
+		}
+	}
+	if (answerKey.length > 0) {
+		toc.answerKey = answerKey;
+		console.log(`  Found ${answerKey.length} answer key(s)`);
+	}
+
 	return toc;
 }
 
