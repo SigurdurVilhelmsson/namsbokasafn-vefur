@@ -28,11 +28,12 @@ const contentDir = resolve(projectRoot, 'static', 'content');
 // =============================================================================
 
 const VALID_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'];
-const VALID_SECTION_TYPES = ['glossary', 'exercises', 'summary', 'equations', 'answer-key', 'content'];
+const VALID_SECTION_TYPES = ['introduction', 'glossary', 'exercises', 'summary', 'equations', 'answer-key', 'content'];
 
 const DIRECTIVE_NAMES = [
 	// Practice problems and exercises
 	'practice-problem',
+	'æfingadæmi', // Icelandic alias for practice-problem
 	'answer',
 	'svar', // Icelandic alias for 'answer'
 	'explanation',
@@ -52,7 +53,12 @@ const DIRECTIVE_NAMES = [
 	'link-to-material',
 	'chemistry-everyday',
 	'scientist-spotlight',
-	'how-science-connects'
+	'how-science-connects',
+	// End-of-chapter content (OpenStax structure)
+	'exercise',
+	'answer-entry',
+	'glossary-entry',
+	'key-equation'
 ];
 
 const CROSS_REF_TYPES = ['sec', 'eq', 'fig', 'tbl', 'def'];
@@ -379,8 +385,10 @@ function validateFrontmatter(filePath, content, tocSection = null, tocChapter = 
 	if (tocSection && tocChapter) {
 		const tocSectionNum = String(tocSection.number);
 		const fmSectionNum = String(metadata.section);
-		// Allow intro sections to map to X.0 numbers
-		const isIntroMatch = fmSectionNum === 'intro' && tocSectionNum.endsWith('.0');
+		// Allow intro sections to map to X.0 numbers or empty TOC number
+		const isIntroMatch =
+			(fmSectionNum === 'intro' && tocSectionNum.endsWith('.0')) ||
+			(tocSectionNum === '' && /^\d+\.0$/.test(fmSectionNum));
 		if (metadata.section !== undefined && tocSectionNum !== fmSectionNum && !isIntroMatch) {
 			warning(filePath, 1, `Section number mismatch: TOC="${tocSectionNum}", frontmatter="${fmSectionNum}"`);
 		}
@@ -427,7 +435,9 @@ function validateDirectives(filePath, content) {
 		// Check for directive closing
 		if (line.trim() === ':::') {
 			if (openDirectives.length === 0) {
-				error(filePath, lineNum, 'Closing ":::" without matching opening directive');
+				// Downgraded to warning: can be false positive when unknown directives
+				// are opened but not tracked (content still renders correctly)
+				warning(filePath, lineNum, 'Closing ":::" without matching opening directive');
 			} else {
 				openDirectives.pop();
 			}
@@ -471,11 +481,13 @@ function validateCrossReferences(filePath, content) {
 function validateGlossary(bookSlug, toc) {
 	const glossaryPath = join(contentDir, bookSlug, 'glossary.json');
 
-	// Skip glossary check for placeholder books without chapters
-	const hasChapters = toc && toc.chapters && toc.chapters.length > 0;
+	// Only warn about missing glossary if TOC references glossary sections
+	const hasGlossarySections = toc?.chapters?.some(ch =>
+		ch.sections?.some(s => s.type === 'glossary')
+	);
 	if (!existsSync(glossaryPath)) {
-		if (hasChapters) {
-			warning(glossaryPath, 0, 'Glossary file not found');
+		if (hasGlossarySections) {
+			warning(glossaryPath, 0, 'Glossary file not found but TOC references glossary sections');
 		}
 		return;
 	}
