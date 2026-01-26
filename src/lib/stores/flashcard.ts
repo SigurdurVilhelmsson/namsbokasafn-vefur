@@ -21,7 +21,7 @@ import {
 	calculateDeckStats,
 	previewRatingIntervals
 } from '$lib/utils/srs';
-import { getTodayDateString, getYesterdayDateString } from '$lib/utils/storeHelpers';
+import { getTodayDateString, getYesterdayDateString, getCurrentTimestamp } from '$lib/utils/storeHelpers';
 
 const STORAGE_KEY = 'namsbokasafn:flashcards';
 
@@ -35,6 +35,28 @@ interface DeckStats {
 	review: number;
 }
 
+// Review history for analytics
+export interface FlashcardReviewEntry {
+	cardId: string;
+	timestamp: string;
+	rating: DifficultyRating;
+	wasCorrect: boolean; // quality >= 3 (good or easy)
+}
+
+// Daily flashcard stats for tracking
+export interface FlashcardDailyStats {
+	date: string;
+	cardsReviewed: number;
+	correctCount: number;
+	againCount: number;
+	hardCount: number;
+	goodCount: number;
+	easyCount: number;
+}
+
+// Max entries to keep in review history
+const MAX_REVIEW_HISTORY = 500;
+
 interface FlashcardState {
 	decks: FlashcardDeck[];
 	studyRecords: Record<string, FlashcardStudyRecord>;
@@ -45,6 +67,8 @@ interface FlashcardState {
 	todayStudied: number;
 	studyStreak: number;
 	lastStudyDate: string | null;
+	reviewHistory: FlashcardReviewEntry[];
+	dailyFlashcardStats: Record<string, FlashcardDailyStats>;
 }
 
 const defaultState: FlashcardState = {
@@ -56,7 +80,9 @@ const defaultState: FlashcardState = {
 	studyQueue: [],
 	todayStudied: 0,
 	studyStreak: 0,
-	lastStudyDate: null
+	lastStudyDate: null,
+	reviewHistory: [],
+	dailyFlashcardStats: {}
 };
 
 function calculateStudyStreak(lastStudyDate: string | null, currentStreak: number): number {
@@ -71,6 +97,18 @@ function calculateStudyStreak(lastStudyDate: string | null, currentStreak: numbe
 	}
 
 	return 1;
+}
+
+function createEmptyFlashcardDailyStats(date: string): FlashcardDailyStats {
+	return {
+		date,
+		cardsReviewed: 0,
+		correctCount: 0,
+		againCount: 0,
+		hardCount: 0,
+		goodCount: 0,
+		easyCount: 0
+	};
 }
 
 function buildStudyQueue(
@@ -222,6 +260,26 @@ function createFlashcardStore() {
 				: state.studyStreak;
 			const newTodayStudied = isNewDay ? 1 : state.todayStudied + 1;
 
+			// Create review history entry
+			const reviewEntry: FlashcardReviewEntry = {
+				cardId,
+				timestamp: getCurrentTimestamp(),
+				rating,
+				wasCorrect: quality >= 3 // good or easy
+			};
+
+			// Update daily stats
+			const todayStats = state.dailyFlashcardStats[today] || createEmptyFlashcardDailyStats(today);
+			const updatedTodayStats: FlashcardDailyStats = {
+				...todayStats,
+				cardsReviewed: todayStats.cardsReviewed + 1,
+				correctCount: todayStats.correctCount + (quality >= 3 ? 1 : 0),
+				againCount: todayStats.againCount + (rating === 'again' ? 1 : 0),
+				hardCount: todayStats.hardCount + (rating === 'hard' ? 1 : 0),
+				goodCount: todayStats.goodCount + (rating === 'good' ? 1 : 0),
+				easyCount: todayStats.easyCount + (rating === 'easy' ? 1 : 0)
+			};
+
 			update((s) => ({
 				...s,
 				studyRecords: {
@@ -232,7 +290,13 @@ function createFlashcardStore() {
 				studyStreak: newStreak,
 				todayStudied: newTodayStudied,
 				currentCardIndex: s.currentCardIndex + 1,
-				showAnswer: false
+				showAnswer: false,
+				// Keep last MAX_REVIEW_HISTORY entries
+				reviewHistory: [...s.reviewHistory, reviewEntry].slice(-MAX_REVIEW_HISTORY),
+				dailyFlashcardStats: {
+					...s.dailyFlashcardStats,
+					[today]: updatedTodayStats
+				}
 			}));
 		},
 
@@ -270,6 +334,33 @@ function createFlashcardStore() {
 			}));
 		},
 
+		// Get daily stats for a specific date
+		getDailyFlashcardStats: (date?: string): FlashcardDailyStats => {
+			const targetDate = date || getTodayDateString();
+			return get({ subscribe }).dailyFlashcardStats[targetDate] || createEmptyFlashcardDailyStats(targetDate);
+		},
+
+		// Get stats for the last N days
+		getFlashcardStatsForPeriod: (days: number): FlashcardDailyStats[] => {
+			const state = get({ subscribe });
+			const stats: FlashcardDailyStats[] = [];
+			const today = new Date();
+
+			for (let i = days - 1; i >= 0; i--) {
+				const d = new Date(today);
+				d.setDate(d.getDate() - i);
+				const dateStr = d.toISOString().split('T')[0];
+				stats.push(state.dailyFlashcardStats[dateStr] || createEmptyFlashcardDailyStats(dateStr));
+			}
+
+			return stats;
+		},
+
+		// Get recent review history
+		getRecentReviews: (limit = 50): FlashcardReviewEntry[] => {
+			return get({ subscribe }).reviewHistory.slice(-limit).reverse();
+		},
+
 		reset: () => set(defaultState)
 	};
 }
@@ -298,3 +389,33 @@ export const studyStats = derived(flashcardStore, ($store) => ({
 	studyStreak: $store.studyStreak,
 	lastStudyDate: $store.lastStudyDate
 }));
+
+// Derived store for overall success rate from recent history
+export const flashcardSuccessRate = derived(flashcardStore, ($store) => {
+	const history = $store.reviewHistory;
+	if (history.length === 0) {
+		return { rate: 0, total: 0, correct: 0 };
+	}
+
+	const correct = history.filter((r) => r.wasCorrect).length;
+	return {
+		rate: Math.round((correct / history.length) * 100),
+		total: history.length,
+		correct
+	};
+});
+
+// Derived store for daily flashcard stats (last 7 days)
+export const weeklyFlashcardStats = derived(flashcardStore, ($store) => {
+	const stats: FlashcardDailyStats[] = [];
+	const today = new Date();
+
+	for (let i = 6; i >= 0; i--) {
+		const d = new Date(today);
+		d.setDate(d.getDate() - i);
+		const dateStr = d.toISOString().split('T')[0];
+		stats.push($store.dailyFlashcardStats[dateStr] || createEmptyFlashcardDailyStats(dateStr));
+	}
+
+	return stats;
+});

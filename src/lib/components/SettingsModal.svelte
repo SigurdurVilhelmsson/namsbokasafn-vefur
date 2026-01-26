@@ -11,6 +11,7 @@
 		lineHeight,
 		lineWidth,
 		soundEffects,
+		bionicReading,
 		type FontSize,
 		type FontFamily,
 		type LineHeight,
@@ -295,6 +296,36 @@
 						</div>
 					</div>
 
+					<!-- Bionic Reading -->
+					<div>
+						<div class="flex items-center justify-between">
+							<div>
+								<label for="bionic-reading-toggle" class="text-sm font-medium text-[var(--text-primary)]">
+									Hraðlestur
+								</label>
+								<p class="text-xs text-[var(--text-secondary)] mt-0.5">
+									Feitletrað upphaf hvers orðs til að auðvelda lestur
+								</p>
+							</div>
+							<button
+								id="bionic-reading-toggle"
+								role="switch"
+								aria-checked={$bionicReading}
+								aria-label={$bionicReading ? 'Slökkva á hraðlestri' : 'Kveikja á hraðlestri'}
+								on:click={() => settings.toggleBionicReading()}
+								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$bionicReading
+									? 'bg-[var(--accent-color)]'
+									: 'bg-gray-300 dark:bg-gray-600'}"
+							>
+								<span
+									class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {$bionicReading
+										? 'translate-x-6'
+										: 'translate-x-1'}"
+								></span>
+							</button>
+						</div>
+					</div>
+
 					<!-- Preview -->
 					<div>
 						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
@@ -308,9 +339,15 @@
 								class="text-[var(--text-primary)]"
 								style="font-size: var(--font-size-base); line-height: var(--line-height-{$lineHeight})"
 							>
-								Efnafræði er vísindin um efni og breytingar þess. Hún fjallar um
-								uppbyggingu, eiginleika og hegðun efna, svo og orkubreytingar sem
-								fylgja efnahvörfum.
+								{#if $bionicReading}
+									<b class="bionic-bold">Efn</b>afræði <b class="bionic-bold">er</b> <b class="bionic-bold">vís</b>indin <b class="bionic-bold">um</b> <b class="bionic-bold">efni</b> <b class="bionic-bold">og</b> <b class="bionic-bold">brey</b>tingar <b class="bionic-bold">þes</b>s. <b class="bionic-bold">Hún</b> <b class="bionic-bold">fja</b>llar <b class="bionic-bold">um</b>
+									<b class="bionic-bold">upp</b>byggingu, <b class="bionic-bold">eig</b>inleika <b class="bionic-bold">og</b> <b class="bionic-bold">heg</b>ðun <b class="bionic-bold">efn</b>a, <b class="bionic-bold">svo</b> <b class="bionic-bold">og</b> <b class="bionic-bold">ork</b>ubreytingar <b class="bionic-bold">sem</b>
+									<b class="bionic-bold">fyl</b>gja <b class="bionic-bold">efn</b>ahvörfum.
+								{:else}
+									Efnafræði er vísindin um efni og breytingar þess. Hún fjallar um
+									uppbyggingu, eiginleika og hegðun efna, svo og orkubreytingar sem
+									fylgja efnahvörfum.
+								{/if}
 							</p>
 						</div>
 						<p class="mt-3 flex items-center gap-2 text-sm text-[var(--text-secondary)]">

@@ -268,6 +268,28 @@
   color: var(--accent-hover);
 }
 
+/* ========================================== */
+/* BIONIC READING                             */
+/* ========================================== */
+
+/* Bionic reading bold portion - slightly heavier than regular text */
+.bionic-bold {
+  font-weight: 700;
+}
+
+/* Slightly heavier in headings to maintain visual hierarchy */
+.reading-content h1 .bionic-bold,
+.reading-content h2 .bionic-bold,
+.reading-content h3 .bionic-bold,
+.reading-content h4 .bionic-bold {
+  font-weight: 800;
+}
+
+/* Ensure good contrast in content blocks */
+.content-block .bionic-bold {
+  font-weight: 700;
+}
+
 /* Status badges */
 .badge {
   display: inline-flex;
@@ -2183,5 +2205,13 @@
   .flashcard-back::before {
     content: "Svar: ";
     font-weight: 700;
+  }
+
+  /* ----------------------------------------
+   * BIONIC READING (disabled in print)
+   * ---------------------------------------- */
+
+  .bionic-bold {
+    font-weight: inherit !important;
   }
 }

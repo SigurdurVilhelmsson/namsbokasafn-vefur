@@ -22,6 +22,7 @@ export interface ReadingSession {
 	bookSlug: string;
 	chapterSlug: string;
 	sectionSlug: string;
+	hourOfDay?: number; // 0-23, for reading pattern analysis
 }
 
 export interface SectionReadingTime {
@@ -63,6 +64,33 @@ export interface ActivityEntry {
 	};
 }
 
+// Study goal types
+export type GoalType = 'daily_reading_time' | 'daily_flashcards' | 'weekly_sections' | 'streak_days';
+export type GoalUnit = 'minutes' | 'cards' | 'sections' | 'days';
+
+export interface StudyGoal {
+	id: string;
+	type: GoalType;
+	target: number;
+	unit: GoalUnit;
+	createdAt: string;
+	isActive: boolean;
+}
+
+export interface GoalProgress {
+	goal: StudyGoal;
+	current: number;
+	percentage: number;
+	isComplete: boolean;
+}
+
+// Hourly reading distribution
+export interface HourlyReadingData {
+	hour: number; // 0-23
+	totalSeconds: number;
+	sessionCount: number;
+}
+
 interface AnalyticsState {
 	sessions: ReadingSession[];
 	currentSession: ReadingSession | null;
@@ -72,6 +100,8 @@ interface AnalyticsState {
 	currentStreak: number;
 	longestStreak: number;
 	lastActiveDate: string | null;
+	goals: StudyGoal[];
+	hourlyReadingData: Record<number, { totalSeconds: number; sessionCount: number }>;
 }
 
 const defaultState: AnalyticsState = {
@@ -82,7 +112,9 @@ const defaultState: AnalyticsState = {
 	activityLog: [],
 	currentStreak: 0,
 	longestStreak: 0,
-	lastActiveDate: null
+	lastActiveDate: null,
+	goals: [],
+	hourlyReadingData: {}
 };
 
 function getWeekStart(date: Date): string {
@@ -241,6 +273,7 @@ function createAnalyticsStore() {
 				}
 
 				const sectionKey = createSectionKey(chapterSlug, sectionSlug);
+				const now = new Date();
 				const newSession: ReadingSession = {
 					sectionKey,
 					startTime: getCurrentTimestamp(),
@@ -248,7 +281,8 @@ function createAnalyticsStore() {
 					durationSeconds: 0,
 					bookSlug,
 					chapterSlug,
-					sectionSlug
+					sectionSlug,
+					hourOfDay: now.getHours()
 				};
 
 				return {
@@ -297,6 +331,10 @@ function createAnalyticsStore() {
 					(s) => s.sectionKey === sectionKey && s.startTime.startsWith(today)
 				);
 
+				// Update hourly reading data
+				const hourOfDay = state.currentSession.hourOfDay ?? new Date(state.currentSession.startTime).getHours();
+				const existingHourlyData = state.hourlyReadingData[hourOfDay] || { totalSeconds: 0, sessionCount: 0 };
+
 				return {
 					...state,
 					currentSession: null,
@@ -321,6 +359,13 @@ function createAnalyticsStore() {
 							sectionsVisited: visitedToday
 								? todayStats.sectionsVisited
 								: todayStats.sectionsVisited + 1
+						}
+					},
+					hourlyReadingData: {
+						...state.hourlyReadingData,
+						[hourOfDay]: {
+							totalSeconds: existingHourlyData.totalSeconds + durationSeconds,
+							sessionCount: existingHourlyData.sessionCount + 1
 						}
 					}
 				};
@@ -409,6 +454,157 @@ function createAnalyticsStore() {
 			};
 		},
 
+		// Goal management
+		addGoal: (type: GoalType, target: number, unit: GoalUnit) => {
+			update((state) => ({
+				...state,
+				goals: [
+					...state.goals,
+					{
+						id: generateId(),
+						type,
+						target,
+						unit,
+						createdAt: getCurrentTimestamp(),
+						isActive: true
+					}
+				]
+			}));
+		},
+
+		updateGoal: (goalId: string, updates: Partial<Pick<StudyGoal, 'target' | 'isActive'>>) => {
+			update((state) => ({
+				...state,
+				goals: state.goals.map((g) =>
+					g.id === goalId ? { ...g, ...updates } : g
+				)
+			}));
+		},
+
+		removeGoal: (goalId: string) => {
+			update((state) => ({
+				...state,
+				goals: state.goals.filter((g) => g.id !== goalId)
+			}));
+		},
+
+		getActiveGoals: (): StudyGoal[] => {
+			return get({ subscribe }).goals.filter((g) => g.isActive);
+		},
+
+		getGoalProgress: (goalId: string): GoalProgress | null => {
+			const state = get({ subscribe });
+			const goal = state.goals.find((g) => g.id === goalId);
+			if (!goal) return null;
+
+			const today = getTodayDateString();
+			const todayStats = state.dailyStats[today] || createEmptyDailyStats(today);
+
+			let current = 0;
+
+			switch (goal.type) {
+				case 'daily_reading_time':
+					current = Math.floor(todayStats.totalReadingSeconds / 60); // Convert to minutes
+					break;
+				case 'daily_flashcards':
+					current = todayStats.flashcardsReviewed;
+					break;
+				case 'weekly_sections':
+					// Sum sections visited for the current week
+					const weekStart = getWeekStart(new Date());
+					const weekDates: string[] = [];
+					const startDate = new Date(weekStart);
+					for (let i = 0; i < 7; i++) {
+						const d = new Date(startDate);
+						d.setDate(d.getDate() + i);
+						weekDates.push(d.toISOString().split('T')[0]);
+					}
+					current = weekDates.reduce((sum, date) => {
+						const stats = state.dailyStats[date];
+						return sum + (stats?.sectionsVisited || 0);
+					}, 0);
+					break;
+				case 'streak_days':
+					current = state.currentStreak;
+					break;
+			}
+
+			const percentage = Math.min(100, Math.round((current / goal.target) * 100));
+
+			return {
+				goal,
+				current,
+				percentage,
+				isComplete: current >= goal.target
+			};
+		},
+
+		getAllGoalsProgress: (): GoalProgress[] => {
+			const state = get({ subscribe });
+			const result: GoalProgress[] = [];
+
+			for (const goal of state.goals.filter((g) => g.isActive)) {
+				const today = getTodayDateString();
+				const todayStats = state.dailyStats[today] || createEmptyDailyStats(today);
+
+				let current = 0;
+
+				switch (goal.type) {
+					case 'daily_reading_time':
+						current = Math.floor(todayStats.totalReadingSeconds / 60);
+						break;
+					case 'daily_flashcards':
+						current = todayStats.flashcardsReviewed;
+						break;
+					case 'weekly_sections':
+						const weekStart = getWeekStart(new Date());
+						const weekDates: string[] = [];
+						const startDate = new Date(weekStart);
+						for (let i = 0; i < 7; i++) {
+							const d = new Date(startDate);
+							d.setDate(d.getDate() + i);
+							weekDates.push(d.toISOString().split('T')[0]);
+						}
+						current = weekDates.reduce((sum, date) => {
+							const stats = state.dailyStats[date];
+							return sum + (stats?.sectionsVisited || 0);
+						}, 0);
+						break;
+					case 'streak_days':
+						current = state.currentStreak;
+						break;
+				}
+
+				const percentage = Math.min(100, Math.round((current / goal.target) * 100));
+
+				result.push({
+					goal,
+					current,
+					percentage,
+					isComplete: current >= goal.target
+				});
+			}
+
+			return result;
+		},
+
+		// Hourly reading distribution
+		getHourlyReadingDistribution: (): HourlyReadingData[] => {
+			const state = get({ subscribe });
+			const result: HourlyReadingData[] = [];
+
+			for (let hour = 0; hour < 24; hour++) {
+				const data = state.hourlyReadingData[hour];
+				result.push({
+					hour,
+					totalSeconds: data?.totalSeconds || 0,
+					sessionCount: data?.sessionCount || 0
+				});
+			}
+
+			return result;
+		},
+
 		// Export
 		exportAnalytics: (): string => {
 			const state = get({ subscribe });
@@ -427,7 +623,9 @@ function createAnalyticsStore() {
 				},
 				sectionReadingTimes: state.sectionReadingTimes,
 				dailyStats: state.dailyStats,
-				recentActivity: state.activityLog.slice(-100)
+				recentActivity: state.activityLog.slice(-100),
+				goals: state.goals,
+				hourlyReadingData: state.hourlyReadingData
 			};
 
 			return JSON.stringify(exportData, null, 2);
@@ -453,3 +651,22 @@ export const todayStats = derived(analyticsStore, ($store) => {
 });
 
 export const isSessionActive = derived(analyticsStore, ($store) => $store.currentSession !== null);
+
+// Derived store for active goals
+export const activeGoals = derived(analyticsStore, ($store) =>
+	$store.goals.filter((g) => g.isActive)
+);
+
+// Derived store for hourly reading distribution
+export const hourlyReadingDistribution = derived(analyticsStore, ($store) => {
+	const result: HourlyReadingData[] = [];
+	for (let hour = 0; hour < 24; hour++) {
+		const data = $store.hourlyReadingData[hour];
+		result.push({
+			hour,
+			totalSeconds: data?.totalSeconds || 0,
+			sessionCount: data?.sessionCount || 0
+		});
+	}
+	return result;
+});

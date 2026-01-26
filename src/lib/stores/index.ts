@@ -12,6 +12,7 @@ export {
 	lineWidth,
 	sidebarOpen,
 	soundEffects,
+	bionicReading,
 	DEFAULT_SHORTCUTS,
 	type Theme,
 	type FontSize,
@@ -31,7 +32,11 @@ export {
 	currentDeck,
 	currentCard,
 	studyProgress,
-	studyStats
+	studyStats,
+	flashcardSuccessRate,
+	weeklyFlashcardStats,
+	type FlashcardReviewEntry,
+	type FlashcardDailyStats
 } from './flashcard';
 
 // Annotation
@@ -46,12 +51,19 @@ export {
 	streakInfo,
 	todayStats,
 	isSessionActive,
+	activeGoals,
+	hourlyReadingDistribution,
 	type ReadingSession,
 	type SectionReadingTime,
 	type DailyStats,
 	type WeeklySummary,
 	type ActivityType,
-	type ActivityEntry
+	type ActivityEntry,
+	type GoalType,
+	type GoalUnit,
+	type StudyGoal,
+	type GoalProgress,
+	type HourlyReadingData
 } from './analytics';
 
 // Objectives

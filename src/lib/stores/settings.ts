@@ -51,6 +51,7 @@ interface SettingsState {
 	sidebarOpen: boolean;
 	shortcutPreferences: ShortcutPreferences;
 	soundEffects: boolean;
+	bionicReading: boolean;
 }
 
 const STORAGE_KEY = 'namsbokasafn:settings';
@@ -63,7 +64,8 @@ const defaultSettings: SettingsState = {
 	lineWidth: 'medium',
 	sidebarOpen: false,
 	shortcutPreferences: {},
-	soundEffects: false
+	soundEffects: false,
+	bionicReading: false
 };
 
 function loadSettings(): SettingsState {
@@ -148,6 +150,10 @@ function createSettingsStore() {
 		setSoundEffects: (enabled: boolean) => update((s) => ({ ...s, soundEffects: enabled })),
 		toggleSoundEffects: () => update((s) => ({ ...s, soundEffects: !s.soundEffects })),
 
+		// Bionic reading methods
+		setBionicReading: (enabled: boolean) => update((s) => ({ ...s, bionicReading: enabled })),
+		toggleBionicReading: () => update((s) => ({ ...s, bionicReading: !s.bionicReading })),
+
 		getShortcut: (action: ShortcutAction): string => {
 			const state = get({ subscribe });
 			return state.shortcutPreferences[action] || DEFAULT_SHORTCUTS[action];
@@ -167,3 +173,4 @@ export const lineHeight = derived(settings, ($settings) => $settings.lineHeight)
 export const lineWidth = derived(settings, ($settings) => $settings.lineWidth);
 export const sidebarOpen = derived(settings, ($settings) => $settings.sidebarOpen);
 export const soundEffects = derived(settings, ($settings) => $settings.soundEffects);
+export const bionicReading = derived(settings, ($settings) => $settings.bionicReading);
