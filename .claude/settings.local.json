@@ -112,7 +112,15 @@
       "mcp__chrome-devtools__list_pages",
       "mcp__chrome-devtools__new_page",
       "Bash(git -C ../namsbokasafn-efni status --short)",
-      "Bash(git -C ../namsbokasafn-efni diff --stat HEAD)"
+      "Bash(git -C ../namsbokasafn-efni diff --stat HEAD)",
+      "Bash(git -C ../namsbokasafn-efni log --oneline -20)",
+      "Bash(node --check:*)",
+      "Bash(xxd:*)",
+      "Bash(node tools/restore-figures.js:*)",
+      "Bash(node tools/repair-corrupted-tables.js:*)",
+      "Bash(node tools/integrate-translated-tables.js:*)",
+      "Bash(node tools/pipeline-runner.js:*)",
+      "Bash(node tools/extract-table-strings.js:*)"
     ]
   }
 }
