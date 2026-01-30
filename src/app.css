@@ -708,79 +708,79 @@
   list-style: disc;
 }
 
-/* Link to Material block - Blue/Indigo theme */
-.content-block.link-to-material {
+/* Link to Learning block - Blue/Indigo theme (OpenStax: link-to-learning) */
+.content-block.link-to-learning {
   background-color: #eef2ff;
   border-color: #c7d2fe;
 }
 
-.dark .content-block.link-to-material {
+.dark .content-block.link-to-learning {
   background-color: rgba(55, 48, 163, 0.2);
   border-color: rgba(67, 56, 202, 0.3);
 }
 
-.content-block.link-to-material .content-block-title {
+.content-block.link-to-learning .content-block-title {
   color: #3730a3;
 }
 
-.dark .content-block.link-to-material .content-block-title {
+.dark .content-block.link-to-learning .content-block-title {
   color: #a5b4fc;
 }
 
-.content-block.link-to-material .content-block-icon {
+.content-block.link-to-learning .content-block-icon {
   color: #4f46e5;
 }
 
-.dark .content-block.link-to-material .content-block-icon {
+.dark .content-block.link-to-learning .content-block-icon {
   color: #818cf8;
 }
 
-.content-block.link-to-material p {
+.content-block.link-to-learning p {
   color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
-.dark .content-block.link-to-material p {
+.dark .content-block.link-to-learning p {
   color: var(--text-primary);
 }
 
-/* Chemistry Everyday block - Orange theme */
-.content-block.chemistry-everyday {
+/* Everyday Life block - Orange theme (OpenStax: everyday-life) */
+.content-block.everyday-life {
   background-color: #fff7ed;
   border-color: #fed7aa;
 }
 
-.dark .content-block.chemistry-everyday {
+.dark .content-block.everyday-life {
   background-color: rgba(154, 52, 18, 0.2);
   border-color: rgba(194, 65, 12, 0.3);
 }
 
-.content-block.chemistry-everyday .content-block-title {
+.content-block.everyday-life .content-block-title {
   color: #9a3412;
 }
 
-.dark .content-block.chemistry-everyday .content-block-title {
+.dark .content-block.everyday-life .content-block-title {
   color: #fdba74;
 }
 
-.content-block.chemistry-everyday .content-block-icon {
+.content-block.everyday-life .content-block-icon {
   color: #ea580c;
 }
 
-.dark .content-block.chemistry-everyday .content-block-icon {
+.dark .content-block.everyday-life .content-block-icon {
   color: #fb923c;
 }
 
-.content-block.chemistry-everyday p {
+.content-block.everyday-life p {
   color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
-.dark .content-block.chemistry-everyday p {
+.dark .content-block.everyday-life p {
   color: var(--text-primary);
 }
 
@@ -822,79 +822,79 @@
   color: var(--text-primary);
 }
 
-/* Scientist Spotlight block - Pink/Rose theme */
-.content-block.scientist-spotlight {
+/* Chemist Portrait block - Pink/Rose theme (OpenStax: chemist-portrait) */
+.content-block.chemist-portrait {
   background-color: #fff1f2;
   border-color: #fecdd3;
 }
 
-.dark .content-block.scientist-spotlight {
+.dark .content-block.chemist-portrait {
   background-color: rgba(136, 19, 55, 0.2);
   border-color: rgba(159, 18, 57, 0.3);
 }
 
-.content-block.scientist-spotlight .content-block-title {
+.content-block.chemist-portrait .content-block-title {
   color: #881337;
 }
 
-.dark .content-block.scientist-spotlight .content-block-title {
+.dark .content-block.chemist-portrait .content-block-title {
   color: #fda4af;
 }
 
-.content-block.scientist-spotlight .content-block-icon {
+.content-block.chemist-portrait .content-block-icon {
   color: #e11d48;
 }
 
-.dark .content-block.scientist-spotlight .content-block-icon {
+.dark .content-block.chemist-portrait .content-block-icon {
   color: #fb7185;
 }
 
-.content-block.scientist-spotlight p {
+.content-block.chemist-portrait p {
   color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
-.dark .content-block.scientist-spotlight p {
+.dark .content-block.chemist-portrait p {
   color: var(--text-primary);
 }
 
-/* How Science Connects block - Emerald/Green theme */
-.content-block.how-science-connects {
+/* Sciences Interconnect block - Emerald/Green theme (OpenStax: sciences-interconnect) */
+.content-block.sciences-interconnect {
   background-color: #ecfdf5;
   border-color: #a7f3d0;
 }
 
-.dark .content-block.how-science-connects {
+.dark .content-block.sciences-interconnect {
   background-color: rgba(6, 78, 59, 0.2);
   border-color: rgba(5, 150, 105, 0.3);
 }
 
-.content-block.how-science-connects .content-block-title {
+.content-block.sciences-interconnect .content-block-title {
   color: #064e3b;
 }
 
-.dark .content-block.how-science-connects .content-block-title {
+.dark .content-block.sciences-interconnect .content-block-title {
   color: #6ee7b7;
 }
 
-.content-block.how-science-connects .content-block-icon {
+.content-block.sciences-interconnect .content-block-icon {
   color: #059669;
 }
 
-.dark .content-block.how-science-connects .content-block-icon {
+.dark .content-block.sciences-interconnect .content-block-icon {
   color: #34d399;
 }
 
-.content-block.how-science-connects p {
+.content-block.sciences-interconnect p {
   color: var(--text-primary);
   font-size: var(--font-size-base);
   line-height: 1.75;
   margin: 0;
 }
 
-.dark .content-block.how-science-connects p {
+.dark .content-block.sciences-interconnect p {
   color: var(--text-primary);
 }
 
@@ -1877,13 +1877,13 @@
     border-left-color: var(--accent-color) !important;
   }
 
-  /* Link to Material block - Indigo */
-  .content-block.link-to-material {
+  /* Link to Learning block - Indigo (OpenStax: link-to-learning) */
+  .content-block.link-to-learning {
     border-left-color: #4f46e5 !important;
   }
 
-  /* Chemistry Everyday block - Orange */
-  .content-block.chemistry-everyday {
+  /* Everyday Life block - Orange (OpenStax: everyday-life) */
+  .content-block.everyday-life {
     border-left-color: #ea580c !important;
   }
 
@@ -1892,13 +1892,13 @@
     border-left-color: #64748b !important;
   }
 
-  /* Scientist Spotlight block - Rose */
-  .content-block.scientist-spotlight {
+  /* Chemist Portrait block - Rose (OpenStax: chemist-portrait) */
+  .content-block.chemist-portrait {
     border-left-color: #e11d48 !important;
   }
 
-  /* How Science Connects block - Emerald */
-  .content-block.how-science-connects {
+  /* Sciences Interconnect block - Emerald (OpenStax: sciences-interconnect) */
+  .content-block.sciences-interconnect {
     border-left-color: #059669 !important;
   }
 
