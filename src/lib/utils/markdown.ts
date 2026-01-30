@@ -35,15 +35,11 @@ type ContentBlockType =
 	| 'checkpoint'
 	| 'common-misconception'
 	| 'learning-objectives'
-	| 'link-to-material' // Deprecated: use link-to-learning
-	| 'link-to-learning' // New: original OpenStax name
-	| 'chemistry-everyday' // Deprecated: use everyday-life
-	| 'everyday-life' // New: original OpenStax name
+	| 'link-to-learning' // OpenStax class name
+	| 'everyday-life' // OpenStax class name
 	| 'chapter-overview'
-	| 'scientist-spotlight' // Deprecated: use chemist-portrait
-	| 'chemist-portrait' // New: original OpenStax name
-	| 'how-science-connects' // Deprecated: use sciences-interconnect
-	| 'sciences-interconnect'; // New: original OpenStax name
+	| 'chemist-portrait' // OpenStax class name
+	| 'sciences-interconnect'; // OpenStax class name
 
 // =============================================================================
 // DIRECTIVE CONFIGURATION
@@ -140,24 +136,7 @@ const DIRECTIVE_CONFIG: Record<
 		className: 'content-block learning-objectives',
 		blockType: 'learning-objectives'
 	},
-	// Old directive names (deprecated, kept for backward compatibility)
-	'link-to-material': {
-		className: 'content-block link-to-material',
-		blockType: 'link-to-material'
-	},
-	'chemistry-everyday': {
-		className: 'content-block chemistry-everyday',
-		blockType: 'chemistry-everyday'
-	},
-	'scientist-spotlight': {
-		className: 'content-block scientist-spotlight',
-		blockType: 'scientist-spotlight'
-	},
-	'how-science-connects': {
-		className: 'content-block how-science-connects',
-		blockType: 'how-science-connects'
-	},
-	// New directive names (original OpenStax class names - preferred)
+	// OpenStax class names
 	'link-to-learning': {
 		className: 'content-block link-to-learning',
 		blockType: 'link-to-learning'
@@ -190,12 +169,7 @@ const BLOCK_TITLES: Record<ContentBlockType, string> = {
 	checkpoint: 'Sjálfsmat',
 	'common-misconception': 'Algeng misskilningur',
 	'learning-objectives': 'Námsmarkmið',
-	// Old directive names (deprecated)
-	'link-to-material': 'Tengill á námsefni',
-	'chemistry-everyday': 'Efnafræði í daglegu lífi',
-	'scientist-spotlight': 'Nærmynd af efnafræðingi',
-	'how-science-connects': 'Hvernig vísindin tengjast',
-	// New directive names (original OpenStax class names - preferred)
+	// OpenStax class names
 	'link-to-learning': 'Tengill á námsefni',
 	'everyday-life': 'Efnafræði í daglegu lífi',
 	'chemist-portrait': 'Nærmynd af efnafræðingi',
@@ -220,16 +194,7 @@ const BLOCK_ICONS: Record<ContentBlockType, string> = {
 		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
 	'learning-objectives':
 		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>',
-	// Old directive names (deprecated)
-	'link-to-material':
-		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>',
-	'chemistry-everyday':
-		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>',
-	'scientist-spotlight':
-		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>',
-	'how-science-connects':
-		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>',
-	// New directive names (original OpenStax class names - preferred)
+	// OpenStax class names
 	'link-to-learning':
 		'<svg class="content-block-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>',
 	'everyday-life':
