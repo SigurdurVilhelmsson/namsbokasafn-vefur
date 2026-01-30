@@ -387,6 +387,12 @@
   border-radius: 0.75rem;
   border: 1px solid;
   margin: 2rem 0;
+  /* Clear visual boundary with shadow */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.dark .content-block {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 /* Note block - Blue theme */
@@ -1028,6 +1034,12 @@
   padding: 0.5rem;
   border-radius: 0.5rem;
   transition: background-color 0.2s;
+  text-align: center;
+}
+
+/* Ensure spacing between consecutive equations */
+.equation-wrapper + .equation-wrapper {
+  margin-top: 1rem;
 }
 
 .equation-wrapper:hover,
@@ -1043,6 +1055,8 @@
 .equation-content {
   overflow-x: auto;
   padding: 0.5rem 0;
+  display: flex;
+  justify-content: center;
 }
 
 .equation-wrapper .equation-actions {
@@ -1234,6 +1248,7 @@
   text-transform: uppercase;
   letter-spacing: 0.025em;
   color: var(--text-primary);
+  text-align: center;
 }
 
 .dark .reading-content th {
@@ -1424,21 +1439,39 @@
 }
 
 .reading-content figcaption {
-  margin-top: 0.75rem;
-  font-size: 0.9375rem;
+  margin-top: 1.25rem;
+  font-size: 0.875rem;
   font-style: italic;
   line-height: 1.5;
-  color: var(--figcaption-color, #5a6673);
+  color: var(--text-secondary);
   text-align: center;
 }
 
 .dark .reading-content figcaption {
-  color: var(--figcaption-color, #9ca3af);
+  color: var(--text-secondary);
 }
 
 .reading-content figcaption .figure-label {
   font-style: normal;
-  font-weight: 600;
+  font-weight: 700;
+}
+
+/* Style for italic caption paragraphs (when not wrapped in figure)
+   Only target em elements that contain a strong element (figure label like "Mynd X.X")
+   This prevents single-character italic variables like *q* from being styled as captions */
+.reading-content p > em:first-child:last-child:has(strong) {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+/* Bold figure label in caption text */
+.reading-content em strong:first-child,
+.reading-content p > em > strong:first-child {
+  font-style: normal;
+  font-weight: 700;
 }
 
 /* ========================================== */
