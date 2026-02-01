@@ -57,6 +57,7 @@
 			chapterSlug="appendix"
 			sectionSlug={data.appendixLetter}
 			chapterNumber={0}
+			isHtml={data.content.isHtml || false}
 		/>
 	</div>
 </article>

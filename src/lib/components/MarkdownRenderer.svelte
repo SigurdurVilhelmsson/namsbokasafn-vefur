@@ -1,5 +1,6 @@
 <!--
   MarkdownRenderer - Renders markdown content with custom directives and KaTeX math
+  Supports both markdown and pre-rendered HTML content (from CNXML pipeline)
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
@@ -21,23 +22,30 @@
 	export let sectionSlug: string = '';
 	export let chapterNumber: number = 1;
 	export let sectionType: string = '';
+	export let isHtml: boolean = false; // True for pre-rendered HTML from CNXML pipeline
 
 	let html = '';
 	let loading = true;
 	let error: string | null = null;
 
-	// Process markdown when content changes
+	// Process content when it changes
 	$: if (content) {
-		processContent(content);
+		processContent(content, isHtml);
 	}
 
-	async function processContent(markdown: string) {
+	async function processContent(rawContent: string, preRendered: boolean) {
 		loading = true;
 		error = null;
 		try {
-			html = await processMarkdown(markdown);
+			if (preRendered) {
+				// HTML content: use directly, skip markdown processing
+				html = rawContent;
+			} else {
+				// Markdown content: process through remark/rehype pipeline
+				html = await processMarkdown(rawContent);
+			}
 		} catch (e) {
-			console.error('Markdown processing error:', e);
+			console.error('Content processing error:', e);
 			error = 'Villa við úrvinnslu efnis';
 		} finally {
 			loading = false;
@@ -46,7 +54,7 @@
 
 	onMount(() => {
 		if (content) {
-			processContent(content);
+			processContent(content, isHtml);
 		}
 	});
 </script>
