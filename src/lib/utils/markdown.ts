@@ -565,6 +565,112 @@ function rehypeTableAttributes() {
 }
 
 /**
+ * Rehype plugin to apply IDs to equations from marker comments
+ * Processes <!-- EQ_ID:id --> markers added by preprocessEquationAttributes
+ */
+function rehypeEquationIds() {
+	return (tree: Node) => {
+		visit(tree, 'element', (node: Element, index, parent) => {
+			if (!parent || index === undefined) return;
+
+			const parentEl = parent as Element;
+
+			// Check if this is a paragraph containing a KaTeX equation
+			if (node.tagName !== 'p') return;
+
+			// Look for preceding comment node with EQ_ID
+			for (let i = index - 1; i >= 0; i--) {
+				const sibling = parentEl.children[i];
+
+				// Skip whitespace text nodes
+				if (sibling.type === 'text') {
+					const textValue = (sibling as { value: string }).value;
+					if (textValue.trim().length === 0) continue;
+					break;  // Non-whitespace text - stop looking
+				}
+
+				// Found a raw/comment node
+				if (sibling.type === 'raw' || sibling.type === 'comment') {
+					const value = (sibling as { value: string }).value || '';
+					const match = value.match(/EQ_ID:(\S+)\s*-->/);
+
+					if (match) {
+						const eqId = match[1];
+
+						// Check if this paragraph contains a KaTeX equation
+						const hasKatex = node.children?.some((child) => {
+							if (child.type !== 'element') return false;
+							const el = child as Element;
+							const className = Array.isArray(el.properties?.className)
+								? el.properties.className.join(' ')
+								: (el.properties?.className as string) || '';
+							return className.includes('katex');
+						});
+
+						if (hasKatex) {
+							// Apply the ID to the paragraph (which contains the equation)
+							node.properties = node.properties || {};
+							node.properties.id = eqId;
+							node.properties.className = node.properties.className
+								? `${node.properties.className} equation-block`
+								: 'equation-block';
+
+							// Remove the marker comment
+							parentEl.children.splice(i, 1);
+						}
+					}
+					break;
+				}
+
+				// Any other element type - stop looking
+				if (sibling.type === 'element') break;
+			}
+		});
+
+		// Also handle inline equation markers
+		visit(tree, 'raw', (node: { type: string; value: string }, index, parent) => {
+			if (!parent || index === undefined) return;
+
+			const value = node.value || '';
+			const match = value.match(/<!--\s*EQ_INLINE_ID:(\S+)\s*-->/);
+			if (!match) return;
+
+			const eqId = match[1];
+			const parentEl = parent as Element;
+
+			// Find the next sibling that's a KaTeX span
+			for (let i = index + 1; i < parentEl.children.length; i++) {
+				const sibling = parentEl.children[i];
+
+				if (sibling.type === 'text') {
+					const textValue = (sibling as { value: string }).value;
+					if (textValue.trim().length === 0) continue;
+					break;  // Non-whitespace text - stop looking
+				}
+
+				if (sibling.type === 'element') {
+					const el = sibling as Element;
+					const className = Array.isArray(el.properties?.className)
+						? el.properties.className.join(' ')
+						: (el.properties?.className as string) || '';
+
+					if (className.includes('katex')) {
+						// Apply the ID to the KaTeX span
+						el.properties = el.properties || {};
+						el.properties.id = eqId;
+
+						// Remove the marker comment
+						parentEl.children.splice(index, 1);
+						return;
+					}
+					break;
+				}
+			}
+		});
+	};
+}
+
+/**
  * Rehype plugin to apply Pandoc-style IDs from data attributes to elements
  * Processes data-pandoc-id, data-term-id, data-caption-id
  */
@@ -1104,31 +1210,108 @@ function preprocessImageAttributes(content: string): string {
 
 /**
  * Process Pandoc-style attributes on inline elements (bold, italic)
- * Converts: **term**{#id} → <strong data-pandoc-id="id">term</strong>
- * Converts: *caption*{#id} → <em data-pandoc-id="id">caption</em>
+ * Converts: **term**{#id} → <strong data-term-id="id">term</strong>
+ * Converts: **term**{id="id"} → <strong data-term-id="id">term</strong>
+ * Converts: *caption*{#id} → <em data-caption-id="id">caption</em>
  */
 function preprocessInlineAttributes(content: string): string {
 	// Bold with attributes: **text**{...}
-	const boldPattern = /\*\*([^*]+)\*\*\{([^}]+)\}/g;
+	// Use non-greedy matching with 's' flag behavior ([\s\S] for dotall) to handle:
+	// - Nested formatting like **term (*x*)**{id="..."}
+	// - Multi-line terms like **útvermið\nferli**{#term-00009}
+	const boldPattern = /\*\*([\s\S]+?)\*\*\{([^}]+)\}/g;
 	content = content.replace(boldPattern, (match, text, attrs) => {
 		const parsed = parsePandocAttributes(`{${attrs}}`);
 		const dataAttrs: string[] = [];
-		if (parsed.id) dataAttrs.push(`data-term-id="${parsed.id}"`);
+		// Use shorthand id OR long-form id="..." attribute
+		const termId = parsed.id || parsed.attrs.id;
+		if (termId) dataAttrs.push(`data-term-id="${termId}"`);
 		if (parsed.classes.length > 0) dataAttrs.push(`class="${parsed.classes.join(' ')}"`);
 
 		return `<strong ${dataAttrs.join(' ')}>${text}</strong>`;
 	});
 
 	// Italic with attributes: *text*{...} (often figure captions)
-	const italicPattern = /(?<!\*)\*([^*\n]+)\*\{([^}]+)\}/g;
+	// Use [\s\S] for dotall behavior to handle multi-line captions
+	// The negative lookbehind prevents matching inside bold (**)
+	const italicPattern = /(?<!\*)\*([\s\S]+?)\*\{([^}]+)\}/g;
 	content = content.replace(italicPattern, (match, text, attrs) => {
 		const parsed = parsePandocAttributes(`{${attrs}}`);
 		const dataAttrs: string[] = [];
-		if (parsed.id) dataAttrs.push(`data-caption-id="${parsed.id}"`);
+		// Use shorthand id OR long-form id="..." attribute
+		const captionId = parsed.id || parsed.attrs.id;
+		if (captionId) dataAttrs.push(`data-caption-id="${captionId}"`);
 		if (parsed.classes.length > 0) dataAttrs.push(`class="${parsed.classes.join(' ')}"`);
 
 		return `<em ${dataAttrs.join(' ')}>${text}</em>`;
 	});
+
+	return content;
+}
+
+/**
+ * Process Pandoc-style attributes on display equations
+ * Uses a marker comment approach: equations stay as markdown so remark-math can process them,
+ * then a rehype plugin applies the IDs after rendering.
+ *
+ * Converts: $$equation$${#id} → <!-- EQ_ID:id -->$$equation$$
+ * Also handles: $$equation$${id="..."} long form
+ */
+function preprocessEquationAttributes(content: string): string {
+	// Display equations with attributes: $$...$${ ... }
+	// Match $$ equation $$ followed by {#id} or {id="..."}
+	const displayEqPattern = /(\$\$[^$]+\$\$)\{([^}]+)\}/g;
+	content = content.replace(displayEqPattern, (match, equation, attrs) => {
+		const parsed = parsePandocAttributes(`{${attrs}}`);
+		const eqId = parsed.id || parsed.attrs.id;
+
+		if (eqId) {
+			// Add marker comment before the equation - rehype plugin will apply the ID
+			return `<!-- EQ_ID:${eqId} -->\n${equation}`;
+		}
+		return equation; // Strip the attribute if no ID found
+	});
+
+	// Inline equations with attributes: $...${ ... }
+	// Less common but handle for completeness
+	const inlineEqPattern = /(?<!\$)(\$[^$\n]+\$)\{([^}]+)\}/g;
+	content = content.replace(inlineEqPattern, (match, equation, attrs) => {
+		const parsed = parsePandocAttributes(`{${attrs}}`);
+		const eqId = parsed.id || parsed.attrs.id;
+
+		if (eqId) {
+			// For inline, use a span marker that won't break the math rendering
+			return `<!-- EQ_INLINE_ID:${eqId} -->${equation}`;
+		}
+		return equation; // Strip the attribute if no ID found
+	});
+
+	return content;
+}
+
+/**
+ * Strip standalone Pandoc ID attributes that weren't caught by other preprocessors
+ * These appear as orphan {#id} or {id="..."} on their own line or inline
+ * Common after figure captions that aren't wrapped in italic
+ */
+function stripOrphanPandocAttributes(content: string): string {
+	// Pattern: standalone {#id} or {id="..."} that appears:
+	// 1. At the end of a line (after caption text)
+	// 2. On its own line
+	// 3. After closing asterisks for multi-line italics (figure captions)
+	// We strip these as they've already been processed or aren't needed
+
+	// First, handle {#id} on its own line (common for figure IDs)
+	content = content.replace(/^\{#[\w-]+\}\s*$/gm, '');
+
+	// Handle {#id} at end of line after closing paren, asterisk, or other caption terminators
+	// Must NOT match directive attributes (:::directive{#id})
+	// Key insight: directive attributes come immediately after word characters (directive name)
+	// Orphan attributes come after punctuation like ), *, ], etc.
+	content = content.replace(/([)\]*"'])\{#[\w-]+\}\s*$/gm, '$1');
+
+	// Handle {id="..."} at end of line after punctuation (not after directive names)
+	content = content.replace(/([)\]*"'])\{id="[^"]*"\}\s*$/gm, '$1');
 
 	return content;
 }
@@ -1171,15 +1354,18 @@ function markUnprocessedEquations(content: string): string {
 
 /**
  * Apply all preprocessing steps to content before markdown parsing
+ * Order matters: more specific patterns should be processed before general ones
  */
 function preprocessContent(content: string): string {
 	let result = content;
 	result = normalizeDirectiveNames(result);
 	result = unescapeBrackets(result);
 	result = preprocessImageAttributes(result);
-	result = preprocessInlineAttributes(result);
+	result = preprocessInlineAttributes(result);    // **term**{#id} and *caption*{#id}
+	result = preprocessEquationAttributes(result);  // $$eq$${#id}
 	result = preprocessTableAttributes(result);
 	result = markUnprocessedEquations(result);
+	result = stripOrphanPandocAttributes(result);   // Clean up any remaining {#id} or {id="..."}
 	return result;
 }
 
@@ -1208,6 +1394,7 @@ export async function processMarkdown(content: string): Promise<string> {
 			trust: true,
 			throwOnError: false
 		})
+		.use(rehypeEquationIds) // Apply IDs from marker comments to rendered equations
 		.use(rehypeFigureCaptions) // Wrap images + captions into figure elements
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
@@ -1243,6 +1430,7 @@ export function processMarkdownSync(content: string): string {
 			trust: true,
 			throwOnError: false
 		})
+		.use(rehypeEquationIds) // Apply IDs from marker comments to rendered equations
 		.use(rehypeFigureCaptions) // Wrap images + captions into figure elements
 		.use(rehypeEquationWrapper)
 		.use(rehypeContentBlocks)
