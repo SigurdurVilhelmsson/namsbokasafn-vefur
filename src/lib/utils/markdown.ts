@@ -56,6 +56,13 @@ const DIRECTIVE_CONFIG: Record<
 		) => Record<string, unknown>;
 	}
 > = {
+	// Practice problem - interactive problems within content
+	'practice-problem': {
+		className: 'practice-problem-container',
+		additionalProps: (attrs) => ({
+			'data-problem-id': attrs.id || undefined
+		})
+	},
 	// End-of-chapter exercise - minimal styling with running numbers (OpenStax style)
 	// Note: All <exercise> tags in OpenStax are EOC exercises
 	exercise: {
