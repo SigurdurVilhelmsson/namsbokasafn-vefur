@@ -165,8 +165,61 @@ export async function loadTableOfContents(
 }
 
 /**
+ * Extract page-data JSON from HTML content
+ * HTML files may include embedded metadata in a script tag with id="page-data"
+ */
+function extractHtmlPageData(html: string): {
+	moduleId?: string;
+	chapter?: number;
+	section?: string;
+	title?: string;
+	equations?: string[];
+	terms?: Record<string, string>;
+} {
+	const match = html.match(/<script[^>]*id="page-data"[^>]*>([\s\S]*?)<\/script>/);
+	if (!match) return {};
+	try {
+		return JSON.parse(match[1]);
+	} catch {
+		return {};
+	}
+}
+
+/**
+ * Extract title from HTML content (from h1 or title tag)
+ */
+function extractHtmlTitle(html: string): string {
+	// Try h1 first
+	const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/);
+	if (h1Match) return h1Match[1].trim();
+
+	// Try title tag
+	const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+	if (titleMatch) return titleMatch[1].trim();
+
+	return '';
+}
+
+/**
+ * Extract article content from HTML (the main content without wrapper)
+ */
+function extractHtmlArticleContent(html: string): string {
+	// Extract content between <article> and </article>
+	const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/);
+	if (articleMatch) return articleMatch[0];
+
+	// Fallback: extract body content
+	const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/);
+	if (bodyMatch) return bodyMatch[1];
+
+	return html;
+}
+
+/**
  * Load section content for a book (with caching)
  *
+ * Supports both HTML (.html) and Markdown (.md) files.
+ * HTML files are loaded as pre-rendered content with embedded metadata.
  * If preloadedMetadata is provided (from toc.json), it will be used instead of
  * parsing frontmatter at runtime. This is more efficient and handles YAML properly.
  */
@@ -212,18 +265,49 @@ export async function loadSectionContent(
 			isOffline
 		);
 	}
-	const markdown = await response.text();
+
+	const fileContent = await response.text();
+	const isHtmlFile = sectionFile.endsWith('.html');
 
 	// Transform relative image paths to absolute
 	const basePath = `/content/${bookSlug}/chapters/${chapterSlug}`;
 
 	let sectionContent: SectionContent;
 
-	if (preloadedMetadata) {
-		// Use pre-parsed metadata from build time (preferred)
+	if (isHtmlFile) {
+		// HTML content: pre-rendered from CNXML pipeline
+		const pageData = extractHtmlPageData(fileContent);
+		const articleContent = extractHtmlArticleContent(fileContent);
+
+		// Get title from preloaded metadata, page-data, or extract from HTML
+		const title = preloadedMetadata?.title || pageData.title || extractHtmlTitle(fileContent);
+
+		// Get section number from preloaded metadata or page-data
+		const section = preloadedMetadata?.section || pageData.section || '';
+
+		// Get chapter number from preloaded metadata or page-data
+		const chapter = preloadedMetadata?.chapter || pageData.chapter || 0;
+
+		// For HTML content, we mark it as pre-rendered so the renderer knows
+		// not to process it through remark/rehype
+		sectionContent = {
+			title,
+			section,
+			chapter,
+			objectives: preloadedMetadata?.objectives || [],
+			content: articleContent,
+			readingTime: preloadedMetadata?.readingTime || 5, // Default reading time
+			difficulty: preloadedMetadata?.difficulty,
+			keywords: preloadedMetadata?.keywords,
+			prerequisites: preloadedMetadata?.prerequisites,
+			source: preloadedMetadata?.source,
+			isHtml: true // Flag to indicate pre-rendered HTML
+		};
+	} else if (preloadedMetadata) {
+		// Markdown with pre-parsed metadata from build time (preferred)
 		// Just extract the content without frontmatter
-		const contentMatch = markdown.match(/^---[\s\S]*?---\n([\s\S]*)$/);
-		const rawContent = contentMatch ? contentMatch[1] : markdown;
+		const contentMatch = fileContent.match(/^---[\s\S]*?---\n([\s\S]*)$/);
+		const rawContent = contentMatch ? contentMatch[1] : fileContent;
 		const transformedContent = rawContent.replace(
 			/!\[([^\]]*)\]\(\.?\/?\/?images\//g,
 			`![$1](${basePath}/images/`
@@ -243,7 +327,7 @@ export async function loadSectionContent(
 		};
 	} else {
 		// Fallback: parse frontmatter at runtime (for offline/legacy content)
-		const { metadata, content } = parseFrontmatter(markdown);
+		const { metadata, content } = parseFrontmatter(fileContent);
 		const transformedContent = content.replace(
 			/!\[([^\]]*)\]\(\.?\/?\/?images\//g,
 			`![$1](${basePath}/images/`
@@ -353,9 +437,9 @@ export function getSectionPath(section: { number: string; slug?: string; file?: 
 
   // For unnumbered sections (intro, glossary, etc.), derive from filename
   // e.g., "1-0-introduction.md" → "1-0-introduction"
-  // e.g., "1-key-terms.md" → "1-key-terms"
+  // e.g., "1-key-terms.html" → "1-key-terms"
   if (section.file) {
-    return section.file.replace(/\.md$/, '');
+    return section.file.replace(/\.(md|html)$/, '');
   }
 
   // Fallback to slug if available
@@ -414,10 +498,10 @@ export function findSectionBySlug(toc: TableOfContents, chapterPath: string, sec
   if (section) return { chapter, section };
 
   // For unnumbered sections (intro, EOC pages), try matching by file basename
-  // e.g., sectionPath "1-0-introduction" matches file "1-0-introduction.md"
+  // e.g., sectionPath "1-0-introduction" matches file "1-0-introduction.md" or "1-0-introduction.html"
   section = chapter.sections.find((s) => {
     if (s.number === '' && s.file) {
-      const fileBasename = s.file.replace(/\.md$/, '');
+      const fileBasename = s.file.replace(/\.(md|html)$/, '');
       return fileBasename === sectionPath;
     }
     return false;
@@ -490,25 +574,46 @@ export async function loadAppendixContent(
     );
   }
 
-  const markdown = await response.text();
+  const fileContent = await response.text();
+  const isHtmlFile = appendixFile.endsWith('.html');
   const basePath = `/content/${bookSlug}/chapters/appendix`;
 
-  const { metadata, content } = parseFrontmatter(markdown);
-  const transformedContent = content.replace(
-    /!\[([^\]]*)\]\(\.?\/?\/?images\//g,
-    `![$1](${basePath}/images/`
-  );
+  let sectionContent: SectionContent;
 
-  const readingTime = calculateReadingTime(transformedContent);
+  if (isHtmlFile) {
+    // HTML content: pre-rendered from CNXML pipeline
+    const pageData = extractHtmlPageData(fileContent);
+    const articleContent = extractHtmlArticleContent(fileContent);
+    const title = pageData.title || extractHtmlTitle(fileContent);
 
-  const sectionContent: SectionContent = {
-    title: typeof metadata.title === 'string' ? metadata.title : '',
-    section: '',  // Appendices don't have section numbers
-    chapter: 0,   // Appendices don't belong to chapters
-    objectives: Array.isArray(metadata.objectives) ? metadata.objectives : [],
-    content: transformedContent,
-    readingTime
-  };
+    sectionContent = {
+      title,
+      section: '',  // Appendices don't have section numbers
+      chapter: 0,   // Appendices don't belong to chapters
+      objectives: [],
+      content: articleContent,
+      readingTime: 5,
+      isHtml: true
+    };
+  } else {
+    // Markdown content
+    const { metadata, content } = parseFrontmatter(fileContent);
+    const transformedContent = content.replace(
+      /!\[([^\]]*)\]\(\.?\/?\/?images\//g,
+      `![$1](${basePath}/images/`
+    );
+
+    const readingTime = calculateReadingTime(transformedContent);
+
+    sectionContent = {
+      title: typeof metadata.title === 'string' ? metadata.title : '',
+      section: '',  // Appendices don't have section numbers
+      chapter: 0,   // Appendices don't belong to chapters
+      objectives: Array.isArray(metadata.objectives) ? metadata.objectives : [],
+      content: transformedContent,
+      readingTime
+    };
+  }
 
   // Cache the result (browser only)
   if (browser) {
