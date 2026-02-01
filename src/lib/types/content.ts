@@ -113,6 +113,7 @@ export interface SectionContent {
   difficulty?: DifficultyLevel;
   keywords?: string[];
   prerequisites?: string[];
+  isHtml?: boolean;  // True if content is pre-rendered HTML (from CNXML pipeline)
 }
 
 // Navigation context for section navigation

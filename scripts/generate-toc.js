@@ -98,9 +98,60 @@ function parseFrontmatter(content) {
 	return frontmatter;
 }
 
+// Parse metadata from HTML file (from embedded page-data JSON or HTML elements)
+function parseHtmlMetadata(content) {
+	const metadata = {};
+
+	// Try to extract from embedded page-data JSON
+	const pageDataMatch = content.match(/<script[^>]*id="page-data"[^>]*>([\s\S]*?)<\/script>/);
+	if (pageDataMatch) {
+		try {
+			const pageData = JSON.parse(pageDataMatch[1]);
+			if (pageData.title) metadata.title = pageData.title;
+			if (pageData.section) metadata.section = pageData.section;
+			if (pageData.chapter) metadata.chapter = pageData.chapter;
+			return metadata;
+		} catch {
+			// Fall through to HTML parsing
+		}
+	}
+
+	// Fallback: extract from HTML elements
+	const titleMatch = content.match(/<h1[^>]*id="title"[^>]*>([^<]+)<\/h1>/);
+	if (titleMatch) {
+		metadata.title = titleMatch[1].trim();
+	} else {
+		// Try any h1
+		const h1Match = content.match(/<h1[^>]*>([^<]+)<\/h1>/);
+		if (h1Match) metadata.title = h1Match[1].trim();
+	}
+
+	// Try title tag
+	if (!metadata.title) {
+		const tagMatch = content.match(/<title>([^<]+)<\/title>/);
+		if (tagMatch) metadata.title = tagMatch[1].trim();
+	}
+
+	return metadata;
+}
+
+// Get file extension (.md or .html)
+function getFileExtension(filename) {
+	return extname(filename).toLowerCase();
+}
+
+// Get basename without extension (.md or .html)
+function getBasenameWithoutExt(filename) {
+	const ext = getFileExtension(filename);
+	if (ext === '.md' || ext === '.html') {
+		return basename(filename, ext);
+	}
+	return basename(filename);
+}
+
 // Determine section type from filename
 function getSectionType(filename) {
-	const name = basename(filename, '.md').toLowerCase();
+	const name = getBasenameWithoutExt(filename).toLowerCase();
 
 	if (name.includes('key-terms') || name.includes('lykilhugtok')) {
 		return 'glossary';
@@ -131,8 +182,8 @@ function getSectionNumber(frontmatter, filename, chapterNum) {
 		return frontmatter.section;
 	}
 
-	// Try parsing from filename (e.g., "1-2-name.md" -> "1.2")
-	const name = basename(filename, '.md');
+	// Try parsing from filename (e.g., "1-2-name.md" or "1-2-name.html" -> "1.2")
+	const name = getBasenameWithoutExt(filename);
 	const match = name.match(/^(\d+)-(\d+)/);
 	if (match) {
 		return `${match[1]}.${match[2]}`;
@@ -210,19 +261,34 @@ function scanAppendices(bookPath) {
 		return [];
 	}
 
-	const appendixFiles = readdirSync(appendixDir)
-		.filter((f) => f.endsWith('.md'))
+	// Find all appendix files and prefer HTML when both exist for same basename
+	const allAppendixFiles = readdirSync(appendixDir)
+		.filter((f) => f.endsWith('.md') || f.endsWith('.html'))
 		.sort();
+
+	const appendixByBasename = new Map();
+	for (const file of allAppendixFiles) {
+		const base = getBasenameWithoutExt(file);
+		const existing = appendixByBasename.get(base);
+		if (!existing) {
+			appendixByBasename.set(base, file);
+		} else if (file.endsWith('.html') && existing.endsWith('.md')) {
+			appendixByBasename.set(base, file);
+		}
+	}
+
+	const appendixFiles = Array.from(appendixByBasename.values()).sort();
 
 	const appendices = [];
 
 	for (const file of appendixFiles) {
 		const filePath = resolve(appendixDir, file);
 		const content = readFileSync(filePath, 'utf-8');
-		const frontmatter = parseFrontmatter(content);
+		const isHtml = file.endsWith('.html');
+		const frontmatter = isHtml ? parseHtmlMetadata(content) : parseFrontmatter(content);
 
-		// Extract letter from filename (e.g., "A-periodic-table.md" -> "A")
-		const letterMatch = basename(file, '.md').match(/^([A-M])-/i);
+		// Extract letter from filename (e.g., "A-periodic-table.md" or "A-periodic-table.html" -> "A")
+		const letterMatch = getBasenameWithoutExt(file).match(/^([A-M])-/i);
 		const letter = letterMatch ? letterMatch[1].toUpperCase() : null;
 
 		if (!letter) {
@@ -311,18 +377,37 @@ function generateToc(bookSlug, options) {
 		// Load chapter metadata from efni repo
 		const chapterMeta = loadChapterMetadata(options.efniPath, bookSlug, chapterNum);
 
-		// Find all markdown files in chapter
-		const mdFiles = readdirSync(chapterPath).filter((f) => f.endsWith('.md'));
+		// Find all content files in chapter (both .md and .html)
+		// When both .md and .html exist for same basename, prefer .html (pre-rendered from CNXML pipeline)
+		const allFiles = readdirSync(chapterPath).filter((f) => f.endsWith('.md') || f.endsWith('.html'));
+
+		// Group files by basename and prefer HTML when both exist
+		const filesByBasename = new Map();
+		for (const file of allFiles) {
+			const base = getBasenameWithoutExt(file);
+			const existing = filesByBasename.get(base);
+			if (!existing) {
+				filesByBasename.set(base, file);
+			} else {
+				// Prefer .html over .md when both exist
+				if (file.endsWith('.html') && existing.endsWith('.md')) {
+					filesByBasename.set(base, file);
+				}
+			}
+		}
+
+		const contentFiles = Array.from(filesByBasename.values());
 
 		const sections = [];
 
-		for (const mdFile of mdFiles) {
-			const filePath = resolve(chapterPath, mdFile);
+		for (const contentFile of contentFiles) {
+			const filePath = resolve(chapterPath, contentFile);
 			const content = readFileSync(filePath, 'utf-8');
-			const frontmatter = parseFrontmatter(content);
+			const isHtml = contentFile.endsWith('.html');
+			const frontmatter = isHtml ? parseHtmlMetadata(content) : parseFrontmatter(content);
 
-			const sectionType = getSectionType(mdFile);
-			const sectionNum = getSectionNumber(frontmatter, mdFile, chapterNum);
+			const sectionType = getSectionType(contentFile);
+			const sectionNum = getSectionNumber(frontmatter, contentFile, chapterNum);
 
 			// Get title from frontmatter or chapter metadata
 			let title = frontmatter.title;
@@ -334,7 +419,7 @@ function generateToc(bookSlug, options) {
 			}
 			if (!title) {
 				// Fallback: derive from filename
-				title = basename(mdFile, '.md')
+				title = getBasenameWithoutExt(contentFile)
 					.replace(/^\d+-\d+-/, '')
 					.replace(/^\d+-/, '')
 					.replace(/-/g, ' ');
@@ -344,7 +429,7 @@ function generateToc(bookSlug, options) {
 			const section = {
 				number: sectionNum, // May be null, will be assigned after sorting
 				title,
-				file: mdFile,
+				file: contentFile,
 				type: sectionType
 			};
 
