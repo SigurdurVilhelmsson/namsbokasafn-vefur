@@ -61,6 +61,7 @@
 			sectionSlug="{data.chapterNumber}-answer-key"
 			chapterNumber={data.chapterNumber}
 			sectionType="answer-key"
+			isHtml={data.section.isHtml || false}
 		/>
 	</div>
 

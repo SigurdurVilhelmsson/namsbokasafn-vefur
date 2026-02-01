@@ -386,6 +386,7 @@
 			sectionSlug={data.sectionSlug}
 			chapterNumber={data.chapterNumber}
 			sectionType={data.section.type || ''}
+			isHtml={data.section.isHtml || false}
 		/>
 	</TextHighlighter>
 
