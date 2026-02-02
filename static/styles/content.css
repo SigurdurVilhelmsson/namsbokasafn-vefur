@@ -1,0 +1,628 @@
+/**
+ * content.css - Styles for CNXML-rendered HTML content
+ *
+ * These styles apply to pre-rendered HTML from the CNXML pipeline.
+ * The HTML structure uses semantic elements with specific class names.
+ *
+ * Based on OpenStax Chemistry 2e styling.
+ */
+
+/* ==============================================
+   ROOT VARIABLES
+   ============================================== */
+
+:root {
+  /* OpenStax-inspired colors */
+  --os-gray-bg: #ededed;
+  --os-gray-border: #dcdcdc;
+  --os-text-dark: #333333;
+  --os-text-body: #424242;
+  --os-link-color: #027eb5;
+  --os-green: #4caf50;
+
+  /* Note type colors */
+  --note-link-learning-bg: #e8f4f8;
+  --note-link-learning-border: #b8d4e3;
+  --note-everyday-life-bg: #fff8e6;
+  --note-everyday-life-border: #f0d88e;
+  --note-sciences-bg: #e8f5e9;
+  --note-sciences-border: #a5d6a7;
+  --note-portrait-bg: #fce4ec;
+  --note-portrait-border: #f48fb1;
+}
+
+/* ==============================================
+   BASE ARTICLE STYLES
+   ============================================== */
+
+article.cnx-module {
+  font-family: "Neue Helvetica W01", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.44;
+  color: var(--os-text-body);
+}
+
+article.cnx-module header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--os-text-dark);
+  margin: 15px 0 10px;
+  line-height: 1.2;
+}
+
+/* ==============================================
+   LEARNING OBJECTIVES
+   ============================================== */
+
+.learning-objectives {
+  background-color: var(--os-gray-bg);
+  border: 2px solid var(--os-gray-border);
+  padding: 15px 20px;
+  margin: 20px 0 30px;
+}
+
+.learning-objectives h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--os-text-body);
+  margin: 0 0 10px;
+}
+
+.learning-objectives p {
+  margin: 0 0 8px;
+}
+
+.learning-objectives ul {
+  margin: 0;
+  padding-left: 25px;
+}
+
+.learning-objectives li {
+  margin-bottom: 5px;
+}
+
+/* ==============================================
+   SECTION HEADINGS
+   ============================================== */
+
+article.cnx-module section h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--os-text-dark);
+  margin: 15px 0 10px;
+  line-height: 1.2;
+}
+
+article.cnx-module section h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--os-text-dark);
+  margin: 25px 0 12px;
+  line-height: 1.2;
+}
+
+article.cnx-module section h4 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--os-text-dark);
+  margin: 20px 0 10px;
+}
+
+/* ==============================================
+   PARAGRAPHS
+   ============================================== */
+
+article.cnx-module p {
+  margin: 10px 0;
+  line-height: 1.44;
+}
+
+/* ==============================================
+   TERMS (Definitions)
+   ============================================== */
+
+article.cnx-module dfn.term {
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* ==============================================
+   FIGURES
+   ============================================== */
+
+article.cnx-module figure {
+  margin: 20px 0;
+  text-align: center;
+}
+
+article.cnx-module figure img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+article.cnx-module figure figcaption {
+  font-size: 14px;
+  font-style: italic;
+  color: var(--os-text-body);
+  margin-top: 10px;
+  text-align: center;
+  line-height: 1.4;
+}
+
+article.cnx-module figure figcaption .figure-label {
+  font-weight: 700;
+  font-style: normal;
+  color: var(--os-blue-primary);
+}
+
+article.cnx-module figure.splash {
+  margin: 0 0 30px;
+}
+
+/* ==============================================
+   NOTES (Feature Boxes)
+   ============================================== */
+
+article.cnx-module aside.note {
+  background-color: var(--os-gray-bg);
+  border: 2px solid var(--os-gray-border);
+  margin: 30px 0;
+  padding: 0;
+}
+
+article.cnx-module aside.note .note-type {
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--os-text-body);
+  padding: 15px 15px 10px;
+  margin: 0;
+  border-bottom: 2px solid var(--os-gray-border);
+}
+
+article.cnx-module aside.note h4 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--os-text-dark);
+  padding: 15px 30px 10px;
+  margin: 0;
+}
+
+article.cnx-module aside.note p {
+  padding: 0 30px 10px;
+  margin: 10px 0 0;
+}
+
+article.cnx-module aside.note figure {
+  padding: 0 30px 15px;
+  margin: 0;
+}
+
+/* Link to Learning - Blue tint */
+article.cnx-module aside.note-link-to-learning {
+  background-color: var(--note-link-learning-bg);
+  border-color: var(--note-link-learning-border);
+}
+
+/* Chemistry in Everyday Life - Yellow/Orange tint */
+article.cnx-module aside.note-chemistry.note-everyday-life,
+article.cnx-module aside.note.note-chemistry.everyday-life {
+  background-color: var(--note-everyday-life-bg);
+  border-color: var(--note-everyday-life-border);
+}
+
+/* Sciences Interconnect - Green tint */
+article.cnx-module aside.note-sciences-interconnect {
+  background-color: var(--note-sciences-bg);
+  border-color: var(--note-sciences-border);
+}
+
+/* Portrait of a Chemist - Pink tint */
+article.cnx-module aside.note-chemist-portrait {
+  background-color: var(--note-portrait-bg);
+  border-color: var(--note-portrait-border);
+}
+
+/* ==============================================
+   EXAMPLES
+   ============================================== */
+
+article.cnx-module aside.example {
+  background-color: var(--os-gray-bg);
+  border: 2px solid var(--os-gray-border);
+  margin: 30px 0;
+  padding: 0;
+}
+
+article.cnx-module aside.example .example-label {
+  font-size: 17px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--os-text-body);
+  padding: 15px 15px 10px;
+  margin: 0;
+}
+
+article.cnx-module aside.example h4 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--os-text-dark);
+  padding: 15px 30px 10px;
+  margin: 0;
+}
+
+article.cnx-module aside.example p {
+  padding: 0 30px 10px;
+  margin: 10px 0 0;
+}
+
+article.cnx-module aside.example .para-title {
+  padding: 15px 30px 5px;
+  margin: 0;
+  font-size: 17px;
+}
+
+article.cnx-module aside.example .para-title strong {
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ==============================================
+   EXERCISES (Check Your Learning)
+   ============================================== */
+
+article.cnx-module div.exercise {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #027eb5;
+  margin: 20px 0;
+  padding: 15px;
+}
+
+article.cnx-module div.exercise .problem {
+  margin-bottom: 10px;
+}
+
+article.cnx-module div.exercise .solution {
+  border-top: 1px solid #e0e0e0;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+/* ==============================================
+   EQUATIONS
+   ============================================== */
+
+article.cnx-module div.equation {
+  margin: 20px 0;
+  text-align: center;
+  overflow-x: auto;
+}
+
+article.cnx-module div.equation .katex-display {
+  margin: 0;
+  padding: 10px 0;
+}
+
+article.cnx-module div.equation .equation-number {
+  float: right;
+  color: var(--os-text-body);
+  font-size: 14px;
+}
+
+article.cnx-module div.equation.unnumbered .equation-number {
+  display: none;
+}
+
+/* ==============================================
+   TABLES
+   ============================================== */
+
+article.cnx-module table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+}
+
+article.cnx-module table th,
+article.cnx-module table td {
+  border: 1px solid var(--os-gray-border);
+  padding: 8px 16px;
+  text-align: left;
+  vertical-align: top;
+}
+
+article.cnx-module table th {
+  font-weight: 700;
+}
+
+article.cnx-module table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* ==============================================
+   LISTS
+   ============================================== */
+
+article.cnx-module ul,
+article.cnx-module ol {
+  margin: 10px 0;
+  padding-left: 30px;
+}
+
+article.cnx-module li {
+  margin-bottom: 5px;
+  line-height: 1.44;
+}
+
+/* ==============================================
+   LINKS
+   ============================================== */
+
+article.cnx-module a {
+  color: var(--os-link-color);
+  text-decoration: none;
+}
+
+article.cnx-module a:hover {
+  text-decoration: underline;
+}
+
+/* ==============================================
+   GLOSSARY
+   ============================================== */
+
+article.cnx-module section.glossary {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 2px solid var(--os-gray-border);
+}
+
+article.cnx-module section.glossary h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+}
+
+article.cnx-module section.glossary dl {
+  margin: 0;
+}
+
+article.cnx-module section.glossary dt {
+  font-weight: 700;
+  margin-top: 15px;
+}
+
+article.cnx-module section.glossary dd {
+  margin: 5px 0 0 20px;
+}
+
+/* ==============================================
+   FOOTNOTES
+   ============================================== */
+
+/* Footnote reference (superscript number in text) */
+article.cnx-module .footnote-ref {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+  top: -0.5em;
+}
+
+article.cnx-module .footnote-ref a {
+  color: var(--os-link-color);
+  text-decoration: none;
+}
+
+article.cnx-module .footnote-ref a:hover {
+  text-decoration: underline;
+}
+
+/* Footnotes section at bottom of page */
+article.cnx-module section.footnotes {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--os-gray-border);
+}
+
+article.cnx-module section.footnotes h2 {
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+article.cnx-module .footnotes-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  color: var(--os-text-body);
+}
+
+article.cnx-module .footnote-item {
+  margin-bottom: 10px;
+}
+
+article.cnx-module .footnote-item p {
+  margin: 0;
+  padding: 0;
+}
+
+article.cnx-module .footnote-backref {
+  margin-left: 5px;
+  color: var(--os-link-color);
+  text-decoration: none;
+}
+
+article.cnx-module .footnote-backref:hover {
+  text-decoration: underline;
+}
+
+/* ==============================================
+   EXERCISES PAGE
+   ============================================== */
+
+article.chapter-resource.exercises .exercises-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+article.chapter-resource.exercises .exercises-list .exercise {
+  display: flex;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-left: 4px solid var(--os-blue-primary);
+}
+
+article.chapter-resource.exercises .exercises-list .exercise::before {
+  content: attr(value) ".";
+  font-weight: 700;
+  color: var(--os-blue-primary);
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+article.chapter-resource.exercises .exercises-list .exercise .problem {
+  flex: 1;
+}
+
+article.chapter-resource.exercises .exercises-list .exercise .problem p {
+  margin: 0 0 10px;
+}
+
+article.chapter-resource.exercises
+  .exercises-list
+  .exercise
+  .problem
+  p:last-child {
+  margin-bottom: 0;
+}
+
+article.chapter-resource.exercises .exercises-section h2 {
+  font-size: 20px;
+  margin: 30px 0 15px;
+  color: var(--os-text-heading);
+  border-bottom: 1px solid var(--os-gray-border);
+  padding-bottom: 10px;
+}
+
+article.chapter-resource.exercises .exercises-section h2:first-child {
+  margin-top: 0;
+}
+
+/* ==============================================
+   ANSWER KEY PAGE
+   ============================================== */
+
+article.chapter-resource.answer-key .answers-list {
+  margin: 0;
+}
+
+article.chapter-resource.answer-key .answer-entry {
+  display: flex;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-left: 3px solid var(--os-green);
+}
+
+article.chapter-resource.answer-key .answer-entry dt {
+  font-weight: 700;
+  color: var(--os-blue-primary);
+  min-width: 40px;
+  flex-shrink: 0;
+}
+
+article.chapter-resource.answer-key .answer-entry dd {
+  flex: 1;
+  margin: 0;
+}
+
+article.chapter-resource.answer-key .answer-entry dd p {
+  margin: 0;
+}
+
+article.chapter-resource.answer-key .answers-section h2 {
+  font-size: 20px;
+  margin: 30px 0 15px;
+  color: var(--os-text-heading);
+  border-bottom: 1px solid var(--os-gray-border);
+  padding-bottom: 10px;
+}
+
+article.chapter-resource.answer-key .answers-section h2:first-child {
+  margin-top: 0;
+}
+
+/* ==============================================
+   KEY TERMS PAGE
+   ============================================== */
+
+article.chapter-resource.key-terms dl.key-terms-list {
+  margin: 0;
+}
+
+article.chapter-resource.key-terms .term-entry {
+  display: flex;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+article.chapter-resource.key-terms .term-entry dt {
+  font-weight: 700;
+  color: var(--os-text-heading);
+  min-width: 150px;
+  flex-shrink: 0;
+}
+
+article.chapter-resource.key-terms .term-entry dd {
+  flex: 1;
+  margin: 0;
+  color: var(--os-text-body);
+}
+
+/* ==============================================
+   EMPHASIS
+   ============================================== */
+
+article.cnx-module em {
+  font-style: italic;
+}
+
+article.cnx-module strong {
+  font-weight: 700;
+}
+
+/* ==============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================== */
+
+@media (max-width: 768px) {
+  article.cnx-module header h1 {
+    font-size: 24px;
+  }
+
+  article.cnx-module section h2 {
+    font-size: 20px;
+  }
+
+  article.cnx-module section h3 {
+    font-size: 18px;
+  }
+
+  article.cnx-module aside.note p,
+  article.cnx-module aside.example p {
+    padding: 0 10px 10px;
+  }
+
+  article.cnx-module aside.note .note-type,
+  article.cnx-module aside.example .example-label {
+    padding: 8px 10px;
+  }
+}
