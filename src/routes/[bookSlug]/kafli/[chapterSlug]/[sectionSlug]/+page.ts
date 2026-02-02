@@ -36,9 +36,9 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			currentSection.metadata
 		);
 
-		// Find chapter and section indices using number-based matching
+		// Find chapter and section indices using file-based matching (handles supplementary pages with empty number)
 		const chapterIndex = toc.chapters.findIndex((c) => c.number === chapter.number);
-		const sectionIndex = chapter.sections.findIndex((s) => s.number === currentSection.number);
+		const sectionIndex = chapter.sections.findIndex((s) => s.file === currentSection.file);
 
 		// Build navigation context
 		let previous: NavigationContext['previous'];
