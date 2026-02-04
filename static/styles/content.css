@@ -385,10 +385,16 @@ article.cnx-module table tbody tr:nth-child(even) {
    LISTS
    ============================================== */
 
-article.cnx-module ul,
+article.cnx-module ul {
+  margin: 10px 0;
+  padding-left: 30px;
+  list-style-type: disc;
+}
+
 article.cnx-module ol {
   margin: 10px 0;
   padding-left: 30px;
+  list-style-type: decimal;
 }
 
 article.cnx-module li {
