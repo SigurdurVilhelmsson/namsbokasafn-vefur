@@ -472,23 +472,12 @@ article.chapter-resource.exercises .exercises-list {
 }
 
 article.chapter-resource.exercises .exercises-list .exercise {
-  display: flex;
+  display: block;
+  position: relative;
   margin-bottom: 20px;
-  padding: 15px;
+  padding: 15px 15px 15px 3rem;
   background-color: #f9f9f9;
   border-left: 4px solid var(--os-blue-primary);
-}
-
-article.chapter-resource.exercises .exercises-list .exercise::before {
-  content: attr(value) ".";
-  font-weight: 700;
-  color: var(--os-blue-primary);
-  min-width: 40px;
-  flex-shrink: 0;
-}
-
-article.chapter-resource.exercises .exercises-list .exercise .problem {
-  flex: 1;
 }
 
 article.chapter-resource.exercises .exercises-list .exercise .problem p {
@@ -524,26 +513,15 @@ article.chapter-resource.answer-key .answers-list {
 }
 
 article.chapter-resource.answer-key .answer-entry {
-  display: flex;
+  display: block;
+  position: relative;
   margin-bottom: 15px;
-  padding: 10px;
+  padding: 10px 10px 10px 3rem;
   background-color: #f5f5f5;
   border-left: 3px solid var(--os-green);
 }
 
-article.chapter-resource.answer-key .answer-entry dt {
-  font-weight: 700;
-  color: var(--os-blue-primary);
-  min-width: 40px;
-  flex-shrink: 0;
-}
-
-article.chapter-resource.answer-key .answer-entry dd {
-  flex: 1;
-  margin: 0;
-}
-
-article.chapter-resource.answer-key .answer-entry dd p {
+article.chapter-resource.answer-key .answer-entry p {
   margin: 0;
 }
 
