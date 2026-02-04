@@ -1219,7 +1219,7 @@ mjx-container[jax="SVG"][display="true"] {
 }
 
 mjx-container[jax="SVG"] {
-  font-size: 1.1em;
+  font-size: 1em;
 }
 
 /* Override Tailwind Preflight which sets all SVGs to display:block —
