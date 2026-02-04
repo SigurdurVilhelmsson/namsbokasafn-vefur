@@ -8,7 +8,7 @@ import remarkMath from 'remark-math';
 import remarkDirective from 'remark-directive';
 import remarkRehype from 'remark-rehype';
 import rehypeSlug from 'rehype-slug';
-import rehypeKatex from 'rehype-katex';
+import rehypeMathjaxSvg from 'rehype-mathjax/svg';
 import rehypeStringify from 'rehype-stringify';
 import { visit } from 'unist-util-visit';
 import type { Root } from 'mdast';
@@ -575,7 +575,7 @@ function rehypeEquationIds() {
 
 			const parentEl = parent as Element;
 
-			// Check if this is a paragraph containing a KaTeX equation
+			// Check if this is a paragraph containing a MathJax equation
 			if (node.tagName !== 'p') return;
 
 			// Look for preceding comment node with EQ_ID
@@ -597,17 +597,17 @@ function rehypeEquationIds() {
 					if (match) {
 						const eqId = match[1];
 
-						// Check if this paragraph contains a KaTeX equation
-						const hasKatex = node.children?.some((child) => {
+						// Check if this paragraph contains a MathJax equation
+						const hasMath = node.children?.some((child) => {
 							if (child.type !== 'element') return false;
 							const el = child as Element;
 							const className = Array.isArray(el.properties?.className)
 								? el.properties.className.join(' ')
 								: (el.properties?.className as string) || '';
-							return className.includes('katex');
+							return className.includes('MathJax') || el.tagName === 'mjx-container';
 						});
 
-						if (hasKatex) {
+						if (hasMath) {
 							// Apply the ID to the paragraph (which contains the equation)
 							node.properties = node.properties || {};
 							node.properties.id = eqId;
@@ -638,7 +638,7 @@ function rehypeEquationIds() {
 			const eqId = match[1];
 			const parentEl = parent as Element;
 
-			// Find the next sibling that's a KaTeX span
+			// Find the next sibling that's a MathJax element
 			for (let i = index + 1; i < parentEl.children.length; i++) {
 				const sibling = parentEl.children[i];
 
@@ -654,8 +654,8 @@ function rehypeEquationIds() {
 						? el.properties.className.join(' ')
 						: (el.properties?.className as string) || '';
 
-					if (className.includes('katex')) {
-						// Apply the ID to the KaTeX span
+					if (className.includes('MathJax') || el.tagName === 'mjx-container') {
+						// Apply the ID to the MathJax element
 						el.properties = el.properties || {};
 						el.properties.id = eqId;
 
@@ -919,12 +919,12 @@ function latexToSpeech(latex: string): string {
 }
 
 /**
- * Check if a paragraph contains only a single KaTeX equation (treat as block)
+ * Check if a paragraph contains only a single MathJax equation (treat as block)
  */
-function isBlockEquation(parent: Element, katexNode: Element): boolean {
+function isBlockEquation(parent: Element, mathNode: Element): boolean {
 	if (parent.tagName !== 'p') return false;
 
-	// Check if katex span is the only significant child
+	// Check if math element is the only significant child
 	const significantChildren = parent.children?.filter((child) => {
 		if (child.type === 'text') {
 			return (child as { value: string }).value.trim().length > 0;
@@ -932,11 +932,11 @@ function isBlockEquation(parent: Element, katexNode: Element): boolean {
 		return child.type === 'element';
 	}) || [];
 
-	return significantChildren.length === 1 && significantChildren[0] === katexNode;
+	return significantChildren.length === 1 && significantChildren[0] === mathNode;
 }
 
 /**
- * Extract LaTeX source from KaTeX element
+ * Extract LaTeX source from MathJax element
  */
 function extractLatex(node: Element): string {
 	let latex = '';
@@ -957,7 +957,7 @@ function extractLatex(node: Element): string {
 /**
  * Create equation wrapper element
  */
-function createEquationWrapper(katexNode: Element, latex: string): Element {
+function createEquationWrapper(mathNode: Element, latex: string): Element {
 	const ariaLabel = latexToSpeech(latex);
 
 	return {
@@ -975,7 +975,7 @@ function createEquationWrapper(katexNode: Element, latex: string): Element {
 				type: 'element',
 				tagName: 'div',
 				properties: { className: 'equation-content' },
-				children: [katexNode]
+				children: [mathNode]
 			},
 			{
 				type: 'element',
@@ -1025,7 +1025,7 @@ function createEquationWrapper(katexNode: Element, latex: string): Element {
 }
 
 /**
- * Rehype plugin to wrap KaTeX equations with accessibility and interaction features
+ * Rehype plugin to wrap MathJax equations with accessibility and interaction features
  */
 function rehypeEquationWrapper() {
 	return (tree: Node) => {
@@ -1033,21 +1033,22 @@ function rehypeEquationWrapper() {
 		visit(tree, 'element', (node: Element, index, parent) => {
 			if (!parent || index === undefined) return;
 
-			// Check if this is a paragraph containing only a KaTeX equation
+			// Check if this is a paragraph containing only a MathJax equation
 			if (node.tagName === 'p') {
 				const children = node.children || [];
 
-				// Find katex spans
-				const katexSpans = children.filter((child) => {
+				// Find MathJax elements (mjx-container from rehype-mathjax)
+				const mathSpans = children.filter((child) => {
 					if (child.type !== 'element') return false;
 					const el = child as Element;
 					const className = Array.isArray(el.properties?.className)
 						? el.properties.className.join(' ')
 						: (el.properties?.className as string) || '';
-					return el.tagName === 'span' && className.includes('katex');
+					return (el.tagName === 'mjx-container' || el.tagName === 'span') &&
+						(className.includes('MathJax') || className.includes('mathjax'));
 				}) as Element[];
 
-				// Check if paragraph has only whitespace text and one katex span
+				// Check if paragraph has only whitespace text and one math element
 				const nonWhitespaceText = children.filter((child) => {
 					if (child.type === 'text') {
 						return (child as { value: string }).value.trim().length > 0;
@@ -1055,11 +1056,11 @@ function rehypeEquationWrapper() {
 					return child.type === 'element';
 				});
 
-				if (nonWhitespaceText.length === 1 && katexSpans.length === 1) {
+				if (nonWhitespaceText.length === 1 && mathSpans.length === 1) {
 					// This is a standalone block equation
-					const katexNode = katexSpans[0];
-					const latex = extractLatex(katexNode);
-					const wrapper = createEquationWrapper(katexNode, latex);
+					const mathNode = mathSpans[0];
+					const latex = extractLatex(mathNode);
+					const wrapper = createEquationWrapper(mathNode, latex);
 
 					// Replace the paragraph with the wrapper
 					const parentEl = parent as { children: RootContent[] };
@@ -1077,7 +1078,8 @@ function rehypeEquationWrapper() {
 				? node.properties.className.join(' ')
 				: (node.properties?.className as string) || '';
 
-			if (node.tagName === 'span' && className.includes('katex')) {
+			if ((node.tagName === 'mjx-container' || node.tagName === 'span') &&
+				(className.includes('MathJax') || className.includes('mathjax'))) {
 				// Skip if already wrapped (check if parent is equation-content)
 				const latex = extractLatex(node);
 
@@ -1389,11 +1391,7 @@ export async function processMarkdown(content: string): Promise<string> {
 		.use(remarkCustomDirectives)
 		.use(remarkCrossReferences)
 		.use(remarkRehype, { allowDangerousHtml: true })
-		.use(rehypeKatex, {
-			strict: false,
-			trust: true,
-			throwOnError: false
-		})
+		.use(rehypeMathjaxSvg)
 		.use(rehypeEquationIds) // Apply IDs from marker comments to rendered equations
 		.use(rehypeFigureCaptions) // Wrap images + captions into figure elements
 		.use(rehypeEquationWrapper)
@@ -1425,11 +1423,7 @@ export function processMarkdownSync(content: string): string {
 		.use(remarkCustomDirectives)
 		.use(remarkCrossReferences)
 		.use(remarkRehype, { allowDangerousHtml: true })
-		.use(rehypeKatex, {
-			strict: false,
-			trust: true,
-			throwOnError: false
-		})
+		.use(rehypeMathjaxSvg)
 		.use(rehypeEquationIds) // Apply IDs from marker comments to rendered equations
 		.use(rehypeFigureCaptions) // Wrap images + captions into figure elements
 		.use(rehypeEquationWrapper)
