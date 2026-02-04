@@ -23,6 +23,7 @@ npm run format           # Prettier formatting
 ## Architecture
 
 ### State Management
+
 - **Svelte stores** (`src/lib/stores/`) with localStorage persistence
 - `settings.ts`: Theme, font size, sidebar state
 - `reader.ts`: Reading progress, bookmarks, current location
@@ -31,12 +32,16 @@ npm run format           # Prettier formatting
 - `annotation.ts`: Text highlights and notes with export capability
 
 ### Content Loading
-- Static content served from `static/content/{bookSlug}/`
-- Each book has: `toc.json` (table of contents), `glossary.json`, and `chapters/{chapterSlug}/{sectionSlug}.md`
-- Markdown files use YAML-like frontmatter for metadata
-- Custom directives: `:::practice-problem`, `:::note`, `:::warning`, `:::example`
+
+- Static content served from `static/content/{bookSlug}/` (gitignored — synced from namsbokasafn-efni, not tracked here)
+- Each book has: `toc.json` (table of contents), `glossary.json`, and `chapters/{chapterNum}/{sectionFile}`
+- **Two content formats coexist** (migration in progress):
+  - **HTML** (`.html`): Pre-rendered from CNXML pipeline in namsbokasafn-efni. Metadata in `<script id="page-data">` JSON. Used by efnafraedi (Chemistry).
+  - **Markdown** (`.md`): Legacy format with YAML frontmatter. Custom directives: `:::practice-problem`, `:::note`, `:::warning`, `:::example`. Used by liffraedi (Biology).
+- Chapter directories use zero-padded numbers (v2 format): `01/`, `02/`, etc. Legacy v1 slug format (`01-grunnhugmyndir`) still supported via `getChapterFolder()`
 
 ### Routing (SvelteKit file-based)
+
 - `/` - Book catalog (`src/routes/+page.svelte`)
 - `/:bookSlug` - Book home (`src/routes/[bookSlug]/+page.svelte`)
 - `/:bookSlug/kafli/:chapterSlug` - Chapter view
@@ -47,11 +52,14 @@ npm run format           # Prettier formatting
 - `/:bookSlug/prof` - Quizzes
 
 ### Key Patterns
-- Book config loaded via `+layout.ts` load function and passed to child routes
+
+- Book config defined in `src/lib/types/book.ts`; loaded via `+layout.ts` and passed to child routes
+- Landing page (`+page.ts`) dynamically reads `toc.json` to derive chapter counts — no hardcoded stats
+- Books with `status: 'coming-soon'` are hidden from the landing page (currently: liffraedi)
 - Svelte actions for DOM manipulation (equations, practice problems, figure viewer)
 - `$:` reactive declarations for derived state
 - `$store` auto-subscription syntax for store values
-- Math rendering: KaTeX with mhchem for chemical equations
+- Math rendering: MathJax (pre-rendered SVG in HTML content)
 - Path alias: `$lib/` resolves to `src/lib/`
 
 ## Language Policy
@@ -60,6 +68,7 @@ npm run format           # Prettier formatting
 - **English**: Code, comments, variable names, technical documentation
 
 Example:
+
 ```svelte
 <!-- Load chapter content (English comment) -->
 <button aria-label="Leita">Leita</button>  <!-- Icelandic UI -->
@@ -68,26 +77,26 @@ Example:
 ## Tech Stack
 
 - SvelteKit 2, Svelte 5, TypeScript 5.7, Vite 6
-- unified/remark/rehype for markdown processing
-- rehype-katex for math, Svelte stores for state
-- @sveltejs/adapter-static for static site generation
+- unified/remark/rehype for markdown processing (legacy — will be removed when all content migrated to HTML)
+- MathJax for math rendering (pre-rendered SVG in HTML content)
+- Svelte stores for state, @sveltejs/adapter-static for static site generation
 - @vite-pwa/sveltekit for PWA support
 - Vitest + Playwright for tests
 
 ## SRS Algorithm
 
 The flashcard system uses SM-2 spaced repetition in `src/lib/utils/srs.ts`:
+
 - Ease factor range: 1.3-2.5
 - Quality ratings: again(0), hard(2), good(4), easy(5)
 - Be careful modifying this algorithm as it affects learning outcomes
 
 ## Key Actions & Components
 
-- `src/lib/actions/equations.ts`: KaTeX equation rendering
+- `src/lib/actions/equations.ts`: Equation rendering
 - `src/lib/actions/practiceProblems.ts`: Interactive problem handling
 - `src/lib/actions/crossReferences.ts`: Internal link handling
-- `src/lib/components/MarkdownRenderer.svelte`: Main content renderer
-- `src/lib/components/FlashcardStudy.svelte`: Flashcard UI with SM-2
+- `src/lib/components/MarkdownRenderer.svelte`: Main content renderer (handles both HTML and markdown via `isHtml` prop)
 
 ## Deployment
 
@@ -98,16 +107,38 @@ Static site deployed to Linode via GitHub Actions. Output goes to `build/` direc
 This project works together with `namsbokasafn-efni` (content repository). When fixing bugs:
 
 ### Content Problems → Fix in namsbokasafn-efni
+
 - **Prepared content**: Fix issues in `books/*/05-publication/mt-preview/`
 - **Processing pipeline**: Fix the root cause in `tools/` scripts so problems don't recur
 - Then sync content here using `node scripts/sync-content.js --source ../namsbokasafn-efni`
 
 ### Website/Rendering Bugs → Fix here (namsbokasafn-vefur)
+
 - Markdown processing issues in `src/lib/utils/markdown.ts`
 - Component rendering in `src/lib/components/`
 - Styling in CSS files
 
+### After syncing new content
+
+Run `node scripts/generate-toc.js` to regenerate `toc.json` from the chapter directories on disk. The landing page reads chapter counts from `toc.json` dynamically.
+
 **Important**: Avoid adding workarounds here that compensate for content problems. Fix content at the source in namsbokasafn-efni. Always verify changes render correctly in both repositories.
+
+## Build Scripts
+
+- `scripts/generate-toc.js`: Scans chapter directories and generates `toc.json`. Handles both `.md` and `.html` files, preferring `.html` when both exist. Run after syncing new content.
+- `scripts/process-content.js`: Enriches `toc.json` with metadata (reading time, cross-references). Runs automatically before `dev` and `build` via `prepare-content`. Handles both `.md` and `.html` files.
+- `scripts/validate-content.js`: Validates markdown content (frontmatter, directives, links, images). Skips `.html` files (validated upstream in CNXML pipeline). Runs before production builds.
+- `scripts/sync-content.js`: Syncs content from namsbokasafn-efni repo.
+
+## Pending: Markdown Pipeline Removal (Phase D)
+
+When all `.md` content is migrated to HTML (`find static/content -name "*.md" -path "*/chapters/*"` returns 0), the markdown pipeline can be removed:
+
+- Delete `src/lib/utils/markdown.ts` and its tests
+- Remove unified/remark/rehype npm dependencies
+- Simplify `MarkdownRenderer.svelte` to HTML-only (rename to `ContentRenderer.svelte`)
+- Clean up markdown branches in `contentLoader.ts` and search worker
 
 ## Migration Note
 
