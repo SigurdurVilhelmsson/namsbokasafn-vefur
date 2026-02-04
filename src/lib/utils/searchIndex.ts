@@ -170,7 +170,7 @@ class SearchIndexWorker {
 					);
 					if (!response.ok) continue;
 
-					const markdown = await response.text();
+					const content = await response.text();
 
 					documents.push({
 						chapterSlug: chapterPath,
@@ -178,7 +178,7 @@ class SearchIndexWorker {
 						chapterTitle: chapter.title,
 						sectionTitle: section.title,
 						sectionNumber: section.number,
-						markdown
+						content
 					});
 				} catch (error) {
 					console.error(`Villa við að hlaða ${chapterPath}/${sectionPath}:`, error);

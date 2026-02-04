@@ -175,7 +175,7 @@ function extractReferences(content, chapterSlug, sectionSlug, chapterNumber, cou
 	return refs;
 }
 
-function calculateReadingTime(content) {
+function calculateReadingTimeMarkdown(content) {
 	const cleanText = content
 		.replace(/```[\s\S]*?```/g, '')
 		.replace(/`[^`]+`/g, '')
@@ -192,6 +192,35 @@ function calculateReadingTime(content) {
 	const minutes = Math.ceil(wordCount / WORDS_PER_MINUTE);
 
 	return Math.max(1, Math.min(minutes, 60));
+}
+
+function calculateReadingTimeHtml(content) {
+	const cleanText = content
+		.replace(/<script[\s\S]*?<\/script>/gi, '')
+		.replace(/<style[\s\S]*?<\/style>/gi, '')
+		.replace(/<[^>]*>/g, ' ')
+		.replace(/&\w+;/g, ' ')
+		.replace(/\s+/g, ' ')
+		.trim();
+
+	const wordCount = cleanText.split(/\s+/).filter((word) => word.length > 0).length;
+	const minutes = Math.ceil(wordCount / WORDS_PER_MINUTE);
+
+	return Math.max(1, Math.min(minutes, 60));
+}
+
+/**
+ * Parse metadata from HTML page-data JSON
+ */
+function parseHtmlPageData(content) {
+	const match = content.match(/<script[^>]*id="page-data"[^>]*>([\s\S]*?)<\/script>/);
+	if (!match) return null;
+
+	try {
+		return JSON.parse(match[1]);
+	} catch {
+		return null;
+	}
 }
 
 function parseDifficulty(value) {
@@ -250,6 +279,7 @@ function processBook(bookSlug) {
 		for (const section of chapter.sections || []) {
 			const sectionFilePath = join(chapterDir, section.file);
 			const sectionPath = getSectionPath(section);
+			const isHtml = section.file.endsWith('.html');
 
 			if (!existsSync(sectionFilePath)) {
 				console.warn(`    Warning: Section file not found: ${section.file}`);
@@ -259,36 +289,49 @@ function processBook(bookSlug) {
 
 			try {
 				const fileContent = readFileSync(sectionFilePath, 'utf-8');
-				const { data: frontmatter, content } = matter(fileContent);
 
-				// Calculate reading time from content
-				const readingTime = calculateReadingTime(content);
+				if (isHtml) {
+					// HTML content: extract metadata from page-data JSON
+					const pageData = parseHtmlPageData(fileContent);
+					const readingTime = calculateReadingTimeHtml(fileContent);
 
-				// Enrich section with parsed metadata
-				section.metadata = {
-					title: frontmatter.title || section.title,
-					section: String(frontmatter.section || section.number),
-					chapter: frontmatter.chapter || chapter.number,
-					readingTime,
-					difficulty: parseDifficulty(frontmatter.difficulty),
-					objectives: Array.isArray(frontmatter.objectives) ? frontmatter.objectives : [],
-					keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : undefined,
-					prerequisites: Array.isArray(frontmatter.prerequisites)
-						? frontmatter.prerequisites
-						: undefined
-				};
+					section.metadata = {
+						title: pageData?.title || section.title,
+						section: String(pageData?.section || section.number),
+						chapter: pageData?.chapter || chapter.number,
+						readingTime,
+						difficulty: undefined,
+						objectives: []
+					};
+				} else {
+					// Markdown content: extract metadata from frontmatter
+					const { data: frontmatter, content } = matter(fileContent);
+					const readingTime = calculateReadingTimeMarkdown(content);
 
-				// Include source attribution if present
-				if (frontmatter.source) {
-					section.metadata.source = frontmatter.source;
-				}
+					section.metadata = {
+						title: frontmatter.title || section.title,
+						section: String(frontmatter.section || section.number),
+						chapter: frontmatter.chapter || chapter.number,
+						readingTime,
+						difficulty: parseDifficulty(frontmatter.difficulty),
+						objectives: Array.isArray(frontmatter.objectives) ? frontmatter.objectives : [],
+						keywords: Array.isArray(frontmatter.keywords) ? frontmatter.keywords : undefined,
+						prerequisites: Array.isArray(frontmatter.prerequisites)
+							? frontmatter.prerequisites
+							: undefined
+					};
 
-				// Extract cross-references from content
-				const refs = extractReferences(content, chapterPath, sectionPath, chapterNumber, counters);
-				for (const ref of refs) {
-					const { key, ...refData } = ref;
-					referenceIndex[key] = refData;
-					referencesFound++;
+					if (frontmatter.source) {
+						section.metadata.source = frontmatter.source;
+					}
+
+					// Extract cross-references from markdown content
+					const refs = extractReferences(content, chapterPath, sectionPath, chapterNumber, counters);
+					for (const ref of refs) {
+						const { key, ...refData } = ref;
+						referenceIndex[key] = refData;
+						referencesFound++;
+					}
 				}
 
 				sectionsProcessed++;

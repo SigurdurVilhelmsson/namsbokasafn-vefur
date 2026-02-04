@@ -18,7 +18,7 @@ export interface RawDocument {
 	chapterTitle: string;
 	sectionTitle: string;
 	sectionNumber: string;
-	markdown: string;
+	content: string;
 }
 
 export interface SearchFilters {
