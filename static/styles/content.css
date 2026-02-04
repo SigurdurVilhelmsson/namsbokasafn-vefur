@@ -75,6 +75,7 @@ article.cnx-module header h1 {
 .learning-objectives ul {
   margin: 0;
   padding-left: 25px;
+  list-style-type: disc;
 }
 
 .learning-objectives li {
@@ -154,7 +155,7 @@ article.cnx-module figure figcaption {
 article.cnx-module figure figcaption .figure-label {
   font-weight: 700;
   font-style: normal;
-  color: var(--os-blue-primary);
+  color: var(--os-link-color);
 }
 
 article.cnx-module figure.splash {
@@ -482,6 +483,7 @@ article.cnx-module .footnotes-list {
   padding-left: 20px;
   font-size: 14px;
   color: var(--os-text-body);
+  list-style-type: decimal;
 }
 
 article.cnx-module .footnote-item {
@@ -519,7 +521,7 @@ article.chapter-resource.exercises .exercises-list .exercise {
   margin-bottom: 20px;
   padding: 15px 15px 15px 3rem;
   background-color: #f9f9f9;
-  border-left: 4px solid var(--os-blue-primary);
+  border-left: 4px solid var(--os-link-color);
 }
 
 article.chapter-resource.exercises .exercises-list .exercise .problem p {
@@ -537,7 +539,7 @@ article.chapter-resource.exercises
 article.chapter-resource.exercises .exercises-section h2 {
   font-size: 20px;
   margin: 30px 0 15px;
-  color: var(--os-text-heading);
+  color: var(--os-text-dark);
   border-bottom: 1px solid var(--os-gray-border);
   padding-bottom: 10px;
 }
@@ -570,7 +572,7 @@ article.chapter-resource.answer-key .answer-entry p {
 article.chapter-resource.answer-key .answers-section h2 {
   font-size: 20px;
   margin: 30px 0 15px;
-  color: var(--os-text-heading);
+  color: var(--os-text-dark);
   border-bottom: 1px solid var(--os-gray-border);
   padding-bottom: 10px;
 }
@@ -596,7 +598,7 @@ article.chapter-resource.key-terms .term-entry {
 
 article.chapter-resource.key-terms .term-entry dt {
   font-weight: 700;
-  color: var(--os-text-heading);
+  color: var(--os-text-dark);
   min-width: 150px;
   flex-shrink: 0;
 }
