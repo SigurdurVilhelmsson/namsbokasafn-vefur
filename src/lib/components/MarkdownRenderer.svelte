@@ -3,8 +3,6 @@
   Supports both markdown and pre-rendered HTML content (from CNXML pipeline)
 -->
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { processMarkdown } from '$lib/utils/markdown';
 	import { practiceProblems } from '$lib/actions/practiceProblems';
 	import { equations } from '$lib/actions/equations';
 	import { figureViewer } from '$lib/actions/figureViewer';
@@ -24,23 +22,27 @@
 	export let isHtml: boolean = false; // True for pre-rendered HTML from CNXML pipeline
 
 	let html = '';
-	let loading = true;
+	let loading = false;
 	let error: string | null = null;
+	let lastProcessedContent = '';
 
-	// Process content when it changes
-	$: if (content) {
+	// Process content when it changes (deduplication guard prevents re-processing on hydration)
+	$: if (content && content !== lastProcessedContent) {
 		processContent(content, isHtml);
 	}
 
 	async function processContent(rawContent: string, preRendered: boolean) {
-		loading = true;
+		lastProcessedContent = rawContent;
 		error = null;
 		try {
 			if (preRendered) {
-				// HTML content: use directly, skip markdown processing
+				// HTML content: use directly, no skeleton needed (synchronous)
 				html = rawContent;
 			} else {
 				// Markdown content: process through remark/rehype pipeline
+				// Dynamic import prevents mathjax-full (CJS) from loading in the browser bundle
+				loading = true;
+				const { processMarkdown } = await import('$lib/utils/markdown');
 				html = await processMarkdown(rawContent);
 			}
 		} catch (e) {
@@ -50,12 +52,6 @@
 			loading = false;
 		}
 	}
-
-	onMount(() => {
-		if (content) {
-			processContent(content, isHtml);
-		}
-	});
 </script>
 
 {#if loading}
@@ -64,7 +60,7 @@
 	<div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4 my-4">
 		<p class="text-red-600 dark:text-red-400">{error}</p>
 	</div>
-{:else}
+{:else if html}
 	<div
 		class="reading-content"
 		use:practiceProblems
@@ -76,4 +72,6 @@
 	>
 		{@html html}
 	</div>
+{:else}
+	<Skeleton variant="content" />
 {/if}
