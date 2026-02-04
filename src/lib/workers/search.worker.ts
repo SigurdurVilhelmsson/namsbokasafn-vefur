@@ -43,8 +43,9 @@ function htmlToPlainText(html: string): string {
 			// Remove script and style blocks entirely
 			.replace(/<script[\s\S]*?<\/script>/gi, '')
 			.replace(/<style[\s\S]*?<\/style>/gi, '')
-			// Remove KaTeX/math markup
-			.replace(/<span class="katex[\s\S]*?<\/span>(?=\s*(?:<\/span>)*)/gi, '')
+			// Remove MathJax/math markup
+			.replace(/<mjx-container[\s\S]*?<\/mjx-container>/gi, '')
+			.replace(/<span class="mathjax[\s\S]*?<\/span>(?=\s*(?:<\/span>)*)/gi, '')
 			// Remove all HTML tags, keeping text content
 			.replace(/<[^>]*>/g, ' ')
 			// Decode common HTML entities
