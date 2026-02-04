@@ -243,10 +243,16 @@
   color: #cbd5e1;
 }
 
-.reading-content ul,
+.reading-content ul {
+  margin-bottom: 1.5rem;
+  padding-left: 2rem;
+  list-style-type: disc;
+}
+
 .reading-content ol {
   margin-bottom: 1.5rem;
   padding-left: 2rem;
+  list-style-type: decimal;
 }
 
 .reading-content li {
