@@ -6,8 +6,9 @@
   export let chapterNumber: number = 0;
   export let showFeedbackLink: boolean = true;
 
-  // Chapter 1 is reviewed, chapters 2-4 are MT for pilot
-  $: isReviewed = chapterNumber === 1;
+  // All chapters show as MT-preview while pipeline bugfixes are in progress
+  // Restore to `chapterNumber === 1` (or a list) when faithful version is ready
+  let isReviewed = false;
   $: statusText = isReviewed ? 'Yfirfarið' : 'Vélþýtt';
   $: statusDescription = isReviewed
     ? 'Þessi kafli hefur verið yfirfarinn af fagaðila.'
