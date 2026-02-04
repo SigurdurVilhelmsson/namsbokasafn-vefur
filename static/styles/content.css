@@ -337,6 +337,24 @@ article.cnx-module div.equation.unnumbered .equation-number {
 }
 
 /* ==============================================
+   STANDALONE MEDIA (inline images between paragraphs)
+   ============================================== */
+
+.media-inline {
+  margin: 16px 0;
+  text-align: center;
+}
+
+.media-inline img {
+  max-width: 100%;
+  height: auto;
+}
+
+.media-inline.scaled-down img {
+  max-width: 60%;
+}
+
+/* ==============================================
    TABLES
    ============================================== */
 
