@@ -4,10 +4,10 @@
 -->
 <script lang="ts">
   import { settings } from '$lib/stores/settings';
-  import { getAllBooks } from '$lib/types/book';
   import { onMount } from 'svelte';
 
-  const books = getAllBooks();
+  export let data;
+  $: books = data.books;
   let mounted = false;
 
   onMount(() => {

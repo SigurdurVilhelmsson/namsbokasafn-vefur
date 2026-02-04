@@ -68,7 +68,7 @@ export const books: BookConfig[] = [
     subject: 'raunvisindi',
     coverImage: '/covers/liffraedi.svg',
     translator: 'Þórhallur Halldórsson',
-    status: 'available',
+    status: 'coming-soon',
     source: {
       title: 'Biology 2e',
       publisher: 'OpenStax',
