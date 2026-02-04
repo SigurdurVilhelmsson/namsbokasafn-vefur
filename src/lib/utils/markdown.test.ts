@@ -104,15 +104,15 @@ describe('markdown utils', () => {
 		});
 	});
 
-	describe('math (KaTeX)', () => {
+	describe('math (MathJax)', () => {
 		it('should process inline math', async () => {
 			const html = await processMarkdown('The formula $E = mc^2$ is famous.');
-			expect(html).toContain('class="katex"');
+			expect(html).toContain('MathJax');
 		});
 
 		it('should process display math', async () => {
 			const html = await processMarkdown('$$\nE = mc^2\n$$');
-			expect(html).toContain('katex');
+			expect(html).toContain('MathJax');
 		});
 
 		it('should add accessibility attributes to math', async () => {
@@ -315,7 +315,7 @@ This is often misunderstood.
 
 		it('should handle math synchronously', () => {
 			const html = processMarkdownSync('$x^2$');
-			expect(html).toContain('katex');
+			expect(html).toContain('MathJax');
 		});
 	});
 
@@ -330,7 +330,7 @@ This has **bold** and *italic* and $math$.
 			expect(html).toContain('note');
 			expect(html).toContain('<strong>bold</strong>');
 			expect(html).toContain('<em>italic</em>');
-			expect(html).toContain('katex');
+			expect(html).toContain('MathJax');
 		});
 
 		it('should process practice problem with all parts', async () => {
@@ -372,7 +372,7 @@ See [ref:eq:1] for details.
 `;
 			const html = await processMarkdown(md);
 			expect(html).toMatch(/<h2[^>]*>/); // h1 shifted to h2 (with id attribute)
-			expect(html).toContain('katex');
+			expect(html).toContain('MathJax');
 			expect(html).toContain('note');
 			expect(html).toContain('cross-reference');
 		});
