@@ -301,6 +301,8 @@ article.cnx-module div.equation {
   margin: 20px 0;
   text-align: center;
   overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25rem 0;
 }
 
 article.cnx-module div.equation .mathjax-display,
