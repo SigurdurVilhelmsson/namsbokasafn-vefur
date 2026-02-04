@@ -303,9 +303,25 @@ article.cnx-module div.equation {
   overflow-x: auto;
 }
 
-article.cnx-module div.equation .katex-display {
+article.cnx-module div.equation .mathjax-display,
+article.cnx-module div.equation mjx-container {
   margin: 0;
   padding: 10px 0;
+}
+
+/* MathJax SVG inline sizing */
+mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"]:not([display="true"]) {
+  display: inline;
 }
 
 article.cnx-module div.equation .equation-number {
