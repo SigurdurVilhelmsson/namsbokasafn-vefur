@@ -1,5 +1,5 @@
 <!--
-  MarkdownRenderer - Renders markdown content with custom directives and KaTeX math
+  MarkdownRenderer - Renders markdown content with custom directives and MathJax math
   Supports both markdown and pre-rendered HTML content (from CNXML pipeline)
 -->
 <script lang="ts">
@@ -13,8 +13,7 @@
 	import { bionicReadingAction } from '$lib/actions/bionicReading';
 	import Skeleton from './Skeleton.svelte';
 
-	// Import KaTeX CSS
-	import 'katex/dist/katex.min.css';
+	// MathJax SVG is self-contained — no external CSS needed
 
 	export let content: string;
 	export let bookSlug: string = '';
