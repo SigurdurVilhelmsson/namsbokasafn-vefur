@@ -93,14 +93,14 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <p class="hero-eyebrow">Opnar kennslubækur</p>
+      <p class="hero-eyebrow">Opið námsefni</p>
       <h1 class="hero-title">
-        Háskólabækur<br/>
+        Námsbækur<br/>
         <span class="hero-title-accent">á íslensku</span>
       </h1>
       <p class="hero-description">
-        Íslenskar þýðingar á alþjóðlega viðurkenndum kennslubókum frá OpenStax —
-        aðgengilegar öllum nemendum og kennurum, alveg ókeypis.
+        Íslenskar þýðingar á alþjóðlega viðurkenndum námsbókum frá OpenStax —
+        aðgengilegar öllum nemendum og kennurum, án endurgjalds.
       </p>
 
       <div class="hero-features">
