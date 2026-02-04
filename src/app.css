@@ -1222,6 +1222,12 @@ mjx-container[jax="SVG"] {
   font-size: 1.1em;
 }
 
+/* Override Tailwind Preflight which sets all SVGs to display:block —
+   inline math equations must remain inline within text flow */
+mjx-container[jax="SVG"]:not([display="true"]) svg {
+  display: inline;
+}
+
 /* ========================================== */
 /* TABLES                                    */
 /* ========================================== */
