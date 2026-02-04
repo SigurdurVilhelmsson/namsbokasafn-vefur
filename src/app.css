@@ -18,7 +18,7 @@
     /* Line heights */
     --line-height-normal: 1.6;
     --line-height-relaxed: 1.8;
-    --line-height-loose: 2.0;
+    --line-height-loose: 2;
 
     /* Line widths (max-width for reading content) */
     --line-width-narrow: 38rem;
@@ -61,30 +61,33 @@
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-family: 'Source Serif Pro', Georgia, serif;
+    font-family: "Source Serif Pro", Georgia, serif;
   }
 }
 
 /* OpenDyslexic font for dyslexia-friendly reading */
 @font-face {
-  font-family: 'OpenDyslexic';
-  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff') format('woff');
+  font-family: "OpenDyslexic";
+  src: url("https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Regular.woff")
+    format("woff");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'OpenDyslexic';
-  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Bold.woff') format('woff');
+  font-family: "OpenDyslexic";
+  src: url("https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Bold.woff")
+    format("woff");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'OpenDyslexic';
-  src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Italic.woff') format('woff');
+  font-family: "OpenDyslexic";
+  src: url("https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/woff/OpenDyslexic-Italic.woff")
+    format("woff");
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -97,7 +100,7 @@
 /* ========================================== */
 
 .font-opendyslexic {
-  font-family: 'OpenDyslexic', Arial, sans-serif;
+  font-family: "OpenDyslexic", Arial, sans-serif;
 }
 
 .font-opendyslexic h1,
@@ -106,7 +109,7 @@
 .font-opendyslexic h4,
 .font-opendyslexic h5,
 .font-opendyslexic h6 {
-  font-family: 'OpenDyslexic', Arial, sans-serif;
+  font-family: "OpenDyslexic", Arial, sans-serif;
 }
 
 /* ========================================== */
@@ -198,7 +201,7 @@
 .reading-content h2,
 .reading-content h3,
 .reading-content h4 {
-  font-family: 'Lora', Georgia, serif;
+  font-family: "Lora", Georgia, serif;
   font-weight: 700;
   color: #111827;
 }
@@ -1083,7 +1086,9 @@
   border: 1px solid var(--border-color);
   border-radius: 0.25rem;
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .equation-copy-btn:hover,
@@ -1118,7 +1123,7 @@
   font-size: 1.5em;
 }
 
-.equation-zoomed .katex {
+.equation-zoomed mjx-container {
   font-size: 1.5em;
 }
 
@@ -1204,16 +1209,16 @@
 }
 
 /* ========================================== */
-/* KATEX STYLES                              */
+/* MATHJAX STYLES                            */
 /* ========================================== */
 
-.katex-display {
+mjx-container[jax="SVG"][display="true"] {
   overflow-x: auto;
   overflow-y: hidden;
   padding: 0.5rem 0;
 }
 
-.katex {
+mjx-container[jax="SVG"] {
   font-size: 1.1em;
 }
 
@@ -1297,7 +1302,7 @@
   background-color: var(--bg-secondary);
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
-  font-family: 'Fira Code', monospace;
+  font-family: "Fira Code", monospace;
   font-size: 0.875em;
 }
 
@@ -1362,7 +1367,9 @@
   background: transparent;
   color: rgba(255, 255, 255, 0.7);
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 
 .figure-lightbox-btn:hover {
@@ -1483,7 +1490,9 @@
   text-decoration: none;
   border-bottom: 1px dashed var(--accent-color);
   padding-bottom: 1px;
-  transition: border-color 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
 }
 
 .reading-content a.cross-reference:hover {
@@ -1564,7 +1573,9 @@
 /* Touch-friendly tap targets */
 @media (pointer: coarse) {
   /* Ensure minimum 44px tap targets */
-  button, a, [role="button"] {
+  button,
+  a,
+  [role="button"] {
     min-height: 44px;
   }
 
@@ -1584,54 +1595,28 @@
     /* Subtle scroll shadows to indicate more content */
     background:
       /* Top shadow */
-      linear-gradient(
-        to bottom,
-        var(--bg-secondary) 0%,
-        transparent 100%
-      ) top / 100% 40px no-repeat,
+      linear-gradient(to bottom, var(--bg-secondary) 0%, transparent 100%) top /
+        100% 40px no-repeat,
       /* Bottom shadow */
-      linear-gradient(
-        to top,
-        var(--bg-secondary) 0%,
-        transparent 100%
-      ) bottom / 100% 40px no-repeat,
-      /* Top shadow cover */
-      linear-gradient(
-        to bottom,
-        white 0%,
-        white 100%
-      ) top / 100% 40px no-repeat,
-      /* Bottom shadow cover */
-      linear-gradient(
-        to top,
-        white 0%,
-        white 100%
-      ) bottom / 100% 40px no-repeat;
+        linear-gradient(to top, var(--bg-secondary) 0%, transparent 100%)
+        bottom / 100% 40px no-repeat,
+      /* Top shadow cover */ linear-gradient(to bottom, white 0%, white 100%)
+        top / 100% 40px no-repeat,
+      /* Bottom shadow cover */ linear-gradient(to top, white 0%, white 100%)
+        bottom / 100% 40px no-repeat;
     background-attachment: local, local, scroll, scroll;
   }
 
   .dark aside nav {
     background:
-      linear-gradient(
-        to bottom,
-        var(--bg-tertiary) 0%,
-        transparent 100%
-      ) top / 100% 40px no-repeat,
-      linear-gradient(
-        to top,
-        var(--bg-tertiary) 0%,
-        transparent 100%
-      ) bottom / 100% 40px no-repeat,
-      linear-gradient(
-        to bottom,
-        rgb(17 24 39) 0%,
-        rgb(17 24 39) 100%
-      ) top / 100% 40px no-repeat,
-      linear-gradient(
-        to top,
-        rgb(17 24 39) 0%,
-        rgb(17 24 39) 100%
-      ) bottom / 100% 40px no-repeat;
+      linear-gradient(to bottom, var(--bg-tertiary) 0%, transparent 100%) top /
+        100% 40px no-repeat,
+      linear-gradient(to top, var(--bg-tertiary) 0%, transparent 100%) bottom /
+        100% 40px no-repeat,
+      linear-gradient(to bottom, rgb(17 24 39) 0%, rgb(17 24 39) 100%) top /
+        100% 40px no-repeat,
+      linear-gradient(to top, rgb(17 24 39) 0%, rgb(17 24 39) 100%) bottom /
+        100% 40px no-repeat;
     background-attachment: local, local, scroll, scroll;
   }
 
@@ -1642,7 +1627,9 @@
 
   /* Subtle hover effect on sidebar section links */
   aside nav a {
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
   }
 
   /* Active section indicator animation */
@@ -1651,7 +1638,7 @@
   }
 
   aside nav a[class*="bg-blue"]::before {
-    content: '';
+    content: "";
     position: absolute;
     left: 0;
     top: 0;
@@ -1690,7 +1677,7 @@
   }
 
   body {
-    font-family: 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+    font-family: "Source Serif Pro", Georgia, "Times New Roman", serif;
     line-height: 1.5;
     color: #000 !important;
     background: #fff !important;
@@ -1821,7 +1808,8 @@
   }
 
   /* Lists */
-  ul, ol {
+  ul,
+  ol {
     margin-bottom: 12pt;
     padding-left: 24pt;
   }
@@ -1993,16 +1981,16 @@
   }
 
   /* ----------------------------------------
-   * MATH EQUATIONS (KaTeX)
+   * MATH EQUATIONS (MathJax)
    * ---------------------------------------- */
 
-  .katex-display {
+  mjx-container[jax="SVG"][display="true"] {
     page-break-inside: avoid;
     margin: 12pt 0;
     text-align: center;
   }
 
-  .katex {
+  mjx-container[jax="SVG"] {
     font-size: 11pt !important;
   }
 
@@ -2030,7 +2018,8 @@
     border-bottom: 2pt solid #333 !important;
   }
 
-  th, td {
+  th,
+  td {
     border: 1pt solid #666 !important;
     padding: 8pt 10pt;
     text-align: left;
@@ -2102,14 +2091,14 @@
    * ---------------------------------------- */
 
   code {
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     font-size: 10pt;
     background-color: #f3f4f6 !important;
     padding: 1pt 3pt;
   }
 
   pre {
-    font-family: 'Courier New', monospace;
+    font-family: "Courier New", monospace;
     font-size: 9pt;
     background-color: #f3f4f6 !important;
     padding: 9pt;
@@ -2157,12 +2146,19 @@
    * ---------------------------------------- */
 
   /* Keep headings with following content */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     page-break-after: avoid;
   }
 
   /* Avoid orphans and widows */
-  p, li, blockquote {
+  p,
+  li,
+  blockquote {
     orphans: 3;
     widows: 3;
   }
