@@ -354,6 +354,7 @@
 .objectives-box ul {
   margin: 0;
   padding-left: 1.5rem;
+  list-style-type: disc;
 }
 
 .objectives-box li {
@@ -1820,10 +1821,16 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   }
 
   /* Lists */
-  ul,
+  ul {
+    margin-bottom: 12pt;
+    padding-left: 24pt;
+    list-style-type: disc;
+  }
+
   ol {
     margin-bottom: 12pt;
     padding-left: 24pt;
+    list-style-type: decimal;
   }
 
   li {
@@ -2146,6 +2153,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   .objectives-box ul {
     margin: 0;
     padding-left: 18pt;
+    list-style-type: disc;
   }
 
   .objectives-box li {

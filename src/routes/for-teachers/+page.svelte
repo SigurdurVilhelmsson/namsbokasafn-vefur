@@ -427,11 +427,20 @@
     margin: 0 0 1rem;
   }
 
-  .section ul, .section ol {
+  .section ul {
     margin: 0 0 1rem;
     padding-left: 1.5rem;
     color: var(--text-secondary);
     line-height: 1.7;
+    list-style-type: disc;
+  }
+
+  .section ol {
+    margin: 0 0 1rem;
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    list-style-type: decimal;
   }
 
   .section li {
