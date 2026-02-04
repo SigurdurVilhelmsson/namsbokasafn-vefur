@@ -17,6 +17,8 @@ export default defineConfig({
 			workbox: {
 				// Precache essential app shell
 				globPatterns: ['client/**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+				// MathJax bundle pushes chunks above default 2MB limit
+				maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
 				// Suppress the prerendered warning - we use SPA fallback, not prerendering
 				// This is a known issue: https://github.com/vite-pwa/sveltekit/issues/55
 				globIgnores: ['**/prerendered/**'],
