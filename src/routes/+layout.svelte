@@ -26,6 +26,8 @@
 	<meta name="theme-color" content="#1a7d5c" />
 	<link rel="manifest" href="/manifest.webmanifest" />
 	<link rel="apple-touch-icon" href="/icons/icon-192.svg" />
+	<!-- CNXML content styles -->
+	<link rel="stylesheet" href="/styles/content.css" />
 </svelte:head>
 
 <slot />
