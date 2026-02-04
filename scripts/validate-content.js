@@ -96,14 +96,14 @@ function getChapterDir(chapter) {
 /**
  * Get section slug (supports both v1 and v2 formats)
  * v1: uses section.slug directly
- * v2: derives from section.file by removing .md extension
+ * v2: derives from section.file by removing .md/.html extension
  */
 function getSectionSlug(section) {
 	if (section.slug) {
 		return section.slug; // v1 format
 	}
-	// v2 format: file name without .md extension
-	return section.file.replace(/\.md$/, '');
+	// v2 format: file name without extension
+	return section.file.replace(/\.(md|html)$/, '');
 }
 
 /**
@@ -569,7 +569,10 @@ function validateBook(bookSlug) {
 				continue;
 			}
 
-			validateMarkdown(sectionPath, bookSlug, chapterDirName, section, chapter);
+			// Only validate markdown files; HTML files are pre-rendered and validated upstream
+			if (section.file.endsWith('.md')) {
+				validateMarkdown(sectionPath, bookSlug, chapterDirName, section, chapter);
+			}
 		}
 	}
 

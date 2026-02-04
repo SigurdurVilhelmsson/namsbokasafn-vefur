@@ -23,8 +23,42 @@ let documents: SearchDocument[] = [];
 let currentBookSlug = '';
 
 // =============================================================================
-// MARKDOWN PROCESSING
+// CONTENT PROCESSING
 // =============================================================================
+
+/**
+ * Detect whether content is HTML (vs markdown)
+ */
+function isHtmlContent(content: string): boolean {
+	const trimmed = content.trimStart();
+	return trimmed.startsWith('<') || trimmed.startsWith('<!');
+}
+
+/**
+ * Convert HTML to plain text for searching
+ */
+function htmlToPlainText(html: string): string {
+	return (
+		html
+			// Remove script and style blocks entirely
+			.replace(/<script[\s\S]*?<\/script>/gi, '')
+			.replace(/<style[\s\S]*?<\/style>/gi, '')
+			// Remove KaTeX/math markup
+			.replace(/<span class="katex[\s\S]*?<\/span>(?=\s*(?:<\/span>)*)/gi, '')
+			// Remove all HTML tags, keeping text content
+			.replace(/<[^>]*>/g, ' ')
+			// Decode common HTML entities
+			.replace(/&amp;/g, '&')
+			.replace(/&lt;/g, '<')
+			.replace(/&gt;/g, '>')
+			.replace(/&quot;/g, '"')
+			.replace(/&#39;/g, "'")
+			.replace(/&nbsp;/g, ' ')
+			// Clean up whitespace
+			.replace(/\s+/g, ' ')
+			.trim()
+	);
+}
 
 /**
  * Convert markdown to plain text for searching
@@ -61,10 +95,21 @@ function markdownToPlainText(markdown: string): string {
 }
 
 /**
- * Remove frontmatter from markdown
+ * Remove frontmatter from markdown content (no-op for HTML)
  */
-function removeFrontmatter(markdown: string): string {
-	return markdown.replace(/^---[\s\S]*?---\n/, '');
+function removeFrontmatter(content: string): string {
+	if (isHtmlContent(content)) return content;
+	return content.replace(/^---[\s\S]*?---\n/, '');
+}
+
+/**
+ * Convert content to plain text, auto-detecting format
+ */
+function contentToPlainText(content: string): string {
+	if (isHtmlContent(content)) {
+		return htmlToPlainText(content);
+	}
+	return markdownToPlainText(content);
 }
 
 // =============================================================================
@@ -79,8 +124,8 @@ function buildIndex(rawDocs: RawDocument[], bookSlug: string): void {
 
 	// Process documents
 	documents = rawDocs.map((doc) => {
-		const content = removeFrontmatter(doc.markdown);
-		const plainText = markdownToPlainText(content);
+		const content = removeFrontmatter(doc.content);
+		const plainText = contentToPlainText(content);
 
 		return {
 			chapterSlug: doc.chapterSlug,

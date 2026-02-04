@@ -5,6 +5,7 @@
 import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
 import type { TableOfContents } from '$lib/types/content';
+import { getChapterFolder } from '$lib/utils/contentLoader';
 
 // Types
 export interface BookDownloadState {
@@ -225,10 +226,10 @@ export function getBookContentUrls(bookSlug: string, toc: TableOfContents): stri
 	urls.push(`${basePath}/toc.json`);
 	urls.push(`${basePath}/glossary.json`);
 
-	// All section markdown files
+	// All section content files
 	for (const chapter of toc.chapters) {
 		for (const section of chapter.sections) {
-			urls.push(`${basePath}/chapters/${chapter.slug}/${section.file}`);
+			urls.push(`${basePath}/chapters/${getChapterFolder(chapter)}/${section.file}`);
 		}
 	}
 
@@ -236,26 +237,32 @@ export function getBookContentUrls(bookSlug: string, toc: TableOfContents): stri
 }
 
 /**
- * Extract image URLs from markdown content
+ * Extract image URLs from content (supports both markdown and HTML)
  */
-export function extractImageUrls(markdown: string, basePath: string): string[] {
-	const imageRegex = /!\[.*?\]\((.*?)\)/g;
+export function extractImageUrls(content: string, basePath: string): string[] {
 	const urls: string[] = [];
 	let match;
 
-	while ((match = imageRegex.exec(markdown)) !== null) {
-		let url = match[1];
-		// Handle relative paths
+	// Markdown image syntax: ![alt](url)
+	const mdImageRegex = /!\[.*?\]\((.*?)\)/g;
+	while ((match = mdImageRegex.exec(content)) !== null) {
+		urls.push(match[1]);
+	}
+
+	// HTML image syntax: <img src="url">
+	const htmlImageRegex = /<img[^>]+src=["']([^"']+)["']/g;
+	while ((match = htmlImageRegex.exec(content)) !== null) {
+		urls.push(match[1]);
+	}
+
+	// Normalize paths
+	return urls.map((url) => {
 		if (url.startsWith('./') || url.startsWith('../') || !url.startsWith('/')) {
 			url = url.replace(/^\.\//, '');
 			url = `${basePath}/${url}`;
 		}
-		// Normalize paths
-		url = url.replace(/\/+/g, '/');
-		urls.push(url);
-	}
-
-	return urls;
+		return url.replace(/\/+/g, '/');
+	});
 }
 
 /**
@@ -307,8 +314,8 @@ export async function downloadBook(
 				// Cache the response
 				await contentCache.put(url, response);
 
-				// Extract images from markdown files
-				if (url.endsWith('.md')) {
+				// Extract images from content files
+				if (url.endsWith('.md') || url.endsWith('.html')) {
 					const basePath = url.substring(0, url.lastIndexOf('/'));
 					const images = extractImageUrls(content, basePath);
 					images.forEach((img) => allImageUrls.add(img));
@@ -371,13 +378,14 @@ export async function estimateBookSize(bookSlug: string): Promise<number> {
 		const toc: TableOfContents = await tocResponse.json();
 		const contentUrls = getBookContentUrls(bookSlug, toc);
 
-		// Estimate ~10KB per markdown file + ~50KB per image
+		// Estimate ~10KB per content file + ~50KB per image
 		// This is a rough estimate - actual size fetched during download
-		const estimatedMarkdownSize = contentUrls.filter((u) => u.endsWith('.md')).length * 10000;
+		const estimatedContentSize =
+			contentUrls.filter((u) => u.endsWith('.md') || u.endsWith('.html')).length * 10000;
 		const estimatedImageCount = toc.chapters.reduce((acc, ch) => acc + ch.sections.length * 2, 0);
 		const estimatedImageSize = estimatedImageCount * 50000;
 
-		return estimatedMarkdownSize + estimatedImageSize;
+		return estimatedContentSize + estimatedImageSize;
 	} catch {
 		return 0;
 	}
