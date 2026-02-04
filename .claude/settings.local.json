@@ -120,7 +120,12 @@
       "Bash(node tools/repair-corrupted-tables.js:*)",
       "Bash(node tools/integrate-translated-tables.js:*)",
       "Bash(node tools/pipeline-runner.js:*)",
-      "Bash(node tools/extract-table-strings.js:*)"
+      "Bash(node tools/extract-table-strings.js:*)",
+      "Bash(git -C /home/siggi/dev/repos/namsbokasafn-vefur log --oneline -5 --all -- src/lib/utils/markdown.ts)",
+      "Bash(git -C /home/siggi/dev/repos/namsbokasafn-vefur diff b6a8515..1142a8a --stat)",
+      "Bash(git -C /home/siggi/dev/repos/namsbokasafn-vefur show b6a8515 --stat)",
+      "Bash(node scripts/process-content.js:*)",
+      "Bash(node scripts/validate-content.js:*)"
     ]
   }
 }
