@@ -26,9 +26,10 @@ export default defineConfig({
 				// Runtime caching for content
 				runtimeCaching: [
 					{
-						// Cache book content (markdown, JSON)
-						urlPattern: /^.*\/content\/.*\.(md|json)$/,
-						handler: 'CacheFirst',
+						// Cache book content (HTML, markdown, JSON) — NetworkFirst
+						// so deploys are picked up immediately when online
+						urlPattern: /^.*\/content\/.*\.(html|md|json)$/,
+						handler: 'NetworkFirst',
 						options: {
 							cacheName: 'book-content',
 							expiration: {
@@ -37,7 +38,8 @@ export default defineConfig({
 							},
 							cacheableResponse: {
 								statuses: [0, 200]
-							}
+							},
+							networkTimeoutSeconds: 3
 						}
 					},
 					{
