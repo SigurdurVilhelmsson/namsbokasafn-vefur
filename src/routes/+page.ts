@@ -2,7 +2,7 @@ import { getAllBooks } from '$lib/types/book';
 import type { TableOfContents } from '$lib/types/content';
 import type { BookConfig } from '$lib/types/book';
 
-export async function load({ fetch }) {
+export async function load({ fetch }: { fetch: typeof globalThis.fetch }) {
 	const allBooks = getAllBooks();
 
 	// Only show books that are available or in-progress
