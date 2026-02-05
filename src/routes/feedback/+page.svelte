@@ -4,7 +4,8 @@
 -->
 <script lang="ts">
   import { FEEDBACK_TYPES, type FeedbackType } from '$lib/config';
-  import { submitFeedback } from '$lib/utils/api';
+
+  const FEEDBACK_EMAIL = 'namsbokasafn@gmail.com';
 
   // Form state
   let selectedType: FeedbackType | '' = '';
@@ -16,11 +17,10 @@
   let userEmail = '';
 
   // UI state
-  let isSubmitting = false;
   let submitSuccess = false;
   let submitError = '';
 
-  async function handleSubmit() {
+  function handleSubmit() {
     // Validate
     if (!selectedType) {
       submitError = 'Vinsamlegast veldu tegund athugasemdar';
@@ -33,33 +33,29 @@
     }
 
     submitError = '';
-    isSubmitting = true;
 
-    const result = await submitFeedback({
-      type: selectedType,
-      message: message.trim(),
-      book: book || undefined,
-      chapter: chapter || undefined,
-      section: section || undefined,
-      userName: userName || undefined,
-      userEmail: userEmail || undefined,
-    });
+    // Build structured email body
+    const typeLabel = FEEDBACK_TYPES.find(t => t.value === selectedType)?.label ?? 'Annað';
+    const subject = `Endurgjöf: ${typeLabel}`;
 
-    isSubmitting = false;
-
-    if (result.success) {
-      submitSuccess = true;
-      // Reset form
-      selectedType = '';
-      message = '';
-      book = '';
-      chapter = '';
-      section = '';
-      userName = '';
-      userEmail = '';
-    } else {
-      submitError = result.error || 'Gat ekki sent endurgjöf. Vinsamlegast reyndu aftur.';
+    const bodyParts: string[] = [];
+    bodyParts.push(`Tegund: ${typeLabel}`);
+    if (book) bodyParts.push(`Bók: ${book}`);
+    if (chapter) bodyParts.push(`Kafli: ${chapter}`);
+    if (section) bodyParts.push(`Hluti: ${section}`);
+    bodyParts.push('');
+    bodyParts.push(message.trim());
+    if (userName || userEmail) {
+      bodyParts.push('');
+      if (userName) bodyParts.push(`Nafn: ${userName}`);
+      if (userEmail) bodyParts.push(`Netfang: ${userEmail}`);
     }
+
+    const body = bodyParts.join('\n');
+    const mailto = `mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+    window.location.href = mailto;
+    submitSuccess = true;
   }
 
   function resetForm() {
@@ -98,7 +94,8 @@
             </svg>
           </div>
           <h2>Takk fyrir!</h2>
-          <p>Endurgjöfin þín hefur verið móttekin. Við munum skoða hana eins fljótt og auðið er.</p>
+          <p>Tölvupóstforrit ætti að hafa opnast með endurgjöfinni þinni. Vinsamlegast sendu tölvupóstinn til að ljúka sendingu.</p>
+          <p class="email-fallback">Ef ekkert gerðist, sendu tölvupóst beint á <a href="mailto:{FEEDBACK_EMAIL}">{FEEDBACK_EMAIL}</a></p>
           <button class="btn-secondary">Senda aðra endurgjöf</button>
         </div>
       {:else}
@@ -213,19 +210,12 @@
 
             <!-- Submit -->
             <div class="form-actions">
-              <button type="submit" class="btn-primary" disabled={isSubmitting}>
-                {#if isSubmitting}
-                  <svg class="spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="12" />
-                  </svg>
-                  Sendir...
-                {:else}
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="22" y1="2" x2="11" y2="13" />
-                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                  </svg>
-                  Senda endurgjöf
-                {/if}
+              <button type="submit" class="btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+                Senda endurgjöf
               </button>
             </div>
           </form>
@@ -344,6 +334,15 @@
   .success-card p {
     color: var(--text-secondary);
     margin: 0 0 1.5rem;
+  }
+
+  .email-fallback {
+    font-size: 0.85rem;
+  }
+
+  .email-fallback a {
+    color: var(--accent-color);
+    text-decoration: underline;
   }
 
   .btn-secondary {
@@ -569,23 +568,9 @@
     background: var(--accent-dark, #1d4ed8);
   }
 
-  .btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
   .btn-primary svg {
     width: 1.25rem;
     height: 1.25rem;
-  }
-
-  .spinner {
-    animation: spin 1s linear infinite;
-  }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
   }
 
   /* Help link */

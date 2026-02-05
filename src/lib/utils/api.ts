@@ -2,24 +2,11 @@
  * API Utilities
  *
  * Functions for communicating with the editorial server (ritstjorn.namsbokasafn.is).
- * Used for feedback submission and analytics tracking.
+ * Used for analytics tracking.
  */
 
 import { browser } from '$app/environment';
-import { apiUrl, type FeedbackType } from '$lib/config';
-
-/**
- * Feedback submission payload
- */
-export interface FeedbackSubmission {
-  type: FeedbackType;
-  message: string;
-  book?: string;
-  chapter?: string;
-  section?: string;
-  userName?: string;
-  userEmail?: string;
-}
+import { apiUrl } from '$lib/config';
 
 /**
  * Analytics event payload
@@ -30,36 +17,6 @@ export interface AnalyticsEvent {
   chapter?: string;
   section?: string;
   metadata?: Record<string, unknown>;
-}
-
-/**
- * Submit feedback to the editorial server
- */
-export async function submitFeedback(feedback: FeedbackSubmission): Promise<{ success: boolean; message?: string; error?: string }> {
-  if (!browser) {
-    return { success: false, error: 'Cannot submit feedback during SSR' };
-  }
-
-  try {
-    const response = await fetch(apiUrl('/api/feedback'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(feedback),
-    });
-
-    const data = await response.json();
-
-    if (response.ok && data.success) {
-      return { success: true, message: data.message };
-    } else {
-      return { success: false, error: data.message || data.error || 'Submission failed' };
-    }
-  } catch (error) {
-    console.error('[API] Feedback submission error:', error);
-    return { success: false, error: 'Network error - please try again' };
-  }
 }
 
 /**
