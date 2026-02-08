@@ -6,6 +6,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Námsbókasafn (Textbook Library) is an interactive web-based reader for Icelandic translations of OpenStax educational textbooks. It's a SvelteKit static site with integrated study tools (flashcards with SM-2 spaced repetition, glossary, progress tracking).
 
+## Notes for Code Reviewers
+
+- Migrated from React to SvelteKit January 2025 — some patterns may be carry-overs
+- Markdown pipeline is legacy, scheduled for removal (Phase D documented below)
+- No backend — all user state in localStorage (intentional, not an oversight)
+- Content directory is gitignored and synced from sister repo
+- Built iteratively with AI assistance; patterns may be inconsistent across files
+
+## Project Context
+
+- **Developer profile:** Chemistry teacher with basic Linux skills, built with Claude Code
+- **Scale:** Small educational project — 1-2 developers, ~5 editors
+- **Server:** Linode Ubuntu, nginx serving static build output
+- **Domain:** namsbokasafn.is
+- **Sister repo:** namsbokasafn-efni (content/translation pipeline)
+
 ## Development Commands
 
 ```bash
