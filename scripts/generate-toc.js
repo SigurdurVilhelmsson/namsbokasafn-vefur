@@ -525,6 +525,16 @@ function generateToc(bookSlug, options) {
 		console.log(`  Found ${answerKey.length} answer key(s)`);
 	}
 
+	// Check if index.json exists and add index entry
+	const indexPath = resolve(bookPath, 'index.json');
+	if (existsSync(indexPath)) {
+		toc.index = {
+			title: 'Stafrófsröð',
+			file: 'index.json'
+		};
+		console.log('  Found index');
+	}
+
 	return toc;
 }
 
