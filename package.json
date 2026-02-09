@@ -1,6 +1,7 @@
 {
   "name": "namsbokasafn-sveltekit",
   "version": "1.0.0",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "npm run prepare-content && vite dev",
