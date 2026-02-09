@@ -33,7 +33,7 @@
     "@types/node": "^25.2.2",
     "@vite-pwa/sveltekit": "^1.1.0",
     "autoprefixer": "^10.4.24",
-    "eslint": "^10.0.0",
+    "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.14.0",
     "globals": "^17.3.0",
