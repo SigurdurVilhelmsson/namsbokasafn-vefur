@@ -13,7 +13,7 @@ const config = {
       assets: 'build',
       fallback: 'index.html', // SPA fallback
       precompress: false,
-      strict: true
+      strict: false // Allow gitignored static files (content is generated)
     }),
 
     // Path aliases (same as current React setup)
