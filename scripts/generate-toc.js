@@ -200,6 +200,20 @@ function sortSections(sections) {
 		if (a.type === 'introduction') return -1;
 		if (b.type === 'introduction') return 1;
 
+		// Special sections (summary, exercises, etc.) always come last, regardless of number
+		const specialTypes = ['glossary', 'equations', 'summary', 'exercises', 'answer-key'];
+		const aIsSpecial = a.type && specialTypes.includes(a.type);
+		const bIsSpecial = b.type && specialTypes.includes(b.type);
+
+		// If both are special, sort by type order
+		if (aIsSpecial && bIsSpecial) {
+			return specialTypes.indexOf(a.type) - specialTypes.indexOf(b.type);
+		}
+
+		// If only one is special, regular sections come first
+		if (aIsSpecial) return 1;
+		if (bIsSpecial) return -1;
+
 		// Regular sections sorted by number
 		if (a.number && b.number) {
 			const [aMajor, aMinor] = a.number.split('.').map(Number);
@@ -208,14 +222,9 @@ function sortSections(sections) {
 			return (aMinor || 0) - (bMinor || 0);
 		}
 
-		// Special sections at the end, in standard OpenStax order
-		const typeOrder = ['glossary', 'equations', 'summary', 'exercises', 'answer-key'];
-		const aOrder = a.type ? typeOrder.indexOf(a.type) : -1;
-		const bOrder = b.type ? typeOrder.indexOf(b.type) : -1;
-
-		if (aOrder !== -1 && bOrder !== -1) return aOrder - bOrder;
-		if (aOrder !== -1) return 1;
-		if (bOrder !== -1) return -1;
+		// If one has a number and the other doesn't, numbered comes first
+		if (a.number) return -1;
+		if (b.number) return 1;
 
 		// Fallback: alphabetical by filename
 		return a.file.localeCompare(b.file);
