@@ -264,9 +264,22 @@ function loadExistingToc(bookPath) {
 
 // Scan appendix directory and generate appendix entries
 function scanAppendices(bookPath) {
-	const appendixDir = resolve(bookPath, 'chapters', 'appendix');
+	// Check for appendices in multiple possible locations
+	const possibleDirs = [
+		resolve(bookPath, 'chapters', 'appendix'),
+		resolve(bookPath, 'chapters', 'appendices'),
+		resolve(bookPath, 'chapters', '99')
+	];
 
-	if (!existsSync(appendixDir)) {
+	let appendixDir = null;
+	for (const dir of possibleDirs) {
+		if (existsSync(dir)) {
+			appendixDir = dir;
+			break;
+		}
+	}
+
+	if (!appendixDir) {
 		return [];
 	}
 
@@ -296,19 +309,36 @@ function scanAppendices(bookPath) {
 		const isHtml = file.endsWith('.html');
 		const frontmatter = isHtml ? parseHtmlMetadata(content) : parseFrontmatter(content);
 
-		// Extract letter from filename (e.g., "A-periodic-table.md" or "A-periodic-table.html" -> "A")
+		let letter = null;
+
+		// Try to extract letter from filename (e.g., "A-periodic-table.md" -> "A")
 		const letterMatch = getBasenameWithoutExt(file).match(/^([A-M])-/i);
-		const letter = letterMatch ? letterMatch[1].toUpperCase() : null;
+		if (letterMatch) {
+			letter = letterMatch[1].toUpperCase();
+		} else {
+			// Try to extract from "99-N-" format (e.g., "99-1-" -> "A", "99-2-" -> "B")
+			const numberMatch = getBasenameWithoutExt(file).match(/^99-(\d+)-/);
+			if (numberMatch) {
+				const num = parseInt(numberMatch[1], 10);
+				// Convert 1→A, 2→B, ..., 13→M
+				if (num >= 1 && num <= 13) {
+					letter = String.fromCharCode(64 + num); // 65 is 'A'
+				}
+			}
+		}
 
 		if (!letter) {
 			console.warn(`    Warning: Could not extract appendix letter from: ${file}`);
 			continue;
 		}
 
+		// Determine the directory name for the file path
+		const dirName = basename(appendixDir);
+
 		const appendix = {
 			letter,
 			title: frontmatter.title || `Viðauki ${letter}`,
-			file
+			file: `${dirName}/${file}`
 		};
 
 		// Check if this appendix should link to an interactive component
@@ -370,10 +400,11 @@ function generateToc(bookSlug, options) {
 	}
 
 	// Find chapter directories (01, 02, etc.)
+	// Exclude 99 as it's used for appendices
 	const chapterDirs = readdirSync(chaptersDir)
 		.filter((name) => {
 			const fullPath = resolve(chaptersDir, name);
-			return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name);
+			return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name) && name !== '99';
 		})
 		.sort();
 
