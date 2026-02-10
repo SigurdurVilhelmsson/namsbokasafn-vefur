@@ -382,6 +382,22 @@ article.cnx-module table tbody tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
+article.cnx-module table caption {
+  caption-side: bottom;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--os-text-body);
+  margin-top: 6px;
+  padding: 4px 0;
+  text-align: left;
+}
+
+article.cnx-module table caption .table-label {
+  font-weight: 700;
+  font-style: normal;
+  color: var(--os-link-color);
+}
+
 /* ==============================================
    LISTS
    ============================================== */
