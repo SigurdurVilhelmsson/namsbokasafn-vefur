@@ -232,7 +232,12 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 			if (!exerciseId) return;
 
 			// Only odd-numbered exercises have answers in OpenStax
-			const num = parseInt(exerciseNum || '0', 10);
+			// Exercise numbers are now in format "1.1", "9.105" (chapter.exerciseNum)
+			// Extract just the exercise number after the decimal point
+			const numStr = exerciseNum || '0';
+			const num = numStr.includes('.')
+				? parseInt(numStr.split('.')[1], 10)
+				: parseInt(numStr, 10);
 			if (num > 0 && num % 2 === 0) return; // Skip even numbers
 
 			// For eoc-exercise, make the number itself a link (OpenStax style)
