@@ -31,25 +31,15 @@
 		processContent(content, isHtml);
 	}
 
-	async function processContent(rawContent: string, preRendered: boolean) {
+	async function processContent(rawContent: string, _preRendered: boolean) {
 		lastProcessedContent = rawContent;
 		error = null;
 		try {
-			if (preRendered) {
-				// HTML content: use directly, no skeleton needed (synchronous)
-				html = rawContent;
-			} else {
-				// Markdown content: process through remark/rehype pipeline
-				// Dynamic import prevents mathjax-full (CJS) from loading in the browser bundle
-				loading = true;
-				const { processMarkdown } = await import('$lib/utils/markdown');
-				html = await processMarkdown(rawContent);
-			}
+			// All content is now pre-rendered HTML from the CNXML pipeline
+			html = rawContent;
 		} catch (e) {
 			console.error('Content processing error:', e);
 			error = 'Villa við úrvinnslu efnis';
-		} finally {
-			loading = false;
 		}
 	}
 </script>
