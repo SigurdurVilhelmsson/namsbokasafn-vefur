@@ -324,6 +324,16 @@ function scanAppendices(bookPath) {
 				if (num >= 1 && num <= 13) {
 					letter = String.fromCharCode(64 + num); // 65 is 'A'
 				}
+			} else {
+				// Try to extract from "appendices-N-" format (e.g., "appendices-1-" -> "A")
+				const appendixMatch = getBasenameWithoutExt(file).match(/^appendices-(\d+)-/);
+				if (appendixMatch) {
+					const num = parseInt(appendixMatch[1], 10);
+					// Convert 1→A, 2→B, ..., 13→M
+					if (num >= 1 && num <= 13) {
+						letter = String.fromCharCode(64 + num); // 65 is 'A'
+					}
+				}
 			}
 		}
 
