@@ -69,3 +69,24 @@ export function safeSetItem(key: string, value: string): boolean {
 export function dismissStorageWarning(): void {
 	storageWarning.set({ visible: false, quotaExceeded: false });
 }
+
+/**
+ * Set up cross-tab synchronization for a localStorage-backed store.
+ *
+ * The 'storage' event fires only in OTHER tabs when localStorage changes,
+ * so there is no circular update risk.
+ *
+ * @param key - The localStorage key to watch
+ * @param onExternalChange - Callback with the parsed new value
+ * @returns Cleanup function to remove the listener
+ */
+export function onStorageChange(key: string, onExternalChange: (newValue: string) => void): () => void {
+	const handler = (e: StorageEvent) => {
+		if (e.key === key && e.newValue) {
+			onExternalChange(e.newValue);
+		}
+	};
+
+	window.addEventListener('storage', handler);
+	return () => window.removeEventListener('storage', handler);
+}

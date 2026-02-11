@@ -16,6 +16,7 @@
 	let updating = false;
 	let updateError: string | null = null;
 	let intervalId: ReturnType<typeof setInterval> | null = null;
+	let offlineReadyTimeout: ReturnType<typeof setTimeout>;
 	let updateServiceWorker: (() => Promise<void>) | null = null;
 
 	onMount(async () => {
@@ -76,6 +77,7 @@
 		if (intervalId) {
 			clearInterval(intervalId);
 		}
+		clearTimeout(offlineReadyTimeout);
 	});
 
 	async function handleUpdate() {
@@ -105,10 +107,10 @@
 
 	// Auto-dismiss offline ready notification after 5 seconds
 	$: if (offlineReady) {
-		const timeout = setTimeout(() => {
+		clearTimeout(offlineReadyTimeout);
+		offlineReadyTimeout = setTimeout(() => {
 			offlineReady = false;
 		}, 5000);
-		// Cleanup handled by reactive statement re-running
 	}
 </script>
 

@@ -39,6 +39,7 @@
 	let inputRef: HTMLInputElement;
 	let modalRef: HTMLDivElement;
 	let searchTimeout: ReturnType<typeof setTimeout>;
+	let focusTimeout: ReturnType<typeof setTimeout>;
 
 	// Initialize search on mount
 	onMount(() => {
@@ -55,7 +56,8 @@
 
 	// Focus input when modal opens
 	$: if (isOpen && inputRef) {
-		setTimeout(() => inputRef?.focus(), 50);
+		clearTimeout(focusTimeout);
+		focusTimeout = setTimeout(() => inputRef?.focus(), 50);
 	}
 
 	// Keyboard shortcut handler
@@ -175,6 +177,7 @@
 
 	onDestroy(() => {
 		clearTimeout(searchTimeout);
+		clearTimeout(focusTimeout);
 	});
 </script>
 

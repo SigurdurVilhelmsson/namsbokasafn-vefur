@@ -5,7 +5,8 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
-import { safeSetItem } from '$lib/utils/localStorage';
+import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
+import { validateStoreData, isObject } from '$lib/utils/storeValidation';
 import {
 	type ProgressResult,
 	createObjectiveKey,
@@ -39,13 +40,17 @@ const defaultState: ObjectivesState = {
 	completedObjectives: {}
 };
 
+const objectivesValidators = {
+	completedObjectives: isObject
+};
+
 function loadState(): ObjectivesState {
 	if (!browser) return defaultState;
 
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return { ...defaultState, ...JSON.parse(stored) };
+			return validateStoreData(JSON.parse(stored), defaultState, objectivesValidators);
 		}
 	} catch (e) {
 		console.warn('Failed to load objectives state:', e);
@@ -57,9 +62,21 @@ function createObjectivesStore() {
 	const { subscribe, set, update } = writable<ObjectivesState>(loadState());
 
 	// Persist to localStorage
+	let _externalUpdate = false;
 	if (browser) {
 		subscribe((state) => {
-			safeSetItem(STORAGE_KEY, JSON.stringify(state));
+			if (!_externalUpdate) {
+				safeSetItem(STORAGE_KEY, JSON.stringify(state));
+			}
+		});
+
+		// Cross-tab synchronization
+		onStorageChange(STORAGE_KEY, (newValue) => {
+			try {
+				_externalUpdate = true;
+				set(validateStoreData(JSON.parse(newValue), defaultState, objectivesValidators));
+			} catch { /* ignore */ }
+			finally { _externalUpdate = false; }
 		});
 	}
 
