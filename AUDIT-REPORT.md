@@ -503,36 +503,36 @@ If `bookDest` is unset or malformed, this command is dangerous. Should use path 
 
 #### Medium
 
-| ID  | Area       | Finding                                            | Status                 |
-| --- | ---------- | -------------------------------------------------- | ---------------------- |
-| S2  | Security   | GitHub Actions not pinned to commit SHAs           | **FIXED** (2026-02-11) |
-| F2  | Stores     | No cross-tab state synchronization                 | Open                   |
-| F3  | Utils      | Highlight restoration O(n) per annotation          | Open                   |
-| F4  | Components | Sidebar re-renders all sections when collapsed     | Open                   |
-| F5  | Routes     | Orphaned `setTimeout` calls in reading view        | Open                   |
-| F6  | Utils      | SM-2 `startOfDay()` assumes UTC — timezone risk    | Open                   |
-| F7  | Stores     | No data validation on localStorage load            | Open                   |
-| F8  | Components | PeriodicTable missing keyboard navigation          | Open                   |
-| F9  | Components | No skip-to-content link                            | Open                   |
-| Q3  | Scripts    | YAML parsing inconsistency across build scripts    | **FIXED** (2026-02-11) |
-| Q4  | Scripts    | `check-status.mjs` references non-existent scripts | **FIXED** (2026-02-11) |
-| Q7  | Testing    | E2E covers only 2 of 12+ routes                    | Open                   |
-| Q8  | Testing    | No component tests                                 | Open                   |
+| ID  | Area       | Finding                                            | Status                    |
+| --- | ---------- | -------------------------------------------------- | ------------------------- |
+| S2  | Security   | GitHub Actions not pinned to commit SHAs           | **FIXED** (2026-02-11)    |
+| F2  | Stores     | No cross-tab state synchronization                 | **FIXED** (2026-02-11)    |
+| F3  | Utils      | Highlight restoration O(n) per annotation          | **FIXED** (2026-02-11)    |
+| F4  | Components | Sidebar re-renders all sections when collapsed     | **ACCEPTED** (2026-02-11) |
+| F5  | Routes     | Orphaned `setTimeout` calls in reading view        | **FIXED** (2026-02-11)    |
+| F6  | Utils      | SM-2 `startOfDay()` assumes UTC — timezone risk    | **FIXED** (2026-02-11)    |
+| F7  | Stores     | No data validation on localStorage load            | **FIXED** (2026-02-11)    |
+| F8  | Components | PeriodicTable missing keyboard navigation          | **ACCEPTED** (2026-02-11) |
+| F9  | Components | No skip-to-content link                            | **ACCEPTED** (2026-02-11) |
+| Q3  | Scripts    | YAML parsing inconsistency across build scripts    | **FIXED** (2026-02-11)    |
+| Q4  | Scripts    | `check-status.mjs` references non-existent scripts | **FIXED** (2026-02-11)    |
+| Q7  | Testing    | E2E covers only 2 of 12+ routes                    | **Improved** (2026-02-11) |
+| Q8  | Testing    | No component tests                                 | Open                      |
 
 #### Low
 
-| ID  | Area     | Finding                                           | Status                   |
-| --- | -------- | ------------------------------------------------- | ------------------------ |
-| S3  | Security | Missing `Permissions-Policy` header               | **FIXED** (2026-02-11)   |
-| S4  | Security | Missing HSTS header                               | **FIXED** (2026-02-11)   |
-| S5  | Security | `style-src 'unsafe-inline'` could use nonces      | Open                     |
-| T1  | Stack    | 12 markdown pipeline dependencies pending removal | Open                     |
-| T2  | Stack    | ESLint config is lenient                          | Open                     |
-| F10 | Actions  | `crossReferences.ts` global singleton tooltip     | Open                     |
-| F11 | Actions  | `practiceProblems.ts` inline CSS strings          | Open                     |
-| Q5  | Testing  | No coverage reporting in CI                       | **Partial** (2026-02-11) |
-| Q6  | Testing  | Pre-commit hook doesn't run tests                 | Open                     |
-| Q9  | Testing  | No vitest coverage tool configured                | **FIXED** (2026-02-11)   |
+| ID  | Area     | Finding                                           | Status                    |
+| --- | -------- | ------------------------------------------------- | ------------------------- |
+| S3  | Security | Missing `Permissions-Policy` header               | **FIXED** (2026-02-11)    |
+| S4  | Security | Missing HSTS header                               | **FIXED** (2026-02-11)    |
+| S5  | Security | `style-src 'unsafe-inline'` could use nonces      | Open                      |
+| T1  | Stack    | 12 markdown pipeline dependencies pending removal | **READY** (2026-02-11)    |
+| T2  | Stack    | ESLint config is lenient                          | **Improved** (2026-02-11) |
+| F10 | Actions  | `crossReferences.ts` global singleton tooltip     | Open                      |
+| F11 | Actions  | `practiceProblems.ts` inline CSS strings          | Open                      |
+| Q5  | Testing  | No coverage reporting in CI                       | **Partial** (2026-02-11)  |
+| Q6  | Testing  | Pre-commit hook doesn't run tests                 | Open                      |
+| Q9  | Testing  | No vitest coverage tool configured                | **FIXED** (2026-02-11)    |
 
 ---
 
@@ -654,33 +654,40 @@ This plan is organized into four phases, prioritized by risk and impact. Each ph
 
 **Goal:** Improve accessibility toward WCAG 2.1 AA and address low-severity issues.
 
-#### 4.1 Skip-to-content link (F9)
+#### 4.1 Skip-to-content link (F9) — ACCEPTED (2026-02-11)
 
-- Add a visually-hidden skip link as the first focusable element in the layout
-- Target the main content area
+- Already implemented in `[bookSlug]/+layout.svelte` (lines 73-79)
+- Visually-hidden skip link ("Hoppa beint í efni") targets `#main-content`
+- Styled with `sr-only focus:not-sr-only` pattern for proper visibility on focus
 
-#### 4.2 PeriodicTable keyboard navigation (F8)
+#### 4.2 PeriodicTable keyboard navigation (F8) — ACCEPTED (2026-02-11)
 
-- Arrow key navigation between elements
-- Enter/Space to select an element
-- Escape to close detail view
+- Already fully implemented in `PeriodicTable.svelte`:
+  - ~~Arrow key navigation between elements~~ (lines 118-150)
+  - ~~Enter/Space to select an element~~ (lines 130-134)
+  - ~~Escape to close detail view~~ (line 153)
+  - Modal arrow keys navigate between elements (lines 154-155)
+  - Proper focus management via `data-atomic-number` attribute targeting
 
-#### 4.3 Focus management
+#### 4.3 Focus management — DONE (2026-02-11)
 
-- Trap focus in all modals (SearchModal, SettingsModal, FlashcardModal, NoteModal)
-- Restore focus to trigger element when modal closes
-- `SelectionPopup`: handle viewport bounds
+- ~~Trap focus in all modals~~: SearchModal and SettingsModal already had focus traps; added to FlashcardModal and NoteModal
+- ~~Restore focus to trigger element when modal closes~~: Added `previouslyFocused` tracking and restoration to all 4 modals
+- ~~SettingsModal auto-focus~~: Added auto-focus on first interactive element when modal opens
+- `SelectionPopup`: Already handles viewport bounds (lines 25-29)
 
-#### 4.4 ESLint tightening (T2)
+#### 4.4 ESLint tightening (T2) — DONE (2026-02-11)
 
-- Gradually promote WARN rules to ERROR as issues are fixed
-- Consider enabling `svelte/no-at-html-tags` with specific file overrides
-- Reduce `no-explicit-any` usage
+- ~~Promoted to ERROR (0 violations):~~ `no-useless-escape`
+- ~~Fixed and promoted to ERROR:~~ `@typescript-eslint/no-explicit-any` (2 → 0), `svelte/no-unused-svelte-ignore` (2 → 0)
+- ~~Enabled `svelte/no-at-html-tags` as ERROR~~ with file-specific overrides for `MarkdownRenderer.svelte` and `SearchModal.svelte`
+- Reduced warnings from 189 to 184; promoted 4 rules from warn to error
+- Remaining warn rules (fix incrementally): `require-each-key` (49), `no-navigation-without-resolve` (65), `no-unused-vars` (33), `no-immutable-reactive-statements` (16), `no-case-declarations` (9), `prefer-svelte-reactivity` (7), `infinite-reactive-loop` (5)
 
-#### 4.5 Markdown pipeline removal readiness (T1)
+#### 4.5 Markdown pipeline removal readiness (T1) — READY (2026-02-11)
 
-- Monitor: `find static/content -name "*.md" -path "*/chapters/*"` should return 0
-- When ready, execute Phase D per CLAUDE.md:
+- ~~Monitor: `find static/content -name "*.md" -path "*/chapters/*"` returns 0~~ — confirmed no `.md` chapter files exist
+- Pipeline is ready for Phase D removal per CLAUDE.md:
   - Delete `src/lib/utils/markdown.ts` and tests
   - Remove 12 remark/rehype/unified dependencies
   - Simplify `MarkdownRenderer.svelte` to HTML-only
