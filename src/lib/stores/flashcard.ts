@@ -5,7 +5,8 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
-import { safeSetItem } from '$lib/utils/localStorage';
+import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
+import { validateStoreData, isArray, isObject, isNullOrString, isNumber, isBoolean } from '$lib/utils/storeValidation';
 import type {
 	Flashcard,
 	FlashcardDeck,
@@ -22,7 +23,7 @@ import {
 	calculateDeckStats,
 	previewRatingIntervals
 } from '$lib/utils/srs';
-import { getTodayDateString, getYesterdayDateString, getCurrentTimestamp } from '$lib/utils/storeHelpers';
+import { getTodayDateString, getYesterdayDateString, getCurrentTimestamp, formatLocalDate } from '$lib/utils/storeHelpers';
 
 const STORAGE_KEY = 'namsbokasafn:flashcards';
 
@@ -127,13 +128,27 @@ function buildStudyQueue(
 	}
 }
 
+const flashcardValidators = {
+	decks: isArray,
+	studyRecords: isObject,
+	currentDeckId: isNullOrString,
+	currentCardIndex: isNumber,
+	showAnswer: isBoolean,
+	studyQueue: isArray,
+	todayStudied: isNumber,
+	studyStreak: isNumber,
+	lastStudyDate: isNullOrString,
+	reviewHistory: isArray,
+	dailyFlashcardStats: isObject
+};
+
 function loadState(): FlashcardState {
 	if (!browser) return defaultState;
 
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return { ...defaultState, ...JSON.parse(stored) };
+			return validateStoreData(JSON.parse(stored), defaultState, flashcardValidators);
 		}
 	} catch (e) {
 		console.warn('Failed to load flashcard state:', e);
@@ -145,9 +160,21 @@ function createFlashcardStore() {
 	const { subscribe, set, update } = writable<FlashcardState>(loadState());
 
 	// Persist to localStorage
+	let _externalUpdate = false;
 	if (browser) {
 		subscribe((state) => {
-			safeSetItem(STORAGE_KEY, JSON.stringify(state));
+			if (!_externalUpdate) {
+				safeSetItem(STORAGE_KEY, JSON.stringify(state));
+			}
+		});
+
+		// Cross-tab synchronization
+		onStorageChange(STORAGE_KEY, (newValue) => {
+			try {
+				_externalUpdate = true;
+				set(validateStoreData(JSON.parse(newValue), defaultState, flashcardValidators));
+			} catch { /* ignore */ }
+			finally { _externalUpdate = false; }
 		});
 	}
 
@@ -350,7 +377,7 @@ function createFlashcardStore() {
 			for (let i = days - 1; i >= 0; i--) {
 				const d = new Date(today);
 				d.setDate(d.getDate() - i);
-				const dateStr = d.toISOString().split('T')[0];
+				const dateStr = formatLocalDate(d);
 				stats.push(state.dailyFlashcardStats[dateStr] || createEmptyFlashcardDailyStats(dateStr));
 			}
 
@@ -414,7 +441,7 @@ export const weeklyFlashcardStats = derived(flashcardStore, ($store) => {
 	for (let i = 6; i >= 0; i--) {
 		const d = new Date(today);
 		d.setDate(d.getDate() - i);
-		const dateStr = d.toISOString().split('T')[0];
+		const dateStr = formatLocalDate(d);
 		stats.push($store.dailyFlashcardStats[dateStr] || createEmptyFlashcardDailyStats(dateStr));
 	}
 

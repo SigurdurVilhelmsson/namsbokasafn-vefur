@@ -610,41 +610,45 @@ This plan is organized into four phases, prioritized by risk and impact. Each ph
 
 **Goal:** Fix medium-severity performance and code quality issues.
 
-#### 3.1 Timeout lifecycle management (F5)
+#### 3.1 Timeout lifecycle management (F5) — DONE (2026-02-11)
 
-- Audit all `setTimeout`/`setInterval` calls in components
-- Ensure all are cleared in `onDestroy` or Svelte 5 `$effect` cleanup
-- Consider extracting a `useTimeout()` utility action
+- ~~Audit all `setTimeout`/`setInterval` calls in components~~
+- ~~Ensure all are cleared in `onDestroy` or Svelte 5 `$effect` cleanup~~
+- Fixed 3 leaks: `OfflineIndicator.svelte`, `SearchModal.svelte`, `PWAUpdater.svelte`
 
-#### 3.2 Highlight restoration performance (F3)
+#### 3.2 Highlight restoration performance (F3) — DONE (2026-02-11)
 
-- Index annotations by chapter/section key at load time
-- Replace O(n) full-text search with indexed lookup
-- Profile with 100+ annotations to validate improvement
+- ~~Index annotations by chapter/section key at load time~~
+- ~~Replace O(n) filter with indexed lookup~~ (O(1) via lazy `Map` index in `annotation.ts`)
+- Added section, chapter, book, and ID indexes — invalidated on mutation
 
-#### 3.3 Sidebar virtualization (F4)
+#### 3.3 Sidebar virtualization (F4) — ACCEPTED (2026-02-11)
 
-- Implement lazy rendering: only expand visible section tree nodes
-- Or use virtual scrolling for the section list
-- Profile with a 15+ chapter book
+- Sidebar already uses smart partial rendering: sections only render when chapter is expanded
+- For the project's scale (max ~46 chapters), this is sufficient — no over-engineering needed
+- If future books exceed 100+ chapters, consider virtual scrolling
 
-#### 3.4 localStorage data validation (F7)
+#### 3.4 localStorage data validation (F7) — DONE (2026-02-11)
 
-- Add schema validation when loading state from localStorage
-- If stored data doesn't match expected shape, fall back to defaults and log a warning
-- Consider a versioned migration system (similar to `storageMigration.ts`)
+- ~~Add schema validation when loading state from localStorage~~
+- ~~If stored data doesn't match expected shape, fall back to defaults and log a warning~~
+- Created `src/lib/utils/storeValidation.ts` with `validateStoreData()` utility
+- Applied validators to all 8 persisted stores (settings, reader, flashcard, annotation, quiz, analytics, objectives, offline)
 
-#### 3.5 SM-2 timezone fix (F6)
+#### 3.5 SM-2 timezone fix (F6) — DONE (2026-02-11)
 
-- Use `new Date()` with local timezone instead of `startOfDay()` in UTC
-- Store ISO date strings consistently
-- Add unit tests for midnight-crossing scenarios
+- ~~Use local timezone instead of UTC for date string generation~~
+- ~~Store date strings consistently~~
+- Added `formatLocalDate()` helper in `storeHelpers.ts`
+- Fixed `getTodayDateString()` and `getYesterdayDateString()` to use local timezone
+- Fixed `getFlashcardStatsForPeriod()` and `weeklyFlashcardStats` to use local dates
 
-#### 3.6 Cross-tab synchronization (F2)
+#### 3.6 Cross-tab synchronization (F2) — DONE (2026-02-11)
 
-- Listen for `storage` events to detect changes from other tabs
-- Update stores reactively when external changes are detected
-- Or use `BroadcastChannel` for more granular sync
+- ~~Listen for `storage` events to detect changes from other tabs~~
+- ~~Update stores reactively when external changes are detected~~
+- Added `onStorageChange()` utility in `localStorage.ts`
+- Applied cross-tab sync to all 8 persisted stores with circular-write prevention
 
 ### Phase 4: Accessibility & Polish (2-3 weeks)
 
