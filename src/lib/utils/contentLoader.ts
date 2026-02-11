@@ -551,7 +551,7 @@ export async function loadAppendixContent(
 
   let response: Response;
   try {
-    response = await fetchFn(`/content/${bookSlug}/chapters/appendix/${appendixFile}`);
+    response = await fetchFn(`/content/${bookSlug}/chapters/appendices/${appendixFile}`);
   } catch (e) {
     const isOffline = checkOffline();
     throw new ContentLoadError(
@@ -576,7 +576,7 @@ export async function loadAppendixContent(
 
   const fileContent = await response.text();
   const isHtmlFile = appendixFile.endsWith('.html');
-  const basePath = `/content/${bookSlug}/chapters/appendix`;
+  const basePath = `/content/${bookSlug}/chapters/appendices`;
 
   let sectionContent: SectionContent;
 
