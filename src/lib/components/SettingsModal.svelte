@@ -2,7 +2,7 @@
   SettingsModal - User settings for font size and font family
 -->
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, onDestroy } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 	import {
 		settings,
@@ -48,9 +48,28 @@
 	];
 
 	let modalRef: HTMLDivElement;
+	let previouslyFocused: HTMLElement | null = null;
+	let focusTimeout: ReturnType<typeof setTimeout>;
+
+	// Save focus when modal opens
+	$: if (isOpen) {
+		previouslyFocused = document.activeElement as HTMLElement;
+	}
+
+	// Auto-focus first interactive element when modal opens
+	$: if (isOpen && modalRef) {
+		clearTimeout(focusTimeout);
+		focusTimeout = setTimeout(() => {
+			const firstFocusable = modalRef?.querySelector<HTMLElement>(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			);
+			firstFocusable?.focus();
+		}, 50);
+	}
 
 	function close() {
 		dispatch('close');
+		previouslyFocused?.focus();
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -64,6 +83,10 @@
 			close();
 		}
 	}
+
+	onDestroy(() => {
+		clearTimeout(focusTimeout);
+	});
 
 	// Focus trap
 	function handleModalKeydown(e: KeyboardEvent) {

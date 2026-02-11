@@ -39,8 +39,8 @@ export function validateStoreData<T>(
 ): T {
 	if (!isObject(stored)) return defaults;
 
-	const result = { ...defaults } as Record<string, any>;
-	const defaultsObj = defaults as Record<string, any>;
+	const result = { ...defaults } as Record<string, unknown>;
+	const defaultsObj = defaults as Record<string, unknown>;
 
 	for (const key of Object.keys(defaultsObj)) {
 		if (!(key in stored)) continue;
