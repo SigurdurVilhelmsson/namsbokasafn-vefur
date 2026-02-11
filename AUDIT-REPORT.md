@@ -484,45 +484,45 @@ If `bookDest` is unset or malformed, this command is dangerous. Should use path 
 
 #### High
 
-| ID | Area | Finding |
-|----|------|---------|
-| S1 | Security | CSP allows `'unsafe-eval'` — remove from nginx config |
-| Q2 | Scripts | `sync-content.js` uses unsafe `rm -rf` via shell interpolation |
-| F1 | Stores | No localStorage quota monitoring — app crashes silently when full |
-| Q1 | Testing | ~25% test coverage with critical gaps |
+| ID | Area | Finding | Status |
+|----|------|---------|--------|
+| S1 | Security | CSP allows `'unsafe-eval'` — remove from nginx config | **FIXED** (2026-02-11) |
+| Q2 | Scripts | `sync-content.js` uses unsafe `rm -rf` via shell interpolation | **FIXED** (2026-02-11) |
+| F1 | Stores | No localStorage quota monitoring — app crashes silently when full | Open |
+| Q1 | Testing | ~25% test coverage with critical gaps | Open |
 
 #### Medium
 
-| ID | Area | Finding |
-|----|------|---------|
-| S2 | Security | GitHub Actions not pinned to commit SHAs |
-| F2 | Stores | No cross-tab state synchronization |
-| F3 | Utils | Highlight restoration O(n) per annotation |
-| F4 | Components | Sidebar re-renders all sections when collapsed |
-| F5 | Routes | Orphaned `setTimeout` calls in reading view |
-| F6 | Utils | SM-2 `startOfDay()` assumes UTC — timezone risk |
-| F7 | Stores | No data validation on localStorage load |
-| F8 | Components | PeriodicTable missing keyboard navigation |
-| F9 | Components | No skip-to-content link |
-| Q3 | Scripts | YAML parsing inconsistency across build scripts |
-| Q4 | Scripts | `check-status.mjs` references non-existent scripts |
-| Q7 | Testing | E2E covers only 2 of 12+ routes |
-| Q8 | Testing | No component tests |
+| ID | Area | Finding | Status |
+|----|------|---------|--------|
+| S2 | Security | GitHub Actions not pinned to commit SHAs | Open |
+| F2 | Stores | No cross-tab state synchronization | Open |
+| F3 | Utils | Highlight restoration O(n) per annotation | Open |
+| F4 | Components | Sidebar re-renders all sections when collapsed | Open |
+| F5 | Routes | Orphaned `setTimeout` calls in reading view | Open |
+| F6 | Utils | SM-2 `startOfDay()` assumes UTC — timezone risk | Open |
+| F7 | Stores | No data validation on localStorage load | Open |
+| F8 | Components | PeriodicTable missing keyboard navigation | Open |
+| F9 | Components | No skip-to-content link | Open |
+| Q3 | Scripts | YAML parsing inconsistency across build scripts | Open |
+| Q4 | Scripts | `check-status.mjs` references non-existent scripts | Open |
+| Q7 | Testing | E2E covers only 2 of 12+ routes | Open |
+| Q8 | Testing | No component tests | Open |
 
 #### Low
 
-| ID | Area | Finding |
-|----|------|---------|
-| S3 | Security | Missing `Permissions-Policy` header |
-| S4 | Security | Missing HSTS header |
-| S5 | Security | `style-src 'unsafe-inline'` could use nonces |
-| T1 | Stack | 12 markdown pipeline dependencies pending removal |
-| T2 | Stack | ESLint config is lenient |
-| F10 | Actions | `crossReferences.ts` global singleton tooltip |
-| F11 | Actions | `practiceProblems.ts` inline CSS strings |
-| Q5 | Testing | No coverage reporting in CI |
-| Q6 | Testing | Pre-commit hook doesn't run tests |
-| Q9 | Testing | No vitest coverage tool configured |
+| ID | Area | Finding | Status |
+|----|------|---------|--------|
+| S3 | Security | Missing `Permissions-Policy` header | **FIXED** (2026-02-11) |
+| S4 | Security | Missing HSTS header | **FIXED** (2026-02-11) |
+| S5 | Security | `style-src 'unsafe-inline'` could use nonces | Open |
+| T1 | Stack | 12 markdown pipeline dependencies pending removal | Open |
+| T2 | Stack | ESLint config is lenient | Open |
+| F10 | Actions | `crossReferences.ts` global singleton tooltip | Open |
+| F11 | Actions | `practiceProblems.ts` inline CSS strings | Open |
+| Q5 | Testing | No coverage reporting in CI | Open |
+| Q6 | Testing | Pre-commit hook doesn't run tests | Open |
+| Q9 | Testing | No vitest coverage tool configured | Open |
 
 ---
 
@@ -534,16 +534,17 @@ This plan is organized into four phases, prioritized by risk and impact. Each ph
 
 **Goal:** Address high-severity security and safety issues.
 
-#### 1.1 Remove `'unsafe-eval'` from CSP (S1)
-- Edit `nginx-config-example.conf` to remove `'unsafe-eval'` from `script-src`
-- Test that the production build loads correctly without it
+#### 1.1 Remove `'unsafe-eval'` from CSP (S1) — DONE (2026-02-11)
+- ~~Edit `nginx-config-example.conf` to remove `'unsafe-eval'` from `script-src`~~
+- Test that the production build loads correctly without it (pending deploy)
 - Consider removing `'unsafe-inline'` as well (test with Vite's script hashing)
-- Add `Permissions-Policy` and `Strict-Transport-Security` headers (S3, S4)
+- ~~Add `Permissions-Policy` and `Strict-Transport-Security` headers (S3, S4)~~
 
-#### 1.2 Fix `sync-content.js` safety (Q2)
-- Replace `execSync('rm -rf ...')` with `fs.rmSync(bookDest, { recursive: true, force: true })`
-- Add path validation before any destructive operation
-- Verify `bookDest` is within expected directory tree
+#### 1.2 Fix `sync-content.js` safety (Q2) — DONE (2026-02-11)
+- ~~Replace `execSync('rm -rf ...')` with `fs.rmSync(bookDest, { recursive: true, force: true })`~~
+- ~~Add path validation before any destructive operation~~
+- ~~Verify `bookDest` is within expected directory tree~~
+- Also replaced `execSync('cp -r ...')` with `fs.cpSync()` for consistency
 
 #### 1.3 Pin GitHub Actions to commit SHAs (S2)
 - Pin `actions/checkout`, `actions/setup-node`, `actions/upload-artifact` to commit SHAs
