@@ -9,6 +9,7 @@
 	import { crossReferences } from '$lib/actions/crossReferences';
 	import { answerLinks } from '$lib/actions/answerLinks';
 	import { bionicReadingAction } from '$lib/actions/bionicReading';
+	import { glossaryTerms } from '$lib/actions/glossaryTerms';
 	import Skeleton from './Skeleton.svelte';
 
 	// MathJax SVG is self-contained — no external CSS needed
@@ -58,6 +59,7 @@
 		use:figureViewer
 		use:crossReferences={{ bookSlug, chapterSlug, sectionSlug, chapterNumber, content }}
 		use:answerLinks={{ bookSlug, chapterSlug, sectionSlug, sectionType, chapterNumber }}
+		use:glossaryTerms={{ bookSlug }}
 		use:bionicReadingAction
 	>
 		{@html html}
