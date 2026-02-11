@@ -4,6 +4,7 @@
 
 import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
+import { safeSetItem } from '$lib/utils/localStorage';
 import type { TableOfContents } from '$lib/types/content';
 import { getChapterFolder } from '$lib/utils/contentLoader';
 
@@ -62,7 +63,7 @@ function createOfflineStore() {
 			const persistState = {
 				books: state.books
 			};
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(persistState));
+			safeSetItem(STORAGE_KEY, JSON.stringify(persistState));
 		});
 	}
 

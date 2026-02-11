@@ -5,6 +5,7 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { safeSetItem } from '$lib/utils/localStorage';
 import type { QuizQuestion, QuizAnswer, QuizSession, QuizStats } from '$lib/types/quiz';
 import type { MasteryLevel } from '$lib/types/quiz';
 import {
@@ -129,7 +130,7 @@ function createQuizStore() {
 	// Persist to localStorage
 	if (browser) {
 		subscribe((state) => {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			safeSetItem(STORAGE_KEY, JSON.stringify(state));
 		});
 	}
 
