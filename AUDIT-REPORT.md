@@ -591,13 +591,13 @@ This plan is organized into four phases, prioritized by risk and impact. Each ph
 - ~~`keyboardShortcuts.test.ts`: utility functions, key formatting, validation~~ (21 tests)
 - `practiceProblems.test.ts`: DOM-heavy action, deferred to E2E coverage
 
-#### 2.4 E2E test expansion
+#### 2.4 E2E test expansion — DONE (2026-02-11)
 
-- Glossary page: search, filtering, term display
-- Flashcard study session: rating, deck progression, streak tracking
-- Search modal: indexing, results display, navigation
-- Theme/font switching: persists across page reload
-- Basic accessibility checks (headings, aria-labels)
+- ~~Glossary page: search, filtering, term display~~ (`e2e/glossary.spec.ts`)
+- ~~Flashcard study session: rating, deck progression, streak tracking~~ (`e2e/flashcards.spec.ts`)
+- ~~Search modal: opening/closing, input, filters, keyboard shortcuts~~ (`e2e/search.spec.ts`)
+- ~~Theme/font switching: persists across page reload~~ (`e2e/theme-settings.spec.ts`)
+- ~~Basic accessibility checks (headings, aria-labels, landmarks, reduced motion)~~ (`e2e/accessibility.spec.ts`)
 
 #### 2.5 Build script fixes — DONE (2026-02-11)
 
