@@ -494,12 +494,12 @@ If `bookDest` is unset or malformed, this command is dangerous. Should use path 
 
 #### High
 
-| ID  | Area     | Finding                                                           | Status                 |
-| --- | -------- | ----------------------------------------------------------------- | ---------------------- |
-| S1  | Security | CSP allows `'unsafe-eval'` — remove from nginx config             | **FIXED** (2026-02-11) |
-| Q2  | Scripts  | `sync-content.js` uses unsafe `rm -rf` via shell interpolation    | **FIXED** (2026-02-11) |
-| F1  | Stores   | No localStorage quota monitoring — app crashes silently when full | **FIXED** (2026-02-11) |
-| Q1  | Testing  | ~25% test coverage with critical gaps                             | Open                   |
+| ID  | Area     | Finding                                                           | Status                    |
+| --- | -------- | ----------------------------------------------------------------- | ------------------------- |
+| S1  | Security | CSP allows `'unsafe-eval'` — remove from nginx config             | **FIXED** (2026-02-11)    |
+| Q2  | Scripts  | `sync-content.js` uses unsafe `rm -rf` via shell interpolation    | **FIXED** (2026-02-11)    |
+| F1  | Stores   | No localStorage quota monitoring — app crashes silently when full | **FIXED** (2026-02-11)    |
+| Q1  | Testing  | ~25% test coverage with critical gaps                             | **Improved** (2026-02-11) |
 
 #### Medium
 
@@ -514,25 +514,25 @@ If `bookDest` is unset or malformed, this command is dangerous. Should use path 
 | F7  | Stores     | No data validation on localStorage load            | Open                   |
 | F8  | Components | PeriodicTable missing keyboard navigation          | Open                   |
 | F9  | Components | No skip-to-content link                            | Open                   |
-| Q3  | Scripts    | YAML parsing inconsistency across build scripts    | Open                   |
-| Q4  | Scripts    | `check-status.mjs` references non-existent scripts | Open                   |
+| Q3  | Scripts    | YAML parsing inconsistency across build scripts    | **FIXED** (2026-02-11) |
+| Q4  | Scripts    | `check-status.mjs` references non-existent scripts | **FIXED** (2026-02-11) |
 | Q7  | Testing    | E2E covers only 2 of 12+ routes                    | Open                   |
 | Q8  | Testing    | No component tests                                 | Open                   |
 
 #### Low
 
-| ID  | Area     | Finding                                           | Status                 |
-| --- | -------- | ------------------------------------------------- | ---------------------- |
-| S3  | Security | Missing `Permissions-Policy` header               | **FIXED** (2026-02-11) |
-| S4  | Security | Missing HSTS header                               | **FIXED** (2026-02-11) |
-| S5  | Security | `style-src 'unsafe-inline'` could use nonces      | Open                   |
-| T1  | Stack    | 12 markdown pipeline dependencies pending removal | Open                   |
-| T2  | Stack    | ESLint config is lenient                          | Open                   |
-| F10 | Actions  | `crossReferences.ts` global singleton tooltip     | Open                   |
-| F11 | Actions  | `practiceProblems.ts` inline CSS strings          | Open                   |
-| Q5  | Testing  | No coverage reporting in CI                       | Open                   |
-| Q6  | Testing  | Pre-commit hook doesn't run tests                 | Open                   |
-| Q9  | Testing  | No vitest coverage tool configured                | Open                   |
+| ID  | Area     | Finding                                           | Status                   |
+| --- | -------- | ------------------------------------------------- | ------------------------ |
+| S3  | Security | Missing `Permissions-Policy` header               | **FIXED** (2026-02-11)   |
+| S4  | Security | Missing HSTS header                               | **FIXED** (2026-02-11)   |
+| S5  | Security | `style-src 'unsafe-inline'` could use nonces      | Open                     |
+| T1  | Stack    | 12 markdown pipeline dependencies pending removal | Open                     |
+| T2  | Stack    | ESLint config is lenient                          | Open                     |
+| F10 | Actions  | `crossReferences.ts` global singleton tooltip     | Open                     |
+| F11 | Actions  | `practiceProblems.ts` inline CSS strings          | Open                     |
+| Q5  | Testing  | No coverage reporting in CI                       | **Partial** (2026-02-11) |
+| Q6  | Testing  | Pre-commit hook doesn't run tests                 | Open                     |
+| Q9  | Testing  | No vitest coverage tool configured                | **FIXED** (2026-02-11)   |
 
 ---
 
@@ -576,20 +576,20 @@ This plan is organized into four phases, prioritized by risk and impact. Each ph
 
 **Goal:** Raise test coverage from ~25% to ~60%, covering critical paths.
 
-#### 2.1 Content loading tests
+#### 2.1 Content loading tests — DONE (2026-02-11)
 
-- Unit tests for `contentLoader.ts`: loading, caching, error paths, offline fallback
-- Unit tests for `srs.ts`: SM-2 algorithm edge cases, timezone handling
+- ~~Unit tests for `contentLoader.ts`: loading, caching, error paths, offline fallback~~ (55 tests)
+- ~~Unit tests for `srs.ts`: SM-2 algorithm edge cases, timezone handling~~ (35 tests)
 
-#### 2.2 Store tests for untested stores
+#### 2.2 Store tests for untested stores — DONE (2026-02-11)
 
-- `annotation.test.ts`: CRUD operations, v1→v2 migration, text range serialization
-- `quiz.test.ts`: session lifecycle, mastery calculation, scoring
+- ~~`annotation.test.ts`: CRUD operations, v1→v2 migration, text range serialization~~ (30 tests)
+- ~~`quiz.test.ts`: session lifecycle, mastery calculation, scoring~~ (33 tests)
 
-#### 2.3 Action tests
+#### 2.3 Action tests — DONE (2026-02-11)
 
-- `keyboardShortcuts.test.ts`: multi-key sequences, customized bindings, edge cases
-- `practiceProblems.test.ts`: DOM structure generation, event handling
+- ~~`keyboardShortcuts.test.ts`: utility functions, key formatting, validation~~ (21 tests)
+- `practiceProblems.test.ts`: DOM-heavy action, deferred to E2E coverage
 
 #### 2.4 E2E test expansion
 
@@ -599,11 +599,12 @@ This plan is organized into four phases, prioritized by risk and impact. Each ph
 - Theme/font switching: persists across page reload
 - Basic accessibility checks (headings, aria-labels)
 
-#### 2.5 Build script fixes
+#### 2.5 Build script fixes — DONE (2026-02-11)
 
-- Unify YAML parsing: use gray-matter in `generate-toc.js` and `validate-content.js` (Q3)
-- Fix `check-status.mjs` to reference correct npm scripts (Q4)
-- Add test coverage reporting to CI pipeline (Q5, Q9)
+- ~~Unify YAML parsing: use gray-matter in `generate-toc.js` and `validate-content.js` (Q3)~~
+- ~~Fix `check-status.mjs` to reference correct npm scripts (Q4)~~
+- ~~Add test coverage reporting: `@vitest/coverage-v8` configured, `npm run test:coverage` added (Q5, Q9)~~
+- Added `$app/navigation` mock for vitest
 
 ### Phase 3: Performance & Quality (2-4 weeks)
 
