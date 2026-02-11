@@ -5,6 +5,7 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { safeSetItem } from '$lib/utils/localStorage';
 import {
 	createSectionKey,
 	getCurrentTimestamp,
@@ -156,7 +157,7 @@ function createAnalyticsStore() {
 	// Persist to localStorage
 	if (browser) {
 		subscribe((state) => {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			safeSetItem(STORAGE_KEY, JSON.stringify(state));
 		});
 	}
 

@@ -8,6 +8,7 @@
 	import { migrateStorageKeys } from '$lib/utils/storageMigration';
 	import PWAUpdater from '$lib/components/PWAUpdater.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
+	import StorageWarning from '$lib/components/StorageWarning.svelte';
 	import '../app.css';
 
 	// Run storage migration on startup
@@ -37,3 +38,6 @@
 
 <!-- Offline indicator -->
 <OfflineIndicator />
+
+<!-- Storage quota warning -->
+<StorageWarning />

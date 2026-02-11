@@ -5,6 +5,7 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { safeSetItem } from '$lib/utils/localStorage';
 
 // Types
 export type Theme = 'light' | 'dark';
@@ -88,7 +89,7 @@ function createSettingsStore() {
 	// Persist to localStorage on every change
 	if (browser) {
 		subscribe((state) => {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			safeSetItem(STORAGE_KEY, JSON.stringify(state));
 			// Update dark class on html element
 			if (state.theme === 'dark') {
 				document.documentElement.classList.add('dark');

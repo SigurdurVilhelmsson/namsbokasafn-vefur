@@ -10,6 +10,7 @@ import {
 	createChapterPrefix,
 	getCurrentTimestamp
 } from '$lib/utils/storeHelpers';
+import { safeSetItem } from '$lib/utils/localStorage';
 
 const STORAGE_KEY = 'namsbokasafn:reader';
 
@@ -70,7 +71,7 @@ function createReaderStore() {
 	// Persist to localStorage
 	if (browser) {
 		subscribe((state) => {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			safeSetItem(STORAGE_KEY, JSON.stringify(state));
 		});
 	}
 

@@ -7,6 +7,7 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { safeSetItem } from '$lib/utils/localStorage';
 import type { Annotation, HighlightColor, TextRange, AnnotationStats } from '$lib/types/annotation';
 import { isLegacyTextRange } from '$lib/types/annotation';
 import { generateId, getCurrentTimestamp } from '$lib/utils/storeHelpers';
@@ -41,7 +42,7 @@ function createAnnotationStore() {
 	// Persist to localStorage
 	if (browser) {
 		subscribe((state) => {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			safeSetItem(STORAGE_KEY, JSON.stringify(state));
 		});
 	}
 
