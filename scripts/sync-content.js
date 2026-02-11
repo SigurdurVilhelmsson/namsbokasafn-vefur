@@ -26,7 +26,7 @@
  */
 
 import { execSync, spawnSync } from 'child_process';
-import { existsSync, readdirSync, statSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, statSync, readFileSync, rmSync, cpSync } from 'fs';
 import { resolve, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -227,13 +227,21 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 	console.log(`  Syncing ${bookSlug} (${publication.variant})...`);
 
 	try {
+		// Safety: verify bookDest is inside the expected destination directory
+		const resolvedDest = resolve(bookDest);
+		const resolvedDestDir = resolve(destDir);
+		if (!resolvedDest.startsWith(resolvedDestDir + '/')) {
+			console.error(`  Error: destination path is outside content directory: ${resolvedDest}`);
+			return false;
+		}
+
 		// Remove existing destination
 		if (existsSync(bookDest)) {
-			execSync(`rm -rf "${bookDest}"`, { stdio: 'inherit' });
+			rmSync(bookDest, { recursive: true, force: true });
 		}
 
 		// Copy source to destination
-		execSync(`cp -r "${publication.path}" "${bookDest}"`, { stdio: 'inherit' });
+		cpSync(publication.path, bookDest, { recursive: true });
 
 		// Regenerate toc.json based on actual content
 		console.log(`  Regenerating toc.json...`);
