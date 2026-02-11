@@ -551,7 +551,7 @@ export async function loadAppendixContent(
 
   let response: Response;
   try {
-    response = await fetchFn(`/content/${bookSlug}/chapters/appendices/${appendixFile}`);
+    response = await fetchFn(`/content/${bookSlug}/chapters/${appendixFile}`);
   } catch (e) {
     const isOffline = checkOffline();
     throw new ContentLoadError(
