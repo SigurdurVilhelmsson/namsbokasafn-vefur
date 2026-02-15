@@ -19,8 +19,17 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
+      - name: Checkout content repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: SigurdurVilhelmsson/namsbokasafn-efni
+          path: namsbokasafn-efni
+
       - name: Install dependencies
         run: npm ci
+
+      - name: Sync content
+        run: node scripts/sync-content.js --source ./namsbokasafn-efni
 
       - name: Run ESLint
         run: npm run lint
@@ -47,8 +56,17 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
+      - name: Checkout content repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: SigurdurVilhelmsson/namsbokasafn-efni
+          path: namsbokasafn-efni
+
       - name: Install dependencies
         run: npm ci
+
+      - name: Sync content
+        run: node scripts/sync-content.js --source ./namsbokasafn-efni
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
