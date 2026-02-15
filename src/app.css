@@ -1541,21 +1541,21 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
     padding: 1.5rem 1rem;
   }
 
-  /* Smaller headings on mobile */
+  /* Smaller headings on mobile — maintain clear visual hierarchy */
   .reading-content h1 {
     font-size: 1.5rem;
     margin-bottom: 1.5rem;
   }
 
   .reading-content h2 {
-    font-size: 1.375rem;
+    font-size: 1.25rem;
     margin-top: 2.5rem;
     padding-top: 1.5rem;
     border-top: 1px solid var(--border-color);
   }
 
   .reading-content h3 {
-    font-size: 1.1875rem;
+    font-size: 1.125rem;
     margin-top: 2rem;
   }
 
