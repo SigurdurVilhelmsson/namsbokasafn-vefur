@@ -33,8 +33,8 @@ test.describe('Reader Flow', () => {
 		// Check page title
 		await expect(page).toHaveTitle(/Námsbókasafn/);
 
-		// Check for main heading (exact match to avoid multiple elements)
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({ timeout: 15000 });
+		// Check for main heading
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({ timeout: 15000 });
 	});
 
 	test('should navigate from catalog to book home', async ({ page }) => {
@@ -178,8 +178,8 @@ test.describe('Responsive Behavior', () => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
 
-		// Page should be visible (use heading role to avoid multiple matches)
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({ timeout: 10000 });
+		// Page should be visible
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({ timeout: 10000 });
 	});
 });
 

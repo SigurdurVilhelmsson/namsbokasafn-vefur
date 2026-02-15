@@ -32,7 +32,7 @@ test.describe('PWA Infrastructure', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Wait for page to fully render
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -45,7 +45,7 @@ test.describe('PWA Infrastructure', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Wait for page to fully render
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -58,7 +58,7 @@ test.describe('PWA Infrastructure', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Wait for page to fully render
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -72,7 +72,7 @@ test.describe('PWA Infrastructure', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Wait for page to fully render
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -99,7 +99,7 @@ test.describe('PWA Update UI', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Wait for page to fully render
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -116,7 +116,7 @@ test.describe('PWA Update UI', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Verify the page loads correctly (main indicator of PWA working)
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 	});
@@ -129,7 +129,7 @@ test.describe('PWA Offline Capability', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Wait for page to fully render
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -145,7 +145,7 @@ test.describe('PWA Offline Capability', () => {
 
 			// Page should still work
 			await expect(
-				page.getByRole('heading', { name: 'Námsbókasafn', exact: true })
+				page.getByRole('heading', { name: /Námsbækur/i })
 			).toBeVisible({ timeout: 15000 });
 		}
 	});
