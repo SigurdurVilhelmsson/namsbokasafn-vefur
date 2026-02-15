@@ -7,7 +7,7 @@
 	import type { TableOfContents, Chapter } from '$lib/types/content';
 	import { loadTableOfContents, getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
 	import { reader } from '$lib/stores';
-	import { calcChapterProgress } from '$lib/stores/reader';
+	import { calcChapterProgress, isSectionRead } from '$lib/stores/reader';
 	import DownloadBookButton from '$lib/components/DownloadBookButton.svelte';
 	import ErrorMessage from '$lib/components/ErrorMessage.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
@@ -107,9 +107,25 @@
 						{chapter.title}
 					</h2>
 
-					<p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+					<p class="text-sm text-gray-600 dark:text-gray-300 mb-3">
 						{chapter.sections.length} kaflar
 					</p>
+
+					<!-- Section progress dots -->
+					{#if chapter.sections.length > 0}
+						<div class="flex flex-wrap gap-1.5 mb-4" aria-label="Framvinda kafla">
+							{#each chapter.sections as section}
+								{@const sectionPath = getSectionPath(section)}
+								{@const isRead = isSectionRead(progress, chapterPath, sectionPath)}
+								<span
+									class="h-2 w-2 rounded-full transition-colors {isRead
+										? 'bg-emerald-500'
+										: 'bg-gray-200 dark:bg-gray-600'}"
+									title="{section.number} {section.title}{isRead ? ' (lesið)' : ''}"
+								></span>
+							{/each}
+						</div>
+					{/if}
 
 					{#if progressPercent > 0}
 						<div class="h-1.5 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">

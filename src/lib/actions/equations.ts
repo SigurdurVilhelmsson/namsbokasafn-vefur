@@ -148,6 +148,56 @@ async function copyCitation(wrapper: HTMLElement, button: HTMLButtonElement): Pr
 }
 
 /**
+ * Enhances a .equation div with wrapper class, content wrapper, and action buttons
+ */
+function enhanceEquation(eq: HTMLElement): void {
+	// Skip if already enhanced
+	if (eq.classList.contains('equation-wrapper')) return;
+
+	eq.classList.add('equation-wrapper');
+	eq.setAttribute('tabindex', '0');
+
+	// Get LaTeX from the mathjax-display span
+	const mathSpan = eq.querySelector('.mathjax-display');
+	const latex = mathSpan?.getAttribute('data-latex') || '';
+
+	// Store latex on the wrapper for the zoom modal
+	if (latex) {
+		eq.setAttribute('data-latex', latex);
+	}
+
+	// Wrap existing children in .equation-content
+	const contentWrapper = document.createElement('div');
+	contentWrapper.className = 'equation-content';
+	while (eq.firstChild) {
+		contentWrapper.appendChild(eq.firstChild);
+	}
+	eq.appendChild(contentWrapper);
+
+	// Create action buttons
+	const actions = document.createElement('div');
+	actions.className = 'equation-actions';
+
+	if (latex) {
+		const copyBtn = document.createElement('button');
+		copyBtn.className = 'equation-copy-btn';
+		copyBtn.setAttribute('data-action', 'copy-latex');
+		copyBtn.setAttribute('aria-label', 'Afrita LaTeX');
+		copyBtn.textContent = 'LaTeX';
+		actions.appendChild(copyBtn);
+	}
+
+	const zoomBtn = document.createElement('button');
+	zoomBtn.className = 'equation-zoom-btn';
+	zoomBtn.setAttribute('data-action', 'zoom-equation');
+	zoomBtn.setAttribute('aria-label', 'Stækka jöfnu');
+	zoomBtn.textContent = '⊕';
+	actions.appendChild(zoomBtn);
+
+	eq.appendChild(actions);
+}
+
+/**
  * Svelte action for equation interactions
  * Attach to a container element to enable copy/zoom on all equations within
  */
@@ -156,6 +206,9 @@ export function equations(node: HTMLElement) {
 		zoomModal: null,
 		copyTimeout: null
 	};
+
+	// Enhance all equation divs with interactive buttons
+	node.querySelectorAll<HTMLElement>('.equation').forEach(enhanceEquation);
 
 	function handleClick(event: Event) {
 		const target = event.target as HTMLElement;

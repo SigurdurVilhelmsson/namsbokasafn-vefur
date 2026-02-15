@@ -125,7 +125,8 @@
       "Bash(git -C /home/siggi/dev/repos/namsbokasafn-vefur diff b6a8515..1142a8a --stat)",
       "Bash(git -C /home/siggi/dev/repos/namsbokasafn-vefur show b6a8515 --stat)",
       "Bash(node scripts/process-content.js:*)",
-      "Bash(node scripts/validate-content.js:*)"
+      "Bash(node scripts/validate-content.js:*)",
+      "Skill(commit-commands:commit)"
     ]
   }
 }

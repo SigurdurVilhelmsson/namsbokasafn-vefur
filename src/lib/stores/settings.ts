@@ -52,7 +52,6 @@ interface SettingsState {
 	lineWidth: LineWidth;
 	sidebarOpen: boolean;
 	shortcutPreferences: ShortcutPreferences;
-	soundEffects: boolean;
 	bionicReading: boolean;
 }
 
@@ -66,7 +65,6 @@ const defaultSettings: SettingsState = {
 	lineWidth: 'medium',
 	sidebarOpen: false,
 	shortcutPreferences: {},
-	soundEffects: false,
 	bionicReading: false
 };
 
@@ -78,7 +76,6 @@ const settingsValidators = {
 	lineWidth: isOneOf('narrow', 'medium', 'wide'),
 	sidebarOpen: isBoolean,
 	shortcutPreferences: isObject,
-	soundEffects: isBoolean,
 	bionicReading: isBoolean
 };
 
@@ -172,10 +169,6 @@ function createSettingsStore() {
 
 		resetAllShortcuts: () => update((s) => ({ ...s, shortcutPreferences: {} })),
 
-		// Sound effects methods
-		setSoundEffects: (enabled: boolean) => update((s) => ({ ...s, soundEffects: enabled })),
-		toggleSoundEffects: () => update((s) => ({ ...s, soundEffects: !s.soundEffects })),
-
 		// Bionic reading methods
 		setBionicReading: (enabled: boolean) => update((s) => ({ ...s, bionicReading: enabled })),
 		toggleBionicReading: () => update((s) => ({ ...s, bionicReading: !s.bionicReading })),
@@ -198,5 +191,4 @@ export const fontFamily = derived(settings, ($settings) => $settings.fontFamily)
 export const lineHeight = derived(settings, ($settings) => $settings.lineHeight);
 export const lineWidth = derived(settings, ($settings) => $settings.lineWidth);
 export const sidebarOpen = derived(settings, ($settings) => $settings.sidebarOpen);
-export const soundEffects = derived(settings, ($settings) => $settings.soundEffects);
 export const bionicReading = derived(settings, ($settings) => $settings.bionicReading);

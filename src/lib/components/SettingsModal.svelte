@@ -10,7 +10,6 @@
 		fontFamily,
 		lineHeight,
 		lineWidth,
-		soundEffects,
 		bionicReading,
 		type FontSize,
 		type FontFamily,
@@ -286,36 +285,6 @@
 									{width.label}
 								</button>
 							{/each}
-						</div>
-					</div>
-
-					<!-- Sound Effects -->
-					<div>
-						<div class="flex items-center justify-between">
-							<div>
-								<label for="sound-effects-toggle" class="text-sm font-medium text-[var(--text-primary)]">
-									Hljóðmerki
-								</label>
-								<p class="text-xs text-[var(--text-secondary)] mt-0.5">
-									Spila hljóð þegar þú æfir minniskort
-								</p>
-							</div>
-							<button
-								id="sound-effects-toggle"
-								role="switch"
-								aria-checked={$soundEffects}
-								aria-label={$soundEffects ? 'Slökkva á hljóðmerkjum' : 'Kveikja á hljóðmerkjum'}
-								on:click={() => settings.toggleSoundEffects()}
-								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$soundEffects
-									? 'bg-[var(--accent-color)]'
-									: 'bg-gray-300 dark:bg-gray-600'}"
-							>
-								<span
-									class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {$soundEffects
-										? 'translate-x-6'
-										: 'translate-x-1'}"
-								></span>
-							</button>
 						</div>
 					</div>
 
