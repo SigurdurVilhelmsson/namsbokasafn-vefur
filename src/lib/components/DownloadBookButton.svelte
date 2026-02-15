@@ -13,7 +13,6 @@
 	} from '$lib/stores/offline';
 
 	export let bookSlug: string;
-	export let bookTitle: string = '';
 
 	let isDownloaded = false;
 	let downloadState: { downloaded: boolean; sizeBytes: number; downloadedAt: string | null } | null =

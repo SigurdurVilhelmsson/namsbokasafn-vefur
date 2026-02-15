@@ -223,7 +223,7 @@
 	{/if}
 
 	<!-- Pilot status banner -->
-	<PilotBanner chapterNumber={data.chapterNumber} />
+	<PilotBanner />
 
 	<!-- Reading progress bar -->
 	<div class="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2">

@@ -373,7 +373,7 @@
     opacity: 0.12;
   }
 
-  .dark .molecule {
+  :global(.dark) .molecule {
     opacity: 0.08;
   }
 
@@ -413,7 +413,7 @@
     border-bottom: 1px solid var(--border-color);
   }
 
-  .dark .header {
+  :global(.dark) .header {
     background: rgba(26, 26, 46, 0.85);
   }
 
@@ -493,12 +493,12 @@
     transform: rotate(-90deg);
   }
 
-  .dark .sun-icon {
+  :global(.dark) .sun-icon {
     opacity: 0;
     transform: rotate(90deg);
   }
 
-  .dark .moon-icon {
+  :global(.dark) .moon-icon {
     opacity: 1;
     transform: rotate(0);
   }
@@ -747,7 +747,7 @@
     transform: translateY(-2px);
   }
 
-  .dark .book-card.clickable .book-link:hover {
+  :global(.dark) .book-card.clickable .book-link:hover {
     box-shadow: 0 8px 30px -10px rgba(0, 0, 0, 0.4);
   }
 
