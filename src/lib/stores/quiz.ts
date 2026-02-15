@@ -5,6 +5,8 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
+import { validateStoreData, isArray, isObject, isNumber, isBoolean, isNullOrString } from '$lib/utils/storeValidation';
 import type { QuizQuestion, QuizAnswer, QuizSession, QuizStats } from '$lib/types/quiz';
 import type { MasteryLevel } from '$lib/types/quiz';
 import {
@@ -109,13 +111,21 @@ const defaultState: QuizState = {
 	stats: {}
 };
 
+const quizValidators = {
+	currentQuestionIndex: isNumber,
+	showFeedback: isBoolean,
+	practiceProblemProgress: isObject,
+	sessions: isArray,
+	stats: isObject
+};
+
 function loadState(): QuizState {
 	if (!browser) return defaultState;
 
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return { ...defaultState, ...JSON.parse(stored) };
+			return validateStoreData(JSON.parse(stored), defaultState, quizValidators);
 		}
 	} catch (e) {
 		console.warn('Failed to load quiz state:', e);
@@ -127,9 +137,21 @@ function createQuizStore() {
 	const { subscribe, set, update } = writable<QuizState>(loadState());
 
 	// Persist to localStorage
+	let _externalUpdate = false;
 	if (browser) {
 		subscribe((state) => {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			if (!_externalUpdate) {
+				safeSetItem(STORAGE_KEY, JSON.stringify(state));
+			}
+		});
+
+		// Cross-tab synchronization
+		onStorageChange(STORAGE_KEY, (newValue) => {
+			try {
+				_externalUpdate = true;
+				set(validateStoreData(JSON.parse(newValue), defaultState, quizValidators));
+			} catch { /* ignore */ }
+			finally { _externalUpdate = false; }
 		});
 	}
 

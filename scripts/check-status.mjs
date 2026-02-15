@@ -72,7 +72,7 @@ let qualityPassed = true;
 
 // TypeScript
 try {
-  run('npm run type-check', { stdio: 'pipe' });
+  run('npm run check', { stdio: 'pipe' });
   log('  ✅ TypeScript: No errors', 'green');
 } catch (error) {
   qualityPassed = false;
@@ -92,7 +92,7 @@ try {
 
 // Prettier
 try {
-  run('npm run format:check', { stdio: 'pipe' });
+  run('npx prettier --check .', { stdio: 'pipe' });
   log('  ✅ Prettier: All files formatted', 'green');
 } catch (error) {
   qualityPassed = false;

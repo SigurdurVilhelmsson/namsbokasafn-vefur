@@ -4,6 +4,8 @@
 
 import { writable, derived } from 'svelte/store';
 import { browser } from '$app/environment';
+import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
+import { validateStoreData, isObject } from '$lib/utils/storeValidation';
 import type { TableOfContents } from '$lib/types/content';
 import { getChapterFolder } from '$lib/utils/contentLoader';
 
@@ -39,13 +41,17 @@ const defaultState: OfflineState = {
 	currentDownload: null
 };
 
+const offlineValidators = {
+	books: isObject
+};
+
 function loadState(): OfflineState {
 	if (!browser) return defaultState;
 
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return { ...defaultState, ...JSON.parse(stored) };
+			return validateStoreData(JSON.parse(stored), defaultState, offlineValidators);
 		}
 	} catch (e) {
 		console.warn('Failed to load offline state:', e);
@@ -57,12 +63,24 @@ function createOfflineStore() {
 	const { subscribe, set, update } = writable<OfflineState>(loadState());
 
 	// Persist to localStorage (only book download state, not progress)
+	let _externalUpdate = false;
 	if (browser) {
 		subscribe((state) => {
-			const persistState = {
-				books: state.books
-			};
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(persistState));
+			if (!_externalUpdate) {
+				const persistState = {
+					books: state.books
+				};
+				safeSetItem(STORAGE_KEY, JSON.stringify(persistState));
+			}
+		});
+
+		// Cross-tab synchronization
+		onStorageChange(STORAGE_KEY, (newValue) => {
+			try {
+				_externalUpdate = true;
+				set(validateStoreData(JSON.parse(newValue), defaultState, offlineValidators));
+			} catch { /* ignore */ }
+			finally { _externalUpdate = false; }
 		});
 	}
 

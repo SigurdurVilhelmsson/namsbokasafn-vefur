@@ -20,6 +20,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync, statSync } from 'fs';
 import { resolve, dirname, basename, extname } from 'path';
 import { fileURLToPath } from 'url';
+import matter from 'gray-matter';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -72,30 +73,14 @@ Options:
 `);
 }
 
-// Parse YAML-like frontmatter from markdown file
+// Parse frontmatter from markdown file using gray-matter
 function parseFrontmatter(content) {
-	const match = content.match(/^---\n([\s\S]*?)\n---/);
-	if (!match) return {};
-
-	const frontmatter = {};
-	const lines = match[1].split('\n');
-
-	for (const line of lines) {
-		const colonIndex = line.indexOf(':');
-		if (colonIndex === -1) continue;
-
-		const key = line.slice(0, colonIndex).trim();
-		let value = line.slice(colonIndex + 1).trim();
-
-		// Remove surrounding quotes
-		if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
-			value = value.slice(1, -1);
-		}
-
-		frontmatter[key] = value;
+	try {
+		const { data } = matter(content);
+		return data;
+	} catch {
+		return {};
 	}
-
-	return frontmatter;
 }
 
 // Parse metadata from HTML file (from embedded page-data JSON or HTML elements)

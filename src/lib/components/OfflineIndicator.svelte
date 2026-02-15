@@ -8,12 +8,14 @@
 
   let isOnline = true;
   let showBanner = false;
+  let dismissTimeout: ReturnType<typeof setTimeout>;
 
   function handleOnline() {
     isOnline = true;
     // Show "back online" briefly then hide
     showBanner = true;
-    setTimeout(() => {
+    clearTimeout(dismissTimeout);
+    dismissTimeout = setTimeout(() => {
       showBanner = false;
     }, 3000);
   }
@@ -37,6 +39,7 @@
 
   onDestroy(() => {
     if (!browser) return;
+    clearTimeout(dismissTimeout);
     window.removeEventListener('online', handleOnline);
     window.removeEventListener('offline', handleOffline);
   });

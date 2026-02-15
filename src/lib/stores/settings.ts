@@ -5,6 +5,8 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
+import { validateStoreData, isOneOf, isBoolean, isObject } from '$lib/utils/storeValidation';
 
 // Types
 export type Theme = 'light' | 'dark';
@@ -68,13 +70,25 @@ const defaultSettings: SettingsState = {
 	bionicReading: false
 };
 
+const settingsValidators = {
+	theme: isOneOf('light', 'dark'),
+	fontSize: isOneOf('small', 'medium', 'large', 'xlarge'),
+	fontFamily: isOneOf('serif', 'sans', 'opendyslexic'),
+	lineHeight: isOneOf('normal', 'relaxed', 'loose'),
+	lineWidth: isOneOf('narrow', 'medium', 'wide'),
+	sidebarOpen: isBoolean,
+	shortcutPreferences: isObject,
+	soundEffects: isBoolean,
+	bionicReading: isBoolean
+};
+
 function loadSettings(): SettingsState {
 	if (!browser) return defaultSettings;
 
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return { ...defaultSettings, ...JSON.parse(stored) };
+			return validateStoreData(JSON.parse(stored), defaultSettings, settingsValidators);
 		}
 	} catch (e) {
 		console.warn('Failed to load settings:', e);
@@ -86,15 +100,27 @@ function createSettingsStore() {
 	const { subscribe, set, update } = writable<SettingsState>(loadSettings());
 
 	// Persist to localStorage on every change
+	let _externalUpdate = false;
 	if (browser) {
 		subscribe((state) => {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-			// Update dark class on html element
+			if (!_externalUpdate) {
+				safeSetItem(STORAGE_KEY, JSON.stringify(state));
+			}
+			// Update dark class on html element (always, even for cross-tab updates)
 			if (state.theme === 'dark') {
 				document.documentElement.classList.add('dark');
 			} else {
 				document.documentElement.classList.remove('dark');
 			}
+		});
+
+		// Cross-tab synchronization
+		onStorageChange(STORAGE_KEY, (newValue) => {
+			try {
+				_externalUpdate = true;
+				set(validateStoreData(JSON.parse(newValue), defaultSettings, settingsValidators));
+			} catch { /* ignore invalid data from other tabs */ }
+			finally { _externalUpdate = false; }
 		});
 	}
 
