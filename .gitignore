@@ -39,3 +39,6 @@ dev-dist/
 docs/_generated/
 CHANGELOG-AUTO.md
 _archived/
+
+# Worktrees
+.worktrees/
