@@ -16,9 +16,14 @@ function makeQuestion(id: string): QuizQuestion {
 	return {
 		id,
 		question: `Question ${id}`,
-		type: 'multiple-choice',
-		options: ['A', 'B', 'C', 'D'],
-		correctAnswer: 'A'
+		answers: [
+			{ id: 'A', text: 'Option A', isCorrect: true },
+			{ id: 'B', text: 'Option B', isCorrect: false },
+			{ id: 'C', text: 'Option C', isCorrect: false },
+			{ id: 'D', text: 'Option D', isCorrect: false }
+		],
+		chapterSlug: '01',
+		sectionSlug: '1-1'
 	};
 }
 
@@ -26,10 +31,8 @@ function makeQuestion(id: string): QuizQuestion {
 function makeAnswer(id: string, isCorrect: boolean): QuizAnswer {
 	return {
 		id,
-		questionId: id,
-		selectedAnswer: isCorrect ? 'A' : 'B',
-		isCorrect,
-		timeSpent: 5000
+		text: isCorrect ? 'Option A' : 'Option B',
+		isCorrect
 	};
 }
 

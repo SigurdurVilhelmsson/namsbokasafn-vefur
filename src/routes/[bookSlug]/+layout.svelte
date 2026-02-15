@@ -10,6 +10,7 @@
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import FocusModeNav from '$lib/components/layout/FocusModeNav.svelte';
 	import MobileBottomNav from '$lib/components/layout/MobileBottomNav.svelte';
+	import PomodoroTimer from '$lib/components/PomodoroTimer.svelte';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import { keyboardShortcuts } from '$lib/actions/keyboardShortcuts';
 	import { trackPageView } from '$lib/utils/api';
@@ -115,6 +116,9 @@
 	{#if !focusMode}
 		<MobileBottomNav {bookSlug} hasPeriodicTable={data.book?.features?.periodicTable ?? false} />
 	{/if}
+
+	<!-- Pomodoro focus timer -->
+	<PomodoroTimer />
 </div>
 
 <!-- Keyboard Shortcuts Modal -->
