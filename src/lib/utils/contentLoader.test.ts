@@ -4,8 +4,6 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
-	calculateReadingTime,
-	parseFrontmatter,
 	getChapterPath,
 	getSectionPath,
 	getChapterFolder,
@@ -33,8 +31,8 @@ const sampleToc: TableOfContents = {
 			slug: '01-grunnhugmyndir',
 			sections: [
 				{ number: '1.1', title: 'Efnafræði', file: '1-1-efnafraedi.html', slug: '1-1-efnafraedi' },
-				{ number: '1.2', title: 'Frumefnin', file: '1-2-frumefnin.md', slug: '1-2-frumefnin' },
-				{ number: '', title: 'Inngangur', file: '1-0-introduction.md', type: 'introduction' }
+				{ number: '1.2', title: 'Frumefnin', file: '1-2-frumefnin.html', slug: '1-2-frumefnin' },
+				{ number: '', title: 'Inngangur', file: '1-0-introduction.html', type: 'introduction' }
 			]
 		},
 		{
@@ -46,7 +44,7 @@ const sampleToc: TableOfContents = {
 		}
 	],
 	appendices: [
-		{ letter: 'A', title: 'Lotukerfið', file: 'A-periodic-table.md' },
+		{ letter: 'A', title: 'Lotukerfið', file: 'A-periodic-table.html' },
 		{ letter: 'B', title: 'Stuðlar', file: 'B-constants.html' }
 	]
 };
@@ -54,107 +52,6 @@ const sampleToc: TableOfContents = {
 describe('contentLoader utilities', () => {
 	beforeEach(() => {
 		clearContentCache();
-	});
-
-	// ============================================
-	// calculateReadingTime
-	// ============================================
-	describe('calculateReadingTime', () => {
-		it('should return minimum of 1 minute for short content', () => {
-			expect(calculateReadingTime('Hello world')).toBe(1);
-		});
-
-		it('should calculate based on 180 wpm', () => {
-			const words = Array(360).fill('word').join(' '); // 360 words = 2 min
-			expect(calculateReadingTime(words)).toBe(2);
-		});
-
-		it('should cap at 60 minutes', () => {
-			const words = Array(20000).fill('word').join(' ');
-			expect(calculateReadingTime(words)).toBe(60);
-		});
-
-		it('should strip code blocks', () => {
-			const content = 'Hello\n```\nconst x = 1;\nconst y = 2;\n```\nWorld';
-			const time = calculateReadingTime(content);
-			expect(time).toBe(1); // only "Hello" and "World" count
-		});
-
-		it('should strip inline code', () => {
-			const content = 'Use `console.log` to debug';
-			const time = calculateReadingTime(content);
-			expect(time).toBe(1);
-		});
-
-		it('should strip images', () => {
-			const content = '![alt text](image.png) Some text here';
-			const time = calculateReadingTime(content);
-			expect(time).toBe(1);
-		});
-
-		it('should preserve link text', () => {
-			const words = Array(180).fill('word').join(' ');
-			const content = `[click here](url) ${words}`;
-			// "click here" + 180 words = 182 words → ceil(182/180) = 2
-			expect(calculateReadingTime(content)).toBe(2);
-		});
-
-		it('should strip math expressions', () => {
-			const content = 'The formula $E=mc^2$ is famous. Also $$\\int_0^\\infty e^{-x} dx = 1$$';
-			const time = calculateReadingTime(content);
-			expect(time).toBe(1);
-		});
-
-		it('should strip directives', () => {
-			const content = ':::practice-problem\nThis is inside\n:::\nOutside text';
-			const time = calculateReadingTime(content);
-			expect(time).toBe(1);
-		});
-	});
-
-	// ============================================
-	// parseFrontmatter
-	// ============================================
-	describe('parseFrontmatter', () => {
-		it('should return empty metadata for content without frontmatter', () => {
-			const { metadata, content } = parseFrontmatter('Just some content');
-			expect(metadata).toEqual({});
-			expect(content).toBe('Just some content');
-		});
-
-		it('should parse simple key-value pairs', () => {
-			const md = '---\ntitle: My Title\nchapter: 3\n---\nContent here';
-			const { metadata, content } = parseFrontmatter(md);
-			expect(metadata.title).toBe('My Title');
-			expect(metadata.chapter).toBe(3);
-			expect(content).toBe('Content here');
-		});
-
-		it('should parse numeric values as numbers', () => {
-			const md = '---\nchapter: 5\nsection: 2.1\n---\nContent';
-			const { metadata } = parseFrontmatter(md);
-			expect(metadata.chapter).toBe(5);
-			expect(metadata.section).toBe(2.1);
-		});
-
-		it('should parse arrays', () => {
-			const md = '---\nobjectives:\n- Learn X\n- Learn Y\n---\nContent';
-			const { metadata } = parseFrontmatter(md);
-			expect(metadata.objectives).toEqual(['Learn X', 'Learn Y']);
-		});
-
-		it('should handle empty frontmatter', () => {
-			const md = '---\n\n---\nContent';
-			const { metadata, content } = parseFrontmatter(md);
-			expect(metadata).toEqual({});
-			expect(content).toBe('Content');
-		});
-
-		it('should handle values with colons', () => {
-			const md = '---\ntitle: Chapter 1: Introduction\n---\nContent';
-			const { metadata } = parseFrontmatter(md);
-			expect(metadata.title).toBe('Chapter 1: Introduction');
-		});
 	});
 
 	// ============================================
@@ -179,7 +76,7 @@ describe('contentLoader utilities', () => {
 		});
 
 		it('should use file basename for unnumbered sections', () => {
-			expect(getSectionPath({ number: '', file: '1-0-introduction.md' })).toBe('1-0-introduction');
+			expect(getSectionPath({ number: '', file: '1-0-introduction.html' })).toBe('1-0-introduction');
 			expect(getSectionPath({ number: '', file: '1-key-terms.html' })).toBe('1-key-terms');
 		});
 
@@ -400,7 +297,6 @@ describe('contentLoader utilities', () => {
 			});
 
 			const result = await loadSectionContent('book', '01', 'section.html', mockFetch as unknown as typeof fetch);
-			expect(result.isHtml).toBe(true);
 			expect(result.title).toBe('Test');
 			expect(result.chapter).toBe(1);
 			expect(result.section).toBe('1.1');
@@ -420,51 +316,6 @@ describe('contentLoader utilities', () => {
 			);
 			expect(result.title).toBe('Preloaded');
 			expect(result.readingTime).toBe(10);
-		});
-
-		it('should load markdown with preloaded metadata', async () => {
-			const md = '---\ntitle: FM Title\nchapter: 1\nsection: 1.1\n---\nMarkdown content';
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				text: () => Promise.resolve(md)
-			});
-
-			const result = await loadSectionContent(
-				'book', '01', 'section.md',
-				mockFetch as unknown as typeof fetch,
-				{ title: 'Preloaded', section: '1.1', chapter: 1 }
-			);
-			expect(result.title).toBe('Preloaded');
-			expect(result.content).toBe('Markdown content');
-		});
-
-		it('should fallback-parse markdown frontmatter at runtime', async () => {
-			const md = '---\ntitle: Runtime Title\nchapter: 2\nsection: 2.1\n---\nBody content';
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				text: () => Promise.resolve(md)
-			});
-
-			const result = await loadSectionContent(
-				'book', '02', 'section.md',
-				mockFetch as unknown as typeof fetch
-			);
-			expect(result.title).toBe('Runtime Title');
-			expect(result.chapter).toBe(2);
-		});
-
-		it('should transform relative image paths', async () => {
-			const md = '---\ntitle: T\nchapter: 1\nsection: 1.1\n---\n![alt](images/fig.png)';
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				text: () => Promise.resolve(md)
-			});
-
-			const result = await loadSectionContent(
-				'book', '01', 'section.md',
-				mockFetch as unknown as typeof fetch
-			);
-			expect(result.content).toContain('/content/book/chapters/01/images/fig.png');
 		});
 
 		it('should throw ContentLoadError on fetch failure', async () => {

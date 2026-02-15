@@ -8,7 +8,7 @@
 	import type { PageData } from './$types';
 	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
 	import { isSectionRead, isSectionBookmarked, getSavedScrollPosition, type ScrollPositions } from '$lib/stores/reader';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
 	import TextHighlighter from '$lib/components/TextHighlighter.svelte';
 	import AnnotationSidebar from '$lib/components/AnnotationSidebar.svelte';
@@ -379,14 +379,13 @@
 		chapterSlug={data.chapterSlug}
 		sectionSlug={data.sectionSlug}
 	>
-		<MarkdownRenderer
+		<ContentRenderer
 			content={data.section.content}
 			bookSlug={data.bookSlug}
 			chapterSlug={data.chapterSlug}
 			sectionSlug={data.sectionSlug}
 			chapterNumber={data.chapterNumber}
 			sectionType={data.section.type || ''}
-			isHtml={data.section.isHtml || false}
 		/>
 	</TextHighlighter>
 

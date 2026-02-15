@@ -27,14 +27,6 @@ let currentBookSlug = '';
 // =============================================================================
 
 /**
- * Detect whether content is HTML (vs markdown)
- */
-function isHtmlContent(content: string): boolean {
-	const trimmed = content.trimStart();
-	return trimmed.startsWith('<') || trimmed.startsWith('<!');
-}
-
-/**
  * Convert HTML to plain text for searching
  */
 function htmlToPlainText(html: string): string {
@@ -61,58 +53,6 @@ function htmlToPlainText(html: string): string {
 	);
 }
 
-/**
- * Convert markdown to plain text for searching
- */
-function markdownToPlainText(markdown: string): string {
-	return (
-		markdown
-			// Remove headings
-			.replace(/#{1,6}\s/g, '')
-			// Remove bold/italic
-			.replace(/\*\*(.+?)\*\*/g, '$1')
-			.replace(/\*(.+?)\*/g, '$1')
-			.replace(/__(.+?)__/g, '$1')
-			.replace(/_(.+?)_/g, '$1')
-			// Remove links but keep text
-			.replace(/\[(.+?)\]\(.+?\)/g, '$1')
-			// Remove images
-			.replace(/!\[.*?\]\(.+?\)/g, '')
-			// Remove code blocks
-			.replace(/```[\s\S]*?```/g, '')
-			.replace(/`([^`]+)`/g, '$1')
-			// Remove tables
-			.replace(/^\|.+\|$/gm, '')
-			.replace(/^\s*[-|:]+\s*$/gm, '')
-			// Remove custom blocks
-			.replace(/:::.+?:::/gs, '')
-			// Remove LaTeX
-			.replace(/\$\$[\s\S]*?\$\$/g, '')
-			.replace(/\$[^$]+\$/g, '')
-			// Clean up whitespace
-			.replace(/\n{3,}/g, '\n\n')
-			.trim()
-	);
-}
-
-/**
- * Remove frontmatter from markdown content (no-op for HTML)
- */
-function removeFrontmatter(content: string): string {
-	if (isHtmlContent(content)) return content;
-	return content.replace(/^---[\s\S]*?---\n/, '');
-}
-
-/**
- * Convert content to plain text, auto-detecting format
- */
-function contentToPlainText(content: string): string {
-	if (isHtmlContent(content)) {
-		return htmlToPlainText(content);
-	}
-	return markdownToPlainText(content);
-}
-
 // =============================================================================
 // INDEX BUILDING
 // =============================================================================
@@ -125,8 +65,7 @@ function buildIndex(rawDocs: RawDocument[], bookSlug: string): void {
 
 	// Process documents
 	documents = rawDocs.map((doc) => {
-		const content = removeFrontmatter(doc.content);
-		const plainText = contentToPlainText(content);
+		const plainText = htmlToPlainText(doc.content);
 
 		return {
 			chapterSlug: doc.chapterSlug,
@@ -134,7 +73,7 @@ function buildIndex(rawDocs: RawDocument[], bookSlug: string): void {
 			chapterTitle: doc.chapterTitle,
 			sectionTitle: doc.sectionTitle,
 			sectionNumber: doc.sectionNumber,
-			content,
+			content: doc.content,
 			plainText
 		};
 	});

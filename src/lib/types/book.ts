@@ -58,34 +58,6 @@ export const books: BookConfig[] = [
       exercises: true,
       periodicTable: true
     }
-  },
-  {
-    id: 'liffraedi',
-    slug: 'liffraedi',
-    title: 'Líffræði',
-    subtitle: 'Þýðing á OpenStax Biology 2e',
-    description: 'Kennslubók í líffræði fyrir framhaldsskólanema.',
-    subject: 'raunvisindi',
-    coverImage: '/covers/liffraedi.svg',
-    translator: 'Þórhallur Halldórsson',
-    status: 'coming-soon',
-    source: {
-      title: 'Biology 2e',
-      publisher: 'OpenStax',
-      url: 'https://openstax.org/details/books/biology-2e',
-      authors: ['Mary Ann Clark', 'Matthew Douglas', 'Jung Choi'],
-      license: 'CC BY 4.0',
-      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
-    },
-    stats: {
-      totalChapters: 46,
-      translatedChapters: 1
-    },
-    features: {
-      glossary: false,
-      flashcards: true,
-      exercises: false
-    }
   }
 ];
 

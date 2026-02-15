@@ -20,7 +20,6 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync, statSync } from 'fs';
 import { resolve, dirname, basename, extname } from 'path';
 import { fileURLToPath } from 'url';
-import matter from 'gray-matter';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -73,16 +72,6 @@ Options:
 `);
 }
 
-// Parse frontmatter from markdown file using gray-matter
-function parseFrontmatter(content) {
-	try {
-		const { data } = matter(content);
-		return data;
-	} catch {
-		return {};
-	}
-}
-
 // Parse metadata from HTML file (from embedded page-data JSON or HTML elements)
 function parseHtmlMetadata(content) {
 	const metadata = {};
@@ -120,15 +109,10 @@ function parseHtmlMetadata(content) {
 	return metadata;
 }
 
-// Get file extension (.md or .html)
-function getFileExtension(filename) {
-	return extname(filename).toLowerCase();
-}
-
-// Get basename without extension (.md or .html)
+// Get basename without .html extension
 function getBasenameWithoutExt(filename) {
-	const ext = getFileExtension(filename);
-	if (ext === '.md' || ext === '.html') {
+	const ext = extname(filename).toLowerCase();
+	if (ext === '.html') {
 		return basename(filename, ext);
 	}
 	return basename(filename);
@@ -167,7 +151,7 @@ function getSectionNumber(frontmatter, filename, chapterNum) {
 		return frontmatter.section;
 	}
 
-	// Try parsing from filename (e.g., "1-2-name.md" or "1-2-name.html" -> "1.2")
+	// Try parsing from filename (e.g., "1-2-name.html" -> "1.2")
 	const name = getBasenameWithoutExt(filename);
 	const match = name.match(/^(\d+)-(\d+)/);
 	if (match) {
@@ -268,35 +252,20 @@ function scanAppendices(bookPath) {
 		return [];
 	}
 
-	// Find all appendix files and prefer HTML when both exist for same basename
-	const allAppendixFiles = readdirSync(appendixDir)
-		.filter((f) => f.endsWith('.md') || f.endsWith('.html'))
+	const appendixFiles = readdirSync(appendixDir)
+		.filter((f) => f.endsWith('.html'))
 		.sort();
-
-	const appendixByBasename = new Map();
-	for (const file of allAppendixFiles) {
-		const base = getBasenameWithoutExt(file);
-		const existing = appendixByBasename.get(base);
-		if (!existing) {
-			appendixByBasename.set(base, file);
-		} else if (file.endsWith('.html') && existing.endsWith('.md')) {
-			appendixByBasename.set(base, file);
-		}
-	}
-
-	const appendixFiles = Array.from(appendixByBasename.values()).sort();
 
 	const appendices = [];
 
 	for (const file of appendixFiles) {
 		const filePath = resolve(appendixDir, file);
 		const content = readFileSync(filePath, 'utf-8');
-		const isHtml = file.endsWith('.html');
-		const frontmatter = isHtml ? parseHtmlMetadata(content) : parseFrontmatter(content);
+		const frontmatter = parseHtmlMetadata(content);
 
 		let letter = null;
 
-		// Try to extract letter from filename (e.g., "A-periodic-table.md" -> "A")
+		// Try to extract letter from filename (e.g., "A-periodic-table.html" -> "A")
 		const letterMatch = getBasenameWithoutExt(file).match(/^([A-M])-/i);
 		if (letterMatch) {
 			letter = letterMatch[1].toUpperCase();
@@ -412,34 +381,15 @@ function generateToc(bookSlug, options) {
 		// Load chapter metadata from efni repo
 		const chapterMeta = loadChapterMetadata(options.efniPath, bookSlug, chapterNum);
 
-		// Find all content files in chapter (both .md and .html)
-		// When both .md and .html exist for same basename, prefer .html (pre-rendered from CNXML pipeline)
-		const allFiles = readdirSync(chapterPath).filter((f) => f.endsWith('.md') || f.endsWith('.html'));
-
-		// Group files by basename and prefer HTML when both exist
-		const filesByBasename = new Map();
-		for (const file of allFiles) {
-			const base = getBasenameWithoutExt(file);
-			const existing = filesByBasename.get(base);
-			if (!existing) {
-				filesByBasename.set(base, file);
-			} else {
-				// Prefer .html over .md when both exist
-				if (file.endsWith('.html') && existing.endsWith('.md')) {
-					filesByBasename.set(base, file);
-				}
-			}
-		}
-
-		const contentFiles = Array.from(filesByBasename.values());
+		// Find all HTML content files in chapter
+		const contentFiles = readdirSync(chapterPath).filter((f) => f.endsWith('.html'));
 
 		const sections = [];
 
 		for (const contentFile of contentFiles) {
 			const filePath = resolve(chapterPath, contentFile);
 			const content = readFileSync(filePath, 'utf-8');
-			const isHtml = contentFile.endsWith('.html');
-			const frontmatter = isHtml ? parseHtmlMetadata(content) : parseFrontmatter(content);
+			const frontmatter = parseHtmlMetadata(content);
 
 			const sectionType = getSectionType(contentFile);
 			const sectionNum = getSectionNumber(frontmatter, contentFile, chapterNum);

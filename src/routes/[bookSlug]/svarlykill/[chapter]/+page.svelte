@@ -4,7 +4,7 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 
 	export let data: PageData;
 
@@ -54,14 +54,13 @@
 
 	<!-- Answer key content -->
 	<div class="reading-content">
-		<MarkdownRenderer
+		<ContentRenderer
 			content={data.section.content}
 			bookSlug={data.bookSlug}
 			chapterSlug={chapterSlug}
 			sectionSlug="{data.chapterNumber}-answer-key"
 			chapterNumber={data.chapterNumber}
 			sectionType="answer-key"
-			isHtml={data.section.isHtml || false}
 		/>
 	</div>
 

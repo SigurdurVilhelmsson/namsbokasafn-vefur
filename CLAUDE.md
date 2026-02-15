@@ -9,7 +9,6 @@ Námsbókasafn (Textbook Library) is an interactive web-based reader for Iceland
 ## Notes for Code Reviewers
 
 - Migrated from React to SvelteKit January 2025 — some patterns may be carry-overs
-- Markdown pipeline is legacy, scheduled for removal (Phase D documented below)
 - No backend — all user state in localStorage (intentional, not an oversight)
 - Content directory is gitignored and synced from sister repo
 - Built iteratively with AI assistance; patterns may be inconsistent across files
@@ -51,9 +50,7 @@ npm run format           # Prettier formatting
 
 - Static content served from `static/content/{bookSlug}/` (gitignored — synced from namsbokasafn-efni, not tracked here)
 - Each book has: `toc.json` (table of contents), `glossary.json`, and `chapters/{chapterNum}/{sectionFile}`
-- **Two content formats coexist** (migration in progress):
-  - **HTML** (`.html`): Pre-rendered from CNXML pipeline in namsbokasafn-efni. Metadata in `<script id="page-data">` JSON. Used by efnafraedi (Chemistry).
-  - **Markdown** (`.md`): Legacy format with YAML frontmatter. Custom directives: `:::practice-problem`, `:::note`, `:::warning`, `:::example`. Used by liffraedi (Biology).
+- **All content is pre-rendered HTML** from the CNXML pipeline in namsbokasafn-efni. Metadata is embedded in `<script id="page-data">` JSON blocks.
 - Chapter directories use zero-padded numbers (v2 format): `01/`, `02/`, etc. Legacy v1 slug format (`01-grunnhugmyndir`) still supported via `getChapterFolder()`
 
 ### Routing (SvelteKit file-based)
@@ -71,7 +68,6 @@ npm run format           # Prettier formatting
 
 - Book config defined in `src/lib/types/book.ts`; loaded via `+layout.ts` and passed to child routes
 - Landing page (`+page.ts`) dynamically reads `toc.json` to derive chapter counts — no hardcoded stats
-- Books with `status: 'coming-soon'` are hidden from the landing page (currently: liffraedi)
 - Svelte actions for DOM manipulation (equations, practice problems, figure viewer)
 - `$:` reactive declarations for derived state
 - `$store` auto-subscription syntax for store values
@@ -93,7 +89,6 @@ Example:
 ## Tech Stack
 
 - SvelteKit 2, Svelte 5, TypeScript 5.7, Vite 6
-- unified/remark/rehype for markdown processing (legacy — will be removed when all content migrated to HTML)
 - MathJax for math rendering (pre-rendered SVG in HTML content)
 - Svelte stores for state, @sveltejs/adapter-static for static site generation
 - @vite-pwa/sveltekit for PWA support
@@ -112,7 +107,7 @@ The flashcard system uses SM-2 spaced repetition in `src/lib/utils/srs.ts`:
 - `src/lib/actions/equations.ts`: Equation rendering
 - `src/lib/actions/practiceProblems.ts`: Interactive problem handling
 - `src/lib/actions/crossReferences.ts`: Internal link handling
-- `src/lib/components/MarkdownRenderer.svelte`: Main content renderer (handles both HTML and markdown via `isHtml` prop)
+- `src/lib/components/ContentRenderer.svelte`: Main content renderer for pre-rendered HTML
 
 ## Deployment
 
@@ -130,7 +125,6 @@ This project works together with `namsbokasafn-efni` (content repository). When 
 
 ### Website/Rendering Bugs → Fix here (namsbokasafn-vefur)
 
-- Markdown processing issues in `src/lib/utils/markdown.ts`
 - Component rendering in `src/lib/components/`
 - Styling in CSS files
 
@@ -142,19 +136,10 @@ Run `node scripts/generate-toc.js` to regenerate `toc.json` from the chapter dir
 
 ## Build Scripts
 
-- `scripts/generate-toc.js`: Scans chapter directories and generates `toc.json`. Handles both `.md` and `.html` files, preferring `.html` when both exist. Run after syncing new content.
-- `scripts/process-content.js`: Enriches `toc.json` with metadata (reading time, cross-references). Runs automatically before `dev` and `build` via `prepare-content`. Handles both `.md` and `.html` files.
-- `scripts/validate-content.js`: Validates markdown content (frontmatter, directives, links, images). Skips `.html` files (validated upstream in CNXML pipeline). Runs before production builds.
+- `scripts/generate-toc.js`: Scans chapter directories and generates `toc.json` from `.html` files. Run after syncing new content.
+- `scripts/process-content.js`: Enriches `toc.json` with metadata (reading time). Runs automatically before `dev` and `build` via `prepare-content`.
+- `scripts/validate-content.js`: Validates TOC structure and glossary consistency. HTML content is validated upstream in the CNXML pipeline. Runs before production builds.
 - `scripts/sync-content.js`: Syncs content from namsbokasafn-efni repo.
-
-## Pending: Markdown Pipeline Removal (Phase D)
-
-When all `.md` content is migrated to HTML (`find static/content -name "*.md" -path "*/chapters/*"` returns 0), the markdown pipeline can be removed:
-
-- Delete `src/lib/utils/markdown.ts` and its tests
-- Remove unified/remark/rehype npm dependencies
-- Simplify `MarkdownRenderer.svelte` to HTML-only (rename to `ContentRenderer.svelte`)
-- Clean up markdown branches in `contentLoader.ts` and search worker
 
 ## Migration Note
 

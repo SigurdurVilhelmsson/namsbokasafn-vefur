@@ -255,17 +255,11 @@ export function getBookContentUrls(bookSlug: string, toc: TableOfContents): stri
 }
 
 /**
- * Extract image URLs from content (supports both markdown and HTML)
+ * Extract image URLs from HTML content
  */
 export function extractImageUrls(content: string, basePath: string): string[] {
 	const urls: string[] = [];
 	let match;
-
-	// Markdown image syntax: ![alt](url)
-	const mdImageRegex = /!\[.*?\]\((.*?)\)/g;
-	while ((match = mdImageRegex.exec(content)) !== null) {
-		urls.push(match[1]);
-	}
 
 	// HTML image syntax: <img src="url">
 	const htmlImageRegex = /<img[^>]+src=["']([^"']+)["']/g;
@@ -333,7 +327,7 @@ export async function downloadBook(
 				await contentCache.put(url, response);
 
 				// Extract images from content files
-				if (url.endsWith('.md') || url.endsWith('.html')) {
+				if (url.endsWith('.html')) {
 					const basePath = url.substring(0, url.lastIndexOf('/'));
 					const images = extractImageUrls(content, basePath);
 					images.forEach((img) => allImageUrls.add(img));
@@ -399,7 +393,7 @@ export async function estimateBookSize(bookSlug: string): Promise<number> {
 		// Estimate ~10KB per content file + ~50KB per image
 		// This is a rough estimate - actual size fetched during download
 		const estimatedContentSize =
-			contentUrls.filter((u) => u.endsWith('.md') || u.endsWith('.html')).length * 10000;
+			contentUrls.filter((u) => u.endsWith('.html')).length * 10000;
 		const estimatedImageCount = toc.chapters.reduce((acc, ch) => acc + ch.sections.length * 2, 0);
 		const estimatedImageSize = estimatedImageCount * 50000;
 
