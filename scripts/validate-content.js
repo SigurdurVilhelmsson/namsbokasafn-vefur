@@ -18,6 +18,7 @@
 import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
 import { resolve, dirname, basename, join } from 'path';
 import { fileURLToPath } from 'url';
+import matter from 'gray-matter';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -284,61 +285,22 @@ function validateMarkdown(filePath, bookSlug, chapterSlug, tocSection = null, to
 }
 
 /**
- * Parse frontmatter into object
+ * Parse frontmatter into object using gray-matter
  */
 function parseFrontmatter(content) {
-	const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
-	if (!match) {
+	try {
+		const { data, content: body } = matter(content);
+		if (Object.keys(data).length === 0) {
+			return { metadata: null, content, hasFrontmatter: false };
+		}
+		// Preserve section as string (gray-matter may parse "1.0" as number 1)
+		if (data.section !== undefined) {
+			data.section = String(data.section);
+		}
+		return { metadata: data, content: body, hasFrontmatter: true };
+	} catch {
 		return { metadata: null, content, hasFrontmatter: false };
 	}
-
-	const [, frontmatterStr, body] = match;
-	const metadata = {};
-	const lines = frontmatterStr.split('\n');
-	let currentKey = '';
-	let isArray = false;
-
-	for (const line of lines) {
-		const trimmed = line.trim();
-		if (!trimmed) continue;
-
-		if (trimmed.startsWith('- ')) {
-			if (isArray && currentKey && Array.isArray(metadata[currentKey])) {
-				metadata[currentKey].push(trimmed.substring(2).trim());
-			}
-			continue;
-		}
-
-		const colonIndex = trimmed.indexOf(':');
-		if (colonIndex > -1) {
-			const key = trimmed.substring(0, colonIndex).trim();
-			let value = trimmed.substring(colonIndex + 1).trim();
-
-			currentKey = key;
-
-			if (!value) {
-				metadata[key] = [];
-				isArray = true;
-			} else {
-				isArray = false;
-				// Strip surrounding quotes if present
-				if ((value.startsWith('"') && value.endsWith('"')) ||
-				    (value.startsWith("'") && value.endsWith("'"))) {
-					value = value.slice(1, -1);
-				}
-				// Keep section as string (to preserve "1.0" vs "1")
-				// Only convert to number for chapter and other numeric fields
-				if (key === 'section') {
-					metadata[key] = value;
-				} else {
-					const num = Number(value);
-					metadata[key] = isNaN(num) ? value : num;
-				}
-			}
-		}
-	}
-
-	return { metadata, content: body, hasFrontmatter: true };
 }
 
 /**

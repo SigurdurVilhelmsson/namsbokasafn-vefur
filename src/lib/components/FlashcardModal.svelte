@@ -17,6 +17,8 @@
 	let newDeckName = '';
 	let showNewDeckInput = false;
 	let backTextarea: HTMLTextAreaElement;
+	let modalContentRef: HTMLDivElement;
+	let previouslyFocused: HTMLElement | null = null;
 
 	// Get decks from store
 	$: decks = $flashcardStore.decks;
@@ -63,6 +65,22 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
+		// Focus trap
+		if (event.key === 'Tab' && modalContentRef) {
+			const focusable = modalContentRef.querySelectorAll<HTMLElement>(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			);
+			const first = focusable[0];
+			const last = focusable[focusable.length - 1];
+
+			if (event.shiftKey && document.activeElement === first) {
+				event.preventDefault();
+				last?.focus();
+			} else if (!event.shiftKey && document.activeElement === last) {
+				event.preventDefault();
+				first?.focus();
+			}
+		}
 		// Save with Ctrl/Cmd + Enter
 		if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
 			event.preventDefault();
@@ -88,27 +106,30 @@
 	}
 
 	onMount(() => {
+		previouslyFocused = document.activeElement as HTMLElement;
 		backTextarea?.focus();
 		document.addEventListener('keydown', handleKeyDown);
 	});
 
 	onDestroy(() => {
 		document.removeEventListener('keydown', handleKeyDown);
+		previouslyFocused?.focus();
 	});
 
 	$: canSave = back.trim() && (selectedDeckId || (showNewDeckInput && newDeckName.trim()));
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->
 <div
 	class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
 	on:click={handleOverlayClick}
+	on:keydown={handleKeyDown}
 	role="dialog"
 	aria-modal="true"
 	aria-labelledby="flashcard-modal-title"
 	transition:fade={{ duration: 150 }}
 >
 	<div
+		bind:this={modalContentRef}
 		class="mx-4 w-full max-w-lg rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-2xl"
 		transition:scale={{ duration: 200, start: 0.95 }}
 	>

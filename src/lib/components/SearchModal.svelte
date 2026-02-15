@@ -39,6 +39,8 @@
 	let inputRef: HTMLInputElement;
 	let modalRef: HTMLDivElement;
 	let searchTimeout: ReturnType<typeof setTimeout>;
+	let focusTimeout: ReturnType<typeof setTimeout>;
+	let previouslyFocused: HTMLElement | null = null;
 
 	// Initialize search on mount
 	onMount(() => {
@@ -53,9 +55,15 @@
 		initSearch();
 	}
 
+	// Save focus when modal opens, restore when closed
+	$: if (isOpen) {
+		previouslyFocused = document.activeElement as HTMLElement;
+	}
+
 	// Focus input when modal opens
 	$: if (isOpen && inputRef) {
-		setTimeout(() => inputRef?.focus(), 50);
+		clearTimeout(focusTimeout);
+		focusTimeout = setTimeout(() => inputRef?.focus(), 50);
 	}
 
 	// Keyboard shortcut handler
@@ -126,6 +134,7 @@
 		query = '';
 		results = [];
 		dispatch('close');
+		previouslyFocused?.focus();
 	}
 
 	function clearFilters() {
@@ -175,6 +184,7 @@
 
 	onDestroy(() => {
 		clearTimeout(searchTimeout);
+		clearTimeout(focusTimeout);
 	});
 </script>
 

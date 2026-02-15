@@ -7,6 +7,8 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
+import { validateStoreData, isArray } from '$lib/utils/storeValidation';
 import type { Annotation, HighlightColor, TextRange, AnnotationStats } from '$lib/types/annotation';
 import { isLegacyTextRange } from '$lib/types/annotation';
 import { generateId, getCurrentTimestamp } from '$lib/utils/storeHelpers';
@@ -21,13 +23,17 @@ const defaultState: AnnotationState = {
 	annotations: []
 };
 
+const annotationValidators = {
+	annotations: isArray
+};
+
 function loadState(): AnnotationState {
 	if (!browser) return defaultState;
 
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return { ...defaultState, ...JSON.parse(stored) };
+			return validateStoreData(JSON.parse(stored), defaultState, annotationValidators);
 		}
 	} catch (e) {
 		console.warn('Failed to load annotation state:', e);
@@ -38,10 +44,62 @@ function loadState(): AnnotationState {
 function createAnnotationStore() {
 	const { subscribe, set, update } = writable<AnnotationState>(loadState());
 
-	// Persist to localStorage
+	// Annotation index for O(1) lookups (lazily rebuilt on access after mutations)
+	let _sectionIndex: Map<string, Annotation[]> | null = null;
+	let _chapterIndex: Map<string, Annotation[]> | null = null;
+	let _bookIndex: Map<string, Annotation[]> | null = null;
+	let _idIndex: Map<string, Annotation> | null = null;
+
+	function invalidateIndex() {
+		_sectionIndex = null;
+		_chapterIndex = null;
+		_bookIndex = null;
+		_idIndex = null;
+	}
+
+	function ensureIndex() {
+		if (_sectionIndex) return;
+		const { annotations } = get({ subscribe });
+		_sectionIndex = new Map();
+		_chapterIndex = new Map();
+		_bookIndex = new Map();
+		_idIndex = new Map();
+
+		for (const ann of annotations) {
+			const sKey = `${ann.bookSlug}:${ann.chapterSlug}:${ann.sectionSlug}`;
+			const cKey = `${ann.bookSlug}:${ann.chapterSlug}`;
+			const bKey = ann.bookSlug;
+
+			if (!_sectionIndex.has(sKey)) _sectionIndex.set(sKey, []);
+			_sectionIndex.get(sKey)!.push(ann);
+
+			if (!_chapterIndex.has(cKey)) _chapterIndex.set(cKey, []);
+			_chapterIndex.get(cKey)!.push(ann);
+
+			if (!_bookIndex.has(bKey)) _bookIndex.set(bKey, []);
+			_bookIndex.get(bKey)!.push(ann);
+
+			_idIndex.set(ann.id, ann);
+		}
+	}
+
+	// Persist to localStorage and invalidate index on changes
+	let _externalUpdate = false;
 	if (browser) {
 		subscribe((state) => {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			if (!_externalUpdate) {
+				safeSetItem(STORAGE_KEY, JSON.stringify(state));
+			}
+			invalidateIndex();
+		});
+
+		// Cross-tab synchronization
+		onStorageChange(STORAGE_KEY, (newValue) => {
+			try {
+				_externalUpdate = true;
+				set(validateStoreData(JSON.parse(newValue), defaultState, annotationValidators));
+			} catch { /* ignore */ }
+			finally { _externalUpdate = false; }
 		});
 	}
 
@@ -108,28 +166,28 @@ function createAnnotationStore() {
 			}));
 		},
 
-		// Get annotations for a specific section
+		// Get annotations for a specific section (O(1) indexed lookup)
 		getAnnotationsForSection: (bookSlug: string, chapterSlug: string, sectionSlug: string): Annotation[] => {
-			return get({ subscribe }).annotations.filter(
-				(ann) => ann.bookSlug === bookSlug && ann.chapterSlug === chapterSlug && ann.sectionSlug === sectionSlug
-			);
+			ensureIndex();
+			return _sectionIndex!.get(`${bookSlug}:${chapterSlug}:${sectionSlug}`) || [];
 		},
 
-		// Get annotations for a specific chapter
+		// Get annotations for a specific chapter (O(1) indexed lookup)
 		getAnnotationsForChapter: (bookSlug: string, chapterSlug: string): Annotation[] => {
-			return get({ subscribe }).annotations.filter(
-				(ann) => ann.bookSlug === bookSlug && ann.chapterSlug === chapterSlug
-			);
+			ensureIndex();
+			return _chapterIndex!.get(`${bookSlug}:${chapterSlug}`) || [];
 		},
 
-		// Get annotations for a specific book
+		// Get annotations for a specific book (O(1) indexed lookup)
 		getAnnotationsForBook: (bookSlug: string): Annotation[] => {
-			return get({ subscribe }).annotations.filter((ann) => ann.bookSlug === bookSlug);
+			ensureIndex();
+			return _bookIndex!.get(bookSlug) || [];
 		},
 
-		// Get annotation by ID
+		// Get annotation by ID (O(1) indexed lookup)
 		getAnnotationById: (id: string): Annotation | undefined => {
-			return get({ subscribe }).annotations.find((ann) => ann.id === id);
+			ensureIndex();
+			return _idIndex!.get(id);
 		},
 
 		// Get statistics

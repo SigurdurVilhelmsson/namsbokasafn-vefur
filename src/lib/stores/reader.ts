@@ -10,6 +10,8 @@ import {
 	createChapterPrefix,
 	getCurrentTimestamp
 } from '$lib/utils/storeHelpers';
+import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
+import { validateStoreData, isObject, isNullOrString, isArray, isNumber } from '$lib/utils/storeValidation';
 
 const STORAGE_KEY = 'namsbokasafn:reader';
 
@@ -50,13 +52,22 @@ const defaultState: ReaderState = {
 	scrollPositions: {}
 };
 
+const readerValidators = {
+	progress: isObject,
+	currentChapter: isNullOrString,
+	currentSection: isNullOrString,
+	bookmarks: isArray,
+	scrollProgress: isNumber,
+	scrollPositions: isObject
+};
+
 function loadState(): ReaderState {
 	if (!browser) return defaultState;
 
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return { ...defaultState, ...JSON.parse(stored) };
+			return validateStoreData(JSON.parse(stored), defaultState, readerValidators);
 		}
 	} catch (e) {
 		console.warn('Failed to load reader state:', e);
@@ -68,9 +79,21 @@ function createReaderStore() {
 	const { subscribe, set, update } = writable<ReaderState>(loadState());
 
 	// Persist to localStorage
+	let _externalUpdate = false;
 	if (browser) {
 		subscribe((state) => {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			if (!_externalUpdate) {
+				safeSetItem(STORAGE_KEY, JSON.stringify(state));
+			}
+		});
+
+		// Cross-tab synchronization
+		onStorageChange(STORAGE_KEY, (newValue) => {
+			try {
+				_externalUpdate = true;
+				set(validateStoreData(JSON.parse(newValue), defaultState, readerValidators));
+			} catch { /* ignore */ }
+			finally { _externalUpdate = false; }
 		});
 	}
 

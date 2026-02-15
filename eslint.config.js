@@ -28,31 +28,41 @@ export default tseslint.config(
       // Disable typescript-eslint rules that don't work well with Svelte
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      // Svelte-specific rules - be lenient for existing codebase
-      'svelte/no-at-html-tags': 'off', // Expected in markdown renderer
-      'svelte/require-each-key': 'warn', // Good practice but don't block
-      'svelte/no-navigation-without-resolve': 'warn', // May not apply to all use cases
-      'svelte/no-immutable-reactive-statements': 'warn',
-      'svelte/infinite-reactive-loop': 'warn',
-      'svelte/no-unused-svelte-ignore': 'warn',
-      'svelte/prefer-svelte-reactivity': 'warn',
+      // Svelte-specific rules
+      'svelte/no-at-html-tags': 'error',
+      'svelte/require-each-key': 'warn', // 49 violations — fix incrementally
+      'svelte/no-navigation-without-resolve': 'warn', // 65 violations — intentional patterns in actions
+      'svelte/no-immutable-reactive-statements': 'warn', // 16 violations — fix incrementally
+      'svelte/infinite-reactive-loop': 'warn', // 5 violations — review individually
+      'svelte/no-unused-svelte-ignore': 'error',
+      'svelte/prefer-svelte-reactivity': 'warn', // 7 violations — fix incrementally
+    },
+  },
+  {
+    // Allow {@html} in content renderer and search (trusted content, XSS-safe highlighting)
+    files: [
+      'src/lib/components/MarkdownRenderer.svelte',
+      'src/lib/components/SearchModal.svelte',
+    ],
+    rules: {
+      'svelte/no-at-html-tags': 'off',
     },
   },
   {
     files: ['**/*.ts'],
     rules: {
-      // Allow unused vars starting with underscore (warn for now, fix later)
+      // Allow unused vars starting with underscore (33 violations — fix incrementally)
       '@typescript-eslint/no-unused-vars': [
         'warn',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      // Allow any for now (can be stricter later)
-      '@typescript-eslint/no-explicit-any': 'warn',
-      // Allow case declarations without blocks (warn for now)
+      // No explicit any — fixed violations, now enforced
+      '@typescript-eslint/no-explicit-any': 'error',
+      // Case declarations without blocks (9 violations — fix incrementally)
       'no-case-declarations': 'warn',
-      // Unnecessary escapes
-      'no-useless-escape': 'warn',
-      // Navigation rules for actions (warn - these are intentional patterns)
+      // Unnecessary escapes — 0 violations, now enforced
+      'no-useless-escape': 'error',
+      // Navigation rules for actions (warn - intentional patterns)
       'svelte/no-navigation-without-resolve': 'warn',
     },
   },

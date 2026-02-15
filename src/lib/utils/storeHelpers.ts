@@ -76,19 +76,27 @@ export function getCurrentTimestamp(): string {
 }
 
 /**
- * Get today's date as an ISO date string (YYYY-MM-DD)
+ * Format a Date as a local date string (YYYY-MM-DD).
+ * Uses the user's local timezone, not UTC.
  */
-export function getTodayDateString(): string {
-  return new Date().toISOString().split('T')[0];
+export function formatLocalDate(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 /**
- * Get yesterday's date as an ISO date string
+ * Get today's date as a local date string (YYYY-MM-DD)
+ */
+export function getTodayDateString(): string {
+  return formatLocalDate(new Date());
+}
+
+/**
+ * Get yesterday's date as a local date string (YYYY-MM-DD)
  */
 export function getYesterdayDateString(): string {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  return yesterday.toISOString().split('T')[0];
+  return formatLocalDate(yesterday);
 }
 
 /**

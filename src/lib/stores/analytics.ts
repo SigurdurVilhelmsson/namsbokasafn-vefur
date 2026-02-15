@@ -5,6 +5,8 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
+import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
+import { validateStoreData, isArray, isObject, isNumber, isNullOrString } from '$lib/utils/storeValidation';
 import {
 	createSectionKey,
 	getCurrentTimestamp,
@@ -136,13 +138,25 @@ function createEmptyDailyStats(date: string): DailyStats {
 	};
 }
 
+const analyticsValidators = {
+	sessions: isArray,
+	sectionReadingTimes: isObject,
+	dailyStats: isObject,
+	activityLog: isArray,
+	currentStreak: isNumber,
+	longestStreak: isNumber,
+	lastActiveDate: isNullOrString,
+	goals: isArray,
+	hourlyReadingData: isObject
+};
+
 function loadState(): AnalyticsState {
 	if (!browser) return defaultState;
 
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return { ...defaultState, ...JSON.parse(stored) };
+			return validateStoreData(JSON.parse(stored), defaultState, analyticsValidators);
 		}
 	} catch (e) {
 		console.warn('Failed to load analytics state:', e);
@@ -154,9 +168,21 @@ function createAnalyticsStore() {
 	const { subscribe, set, update } = writable<AnalyticsState>(loadState());
 
 	// Persist to localStorage
+	let _externalUpdate = false;
 	if (browser) {
 		subscribe((state) => {
-			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+			if (!_externalUpdate) {
+				safeSetItem(STORAGE_KEY, JSON.stringify(state));
+			}
+		});
+
+		// Cross-tab synchronization
+		onStorageChange(STORAGE_KEY, (newValue) => {
+			try {
+				_externalUpdate = true;
+				set(validateStoreData(JSON.parse(newValue), defaultState, analyticsValidators));
+			} catch { /* ignore */ }
+			finally { _externalUpdate = false; }
 		});
 	}
 
