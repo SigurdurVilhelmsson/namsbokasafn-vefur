@@ -3,7 +3,6 @@
   Shows translation status (reviewed vs MT) for pilot content
 -->
 <script lang="ts">
-  export let chapterNumber: number = 0;
   export let showFeedbackLink: boolean = true;
 
   // All chapters show as MT-preview while pipeline bugfixes are in progress
