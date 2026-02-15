@@ -10,7 +10,6 @@
 	export let bookSlug: string = '';
 	export let bookTitle: string = 'Lesari';
 	export let onOpenShortcuts: (() => void) | undefined = undefined;
-	export let onOpenSearch: (() => void) | undefined = undefined;
 
 	let toc: TableOfContents | null = null;
 	let settingsOpen = false;

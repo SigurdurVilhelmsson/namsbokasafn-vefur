@@ -63,7 +63,7 @@
 		<p class="text-gray-600 dark:text-gray-300 mb-4">
 			Veldu kafla til að byrja að lesa
 		</p>
-		<DownloadBookButton bookSlug={data.bookSlug} bookTitle={data.book?.title ?? ''} />
+		<DownloadBookButton bookSlug={data.bookSlug} />
 	</div>
 
 	{#if loading}
