@@ -32,7 +32,9 @@ jobs:
         run: npm ci
 
       - name: Sync content
-        run: node scripts/sync-content.js --source ./namsbokasafn-efni
+        run: |
+          mkdir -p static/content
+          node scripts/sync-content.js --source ./namsbokasafn-efni
 
       - name: Build
         run: npm run build
