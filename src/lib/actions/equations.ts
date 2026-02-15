@@ -131,20 +131,12 @@ async function copyLatex(latex: string, button: HTMLButtonElement): Promise<void
 }
 
 /**
- * Copies citation to clipboard
+ * Copies equation permalink to clipboard
  */
 async function copyCitation(wrapper: HTMLElement, button: HTMLButtonElement): Promise<void> {
-	const equationNumber = wrapper.getAttribute('data-equation-number') || '';
-	const chapterNumber = wrapper.getAttribute('data-chapter-number') || '';
-
-	let citation = 'Jafna';
-	if (chapterNumber && equationNumber) {
-		citation = `Jafna ${chapterNumber}.${equationNumber}`;
-	} else if (equationNumber) {
-		citation = `Jafna ${equationNumber}`;
-	}
-
-	await copyToClipboard(citation, button, '✓');
+	const id = wrapper.id || wrapper.closest('[id]')?.id || '';
+	const url = id ? `${window.location.origin}${window.location.pathname}#${id}` : window.location.href;
+	await copyToClipboard(url, button, '✓ Afritað');
 }
 
 /**
@@ -186,6 +178,13 @@ function enhanceEquation(eq: HTMLElement): void {
 		copyBtn.textContent = 'LaTeX';
 		actions.appendChild(copyBtn);
 	}
+
+	const citeBtn = document.createElement('button');
+	citeBtn.className = 'equation-copy-btn';
+	citeBtn.setAttribute('data-action', 'copy-citation');
+	citeBtn.setAttribute('aria-label', 'Afrita tengil');
+	citeBtn.textContent = '🔗';
+	actions.appendChild(citeBtn);
 
 	const zoomBtn = document.createElement('button');
 	zoomBtn.className = 'equation-zoom-btn';
