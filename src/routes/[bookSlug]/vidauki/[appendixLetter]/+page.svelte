@@ -3,7 +3,7 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
-	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 	import { getAppendixPath } from '$lib/utils/contentLoader';
 
 	export let data: PageData;
@@ -51,13 +51,12 @@
 
 	<!-- Main content -->
 	<div class="prose dark:prose-invert max-w-none">
-		<MarkdownRenderer
+		<ContentRenderer
 			content={data.content.content}
 			bookSlug={data.bookSlug}
 			chapterSlug="appendix"
 			sectionSlug={data.appendixLetter}
 			chapterNumber={0}
-			isHtml={data.content.isHtml || false}
 		/>
 	</div>
 </article>

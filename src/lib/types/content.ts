@@ -49,7 +49,7 @@ export interface Chapter {
 export interface Appendix {
   letter: string;  // A, B, C, ... M
   title: string;
-  file: string;    // e.g., "A-periodic-table.md"
+  file: string;    // e.g., "A-periodic-table.html"
   isInteractive?: boolean;  // True for appendices rendered as interactive components
   componentPath?: string;   // Path to component if isInteractive (e.g., "/lotukerfi")
 }
@@ -113,7 +113,6 @@ export interface SectionContent {
   difficulty?: DifficultyLevel;
   keywords?: string[];
   prerequisites?: string[];
-  isHtml?: boolean;  // True if content is pre-rendered HTML (from CNXML pipeline)
 }
 
 // Navigation context for section navigation

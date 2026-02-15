@@ -41,7 +41,7 @@ export default tseslint.config(
   {
     // Allow {@html} in content renderer, search, and review (trusted content, XSS-safe highlighting)
     files: [
-      'src/lib/components/MarkdownRenderer.svelte',
+      'src/lib/components/ContentRenderer.svelte',
       'src/lib/components/SearchModal.svelte',
       'src/routes/\\[bookSlug\\]/yfirlit/+page.svelte',
     ],
