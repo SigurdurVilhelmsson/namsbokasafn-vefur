@@ -126,6 +126,7 @@
 	role="dialog"
 	aria-modal="true"
 	aria-labelledby="flashcard-modal-title"
+	tabindex="-1"
 	transition:fade={{ duration: 150 }}
 >
 	<div
@@ -161,9 +162,9 @@
 		<div class="p-6 space-y-4">
 			<!-- Front (selected text) -->
 			<div>
-				<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+				<span class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
 					Framhlið (spurning)
-				</label>
+				</span>
 				<blockquote
 					class="rounded-lg border-l-4 border-[var(--accent-color)] bg-gray-50 dark:bg-gray-900 p-3 text-sm text-gray-700 dark:text-gray-300"
 				>
@@ -198,7 +199,7 @@
 
 			<!-- Deck selection -->
 			<div>
-				<label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+				<label for="deck-select" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
 					Velja stokkur <span class="text-red-500">*</span>
 				</label>
 
@@ -210,6 +211,7 @@
 
 				{#if !showNewDeckInput && decks.length > 0}
 					<select
+						id="deck-select"
 						bind:value={selectedDeckId}
 						class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-gray-900 dark:text-gray-100 focus:border-[var(--accent-color)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]/20"
 					>

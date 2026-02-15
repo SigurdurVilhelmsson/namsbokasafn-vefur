@@ -121,7 +121,7 @@
 
             <!-- Feedback Type -->
             <div class="form-group">
-              <label class="form-label required">Tegund athugasemdar</label>
+              <span class="form-label required">Tegund athugasemdar</span>
               <div class="type-grid">
                 {#each FEEDBACK_TYPES as feedbackType}
                   <label class="type-option" class:selected={selectedType === feedbackType.value}>

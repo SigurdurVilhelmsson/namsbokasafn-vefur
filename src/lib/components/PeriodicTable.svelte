@@ -264,11 +264,14 @@
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="element-modal-title"
+		tabindex="-1"
 		transition:fade={{ duration: 150 }}
 	>
 		<div
 			class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white dark:bg-gray-900 shadow-2xl"
 			on:click|stopPropagation
+			on:keydown|stopPropagation
+			role="presentation"
 			transition:scale={{ duration: 200, start: 0.95 }}
 		>
 			<!-- Header -->

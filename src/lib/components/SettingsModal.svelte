@@ -221,9 +221,9 @@
 
 					<!-- Font Family -->
 					<div>
-						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
+						<span class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Leturgerð
-						</label>
+						</span>
 						<div class="space-y-2">
 							{#each fontFamilies as family}
 								<label
@@ -253,9 +253,9 @@
 
 					<!-- Line Height -->
 					<div>
-						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
+						<span class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Línubil
-						</label>
+						</span>
 						<div class="grid grid-cols-3 gap-2 sm:flex">
 							{#each lineHeights as height}
 								<button
@@ -272,9 +272,9 @@
 
 					<!-- Line Width -->
 					<div>
-						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
+						<span class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Línubreidd
-						</label>
+						</span>
 						<div class="grid grid-cols-3 gap-2 sm:flex">
 							{#each lineWidths as width}
 								<button
@@ -351,9 +351,9 @@
 
 					<!-- Preview -->
 					<div>
-						<label class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
+						<span class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Forskoðun
-						</label>
+						</span>
 						<div
 							class="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 font-size-{$fontSize} {$fontFamily === 'opendyslexic' ? 'font-opendyslexic' : $fontFamily === 'serif' ? 'font-serif' : 'font-sans'}"
 							style="max-width: var(--line-width-{$lineWidth})"

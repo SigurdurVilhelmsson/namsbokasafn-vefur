@@ -82,6 +82,7 @@
 	role="dialog"
 	aria-modal="true"
 	aria-labelledby="note-modal-title"
+	tabindex="-1"
 	transition:fade={{ duration: 150 }}
 >
 	<div
@@ -114,9 +115,9 @@
 		<div class="p-6">
 			<!-- Selected text preview -->
 			<div class="mb-4">
-				<label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-300">
+				<span class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-300">
 					Valinn texti
-				</label>
+				</span>
 				<blockquote
 					class="rounded-lg border-l-4 border-blue-500 bg-gray-50 dark:bg-gray-900 p-3 text-sm italic text-gray-600 dark:text-gray-300"
 				>
@@ -126,9 +127,9 @@
 
 			<!-- Color selector -->
 			<div class="mb-4">
-				<label class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-300">
+				<span class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-300">
 					Litur yfirstrokunar
-				</label>
+				</span>
 				<div class="flex gap-2">
 					{#each HIGHLIGHT_COLORS as { color: c, label, bg }}
 						<button
