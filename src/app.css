@@ -1193,10 +1193,21 @@
   color: #fde68a;
 }
 
-/* Glossary term styling */
+/* Glossary term styling - inline terms with hover definitions */
 .glossary-term {
   cursor: help;
   border-bottom: 1px dotted var(--accent-color);
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+  border-radius: 2px;
+}
+
+.glossary-term:hover,
+.glossary-term:focus {
+  background-color: var(--accent-light);
+  border-bottom-style: solid;
+  outline: none;
 }
 
 /* Figure caption ID (for cross-reference anchors) */
@@ -2202,6 +2213,19 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   a.cross-reference {
     text-decoration: none;
     border-bottom: none !important;
+  }
+
+  /* ----------------------------------------
+   * GLOSSARY TERMS (disabled in print)
+   * ---------------------------------------- */
+
+  .glossary-term {
+    border-bottom: none !important;
+    cursor: default;
+  }
+
+  .glossary-tooltip {
+    display: none !important;
   }
 
   /* ----------------------------------------
