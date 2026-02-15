@@ -11,7 +11,6 @@ export {
 	lineHeight,
 	lineWidth,
 	sidebarOpen,
-	soundEffects,
 	bionicReading,
 	DEFAULT_SHORTCUTS,
 	type Theme,

@@ -1548,8 +1548,10 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   }
 
   .reading-content h2 {
-    font-size: 1.5rem;
+    font-size: 1.375rem;
     margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
   }
 
   .reading-content h3 {
