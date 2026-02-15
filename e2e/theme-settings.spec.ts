@@ -9,7 +9,7 @@ test.describe('Theme Toggle', () => {
 	test('should toggle dark mode on landing page', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -34,7 +34,7 @@ test.describe('Theme Toggle', () => {
 	test('should persist theme across page reload', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -56,7 +56,7 @@ test.describe('Theme Toggle', () => {
 		// Reload the page
 		await page.reload();
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -70,7 +70,7 @@ test.describe('Theme Toggle', () => {
 	test('should persist theme when navigating between pages', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -96,7 +96,7 @@ test.describe('Theme Toggle', () => {
 	test('should have accessible theme toggle button', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -110,7 +110,7 @@ test.describe('Settings Persistence', () => {
 	test('should store settings in localStorage', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -134,7 +134,7 @@ test.describe('Settings Persistence', () => {
 		await page.evaluate(() => localStorage.clear());
 		await page.reload();
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 

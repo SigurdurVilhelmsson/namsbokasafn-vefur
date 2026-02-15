@@ -11,7 +11,7 @@ test.describe('Landing Page Accessibility', () => {
 	test('should have proper heading hierarchy', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -19,15 +19,15 @@ test.describe('Landing Page Accessibility', () => {
 		const h1Count = await page.locator('h1').count();
 		expect(h1Count).toBe(1);
 
-		// h1 should contain the site name
+		// h1 should contain the hero title
 		const h1Text = await page.locator('h1').textContent();
-		expect(h1Text).toContain('Námsbókasafn');
+		expect(h1Text).toContain('Námsbækur');
 	});
 
 	test('should have lang attribute set to Icelandic', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -49,7 +49,7 @@ test.describe('Landing Page Accessibility', () => {
 	test('should have accessible brand link', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -60,7 +60,7 @@ test.describe('Landing Page Accessibility', () => {
 	test('should have accessible theme toggle', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -78,7 +78,7 @@ test.describe('Landing Page Accessibility', () => {
 	test('external links should have rel="noopener noreferrer"', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
@@ -98,7 +98,7 @@ test.describe('Landing Page Accessibility', () => {
 
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
-		await expect(page.getByRole('heading', { name: 'Námsbókasafn', exact: true })).toBeVisible({
+		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
