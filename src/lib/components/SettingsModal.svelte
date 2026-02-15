@@ -11,6 +11,7 @@
 		lineHeight,
 		lineWidth,
 		bionicReading,
+		glossaryHighlighting,
 		type FontSize,
 		type FontFamily,
 		type LineHeight,
@@ -285,6 +286,36 @@
 									{width.label}
 								</button>
 							{/each}
+						</div>
+					</div>
+
+					<!-- Glossary Highlighting -->
+					<div>
+						<div class="flex items-center justify-between">
+							<div>
+								<label for="glossary-highlighting-toggle" class="text-sm font-medium text-[var(--text-primary)]">
+									Orðasafnsmerkingar
+								</label>
+								<p class="text-xs text-[var(--text-secondary)] mt-0.5">
+									Undirstrika hugtök úr orðasafni í texta
+								</p>
+							</div>
+							<button
+								id="glossary-highlighting-toggle"
+								role="switch"
+								aria-checked={$glossaryHighlighting}
+								aria-label={$glossaryHighlighting ? 'Slökkva á orðasafnsmerkingum' : 'Kveikja á orðasafnsmerkingum'}
+								on:click={() => settings.toggleGlossaryHighlighting()}
+								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$glossaryHighlighting
+									? 'bg-[var(--accent-color)]'
+									: 'bg-gray-300 dark:bg-gray-600'}"
+							>
+								<span
+									class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {$glossaryHighlighting
+										? 'translate-x-6'
+										: 'translate-x-1'}"
+								></span>
+							</button>
 						</div>
 					</div>
 

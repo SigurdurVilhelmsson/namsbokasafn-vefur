@@ -8,6 +8,7 @@
 
 import { browser } from '$app/environment';
 import { glossaryStore } from '$lib/stores/glossary';
+import { settings } from '$lib/stores/settings';
 import { get } from 'svelte/store';
 import type { GlossaryTerm } from '$lib/types/content';
 
@@ -188,6 +189,10 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 	let destroyed = false;
 
 	async function init() {
+		// Check if glossary highlighting is enabled
+		const settingsState = get(settings);
+		if (!settingsState.glossaryHighlighting) return;
+
 		// Load glossary (cached if already loaded for this book)
 		await glossaryStore.load(bookSlug);
 		if (destroyed) return;

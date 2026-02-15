@@ -12,6 +12,7 @@ export {
 	lineWidth,
 	sidebarOpen,
 	bionicReading,
+	glossaryHighlighting,
 	DEFAULT_SHORTCUTS,
 	type Theme,
 	type FontSize,

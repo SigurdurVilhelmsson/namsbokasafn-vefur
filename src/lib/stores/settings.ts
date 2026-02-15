@@ -53,6 +53,7 @@ interface SettingsState {
 	sidebarOpen: boolean;
 	shortcutPreferences: ShortcutPreferences;
 	bionicReading: boolean;
+	glossaryHighlighting: boolean;
 }
 
 const STORAGE_KEY = 'namsbokasafn:settings';
@@ -65,7 +66,8 @@ const defaultSettings: SettingsState = {
 	lineWidth: 'medium',
 	sidebarOpen: false,
 	shortcutPreferences: {},
-	bionicReading: false
+	bionicReading: false,
+	glossaryHighlighting: true
 };
 
 const settingsValidators = {
@@ -76,7 +78,8 @@ const settingsValidators = {
 	lineWidth: isOneOf('narrow', 'medium', 'wide'),
 	sidebarOpen: isBoolean,
 	shortcutPreferences: isObject,
-	bionicReading: isBoolean
+	bionicReading: isBoolean,
+	glossaryHighlighting: isBoolean
 };
 
 function loadSettings(): SettingsState {
@@ -173,6 +176,10 @@ function createSettingsStore() {
 		setBionicReading: (enabled: boolean) => update((s) => ({ ...s, bionicReading: enabled })),
 		toggleBionicReading: () => update((s) => ({ ...s, bionicReading: !s.bionicReading })),
 
+		// Glossary highlighting methods
+		setGlossaryHighlighting: (enabled: boolean) => update((s) => ({ ...s, glossaryHighlighting: enabled })),
+		toggleGlossaryHighlighting: () => update((s) => ({ ...s, glossaryHighlighting: !s.glossaryHighlighting })),
+
 		getShortcut: (action: ShortcutAction): string => {
 			const state = get({ subscribe });
 			return state.shortcutPreferences[action] || DEFAULT_SHORTCUTS[action];
@@ -192,3 +199,4 @@ export const lineHeight = derived(settings, ($settings) => $settings.lineHeight)
 export const lineWidth = derived(settings, ($settings) => $settings.lineWidth);
 export const sidebarOpen = derived(settings, ($settings) => $settings.sidebarOpen);
 export const bionicReading = derived(settings, ($settings) => $settings.bionicReading);
+export const glossaryHighlighting = derived(settings, ($settings) => $settings.glossaryHighlighting);
