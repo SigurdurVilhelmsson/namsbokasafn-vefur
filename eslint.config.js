@@ -80,6 +80,7 @@ export default tseslint.config(
       '.svelte-kit/',
       'node_modules/',
       'static/content/',
+      'namsbokasafn-efni/',
       'dev-dist/',
       'logs/',
       '*.config.js',
