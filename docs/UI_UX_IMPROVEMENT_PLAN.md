@@ -384,7 +384,7 @@ These can be implemented rapidly with significant user benefit:
 
 **Recommendation:** Prefetch next section when scroll > 80%
 
-**Status:** Pending — SvelteKit's `data-sveltekit-preload-data` could be added to next/prev navigation links as an easy first step
+**Status:** Done — Global `data-sveltekit-preload-data="hover"` on body; `eager` prefetching on prev/next NavigationButtons
 
 ### 7.3 Offline Indicators
 
@@ -522,10 +522,10 @@ Based on the audit, here are the recommended actions in priority order:
 
 ### High-Value Next Implementations
 
-4. **9.2: Book home progress overview** — Low effort, shows students their progress at a glance.
-5. **9.3: Glossary term highlighting in content** — Medium effort, creates a natural learning loop.
-6. **7.2: SvelteKit prefetching on nav links** — Low effort, improves perceived performance.
-7. **9.1: Structured study sessions** — Medium effort, highest learning impact.
+4. ~~**9.2: Book home progress overview**~~ — **Done.** Chapter cards show completion %, section dots, and progress bars.
+5. ~~**9.3: Glossary term highlighting in content**~~ — **Done.** Inline dotted underline + hover tooltips. Settings toggle added.
+6. ~~**7.2: SvelteKit prefetching on nav links**~~ — **Done.** Global `hover` already set; `eager` added to prev/next navigation buttons.
+7. ~~**9.1: Structured study sessions**~~ — **Done.** Full 4-phase guided session at `/:bookSlug/nam`.
 
 ### Deprioritize or Remove
 

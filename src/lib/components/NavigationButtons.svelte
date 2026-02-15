@@ -102,6 +102,7 @@
 			{#if previous}
 				<a
 					href="/{bookSlug}/kafli/{getChapterPath(previous.chapter)}/{getSectionPath(previous.section)}"
+					data-sveltekit-preload-data="eager"
 					class="group flex items-center gap-3 rounded-lg border border-[var(--border-color)] px-4 py-3 transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5 sm:max-w-[48%]"
 				>
 					<svg
@@ -126,6 +127,7 @@
 			{#if next}
 				<a
 					href="/{bookSlug}/kafli/{getChapterPath(next.chapter)}/{getSectionPath(next.section)}"
+					data-sveltekit-preload-data="eager"
 					class="group flex items-center gap-3 rounded-lg border border-[var(--border-color)] px-4 py-3 transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5 sm:max-w-[48%] {!previous ? 'sm:ml-auto' : ''}"
 				>
 					<div class="text-left sm:text-right min-w-0 flex-1">
