@@ -1610,6 +1610,15 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
    * TYPOGRAPHY
    * ---------------------------------------- */
 
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  }
+
   h1 {
     font-size: 24pt;
     font-weight: 700;
@@ -1779,6 +1788,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   }
 
   .content-block-title {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
     font-weight: 700;
     font-size: 11pt;
     margin-bottom: 6pt;
@@ -1817,7 +1827,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   /* Always show answers in print */
   .practice-answer {
     display: block !important;
-    border-top: 2pt solid #16a34a !important;
+    border-top: 2pt solid #c78c20 !important;
     padding-top: 9pt;
     margin-top: 9pt;
   }
@@ -1973,8 +1983,8 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
    * ---------------------------------------- */
 
   .objectives-box {
-    border: 1pt solid #16a34a !important;
-    border-left: 4pt solid #16a34a !important;
+    border: 1pt solid #c78c20 !important;
+    border-left: 4pt solid #c78c20 !important;
     padding: 12pt !important;
     margin: 18pt 0 !important;
     page-break-inside: avoid;
