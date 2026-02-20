@@ -55,7 +55,26 @@
 	}
 
 	$: bookSlug = $page.params.bookSlug ?? '';
+
+	// Scroll progress bar
+	let scrollProgress = 0;
+
+	function handleScrollProgress() {
+		const scrollTop = window.scrollY;
+		const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+		if (docHeight > 0) {
+			scrollProgress = Math.min(100, Math.max(0, (scrollTop / docHeight) * 100));
+		} else {
+			scrollProgress = 0;
+		}
+	}
 </script>
+
+<svelte:window on:scroll={handleScrollProgress} />
+
+{#if !focusMode}
+	<div class="scroll-progress" style="width: {scrollProgress}%"></div>
+{/if}
 
 <div
 	class="min-h-screen font-size-{$fontSize} line-height-{$lineHeight} line-width-{$lineWidth} {$fontFamily === 'opendyslexic'
