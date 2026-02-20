@@ -34,29 +34,21 @@
 </script>
 
 <div>
-	<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+	<h2 class="rdp-heading">
 		Lestur
 	</h2>
-	<p class="text-sm text-gray-500 dark:text-gray-300 mb-4">
+	<p class="rdp-description">
 		Lestu eftirfarandi kafla. Smelltu á „Lesið" þegar þú hefur lokið.
 	</p>
 
 	<div class="space-y-3">
 		{#each sections as section, i}
 			{@const isDone = markedDone.has(i)}
-			<div
-				class="rounded-xl border p-4 transition-all
-					{isDone
-						? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20'
-						: 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'}"
-			>
+			<div class="rdp-section-card" class:rdp-section-card--done={isDone}>
 				<div class="flex items-start justify-between gap-3">
 					<div class="flex-1 min-w-0">
 						<div class="flex items-center gap-2 mb-1">
-							<span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-medium
-								{isDone
-									? 'bg-emerald-500 text-white'
-									: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}">
+							<span class="rdp-badge" class:rdp-badge--done={isDone}>
 								{#if isDone}
 									<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -65,11 +57,11 @@
 									{section.sectionNumber || (i + 1)}
 								{/if}
 							</span>
-							<h3 class="font-medium text-gray-900 dark:text-gray-100 truncate {isDone ? 'line-through opacity-60' : ''}">
+							<h3 class="rdp-section-title" class:rdp-section-title--done={isDone}>
 								{section.sectionTitle}
 							</h3>
 						</div>
-						<div class="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+						<div class="rdp-meta">
 							<span>Kafli {section.chapterNumber}: {section.chapterTitle}</span>
 							<span>~{section.readingTime} mín</span>
 						</div>
@@ -79,7 +71,7 @@
 						{#if !isDone}
 							<a
 								href="/{bookSlug}/kafli/{section.chapterSlug}/{section.sectionSlug}"
-								class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors"
+								class="rdp-read-link"
 								target="_blank"
 								rel="noopener"
 							>
@@ -90,7 +82,7 @@
 							</a>
 							<button
 								on:click={() => markDone(i)}
-								class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors"
+								class="rdp-done-btn"
 							>
 								Lesið
 							</button>
@@ -103,10 +95,7 @@
 
 	<!-- Finish button -->
 	<div class="mt-6 flex justify-end">
-		<button
-			on:click={finish}
-			class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-colors"
-		>
+		<button on:click={finish} class="rdp-finish-btn">
 			{markedDone.size === sections.length ? 'Áfram' : 'Halda áfram'}
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -114,3 +103,112 @@
 		</button>
 	</div>
 </div>
+
+<style>
+	.rdp-heading {
+		font-family: "Bricolage Grotesque", system-ui, sans-serif;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		margin-bottom: 0.25rem;
+	}
+	.rdp-description {
+		font-size: 0.875rem;
+		color: var(--text-secondary);
+		margin-bottom: 1rem;
+	}
+	.rdp-section-card {
+		border-radius: var(--radius-xl);
+		border: 1px solid var(--border-color);
+		background-color: var(--bg-secondary);
+		padding: 1rem;
+		transition: all 0.15s;
+	}
+	.rdp-section-card--done {
+		border-color: #86efac;
+		background-color: #ecfdf5;
+	}
+	:global(.dark) .rdp-section-card--done {
+		border-color: rgba(6,78,59,0.5);
+		background-color: rgba(6,78,59,0.2);
+	}
+	.rdp-badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		background-color: var(--accent-light);
+		color: var(--accent-color);
+	}
+	.rdp-badge--done {
+		background-color: #059669;
+		color: white;
+	}
+	:global(.dark) .rdp-badge--done {
+		background-color: #34d399;
+		color: #022c22;
+	}
+	.rdp-section-title {
+		font-weight: 500;
+		color: var(--text-primary);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.rdp-section-title--done {
+		text-decoration: line-through;
+		opacity: 0.6;
+	}
+	.rdp-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		font-size: 0.75rem;
+		color: var(--text-tertiary);
+	}
+	.rdp-read-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.375rem 0.75rem;
+		border-radius: var(--radius-lg);
+		font-size: 0.875rem;
+		color: var(--accent-color);
+		background-color: var(--accent-light);
+		transition: opacity 0.15s;
+	}
+	.rdp-read-link:hover { opacity: 0.85; }
+	.rdp-done-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		padding: 0.375rem 0.75rem;
+		border-radius: var(--radius-lg);
+		font-size: 0.875rem;
+		color: #059669;
+		background-color: #ecfdf5;
+		transition: opacity 0.15s;
+	}
+	:global(.dark) .rdp-done-btn {
+		color: #34d399;
+		background-color: rgba(6,78,59,0.2);
+	}
+	.rdp-done-btn:hover { opacity: 0.85; }
+	.rdp-finish-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		border-radius: var(--radius-lg);
+		background-color: var(--accent-color);
+		color: white;
+		font-size: 0.875rem;
+		font-weight: 500;
+		transition: opacity 0.15s;
+	}
+	.rdp-finish-btn:hover { opacity: 0.9; }
+</style>
