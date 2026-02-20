@@ -6,7 +6,6 @@
 /* Ensure our custom CSS variables take precedence */
 @layer base {
   :root {
-    /* Force browser to use light color scheme for native elements */
     color-scheme: light;
 
     /* Font sizes */
@@ -16,7 +15,7 @@
     --font-size-xlarge: 20px;
 
     /* Line heights */
-    --line-height-normal: 1.6;
+    --line-height-normal: 1.7;
     --line-height-relaxed: 1.8;
     --line-height-loose: 2;
 
@@ -25,43 +24,94 @@
     --line-width-medium: 48rem;
     --line-width-wide: 60rem;
 
+    /* Spacing scale (4px base) */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-24: 6rem;
+
+    /* Border radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
+
     /* Light theme colors */
-    --bg-primary: #faf8f5;
+    --bg-primary: #f7f4ef;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #f3f4f6;
-    --text-primary: #1a1a1a;
-    --text-secondary: #4a5568;
-    --border-color: #e8eaed;
-    --accent-color: #1a7d5c;
-    --accent-hover: #145f46;
-    --accent-light: #e8f5f1;
-    --accent-decorative: #5dba9c;
-    --header-banner: #1a7d5c;
+    --bg-tertiary: #efeae0;
+    --text-primary: #1b2838;
+    --text-secondary: #5a6474;
+    --text-tertiary: #8a919c;
+    --border-color: #ddd6c9;
+    --accent-color: #c78c20;
+    --accent-hover: #a87518;
+    --accent-light: #fdf6e8;
+    --accent-subtle: #f0e4c8;
+    --accent-decorative: #c78c20;
+    --header-banner: #c78c20;
     --header-banner-text: #ffffff;
+
+    /* Shadows (warm-tinted) */
+    --shadow-sm: 0 1px 2px rgba(27, 40, 56, 0.06);
+    --shadow-md: 0 2px 8px rgba(27, 40, 56, 0.08);
+    --shadow-lg: 0 4px 16px rgba(27, 40, 56, 0.1);
+    --shadow-xl: 0 8px 32px rgba(27, 40, 56, 0.12);
+
+    /* Subject colors */
+    --subject-chemistry: #2e7d9c;
+    --subject-chemistry-light: #e8f4f8;
+    --subject-biology: #4a8c5c;
+    --subject-biology-light: #e8f4ec;
+    --subject-math: #7c5cad;
+    --subject-math-light: #f0e8f8;
+    --subject-social: #b07040;
+    --subject-social-light: #f8f0e8;
   }
 
   .dark {
-    /* Force browser to use dark color scheme for native elements */
     color-scheme: dark;
 
-    --bg-primary: #1a1a2e;
-    --bg-secondary: #16213e;
-    --bg-tertiary: #1e293b;
-    --text-primary: #e2e8f0;
-    --text-secondary: #cbd5e1;
-    --border-color: #2d3748;
-    --accent-color: #6ee7b7;
-    --accent-hover: #86efac;
-    --accent-light: #1e3a32;
-    --accent-decorative: #5dba9c;
-    --header-banner: #5dba9c;
-    --header-banner-text: #1a1a2e;
+    --bg-primary: #16161c;
+    --bg-secondary: #1e1e26;
+    --bg-tertiary: #26262f;
+    --text-primary: #e8e4de;
+    --text-secondary: #9a9590;
+    --text-tertiary: #6a6560;
+    --border-color: #2e2e38;
+    --accent-color: #e8a838;
+    --accent-hover: #f0bc5a;
+    --accent-light: #2a2418;
+    --accent-subtle: #332c1e;
+    --accent-decorative: #e8a838;
+    --header-banner: #e8a838;
+    --header-banner-text: #16161c;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+    --subject-chemistry: #4da8c9;
+    --subject-chemistry-light: #1a2d38;
+    --subject-biology: #6aac7c;
+    --subject-biology-light: #1a2d1e;
+    --subject-math: #9c7cd0;
+    --subject-math-light: #241a38;
+    --subject-social: #d09060;
+    --subject-social-light: #2d1e1a;
   }
 
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-family: "Source Serif Pro", Georgia, serif;
+    font-family: "Literata", Georgia, serif;
   }
 }
 
@@ -201,7 +251,7 @@
 .reading-content h2,
 .reading-content h3,
 .reading-content h4 {
-  font-family: "Lora", Georgia, serif;
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
   font-weight: 700;
   color: #111827;
 }
@@ -1703,7 +1753,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   }
 
   body {
-    font-family: "Source Serif Pro", Georgia, "Times New Roman", serif;
+    font-family: "Literata", Georgia, "Times New Roman", serif;
     line-height: 1.5;
     color: #000 !important;
     background: #fff !important;
@@ -1827,7 +1877,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
 
   p {
     font-size: 12pt;
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: 12pt;
     orphans: 3;
     widows: 3;
