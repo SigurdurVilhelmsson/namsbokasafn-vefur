@@ -16,16 +16,16 @@
 
 	const COLOR_LABELS: Record<HighlightColor, string> = {
 		yellow: 'Gulur',
-		green: 'Grænn',
+		green: 'Gulbrúnn',
 		blue: 'Blár',
-		pink: 'Bleikur'
+		pink: 'Rósrauður'
 	};
 
-	const COLOR_CLASSES: Record<HighlightColor, { bg: string; border: string; darkBg: string }> = {
-		yellow: { bg: 'bg-yellow-100', border: 'border-yellow-300', darkBg: 'dark:bg-yellow-900/30' },
-		green: { bg: 'bg-green-100', border: 'border-green-300', darkBg: 'dark:bg-green-900/30' },
-		blue: { bg: 'bg-blue-100', border: 'border-blue-300', darkBg: 'dark:bg-blue-900/30' },
-		pink: { bg: 'bg-pink-100', border: 'border-pink-300', darkBg: 'dark:bg-pink-900/30' }
+	const COLOR_STYLES: Record<HighlightColor, { bg: string; border: string; darkBg: string; swatch: string }> = {
+		yellow: { bg: '#f5e6b8', border: '#e0d0a0', darkBg: 'rgba(196, 160, 60, 0.2)', swatch: '#f5e6b8' },
+		green: { bg: '#f0d0a0', border: '#dabb88', darkBg: 'rgba(192, 140, 60, 0.2)', swatch: '#f0d0a0' },
+		blue: { bg: '#c8daf0', border: '#a8c0e0', darkBg: 'rgba(80, 120, 200, 0.2)', swatch: '#c8daf0' },
+		pink: { bg: '#f0c8c8', border: '#dab0b0', darkBg: 'rgba(200, 100, 100, 0.2)', swatch: '#f0c8c8' }
 	};
 
 	let filter: FilterType = 'all';
@@ -213,7 +213,8 @@
 									: 'text-gray-700 dark:text-gray-300'}"
 							>
 								<span
-									class="h-3 w-3 rounded-full {COLOR_CLASSES[color as HighlightColor].bg} {COLOR_CLASSES[color as HighlightColor].border} border"
+									class="h-3 w-3 rounded-full border"
+									style="background-color: {COLOR_STYLES[color as HighlightColor].swatch}; border-color: {COLOR_STYLES[color as HighlightColor].border};"
 								></span>
 								{label} ({stats.byColor[color as HighlightColor]})
 							</button>
@@ -267,9 +268,10 @@
 			{:else}
 				<div class="space-y-3">
 					{#each filteredAnnotations as annotation (annotation.id)}
-						{@const colors = COLOR_CLASSES[annotation.color]}
+						{@const colors = COLOR_STYLES[annotation.color]}
 						<div
-							class="rounded-lg border {colors.border} {colors.bg} {colors.darkBg} p-3 transition-shadow hover:shadow-md"
+							class="annotation-card rounded-lg border p-3 transition-shadow hover:shadow-md"
+							style="--card-bg: {colors.bg}; --card-border: {colors.border}; --card-dark-bg: {colors.darkBg};"
 							transition:slide={{ duration: 150 }}
 						>
 							<!-- Header -->
@@ -366,3 +368,15 @@
 		{/if}
 	</div>
 {/if}
+
+<style>
+	.annotation-card {
+		background-color: var(--card-bg);
+		border-color: var(--card-border);
+	}
+
+	:global(.dark) .annotation-card {
+		background-color: var(--card-dark-bg);
+		border-color: var(--card-border);
+	}
+</style>

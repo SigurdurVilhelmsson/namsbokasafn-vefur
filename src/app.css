@@ -2059,7 +2059,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
 
   /* Show highlight background in print */
   [data-highlight] {
-    background-color: #fef08a !important;
+    background-color: #f5e6b8 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
