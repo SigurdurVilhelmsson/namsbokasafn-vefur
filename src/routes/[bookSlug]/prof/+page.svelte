@@ -22,17 +22,14 @@
 	<div class="mx-auto max-w-2xl">
 		<!-- Header -->
 		<div class="mb-6">
-			<a
-				href="/{bookSlug}"
-				class="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors mb-4"
-			>
+			<a href="/{bookSlug}" class="quiz-back-link">
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
 				</svg>
 				Til baka
 			</a>
-			<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Adlogunarprof</h1>
-			<p class="text-gray-500 dark:text-gray-300">
+			<h1 class="quiz-heading">Adlogunarprof</h1>
+			<p class="quiz-subtext">
 				{#if chapterSlug}
 					Aefingadaemi ur kafla: {chapterSlug}
 				{:else}
@@ -45,8 +42,8 @@
 		<AdaptiveQuiz {chapterSlug} onComplete={handleComplete} maxProblems={5} />
 
 		<!-- Help section -->
-		<div class="mt-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 p-4">
-			<h3 class="flex items-center gap-2 text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+		<div class="quiz-help">
+			<h3 class="quiz-help-title">
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
@@ -57,7 +54,7 @@
 				</svg>
 				Hvernig virkar adlogunarprof?
 			</h3>
-			<ul class="text-sm text-blue-700 dark:text-blue-300 space-y-1 list-disc list-inside">
+			<ul class="quiz-help-list">
 				<li>Profid velur daemi sem passa vid thar sem thu ert staddur</li>
 				<li>Daemi sem thu hefur ekki leyst fa forgang</li>
 				<li>Eftir ad thu svarar er naesti spurning adlögud</li>
@@ -66,3 +63,53 @@
 		</div>
 	</div>
 </div>
+
+<style>
+	.quiz-back-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		color: var(--text-tertiary);
+		transition: color 0.15s;
+		margin-bottom: 1rem;
+	}
+	.quiz-back-link:hover {
+		color: var(--accent-color);
+	}
+	.quiz-heading {
+		font-family: "Bricolage Grotesque", system-ui, sans-serif;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--text-primary);
+		margin-bottom: 0.5rem;
+	}
+	.quiz-subtext {
+		color: var(--text-secondary);
+	}
+	.quiz-help {
+		margin-top: 2rem;
+		border-radius: var(--radius-lg);
+		background-color: var(--accent-light);
+		border: 1px solid var(--border-color);
+		padding: 1rem;
+	}
+	.quiz-help-title {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--accent-color);
+		margin-bottom: 0.5rem;
+	}
+	.quiz-help-list {
+		font-size: 0.875rem;
+		color: var(--text-secondary);
+		list-style-type: disc;
+		list-style-position: inside;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+</style>
