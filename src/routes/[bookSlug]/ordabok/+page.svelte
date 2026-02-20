@@ -56,7 +56,7 @@
 </svelte:head>
 
 <div class="max-w-4xl mx-auto">
-	<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">
+	<h1 class="glossary-heading">
 		Orðasafn
 	</h1>
 
@@ -67,8 +67,8 @@
 			{/each}
 		</div>
 	{:else if error}
-		<div class="rounded-lg bg-red-50 dark:bg-red-900/20 p-4">
-			<p class="text-red-600 dark:text-red-400">{error}</p>
+		<div class="glossary-error">
+			<p>{error}</p>
 		</div>
 	{:else if glossary}
 		<!-- Search and filters -->
@@ -76,7 +76,7 @@
 			<!-- Search input -->
 			<div class="relative">
 				<svg
-					class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+					class="glossary-search-icon"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -92,7 +92,7 @@
 					type="text"
 					bind:value={searchQuery}
 					placeholder="Leita í orðasafni..."
-					class="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+					class="glossary-search-input"
 				/>
 			</div>
 
@@ -101,9 +101,8 @@
 				{#each letters as letter}
 					<button
 						on:click={() => (selectedLetter = selectedLetter === letter ? null : letter)}
-						class="w-8 h-8 rounded-lg text-sm font-medium transition-colors {selectedLetter === letter
-							? 'bg-blue-600 text-white'
-							: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
+						class="glossary-letter-btn"
+						class:glossary-letter-btn--active={selectedLetter === letter}
 					>
 						{letter}
 					</button>
@@ -111,7 +110,7 @@
 				{#if selectedLetter || searchQuery}
 					<button
 						on:click={clearFilters}
-						class="px-3 h-8 rounded-lg text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+						class="glossary-clear-btn"
 					>
 						Hreinsa síu
 					</button>
@@ -120,42 +119,42 @@
 		</div>
 
 		<!-- Results count -->
-		<p class="text-sm text-gray-500 dark:text-gray-300 mb-4">
+		<p class="glossary-count">
 			{filteredTerms.length} {filteredTerms.length === 1 ? 'niðurstaða' : 'niðurstöður'}
 		</p>
 
 		<!-- Terms list -->
 		{#if filteredTerms.length === 0}
 			<div class="text-center py-12">
-				<svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="glossary-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 				</svg>
-				<p class="text-gray-500 dark:text-gray-300">Engin orð fundust</p>
+				<p class="glossary-empty-text">Engin orð fundust</p>
 			</div>
 		{:else}
-			<div class="space-y-4">
+			<div class="glossary-list">
 				{#each filteredTerms as term (term.term)}
-					<div class="p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+					<div class="glossary-term-card">
 						<div class="flex items-start justify-between">
-							<h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+							<h3 class="glossary-term-title">
 								{term.term}
 							</h3>
 							{#if term.english}
-								<span class="text-sm text-gray-500 dark:text-gray-300 italic">
+								<span class="glossary-term-english">
 									{term.english}
 								</span>
 							{/if}
 						</div>
-						<p class="mt-2 text-gray-700 dark:text-gray-300">
+						<p class="glossary-term-definition">
 							{term.definition}
 						</p>
 						{#if term.relatedTerms && term.relatedTerms.length > 0}
-							<div class="mt-3 flex flex-wrap gap-2">
-								<span class="text-xs text-gray-500 dark:text-gray-300">Tengd orð:</span>
+							<div class="glossary-related">
+								<span class="glossary-related-label">Tengd orð:</span>
 								{#each term.relatedTerms as related}
 									<button
 										on:click={() => (searchQuery = related)}
-										class="text-xs px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-blue-600 dark:text-blue-400 hover:underline"
+										class="glossary-related-tag"
 									>
 										{related}
 									</button>
@@ -168,3 +167,165 @@
 		{/if}
 	{/if}
 </div>
+
+<style>
+	/* Heading */
+	.glossary-heading {
+		font-family: "Bricolage Grotesque", system-ui, sans-serif;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--text-primary);
+		margin-bottom: 1.5rem;
+	}
+
+	/* Error */
+	.glossary-error {
+		border-radius: var(--radius-lg);
+		background-color: #fef2f2;
+		padding: 1rem;
+		color: #dc2626;
+	}
+	:global(.dark) .glossary-error {
+		background-color: rgba(127,29,29,0.2);
+		color: #f87171;
+	}
+
+	/* Search */
+	.glossary-search-icon {
+		position: absolute;
+		left: 0.75rem;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 1.25rem;
+		height: 1.25rem;
+		color: var(--text-tertiary);
+	}
+	.glossary-search-input {
+		width: 100%;
+		padding: 0.75rem 1rem 0.75rem 2.5rem;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--border-color);
+		background-color: var(--bg-secondary);
+		color: var(--text-primary);
+		font-size: 1rem;
+	}
+	.glossary-search-input::placeholder {
+		color: var(--text-tertiary);
+	}
+	.glossary-search-input:focus {
+		outline: none;
+		border-color: var(--accent-color);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 20%, transparent);
+	}
+
+	/* Letter filter */
+	.glossary-letter-btn {
+		width: 2rem;
+		height: 2rem;
+		border-radius: var(--radius-lg);
+		font-size: 0.875rem;
+		font-weight: 500;
+		transition: all 0.15s;
+		background-color: var(--bg-secondary);
+		color: var(--text-secondary);
+		border: 1px solid var(--border-color);
+	}
+	.glossary-letter-btn:hover {
+		background-color: var(--bg-tertiary);
+	}
+	.glossary-letter-btn--active {
+		background-color: var(--accent-color);
+		color: white;
+		border-color: var(--accent-color);
+	}
+	.glossary-letter-btn--active:hover {
+		background-color: var(--accent-color);
+		opacity: 0.9;
+	}
+	.glossary-clear-btn {
+		padding: 0 0.75rem;
+		height: 2rem;
+		border-radius: var(--radius-lg);
+		font-size: 0.875rem;
+		font-weight: 500;
+		background-color: var(--bg-secondary);
+		color: var(--text-secondary);
+		border: 1px solid var(--border-color);
+		transition: background-color 0.15s;
+	}
+	.glossary-clear-btn:hover {
+		background-color: var(--bg-tertiary);
+	}
+
+	/* Results count */
+	.glossary-count {
+		font-size: 0.875rem;
+		color: var(--text-tertiary);
+		margin-bottom: 1rem;
+	}
+
+	/* Empty state */
+	.glossary-empty-icon {
+		width: 4rem;
+		height: 4rem;
+		margin: 0 auto;
+		color: var(--border-color);
+		margin-bottom: 1rem;
+	}
+	.glossary-empty-text {
+		color: var(--text-tertiary);
+	}
+
+	/* Terms list */
+	.glossary-list {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	.glossary-term-card {
+		padding: 1rem;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--border-color);
+		background-color: var(--bg-secondary);
+	}
+	.glossary-term-title {
+		font-family: "Bricolage Grotesque", system-ui, sans-serif;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: var(--text-primary);
+	}
+	.glossary-term-english {
+		font-size: 0.875rem;
+		color: var(--text-tertiary);
+		font-style: italic;
+	}
+	.glossary-term-definition {
+		margin-top: 0.5rem;
+		color: var(--text-secondary);
+	}
+
+	/* Related terms */
+	.glossary-related {
+		margin-top: 0.75rem;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-items: center;
+	}
+	.glossary-related-label {
+		font-size: 0.75rem;
+		color: var(--text-tertiary);
+	}
+	.glossary-related-tag {
+		font-size: 0.75rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.25rem;
+		background-color: var(--bg-tertiary);
+		color: var(--accent-color);
+		transition: opacity 0.15s;
+	}
+	.glossary-related-tag:hover {
+		opacity: 0.8;
+		text-decoration: underline;
+	}
+</style>
