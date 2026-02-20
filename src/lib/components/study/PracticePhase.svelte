@@ -37,37 +37,37 @@
 </script>
 
 <div>
-	<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+	<h2 class="pp-heading">
 		Æfingar
 	</h2>
-	<p class="text-sm text-gray-500 dark:text-gray-300 mb-4">
+	<p class="pp-description">
 		Leystu dæmi til að styrkja skilninginn.
 	</p>
 
 	<!-- Progress bar -->
 	<div class="mb-4">
-		<div class="flex justify-between text-sm text-gray-500 dark:text-gray-300 mb-1">
+		<div class="pp-progress-text">
 			<span>Dæmi {currentIndex + 1} af {total}</span>
 			<span>{progress}%</span>
 		</div>
-		<div class="h-2 rounded-full bg-gray-100 dark:bg-gray-800">
+		<div class="pp-progress-track">
 			<div
-				class="h-full rounded-full bg-purple-500 transition-all duration-300"
+				class="pp-progress-fill"
 				style="width: {progress}%"
 			></div>
 		</div>
 	</div>
 
 	{#if currentProblem}
-		<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6">
+		<div class="pp-card">
 			<div class="mb-4">
-				<h4 class="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-300">
-					<svg class="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<h4 class="pp-problem-label">
+					<svg class="w-4 h-4" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
 					</svg>
 					Dæmi {currentIndex + 1}
 				</h4>
-				<div class="prose prose-sm max-w-none dark:prose-invert text-gray-900 dark:text-gray-100">
+				<div class="prose prose-sm max-w-none dark:prose-invert" style="color: var(--text-primary);">
 					{currentProblem.content}
 				</div>
 			</div>
@@ -75,7 +75,7 @@
 			{#if !isShowingAnswer}
 				<button
 					on:click={showAnswer}
-					class="w-full flex items-center justify-center gap-2 rounded-lg border border-purple-500 bg-purple-500/10 px-4 py-3 text-sm font-medium text-purple-600 dark:text-purple-400 transition-colors hover:bg-purple-500/20"
+					class="pp-show-answer-btn"
 				>
 					Sýna svar
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -84,19 +84,19 @@
 				</button>
 			{:else}
 				<div class="space-y-4">
-					<div class="rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-900/20 p-4">
-						<h5 class="mb-1 text-sm font-semibold text-emerald-700 dark:text-emerald-400">Svar</h5>
-						<div class="prose prose-sm max-w-none text-emerald-800 dark:text-emerald-200">
+					<div class="pp-answer-box">
+						<h5 class="pp-answer-title">Svar</h5>
+						<div class="pp-answer-text">
 							{currentProblem.answer}
 						</div>
 					</div>
 
-					<div class="rounded-lg bg-gray-50 dark:bg-gray-900 p-4">
-						<p class="mb-3 text-center text-sm text-gray-500 dark:text-gray-300">Hvernig gekk?</p>
+					<div class="pp-assess-area">
+						<p class="pp-assess-prompt">Hvernig gekk?</p>
 						<div class="flex gap-3">
 							<button
 								on:click={() => handleAnswer(true)}
-								class="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2 font-medium text-emerald-700 dark:text-emerald-400 transition-all hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+								class="pp-assess-btn pp-assess-btn--correct"
 							>
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -105,7 +105,7 @@
 							</button>
 							<button
 								on:click={() => handleAnswer(false)}
-								class="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-2 font-medium text-red-700 dark:text-red-400 transition-all hover:bg-red-100 dark:hover:bg-red-900/30"
+								class="pp-assess-btn pp-assess-btn--wrong"
 							>
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -119,3 +119,133 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	.pp-heading {
+		font-family: "Bricolage Grotesque", system-ui, sans-serif;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		margin-bottom: 0.25rem;
+	}
+	.pp-description {
+		font-size: 0.875rem;
+		color: var(--text-secondary);
+		margin-bottom: 1rem;
+	}
+	.pp-progress-text {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.875rem;
+		color: var(--text-tertiary);
+		margin-bottom: 0.25rem;
+	}
+	.pp-progress-track {
+		height: 0.5rem;
+		border-radius: 9999px;
+		background-color: var(--bg-tertiary);
+	}
+	.pp-progress-fill {
+		height: 100%;
+		border-radius: 9999px;
+		background-color: var(--accent-color);
+		transition: width 0.3s;
+	}
+	.pp-card {
+		border-radius: var(--radius-xl);
+		border: 1px solid var(--border-color);
+		background-color: var(--bg-secondary);
+		padding: 1.5rem;
+	}
+	.pp-problem-label {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--text-secondary);
+		margin-bottom: 0.75rem;
+	}
+	.pp-show-answer-btn {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--accent-color);
+		background-color: var(--accent-light);
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--accent-color);
+		transition: opacity 0.15s;
+	}
+	.pp-show-answer-btn:hover { opacity: 0.85; }
+	.pp-answer-box {
+		border-radius: var(--radius-lg);
+		border: 1px solid #a7f3d0;
+		background-color: #ecfdf5;
+		padding: 1rem;
+	}
+	:global(.dark) .pp-answer-box {
+		border-color: rgba(6,78,59,0.5);
+		background-color: rgba(6,78,59,0.2);
+	}
+	.pp-answer-title {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #047857;
+		margin-bottom: 0.25rem;
+	}
+	:global(.dark) .pp-answer-title { color: #34d399; }
+	.pp-answer-text {
+		font-size: 0.875rem;
+		color: #065f46;
+	}
+	:global(.dark) .pp-answer-text { color: #a7f3d0; }
+	.pp-assess-area {
+		border-radius: var(--radius-lg);
+		background-color: var(--bg-tertiary);
+		padding: 1rem;
+	}
+	.pp-assess-prompt {
+		text-align: center;
+		font-size: 0.875rem;
+		color: var(--text-secondary);
+		margin-bottom: 0.75rem;
+	}
+	.pp-assess-btn {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: var(--radius-lg);
+		border: 2px solid;
+		padding: 0.5rem 1rem;
+		font-weight: 500;
+		transition: opacity 0.15s;
+	}
+	.pp-assess-btn:hover { opacity: 0.85; }
+	.pp-assess-btn--correct {
+		border-color: #86efac;
+		background-color: #ecfdf5;
+		color: #047857;
+	}
+	:global(.dark) .pp-assess-btn--correct {
+		border-color: rgba(6,78,59,0.5);
+		background-color: rgba(6,78,59,0.2);
+		color: #34d399;
+	}
+	.pp-assess-btn--wrong {
+		border-color: #fca5a5;
+		background-color: #fef2f2;
+		color: #b91c1c;
+	}
+	:global(.dark) .pp-assess-btn--wrong {
+		border-color: rgba(127,29,29,0.5);
+		background-color: rgba(127,29,29,0.2);
+		color: #fca5a5;
+	}
+</style>

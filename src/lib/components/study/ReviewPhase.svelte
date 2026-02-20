@@ -67,22 +67,22 @@
 </script>
 
 <div>
-	<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
+	<h2 class="rp-heading">
 		Endurtekningar
 	</h2>
-	<p class="text-sm text-gray-500 dark:text-gray-300 mb-4">
+	<p class="rp-description">
 		Farðu yfir kort og dæmi sem þarfnast endurtekningar.
 	</p>
 
 	<!-- Progress bar -->
 	<div class="mb-4">
-		<div class="flex justify-between text-sm text-gray-500 dark:text-gray-300 mb-1">
+		<div class="rp-progress-text">
 			<span>{currentIndex + 1} af {total}</span>
 			<span>{progress}%</span>
 		</div>
-		<div class="h-2 rounded-full bg-gray-100 dark:bg-gray-800">
+		<div class="rp-progress-track">
 			<div
-				class="h-full rounded-full bg-orange-500 transition-all duration-300"
+				class="rp-progress-fill"
 				style="width: {progress}%"
 			></div>
 		</div>
@@ -92,31 +92,31 @@
 		<!-- Flashcard review -->
 		<button
 			on:click={flip}
-			class="w-full min-h-[250px] p-6 rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 cursor-pointer transition-transform hover:scale-[1.01] text-left"
+			class="rp-card"
 		>
 			<div class="text-center">
-				<span class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-4 block">
+				<span class="rp-card-label">
 					{isFlipped ? 'Svar' : 'Spurning'}
 				</span>
-				<p class="text-lg text-gray-900 dark:text-gray-100">
+				<p class="rp-card-text">
 					{isFlipped ? currentItem.card.back : currentItem.card.front}
 				</p>
 			</div>
 		</button>
 
 		{#if !isFlipped}
-			<p class="text-center text-sm text-gray-500 dark:text-gray-300 mt-3">
+			<p class="rp-hint">
 				Smelltu á kortið til að sjá svarið
 			</p>
 		{:else}
 			<div class="mt-4">
-				<p class="text-center text-sm text-gray-500 dark:text-gray-300 mb-3">
+				<p class="rp-hint" style="margin-bottom: 0.75rem;">
 					Hversu auðvelt var þetta?
 				</p>
 				<div class="grid grid-cols-4 gap-2">
 					<button
 						on:click={() => rateFlashcard('again')}
-						class="p-3 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+						class="rp-rating rp-rating--again"
 					>
 						<div class="font-medium text-sm">Aftur</div>
 						{#if previewIntervals}
@@ -125,7 +125,7 @@
 					</button>
 					<button
 						on:click={() => rateFlashcard('hard')}
-						class="p-3 rounded-lg bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors"
+						class="rp-rating rp-rating--hard"
 					>
 						<div class="font-medium text-sm">Erfitt</div>
 						{#if previewIntervals}
@@ -134,7 +134,7 @@
 					</button>
 					<button
 						on:click={() => rateFlashcard('good')}
-						class="p-3 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+						class="rp-rating rp-rating--good"
 					>
 						<div class="font-medium text-sm">Gott</div>
 						{#if previewIntervals}
@@ -143,7 +143,7 @@
 					</button>
 					<button
 						on:click={() => rateFlashcard('easy')}
-						class="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+						class="rp-rating rp-rating--easy"
 					>
 						<div class="font-medium text-sm">Auðvelt</div>
 						{#if previewIntervals}
@@ -155,25 +155,25 @@
 		{/if}
 	{:else if currentItem?.type === 'problem'}
 		<!-- Practice problem review -->
-		<div class="rounded-2xl bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 p-6">
-			<span class="text-xs font-medium uppercase tracking-wider text-purple-500 mb-3 block">
+		<div class="rp-problem-card">
+			<span class="rp-problem-label">
 				Æfingadæmi
 			</span>
-			<div class="prose prose-sm max-w-none dark:prose-invert text-gray-900 dark:text-gray-100 mb-4">
+			<div class="prose prose-sm max-w-none dark:prose-invert mb-4" style="color: var(--text-primary);">
 				{currentItem.problem.content}
 			</div>
 
 			{#if !isFlipped}
 				<button
 					on:click={flip}
-					class="w-full flex items-center justify-center gap-2 rounded-lg border border-blue-500 bg-blue-500/10 px-4 py-3 text-sm font-medium text-blue-600 dark:text-blue-400 transition-colors hover:bg-blue-500/20"
+					class="rp-show-answer-btn"
 				>
 					Sýna svar
 				</button>
 			{:else}
-				<div class="rounded-lg border border-emerald-200 dark:border-emerald-800/50 bg-emerald-50 dark:bg-emerald-900/20 p-4 mb-4">
-					<h5 class="mb-1 text-sm font-semibold text-emerald-700 dark:text-emerald-400">Svar</h5>
-					<div class="prose prose-sm max-w-none text-emerald-800 dark:text-emerald-200">
+				<div class="rp-answer-box">
+					<h5 class="rp-answer-title">Svar</h5>
+					<div class="rp-answer-text">
 						{currentItem.problem.answer}
 					</div>
 				</div>
@@ -181,7 +181,7 @@
 				<div class="flex gap-3">
 					<button
 						on:click={() => rateProblem(true)}
-						class="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2 font-medium text-emerald-700 dark:text-emerald-400 transition-all hover:bg-emerald-100 dark:hover:bg-emerald-900/30"
+						class="rp-assess-btn rp-assess-btn--correct"
 					>
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -190,7 +190,7 @@
 					</button>
 					<button
 						on:click={() => rateProblem(false)}
-						class="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-2 font-medium text-red-700 dark:text-red-400 transition-all hover:bg-red-100 dark:hover:bg-red-900/30"
+						class="rp-assess-btn rp-assess-btn--wrong"
 					>
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -202,3 +202,174 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	.rp-heading {
+		font-family: "Bricolage Grotesque", system-ui, sans-serif;
+		font-size: 1.125rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		margin-bottom: 0.25rem;
+	}
+	.rp-description {
+		font-size: 0.875rem;
+		color: var(--text-secondary);
+		margin-bottom: 1rem;
+	}
+	.rp-progress-text {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.875rem;
+		color: var(--text-tertiary);
+		margin-bottom: 0.25rem;
+	}
+	.rp-progress-track {
+		height: 0.5rem;
+		border-radius: 9999px;
+		background-color: var(--bg-tertiary);
+	}
+	.rp-progress-fill {
+		height: 100%;
+		border-radius: 9999px;
+		background-color: var(--accent-color);
+		transition: width 0.3s;
+	}
+	.rp-card {
+		width: 100%;
+		min-height: 250px;
+		padding: 1.5rem;
+		border-radius: var(--radius-xl);
+		background-color: var(--bg-secondary);
+		box-shadow: var(--shadow-lg);
+		border: 1px solid var(--border-color);
+		cursor: pointer;
+		transition: transform 0.15s;
+		text-align: left;
+	}
+	.rp-card:hover {
+		transform: scale(1.01);
+	}
+	.rp-card-label {
+		display: block;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--text-tertiary);
+		margin-bottom: 1rem;
+	}
+	.rp-card-text {
+		font-size: 1.125rem;
+		color: var(--text-primary);
+	}
+	.rp-hint {
+		text-align: center;
+		font-size: 0.875rem;
+		color: var(--text-tertiary);
+		margin-top: 0.75rem;
+	}
+	/* Rating buttons */
+	.rp-rating {
+		padding: 0.75rem;
+		border-radius: var(--radius-lg);
+		transition: opacity 0.15s;
+	}
+	.rp-rating:hover { opacity: 0.85; }
+	.rp-rating--again { background-color: #fef2f2; color: #b91c1c; }
+	:global(.dark) .rp-rating--again { background-color: rgba(127,29,29,0.3); color: #fca5a5; }
+	.rp-rating--hard { background-color: #fff7ed; color: #c2410c; }
+	:global(.dark) .rp-rating--hard { background-color: rgba(124,45,18,0.3); color: #fdba74; }
+	.rp-rating--good { background-color: var(--accent-light); color: var(--accent-color); }
+	.rp-rating--easy { background-color: #ecfdf5; color: #047857; }
+	:global(.dark) .rp-rating--easy { background-color: rgba(6,78,59,0.3); color: #6ee7b7; }
+
+	/* Problem card */
+	.rp-problem-card {
+		border-radius: var(--radius-xl);
+		background-color: var(--bg-secondary);
+		box-shadow: var(--shadow-lg);
+		border: 1px solid var(--border-color);
+		padding: 1.5rem;
+	}
+	.rp-problem-label {
+		display: block;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--accent-color);
+		margin-bottom: 0.75rem;
+	}
+	.rp-show-answer-btn {
+		width: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--accent-color);
+		background-color: var(--accent-light);
+		padding: 0.75rem 1rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--accent-color);
+		transition: opacity 0.15s;
+	}
+	.rp-show-answer-btn:hover { opacity: 0.85; }
+	.rp-answer-box {
+		border-radius: var(--radius-lg);
+		border: 1px solid #a7f3d0;
+		background-color: #ecfdf5;
+		padding: 1rem;
+		margin-bottom: 1rem;
+	}
+	:global(.dark) .rp-answer-box {
+		border-color: rgba(6,78,59,0.5);
+		background-color: rgba(6,78,59,0.2);
+	}
+	.rp-answer-title {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: #047857;
+		margin-bottom: 0.25rem;
+	}
+	:global(.dark) .rp-answer-title { color: #34d399; }
+	.rp-answer-text {
+		font-size: 0.875rem;
+		color: #065f46;
+	}
+	:global(.dark) .rp-answer-text { color: #a7f3d0; }
+	.rp-assess-btn {
+		display: flex;
+		flex: 1;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		border-radius: var(--radius-lg);
+		border: 2px solid;
+		padding: 0.5rem 1rem;
+		font-weight: 500;
+		transition: opacity 0.15s;
+	}
+	.rp-assess-btn:hover { opacity: 0.85; }
+	.rp-assess-btn--correct {
+		border-color: #86efac;
+		background-color: #ecfdf5;
+		color: #047857;
+	}
+	:global(.dark) .rp-assess-btn--correct {
+		border-color: rgba(6,78,59,0.5);
+		background-color: rgba(6,78,59,0.2);
+		color: #34d399;
+	}
+	.rp-assess-btn--wrong {
+		border-color: #fca5a5;
+		background-color: #fef2f2;
+		color: #b91c1c;
+	}
+	:global(.dark) .rp-assess-btn--wrong {
+		border-color: rgba(127,29,29,0.5);
+		background-color: rgba(127,29,29,0.2);
+		color: #fca5a5;
+	}
+</style>

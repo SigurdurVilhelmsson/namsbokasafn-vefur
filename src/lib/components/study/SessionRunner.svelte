@@ -89,9 +89,20 @@
 	<div class="mt-4 flex justify-end">
 		<button
 			on:click={handleSkip}
-			class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+			class="sr-skip-btn"
 		>
 			Sleppa þessum þætti
 		</button>
 	</div>
 </div>
+
+<style>
+	.sr-skip-btn {
+		font-size: 0.875rem;
+		color: var(--text-tertiary);
+		transition: color 0.15s;
+	}
+	.sr-skip-btn:hover {
+		color: var(--text-primary);
+	}
+</style>

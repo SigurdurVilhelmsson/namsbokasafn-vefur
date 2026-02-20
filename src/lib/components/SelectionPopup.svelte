@@ -13,11 +13,11 @@
 	export let onGlossaryLookup: (() => void) | undefined = undefined;
 	export let onClose: () => void;
 
-	const HIGHLIGHT_COLORS: { color: HighlightColor; label: string; bg: string }[] = [
-		{ color: 'yellow', label: 'Gulur', bg: 'bg-yellow-300' },
-		{ color: 'green', label: 'Grænn', bg: 'bg-green-300' },
-		{ color: 'blue', label: 'Blár', bg: 'bg-blue-300' },
-		{ color: 'pink', label: 'Bleikur', bg: 'bg-pink-300' }
+	const HIGHLIGHT_COLORS: { color: HighlightColor; label: string; hex: string }[] = [
+		{ color: 'yellow', label: 'Gulur', hex: '#f5e6b8' },
+		{ color: 'green', label: 'Gulbrúnn', hex: '#f0d0a0' },
+		{ color: 'blue', label: 'Blár', hex: '#c8daf0' },
+		{ color: 'pink', label: 'Rósrauður', hex: '#f0c8c8' }
 	];
 
 	let popupElement: HTMLDivElement;
@@ -86,10 +86,11 @@
 					d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
 				/>
 			</svg>
-			{#each HIGHLIGHT_COLORS as { color, label, bg }}
+			{#each HIGHLIGHT_COLORS as { color, label, hex }}
 				<button
 					on:click={() => onHighlight(color)}
-					class="h-6 w-6 rounded-full {bg} transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+					class="h-6 w-6 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+					style="background-color: {hex};"
 					aria-label="Yfirstrika med {label.toLowerCase()}"
 					title={label}
 				></button>

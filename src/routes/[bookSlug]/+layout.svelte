@@ -55,7 +55,26 @@
 	}
 
 	$: bookSlug = $page.params.bookSlug ?? '';
+
+	// Scroll progress bar
+	let scrollProgress = 0;
+
+	function handleScrollProgress() {
+		const scrollTop = window.scrollY;
+		const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+		if (docHeight > 0) {
+			scrollProgress = Math.min(100, Math.max(0, (scrollTop / docHeight) * 100));
+		} else {
+			scrollProgress = 0;
+		}
+	}
 </script>
+
+<svelte:window on:scroll={handleScrollProgress} />
+
+{#if !focusMode}
+	<div class="scroll-progress" style="width: {scrollProgress}%"></div>
+{/if}
 
 <div
 	class="min-h-screen font-size-{$fontSize} line-height-{$lineHeight} line-width-{$lineWidth} {$fontFamily === 'opendyslexic'
@@ -98,10 +117,9 @@
 		<!-- Main content area with max-width for comfortable reading -->
 		<main
 			id="main-content"
-			class="flex-1 overflow-x-hidden {focusMode ? '' : 'lg:ml-80'}"
+			class="flex-1 overflow-x-hidden {focusMode ? '' : 'lg:ml-[280px]'}"
 		>
-			<!-- Add bottom padding on mobile for the bottom nav bar -->
-			<div class="mx-auto max-w-7xl px-4 py-6 pb-24 lg:pb-6">
+			<div class="mx-auto max-w-7xl px-4 py-6">
 				<slot />
 			</div>
 		</main>

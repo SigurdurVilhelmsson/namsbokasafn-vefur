@@ -6,7 +6,6 @@
 /* Ensure our custom CSS variables take precedence */
 @layer base {
   :root {
-    /* Force browser to use light color scheme for native elements */
     color-scheme: light;
 
     /* Font sizes */
@@ -16,7 +15,7 @@
     --font-size-xlarge: 20px;
 
     /* Line heights */
-    --line-height-normal: 1.6;
+    --line-height-normal: 1.7;
     --line-height-relaxed: 1.8;
     --line-height-loose: 2;
 
@@ -25,43 +24,94 @@
     --line-width-medium: 48rem;
     --line-width-wide: 60rem;
 
+    /* Spacing scale (4px base) */
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-12: 3rem;
+    --space-16: 4rem;
+    --space-24: 6rem;
+
+    /* Border radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-full: 9999px;
+
     /* Light theme colors */
-    --bg-primary: #faf8f5;
+    --bg-primary: #f7f4ef;
     --bg-secondary: #ffffff;
-    --bg-tertiary: #f3f4f6;
-    --text-primary: #1a1a1a;
-    --text-secondary: #4a5568;
-    --border-color: #e8eaed;
-    --accent-color: #1a7d5c;
-    --accent-hover: #145f46;
-    --accent-light: #e8f5f1;
-    --accent-decorative: #5dba9c;
-    --header-banner: #1a7d5c;
+    --bg-tertiary: #efeae0;
+    --text-primary: #1b2838;
+    --text-secondary: #5a6474;
+    --text-tertiary: #8a919c;
+    --border-color: #ddd6c9;
+    --accent-color: #c78c20;
+    --accent-hover: #a87518;
+    --accent-light: #fdf6e8;
+    --accent-subtle: #f0e4c8;
+    --accent-decorative: #c78c20;
+    --header-banner: #c78c20;
     --header-banner-text: #ffffff;
+
+    /* Shadows (warm-tinted) */
+    --shadow-sm: 0 1px 2px rgba(27, 40, 56, 0.06);
+    --shadow-md: 0 2px 8px rgba(27, 40, 56, 0.08);
+    --shadow-lg: 0 4px 16px rgba(27, 40, 56, 0.1);
+    --shadow-xl: 0 8px 32px rgba(27, 40, 56, 0.12);
+
+    /* Subject colors */
+    --subject-chemistry: #2e7d9c;
+    --subject-chemistry-light: #e8f4f8;
+    --subject-biology: #4a8c5c;
+    --subject-biology-light: #e8f4ec;
+    --subject-math: #7c5cad;
+    --subject-math-light: #f0e8f8;
+    --subject-social: #b07040;
+    --subject-social-light: #f8f0e8;
   }
 
   .dark {
-    /* Force browser to use dark color scheme for native elements */
     color-scheme: dark;
 
-    --bg-primary: #1a1a2e;
-    --bg-secondary: #16213e;
-    --bg-tertiary: #1e293b;
-    --text-primary: #e2e8f0;
-    --text-secondary: #cbd5e1;
-    --border-color: #2d3748;
-    --accent-color: #6ee7b7;
-    --accent-hover: #86efac;
-    --accent-light: #1e3a32;
-    --accent-decorative: #5dba9c;
-    --header-banner: #5dba9c;
-    --header-banner-text: #1a1a2e;
+    --bg-primary: #16161c;
+    --bg-secondary: #1e1e26;
+    --bg-tertiary: #26262f;
+    --text-primary: #e8e4de;
+    --text-secondary: #9a9590;
+    --text-tertiary: #6a6560;
+    --border-color: #2e2e38;
+    --accent-color: #e8a838;
+    --accent-hover: #f0bc5a;
+    --accent-light: #2a2418;
+    --accent-subtle: #332c1e;
+    --accent-decorative: #e8a838;
+    --header-banner: #e8a838;
+    --header-banner-text: #16161c;
+
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.4);
+    --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+    --subject-chemistry: #4da8c9;
+    --subject-chemistry-light: #1a2d38;
+    --subject-biology: #6aac7c;
+    --subject-biology-light: #1a2d1e;
+    --subject-math: #9c7cd0;
+    --subject-math-light: #241a38;
+    --subject-social: #d09060;
+    --subject-social-light: #2d1e1a;
   }
 
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-family: "Source Serif Pro", Georgia, serif;
+    font-family: "Literata", Georgia, serif;
   }
 }
 
@@ -178,15 +228,23 @@
   }
 }
 
+/* Scroll progress bar */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent-color);
+  z-index: 50;
+  transition: width 50ms linear;
+  pointer-events: none;
+}
+
 /* Focus styles - Enhanced for better visibility on busy backgrounds */
 *:focus-visible {
   outline: 2px solid var(--accent-color);
   outline-offset: 3px;
-  box-shadow: 0 0 0 4px rgba(26, 125, 92, 0.2);
-}
-
-.dark *:focus-visible {
-  box-shadow: 0 0 0 4px rgba(110, 231, 183, 0.2);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color) 20%, transparent);
 }
 
 /* Reading content styles */
@@ -201,7 +259,7 @@
 .reading-content h2,
 .reading-content h3,
 .reading-content h4 {
-  font-family: "Lora", Georgia, serif;
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
   font-weight: 700;
   color: #111827;
 }
@@ -315,27 +373,28 @@
 }
 
 .dark .badge-available {
-  background-color: #14532d;
+  background-color: rgba(22, 101, 52, 0.3);
   color: #86efac;
 }
 
 .badge-in-progress {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: var(--accent-light);
+  color: var(--accent-color);
 }
 
 .dark .badge-in-progress {
-  background-color: #78350f;
-  color: #fcd34d;
+  background-color: var(--accent-subtle);
+  color: var(--accent-color);
 }
 
 /* Learning objectives box */
 .objectives-box {
-  background-color: var(--accent-light);
-  border: 1px solid var(--accent-color);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 .objectives-box h3 {
@@ -390,38 +449,37 @@
 /* CONTENT BLOCKS (Directives)               */
 /* ========================================== */
 
+/* Base content block — left-border pattern */
 .content-block {
   display: flex;
   gap: 1rem;
-  padding: 1.25rem;
-  border-radius: 0.75rem;
-  border: 1px solid;
-  margin: 2rem 0;
-  /* Clear visual boundary with shadow */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--border-color);
+  margin-block: var(--space-6);
+  background-color: var(--bg-secondary);
 }
 
-.dark .content-block {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+/* Shared paragraph styles for all content blocks */
+.content-block p {
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
 }
 
-/* Note block - Blue theme */
+/* Note block - Blue left border */
 .content-block.note {
-  background-color: #eff6ff;
-  border-color: #dbeafe;
-}
-
-.dark .content-block.note {
-  background-color: rgba(30, 58, 138, 0.2);
-  border-color: rgba(30, 64, 175, 0.3);
+  border-left-color: #2563eb;
 }
 
 .content-block.note .content-block-title {
-  color: #1e3a8a;
+  color: #2563eb;
 }
 
 .dark .content-block.note .content-block-title {
-  color: #93c5fd;
+  color: #60a5fa;
 }
 
 .content-block.note .content-block-icon {
@@ -432,34 +490,22 @@
   color: #60a5fa;
 }
 
-.content-block.note p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.note p {
-  color: var(--text-primary);
-}
-
-/* Warning block - Amber theme */
+/* Warning block - Amber left border + subtle tinted background */
 .content-block.warning {
+  border-left-color: #d97706;
   background-color: #fffbeb;
-  border-color: #fef3c7;
 }
 
 .dark .content-block.warning {
-  background-color: rgba(120, 53, 15, 0.2);
-  border-color: rgba(146, 64, 14, 0.3);
+  background-color: #332c1a;
 }
 
 .content-block.warning .content-block-title {
-  color: #78350f;
+  color: #d97706;
 }
 
 .dark .content-block.warning .content-block-title {
-  color: #fde68a; /* Improved contrast: yellow-200 instead of yellow-400 */
+  color: #fbbf24;
 }
 
 .content-block.warning .content-block-icon {
@@ -470,72 +516,38 @@
   color: #fbbf24;
 }
 
-.content-block.warning p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.warning p {
-  color: var(--text-primary);
-}
-
-/* Example block - Gray theme */
+/* Example block - Gray left border */
 .content-block.example {
-  background-color: #f9fafb;
-  border-color: #e5e7eb;
-}
-
-.dark .content-block.example {
-  background-color: rgba(55, 65, 81, 0.2);
-  border-color: rgba(75, 85, 99, 0.3);
+  border-left-color: #6b7280;
 }
 
 .content-block.example .content-block-title {
-  color: #111827;
+  color: #6b7280;
 }
 
 .dark .content-block.example .content-block-title {
-  color: #e5e7eb;
+  color: #9ca3af;
 }
 
 .content-block.example .content-block-icon {
-  color: #4b5563;
+  color: #6b7280;
 }
 
 .dark .content-block.example .content-block-icon {
   color: #9ca3af;
 }
 
-.content-block.example p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.example p {
-  color: var(--text-primary);
-}
-
-/* Definition block - Purple theme */
+/* Definition block - Purple left border */
 .content-block.definition {
-  background-color: #faf5ff;
-  border-color: #e9d5ff;
-}
-
-.dark .content-block.definition {
-  background-color: rgba(88, 28, 135, 0.2);
-  border-color: rgba(107, 33, 168, 0.3);
+  border-left-color: #7c3aed;
 }
 
 .content-block.definition .content-block-title {
-  color: #581c87;
+  color: #7c3aed;
 }
 
 .dark .content-block.definition .content-block-title {
-  color: #d8b4fe;
+  color: #a78bfa;
 }
 
 .content-block.definition .content-block-icon {
@@ -546,34 +558,17 @@
   color: #a78bfa;
 }
 
-.content-block.definition p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.definition p {
-  color: var(--text-primary);
-}
-
-/* Key Concept block - Teal theme */
+/* Key Concept block - Teal left border */
 .content-block.key-concept {
-  background-color: #ecfeff;
-  border-color: #cffafe;
-}
-
-.dark .content-block.key-concept {
-  background-color: rgba(22, 78, 99, 0.2);
-  border-color: rgba(21, 94, 117, 0.3);
+  border-left-color: #0891b2;
 }
 
 .content-block.key-concept .content-block-title {
-  color: #164e63;
+  color: #0891b2;
 }
 
 .dark .content-block.key-concept .content-block-title {
-  color: #67e8f9;
+  color: #22d3ee;
 }
 
 .content-block.key-concept .content-block-icon {
@@ -584,34 +579,17 @@
   color: #22d3ee;
 }
 
-.content-block.key-concept p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.key-concept p {
-  color: var(--text-primary);
-}
-
-/* Checkpoint block - Green theme */
+/* Checkpoint block - Green left border */
 .content-block.checkpoint {
-  background-color: #f0fdf4;
-  border-color: #bbf7d0;
-}
-
-.dark .content-block.checkpoint {
-  background-color: rgba(20, 83, 45, 0.2);
-  border-color: rgba(22, 101, 52, 0.3);
+  border-left-color: #16a34a;
 }
 
 .content-block.checkpoint .content-block-title {
-  color: #14532d;
+  color: #16a34a;
 }
 
 .dark .content-block.checkpoint .content-block-title {
-  color: #86efac;
+  color: #4ade80;
 }
 
 .content-block.checkpoint .content-block-icon {
@@ -622,34 +600,17 @@
   color: #4ade80;
 }
 
-.content-block.checkpoint p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.checkpoint p {
-  color: var(--text-primary);
-}
-
-/* Common Misconception block - Red theme */
+/* Common Misconception block - Red left border */
 .content-block.common-misconception {
-  background-color: #fef2f2;
-  border-color: #fecaca;
-}
-
-.dark .content-block.common-misconception {
-  background-color: rgba(127, 29, 29, 0.2);
-  border-color: rgba(153, 27, 27, 0.3);
+  border-left-color: #dc2626;
 }
 
 .content-block.common-misconception .content-block-title {
-  color: #7f1d1d;
+  color: #dc2626;
 }
 
 .dark .content-block.common-misconception .content-block-title {
-  color: #fca5a5;
+  color: #f87171;
 }
 
 .content-block.common-misconception .content-block-icon {
@@ -660,54 +621,17 @@
   color: #f87171;
 }
 
-.content-block.common-misconception p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.common-misconception p {
-  color: var(--text-primary);
-}
-
-/* Learning Objectives block - Accent/Teal theme */
+/* Learning Objectives block - Accent left border */
 .content-block.learning-objectives {
-  background-color: var(--accent-light);
-  border-color: var(--accent-color);
-}
-
-.dark .content-block.learning-objectives {
-  background-color: var(--accent-light);
-  border-color: var(--accent-color);
-  opacity: 0.9;
+  border-left-color: var(--accent-color);
 }
 
 .content-block.learning-objectives .content-block-title {
   color: var(--accent-color);
 }
 
-.dark .content-block.learning-objectives .content-block-title {
-  color: var(--accent-color);
-}
-
 .content-block.learning-objectives .content-block-icon {
   color: var(--accent-color);
-}
-
-.dark .content-block.learning-objectives .content-block-icon {
-  color: var(--accent-color);
-}
-
-.content-block.learning-objectives p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.learning-objectives p {
-  color: var(--text-primary);
 }
 
 .content-block.learning-objectives ul {
@@ -724,194 +648,101 @@
   list-style: disc;
 }
 
-/* Link to Learning block - Blue/Indigo theme (OpenStax: link-to-learning) */
+/* Link to Learning block - Blue left border */
 .content-block.link-to-learning {
-  background-color: #eef2ff;
-  border-color: #c7d2fe;
-}
-
-.dark .content-block.link-to-learning {
-  background-color: rgba(55, 48, 163, 0.2);
-  border-color: rgba(67, 56, 202, 0.3);
+  border-left-color: #2563eb;
 }
 
 .content-block.link-to-learning .content-block-title {
-  color: #3730a3;
+  color: #2563eb;
 }
 
 .dark .content-block.link-to-learning .content-block-title {
-  color: #a5b4fc;
+  color: #60a5fa;
 }
 
 .content-block.link-to-learning .content-block-icon {
-  color: #4f46e5;
+  color: #2563eb;
 }
 
 .dark .content-block.link-to-learning .content-block-icon {
-  color: #818cf8;
+  color: #60a5fa;
 }
 
-.content-block.link-to-learning p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.link-to-learning p {
-  color: var(--text-primary);
-}
-
-/* Everyday Life block - Orange theme (OpenStax: everyday-life) */
+/* Everyday Life block - Emerald left border */
 .content-block.everyday-life {
-  background-color: #fff7ed;
-  border-color: #fed7aa;
-}
-
-.dark .content-block.everyday-life {
-  background-color: rgba(154, 52, 18, 0.2);
-  border-color: rgba(194, 65, 12, 0.3);
+  border-left-color: #059669;
 }
 
 .content-block.everyday-life .content-block-title {
-  color: #9a3412;
-}
-
-.dark .content-block.everyday-life .content-block-title {
-  color: #fdba74;
-}
-
-.content-block.everyday-life .content-block-icon {
-  color: #ea580c;
-}
-
-.dark .content-block.everyday-life .content-block-icon {
-  color: #fb923c;
-}
-
-.content-block.everyday-life p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.everyday-life p {
-  color: var(--text-primary);
-}
-
-/* Chapter Overview block - Slate/Gray theme */
-.content-block.chapter-overview {
-  background-color: #f8fafc;
-  border-color: #e2e8f0;
-}
-
-.dark .content-block.chapter-overview {
-  background-color: rgba(51, 65, 85, 0.2);
-  border-color: rgba(71, 85, 105, 0.3);
-}
-
-.content-block.chapter-overview .content-block-title {
-  color: #334155;
-}
-
-.dark .content-block.chapter-overview .content-block-title {
-  color: #cbd5e1;
-}
-
-.content-block.chapter-overview .content-block-icon {
-  color: #64748b;
-}
-
-.dark .content-block.chapter-overview .content-block-icon {
-  color: #94a3b8;
-}
-
-.content-block.chapter-overview p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.chapter-overview p {
-  color: var(--text-primary);
-}
-
-/* Chemist Portrait block - Pink/Rose theme (OpenStax: chemist-portrait) */
-.content-block.chemist-portrait {
-  background-color: #fff1f2;
-  border-color: #fecdd3;
-}
-
-.dark .content-block.chemist-portrait {
-  background-color: rgba(136, 19, 55, 0.2);
-  border-color: rgba(159, 18, 57, 0.3);
-}
-
-.content-block.chemist-portrait .content-block-title {
-  color: #881337;
-}
-
-.dark .content-block.chemist-portrait .content-block-title {
-  color: #fda4af;
-}
-
-.content-block.chemist-portrait .content-block-icon {
-  color: #e11d48;
-}
-
-.dark .content-block.chemist-portrait .content-block-icon {
-  color: #fb7185;
-}
-
-.content-block.chemist-portrait p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.chemist-portrait p {
-  color: var(--text-primary);
-}
-
-/* Sciences Interconnect block - Emerald/Green theme (OpenStax: sciences-interconnect) */
-.content-block.sciences-interconnect {
-  background-color: #ecfdf5;
-  border-color: #a7f3d0;
-}
-
-.dark .content-block.sciences-interconnect {
-  background-color: rgba(6, 78, 59, 0.2);
-  border-color: rgba(5, 150, 105, 0.3);
-}
-
-.content-block.sciences-interconnect .content-block-title {
-  color: #064e3b;
-}
-
-.dark .content-block.sciences-interconnect .content-block-title {
-  color: #6ee7b7;
-}
-
-.content-block.sciences-interconnect .content-block-icon {
   color: #059669;
 }
 
-.dark .content-block.sciences-interconnect .content-block-icon {
+.dark .content-block.everyday-life .content-block-title {
   color: #34d399;
 }
 
-.content-block.sciences-interconnect p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
+.content-block.everyday-life .content-block-icon {
+  color: #059669;
 }
 
-.dark .content-block.sciences-interconnect p {
-  color: var(--text-primary);
+.dark .content-block.everyday-life .content-block-icon {
+  color: #34d399;
+}
+
+/* Chapter Overview block - Accent left border */
+.content-block.chapter-overview {
+  border-left-color: var(--accent-color);
+}
+
+.content-block.chapter-overview .content-block-title {
+  color: var(--accent-color);
+}
+
+.content-block.chapter-overview .content-block-icon {
+  color: var(--accent-color);
+}
+
+/* Chemist Portrait block - Gray left border */
+.content-block.chemist-portrait {
+  border-left-color: #6b7280;
+}
+
+.content-block.chemist-portrait .content-block-title {
+  color: #6b7280;
+}
+
+.dark .content-block.chemist-portrait .content-block-title {
+  color: #9ca3af;
+}
+
+.content-block.chemist-portrait .content-block-icon {
+  color: #6b7280;
+}
+
+.dark .content-block.chemist-portrait .content-block-icon {
+  color: #9ca3af;
+}
+
+/* Sciences Interconnect block - Purple left border */
+.content-block.sciences-interconnect {
+  border-left-color: #7c3aed;
+}
+
+.content-block.sciences-interconnect .content-block-title {
+  color: #7c3aed;
+}
+
+.dark .content-block.sciences-interconnect .content-block-title {
+  color: #a78bfa;
+}
+
+.content-block.sciences-interconnect .content-block-icon {
+  color: #7c3aed;
+}
+
+.dark .content-block.sciences-interconnect .content-block-icon {
+  color: #a78bfa;
 }
 
 /* Icon wrapper */
@@ -1271,7 +1102,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
 }
 
 .reading-content th {
-  background-color: var(--accent-light);
+  background-color: var(--bg-tertiary);
   font-weight: 600;
   font-size: 0.875rem;
   text-transform: uppercase;
@@ -1280,20 +1111,12 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   text-align: center;
 }
 
-.dark .reading-content th {
-  background-color: var(--bg-tertiary);
-}
-
 .reading-content tbody tr:nth-child(even) {
   background-color: var(--bg-secondary);
 }
 
 .reading-content tbody tr:hover {
-  background-color: var(--bg-tertiary);
-}
-
-.dark .reading-content tbody tr:hover {
-  background-color: var(--bg-secondary);
+  background-color: var(--accent-light);
 }
 
 /* Table caption styling */
@@ -1323,15 +1146,15 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
 /* ========================================== */
 
 .reading-content code {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-tertiary);
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
-  font-family: "Fira Code", monospace;
+  font-family: "JetBrains Mono", monospace;
   font-size: 0.875em;
 }
 
 .reading-content pre {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-tertiary);
   padding: 1rem;
   border-radius: 0.5rem;
   overflow-x: auto;
@@ -1371,8 +1194,8 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   align-items: center;
   justify-content: flex-end;
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
 }
 
 .figure-lightbox-controls {
@@ -1389,7 +1212,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   border: none;
   border-radius: 0.375rem;
   background: transparent;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   cursor: pointer;
   transition:
     background-color 0.2s,
@@ -1397,8 +1220,8 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
 }
 
 .figure-lightbox-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
+  background-color: var(--bg-tertiary);
+  color: var(--accent-color);
 }
 
 .figure-lightbox-btn svg {
@@ -1410,14 +1233,14 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   min-width: 60px;
   text-align: center;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
 }
 
 .figure-lightbox-divider {
   width: 1px;
   height: 24px;
   margin: 0 0.5rem;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--border-color);
 }
 
 .figure-lightbox-container {
@@ -1441,9 +1264,9 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   padding: 0.75rem 1rem;
   text-align: center;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.9);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(0, 0, 0, 0.5);
+  color: var(--text-primary);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
 }
 
 /* Make images in content clickable */
@@ -1703,7 +1526,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   }
 
   body {
-    font-family: "Source Serif Pro", Georgia, "Times New Roman", serif;
+    font-family: "Literata", Georgia, "Times New Roman", serif;
     line-height: 1.5;
     color: #000 !important;
     background: #fff !important;
@@ -1787,6 +1610,15 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
    * TYPOGRAPHY
    * ---------------------------------------- */
 
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  }
+
   h1 {
     font-size: 24pt;
     font-weight: 700;
@@ -1827,7 +1659,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
 
   p {
     font-size: 12pt;
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: 12pt;
     orphans: 3;
     widows: 3;
@@ -1956,6 +1788,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   }
 
   .content-block-title {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
     font-weight: 700;
     font-size: 11pt;
     margin-bottom: 6pt;
@@ -1994,7 +1827,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   /* Always show answers in print */
   .practice-answer {
     display: block !important;
-    border-top: 2pt solid #16a34a !important;
+    border-top: 2pt solid #c78c20 !important;
     padding-top: 9pt;
     margin-top: 9pt;
   }
@@ -2150,8 +1983,8 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
    * ---------------------------------------- */
 
   .objectives-box {
-    border: 1pt solid #16a34a !important;
-    border-left: 4pt solid #16a34a !important;
+    border: 1pt solid #c78c20 !important;
+    border-left: 4pt solid #c78c20 !important;
     padding: 12pt !important;
     margin: 18pt 0 !important;
     page-break-inside: avoid;
@@ -2236,7 +2069,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
 
   /* Show highlight background in print */
   [data-highlight] {
-    background-color: #fef08a !important;
+    background-color: #f5e6b8 !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

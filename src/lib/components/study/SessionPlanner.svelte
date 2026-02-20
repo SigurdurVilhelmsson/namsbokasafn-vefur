@@ -61,52 +61,70 @@
 		}
 	}
 
-	// Phase colors
-	const PHASE_COLORS: Record<PhaseId, { bg: string; text: string; border: string; icon: string }> = {
+	// Phase colors for inline styling (CSS variables + semantic colors)
+	const PHASE_INLINE_COLORS: Record<PhaseId, { bg: string; text: string; border: string; iconColor: string; dotBg: string }> = {
 		review: {
-			bg: 'bg-orange-50 dark:bg-orange-900/20',
-			text: 'text-orange-700 dark:text-orange-300',
-			border: 'border-orange-200 dark:border-orange-800',
-			icon: 'text-orange-500'
+			bg: '#fff7ed', text: '#c2410c', border: '#fed7aa', iconColor: '#f97316', dotBg: '#f97316'
 		},
 		reading: {
-			bg: 'bg-blue-50 dark:bg-blue-900/20',
-			text: 'text-blue-700 dark:text-blue-300',
-			border: 'border-blue-200 dark:border-blue-800',
-			icon: 'text-blue-500'
+			bg: '#eff6ff', text: '#1d4ed8', border: '#bfdbfe', iconColor: '#3b82f6', dotBg: '#3b82f6'
 		},
 		practice: {
-			bg: 'bg-purple-50 dark:bg-purple-900/20',
-			text: 'text-purple-700 dark:text-purple-300',
-			border: 'border-purple-200 dark:border-purple-800',
-			icon: 'text-purple-500'
+			bg: '#faf5ff', text: '#7e22ce', border: '#e9d5ff', iconColor: '#a855f7', dotBg: '#a855f7'
 		},
 		reflect: {
-			bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-			text: 'text-emerald-700 dark:text-emerald-300',
-			border: 'border-emerald-200 dark:border-emerald-800',
-			icon: 'text-emerald-500'
+			bg: '#ecfdf5', text: '#047857', border: '#a7f3d0', iconColor: '#10b981', dotBg: '#10b981'
 		}
 	};
+	const PHASE_INLINE_COLORS_DARK: Record<PhaseId, { bg: string; text: string; border: string; iconColor: string; dotBg: string }> = {
+		review: {
+			bg: 'rgba(124,45,18,0.2)', text: '#fdba74', border: 'rgba(124,45,18,0.5)', iconColor: '#fb923c', dotBg: '#fb923c'
+		},
+		reading: {
+			bg: 'rgba(30,64,175,0.2)', text: '#93c5fd', border: 'rgba(30,64,175,0.5)', iconColor: '#60a5fa', dotBg: '#60a5fa'
+		},
+		practice: {
+			bg: 'rgba(88,28,135,0.2)', text: '#d8b4fe', border: 'rgba(88,28,135,0.5)', iconColor: '#c084fc', dotBg: '#c084fc'
+		},
+		reflect: {
+			bg: 'rgba(6,78,59,0.2)', text: '#6ee7b7', border: 'rgba(6,78,59,0.5)', iconColor: '#34d399', dotBg: '#34d399'
+		}
+	};
+
+	// Detect dark mode
+	let isDark = false;
+	import { onMount } from 'svelte';
+	onMount(() => {
+		isDark = document.documentElement.classList.contains('dark');
+		const observer = new MutationObserver(() => {
+			isDark = document.documentElement.classList.contains('dark');
+		});
+		observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+		return () => observer.disconnect();
+	});
+
+	function getPhaseColors(phaseId: PhaseId) {
+		return isDark ? PHASE_INLINE_COLORS_DARK[phaseId] : PHASE_INLINE_COLORS[phaseId];
+	}
 </script>
 
 <div>
-	<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+	<h1 class="sp-heading">
 		Námslota
 	</h1>
-	<p class="text-gray-500 dark:text-gray-300 mb-6">
+	<p class="sp-description">
 		Skipuleggðu námstíma þinn. Kerfið greinir hvað þarfnast athygli.
 	</p>
 
 	<!-- Chapter filter -->
 	{#if chapters.length > 1}
 		<div class="mb-6">
-			<label for="chapter-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+			<label for="chapter-filter" class="sp-label">
 				Afmarka við kafla
 			</label>
 			<select
 				id="chapter-filter"
-				class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm text-gray-900 dark:text-gray-100"
+				class="sp-select"
 				value={chapterFilter ?? ''}
 				on:change={handleFilterChange}
 			>
@@ -123,21 +141,18 @@
 	{#if plan.isEmpty}
 		<!-- All caught up -->
 		<div class="text-center py-12">
-			<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 mb-6">
-				<svg class="w-10 h-10 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<div class="sp-success-icon">
+				<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 				</svg>
 			</div>
-			<h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+			<h2 class="sp-subheading">
 				Vel gert!
 			</h2>
-			<p class="text-gray-600 dark:text-gray-300 mb-4">
+			<p class="sp-description" style="margin-bottom: 1rem;">
 				Ekkert þarfnast athygli eins og er. Haltu áfram gullinu!
 			</p>
-			<a
-				href="/{bookSlug}"
-				class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors text-sm"
-			>
+			<a href="/{bookSlug}" class="sp-back-link">
 				Til baka í bók
 			</a>
 		</div>
@@ -146,46 +161,54 @@
 		<div class="space-y-3 mb-8">
 			{#each (['review', 'reading', 'practice', 'reflect'] as PhaseId[]) as phaseId}
 				{@const phase = plan[phaseId]}
-				{@const colors = PHASE_COLORS[phaseId]}
+				{@const colors = getPhaseColors(phaseId)}
 				<button
-					class="w-full text-left rounded-xl border p-4 transition-all
-						{phase.enabled
-							? phaseToggles[phaseId]
-								? `${colors.border} ${colors.bg}`
-								: 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 opacity-60'
-							: 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 opacity-40 cursor-not-allowed'}"
+					class="sp-phase-card"
+					class:sp-phase-card--disabled={!phase.enabled}
+					style={phase.enabled && phaseToggles[phaseId]
+						? `border-color: ${colors.border}; background-color: ${colors.bg};`
+						: phase.enabled
+							? ''
+							: ''}
 					disabled={!phase.enabled}
 					on:click={() => togglePhase(phaseId)}
 				>
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-3">
 							<!-- Toggle indicator -->
-							<div class="w-5 h-5 rounded-full border-2 flex items-center justify-center
-								{phase.enabled && phaseToggles[phaseId]
-									? `${colors.border} ${colors.bg}`
-									: 'border-gray-300 dark:border-gray-600'}"
+							<div
+								class="sp-toggle"
+								style={phase.enabled && phaseToggles[phaseId]
+									? `border-color: ${colors.border}; background-color: ${colors.bg};`
+									: ''}
 							>
 								{#if phase.enabled && phaseToggles[phaseId]}
-									<div class="w-2.5 h-2.5 rounded-full {colors.icon.replace('text-', 'bg-')}"></div>
+									<div class="sp-toggle-dot" style="background-color: {colors.dotBg};"></div>
 								{/if}
 							</div>
 
 							<!-- Phase icon -->
-							<svg class="w-5 h-5 {phase.enabled ? colors.icon : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg
+								class="w-5 h-5"
+								style="color: {phase.enabled ? colors.iconColor : 'var(--text-tertiary)'};"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={PHASE_ICONS[phaseId]} />
 							</svg>
 
 							<!-- Phase label -->
 							<div>
-								<span class="font-medium {phase.enabled ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'}">
+								<span class="font-medium" style="color: {phase.enabled ? 'var(--text-primary)' : 'var(--text-tertiary)'};">
 									{PHASE_LABELS[phaseId]}
 								</span>
 								{#if phase.enabled}
-									<span class="ml-2 text-sm {colors.text}">
+									<span class="ml-2 text-sm" style="color: {colors.text};">
 										{phase.itemCount} {phase.itemCount === 1 ? 'atriði' : 'atriði'}
 									</span>
 								{:else}
-									<span class="ml-2 text-sm text-gray-400 dark:text-gray-500">
+									<span class="ml-2 text-sm" style="color: var(--text-tertiary);">
 										Ekkert til
 									</span>
 								{/if}
@@ -194,7 +217,7 @@
 
 						<!-- Time estimate -->
 						{#if phase.enabled}
-							<span class="text-sm text-gray-500 dark:text-gray-400">
+							<span class="text-sm" style="color: var(--text-tertiary);">
 								~{phase.estimatedMinutes} mín
 							</span>
 						{/if}
@@ -205,7 +228,7 @@
 
 		<!-- Summary and start -->
 		<div class="flex items-center justify-between">
-			<div class="text-sm text-gray-500 dark:text-gray-400">
+			<div class="text-sm" style="color: var(--text-tertiary);">
 				{#if selectedPhases.length > 0}
 					{selectedPhases.length} {selectedPhases.length === 1 ? 'þáttur' : 'þættir'} &middot; ~{selectedMinutes} mín
 				{:else}
@@ -216,10 +239,8 @@
 			<button
 				on:click={handleStart}
 				disabled={selectedPhases.length === 0}
-				class="inline-flex items-center gap-2 px-6 py-3 text-lg font-medium rounded-xl transition-colors
-					{selectedPhases.length > 0
-						? 'bg-blue-600 text-white hover:bg-blue-700'
-						: 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'}"
+				class="sp-start-btn"
+				class:sp-start-btn--disabled={selectedPhases.length === 0}
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
@@ -230,3 +251,118 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	.sp-heading {
+		font-family: "Bricolage Grotesque", system-ui, sans-serif;
+		font-size: 1.5rem;
+		font-weight: 700;
+		color: var(--text-primary);
+		margin-bottom: 0.5rem;
+	}
+	.sp-subheading {
+		font-family: "Bricolage Grotesque", system-ui, sans-serif;
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		margin-bottom: 0.5rem;
+	}
+	.sp-description {
+		color: var(--text-secondary);
+		margin-bottom: 1.5rem;
+	}
+	.sp-label {
+		display: block;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--text-secondary);
+		margin-bottom: 0.25rem;
+	}
+	.sp-select {
+		width: 100%;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--border-color);
+		background-color: var(--bg-secondary);
+		padding: 0.5rem 0.75rem;
+		font-size: 0.875rem;
+		color: var(--text-primary);
+	}
+	.sp-success-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 5rem;
+		height: 5rem;
+		border-radius: 9999px;
+		background-color: #ecfdf5;
+		color: #059669;
+		margin-bottom: 1.5rem;
+	}
+	:global(.dark) .sp-success-icon {
+		background-color: rgba(6, 78, 59, 0.3);
+		color: #34d399;
+	}
+	.sp-back-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		border-radius: var(--radius-lg);
+		background-color: var(--bg-secondary);
+		color: var(--text-secondary);
+		border: 1px solid var(--border-color);
+		font-size: 0.875rem;
+		transition: background-color 0.15s;
+	}
+	.sp-back-link:hover {
+		background-color: var(--bg-tertiary);
+	}
+	.sp-phase-card {
+		width: 100%;
+		text-align: left;
+		border-radius: var(--radius-xl);
+		border: 1px solid var(--border-color);
+		background-color: var(--bg-secondary);
+		padding: 1rem;
+		transition: all 0.15s;
+	}
+	.sp-phase-card--disabled {
+		background-color: var(--bg-tertiary);
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+	.sp-toggle {
+		width: 1.25rem;
+		height: 1.25rem;
+		border-radius: 9999px;
+		border: 2px solid var(--border-color);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.sp-toggle-dot {
+		width: 0.625rem;
+		height: 0.625rem;
+		border-radius: 9999px;
+	}
+	.sp-start-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1.5rem;
+		font-size: 1.125rem;
+		font-weight: 500;
+		border-radius: var(--radius-xl);
+		background-color: var(--accent-color);
+		color: white;
+		transition: opacity 0.15s;
+	}
+	.sp-start-btn:hover:not(:disabled) {
+		opacity: 0.9;
+	}
+	.sp-start-btn--disabled {
+		background-color: var(--bg-tertiary);
+		color: var(--text-tertiary);
+		cursor: not-allowed;
+	}
+</style>
