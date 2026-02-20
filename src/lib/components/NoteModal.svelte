@@ -12,11 +12,11 @@
 	export let onSave: (note: string, color: HighlightColor) => void;
 	export let onClose: () => void;
 
-	const HIGHLIGHT_COLORS: { color: HighlightColor; label: string; bg: string }[] = [
-		{ color: 'yellow', label: 'Gulur', bg: 'bg-yellow-300' },
-		{ color: 'green', label: 'Grænn', bg: 'bg-green-300' },
-		{ color: 'blue', label: 'Blár', bg: 'bg-blue-300' },
-		{ color: 'pink', label: 'Bleikur', bg: 'bg-pink-300' }
+	const HIGHLIGHT_COLORS: { color: HighlightColor; label: string; hex: string }[] = [
+		{ color: 'yellow', label: 'Gulur', hex: '#f5e6b8' },
+		{ color: 'green', label: 'Gulbrúnn', hex: '#f0d0a0' },
+		{ color: 'blue', label: 'Blár', hex: '#c8daf0' },
+		{ color: 'pink', label: 'Rósrauður', hex: '#f0c8c8' }
 	];
 
 	let note = initialNote;
@@ -131,12 +131,13 @@
 					Litur yfirstrokunar
 				</span>
 				<div class="flex gap-2">
-					{#each HIGHLIGHT_COLORS as { color: c, label, bg }}
+					{#each HIGHLIGHT_COLORS as { color: c, label, hex }}
 						<button
 							on:click={() => (color = c)}
-							class="h-8 w-8 rounded-full {bg} transition-all {color === c
+							class="h-8 w-8 rounded-full transition-all {color === c
 								? 'ring-2 ring-blue-500 ring-offset-2'
 								: 'hover:scale-110'}"
+							style="background-color: {hex};"
 							aria-label={label}
 							aria-pressed={color === c}
 							title={label}

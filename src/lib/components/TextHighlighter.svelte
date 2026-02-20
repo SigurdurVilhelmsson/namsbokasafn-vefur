@@ -486,33 +486,33 @@
 
 <style>
 	.text-highlighter :global(.highlight-yellow) {
-		background-color: rgb(254 249 195);
+		background-color: #f5e6b8;
 		padding: 0.125rem 0;
 	}
 	.text-highlighter :global(.highlight-green) {
-		background-color: rgb(187 247 208);
+		background-color: #f0d0a0;
 		padding: 0.125rem 0;
 	}
 	.text-highlighter :global(.highlight-blue) {
-		background-color: rgb(191 219 254);
+		background-color: #c8daf0;
 		padding: 0.125rem 0;
 	}
 	.text-highlighter :global(.highlight-pink) {
-		background-color: rgb(251 207 232);
+		background-color: #f0c8c8;
 		padding: 0.125rem 0;
 	}
 
-	/* Dark mode colors */
+	/* Dark mode colors — slightly more saturated for dark backgrounds */
 	:global(.dark) .text-highlighter :global(.highlight-yellow) {
-		background-color: rgb(133 77 14 / 0.4);
+		background-color: rgba(196, 160, 60, 0.35);
 	}
 	:global(.dark) .text-highlighter :global(.highlight-green) {
-		background-color: rgb(22 101 52 / 0.4);
+		background-color: rgba(192, 140, 60, 0.35);
 	}
 	:global(.dark) .text-highlighter :global(.highlight-blue) {
-		background-color: rgb(30 64 175 / 0.4);
+		background-color: rgba(80, 120, 200, 0.35);
 	}
 	:global(.dark) .text-highlighter :global(.highlight-pink) {
-		background-color: rgb(157 23 77 / 0.4);
+		background-color: rgba(200, 100, 100, 0.35);
 	}
 </style>
