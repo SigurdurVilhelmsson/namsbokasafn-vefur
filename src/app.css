@@ -232,11 +232,7 @@
 *:focus-visible {
   outline: 2px solid var(--accent-color);
   outline-offset: 3px;
-  box-shadow: 0 0 0 4px rgba(26, 125, 92, 0.2);
-}
-
-.dark *:focus-visible {
-  box-shadow: 0 0 0 4px rgba(110, 231, 183, 0.2);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color) 20%, transparent);
 }
 
 /* Reading content styles */
@@ -365,27 +361,28 @@
 }
 
 .dark .badge-available {
-  background-color: #14532d;
+  background-color: rgba(22, 101, 52, 0.3);
   color: #86efac;
 }
 
 .badge-in-progress {
-  background-color: #fef3c7;
-  color: #92400e;
+  background-color: var(--accent-light);
+  color: var(--accent-color);
 }
 
 .dark .badge-in-progress {
-  background-color: #78350f;
-  color: #fcd34d;
+  background-color: var(--accent-subtle);
+  color: var(--accent-color);
 }
 
 /* Learning objectives box */
 .objectives-box {
-  background-color: var(--accent-light);
-  border: 1px solid var(--accent-color);
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 2rem;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  margin-bottom: var(--space-8);
 }
 
 .objectives-box h3 {
@@ -1093,7 +1090,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
 }
 
 .reading-content th {
-  background-color: var(--accent-light);
+  background-color: var(--bg-tertiary);
   font-weight: 600;
   font-size: 0.875rem;
   text-transform: uppercase;
@@ -1102,20 +1099,12 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   text-align: center;
 }
 
-.dark .reading-content th {
-  background-color: var(--bg-tertiary);
-}
-
 .reading-content tbody tr:nth-child(even) {
   background-color: var(--bg-secondary);
 }
 
 .reading-content tbody tr:hover {
-  background-color: var(--bg-tertiary);
-}
-
-.dark .reading-content tbody tr:hover {
-  background-color: var(--bg-secondary);
+  background-color: var(--accent-light);
 }
 
 /* Table caption styling */
@@ -1145,15 +1134,15 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
 /* ========================================== */
 
 .reading-content code {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-tertiary);
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
-  font-family: "Fira Code", monospace;
+  font-family: "JetBrains Mono", monospace;
   font-size: 0.875em;
 }
 
 .reading-content pre {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-tertiary);
   padding: 1rem;
   border-radius: 0.5rem;
   overflow-x: auto;
@@ -1193,8 +1182,8 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   align-items: center;
   justify-content: flex-end;
   padding: 0.5rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
 }
 
 .figure-lightbox-controls {
@@ -1211,7 +1200,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   border: none;
   border-radius: 0.375rem;
   background: transparent;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
   cursor: pointer;
   transition:
     background-color 0.2s,
@@ -1219,8 +1208,8 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
 }
 
 .figure-lightbox-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: white;
+  background-color: var(--bg-tertiary);
+  color: var(--accent-color);
 }
 
 .figure-lightbox-btn svg {
@@ -1232,14 +1221,14 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   min-width: 60px;
   text-align: center;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-secondary);
 }
 
 .figure-lightbox-divider {
   width: 1px;
   height: 24px;
   margin: 0 0.5rem;
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: var(--border-color);
 }
 
 .figure-lightbox-container {
@@ -1263,9 +1252,9 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   padding: 0.75rem 1rem;
   text-align: center;
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.9);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: rgba(0, 0, 0, 0.5);
+  color: var(--text-primary);
+  border-top: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
 }
 
 /* Make images in content clickable */
