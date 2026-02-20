@@ -98,7 +98,7 @@
 		<!-- Main content area with max-width for comfortable reading -->
 		<main
 			id="main-content"
-			class="flex-1 overflow-x-hidden {focusMode ? '' : 'lg:ml-80'}"
+			class="flex-1 overflow-x-hidden {focusMode ? '' : 'lg:ml-[280px]'}"
 		>
 			<!-- Add bottom padding on mobile for the bottom nav bar -->
 			<div class="mx-auto max-w-7xl px-4 py-6 pb-24 lg:pb-6">
