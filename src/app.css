@@ -440,38 +440,37 @@
 /* CONTENT BLOCKS (Directives)               */
 /* ========================================== */
 
+/* Base content block — left-border pattern */
 .content-block {
   display: flex;
   gap: 1rem;
-  padding: 1.25rem;
-  border-radius: 0.75rem;
-  border: 1px solid;
-  margin: 2rem 0;
-  /* Clear visual boundary with shadow */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--border-color);
+  margin-block: var(--space-6);
+  background-color: var(--bg-secondary);
 }
 
-.dark .content-block {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+/* Shared paragraph styles for all content blocks */
+.content-block p {
+  color: var(--text-primary);
+  font-size: var(--font-size-base);
+  line-height: 1.75;
+  margin: 0;
 }
 
-/* Note block - Blue theme */
+/* Note block - Blue left border */
 .content-block.note {
-  background-color: #eff6ff;
-  border-color: #dbeafe;
-}
-
-.dark .content-block.note {
-  background-color: rgba(30, 58, 138, 0.2);
-  border-color: rgba(30, 64, 175, 0.3);
+  border-left-color: #2563eb;
 }
 
 .content-block.note .content-block-title {
-  color: #1e3a8a;
+  color: #2563eb;
 }
 
 .dark .content-block.note .content-block-title {
-  color: #93c5fd;
+  color: #60a5fa;
 }
 
 .content-block.note .content-block-icon {
@@ -482,34 +481,22 @@
   color: #60a5fa;
 }
 
-.content-block.note p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.note p {
-  color: var(--text-primary);
-}
-
-/* Warning block - Amber theme */
+/* Warning block - Amber left border + subtle tinted background */
 .content-block.warning {
+  border-left-color: #d97706;
   background-color: #fffbeb;
-  border-color: #fef3c7;
 }
 
 .dark .content-block.warning {
-  background-color: rgba(120, 53, 15, 0.2);
-  border-color: rgba(146, 64, 14, 0.3);
+  background-color: #332c1a;
 }
 
 .content-block.warning .content-block-title {
-  color: #78350f;
+  color: #d97706;
 }
 
 .dark .content-block.warning .content-block-title {
-  color: #fde68a; /* Improved contrast: yellow-200 instead of yellow-400 */
+  color: #fbbf24;
 }
 
 .content-block.warning .content-block-icon {
@@ -520,72 +507,38 @@
   color: #fbbf24;
 }
 
-.content-block.warning p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.warning p {
-  color: var(--text-primary);
-}
-
-/* Example block - Gray theme */
+/* Example block - Gray left border */
 .content-block.example {
-  background-color: #f9fafb;
-  border-color: #e5e7eb;
-}
-
-.dark .content-block.example {
-  background-color: rgba(55, 65, 81, 0.2);
-  border-color: rgba(75, 85, 99, 0.3);
+  border-left-color: #6b7280;
 }
 
 .content-block.example .content-block-title {
-  color: #111827;
+  color: #6b7280;
 }
 
 .dark .content-block.example .content-block-title {
-  color: #e5e7eb;
+  color: #9ca3af;
 }
 
 .content-block.example .content-block-icon {
-  color: #4b5563;
+  color: #6b7280;
 }
 
 .dark .content-block.example .content-block-icon {
   color: #9ca3af;
 }
 
-.content-block.example p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.example p {
-  color: var(--text-primary);
-}
-
-/* Definition block - Purple theme */
+/* Definition block - Purple left border */
 .content-block.definition {
-  background-color: #faf5ff;
-  border-color: #e9d5ff;
-}
-
-.dark .content-block.definition {
-  background-color: rgba(88, 28, 135, 0.2);
-  border-color: rgba(107, 33, 168, 0.3);
+  border-left-color: #7c3aed;
 }
 
 .content-block.definition .content-block-title {
-  color: #581c87;
+  color: #7c3aed;
 }
 
 .dark .content-block.definition .content-block-title {
-  color: #d8b4fe;
+  color: #a78bfa;
 }
 
 .content-block.definition .content-block-icon {
@@ -596,34 +549,17 @@
   color: #a78bfa;
 }
 
-.content-block.definition p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.definition p {
-  color: var(--text-primary);
-}
-
-/* Key Concept block - Teal theme */
+/* Key Concept block - Teal left border */
 .content-block.key-concept {
-  background-color: #ecfeff;
-  border-color: #cffafe;
-}
-
-.dark .content-block.key-concept {
-  background-color: rgba(22, 78, 99, 0.2);
-  border-color: rgba(21, 94, 117, 0.3);
+  border-left-color: #0891b2;
 }
 
 .content-block.key-concept .content-block-title {
-  color: #164e63;
+  color: #0891b2;
 }
 
 .dark .content-block.key-concept .content-block-title {
-  color: #67e8f9;
+  color: #22d3ee;
 }
 
 .content-block.key-concept .content-block-icon {
@@ -634,34 +570,17 @@
   color: #22d3ee;
 }
 
-.content-block.key-concept p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.key-concept p {
-  color: var(--text-primary);
-}
-
-/* Checkpoint block - Green theme */
+/* Checkpoint block - Green left border */
 .content-block.checkpoint {
-  background-color: #f0fdf4;
-  border-color: #bbf7d0;
-}
-
-.dark .content-block.checkpoint {
-  background-color: rgba(20, 83, 45, 0.2);
-  border-color: rgba(22, 101, 52, 0.3);
+  border-left-color: #16a34a;
 }
 
 .content-block.checkpoint .content-block-title {
-  color: #14532d;
+  color: #16a34a;
 }
 
 .dark .content-block.checkpoint .content-block-title {
-  color: #86efac;
+  color: #4ade80;
 }
 
 .content-block.checkpoint .content-block-icon {
@@ -672,34 +591,17 @@
   color: #4ade80;
 }
 
-.content-block.checkpoint p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.checkpoint p {
-  color: var(--text-primary);
-}
-
-/* Common Misconception block - Red theme */
+/* Common Misconception block - Red left border */
 .content-block.common-misconception {
-  background-color: #fef2f2;
-  border-color: #fecaca;
-}
-
-.dark .content-block.common-misconception {
-  background-color: rgba(127, 29, 29, 0.2);
-  border-color: rgba(153, 27, 27, 0.3);
+  border-left-color: #dc2626;
 }
 
 .content-block.common-misconception .content-block-title {
-  color: #7f1d1d;
+  color: #dc2626;
 }
 
 .dark .content-block.common-misconception .content-block-title {
-  color: #fca5a5;
+  color: #f87171;
 }
 
 .content-block.common-misconception .content-block-icon {
@@ -710,54 +612,17 @@
   color: #f87171;
 }
 
-.content-block.common-misconception p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.common-misconception p {
-  color: var(--text-primary);
-}
-
-/* Learning Objectives block - Accent/Teal theme */
+/* Learning Objectives block - Accent left border */
 .content-block.learning-objectives {
-  background-color: var(--accent-light);
-  border-color: var(--accent-color);
-}
-
-.dark .content-block.learning-objectives {
-  background-color: var(--accent-light);
-  border-color: var(--accent-color);
-  opacity: 0.9;
+  border-left-color: var(--accent-color);
 }
 
 .content-block.learning-objectives .content-block-title {
   color: var(--accent-color);
 }
 
-.dark .content-block.learning-objectives .content-block-title {
-  color: var(--accent-color);
-}
-
 .content-block.learning-objectives .content-block-icon {
   color: var(--accent-color);
-}
-
-.dark .content-block.learning-objectives .content-block-icon {
-  color: var(--accent-color);
-}
-
-.content-block.learning-objectives p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.learning-objectives p {
-  color: var(--text-primary);
 }
 
 .content-block.learning-objectives ul {
@@ -774,194 +639,101 @@
   list-style: disc;
 }
 
-/* Link to Learning block - Blue/Indigo theme (OpenStax: link-to-learning) */
+/* Link to Learning block - Blue left border */
 .content-block.link-to-learning {
-  background-color: #eef2ff;
-  border-color: #c7d2fe;
-}
-
-.dark .content-block.link-to-learning {
-  background-color: rgba(55, 48, 163, 0.2);
-  border-color: rgba(67, 56, 202, 0.3);
+  border-left-color: #2563eb;
 }
 
 .content-block.link-to-learning .content-block-title {
-  color: #3730a3;
+  color: #2563eb;
 }
 
 .dark .content-block.link-to-learning .content-block-title {
-  color: #a5b4fc;
+  color: #60a5fa;
 }
 
 .content-block.link-to-learning .content-block-icon {
-  color: #4f46e5;
+  color: #2563eb;
 }
 
 .dark .content-block.link-to-learning .content-block-icon {
-  color: #818cf8;
+  color: #60a5fa;
 }
 
-.content-block.link-to-learning p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.link-to-learning p {
-  color: var(--text-primary);
-}
-
-/* Everyday Life block - Orange theme (OpenStax: everyday-life) */
+/* Everyday Life block - Emerald left border */
 .content-block.everyday-life {
-  background-color: #fff7ed;
-  border-color: #fed7aa;
-}
-
-.dark .content-block.everyday-life {
-  background-color: rgba(154, 52, 18, 0.2);
-  border-color: rgba(194, 65, 12, 0.3);
+  border-left-color: #059669;
 }
 
 .content-block.everyday-life .content-block-title {
-  color: #9a3412;
-}
-
-.dark .content-block.everyday-life .content-block-title {
-  color: #fdba74;
-}
-
-.content-block.everyday-life .content-block-icon {
-  color: #ea580c;
-}
-
-.dark .content-block.everyday-life .content-block-icon {
-  color: #fb923c;
-}
-
-.content-block.everyday-life p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.everyday-life p {
-  color: var(--text-primary);
-}
-
-/* Chapter Overview block - Slate/Gray theme */
-.content-block.chapter-overview {
-  background-color: #f8fafc;
-  border-color: #e2e8f0;
-}
-
-.dark .content-block.chapter-overview {
-  background-color: rgba(51, 65, 85, 0.2);
-  border-color: rgba(71, 85, 105, 0.3);
-}
-
-.content-block.chapter-overview .content-block-title {
-  color: #334155;
-}
-
-.dark .content-block.chapter-overview .content-block-title {
-  color: #cbd5e1;
-}
-
-.content-block.chapter-overview .content-block-icon {
-  color: #64748b;
-}
-
-.dark .content-block.chapter-overview .content-block-icon {
-  color: #94a3b8;
-}
-
-.content-block.chapter-overview p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.chapter-overview p {
-  color: var(--text-primary);
-}
-
-/* Chemist Portrait block - Pink/Rose theme (OpenStax: chemist-portrait) */
-.content-block.chemist-portrait {
-  background-color: #fff1f2;
-  border-color: #fecdd3;
-}
-
-.dark .content-block.chemist-portrait {
-  background-color: rgba(136, 19, 55, 0.2);
-  border-color: rgba(159, 18, 57, 0.3);
-}
-
-.content-block.chemist-portrait .content-block-title {
-  color: #881337;
-}
-
-.dark .content-block.chemist-portrait .content-block-title {
-  color: #fda4af;
-}
-
-.content-block.chemist-portrait .content-block-icon {
-  color: #e11d48;
-}
-
-.dark .content-block.chemist-portrait .content-block-icon {
-  color: #fb7185;
-}
-
-.content-block.chemist-portrait p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
-}
-
-.dark .content-block.chemist-portrait p {
-  color: var(--text-primary);
-}
-
-/* Sciences Interconnect block - Emerald/Green theme (OpenStax: sciences-interconnect) */
-.content-block.sciences-interconnect {
-  background-color: #ecfdf5;
-  border-color: #a7f3d0;
-}
-
-.dark .content-block.sciences-interconnect {
-  background-color: rgba(6, 78, 59, 0.2);
-  border-color: rgba(5, 150, 105, 0.3);
-}
-
-.content-block.sciences-interconnect .content-block-title {
-  color: #064e3b;
-}
-
-.dark .content-block.sciences-interconnect .content-block-title {
-  color: #6ee7b7;
-}
-
-.content-block.sciences-interconnect .content-block-icon {
   color: #059669;
 }
 
-.dark .content-block.sciences-interconnect .content-block-icon {
+.dark .content-block.everyday-life .content-block-title {
   color: #34d399;
 }
 
-.content-block.sciences-interconnect p {
-  color: var(--text-primary);
-  font-size: var(--font-size-base);
-  line-height: 1.75;
-  margin: 0;
+.content-block.everyday-life .content-block-icon {
+  color: #059669;
 }
 
-.dark .content-block.sciences-interconnect p {
-  color: var(--text-primary);
+.dark .content-block.everyday-life .content-block-icon {
+  color: #34d399;
+}
+
+/* Chapter Overview block - Accent left border */
+.content-block.chapter-overview {
+  border-left-color: var(--accent-color);
+}
+
+.content-block.chapter-overview .content-block-title {
+  color: var(--accent-color);
+}
+
+.content-block.chapter-overview .content-block-icon {
+  color: var(--accent-color);
+}
+
+/* Chemist Portrait block - Gray left border */
+.content-block.chemist-portrait {
+  border-left-color: #6b7280;
+}
+
+.content-block.chemist-portrait .content-block-title {
+  color: #6b7280;
+}
+
+.dark .content-block.chemist-portrait .content-block-title {
+  color: #9ca3af;
+}
+
+.content-block.chemist-portrait .content-block-icon {
+  color: #6b7280;
+}
+
+.dark .content-block.chemist-portrait .content-block-icon {
+  color: #9ca3af;
+}
+
+/* Sciences Interconnect block - Purple left border */
+.content-block.sciences-interconnect {
+  border-left-color: #7c3aed;
+}
+
+.content-block.sciences-interconnect .content-block-title {
+  color: #7c3aed;
+}
+
+.dark .content-block.sciences-interconnect .content-block-title {
+  color: #a78bfa;
+}
+
+.content-block.sciences-interconnect .content-block-icon {
+  color: #7c3aed;
+}
+
+.dark .content-block.sciences-interconnect .content-block-icon {
+  color: #a78bfa;
 }
 
 /* Icon wrapper */
