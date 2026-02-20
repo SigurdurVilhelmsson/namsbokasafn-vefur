@@ -169,19 +169,19 @@
 	<!-- Search and filters -->
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div class="relative">
-			<svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<svg class="pte-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
 			</svg>
 			<input
 				type="text"
 				bind:value={searchQuery}
 				placeholder="Leita að frumefni..."
-				class="w-full sm:w-64 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 py-2 pl-9 pr-4 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				class="pte-search-input"
 				aria-label="Leita að frumefni"
 			/>
 		</div>
 
-		<div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300">
+		<div class="flex items-center gap-2 text-sm" style="color: var(--text-tertiary);">
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
 			</svg>
@@ -193,9 +193,8 @@
 	<div class="flex flex-wrap justify-center gap-2">
 		<button
 			on:click={() => (filterCategory = null)}
-			class="rounded-full px-3 py-1 text-xs font-medium transition-all {filterCategory === null
-				? 'bg-blue-600 text-white'
-				: 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700'}"
+			class="pte-filter-btn"
+			class:pte-filter-btn--active={filterCategory === null}
 		>
 			Allt
 		</button>
@@ -204,9 +203,9 @@
 			<button
 				on:click={() => (filterCategory = category)}
 				class="rounded-full px-3 py-1 text-xs font-medium transition-all {filterCategory === category
-					? 'ring-2 ring-blue-500 ring-offset-1'
+					? 'pte-filter-category--active'
 					: 'opacity-80 hover:opacity-100'}"
-				style="background-color: {colors.bg}; color: {colors.text};"
+				style="background-color: {colors.bg}; color: {colors.text}; {filterCategory === category ? `outline: 2px solid var(--accent-color); outline-offset: 1px;` : ''}"
 			>
 				{label}
 			</button>
@@ -231,11 +230,10 @@
 							on:click={() => handleElementClick(element)}
 							on:keydown={(e) => handleKeyDown(e, element)}
 							data-atomic-number={element.atomicNumber}
-							class="group relative flex h-full w-full flex-col items-center justify-center rounded border p-0.5 text-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
-								{isFiltered ? 'opacity-25' : ''}
-								{isHighlighted ? 'ring-2 ring-blue-500 ring-offset-1' : ''}
-								{isFocused ? 'ring-2 ring-blue-500 ring-offset-1' : ''}"
-							style="background-color: {colors.bg}; border-color: {colors.border}; color: {colors.text};"
+							class="group relative flex h-full w-full flex-col items-center justify-center rounded border p-0.5 text-center transition-all duration-200 focus:outline-none
+								{isFiltered ? 'opacity-25' : ''}"
+							style="background-color: {colors.bg}; border-color: {colors.border}; color: {colors.text};
+								{isHighlighted || isFocused ? `outline: 2px solid var(--accent-color); outline-offset: 1px;` : ''}"
 							aria-label="{element.nameIs} ({element.symbol}), sætistala {element.atomicNumber}"
 						>
 							<span class="absolute left-0.5 top-0 text-[clamp(0.4rem,0.7vw,0.6rem)] opacity-70">{element.atomicNumber}</span>
@@ -248,8 +246,8 @@
 			{/each}
 
 			<!-- Lanthanide/Actinide labels -->
-			<div style="grid-row: 6; grid-column: 3;" class="flex items-center justify-center text-xs text-gray-400">57-71</div>
-			<div style="grid-row: 7; grid-column: 3;" class="flex items-center justify-center text-xs text-gray-400">89-103</div>
+			<div style="grid-row: 6; grid-column: 3;" class="pte-series-label">57-71</div>
+			<div style="grid-row: 7; grid-column: 3;" class="pte-series-label">89-103</div>
 		</div>
 	</div>
 </div>
@@ -268,7 +266,7 @@
 		transition:fade={{ duration: 150 }}
 	>
 		<div
-			class="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white dark:bg-gray-900 shadow-2xl"
+			class="pte-modal"
 			on:click|stopPropagation
 			on:keydown|stopPropagation
 			role="presentation"
@@ -283,7 +281,7 @@
 						<span class="text-xs opacity-70">{selectedElement.atomicMass.toFixed(4)}</span>
 					</div>
 					<div>
-						<h2 id="element-modal-title" class="text-2xl font-bold" style="color: {colors.text};">
+						<h2 id="element-modal-title" class="text-2xl font-bold" style="color: {colors.text}; font-family: 'Bricolage Grotesque', system-ui, sans-serif;">
 							{selectedElement.nameIs}
 						</h2>
 						<p class="text-sm opacity-80" style="color: {colors.text};">{selectedElement.name}</p>
@@ -329,115 +327,115 @@
 			<!-- Content -->
 			<div class="p-6">
 				{#if selectedElement.description}
-					<p class="mb-6 text-gray-700 dark:text-gray-300">{selectedElement.description}</p>
+					<p class="pte-description">{selectedElement.description}</p>
 				{/if}
 
 				<div class="grid gap-4 sm:grid-cols-2">
 					<!-- Atomic properties -->
-					<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
-						<h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-							<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<div class="pte-detail-card">
+						<h3 class="pte-detail-title">
+							<svg class="w-4 h-4" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<circle cx="12" cy="12" r="10" />
 								<circle cx="12" cy="12" r="3" />
 							</svg>
 							Eiginleikar
 						</h3>
-						<dl class="space-y-2 text-sm">
-							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-300">Sætistala</dt>
-								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.atomicNumber}</dd>
+						<dl class="pte-detail-list">
+							<div class="pte-detail-row">
+								<dt>Sætistala</dt>
+								<dd>{selectedElement.atomicNumber}</dd>
 							</div>
-							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-300">Atómmassi</dt>
-								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.atomicMass} u</dd>
+							<div class="pte-detail-row">
+								<dt>Atómmassi</dt>
+								<dd>{selectedElement.atomicMass} u</dd>
 							</div>
-							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-300">Lota</dt>
-								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.period}</dd>
+							<div class="pte-detail-row">
+								<dt>Lota</dt>
+								<dd>{selectedElement.period}</dd>
 							</div>
-							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-300">Flokkur</dt>
-								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.group ?? '—'}</dd>
+							<div class="pte-detail-row">
+								<dt>Flokkur</dt>
+								<dd>{selectedElement.group ?? '—'}</dd>
 							</div>
-							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-300">Blokk</dt>
-								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.block}</dd>
+							<div class="pte-detail-row">
+								<dt>Blokk</dt>
+								<dd>{selectedElement.block}</dd>
 							</div>
 						</dl>
 					</div>
 
 					<!-- Electronic properties -->
-					<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
-						<h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-							<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<div class="pte-detail-card">
+						<h3 class="pte-detail-title">
+							<svg class="w-4 h-4" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
 							</svg>
 							Rafeindir
 						</h3>
-						<dl class="space-y-2 text-sm">
-							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-300">Rafeindaskipan</dt>
-								<dd class="font-mono text-xs text-gray-900 dark:text-gray-100">{selectedElement.electronConfiguration}</dd>
+						<dl class="pte-detail-list">
+							<div class="pte-detail-row">
+								<dt>Rafeindaskipan</dt>
+								<dd class="font-mono text-xs">{selectedElement.electronConfiguration}</dd>
 							</div>
-							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-300">Oxunartölur</dt>
-								<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.oxidationStates.join(', ')}</dd>
+							<div class="pte-detail-row">
+								<dt>Oxunartölur</dt>
+								<dd>{selectedElement.oxidationStates.join(', ')}</dd>
 							</div>
 							{#if selectedElement.electronegativity}
-								<div class="flex justify-between">
-									<dt class="text-gray-500 dark:text-gray-300">Rafneikvæðni</dt>
-									<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.electronegativity}</dd>
+								<div class="pte-detail-row">
+									<dt>Rafneikvæðni</dt>
+									<dd>{selectedElement.electronegativity}</dd>
 								</div>
 							{/if}
 						</dl>
 					</div>
 
 					<!-- Physical properties -->
-					<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
-						<h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-							<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<div class="pte-detail-card">
+						<h3 class="pte-detail-title">
+							<svg class="w-4 h-4" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
 							</svg>
 							Eðliseiginleikar
 						</h3>
-						<dl class="space-y-2 text-sm">
+						<dl class="pte-detail-list">
 							{#if selectedElement.meltingPoint}
-								<div class="flex justify-between">
-									<dt class="text-gray-500 dark:text-gray-300">Bræðslumark</dt>
-									<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.meltingPoint} K</dd>
+								<div class="pte-detail-row">
+									<dt>Bræðslumark</dt>
+									<dd>{selectedElement.meltingPoint} K</dd>
 								</div>
 							{/if}
 							{#if selectedElement.boilingPoint}
-								<div class="flex justify-between">
-									<dt class="text-gray-500 dark:text-gray-300">Suðumark</dt>
-									<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.boilingPoint} K</dd>
+								<div class="pte-detail-row">
+									<dt>Suðumark</dt>
+									<dd>{selectedElement.boilingPoint} K</dd>
 								</div>
 							{/if}
 							{#if selectedElement.density}
-								<div class="flex justify-between">
-									<dt class="text-gray-500 dark:text-gray-300">Eðlismassi</dt>
-									<dd class="font-medium text-gray-900 dark:text-gray-100">{selectedElement.density} g/cm³</dd>
+								<div class="pte-detail-row">
+									<dt>Eðlismassi</dt>
+									<dd>{selectedElement.density} g/cm³</dd>
 								</div>
 							{/if}
 						</dl>
 					</div>
 
 					<!-- Classification -->
-					<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
-						<h3 class="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-gray-100">
-							<svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<div class="pte-detail-card">
+						<h3 class="pte-detail-title">
+							<svg class="w-4 h-4" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
 							</svg>
 							Flokkun
 						</h3>
-						<dl class="space-y-2 text-sm">
-							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-300">Tegund</dt>
-								<dd class="font-medium text-gray-900 dark:text-gray-100">{CATEGORY_LABELS[selectedElement.category]}</dd>
+						<dl class="pte-detail-list">
+							<div class="pte-detail-row">
+								<dt>Tegund</dt>
+								<dd>{CATEGORY_LABELS[selectedElement.category]}</dd>
 							</div>
-							<div class="flex justify-between">
-								<dt class="text-gray-500 dark:text-gray-300">Ástand við 25°C</dt>
-								<dd class="font-medium text-gray-900 dark:text-gray-100">{getPhaseLabel(selectedElement)}</dd>
+							<div class="pte-detail-row">
+								<dt>Ástand við 25°C</dt>
+								<dd>{getPhaseLabel(selectedElement)}</dd>
 							</div>
 						</dl>
 					</div>
@@ -447,7 +445,7 @@
 				<div class="mt-6 flex justify-center">
 					<a
 						href="/{bookSlug}/ordabok?search={encodeURIComponent(selectedElement.nameIs)}"
-						class="flex items-center gap-2 rounded-lg border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+						class="pte-glossary-link"
 					>
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -459,3 +457,126 @@
 		</div>
 	</div>
 {/if}
+
+<style>
+	/* Search */
+	.pte-search-icon {
+		position: absolute;
+		left: 0.75rem;
+		top: 50%;
+		transform: translateY(-50%);
+		width: 1rem;
+		height: 1rem;
+		color: var(--text-tertiary);
+	}
+	.pte-search-input {
+		width: 100%;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--border-color);
+		background-color: var(--bg-secondary);
+		padding: 0.5rem 1rem 0.5rem 2.25rem;
+		font-size: 0.875rem;
+		color: var(--text-primary);
+	}
+	.pte-search-input::placeholder {
+		color: var(--text-tertiary);
+	}
+	.pte-search-input:focus {
+		outline: none;
+		border-color: var(--accent-color);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 20%, transparent);
+	}
+	@media (min-width: 640px) {
+		.pte-search-input { width: 16rem; }
+	}
+
+	/* Filter buttons */
+	.pte-filter-btn {
+		border-radius: 9999px;
+		padding: 0.25rem 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		transition: all 0.15s;
+		background-color: var(--bg-tertiary);
+		color: var(--text-secondary);
+	}
+	.pte-filter-btn--active {
+		background-color: var(--accent-color);
+		color: white;
+	}
+
+	/* Series labels */
+	.pte-series-label {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 0.75rem;
+		color: var(--text-tertiary);
+	}
+
+	/* Modal */
+	.pte-modal {
+		position: relative;
+		max-height: 90vh;
+		width: 100%;
+		max-width: 42rem;
+		overflow-y: auto;
+		border-radius: var(--radius-xl);
+		background-color: var(--bg-secondary);
+		box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+	}
+	.pte-description {
+		margin-bottom: 1.5rem;
+		color: var(--text-secondary);
+	}
+
+	/* Detail cards */
+	.pte-detail-card {
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--border-color);
+		background-color: var(--bg-tertiary);
+		padding: 1rem;
+	}
+	.pte-detail-title {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		margin-bottom: 0.75rem;
+	}
+	.pte-detail-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+	}
+	.pte-detail-row {
+		display: flex;
+		justify-content: space-between;
+	}
+	.pte-detail-row dt {
+		color: var(--text-tertiary);
+	}
+	.pte-detail-row dd {
+		font-weight: 500;
+		color: var(--text-primary);
+	}
+
+	/* Glossary link */
+	.pte-glossary-link {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		border-radius: var(--radius-lg);
+		border: 1px solid var(--border-color);
+		padding: 0.5rem 1rem;
+		font-size: 0.875rem;
+		color: var(--text-secondary);
+		transition: background-color 0.15s;
+	}
+	.pte-glossary-link:hover {
+		background-color: var(--bg-tertiary);
+	}
+</style>

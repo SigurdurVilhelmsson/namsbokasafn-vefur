@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { settings, theme } from '$lib/stores';
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { TableOfContents } from '$lib/types/content';
 	import { loadTableOfContents, findChapterBySlug, findSectionBySlug } from '$lib/utils/contentLoader';
 	import SearchModal from '$lib/components/SearchModal.svelte';
@@ -48,6 +48,19 @@
 	$: currentSection = toc && chapterSlug && sectionSlug ? findSectionBySlug(toc, chapterSlug, sectionSlug)?.section : undefined;
 	$: isDark = $theme === 'dark';
 
+	// Back navigation: section -> chapter, chapter -> book home, book home -> catalog
+	$: backHref = sectionSlug && chapterSlug
+		? `/${bookSlug}/kafli/${chapterSlug}`
+		: chapterSlug
+			? `/${bookSlug}`
+			: '/';
+
+	$: backLabel = sectionSlug && chapterSlug
+		? 'Til baka í kafla'
+		: chapterSlug
+			? 'Til baka á heim síðu'
+			: 'Til baka í bókasafn';
+
 	function toggleTheme() {
 		settings.toggleTheme();
 	}
@@ -59,19 +72,16 @@
 
 <svelte:window on:keydown={handleKeydown} />
 
-<header
-	class="sticky top-0 z-40 border-b border-gray-200/50 dark:border-gray-700/50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md"
->
-	<!-- Top bar with logo and controls -->
-	<div class="flex h-14 items-center justify-between px-4">
-		<!-- Left side: Hamburger menu for mobile and title -->
-		<div class="flex items-center gap-3">
+<header class="header">
+	<div class="header-inner">
+		<!-- Left: Mobile -->
+		<div class="left-mobile">
 			<button
 				on:click={toggleSidebar}
-				class="-ml-2 rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white lg:hidden"
+				class="header-btn sidebar-toggle"
 				aria-label="Opna/loka valmynd"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -81,40 +91,46 @@
 				</svg>
 			</button>
 
-			<!-- Link to catalog -->
-			<a
-				href="/"
-				class="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-				aria-label="Til baka í bókasafn"
-				title="Til baka í bókasafn"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+			<a href={backHref} class="header-btn" aria-label={backLabel} title={backLabel}>
+				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
 						stroke-width="2"
-						d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+						d="M15 19l-7-7 7-7"
 					/>
 				</svg>
 			</a>
-
-			<a
-				href="/{bookSlug}"
-				class="flex items-center gap-2 text-sm font-medium text-gray-900 dark:text-gray-100 no-underline transition-opacity hover:opacity-80"
-			>
-				{bookTitle}
-			</a>
 		</div>
 
-		<!-- Right side: Search button, theme button, settings button -->
-		<div class="flex items-center gap-1">
+		<!-- Center: Mobile book title -->
+		<div class="center-mobile">
+			<span class="mobile-title">{bookTitle}</span>
+		</div>
+
+		<!-- Left: Desktop breadcrumb -->
+		<nav class="left-desktop" aria-label="Brauðmylsna">
+			<a href="/" class="brand-link">Námsbókasafn</a>
+			<span class="breadcrumb-sep" aria-hidden="true">›</span>
+			<a href="/{bookSlug}" class="breadcrumb-item">{bookTitle}</a>
+			{#if currentChapter}
+				<span class="breadcrumb-sep" aria-hidden="true">›</span>
+				<span class="breadcrumb-item current">
+					{currentChapter.number}. {currentChapter.title}
+				</span>
+			{/if}
+		</nav>
+
+		<!-- Right: actions -->
+		<div class="right-actions">
+			<!-- Search button -->
 			<button
 				on:click={() => (searchOpen = true)}
-				class="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+				class="header-btn"
 				aria-label="Leita"
 				title="Leita (Ctrl+K)"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -122,60 +138,29 @@
 						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
 					/>
 				</svg>
+				<kbd class="kbd-hint">Ctrl+K</kbd>
 			</button>
 
+			<!-- Keyboard shortcuts button -->
 			{#if onOpenShortcuts}
 				<button
 					on:click={onOpenShortcuts}
-					class="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+					class="header-btn shortcuts-btn"
 					aria-label="Flýtilyklar"
 					title="Flýtilyklar (?)"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"
-						/>
-					</svg>
+					<span class="shortcuts-label">?</span>
 				</button>
 			{/if}
 
-			<button
-				on:click={toggleTheme}
-				class="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-				aria-label={isDark ? 'Skipta yfir í ljóst þema' : 'Skipta yfir í dökkt þema'}
-				title={isDark ? 'Ljóst þema' : 'Dökkt þema'}
-			>
-				{#if isDark}
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-						/>
-					</svg>
-				{:else}
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-						/>
-					</svg>
-				{/if}
-			</button>
-
+			<!-- Settings button -->
 			<button
 				on:click={() => (settingsOpen = true)}
-				class="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+				class="header-btn settings-btn"
 				aria-label="Stillingar"
 				title="Stillingar"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -191,55 +176,23 @@
 				</svg>
 			</button>
 
-			<!-- Feedback link -->
-			<a
-				href="/feedback"
-				class="rounded-lg p-2 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-				aria-label="Senda ábendingu"
-				title="Senda ábendingu"
+			<!-- Theme toggle -->
+			<button
+				class="theme-toggle"
+				on:click={toggleTheme}
+				aria-label={isDark ? 'Skipta yfir í ljóst þema' : 'Skipta yfir í dökkt þema'}
+				title={isDark ? 'Ljóst þema' : 'Dökkt þema'}
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-					/>
+				<svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<circle cx="12" cy="12" r="5" />
+					<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
 				</svg>
-			</a>
+				<svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+				</svg>
+			</button>
 		</div>
 	</div>
-
-	<!-- Colored banner with current section (only show when viewing a section) -->
-	{#if currentChapter && currentSection}
-		<div class="bg-[var(--header-banner)] text-[var(--header-banner-text)] px-4 py-3">
-			<div class="max-w-7xl mx-auto flex items-center gap-3">
-				<a
-					href="/{bookSlug}"
-					class="text-[var(--header-banner-text)] hover:opacity-80 transition-opacity no-underline"
-					aria-label="Til baka á heim síðu"
-				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M15 19l-7-7 7-7"
-						/>
-					</svg>
-				</a>
-				<div>
-					<div class="text-sm opacity-90 font-sans">
-						{currentChapter.number}. {currentChapter.title}
-					</div>
-					<div class="text-lg font-bold font-sans">
-						{currentSection.number}
-						{currentSection.title}
-					</div>
-				</div>
-			</div>
-		</div>
-	{/if}
 </header>
 
 <!-- Search Modal -->
@@ -247,3 +200,268 @@
 
 <!-- Settings Modal -->
 <SettingsModal isOpen={settingsOpen} on:close={() => (settingsOpen = false)} />
+
+<style>
+	/* ====================================
+	   HEADER BAR
+	   ==================================== */
+	.header {
+		position: sticky;
+		top: 0;
+		z-index: 40;
+		height: 56px;
+		background: color-mix(in srgb, var(--bg-primary) 90%, transparent);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border-bottom: 1px solid var(--border-color);
+	}
+
+	.header-inner {
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0 1rem;
+		gap: 0.5rem;
+	}
+
+	/* ====================================
+	   ICON & BUTTON BASE
+	   ==================================== */
+	.icon {
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	.header-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem;
+		border-radius: var(--radius-md);
+		border: none;
+		background: transparent;
+		color: var(--text-secondary);
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
+		text-decoration: none;
+		flex-shrink: 0;
+	}
+
+	.header-btn:hover {
+		background: var(--bg-secondary);
+		color: var(--text-primary);
+	}
+
+	/* ====================================
+	   LEFT SIDE — MOBILE
+	   ==================================== */
+	.left-mobile {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	/* Hide hamburger on desktop (sidebar always visible) */
+	.sidebar-toggle {
+		display: inline-flex;
+	}
+
+	@media (min-width: 1024px) {
+		.sidebar-toggle {
+			display: none;
+		}
+	}
+
+	/* Hide mobile left on desktop */
+	@media (min-width: 1024px) {
+		.left-mobile {
+			display: none;
+		}
+	}
+
+	/* ====================================
+	   CENTER — MOBILE TITLE
+	   ==================================== */
+	.center-mobile {
+		flex: 1;
+		min-width: 0;
+		text-align: center;
+	}
+
+	.mobile-title {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		display: block;
+	}
+
+	@media (min-width: 1024px) {
+		.center-mobile {
+			display: none;
+		}
+	}
+
+	/* ====================================
+	   LEFT SIDE — DESKTOP BREADCRUMB
+	   ==================================== */
+	.left-desktop {
+		display: none;
+		align-items: center;
+		gap: 0.5rem;
+		min-width: 0;
+		flex: 1;
+	}
+
+	@media (min-width: 1024px) {
+		.left-desktop {
+			display: flex;
+		}
+	}
+
+	.brand-link {
+		font-family: "Bricolage Grotesque", system-ui, sans-serif;
+		font-size: 1.125rem;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		color: var(--text-primary);
+		text-decoration: none;
+		white-space: nowrap;
+		flex-shrink: 0;
+		transition: color 0.15s;
+	}
+
+	.brand-link:hover {
+		color: var(--accent-color);
+	}
+
+	.breadcrumb-sep {
+		color: var(--text-tertiary);
+		font-size: 0.875rem;
+		flex-shrink: 0;
+		user-select: none;
+	}
+
+	.breadcrumb-item {
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--text-secondary);
+		text-decoration: none;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		transition: color 0.15s;
+	}
+
+	a.breadcrumb-item:hover {
+		color: var(--accent-color);
+	}
+
+	.breadcrumb-item.current {
+		color: var(--text-primary);
+	}
+
+	/* ====================================
+	   RIGHT SIDE — ACTIONS
+	   ==================================== */
+	.right-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		flex-shrink: 0;
+	}
+
+	/* Ctrl+K keyboard hint badge */
+	.kbd-hint {
+		display: none;
+		margin-left: 0.375rem;
+		padding: 0.125rem 0.375rem;
+		font-size: 0.6875rem;
+		font-family: inherit;
+		font-weight: 500;
+		color: var(--text-tertiary);
+		background: var(--bg-tertiary);
+		border: 1px solid var(--border-color);
+		border-radius: var(--radius-sm);
+		line-height: 1.2;
+	}
+
+	@media (min-width: 1024px) {
+		.kbd-hint {
+			display: inline;
+		}
+	}
+
+	/* Keyboard shortcuts (?) button */
+	.shortcuts-btn {
+		display: none;
+	}
+
+	@media (min-width: 1024px) {
+		.shortcuts-btn {
+			display: inline-flex;
+		}
+	}
+
+	.shortcuts-label {
+		font-size: 0.875rem;
+		font-weight: 600;
+		width: 1.25rem;
+		height: 1.25rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		line-height: 1;
+	}
+
+	/* Settings button — hidden on mobile to save space */
+	.settings-btn {
+		display: none;
+	}
+
+	@media (min-width: 1024px) {
+		.settings-btn {
+			display: inline-flex;
+		}
+	}
+
+	/* ====================================
+	   THEME TOGGLE
+	   ==================================== */
+	.theme-toggle {
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 50%;
+		border: 1px solid var(--border-color);
+		background: var(--bg-secondary);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: border-color 0.2s, transform 0.2s;
+		position: relative;
+		flex-shrink: 0;
+	}
+
+	.theme-toggle:hover {
+		border-color: var(--accent-color);
+		transform: rotate(15deg);
+	}
+
+	.theme-toggle svg {
+		width: 1rem;
+		height: 1rem;
+		color: var(--text-secondary);
+		position: absolute;
+		transition: opacity 0.2s, transform 0.3s;
+	}
+
+	.sun-icon { opacity: 1; }
+	.moon-icon { opacity: 0; transform: rotate(-90deg); }
+
+	:global(.dark) .sun-icon { opacity: 0; transform: rotate(90deg); }
+	:global(.dark) .moon-icon { opacity: 1; transform: rotate(0); }
+</style>

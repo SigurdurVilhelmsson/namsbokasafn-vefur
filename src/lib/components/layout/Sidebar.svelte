@@ -81,9 +81,7 @@
 
 <!-- Overlay (backdrop) -->
 <div
-	class="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity duration-300 lg:hidden {$sidebarOpen
-		? 'opacity-100'
-		: 'pointer-events-none opacity-0'}"
+	class="sidebar-overlay {$sidebarOpen ? 'sidebar-overlay--visible' : ''}"
 	on:click={closeSidebar}
 	on:keydown={(e) => e.key === 'Escape' && closeSidebar()}
 	role="button"
@@ -94,86 +92,63 @@
 <!-- Sidebar -->
 <aside
 	aria-hidden={!$sidebarOpen ? 'true' : undefined}
-	class="
-    fixed
-    inset-y-0 lg:top-[7rem] left-0
-    z-50 lg:z-30
-    w-80 bg-white dark:bg-gray-900
-    transition-transform duration-300 ease-out
-    overflow-y-auto
-    lg:h-[calc(100vh-7rem)]
-    {$sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
-    lg:shadow-none
-    lg:border-r lg:border-gray-200 dark:lg:border-gray-700
-  "
+	class="sidebar {$sidebarOpen ? 'sidebar--open' : ''}"
 >
 	<div class="flex h-full flex-col">
 		<!-- Sidebar header -->
-		<div class="flex h-14 items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4">
-			<h2 class="font-semibold text-gray-900 dark:text-gray-100">Efnisyfirlit</h2>
+		<div class="sidebar-header">
+			<h2 class="sidebar-title">Efnisyfirlit</h2>
 			<button
 				on:click={closeSidebar}
-				class="rounded-lg p-2 -mr-2 text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-200 lg:hidden"
+				class="sidebar-close"
 				aria-label="Loka valmynd"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg class="sidebar-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
 				</svg>
 			</button>
 		</div>
 
 		<!-- Sidebar content -->
-		<nav class="flex-1 overflow-y-auto py-4" aria-label="Efnisyfirlit">
+		<nav class="sidebar-nav" aria-label="Efnisyfirlit">
 			{#if !toc}
 				<Skeleton variant="sidebar" />
 			{:else}
-				<ul class="space-y-1 px-2">
+				<ul class="sidebar-list">
 					{#each toc.chapters as chapter (chapter.number)}
 						{@const chapterPath = getChapterPath(chapter)}
 						{@const progressPercent = getChapterProgressPercent(chapter)}
 						{@const expanded = expandedChapters.has(chapter.number)}
 						{@const isCurrentChapter = chapterParam === chapterPath || chapterParam === chapter.slug}
 						<li>
-							<!-- Chapter progress indicator -->
-							{#if progressPercent > 0}
-								<div class="mb-2 px-4">
-									<div class="mb-2 flex items-center justify-between">
-										<span class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-300">
-											{chapter.number}. kafli
-										</span>
-										<span class="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-											{progressPercent}%
-										</span>
-									</div>
-									<div class="h-1 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
-										<div class="h-full rounded-full bg-emerald-500" style="width: {progressPercent}%"></div>
-									</div>
-								</div>
-							{/if}
-
 							<button
 								on:click={() => toggleChapter(chapter.number)}
 								aria-expanded={expanded}
 								aria-controls="chapter-{chapter.number}-sections"
-								class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+								class="chapter-btn"
 							>
 								<span class="flex items-center gap-2">
-									{#if expanded}
-										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-										</svg>
-									{:else}
-										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-										</svg>
+									<span class="chapter-number">{chapter.number}</span>
+									<span class="chapter-title">{chapter.title}</span>
+								</span>
+								<span class="flex items-center gap-2">
+									{#if progressPercent > 0}
+										<span class="chapter-progress-badge">{progressPercent}%</span>
 									{/if}
-									<span>{chapter.number}. {chapter.title}</span>
+									<svg
+										class="chapter-chevron {expanded ? 'chapter-chevron--open' : ''}"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+									</svg>
 								</span>
 							</button>
 
 							<!-- Sections -->
 							{#if expanded}
-								<ul id="chapter-{chapter.number}-sections" class="mt-1 space-y-1">
+								<ul id="chapter-{chapter.number}-sections" class="section-list">
 									{#each chapter.sections as section (section.file)}
 										{@const sectionPath = getSectionPath(section)}
 										{@const isCurrent = isCurrentChapter && (sectionParam === sectionPath || sectionParam === section.slug)}
@@ -182,53 +157,46 @@
 										<li>
 											<a
 												href="/{bookSlug}/kafli/{chapterPath}/{sectionPath}"
-												class="flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors {isCurrent
-													? 'bg-blue-50 dark:bg-blue-900/30 font-medium text-blue-700 dark:text-blue-300'
-													: 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'}"
+												class="section-link {isCurrent ? 'section-link--current' : ''}"
 											>
-												{#if isReadSection}
-													<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/50">
-														<svg class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-														</svg>
-													</span>
-												{:else if isCurrent}
-													<!-- Scroll progress ring for current section -->
-													<span class="relative flex h-6 w-6 shrink-0 items-center justify-center">
-														<svg class="absolute w-6 h-6 -rotate-90" viewBox="0 0 24 24">
-															<circle
-																cx="12" cy="12" r="10"
-																fill="none"
-																stroke="currentColor"
-																stroke-width="2"
-																class="text-blue-100 dark:text-blue-900/50"
-															/>
-															<circle
-																cx="12" cy="12" r="10"
-																fill="none"
-																stroke="currentColor"
-																stroke-width="2"
-																stroke-dasharray="62.83"
-																stroke-dashoffset={62.83 - (62.83 * $scrollProgress / 100)}
-																stroke-linecap="round"
-																class="text-blue-500 dark:text-blue-400 transition-[stroke-dashoffset] duration-150"
-															/>
-														</svg>
-														<span class="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400"></span>
-													</span>
-												{:else}
-													<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-														<span class="h-2 w-2 rounded-full bg-gray-300 dark:bg-gray-500"></span>
-													</span>
-												{/if}
+												<span class="section-dot-wrap">
+													{#if isReadSection}
+														<span class="section-dot section-dot--read"></span>
+													{:else if isCurrent}
+														<!-- Scroll progress ring for current section -->
+														<span class="section-progress-ring">
+															<svg class="section-ring-svg" viewBox="0 0 20 20">
+																<circle
+																	cx="10" cy="10" r="8"
+																	fill="none"
+																	stroke="var(--border-color)"
+																	stroke-width="2"
+																/>
+																<circle
+																	cx="10" cy="10" r="8"
+																	fill="none"
+																	stroke="var(--accent-color)"
+																	stroke-width="2"
+																	stroke-dasharray="50.27"
+																	stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)}
+																	stroke-linecap="round"
+																	class="section-ring-progress"
+																/>
+															</svg>
+															<span class="section-dot section-dot--current"></span>
+														</span>
+													{:else}
+														<span class="section-dot section-dot--unread"></span>
+													{/if}
+												</span>
 												<div class="flex-1 min-w-0">
-													<span class="text-sm block truncate">{section.number} {section.title}</span>
+													<span class="section-title">{section.number} {section.title}</span>
 													{#if readingTime && !isReadSection}
-														<span class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1 mt-0.5">
-															<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<span class="section-meta">
+															<svg class="section-meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 																<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
 															</svg>
-															{readingTime} mín
+															{readingTime} min
 														</span>
 													{/if}
 												</div>
@@ -243,20 +211,20 @@
 
 				<!-- Appendices section -->
 				{#if toc.appendices && toc.appendices.length > 0}
-					<div class="mt-4 px-2">
+					<div class="sidebar-section">
 						<button
 							on:click={() => appendicesExpanded = !appendicesExpanded}
 							aria-expanded={appendicesExpanded}
 							aria-controls="appendices-list"
-							class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+							class="chapter-btn"
 						>
 							<span class="flex items-center gap-2">
 								{#if appendicesExpanded}
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<svg class="sidebar-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 									</svg>
 								{:else}
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<svg class="sidebar-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 									</svg>
 								{/if}
@@ -265,20 +233,15 @@
 						</button>
 
 						{#if appendicesExpanded}
-							<ul id="appendices-list" class="mt-1 space-y-1">
+							<ul id="appendices-list" class="section-list">
 								{#each toc.appendices as appendix (appendix.letter)}
 									{@const href = appendix.isInteractive && appendix.componentPath
 										? `/${bookSlug}${appendix.componentPath}`
 										: `/${bookSlug}/vidauki/${appendix.letter}`}
 									<li>
-										<a
-											{href}
-											class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
-										>
-											<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-600 dark:text-gray-300">
-												{appendix.letter}
-											</span>
-											<span class="text-sm">{appendix.title}</span>
+										<a {href} class="section-link">
+											<span class="appendix-letter">{appendix.letter}</span>
+											<span class="section-title">{appendix.title}</span>
 										</a>
 									</li>
 								{/each}
@@ -289,20 +252,20 @@
 
 				<!-- Answer Key section -->
 				{#if toc.answerKey && toc.answerKey.length > 0}
-					<div class="mt-4 px-2">
+					<div class="sidebar-section">
 						<button
 							on:click={() => answerKeyExpanded = !answerKeyExpanded}
 							aria-expanded={answerKeyExpanded}
 							aria-controls="answer-key-list"
-							class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left font-medium text-gray-700 dark:text-gray-200 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+							class="chapter-btn"
 						>
 							<span class="flex items-center gap-2">
 								{#if answerKeyExpanded}
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<svg class="sidebar-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
 									</svg>
 								{:else}
-									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<svg class="sidebar-icon-sm" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 									</svg>
 								{/if}
@@ -311,17 +274,15 @@
 						</button>
 
 						{#if answerKeyExpanded}
-							<ul id="answer-key-list" class="mt-1 space-y-1">
+							<ul id="answer-key-list" class="section-list">
 								{#each toc.answerKey as entry (entry.chapter)}
 									<li>
 										<a
 											href="/{bookSlug}/svarlykill/{entry.chapter}"
-											class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-700 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
+											class="section-link"
 										>
-											<span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-600 dark:text-gray-300">
-												{entry.chapter}
-											</span>
-											<span class="text-sm">{entry.title}</span>
+											<span class="appendix-letter">{entry.chapter}</span>
+											<span class="section-title">{entry.title}</span>
 										</a>
 									</li>
 								{/each}
@@ -331,94 +292,39 @@
 				{/if}
 
 				<!-- Study tools section -->
-				<div class="mt-6 space-y-1 border-t border-gray-100 dark:border-gray-800 px-2 pt-4">
-					<h3 class="px-3 py-2 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-300">
-						Námsverkfæri
-					</h3>
-					<a
-						href="/{bookSlug}/nam"
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-						</svg>
-						<span class="text-sm">Námslota</span>
-					</a>
-					<a
-						href="/{bookSlug}/yfirlit"
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-						</svg>
-						<span class="text-sm">Yfirlit</span>
-					</a>
-					<a
-						href="/{bookSlug}/ordabok"
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-						</svg>
-						<span class="text-sm">Orðasafn</span>
-					</a>
-					<a
-						href="/{bookSlug}/minniskort"
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<div class="study-tools">
+					<h3 class="study-tools-heading">Námsverkfæri</h3>
+
+					<a href="/{bookSlug}/minniskort" class="study-tool-link">
+						<svg class="study-tool-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
 						</svg>
-						<span class="text-sm">Minniskort</span>
+						<span>Minniskort</span>
 					</a>
-					<a
-						href="/{bookSlug}/aefingar"
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+					<a href="/{bookSlug}/ordabok" class="study-tool-link">
+						<svg class="study-tool-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+						</svg>
+						<span>Orðasafn</span>
+					</a>
+
+					<a href="/{bookSlug}/prof" class="study-tool-link">
+						<svg class="study-tool-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
 						</svg>
-						<span class="text-sm">Æfingadæmi</span>
+						<span>Próf</span>
 					</a>
-					<a
-						href="/{bookSlug}/markmid"
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-						</svg>
-						<span class="text-sm">Námsmarkmið</span>
-					</a>
-					<a
-						href="/{bookSlug}/greining"
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-						</svg>
-						<span class="text-sm">Námsgreining</span>
-					</a>
-					<a
-						href="/{bookSlug}/bokamerki"
-						class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-					>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-						</svg>
-						<span class="text-sm">Bókamerki</span>
-					</a>
+
 					{#if hasPeriodicTable}
-						<a
-							href="/{bookSlug}/lotukerfi"
-							class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
-						>
-							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<a href="/{bookSlug}/lotukerfi" class="study-tool-link">
+							<svg class="study-tool-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<circle cx="12" cy="12" r="3" stroke-width="2" />
 								<ellipse cx="12" cy="12" rx="9" ry="4" stroke-width="2" />
 								<ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(60 12 12)" stroke-width="2" />
 								<ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(120 12 12)" stroke-width="2" />
 							</svg>
-							<span class="text-sm">Lotukerfi</span>
+							<span>Lotukerfi</span>
 						</a>
 					{/if}
 				</div>
@@ -426,3 +332,404 @@
 		</nav>
 	</div>
 </aside>
+
+<style>
+	/* ====================================
+	   SIDEBAR OVERLAY (mobile backdrop)
+	   ==================================== */
+	.sidebar-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 40;
+		background: rgba(0, 0, 0, 0.2);
+		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(4px);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.3s;
+	}
+
+	.sidebar-overlay--visible {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	@media (min-width: 1024px) {
+		.sidebar-overlay {
+			display: none;
+		}
+	}
+
+	/* ====================================
+	   SIDEBAR PANEL
+	   ==================================== */
+	.sidebar {
+		position: fixed;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		z-index: 50;
+		width: 280px;
+		background: var(--bg-secondary);
+		overflow-y: auto;
+		transform: translateX(-100%);
+		transition: transform 0.3s ease-out;
+	}
+
+	.sidebar--open {
+		transform: translateX(0);
+		box-shadow: var(--shadow-xl);
+	}
+
+	@media (min-width: 1024px) {
+		.sidebar {
+			top: 56px;
+			z-index: 30;
+			height: calc(100vh - 56px);
+			transform: translateX(0);
+			box-shadow: none;
+			border-right: 1px solid var(--border-color);
+		}
+
+		.sidebar--open {
+			box-shadow: none;
+		}
+	}
+
+	/* ====================================
+	   SIDEBAR HEADER
+	   ==================================== */
+	.sidebar-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		height: 56px;
+		padding: 0 1rem;
+		border-bottom: 1px solid var(--border-color);
+		flex-shrink: 0;
+	}
+
+	.sidebar-title {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--text-primary);
+	}
+
+	.sidebar-close {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem;
+		margin-right: -0.5rem;
+		border: none;
+		border-radius: var(--radius-md);
+		background: transparent;
+		color: var(--text-secondary);
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
+	}
+
+	.sidebar-close:hover {
+		background: var(--bg-tertiary);
+		color: var(--text-primary);
+	}
+
+	@media (min-width: 1024px) {
+		.sidebar-close {
+			display: none;
+		}
+	}
+
+	/* ====================================
+	   ICONS
+	   ==================================== */
+	.sidebar-icon {
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	.sidebar-icon-sm {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	/* ====================================
+	   SIDEBAR NAV
+	   ==================================== */
+	.sidebar-nav {
+		flex: 1;
+		overflow-y: auto;
+		padding: 0.75rem 0;
+	}
+
+	.sidebar-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	.sidebar-section {
+		margin-top: 0.5rem;
+		padding: 0 0.5rem;
+	}
+
+	/* ====================================
+	   CHAPTER BUTTON
+	   ==================================== */
+	.chapter-btn {
+		display: flex;
+		width: 100%;
+		align-items: center;
+		justify-content: space-between;
+		padding: 0.5rem 0.75rem;
+		margin: 0 0.5rem;
+		width: calc(100% - 1rem);
+		border: none;
+		border-radius: var(--radius-md);
+		background: transparent;
+		color: var(--text-primary);
+		font-size: 0.875rem;
+		font-weight: 600;
+		text-align: left;
+		cursor: pointer;
+		transition: background 0.15s;
+	}
+
+	.chapter-btn:hover {
+		background: var(--bg-tertiary);
+	}
+
+	/* ====================================
+	   CHAPTER NUMBER CIRCLE
+	   ==================================== */
+	.chapter-number {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.5rem;
+		height: 1.5rem;
+		border-radius: var(--radius-full);
+		background: var(--accent-color);
+		color: #fff;
+		font-size: 0.6875rem;
+		font-weight: 700;
+		flex-shrink: 0;
+		line-height: 1;
+	}
+
+	.chapter-title {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* ====================================
+	   CHAPTER PROGRESS BADGE
+	   ==================================== */
+	.chapter-progress-badge {
+		font-size: 0.6875rem;
+		font-weight: 600;
+		color: #16a34a;
+		flex-shrink: 0;
+	}
+
+	/* ====================================
+	   CHAPTER CHEVRON
+	   ==================================== */
+	.chapter-chevron {
+		width: 0.875rem;
+		height: 0.875rem;
+		flex-shrink: 0;
+		color: var(--text-tertiary);
+		transition: transform 0.2s;
+	}
+
+	.chapter-chevron--open {
+		transform: rotate(90deg);
+	}
+
+	/* ====================================
+	   SECTION LIST
+	   ==================================== */
+	.section-list {
+		list-style: none;
+		padding: 0.25rem 0 0.25rem 0;
+		margin: 0;
+	}
+
+	/* ====================================
+	   SECTION LINK
+	   ==================================== */
+	.section-link {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		padding: 0.4375rem 0.75rem 0.4375rem 0.75rem;
+		margin: 0 0.5rem;
+		border-radius: var(--radius-md);
+		color: var(--text-secondary);
+		text-decoration: none;
+		transition: background 0.15s, color 0.15s;
+		border-left: 2px solid transparent;
+	}
+
+	.section-link:hover {
+		background: var(--bg-tertiary);
+		color: var(--text-primary);
+	}
+
+	.section-link--current {
+		background: var(--accent-light);
+		color: var(--accent-color);
+		border-left-color: var(--accent-color);
+		font-weight: 500;
+	}
+
+	.section-link--current:hover {
+		background: var(--accent-light);
+		color: var(--accent-color);
+	}
+
+	/* ====================================
+	   SECTION DOT INDICATORS
+	   ==================================== */
+	.section-dot-wrap {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		flex-shrink: 0;
+	}
+
+	.section-dot {
+		border-radius: var(--radius-full);
+	}
+
+	.section-dot--read {
+		width: 0.5rem;
+		height: 0.5rem;
+		background: #16a34a;
+	}
+
+	.section-dot--unread {
+		width: 0.4375rem;
+		height: 0.4375rem;
+		border: 1.5px solid var(--text-tertiary);
+		background: transparent;
+	}
+
+	.section-dot--current {
+		width: 0.375rem;
+		height: 0.375rem;
+		background: var(--accent-color);
+		position: absolute;
+	}
+
+	/* ====================================
+	   SECTION PROGRESS RING (current)
+	   ==================================== */
+	.section-progress-ring {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	.section-ring-svg {
+		position: absolute;
+		width: 1.25rem;
+		height: 1.25rem;
+		transform: rotate(-90deg);
+	}
+
+	.section-ring-progress {
+		transition: stroke-dashoffset 0.15s;
+	}
+
+	/* ====================================
+	   SECTION TEXT
+	   ==================================== */
+	.section-title {
+		font-size: 0.8125rem;
+		display: block;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.section-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		margin-top: 0.125rem;
+		font-size: 0.6875rem;
+		color: var(--text-tertiary);
+	}
+
+	.section-meta-icon {
+		width: 0.75rem;
+		height: 0.75rem;
+	}
+
+	/* ====================================
+	   APPENDIX LETTER CIRCLE
+	   ==================================== */
+	.appendix-letter {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		border-radius: var(--radius-full);
+		background: var(--bg-tertiary);
+		color: var(--text-secondary);
+		font-size: 0.6875rem;
+		font-weight: 600;
+		flex-shrink: 0;
+		line-height: 1;
+	}
+
+	/* ====================================
+	   STUDY TOOLS
+	   ==================================== */
+	.study-tools {
+		margin-top: 1rem;
+		padding: 0.75rem 0.5rem 1rem;
+		border-top: 1px solid var(--border-color);
+	}
+
+	.study-tools-heading {
+		padding: 0 0.75rem 0.375rem;
+		font-size: 0.6875rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--text-tertiary);
+	}
+
+	.study-tool-link {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		padding: 0.4375rem 0.75rem;
+		border-radius: var(--radius-md);
+		color: var(--text-secondary);
+		text-decoration: none;
+		font-size: 0.8125rem;
+		transition: background 0.15s, color 0.15s;
+	}
+
+	.study-tool-link:hover {
+		background: var(--bg-tertiary);
+		color: var(--text-primary);
+	}
+
+	.study-tool-icon {
+		width: 1.125rem;
+		height: 1.125rem;
+		flex-shrink: 0;
+	}
+</style>
