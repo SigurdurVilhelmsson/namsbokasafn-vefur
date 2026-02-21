@@ -38,19 +38,19 @@ graph TB
 
 ## Technology Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| UI Framework | SvelteKit 2.21 | Full-stack framework with SSG |
-| Components | Svelte 5.33 | Reactive component library |
-| Language | TypeScript 5.7 | Type safety |
-| Build Tool | Vite 6.3 | Fast bundling & HMR |
-| Styling | Tailwind CSS 4.1 | Utility-first CSS |
-| Routing | SvelteKit | File-based routing |
-| State | Svelte Stores | Built-in state management |
-| Markdown | unified/remark/rehype | Content rendering |
-| Math | KaTeX 0.16 | LaTeX equation rendering |
-| Icons | Lucide Svelte | UI iconography |
-| PWA | @vite-pwa/sveltekit | Offline support |
+| Layer        | Technology          | Purpose                                     |
+| ------------ | ------------------- | ------------------------------------------- |
+| UI Framework | SvelteKit 2.21      | Full-stack framework with SSG               |
+| Components   | Svelte 5.33         | Reactive component library                  |
+| Language     | TypeScript 5.7      | Type safety                                 |
+| Build Tool   | Vite 6.3            | Fast bundling & HMR                         |
+| Styling      | Tailwind CSS 4.1    | Utility-first CSS                           |
+| Routing      | SvelteKit           | File-based routing                          |
+| State        | Svelte Stores       | Built-in state management                   |
+| Content      | Pre-rendered HTML   | Content from CNXML pipeline                 |
+| Math         | MathJax 4           | LaTeX equation rendering (pre-rendered SVG) |
+| Icons        | Lucide Svelte       | UI iconography                              |
+| PWA          | @vite-pwa/sveltekit | Offline support                             |
 
 ## Application Architecture
 
@@ -213,6 +213,7 @@ graph LR
 **Decision**: Use SvelteKit with `@sveltejs/adapter-static` for SSG.
 
 **Rationale**:
+
 - No backend server required
 - Easy deployment to any static hosting
 - Excellent performance (pre-rendered HTML)
@@ -224,6 +225,7 @@ graph LR
 **Decision**: Use localStorage for all user state (progress, settings, flashcards).
 
 **Rationale**:
+
 - No user accounts needed
 - Privacy-friendly (data stays on device)
 - Works offline
@@ -234,6 +236,7 @@ graph LR
 **Decision**: Use Svelte's built-in stores instead of external libraries.
 
 **Rationale**:
+
 - No additional dependencies
 - Automatic subscription/unsubscription with `$` syntax
 - Simple API for localStorage persistence
@@ -244,6 +247,7 @@ graph LR
 **Decision**: Use SvelteKit's file-based routing.
 
 **Rationale**:
+
 - Intuitive structure
 - Automatic code splitting
 - Load functions for data fetching
@@ -254,6 +258,7 @@ graph LR
 **Decision**: Use Svelte actions for complex DOM interactions (equations, lightbox, etc.).
 
 **Rationale**:
+
 - Clean separation of concerns
 - Reusable across components
 - Proper lifecycle management
@@ -261,16 +266,16 @@ graph LR
 
 ## Routing Architecture
 
-| Path | Component | Load Function |
-|------|-----------|---------------|
-| `/` | `+page.svelte` | - |
-| `/:bookSlug` | `[bookSlug]/+page.svelte` | `+layout.ts` (book config) |
-| `/:bookSlug/ordabok` | `ordabok/+page.svelte` | - |
-| `/:bookSlug/minniskort` | `minniskort/+page.svelte` | - |
-| `/:bookSlug/lotukerfi` | `lotukerfi/+page.svelte` | - |
-| `/:bookSlug/prof` | `prof/+page.svelte` | - |
-| `/:bookSlug/kafli/:chapter` | `kafli/[chapterSlug]/+page.svelte` | `+page.ts` |
-| `/:bookSlug/kafli/:chapter/:section` | `[sectionSlug]/+page.svelte` | `+page.ts` |
+| Path                                 | Component                          | Load Function              |
+| ------------------------------------ | ---------------------------------- | -------------------------- |
+| `/`                                  | `+page.svelte`                     | -                          |
+| `/:bookSlug`                         | `[bookSlug]/+page.svelte`          | `+layout.ts` (book config) |
+| `/:bookSlug/ordabok`                 | `ordabok/+page.svelte`             | -                          |
+| `/:bookSlug/minniskort`              | `minniskort/+page.svelte`          | -                          |
+| `/:bookSlug/lotukerfi`               | `lotukerfi/+page.svelte`           | -                          |
+| `/:bookSlug/prof`                    | `prof/+page.svelte`                | -                          |
+| `/:bookSlug/kafli/:chapter`          | `kafli/[chapterSlug]/+page.svelte` | `+page.ts`                 |
+| `/:bookSlug/kafli/:chapter/:section` | `[sectionSlug]/+page.svelte`       | `+page.ts`                 |
 
 ## Build Configuration
 
@@ -278,18 +283,18 @@ graph LR
 
 ```javascript
 // svelte.config.js
-import adapter from '@sveltejs/adapter-static';
+import adapter from "@sveltejs/adapter-static";
 
 export default {
   kit: {
     adapter: adapter({
-      pages: 'build',
-      assets: 'build',
-      fallback: 'index.html',  // SPA fallback
+      pages: "build",
+      assets: "build",
+      fallback: "index.html", // SPA fallback
       precompress: false,
-      strict: true
-    })
-  }
+      strict: true,
+    }),
+  },
 };
 ```
 
@@ -312,11 +317,11 @@ export default {
 
 ### Lighthouse Targets
 
-| Metric | Target | Strategy |
-|--------|--------|----------|
-| LCP | < 2.5s | SSG, static assets |
-| FID | < 100ms | Minimal JavaScript blocking |
-| CLS | < 0.1 | Reserved space for images |
+| Metric | Target  | Strategy                    |
+| ------ | ------- | --------------------------- |
+| LCP    | < 2.5s  | SSG, static assets          |
+| FID    | < 100ms | Minimal JavaScript blocking |
+| CLS    | < 0.1   | Reserved space for images   |
 
 ## Security Considerations
 

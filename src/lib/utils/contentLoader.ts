@@ -346,7 +346,7 @@ export function findSectionBySlug(toc: TableOfContents, chapterPath: string, sec
   if (section) return { chapter, section };
 
   // Then try number match (v2) - convert "2-1" back to "2.1"
-  const sectionNumber = sectionPath.replace('-', '.');
+  const sectionNumber = sectionPath.replaceAll('-', '.');
   section = chapter.sections.find((s) => s.number === sectionNumber);
   if (section) return { chapter, section };
 

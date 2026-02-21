@@ -58,7 +58,7 @@ export interface Appendix {
 export interface AnswerKeyEntry {
   chapter: number;
   title: string;   // e.g., "Kafli 1" or chapter title
-  file: string;    // e.g., "answer-key/1.md" or "01/1-answer-key.md"
+  file: string;    // e.g., "answer-key/1.html" or "01/1-answer-key.html"
 }
 
 // Precomputed reference for deterministic numbering

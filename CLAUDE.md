@@ -132,6 +132,8 @@ This project works together with `namsbokasafn-efni` (content repository). When 
 
 Run `node scripts/generate-toc.js` to regenerate `toc.json` from the chapter directories on disk. The landing page reads chapter counts from `toc.json` dynamically.
 
+**Cross-repo CSS contract:** `static/styles/content.css` styles the pre-rendered HTML produced by namsbokasafn-efni's `cnxml-render.js`. It is loaded via `<link>` in `src/routes/+layout.svelte`. Changes to this stylesheet must be coordinated with the CNXML rendering pipeline's class names and structure.
+
 **Important**: Avoid adding workarounds here that compensate for content problems. Fix content at the source in namsbokasafn-efni. Always verify changes render correctly in both repositories.
 
 ## Build Scripts

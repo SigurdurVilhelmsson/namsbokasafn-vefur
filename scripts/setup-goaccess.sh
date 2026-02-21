@@ -14,7 +14,7 @@
 #   sudo ./scripts/setup-goaccess.sh live             # Real-time terminal dashboard
 #
 # REPORTS:
-#   Reports are saved to /var/www/Chemistry-Reader/traffic-report.html
+#   Reports are saved to /var/www/efnafraedi-lesari/dist/traffic-report.html
 #   View at: https://namsbokasafn.is/traffic-report.html
 #   (Protected by nginx location block — see nginx config)
 
@@ -23,7 +23,7 @@ set -euo pipefail
 # Configuration
 LOG_DIR="/var/log/nginx"
 LOG_FILE="$LOG_DIR/namsbokasafn.access.log"
-REPORT_DIR="/var/www/Chemistry-Reader"
+REPORT_DIR="/var/www/efnafraedi-lesari/dist"
 REPORT_FILE="$REPORT_DIR/traffic-report.html"
 GOACCESS_CONF="/etc/goaccess/goaccess.conf"
 

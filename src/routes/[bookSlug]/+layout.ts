@@ -21,7 +21,7 @@ const BOOKS: Record<
 			periodicTable: true
 		}
 	},
-	liffraeði: {
+	liffraedi: {
 		title: 'Líffræði',
 		slug: 'liffraedi',
 		color: 'green'

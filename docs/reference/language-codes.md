@@ -1,10 +1,11 @@
 # Language Guidelines for Efnafræðilesari
 
-This document outlines the language policy for the Chemistry Reader (Efnafræðilesari) project to ensure consistency across development and user-facing content.
+This document outlines the language policy for the Námsbókasafn project to ensure consistency across development and user-facing content.
 
 ## Overview
 
 The project uses a bilingual approach:
+
 - **Icelandic** for user-facing content and the textbook material
 - **English** for technical documentation and code
 
@@ -82,8 +83,8 @@ export function useTheme() {
 
   // Apply theme on mount
   useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
     }
   }, [theme]);
 }
@@ -139,6 +140,7 @@ All Phase 1 and Phase 2 code was initially written with Icelandic comments and h
 ## Questions?
 
 If you're unsure which language to use in a specific context, default to:
+
 - English for anything code-related
 - Icelandic for anything user-facing
 

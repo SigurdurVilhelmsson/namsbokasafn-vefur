@@ -203,7 +203,8 @@ article.cnx-module aside.note figure {
 }
 
 /* Link to Learning - Blue tint */
-article.cnx-module aside.note-link-to-learning {
+article.cnx-module aside.note-link-to-learning,
+article.cnx-module aside.note.link-to-learning {
   background-color: var(--note-link-learning-bg);
   border-color: var(--note-link-learning-border);
 }
@@ -216,13 +217,15 @@ article.cnx-module aside.note.note-chemistry.everyday-life {
 }
 
 /* Sciences Interconnect - Green tint */
-article.cnx-module aside.note-sciences-interconnect {
+article.cnx-module aside.note-sciences-interconnect,
+article.cnx-module aside.note.sciences-interconnect {
   background-color: var(--note-sciences-bg);
   border-color: var(--note-sciences-border);
 }
 
 /* Portrait of a Chemist - Pink tint */
-article.cnx-module aside.note-chemist-portrait {
+article.cnx-module aside.note-chemist-portrait,
+article.cnx-module aside.note.chemist-portrait {
   background-color: var(--note-portrait-bg);
   border-color: var(--note-portrait-border);
 }

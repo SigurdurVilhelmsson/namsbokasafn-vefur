@@ -24,7 +24,7 @@ const contentDir = resolve(projectRoot, 'static', 'content');
 // CONFIGURATION
 // =============================================================================
 
-const VALID_SECTION_TYPES = ['introduction', 'glossary', 'exercises', 'summary', 'equations', 'answer-key', 'content'];
+const VALID_SECTION_TYPES = ['introduction', 'glossary', 'exercises', 'summary', 'equations', 'answer-key'];
 
 // Track all issues found
 const issues = {
