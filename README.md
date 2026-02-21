@@ -1,229 +1,241 @@
 # Námsbókasafn (Textbook Library)
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
-[![SvelteKit](https://img.shields.io/badge/SvelteKit-2.21-orange)](https://kit.svelte.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Content License: CC BY 4.0](https://img.shields.io/badge/Content%20License-CC%20BY%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by/4.0/)
+A web-based reader for Icelandic translations of [OpenStax](https://openstax.org/) educational textbooks. Students and teachers can read translated chemistry chapters, study with spaced-repetition flashcards, look up terms in an integrated glossary, and track their reading progress — all offline-capable as a PWA. The UI is in Icelandic; the codebase is in English.
 
-Opnar kennslubækur á íslensku - gagnvirkur veflesari fyrir íslenskar þýðingar á OpenStax kennslubókum.
+## About
 
----
+Iceland's small language community means that high-quality science textbooks in Icelandic are scarce and expensive. Námsbókasafn takes freely-licensed OpenStax textbooks (starting with Chemistry 2e), translates them into Icelandic, and presents them in a modern web reader with built-in study tools.
 
-## Um verkefnið
+The reader is a static SvelteKit site with no backend — all user state (progress, bookmarks, flashcard history) lives in localStorage. Content is pre-rendered HTML produced by a translation pipeline in the sister repository [namsbokasafn-efni](https://github.com/SigurdurVilhelmsson/namsbokasafn-efni).
 
-**Námsbókasafn** er opið verkefni sem gerir hágæða kennslubækur aðgengilegar íslenskum nemendum og kennurum án endurgjalds. Verkefnið byggir á opnum kennslubókum frá OpenStax og býður upp á gagnvirkan veflesara með fjölmörgum námsverkfærum.
+This is an active open educational resource (OER) project. The code is MIT-licensed and the translated content is CC BY 4.0. If you're working on similar textbook translation projects for other languages, this codebase is designed to be forked and adapted.
 
-### Tiltækar bækur
+### Available books
 
-| Bók | Staða | Framvinda |
-|-----|-------|-----------|
-| **Efnafræði** (Chemistry 2e) | Í boði | 4 af 21 köflum |
-| **Líffræði** (Biology 2e) | Væntanlegt | - |
+| Book                         | Status    | Progress         |
+| ---------------------------- | --------- | ---------------- |
+| **Efnafræði** (Chemistry 2e) | Available | 4 of 21 chapters |
+| **Líffræði** (Biology 2e)    | Planned   | —                |
 
-### Helstu eiginleikar
+## Demo / Live Version
 
-- **Fjölbókakerfi** - Einn lesari fyrir margar kennslubækur
-- **Hrein lesupplifun** - Faglegur lestrargluggur hannaður fyrir lengri námslestur
-- **Minniskort (SRS)** - Gagnvirk minniskort með bilun endurtekningu (spaced repetition)
-- **Orðasafn** - Ítarlegt orðasafn fyrir hverja bók með íslenskri stafrófsröðun
-- **Lesframvinda** - Fylgist með framvindu og vistar bókamerki
-- **Leit** - Öflug leit í öllu efni með Ctrl/Cmd+K flýtilykli
-- **Stærðfræði** - Fullkominn stuðningur fyrir stærðfræðijöfnur með KaTeX
-- **Sveigjanlegt** - Hannað fyrir síma, spjaldtölvur og tölvur
-- **Ljóst/dökkt þema** - Sjálfvirk greining á kerfisstillingum
-- **PWA stuðningur** - Virkar án nettengingar eftir fyrstu heimsókn
-- **Gagnvirkt lotukerfi** - 118 frumefni með ítarlegum upplýsingum
+**[https://namsbokasafn.is](https://namsbokasafn.is)**
 
----
+## Tech Stack
 
-## Byrjaðu að nota
+- **Runtime:** Node.js 22 (see `.nvmrc`)
+- **Framework:** SvelteKit 2 + Svelte 5, TypeScript 5.7
+- **Build:** Vite 7, `@sveltejs/adapter-static` → outputs to `build/`
+- **Styling:** Tailwind CSS 4 + PostCSS
+- **Math:** KaTeX (pre-rendered in content HTML)
+- **Search:** Fuse.js (client-side full-text search)
+- **PWA:** `@vite-pwa/sveltekit` with Workbox (offline-first)
+- **Testing:** Vitest (173+ unit tests) + Playwright (E2E)
+- **CI:** GitHub Actions (lint, test, build, security audit)
+- **Linting:** ESLint + Prettier + svelte-check, Husky pre-commit hooks
 
-### Forsendur
+## Features
 
-- **Node.js** 22 eða nýrra
-- **npm**
+- **Textbook reader** — Clean reading layout for long study sessions, light/dark theme, adjustable font size
+- **Flashcards (SRS)** — Spaced repetition using the SM-2 algorithm (`src/lib/utils/srs.ts`)
+- **Glossary** — Per-book terminology lookup with Icelandic alphabetical sorting
+- **Reading progress** — Chapter completion tracking, bookmarks
+- **Search** — Full-text search across all content (Ctrl/Cmd+K)
+- **Periodic table** — Interactive 118-element table with detailed info
+- **Quizzes** — Chapter-based practice questions
+- **Annotations** — Text highlights and notes with export
+- **PWA** — Works offline after first visit, installable as an app
+- **Responsive** — Designed for phones, tablets, and desktops
 
-### Staðbundin þróun
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) 22 (use `nvm use` — `.nvmrc` is included)
+- npm
+
+## Setup
+
+### 1. Clone and install
 
 ```bash
-# Klóna gagnasafnið
 git clone https://github.com/SigurdurVilhelmsson/namsbokasafn-vefur.git
 cd namsbokasafn-vefur
-
-# Setja upp dependencies
 npm install
-
-# Keyra development server
-npm run dev
 ```
 
-Opnaðu [http://localhost:5173](http://localhost:5173) í vafranum.
+### 2. Sync content from sister repo
 
-### Framleiðslubygging
+The textbook content lives in the [namsbokasafn-efni](https://github.com/SigurdurVilhelmsson/namsbokasafn-efni) repo and is gitignored here. To populate `static/content/`:
+
+```bash
+git clone https://github.com/SigurdurVilhelmsson/namsbokasafn-efni.git ../namsbokasafn-efni
+node scripts/sync-content.js --source ../namsbokasafn-efni
+node scripts/generate-toc.js
+```
+
+The CI pipeline does this automatically on every build.
+
+### 3. Run (development)
+
+```bash
+npm run dev
+# Opens at http://localhost:5173
+```
+
+### 4. Build
+
+```bash
+npm run build       # Production build to build/
+npm run preview     # Preview the build locally at http://localhost:4173
+```
+
+### 5. Environment variables (optional)
+
+The app works fully without environment variables for local development. In production, `.env.production` contains:
+
+| Variable             | Purpose                                                              |
+| -------------------- | -------------------------------------------------------------------- |
+| `VITE_TTS_PROXY_URL` | Text-to-speech proxy endpoint (Cloudflare Worker)                    |
+| `VITE_API_URL`       | Backend API URL for editorial features (`ritstjorn.namsbokasafn.is`) |
+
+These are public URLs, not secrets.
+
+## Server Deployment
+
+The production site is a static build served by nginx on a Linode Ubuntu server.
+
+- **Build output:** `build/` (SvelteKit static adapter with SPA fallback)
+- **Server path:** `/var/www/efnafraedi-lesari/dist`
+- **Domain:** `namsbokasafn.is` (formerly `efnafraedi.app`)
+- **Nginx:** `/etc/nginx/sites-available/efnafraedi.app`
+- **SSL:** Let's Encrypt via certbot (auto-renewal)
+- **No backend** — all state is client-side in localStorage
+
+### Deploy
+
+Deployment is handled by GitHub Actions CI. On push to `main`:
+
+1. Checks out both this repo and `namsbokasafn-efni`
+2. Syncs content
+3. Runs lint, type-check, and unit tests
+4. Builds with content validation
+5. Runs Playwright E2E tests
+6. Deploys static output to the server
+
+For manual deployment:
 
 ```bash
 npm run build
-npm run preview
+rsync -avz --delete build/ siggi@kvenno.app:/var/www/efnafraedi-lesari/dist/
 ```
 
----
+See [docs/guides/deployment.md](docs/guides/deployment.md) for the full deployment guide including nginx configuration, SSL setup, and maintenance procedures.
 
-## Uppbygging verkefnis
+## Project Structure
 
 ```
 namsbokasafn-vefur/
-├── static/
-│   ├── content/
-│   │   └── efnafraedi/               # Efni efnafræðibókar
-│   │       ├── toc.json              # Efnisyfirlit
-│   │       ├── glossary.json         # Orðasafn
-│   │       └── chapters/             # Kaflar
-│   │           ├── 01/
-│   │           └── 02/
-│   ├── covers/                       # Forsíðumyndir fyrir bækur
-│   │   ├── efnafraedi.svg
-│   │   └── liffraedi.svg
-│   └── icons/                        # PWA icons
 ├── src/
-│   ├── app.html                      # HTML template
-│   ├── app.css                       # Global styles (Tailwind)
-│   ├── lib/
-│   │   ├── components/               # Svelte components
-│   │   │   ├── layout/               # Header, Sidebar, etc.
-│   │   │   ├── BookCard.svelte
-│   │   │   ├── FlashcardStudy.svelte
-│   │   │   ├── MarkdownRenderer.svelte
-│   │   │   └── ...
-│   │   ├── stores/                   # Svelte stores (state management)
-│   │   │   ├── settings.ts
-│   │   │   ├── reader.ts
-│   │   │   ├── flashcard.ts
-│   │   │   └── ...
-│   │   ├── actions/                  # Svelte actions
-│   │   ├── types/                    # TypeScript types
-│   │   └── utils/                    # Utility functions
-│   │       ├── contentLoader.ts
-│   │       ├── srs.ts                # Spaced repetition algorithm
-│   │       └── ...
-│   └── routes/                       # SvelteKit file-based routing
-│       ├── +layout.svelte            # Root layout
-│       ├── +page.svelte              # Landing page
-│       └── [bookSlug]/               # Dynamic book routes
-│           ├── +layout.svelte
-│           ├── +page.svelte          # Book home
-│           ├── ordabok/              # Glossary
-│           ├── minniskort/           # Flashcards
-│           ├── lotukerfi/            # Periodic table
-│           └── kafli/                # Chapters
-└── package.json
+│   ├── routes/                 # SvelteKit file-based routing
+│   │   ├── +page.svelte        # Book catalog (landing page)
+│   │   └── [bookSlug]/         # Dynamic book routes
+│   │       ├── kafli/          # Chapter reading view
+│   │       ├── ordabok/        # Glossary
+│   │       ├── minniskort/     # Flashcards
+│   │       ├── lotukerfi/      # Periodic table
+│   │       └── prof/           # Quizzes
+│   └── lib/
+│       ├── components/         # Svelte components
+│       ├── stores/             # State management (localStorage-backed)
+│       ├── actions/            # Svelte DOM actions
+│       ├── types/              # TypeScript interfaces
+│       └── utils/              # Utilities (SRS algorithm, content loading)
+├── static/content/             # Book data (gitignored — synced from sister repo)
+├── scripts/                    # Content sync, TOC generation, validation
+├── e2e/                        # Playwright E2E tests
+├── docs/                       # Guides, architecture, reference
+└── nginx-config-example.conf   # Production nginx config
 ```
 
-### Routing
+### Routes
 
-| Slóð | Lýsing |
-|------|--------|
-| `/` | Landingssíða - bókasafn |
-| `/:bookSlug` | Forsíða bókar |
-| `/:bookSlug/kafli/:chapter` | Kaflayfirlit |
-| `/:bookSlug/kafli/:chapter/:section` | Kaflaefni |
-| `/:bookSlug/ordabok` | Orðasafn bókar |
-| `/:bookSlug/minniskort` | Minniskort bókar |
-| `/:bookSlug/lotukerfi` | Lotukerfið |
-| `/:bookSlug/prof` | Próf og æfingar |
+| Path                                 | Page                 |
+| ------------------------------------ | -------------------- |
+| `/`                                  | Book catalog         |
+| `/:bookSlug`                         | Book home page       |
+| `/:bookSlug/kafli/:chapter`          | Chapter overview     |
+| `/:bookSlug/kafli/:chapter/:section` | Section reading view |
+| `/:bookSlug/ordabok`                 | Glossary             |
+| `/:bookSlug/minniskort`              | Flashcards           |
+| `/:bookSlug/lotukerfi`               | Periodic table       |
+| `/:bookSlug/prof`                    | Quizzes              |
 
----
+## Two-Repository Workflow
 
-## Bæta við nýrri bók
+This project works together with [namsbokasafn-efni](https://github.com/SigurdurVilhelmsson/namsbokasafn-efni) (the content/translation pipeline):
 
-Sjá [docs/guides/adding-books.md](docs/guides/adding-books.md) fyrir ítarlegar leiðbeiningar um að bæta við nýrri þýddri bók.
+- **Content bugs** (wrong translations, formatting issues) → fix in namsbokasafn-efni, then re-sync
+- **Reader bugs** (rendering, UI, components) → fix here
+- After syncing new content, regenerate the table of contents: `node scripts/generate-toc.js`
 
----
+## Common Tasks
 
-## Tæknistafl
-
-### Core
-- **SvelteKit** 2.21
-- **Svelte** 5.33
-- **TypeScript** 5.7
-- **Vite** 6.3
-- **Tailwind CSS** 4.1
-
-### Libraries
-- **unified/remark/rehype** - Markdown processing
-- **KaTeX** 0.16 - Math rendering
-- **Lucide Svelte** - Icons
-- **@vite-pwa/sveltekit** - PWA support
-
----
-
-## Skipanir
+### Run tests
 
 ```bash
-npm run dev              # Start dev server (localhost:5173)
-npm run build            # Production build to build/
-npm run preview          # Preview production build
-npm run test             # Run unit tests (Vitest)
-npm run test:e2e         # Run E2E tests (Playwright)
-npm run check            # SvelteKit sync + type check
-npm run lint             # ESLint
-npm run format           # Prettier
+npm run test              # Vitest unit tests
+npm run test:watch        # Watch mode
+npm run test:coverage     # With coverage report
+npm run test:e2e          # Playwright E2E tests
+npm run test:e2e:ui       # E2E with interactive UI
 ```
 
----
+### Code quality
 
-## License og Attribution
+```bash
+npm run check             # SvelteKit sync + TypeScript check
+npm run lint              # ESLint
+npm run format            # Prettier
+```
 
-### Tvöfalt leyfi
+### Content management
 
-1. **Application Code (MIT License)**
-   - Öll forritunarkóði
-   - Sjá [LICENSE](./LICENSE)
+```bash
+node scripts/sync-content.js --source ../namsbokasafn-efni   # Sync content
+node scripts/generate-toc.js                                  # Regenerate TOC
+npm run validate-content                                      # Validate structure
+```
 
-2. **Educational Content (CC BY 4.0)**
-   - Allt efni í `static/content/`
-   - Sjá [CONTENT-LICENSE.md](./CONTENT-LICENSE.md)
+### Add a new book
 
-### Content Attribution
+See [docs/guides/adding-books.md](docs/guides/adding-books.md) for detailed instructions.
 
-Kennslubókaefni er íslensk þýðing og aðlögun á opnum kennslubókum frá **OpenStax**.
+## Contributing
 
-#### Efnafræði
-- **Upprunalegt verk:** Chemistry 2e
-- **Höfundar:** Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson
-- **Útgefandi:** OpenStax
-- **Heimild:** https://openstax.org/details/books/chemistry-2e
-- **Leyfi:** CC BY 4.0
+Contributions are welcome — whether you're fixing a bug, improving the reader, or adapting this for another language.
 
-#### Þessi aðlögun
-- **Þýðandi:** Sigurður E. Vilhelmsson
-- **Leyfi:** CC BY 4.0
+- **Bug reports and ideas:** [Open an issue](https://github.com/SigurdurVilhelmsson/namsbokasafn-vefur/issues)
+- **Development guide:** [docs/guides/contributing.md](docs/guides/contributing.md)
+- **UI language:** Icelandic. Code and comments are in English.
 
----
+## License
 
-## Þakklæti
+### Dual license
 
-- **[OpenStax](https://openstax.org/)** fyrir frábær opin kennslugögn
-- **Chemistry 2e höfundar** fyrir framúrskarandi kennslubók
-- Allir sem leggja sitt af mörkum til opinna menntagagna (OER)
+1. **Application code** — [MIT License](LICENSE)
+2. **Educational content** (`static/content/`) — [CC BY 4.0](CONTENT-LICENSE.md)
 
----
+### Content attribution
 
-## Hafa samband
+The textbook content is an Icelandic translation of open textbooks from [OpenStax](https://openstax.org/).
 
-**Sigurður E. Vilhelmsson**
-- GitHub: [@SigurdurVilhelmsson](https://github.com/SigurdurVilhelmsson)
-- Verkefni: [namsbokasafn-vefur](https://github.com/SigurdurVilhelmsson/namsbokasafn-vefur)
+**Chemistry 2e** — Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson
+Translated by Sigurdur E. Vilhelmsson. Licensed under CC BY 4.0.
 
----
+## Status
 
-<div align="center">
+Actively maintained. The reader is stable and in use. New chapters are added as translations are completed in the sister repo.
 
-**Gert fyrir íslenska nemendur**
+## Related Projects
 
-*Opið verkefni sem stuðlar að aðgengi að gæða kennslugögnum á íslensku*
-
-[![OpenStax](https://img.shields.io/badge/Built%20with-OpenStax-orange)](https://openstax.org/)
-[![CC BY 4.0](https://img.shields.io/badge/Content-CC%20BY%204.0-lightgrey)](https://creativecommons.org/licenses/by/4.0/)
-[![MIT](https://img.shields.io/badge/Code-MIT-yellow)](https://opensource.org/licenses/MIT)
-
-</div>
+- [namsbokasafn-efni](https://github.com/SigurdurVilhelmsson/namsbokasafn-efni) — Translation pipeline and editorial workflow server
+- [kvenno-app](https://github.com/SigurdurVilhelmsson/kvenno-app) — Chemistry games and lab report grading platform
