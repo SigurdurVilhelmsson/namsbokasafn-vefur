@@ -26,14 +26,18 @@ coverage
 
 # Environment
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.*.example
 
 # SvelteKit
 .svelte-kit
 build
 static/content
 dev-dist/
+
+# Test artifacts
+playwright-report/
+test-results/
 
 # Generated docs
 docs/_generated/

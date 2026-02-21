@@ -38,20 +38,20 @@ prerequisites:
 
 ### Required Fields
 
-| Field | Description |
-|-------|-------------|
-| `title` | Section title displayed in header |
-| `section` | Section number (e.g., "1.3") |
-| `chapter` | Chapter number (integer) |
+| Field     | Description                       |
+| --------- | --------------------------------- |
+| `title`   | Section title displayed in header |
+| `section` | Section number (e.g., "1.3")      |
+| `chapter` | Chapter number (integer)          |
 
 ### Optional Fields
 
-| Field | Description |
-|-------|-------------|
-| `objectives` | Learning objectives shown in emerald card at top |
-| `difficulty` | Content difficulty: `beginner`, `intermediate`, or `advanced` |
-| `keywords` | Topic keywords (shown in collapsible tag list) |
-| `prerequisites` | Required prior knowledge |
+| Field           | Description                                                   |
+| --------------- | ------------------------------------------------------------- |
+| `objectives`    | Learning objectives shown in emerald card at top              |
+| `difficulty`    | Content difficulty: `beginner`, `intermediate`, or `advanced` |
+| `keywords`      | Topic keywords (shown in collapsible tag list)                |
+| `prerequisites` | Required prior knowledge                                      |
 
 ### Difficulty Levels
 
@@ -73,12 +73,16 @@ Reading time is **automatically calculated** from content length (no frontmatter
 
 ```markdown
 # Main Chapter Title (H1)
+
 ## Major Section (H2)
+
 ### Subsection (H3)
+
 #### Minor Heading (H4)
 ```
 
 **Styling:**
+
 - H1-H4: Serif font (Lora), bold
 - H1: 3xl-4xl size
 - H2: 2xl size with extra top margin
@@ -88,13 +92,14 @@ Reading time is **automatically calculated** from content length (no frontmatter
 
 ```markdown
 **Bold text** for emphasis
-*Italic text* for emphasis
+_Italic text_ for emphasis
 `inline code` for chemical formulas or code
 ```
 
 ### Lists
 
 **Unordered lists:**
+
 ```markdown
 - First item
 - Second item
@@ -104,6 +109,7 @@ Reading time is **automatically calculated** from content length (no frontmatter
 ```
 
 **Ordered lists:**
+
 ```markdown
 1. First step
 2. Second step
@@ -155,7 +161,7 @@ $$
 
 ```markdown
 Old way: $\text{H}_2\text{O}$
-mhchem:  $\ce{H2O}$          ← Much simpler!
+mhchem: $\ce{H2O}$ ← Much simpler!
 ```
 
 #### States of Matter
@@ -182,26 +188,31 @@ mhchem:  $\ce{H2O}$          ← Much simpler!
 
 ```markdown
 **Combustion of methane:**
+
 $$
 \ce{CH4(g) + 2O2(g) -> CO2(g) + 2H2O(l)}
 $$
 
 **Photosynthesis:**
+
 $$
 \ce{6CO2 + 6H2O ->[light] C6H12O6 + 6O2}
 $$
 
 **Rusting of iron:**
+
 $$
 \ce{4Fe + 3O2 -> 2Fe2O3}
 $$
 
 **Acid-base reaction:**
+
 $$
 \ce{HCl(aq) + NaOH(aq) -> NaCl(aq) + H2O(l)}
 $$
 
 **With equilibrium:**
+
 $$
 \ce{N2(g) + 3H2(g) <=> 2NH3(g)}
 $$
@@ -232,16 +243,19 @@ For pure mathematics (not chemistry), use standard LaTeX:
 
 ```markdown
 **pH calculation:**
+
 $$
 \text{pH} = -\log[\text{H}^+]
 $$
 
 **Ideal gas law:**
+
 $$
 PV = nRT
 $$
 
 **Concentration:**
+
 $$
 c = \frac{n}{V}
 $$
@@ -257,7 +271,7 @@ Tables are rendered as modern cards with no internal borders.
 
 ```markdown
 | Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
+| -------- | -------- | -------- |
 | Row 1A   | Row 1B   | Row 1C   |
 | Row 2A   | Row 2B   | Row 2C   |
 ```
@@ -265,14 +279,15 @@ Tables are rendered as modern cards with no internal borders.
 ### Example with Chemistry Data
 
 ```markdown
-| Element | Symbol | Atomic Mass |
-|---------|--------|-------------|
-| Hydrogen | H | 1.008 |
-| Carbon | C | 12.011 |
-| Oxygen | O | 15.999 |
+| Element  | Symbol | Atomic Mass |
+| -------- | ------ | ----------- |
+| Hydrogen | H      | 1.008       |
+| Carbon   | C      | 12.011      |
+| Oxygen   | O      | 15.999      |
 ```
 
 **Styling:**
+
 - Header row: Gray background with uppercase text
 - Rows: Subtle divider lines, hover effect
 - Rounded corners with subtle shadow
@@ -285,6 +300,7 @@ Tables are rendered as modern cards with no internal borders.
 The reader supports multiple callout block types for highlighting important information.
 
 **Available callout types:**
+
 - Basic: `:::note`, `:::warning`, `:::example`
 - Interactive: `:::practice-problem` (with `:::answer`, `:::hint`, `:::explanation`)
 - Educational: `:::definition`, `:::key-concept`, `:::checkpoint`, `:::common-misconception`
@@ -323,10 +339,11 @@ Use `:::example` for worked examples or demonstrations:
 **Example 1.3.1: Calculating Molar Mass**
 
 To find the molar mass of H₂O:
+
 - H: 2 × 1.008 = 2.016 g/mol
 - O: 1 × 15.999 = 15.999 g/mol
 - Total: 18.015 g/mol
-:::
+  :::
 ```
 
 **Renders as:** Gray card with lightbulb (💡) icon and "Dæmi" title
@@ -343,6 +360,7 @@ Calculate the pH of a 0.01 M HCl solution.
 **Solution:**
 
 HCl is a strong acid that completely dissociates:
+
 - [H⁺] = 0.01 M
 - pH = -log[H⁺] = -log(0.01) = 2
 
@@ -352,6 +370,7 @@ HCl is a strong acid that completely dissociates:
 ```
 
 **Features:**
+
 - **Amber header** with clipboard icon and "Æfingadæmi" title
 - **White content area** for the problem statement
 - **"Sýna svar" button** that reveals the answer when clicked
@@ -384,6 +403,7 @@ Use the formula: pH = -log[H⁺]
 ```
 
 **Features:**
+
 - Multiple hints can be added (revealed progressively)
 - Yellow/amber theme with lightbulb icon
 - "Sýna vísbendingu" button reveals one hint at a time
@@ -402,14 +422,16 @@ What is the molar mass of water?
 
 :::explanation
 Water (H₂O) contains:
+
 - 2 hydrogen atoms: 2 × 1.008 = 2.016 g/mol
 - 1 oxygen atom: 1 × 15.999 = 15.999 g/mol
 - Total: 2.016 + 15.999 = **18.015 g/mol**
-:::
-:::
+  :::
+  :::
 ```
 
 **Features:**
+
 - Appears after answer is revealed
 - Blue theme with info icon
 - "Sýna útskýringu" button
@@ -431,6 +453,7 @@ Mólmassi efnis er massi eins móls af efninu, gefinn upp í grömmum á mól (g
 ```
 
 **Features:**
+
 - Purple theme with book icon
 - Optional `term` attribute displays term in title
 - Title shows "Skilgreining: Mólmassi" (or just "Skilgreining" without term)
@@ -446,6 +469,7 @@ Lögmál Avogadros segir að jafnt rúmmál af gasi við sama þrýsting og hita
 ```
 
 **Features:**
+
 - Cyan/teal theme with key icon
 - Title: "Lykilhugtak"
 - Use for concepts that will be built upon later
@@ -457,6 +481,7 @@ Use `:::checkpoint` for self-assessment questions mid-section:
 ```markdown
 :::checkpoint
 Getur þú:
+
 - Reiknað mólmassa frá efnaformúlu?
 - Umbreytt á milli móla og gramma?
 - Útskýrt mólhugtakið?
@@ -466,6 +491,7 @@ Ef ekki, endurskoðaðu kafla 3.2!
 ```
 
 **Features:**
+
 - Green theme with checkmark icon
 - Title: "Sjálfsmat"
 - Place after major concepts to verify understanding
@@ -483,6 +509,7 @@ Use `:::common-misconception` to address frequent student errors:
 ```
 
 **Features:**
+
 - Rose/red theme with X-circle icon
 - Title: "Algengur misskilningur"
 - Explicitly teaching misconceptions is highly effective
@@ -500,6 +527,7 @@ Reference other sections, equations, figures, and definitions using the cross-re
 ```
 
 **Types:**
+
 - `sec` - Section reference
 - `eq` - Equation reference
 - `fig` - Figure reference
@@ -516,6 +544,7 @@ E = mc^2
 $$ {#eq:einstein}
 
 ![Periodic table](./images/periodic-table.png) {#fig:periodic}
+$$
 ```
 
 ### Using References
@@ -527,6 +556,7 @@ Eins og sýnt er í [ref:fig:periodic], eru frumefnin raðað eftir atómtölu.
 ```
 
 **Features:**
+
 - Hover preview shows referenced content
 - Click navigates to source location
 - Type-specific icons (equation, figure, table, definition)
@@ -541,14 +571,17 @@ You can include multiple paragraphs, lists, and even equations:
 **Important Concept: Avogadro's Number**
 
 Avogadro's number is $6.022 \times 10^{23}$ and represents:
+
 - The number of atoms in 12 grams of carbon-12
 - The number of molecules in one mole of any substance
 - A fundamental constant in chemistry
 
 Use it to convert between moles and particles:
+
 $$
 N = n \times N_A
 $$
+
 :::
 ```
 
@@ -573,6 +606,7 @@ The `alt` text becomes a caption below the image:
 ```
 
 **Features:**
+
 - Automatically centered
 - Rounded corners with shadow
 - Lazy loading for performance
@@ -581,11 +615,13 @@ The `alt` text becomes a caption below the image:
 ### Image Paths
 
 Images should be placed in:
+
 ```
 /static/content/chapters/{chapter-slug}/images/
 ```
 
 Then reference them as:
+
 ```markdown
 ![Description](./images/filename.png)
 ```
@@ -629,7 +665,7 @@ objectives:
 
 # Stoichiometry Basics
 
-**Stoichiometry** is the quantitative study of reactants and products in chemical reactions. The word comes from Greek: *stoicheion* (element) and *metron* (measure).
+**Stoichiometry** is the quantitative study of reactants and products in chemical reactions. The word comes from Greek: _stoicheion_ (element) and _metron_ (measure).
 
 ## Molar Mass
 
@@ -637,11 +673,11 @@ The **molar mass** of a substance is the mass of one mole of that substance, exp
 
 ### Calculating Molar Mass
 
-| Element | Symbol | Atomic Mass | Atoms | Total |
-|---------|--------|-------------|-------|-------|
-| Carbon | C | 12.011 | 1 | 12.011 |
-| Hydrogen | H | 1.008 | 4 | 4.032 |
-| Total | | | | **16.043 g/mol** |
+| Element  | Symbol | Atomic Mass | Atoms | Total            |
+| -------- | ------ | ----------- | ----- | ---------------- |
+| Carbon   | C      | 12.011      | 1     | 12.011           |
+| Hydrogen | H      | 1.008       | 4     | 4.032            |
+| Total    |        |             |       | **16.043 g/mol** |
 
 :::note
 The molar mass is numerically equal to the atomic/molecular weight but has units of g/mol instead of amu.
@@ -655,6 +691,7 @@ The molar mass is numerically equal to the atomic/molecular weight but has units
 How many grams are in 2.5 moles of methane ($\text{CH}_4$)?
 
 **Solution:**
+
 1. Molar mass of $\text{CH}_4 = 16.043\text{ g/mol}$
 2. Use the conversion formula:
    $$
@@ -675,11 +712,13 @@ Always balance equations by adjusting coefficients (numbers in front), never by 
 :::
 
 Unbalanced equation:
+
 $$
 \text{H}_2 + \text{O}_2 \rightarrow \text{H}_2\text{O}
 $$
 
 Balanced equation:
+
 $$
 2\text{H}_2 + \text{O}_2 \rightarrow 2\text{H}_2\text{O}
 $$
@@ -723,32 +762,38 @@ Here's a sentence with a footnote[^1].
 ## 💡 Best Practices
 
 ### 1. **Use Semantic Headings**
+
 - One H1 per file (main title)
 - Use H2 for major sections
 - Use H3 for subsections
 - Keep hierarchy consistent
 
 ### 2. **Write Clear Alt Text**
+
 - Describe what's in the image
 - Alt text becomes the caption
 - Be descriptive for accessibility
 
 ### 3. **Use Callout Blocks Strategically**
+
 - **Note** for important concepts
 - **Warning** for common mistakes or safety
 - **Example** for worked problems
 
 ### 4. **Format Equations Properly**
+
 - Use `\text{}` for text in equations: `$\text{H}_2\text{O}$`
 - Use subscripts/superscripts correctly
 - Display complex equations in block mode ($$)
 
 ### 5. **Keep Tables Readable**
+
 - Use clear column headers
 - Keep cells concise
 - Consider splitting very wide tables
 
 ### 6. **Test Your Content**
+
 - Preview in the reader app
 - Check on mobile devices
 - Test all interactive elements
@@ -770,6 +815,7 @@ See the [Practice Problem Block](#practice-problem-block-interactive) section in
 This feature is now available for use in your markdown files!
 
 #### 2. **Multiple Choice Quizzes**
+
 ```markdown
 :::quiz
 What is the atomic number of Carbon?
@@ -784,20 +830,25 @@ a) 6 - Carbon has 6 protons!
 :::
 :::
 ```
+
 **Why:** Immediate feedback. Could track scores, show explanations for wrong answers, gamify learning.
 
 #### 3. **Fill-in-the-Blank Interactive**
+
 ```markdown
 :::fill-blank
-The formula for photosynthesis is: 6CO₂ + 6H₂O + light → ___ + 6O₂
+The formula for photosynthesis is: 6CO₂ + 6H₂O + light → \_\_\_ + 6O₂
 :::
 ```
+
 **Why:** Active recall is one of the most effective learning techniques. Forces engagement.
 
 #### 4. **Drag-and-Drop Matching**
+
 ```markdown
 :::match
 Match the element to its symbol:
+
 - Sodium
 - Potassium
 - Iron
@@ -806,6 +857,7 @@ Match the element to its symbol:
 Options: Na, K, Fe, Au
 :::
 ```
+
 **Why:** Interactive, game-like. Great for memorization of symbols, formulas, lab equipment.
 
 ---
@@ -813,18 +865,22 @@ Options: Na, K, Fe, Au
 ### 🔬 Lab & Safety
 
 #### 5. **Safety Warning Blocks**
+
 ```markdown
 :::safety
 ⚠️ **Strong Acid - Handle with Care**
+
 - Wear goggles and gloves
 - Work in fume hood
 - Add acid to water, NEVER water to acid
 - Have sodium bicarbonate nearby for spills
-:::
+  :::
 ```
+
 **Why:** Critical for lab work. Red theme, prominent icons. Could include emergency procedures.
 
 #### 6. **Lab Procedure Steps**
+
 ```markdown
 :::lab-procedure
 **Synthesis of Copper Sulfate Crystals**
@@ -834,23 +890,26 @@ Options: Na, K, Fe, Au
 3. Heat gently until dissolved
 4. Filter the solution
 5. Allow to crystallize over 3 days
-:::
+   :::
 ```
+
 **Why:** Step-by-step formatting with checkboxes. Could include timers, photos for each step.
 
 #### 7. **Lab Report Template**
+
 ```markdown
 :::lab-report
 **Experiment:** Determining Molar Mass
 
-**Hypothesis:** ___
-**Materials:** ___
-**Procedure:** ___
-**Data:** ___
-**Analysis:** ___
-**Conclusion:** ___
+**Hypothesis:** **_
+**Materials:** _**
+**Procedure:** **_
+**Data:** _**
+**Analysis:** **_
+**Conclusion:** _**
 :::
 ```
+
 **Why:** Teaches scientific writing. Students can download/print, or submit digitally.
 
 ---
@@ -880,25 +939,31 @@ See the [Common Misconception Block](#common-misconception-block-rosered) sectio
 ```
 
 #### 10. **Mnemonic Helpers**
+
 ```markdown
 :::mnemonic
 **OIL RIG**
+
 - **O**xidation **I**s **L**oss (of electrons)
 - **R**eduction **I**s **G**ain (of electrons)
-:::
+  :::
 ```
+
 **Why:** Memory aids make chemistry less intimidating. Could include student-submitted mnemonics.
 
 #### 11. **Pronunciation Guide**
+
 ```markdown
 :::pronunciation
 **Stoichiometry:** stoy-kee-AH-meh-tree
 [🔊 Listen]
 :::
 ```
+
 **Why:** Chemistry has complex terminology. Audio pronunciation builds confidence in speaking.
 
 #### 12. **Simplified Explanation (ELI5)**
+
 ```markdown
 :::simplify
 **Complex:** "Le Chatelier's principle states that if a dynamic equilibrium is disturbed..."
@@ -906,6 +971,7 @@ See the [Common Misconception Block](#common-misconception-block-rosered) sectio
 **Simple:** Think of equilibrium like a seesaw. If you push one side down (add more reactant), the seesaw tips and the other side goes up (makes more product) to balance it out again.
 :::
 ```
+
 **Why:** Analogies and metaphors make abstract concepts concrete. Great for struggling students.
 
 ---
@@ -913,6 +979,7 @@ See the [Common Misconception Block](#common-misconception-block-rosered) sectio
 ### 🌍 Real-World Connections
 
 #### 13. **Real-World Applications**
+
 ```markdown
 :::real-world
 **Where you see this:** Airbags in cars use rapid decomposition reactions!
@@ -923,21 +990,26 @@ When a crash occurs, sodium azide (NaN₃) decomposes:
 The nitrogen gas inflates the airbag in milliseconds.
 :::
 ```
+
 **Why:** "When will I ever use this?" - Answers that question. Increases motivation and retention.
 
 #### 14. **Career Connections**
+
 ```markdown
 :::career
 **Who uses this?**
+
 - 💊 Pharmacists: Calculate drug concentrations
 - 🏭 Chemical Engineers: Design production processes
 - 🔬 Forensic Scientists: Analyze crime scene evidence
 - 🌊 Environmental Scientists: Test water quality
-:::
+  :::
 ```
+
 **Why:** Shows relevance to future jobs. Inspires career exploration.
 
 #### 15. **Environmental Impact**
+
 ```markdown
 :::environmental
 🌱 **Sustainability Note**
@@ -945,6 +1017,7 @@ The nitrogen gas inflates the airbag in milliseconds.
 Traditional ammonia production (Haber process) uses massive energy. New green ammonia methods using renewable electricity could reduce global CO₂ emissions by 1.8%!
 :::
 ```
+
 **Why:** Gen Z cares deeply about climate. Makes chemistry feel purposeful and urgent.
 
 ---
@@ -952,6 +1025,7 @@ Traditional ammonia production (Haber process) uses massive energy. New green am
 ### 📖 Context & History
 
 #### 16. **Historical Context**
+
 ```markdown
 :::history
 **Marie Curie (1867-1934)**
@@ -961,18 +1035,22 @@ Discovered radium and polonium. First woman to win a Nobel Prize (1903), and fir
 Her notebooks are still too radioactive to handle safely!
 :::
 ```
+
 **Why:** Humanizes science. Shows chemistry is created by people, not just facts from textbooks.
 
 #### 17. **Timeline Visualizations**
+
 ```markdown
 :::timeline
 **Discovery of Atomic Structure**
+
 - 1897: Thomson discovers electron (plum pudding model)
 - 1911: Rutherford's gold foil experiment (nuclear model)
 - 1913: Bohr model with electron shells
 - 1926: Schrödinger's quantum mechanical model
-:::
+  :::
 ```
+
 **Why:** Shows scientific progress isn't linear. Visual timeline helps organize historical development.
 
 ---
@@ -980,6 +1058,7 @@ Her notebooks are still too radioactive to handle safely!
 ### 🎥 Multimedia Integration
 
 #### 18. **Video Embeds**
+
 ```markdown
 :::video
 https://www.youtube.com/watch?v=abc123
@@ -987,9 +1066,11 @@ https://www.youtube.com/watch?v=abc123
 **Duration:** 5:34
 :::
 ```
+
 **Why:** Visual learners benefit immensely. Shows reactions, demos impossible in classroom.
 
 #### 19. **Interactive Simulations**
+
 ```markdown
 :::simulation
 **PhET: Balancing Chemical Equations**
@@ -998,9 +1079,11 @@ https://www.youtube.com/watch?v=abc123
 Try balancing these equations yourself with molecular models!
 :::
 ```
+
 **Why:** Learning by doing. PhET sims are proven effective for conceptual understanding.
 
 #### 20. **3D Molecule Viewer**
+
 ```markdown
 :::molecule-viewer
 **Caffeine (C₈H₁₀N₄O₂)**
@@ -1010,6 +1093,7 @@ Try balancing these equations yourself with molecular models!
 Notice the planar structure of the aromatic rings and the bent geometry around nitrogen atoms.
 :::
 ```
+
 **Why:** Spatial reasoning is critical in chemistry. Interactive 3D beats static 2D drawings.
 
 ---
@@ -1017,6 +1101,7 @@ Notice the planar structure of the aromatic rings and the bent geometry around n
 ### 📊 Data & Visualization
 
 #### 21. **Interactive Graphs**
+
 ```markdown
 :::graph
 **Plot:** Temperature vs. Solubility of KNO₃
@@ -1029,9 +1114,11 @@ Data:
 [Interactive graph students can manipulate]
 :::
 ```
+
 **Why:** Students learn to read graphs by interacting with them. Could add "predict the next point" challenges.
 
 #### 22. **Comparison Tables**
+
 ```markdown
 :::compare
 | Property | Ionic Bonds | Covalent Bonds |
@@ -1042,6 +1129,7 @@ Data:
 | Conductivity | Yes (when dissolved) | No |
 :::
 ```
+
 **Why:** Side-by-side comparisons highlight differences. Could include filtering, sorting.
 
 ---
@@ -1049,31 +1137,38 @@ Data:
 ### 🧮 Tools & Calculators
 
 #### 23. **Embedded Calculators**
+
 ```markdown
 :::calculator
 **Molarity Calculator**
 
 Enter values:
-- Moles of solute: ___
-- Volume (L): ___
 
-Molarity = ___ M
+- Moles of solute: \_\_\_
+- Volume (L): \_\_\_
+
+Molarity = \_\_\_ M
 :::
 ```
+
 **Why:** Instant calculation removes arithmetic barriers. Focus on concepts, not arithmetic.
 
 #### 24. **Unit Converter**
+
 ```markdown
 :::unit-converter
 Convert between:
+
 - grams ⟷ moles
 - Celsius ⟷ Kelvin
 - atm ⟷ Pa ⟷ mmHg
-:::
+  :::
 ```
+
 **Why:** Chemistry is full of unit conversions. Interactive tool reduces cognitive load.
 
 #### 25. **Equation Balancer**
+
 ```markdown
 :::balance-equation
 Enter your unbalanced equation:
@@ -1082,6 +1177,7 @@ H₂ + O₂ → H₂O
 [Check Balance] [Show Steps] [Get Hint]
 :::
 ```
+
 **Why:** Guided practice with immediate feedback. Could show step-by-step balancing process.
 
 ---
@@ -1089,6 +1185,7 @@ H₂ + O₂ → H₂O
 ### 🤝 Collaborative Learning
 
 #### 26. **Think-Pair-Share Prompts**
+
 ```markdown
 :::think-pair-share
 **Question:** Why do ionic compounds dissolve in water but not in oil?
@@ -1100,14 +1197,17 @@ H₂ + O₂ → H₂O
 **Hint:** Consider the polar nature of water molecules.
 :::
 ```
+
 **Why:** Promotes active learning. Students articulate understanding to peers.
 
 #### 27. **Discussion Prompts**
+
 ```markdown
 :::discussion
 **Debate:** Should genetic engineering be allowed for humans?
 
 Consider:
+
 - Medical benefits (cure genetic diseases)
 - Ethical concerns (designer babies)
 - Environmental impacts
@@ -1115,6 +1215,7 @@ Consider:
 💬 **Join the discussion thread** [245 comments]
 :::
 ```
+
 **Why:** Chemistry connects to ethics, society. Develops critical thinking beyond calculations.
 
 ---
@@ -1128,6 +1229,7 @@ See the [Checkpoint Block](#checkpoint-block-green) section above - use `:::chec
 ```markdown
 :::checkpoint
 Getur þú:
+
 - Skilgreint mólstyrk
 - Reiknað mól frá massa
 - Útskýrt mólhugtakið
@@ -1141,6 +1243,7 @@ Ef ekki, endurskoðaðu kafla 3.2!
 The `:::checkpoint` directive serves this purpose. See [Checkpoint Block](#checkpoint-block-green) above.
 
 #### 30. **Flashcard Sets**
+
 ```markdown
 :::flashcard-deck
 **Polyatomic Ions - Set 1**
@@ -1152,6 +1255,7 @@ Card 3: PO₄³⁻ → [flip] → Phosphate
 [Start Practice] [Shuffle] [Track Score]
 :::
 ```
+
 **Why:** Spaced repetition is proven for memorization. Built-in flashcards save students time.
 
 ---
@@ -1159,6 +1263,7 @@ Card 3: PO₄³⁻ → [flip] → Phosphate
 ### 🎨 Advanced Customization
 
 #### 31. **Extension Material**
+
 ```markdown
 :::extension
 **For advanced students:**
@@ -1168,9 +1273,11 @@ Explore quantum mechanical derivation of atomic orbitals using Schrödinger's eq
 [Expand to read more]
 :::
 ```
+
 **Why:** Differentiated instruction. Advanced students stay engaged without slowing others down.
 
 #### 32. **Worked Example Walkthroughs**
+
 ```markdown
 :::worked-example
 **Example 5.4: Finding Empirical Formula**
@@ -1178,11 +1285,13 @@ Explore quantum mechanical derivation of atomic orbitals using Schrödinger's eq
 **Given:** 40% C, 6.7% H, 53.3% O by mass
 
 **Step 1:** Assume 100g sample
+
 - C: 40g
 - H: 6.7g
 - O: 53.3g
 
 **Step 2:** Convert to moles
+
 - C: 40g ÷ 12.01 g/mol = 3.33 mol
 - H: 6.7g ÷ 1.008 g/mol = 6.65 mol
 - O: 53.3g ÷ 16.00 g/mol = 3.33 mol
@@ -1192,9 +1301,11 @@ Explore quantum mechanical derivation of atomic orbitals using Schrödinger's eq
 [Continue step-by-step]
 :::
 ```
+
 **Why:** Breaks complex problems into manageable steps. Students can pause, rewind, review.
 
 #### 33. **Reaction Mechanism Animator**
+
 ```markdown
 :::mechanism-animator
 **SN2 Reaction**
@@ -1206,6 +1317,7 @@ Watch how the nucleophile attacks the electrophile as the leaving group departs 
 [Pause] [Slow Motion] [Replay]
 :::
 ```
+
 **Why:** Reaction mechanisms are abstract. Animation makes electron movement visible.
 
 ---
@@ -1230,6 +1342,7 @@ These features are grounded in research on effective learning:
 ## 🎯 Implementation Priority
 
 **Already Implemented:** ✅
+
 1. ✅ Hide/reveal answer blocks (`:::practice-problem` with `:::answer`)
 2. ✅ Definition boxes (`:::definition`)
 3. ✅ Safety warnings (`:::warning`)
@@ -1243,6 +1356,7 @@ These features are grounded in research on effective learning:
 **Still Available to Implement:**
 
 **High Impact, Medium Complexity:**
+
 - Multiple choice quizzes with feedback
 - Calculators (molarity, pH, etc.)
 - Flashcard decks (inline)
@@ -1250,6 +1364,7 @@ These features are grounded in research on effective learning:
 - Video embeds
 
 **High Impact, High Complexity:**
+
 - 3D molecule viewers
 - Simulation integrations
 - Reaction mechanism animators

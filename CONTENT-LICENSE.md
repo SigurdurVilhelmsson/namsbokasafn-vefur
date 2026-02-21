@@ -11,6 +11,7 @@ The educational content located in the `static/content/` directory is licensed u
 This content is an Icelandic translation and adaptation of:
 
 **Original Work Information:**
+
 - **Title**: Chemistry 2e
 - **Authors**: Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson
 - **Publisher**: OpenStax
@@ -21,6 +22,7 @@ This content is an Icelandic translation and adaptation of:
 ## This Adaptation
 
 **Adaptation Information:**
+
 - **Translator**: Sigurður E. Vilhelmsson
 - **Translation Language**: Icelandic (Íslenska)
 - **Target Audience**: Icelandic high school students
@@ -28,6 +30,7 @@ This content is an Icelandic translation and adaptation of:
 - **License**: Creative Commons Attribution 4.0 International (CC BY 4.0)
 
 **Modifications Made:**
+
 - Translation from English to Icelandic
 - Adaptation of terminology for Icelandic educational context
 - Formatting adjustments for digital reader interface
@@ -55,6 +58,7 @@ When using or redistributing this content, please provide attribution to both th
 ### Recommended Attribution Format:
 
 **For the Original Work:**
+
 ```
 Based on "Chemistry 2e" by Paul Flowers, Klaus Theopold, Richard Langley,
 and William R. Robinson, published by OpenStax, licensed under CC BY 4.0.
@@ -62,12 +66,14 @@ Available at: https://openstax.org/details/books/chemistry-2e
 ```
 
 **For This Translation:**
+
 ```
 Icelandic translation by Sigurður E. Vilhelmsson (2025), licensed under CC BY 4.0.
-Available at: https://github.com/SigurdurVilhelmsson/Chemistry-Reader
+Available at: https://github.com/SigurdurVilhelmsson/namsbokasafn-vefur
 ```
 
 ### Combined Attribution Example:
+
 ```
 This content is based on "Chemistry 2e" by Paul Flowers, Klaus Theopold,
 Richard Langley, and William R. Robinson (OpenStax, CC BY 4.0), translated
@@ -77,6 +83,7 @@ to Icelandic by Sigurður E. Vilhelmsson (2025, CC BY 4.0).
 ## Indicating Changes
 
 This is a derivative work. The following changes have been made from the original:
+
 1. Complete translation from English to Icelandic
 2. Adaptation of chemical terminology for Icelandic educational standards
 3. Reorganization of content for web-based reading experience
@@ -100,11 +107,13 @@ Learn more at: https://openstax.org/
 ## Questions?
 
 If you have questions about the license or how to properly attribute this work, please refer to:
+
 - Creative Commons FAQ: https://creativecommons.org/faq/
 - OpenStax Licensing: https://openstax.org/license
 
 For questions specific to this translation project, please contact:
-- Repository: https://github.com/SigurdurVilhelmsson/Chemistry-Reader
+
+- Repository: https://github.com/SigurdurVilhelmsson/namsbokasafn-vefur
 - Translator: Sigurður E. Vilhelmsson
 
 ---

@@ -23,11 +23,11 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 
 ## Tech Stack
 
-- **Runtime:** Node.js 22 (see `.nvmrc`)
+- **Runtime:** Node.js >= 20 (see `.nvmrc`)
 - **Framework:** SvelteKit 2 + Svelte 5, TypeScript 5.7
 - **Build:** Vite 7, `@sveltejs/adapter-static` → outputs to `build/`
 - **Styling:** Tailwind CSS 4 + PostCSS
-- **Math:** KaTeX (pre-rendered in content HTML)
+- **Math:** MathJax (pre-rendered SVG in content HTML)
 - **Search:** Fuse.js (client-side full-text search)
 - **PWA:** `@vite-pwa/sveltekit` with Workbox (offline-first)
 - **Testing:** Vitest (173+ unit tests) + Playwright (E2E)
@@ -49,7 +49,7 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) 22 (use `nvm use` — `.nvmrc` is included)
+- [Node.js](https://nodejs.org/) >= 20 (use `nvm use` — `.nvmrc` is included)
 - npm
 
 ## Setup
@@ -105,8 +105,8 @@ The production site is a static build served by nginx on a Linode Ubuntu server.
 
 - **Build output:** `build/` (SvelteKit static adapter with SPA fallback)
 - **Server path:** `/var/www/efnafraedi-lesari/dist`
-- **Domain:** `namsbokasafn.is` (formerly `efnafraedi.app`)
-- **Nginx:** `/etc/nginx/sites-available/efnafraedi.app`
+- **Domain:** `namsbokasafn.is`
+- **Nginx:** `/etc/nginx/sites-available/namsbokasafn.is`
 - **SSL:** Let's Encrypt via certbot (auto-renewal)
 - **No backend** — all state is client-side in localStorage
 
