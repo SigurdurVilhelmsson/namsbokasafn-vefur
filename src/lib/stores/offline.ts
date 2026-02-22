@@ -319,7 +319,6 @@ export async function downloadBook(
 					continue;
 				}
 
-				const contentType = response.headers.get('content-type') || '';
 				const content = await response.clone().text();
 				totalBytes += content.length;
 

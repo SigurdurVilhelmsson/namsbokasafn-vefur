@@ -138,8 +138,11 @@ function createEmptyDailyStats(date: string): DailyStats {
 	};
 }
 
+const isNullOrObject = (v: unknown): boolean => v === null || isObject(v);
+
 const analyticsValidators = {
 	sessions: isArray,
+	currentSession: isNullOrObject,
 	sectionReadingTimes: isObject,
 	dailyStats: isObject,
 	activityLog: isArray,

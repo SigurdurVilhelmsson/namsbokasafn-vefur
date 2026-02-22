@@ -63,12 +63,12 @@
     border: 1px solid #fcd34d;
   }
 
-  :global([data-theme="dark"]) .pilot-banner.reviewed {
+  :global(.dark) .pilot-banner.reviewed {
     background: rgba(22, 163, 74, 0.15);
     border-color: rgba(134, 239, 172, 0.3);
   }
 
-  :global([data-theme="dark"]) .pilot-banner.mt {
+  :global(.dark) .pilot-banner.mt {
     background: rgba(217, 119, 6, 0.15);
     border-color: rgba(252, 211, 77, 0.3);
   }
@@ -104,11 +104,11 @@
     color: #92400e;
   }
 
-  :global([data-theme="dark"]) .reviewed .status-badge {
+  :global(.dark) .reviewed .status-badge {
     color: #86efac;
   }
 
-  :global([data-theme="dark"]) .mt .status-badge {
+  :global(.dark) .mt .status-badge {
     color: #fcd34d;
   }
 
@@ -121,7 +121,7 @@
     color: #374151;
   }
 
-  :global([data-theme="dark"]) .status-desc {
+  :global(.dark) .status-desc {
     color: #d1d5db;
   }
 
@@ -156,21 +156,21 @@
     background: rgba(217, 119, 6, 0.2);
   }
 
-  :global([data-theme="dark"]) .reviewed .feedback-link {
+  :global(.dark) .reviewed .feedback-link {
     color: #86efac;
     background: rgba(134, 239, 172, 0.1);
   }
 
-  :global([data-theme="dark"]) .reviewed .feedback-link:hover {
+  :global(.dark) .reviewed .feedback-link:hover {
     background: rgba(134, 239, 172, 0.2);
   }
 
-  :global([data-theme="dark"]) .mt .feedback-link {
+  :global(.dark) .mt .feedback-link {
     color: #fcd34d;
     background: rgba(252, 211, 77, 0.1);
   }
 
-  :global([data-theme="dark"]) .mt .feedback-link:hover {
+  :global(.dark) .mt .feedback-link:hover {
     background: rgba(252, 211, 77, 0.2);
   }
 

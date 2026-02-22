@@ -52,34 +52,21 @@ export function deserializeRange(textRange: TextRange, container: HTMLElement): 
 	// If this is a legacy v1 range, try to find text using selectedText from annotation
 	// The caller should pass the selectedText as textRange.exact for legacy ranges
 
-	const { exact, prefix, suffix, anchorId } = textRange;
+	const { exact, prefix, suffix } = textRange;
 
 	if (!exact) {
 		console.warn('Cannot deserialize range without exact text');
 		return null;
 	}
 
-	// Strategy 1: Start search from anchor element if available
-	let searchStart: Node = container;
-	if (anchorId) {
-		// Use CSS.escape if available, otherwise basic escaping
-		const escapedId = typeof CSS !== 'undefined' && CSS.escape
-			? CSS.escape(anchorId)
-			: anchorId.replace(/([^\w-])/g, '\\$1');
-		const anchorElement = container.querySelector(`#${escapedId}`);
-		if (anchorElement) {
-			searchStart = anchorElement;
-		}
-	}
-
-	// Strategy 2: Find exact text with context matching
-	const range = findTextWithContext(exact, prefix, suffix, searchStart, container);
+	// Strategy 1: Find exact text with context matching
+	const range = findTextWithContext(exact, prefix, suffix, container);
 
 	if (range) {
 		return range;
 	}
 
-	// Strategy 3: Fall back to exact text search without context
+	// Strategy 2: Fall back to exact text search without context
 	const fallbackRange = findExactText(exact, container);
 	if (fallbackRange) {
 		console.debug('Highlight restored using fallback (no context match)');
@@ -178,7 +165,6 @@ function findTextWithContext(
 	exact: string,
 	prefix: string,
 	suffix: string,
-	searchStart: Node,
 	container: HTMLElement
 ): Range | null {
 	const fullText = container.textContent || '';

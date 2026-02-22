@@ -345,7 +345,7 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 		update(newOptions: AnswerLinksOptions) {
 			// If options change, we'd need to rebuild - for now just log
 			if (newOptions.sectionSlug !== sectionSlug) {
-				console.warn('answerLinks: sectionSlug changed, consider remounting');
+				console.debug('answerLinks: sectionSlug changed, consider remounting');
 			}
 		},
 		destroy() {
