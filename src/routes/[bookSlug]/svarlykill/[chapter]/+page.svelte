@@ -21,7 +21,7 @@
 	<header class="mb-8">
 		<nav class="text-sm text-gray-500 dark:text-gray-400 mb-2">
 			<a href="/{data.bookSlug}" class="hover:text-gray-700 dark:hover:text-gray-200">
-				Efnafræði 2e
+				{data.book?.title ?? 'Bók'}
 			</a>
 			<span class="mx-2">/</span>
 			<a href="/{data.bookSlug}/kafli/{chapterSlug}" class="hover:text-gray-700 dark:hover:text-gray-200">

@@ -11,13 +11,13 @@ On push to `main`:
 3. Runs lint, type-check, and unit tests
 4. Builds with content validation (`@sveltejs/adapter-static`)
 5. Runs Playwright E2E tests
-6. Deploys static output to `/var/www/efnafraedi-lesari/dist` on the production server
+6. Deploys static output to `/var/www/namsbokasafn-vefur/build` on the production server
 
 ## Manual deployment
 
 ```bash
 npm run build
-rsync -avz --delete build/ siggi@kvenno.app:/var/www/efnafraedi-lesari/dist/
+rsync -avz --delete build/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/
 ```
 
 ## Server details

@@ -3,6 +3,8 @@
  * Enhances all images in markdown content with zoom/lightbox capability
  */
 
+import { escapeHtml } from '$lib/utils/searchIndex';
+
 interface FigureViewerState {
 	lightbox: HTMLDivElement | null;
 	currentImage: HTMLImageElement | null;
@@ -32,7 +34,10 @@ function showLightbox(img: HTMLImageElement, state: FigureViewerState): void {
 	lightbox.className = 'figure-lightbox';
 	lightbox.setAttribute('role', 'dialog');
 	lightbox.setAttribute('aria-modal', 'true');
-	lightbox.setAttribute('aria-label', `Mynd: ${alt}`);
+	lightbox.setAttribute('aria-label', `Mynd: ${escapeHtml(alt)}`);
+
+	const escapedAlt = escapeHtml(alt);
+	const escapedCaption = escapeHtml(figcaption);
 
 	lightbox.innerHTML = `
 		<div class="figure-lightbox-toolbar">
@@ -68,9 +73,9 @@ function showLightbox(img: HTMLImageElement, state: FigureViewerState): void {
 			</div>
 		</div>
 		<div class="figure-lightbox-container">
-			<img class="figure-lightbox-image" src="${src}" alt="${alt}" draggable="false" />
+			<img class="figure-lightbox-image" src="${src}" alt="${escapedAlt}" draggable="false" />
 		</div>
-		${figcaption || alt ? `<div class="figure-lightbox-caption">${figcaption || alt}</div>` : ''}
+		${escapedCaption || escapedAlt ? `<div class="figure-lightbox-caption">${escapedCaption || escapedAlt}</div>` : ''}
 	`;
 
 	// Add to DOM

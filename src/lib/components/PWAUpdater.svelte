@@ -33,7 +33,7 @@
 			} = useRegisterSW({
 				immediate: true,
 				onRegisteredSW(swUrl, r) {
-					console.log('SW Registered:', swUrl);
+					console.debug('SW Registered:', swUrl);
 
 					// Check for updates periodically (every hour)
 					if (r) {
