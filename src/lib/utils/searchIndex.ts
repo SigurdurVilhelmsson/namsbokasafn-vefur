@@ -7,6 +7,7 @@
 import { browser } from '$app/environment';
 import type { TableOfContents } from '$lib/types/content';
 import { getChapterPath, getSectionPath, getChapterFolder } from '$lib/utils/contentLoader';
+import { escapeHtml } from '$lib/utils/html';
 import type {
 	WorkerMessage,
 	WorkerResponse,
@@ -341,19 +342,8 @@ export function getSearchChapters(): { slug: string; title: string }[] {
 	return searchIndex.getChapters();
 }
 
-/**
- * Escape HTML entities to prevent XSS attacks
- */
-export function escapeHtml(text: string): string {
-	const htmlEntities: Record<string, string> = {
-		'&': '&amp;',
-		'<': '&lt;',
-		'>': '&gt;',
-		'"': '&quot;',
-		"'": '&#39;'
-	};
-	return text.replace(/[&<>"']/g, (char) => htmlEntities[char] || char);
-}
+// escapeHtml is imported from $lib/utils/html and re-exported for backwards compatibility
+export { escapeHtml };
 
 /**
  * Highlight query in text (for displaying results)

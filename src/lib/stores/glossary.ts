@@ -27,49 +27,54 @@ const defaultState: GlossaryState = {
 function createGlossaryStore() {
 	const { subscribe, set, update } = writable<GlossaryState>(defaultState);
 
+	let loadPromise: Promise<void> | null = null;
+
 	return {
 		subscribe,
 
 		/**
 		 * Load glossary for a book (cached - only loads if not already loaded)
 		 */
-		async load(bookSlug: string): Promise<void> {
+		load(bookSlug: string): Promise<void> {
 			const state = get({ subscribe });
 
 			// Already loaded for this book
 			if (state.bookSlug === bookSlug && state.terms.length > 0) {
-				return;
+				return Promise.resolve();
 			}
 
-			// Already loading
-			if (state.loading) {
-				return;
-			}
+			// Already loading - return the existing promise so callers wait
+			if (loadPromise) return loadPromise;
 
-			update((s) => ({ ...s, loading: true, error: null }));
+			loadPromise = (async () => {
+				update((s) => ({ ...s, loading: true, error: null }));
 
-			try {
-				const response = await fetch(`/content/${bookSlug}/glossary.json`);
-				if (!response.ok) {
-					throw new Error('Glossary not found');
+				try {
+					const response = await fetch(`/content/${bookSlug}/glossary.json`);
+					if (!response.ok) {
+						throw new Error('Glossary not found');
+					}
+
+					const glossary: Glossary = await response.json();
+
+					update((s) => ({
+						...s,
+						bookSlug,
+						terms: glossary.terms,
+						loading: false,
+						error: null
+					}));
+				} catch (e) {
+					loadPromise = null;
+					update((s) => ({
+						...s,
+						loading: false,
+						error: 'Villa við að hlaða orðasafni'
+					}));
 				}
+			})();
 
-				const glossary: Glossary = await response.json();
-
-				update((s) => ({
-					...s,
-					bookSlug,
-					terms: glossary.terms,
-					loading: false,
-					error: null
-				}));
-			} catch (e) {
-				update((s) => ({
-					...s,
-					loading: false,
-					error: 'Villa við að hlaða orðasafni'
-				}));
-			}
+			return loadPromise;
 		},
 
 		/**
@@ -128,6 +133,7 @@ function createGlossaryStore() {
 		 * Clear the cached glossary
 		 */
 		clear(): void {
+			loadPromise = null;
 			set(defaultState);
 		}
 	};

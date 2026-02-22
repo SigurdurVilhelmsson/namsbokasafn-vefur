@@ -478,7 +478,7 @@ function createAnalyticsStore() {
 			for (let i = 0; i < 7; i++) {
 				const d = new Date(startDate);
 				d.setDate(d.getDate() + i);
-				weekDates.push(d.toISOString().split('T')[0]);
+				weekDates.push(formatLocalDate(d));
 			}
 
 			weekDates.forEach((date) => {
@@ -577,7 +577,7 @@ function createAnalyticsStore() {
 					for (let i = 0; i < 7; i++) {
 						const d = new Date(startDate);
 						d.setDate(d.getDate() + i);
-						weekDates.push(d.toISOString().split('T')[0]);
+						weekDates.push(formatLocalDate(d));
 					}
 					current = weekDates.reduce((sum, date) => {
 						const stats = state.dailyStats[date];
@@ -623,7 +623,7 @@ function createAnalyticsStore() {
 						for (let i = 0; i < 7; i++) {
 							const d = new Date(startDate);
 							d.setDate(d.getDate() + i);
-							weekDates.push(d.toISOString().split('T')[0]);
+							weekDates.push(formatLocalDate(d));
 						}
 						current = weekDates.reduce((sum, date) => {
 							const stats = state.dailyStats[date];
