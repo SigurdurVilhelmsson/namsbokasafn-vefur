@@ -123,13 +123,13 @@
     color: #166534;
   }
 
-  :global([data-theme="dark"]) .offline-indicator.offline {
+  :global(.dark) .offline-indicator.offline {
     background: rgba(217, 119, 6, 0.2);
     border-bottom-color: rgba(252, 211, 77, 0.3);
     color: #fcd34d;
   }
 
-  :global([data-theme="dark"]) .offline-indicator.online {
+  :global(.dark) .offline-indicator.online {
     background: rgba(22, 163, 74, 0.2);
     border-bottom-color: rgba(134, 239, 172, 0.3);
     color: #86efac;
@@ -185,11 +185,11 @@
     color: #166534;
   }
 
-  :global([data-theme="dark"]) .offline .dismiss-btn {
+  :global(.dark) .offline .dismiss-btn {
     color: #fcd34d;
   }
 
-  :global([data-theme="dark"]) .online .dismiss-btn {
+  :global(.dark) .online .dismiss-btn {
     color: #86efac;
   }
 </style>

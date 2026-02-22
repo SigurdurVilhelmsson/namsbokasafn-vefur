@@ -36,6 +36,7 @@ function showLightbox(img: HTMLImageElement, state: FigureViewerState): void {
 	lightbox.setAttribute('aria-modal', 'true');
 	lightbox.setAttribute('aria-label', `Mynd: ${escapeHtml(alt)}`);
 
+	const escapedSrc = escapeHtml(src);
 	const escapedAlt = escapeHtml(alt);
 	const escapedCaption = escapeHtml(figcaption);
 
@@ -73,7 +74,7 @@ function showLightbox(img: HTMLImageElement, state: FigureViewerState): void {
 			</div>
 		</div>
 		<div class="figure-lightbox-container">
-			<img class="figure-lightbox-image" src="${src}" alt="${escapedAlt}" draggable="false" />
+			<img class="figure-lightbox-image" src="${escapedSrc}" alt="${escapedAlt}" draggable="false" />
 		</div>
 		${escapedCaption || escapedAlt ? `<div class="figure-lightbox-caption">${escapedCaption || escapedAlt}</div>` : ''}
 	`;

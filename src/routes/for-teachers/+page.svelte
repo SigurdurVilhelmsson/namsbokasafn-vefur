@@ -528,7 +528,7 @@
     border-left-color: #d97706;
   }
 
-  :global([data-theme="dark"]) .highlight-box.warning {
+  :global(.dark) .highlight-box.warning {
     background: rgba(217, 119, 6, 0.15);
   }
 
@@ -610,12 +610,12 @@
     color: #92400e;
   }
 
-  :global([data-theme="dark"]) .status-badge.reviewed {
+  :global(.dark) .status-badge.reviewed {
     background: rgba(22, 163, 74, 0.2);
     color: #86efac;
   }
 
-  :global([data-theme="dark"]) .status-badge.mt {
+  :global(.dark) .status-badge.mt {
     background: rgba(217, 119, 6, 0.2);
     color: #fcd34d;
   }

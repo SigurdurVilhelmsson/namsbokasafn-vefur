@@ -97,30 +97,12 @@ function closeZoomModal(state: EquationState): void {
 async function copyToClipboard(text: string, button: HTMLButtonElement, successText = '✓ Afritað'): Promise<void> {
 	if (!text) return;
 
-	try {
-		await navigator.clipboard.writeText(text);
-		const originalText = button.textContent;
-		button.textContent = successText;
-		setTimeout(() => {
-			button.textContent = originalText;
-		}, 2000);
-	} catch {
-		// Fallback for older browsers
-		const textArea = document.createElement('textarea');
-		textArea.value = text;
-		textArea.style.position = 'fixed';
-		textArea.style.left = '-9999px';
-		document.body.appendChild(textArea);
-		textArea.select();
-		document.execCommand('copy');
-		document.body.removeChild(textArea);
-
-		const originalText = button.textContent;
-		button.textContent = successText;
-		setTimeout(() => {
-			button.textContent = originalText;
-		}, 2000);
-	}
+	await navigator.clipboard.writeText(text);
+	const originalText = button.textContent;
+	button.textContent = successText;
+	setTimeout(() => {
+		button.textContent = originalText;
+	}, 2000);
 }
 
 /**

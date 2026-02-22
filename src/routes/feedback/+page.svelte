@@ -314,7 +314,7 @@
     margin: 0 auto 1.5rem;
   }
 
-  :global([data-theme="dark"]) .success-icon {
+  :global(.dark) .success-icon {
     background: rgba(22, 163, 74, 0.2);
   }
 
@@ -402,7 +402,7 @@
     margin-bottom: 1rem;
   }
 
-  :global([data-theme="dark"]) .error-message {
+  :global(.dark) .error-message {
     background: rgba(185, 28, 28, 0.2);
     color: #fca5a5;
   }

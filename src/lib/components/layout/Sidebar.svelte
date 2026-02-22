@@ -478,7 +478,6 @@
 	   ==================================== */
 	.chapter-btn {
 		display: flex;
-		width: 100%;
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.5rem 0.75rem;
