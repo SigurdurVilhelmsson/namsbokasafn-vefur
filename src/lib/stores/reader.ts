@@ -156,10 +156,13 @@ function createReaderStore() {
 		// Add bookmark
 		addBookmark: (chapterSlug: string, sectionSlug: string) => {
 			const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
-			update((state) => ({
-				...state,
-				bookmarks: [...state.bookmarks, bookmarkId]
-			}));
+			update((state) => {
+				if (state.bookmarks.includes(bookmarkId)) return state;
+				return {
+					...state,
+					bookmarks: [...state.bookmarks, bookmarkId]
+				};
+			});
 		},
 
 		// Remove bookmark

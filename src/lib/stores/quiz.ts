@@ -273,7 +273,7 @@ function createQuizStore() {
 
 				return {
 					...state,
-					sessions: [...state.sessions, endedSession],
+					sessions: [...state.sessions, endedSession].slice(-500),
 					stats: { ...state.stats, [statsKey]: newStats },
 					currentSession: null,
 					currentQuestionIndex: 0,

@@ -3,7 +3,7 @@
  * Enhances all images in markdown content with zoom/lightbox capability
  */
 
-import { escapeHtml } from '$lib/utils/searchIndex';
+import { escapeHtml } from '$lib/utils/html';
 
 interface FigureViewerState {
 	lightbox: HTMLDivElement | null;

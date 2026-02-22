@@ -8,6 +8,7 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { referenceStore, type ReferenceType, type ReferenceItem, getReferenceUrl } from '$lib/stores/reference';
+import { escapeHtml } from '$lib/utils/html';
 
 export interface CrossReferenceOptions {
 	bookSlug: string;
@@ -162,15 +163,6 @@ function hideTooltip() {
 }
 
 /**
- * Escape HTML for safe display
- */
-function escapeHtml(text: string): string {
-	const div = document.createElement('div');
-	div.textContent = text;
-	return div.innerHTML;
-}
-
-/**
  * Svelte action for cross-reference hover previews
  */
 export function crossReferences(node: HTMLElement, options: CrossReferenceOptions) {
@@ -179,6 +171,7 @@ export function crossReferences(node: HTMLElement, options: CrossReferenceOption
 	}
 
 	const { bookSlug, chapterSlug, sectionSlug, chapterNumber, content } = options;
+	let currentContent = content;
 
 	// Build reference index from content
 	referenceStore.buildIndexFromContent(chapterSlug, sectionSlug, content, chapterNumber);
@@ -250,7 +243,8 @@ export function crossReferences(node: HTMLElement, options: CrossReferenceOption
 	return {
 		update(newOptions: CrossReferenceOptions) {
 			// Rebuild index if content changes
-			if (newOptions.content !== options.content) {
+			if (newOptions.content !== currentContent) {
+				currentContent = newOptions.content;
 				referenceStore.buildIndexFromContent(
 					newOptions.chapterSlug,
 					newOptions.sectionSlug,

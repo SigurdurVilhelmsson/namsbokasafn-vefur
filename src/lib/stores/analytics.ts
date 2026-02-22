@@ -11,6 +11,7 @@ import {
 	createSectionKey,
 	getCurrentTimestamp,
 	getTodayDateString,
+	getYesterdayDateString,
 	formatLocalDate,
 	generateId
 } from '$lib/utils/storeHelpers';
@@ -236,9 +237,7 @@ function createAnalyticsStore() {
 				return state;
 			}
 
-			const yesterday = new Date();
-			yesterday.setDate(yesterday.getDate() - 1);
-			const yesterdayStr = yesterday.toISOString().split('T')[0];
+			const yesterdayStr = getYesterdayDateString();
 
 			let newStreak = state.currentStreak;
 			if (state.lastActiveDate === yesterdayStr) {
@@ -428,6 +427,9 @@ function createAnalyticsStore() {
 					}
 				};
 			});
+
+			// Ensure streak is updated when a reading session ends
+			updateStreakInternal();
 		},
 
 		logActivity: logActivityInternal,

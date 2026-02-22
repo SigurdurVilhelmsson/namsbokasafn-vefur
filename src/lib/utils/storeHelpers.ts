@@ -137,5 +137,5 @@ export function filterItemsBySection<T extends { chapterSlug: string; sectionSlu
  * Generate a unique ID
  */
 export function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+  return crypto.randomUUID();
 }
