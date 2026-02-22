@@ -233,7 +233,7 @@ describe('annotation store', () => {
 		it('should clear only annotations for the given section', () => {
 			annotationStore.addAnnotation('b', '01', '1-1', 'a', makeRange(), 'yellow');
 			annotationStore.addAnnotation('b', '01', '1-2', 'b', makeRange(), 'blue');
-			annotationStore.clearAnnotationsForSection('01', '1-1');
+			annotationStore.clearAnnotationsForSection('b', '01', '1-1');
 			expect(get(totalAnnotations)).toBe(1);
 			expect(get(annotationStore).annotations[0].sectionSlug).toBe('1-2');
 		});

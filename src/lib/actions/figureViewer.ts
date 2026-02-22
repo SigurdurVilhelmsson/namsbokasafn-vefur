@@ -270,7 +270,7 @@ export function figureViewer(node: HTMLElement) {
 	// Add cursor style to images
 	const images = node.querySelectorAll('img');
 	images.forEach((img) => {
-		if (img.width > 100 || img.height > 100) {
+		if (img.width > 100 && img.height > 100) {
 			img.style.cursor = 'zoom-in';
 		}
 	});
