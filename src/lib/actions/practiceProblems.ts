@@ -363,7 +363,9 @@ export function practiceProblems(node: HTMLElement) {
 
 	// Re-initialize when content changes (for dynamic updates)
 	const observer = new MutationObserver(() => {
+		observer.disconnect();
 		initializePracticeProblems();
+		observer.observe(node, { childList: true, subtree: true });
 	});
 
 	observer.observe(node, { childList: true, subtree: true });

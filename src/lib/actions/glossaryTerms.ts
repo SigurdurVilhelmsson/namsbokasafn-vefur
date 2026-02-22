@@ -22,6 +22,7 @@ export interface GlossaryTermsOptions {
 let tooltipElement: HTMLDivElement | null = null;
 let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 let currentSpan: HTMLElement | null = null;
+let tooltipHoverSetUp = false;
 
 // Minimum term length to mark (avoids matching noise from very short terms)
 const MIN_TERM_LENGTH = 3;
@@ -309,6 +310,7 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 
 	// Keep tooltip visible when mouse enters it
 	function setupTooltipHover() {
+		if (tooltipHoverSetUp) return;
 		const tooltip = getOrCreateTooltip();
 		tooltip.addEventListener('mouseenter', () => {
 			if (hideTimeout) {
@@ -319,6 +321,7 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 		tooltip.addEventListener('mouseleave', () => {
 			hideTooltip();
 		});
+		tooltipHoverSetUp = true;
 	}
 
 	setupTooltipHover();
