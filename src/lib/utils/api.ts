@@ -6,7 +6,7 @@
  */
 
 import { browser } from '$app/environment';
-import { apiUrl } from '$lib/config';
+import { API_BASE_URL, apiUrl } from '$lib/config';
 
 /**
  * Analytics event payload
@@ -25,6 +25,9 @@ export interface AnalyticsEvent {
  */
 export function trackEvent(event: AnalyticsEvent): void {
   if (!browser) return;
+
+  // Skip analytics when no API URL is configured
+  if (!API_BASE_URL) return;
 
   // Use sendBeacon for fire-and-forget tracking (works even on page unload)
   const url = apiUrl('/api/analytics/event');

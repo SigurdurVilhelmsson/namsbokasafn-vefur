@@ -11,6 +11,7 @@ import { glossaryStore } from '$lib/stores/glossary';
 import { settings } from '$lib/stores/settings';
 import { get } from 'svelte/store';
 import type { GlossaryTerm } from '$lib/types/content';
+import { escapeHtml } from '$lib/utils/html';
 
 export interface GlossaryTermsOptions {
 	bookSlug: string;
@@ -30,15 +31,6 @@ const MIN_TERM_LENGTH = 3;
  */
 function escapeRegex(str: string): string {
 	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/**
- * Escape HTML for safe display in tooltip
- */
-function escapeHtml(text: string): string {
-	const div = document.createElement('div');
-	div.textContent = text;
-	return div.innerHTML;
 }
 
 /**

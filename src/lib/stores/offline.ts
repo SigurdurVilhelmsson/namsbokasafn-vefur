@@ -2,7 +2,7 @@
  * Offline Store - Manages book download state for offline reading
  */
 
-import { writable, derived } from 'svelte/store';
+import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isObject } from '$lib/utils/storeValidation';
@@ -91,8 +91,7 @@ function createOfflineStore() {
 		 * Check if a book is downloaded for offline use
 		 */
 		isDownloaded: (bookSlug: string): boolean => {
-			let state: OfflineState = defaultState;
-			subscribe((s) => (state = s))();
+			const state = get({ subscribe });
 			return state.books[bookSlug]?.downloaded ?? false;
 		},
 
@@ -100,8 +99,7 @@ function createOfflineStore() {
 		 * Get download state for a specific book
 		 */
 		getBookState: (bookSlug: string): BookDownloadState | null => {
-			let state: OfflineState = defaultState;
-			subscribe((s) => (state = s))();
+			const state = get({ subscribe });
 			return state.books[bookSlug] ?? null;
 		},
 
@@ -154,10 +152,9 @@ function createOfflineStore() {
 						sizeBytes
 					}
 				},
-				currentDownload: {
-					...s.currentDownload!,
-					status: 'complete'
-				}
+				currentDownload: s.currentDownload
+					? { ...s.currentDownload, status: 'complete' as const }
+					: null
 			})),
 
 		/**

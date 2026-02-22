@@ -36,6 +36,13 @@
 		<p class="text-red-600 dark:text-red-400">{error}</p>
 	</div>
 {:else if html}
+	<!-- ACTION ORDERING CONSTRAINT: bionicReadingAction must be the last action that
+		 modifies innerHTML. It stores a snapshot of innerHTML on activation and restores
+		 it on deactivation. Any action listed after it that adds DOM event listeners
+		 (e.g., practiceProblems, glossaryTerms) would have those listeners orphaned when
+		 bionic reading restores the original HTML. Actions listed before it are safe
+		 because their listeners are already attached before the snapshot is taken.
+		 lazyImages is safe after it because it only observes existing elements. -->
 	<div
 		class="reading-content"
 		use:practiceProblems
@@ -47,6 +54,10 @@
 		use:bionicReadingAction
 		use:lazyImages
 	>
+		<!-- SECURITY: This HTML is trusted output from the CNXML rendering pipeline in
+			 the namsbokasafn-efni sister repo. It is NOT user-generated content.
+			 If the content source were ever compromised, this would be an XSS vector.
+			 Do not use {@html} with untrusted or user-supplied content. -->
 		{@html html}
 	</div>
 {:else}
