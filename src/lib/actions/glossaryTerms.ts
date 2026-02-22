@@ -16,7 +16,8 @@ export interface GlossaryTermsOptions {
 	bookSlug: string;
 }
 
-// Singleton tooltip element (same pattern as crossReferences.ts)
+// Intentional singleton: a single tooltip element is shared across all glossaryTerms
+// action instances for performance (avoids re-creation on every action mount).
 let tooltipElement: HTMLDivElement | null = null;
 let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 let currentSpan: HTMLElement | null = null;

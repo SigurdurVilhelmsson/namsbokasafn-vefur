@@ -8,6 +8,7 @@
 -->
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { annotationStore } from '$lib/stores/annotation';
 	import { glossaryStore } from '$lib/stores/glossary';
 	import SelectionPopup from './SelectionPopup.svelte';
@@ -421,7 +422,7 @@
 			showGlossaryTooltip = true;
 		} else {
 			// No match found - could show a "not found" message or navigate to glossary search
-			window.location.href = `/${bookSlug}/ordabok?search=${encodeURIComponent(selection.text)}`;
+			goto(`/${bookSlug}/ordabok?search=${encodeURIComponent(selection.text)}`);
 		}
 
 		// Clear selection popup but keep text selected for context

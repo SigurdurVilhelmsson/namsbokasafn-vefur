@@ -11,6 +11,7 @@ import {
 	createSectionKey,
 	getCurrentTimestamp,
 	getTodayDateString,
+	formatLocalDate,
 	generateId
 } from '$lib/utils/storeHelpers';
 
@@ -124,7 +125,7 @@ function getWeekStart(date: Date): string {
 	const day = d.getDay();
 	const diff = d.getDate() - day + (day === 0 ? -6 : 1);
 	d.setDate(diff);
-	return d.toISOString().split('T')[0];
+	return formatLocalDate(d);
 }
 
 function createEmptyDailyStats(date: string): DailyStats {
@@ -282,6 +283,17 @@ function createAnalyticsStore() {
 						const newTotalSeconds = existingTime.totalSeconds + durationSeconds;
 						const newSessionCount = existingTime.sessionCount + 1;
 
+						// Update dailyStats (mirrors endReadingSession)
+						const today = getTodayDateString();
+						const todayStats = state.dailyStats[today] || createEmptyDailyStats(today);
+						const visitedToday = state.sessions.some(
+							(s) => s.sectionKey === sectionKey && s.startTime.startsWith(today)
+						);
+
+						// Update hourlyReadingData (mirrors endReadingSession)
+						const hourOfDay = state.currentSession.hourOfDay ?? new Date(state.currentSession.startTime).getHours();
+						const existingHourlyData = state.hourlyReadingData[hourOfDay] || { totalSeconds: 0, sessionCount: 0 };
+
 						updatedState = {
 							...state,
 							sessions: [
@@ -295,6 +307,23 @@ function createAnalyticsStore() {
 									sessionCount: newSessionCount,
 									lastRead: endTime,
 									averageSessionSeconds: Math.round(newTotalSeconds / newSessionCount)
+								}
+							},
+							dailyStats: {
+								...state.dailyStats,
+								[today]: {
+									...todayStats,
+									totalReadingSeconds: todayStats.totalReadingSeconds + durationSeconds,
+									sectionsVisited: visitedToday
+										? todayStats.sectionsVisited
+										: todayStats.sectionsVisited + 1
+								}
+							},
+							hourlyReadingData: {
+								...state.hourlyReadingData,
+								[hourOfDay]: {
+									totalSeconds: existingHourlyData.totalSeconds + durationSeconds,
+									sessionCount: existingHourlyData.sessionCount + 1
 								}
 							}
 						};

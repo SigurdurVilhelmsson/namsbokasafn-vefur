@@ -222,10 +222,10 @@ function createAnnotationStore() {
 		},
 
 		// Clear annotations for a section
-		clearAnnotationsForSection: (chapterSlug: string, sectionSlug: string) => {
+		clearAnnotationsForSection: (bookSlug: string, chapterSlug: string, sectionSlug: string) => {
 			update((state) => ({
 				annotations: state.annotations.filter(
-					(ann) => !(ann.chapterSlug === chapterSlug && ann.sectionSlug === sectionSlug)
+					(ann) => !(ann.bookSlug === bookSlug && ann.chapterSlug === chapterSlug && ann.sectionSlug === sectionSlug)
 				)
 			}));
 		},

@@ -35,6 +35,8 @@ const TYPE_ICONS: Record<ReferenceType, string> = {
 	def: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>`
 };
 
+// Intentional singleton: a single tooltip element is shared across all crossReferences
+// action instances for performance (avoids re-creation on every action mount).
 let tooltipElement: HTMLDivElement | null = null;
 let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 let currentLink: HTMLElement | null = null;
@@ -181,7 +183,7 @@ export function crossReferences(node: HTMLElement, options: CrossReferenceOption
 	// Build reference index from content
 	referenceStore.buildIndexFromContent(chapterSlug, sectionSlug, content, chapterNumber);
 
-	const links = node.querySelectorAll<HTMLAnchorElement>('a.cross-reference');
+	let links = node.querySelectorAll<HTMLAnchorElement>('a.cross-reference');
 
 	function handleMouseEnter(event: MouseEvent) {
 		const link = event.currentTarget as HTMLAnchorElement;
@@ -216,22 +218,34 @@ export function crossReferences(node: HTMLElement, options: CrossReferenceOption
 		}
 	}
 
-	// Add event listeners
-	links.forEach((link) => {
-		link.addEventListener('mouseenter', handleMouseEnter);
-		link.addEventListener('mouseleave', handleMouseLeave);
-		link.addEventListener('click', handleClick);
+	function removeListeners(linkList: NodeListOf<HTMLAnchorElement>) {
+		linkList.forEach((link) => {
+			link.removeEventListener('mouseenter', handleMouseEnter);
+			link.removeEventListener('mouseleave', handleMouseLeave);
+			link.removeEventListener('click', handleClick);
+		});
+	}
 
-		// Update link text with reference label
-		const refType = link.dataset.refType as ReferenceType;
-		const refId = link.dataset.refId;
-		if (refType && refId) {
-			const ref = referenceStore.getReference(refType, refId);
-			if (ref) {
-				link.textContent = ref.label;
+	function addListeners(linkList: NodeListOf<HTMLAnchorElement>) {
+		linkList.forEach((link) => {
+			link.addEventListener('mouseenter', handleMouseEnter);
+			link.addEventListener('mouseleave', handleMouseLeave);
+			link.addEventListener('click', handleClick);
+
+			// Update link text with reference label
+			const refType = link.dataset.refType as ReferenceType;
+			const refId = link.dataset.refId;
+			if (refType && refId) {
+				const ref = referenceStore.getReference(refType, refId);
+				if (ref) {
+					link.textContent = ref.label;
+				}
 			}
-		}
-	});
+		});
+	}
+
+	// Add event listeners
+	addListeners(links);
 
 	return {
 		update(newOptions: CrossReferenceOptions) {
@@ -244,19 +258,18 @@ export function crossReferences(node: HTMLElement, options: CrossReferenceOption
 					newOptions.chapterNumber
 				);
 			}
+
+			// Remove listeners from old links, re-query, and attach to new ones
+			removeListeners(links);
+			links = node.querySelectorAll<HTMLAnchorElement>('a.cross-reference');
+			addListeners(links);
 		},
 		destroy() {
 			// Remove event listeners
-			links.forEach((link) => {
-				link.removeEventListener('mouseenter', handleMouseEnter);
-				link.removeEventListener('mouseleave', handleMouseLeave);
-				link.removeEventListener('click', handleClick);
-			});
+			removeListeners(links);
 
-			// Clean up tooltip
-			if (tooltipElement && currentLink && node.contains(currentLink)) {
-				hideTooltip();
-			}
+			// Clean up tooltip unconditionally (link may already be removed from DOM)
+			hideTooltip();
 		}
 	};
 }
