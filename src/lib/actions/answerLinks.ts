@@ -86,13 +86,13 @@ function addStyles() {
 			color: #2563eb;
 		}
 
-		:global(.dark) .answer-link-btn {
+		.dark .answer-link-btn {
 			color: #60a5fa;
 			background-color: rgba(59, 130, 246, 0.1);
 			border-color: rgba(59, 130, 246, 0.3);
 		}
 
-		:global(.dark) .answer-link-btn:hover {
+		.dark .answer-link-btn:hover {
 			background-color: rgba(59, 130, 246, 0.2);
 			border-color: rgba(59, 130, 246, 0.4);
 		}
@@ -166,7 +166,7 @@ function addStyles() {
 			border-radius: 0 0.5rem 0.5rem 0;
 		}
 
-		:global(.dark) .glossary-entry {
+		.dark .glossary-entry {
 			background-color: rgba(139, 92, 246, 0.1);
 			border-color: #7c3aed;
 		}
@@ -180,7 +180,7 @@ function addStyles() {
 			border-radius: 0 0.5rem 0.5rem 0;
 		}
 
-		:global(.dark) .key-equation-entry {
+		.dark .key-equation-entry {
 			background-color: rgba(245, 158, 11, 0.1);
 			border-color: #d97706;
 		}

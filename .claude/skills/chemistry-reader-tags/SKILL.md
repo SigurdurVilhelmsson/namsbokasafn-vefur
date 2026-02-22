@@ -3,7 +3,7 @@ name: chemistry-reader-tags
 description: Apply custom markdown tags when working on chemistry educational content, markdown files in static/content/, or when asked to tag, format, or structure chemistry textbook material
 ---
 
-# Chemistry Reader Markdown Tags
+# Námsbókasafn Markdown Tags
 
 This skill provides guidance for applying custom markdown directives to Icelandic chemistry educational content in the Námsbókasafn reader application.
 
@@ -20,6 +20,7 @@ This skill provides guidance for applying custom markdown directives to Icelandi
 ### 1. Don't Over-Tag
 
 Not every paragraph needs a tag. Use tags to:
+
 - Highlight genuinely important definitions, concepts, or warnings
 - Create interactive learning opportunities (practice problems)
 - Aid navigation through cross-references
@@ -28,20 +29,21 @@ Not every paragraph needs a tag. Use tags to:
 
 ### 2. Use the Correct Tag for Context
 
-| Content Type | Tag | When to Use |
-|--------------|-----|-------------|
-| Term being defined | `:::definition{term="..."}` | First introduction of a technical term |
-| Important info | `:::note` | Supplementary but important information |
-| Safety/caution | `:::warning` | Common mistakes, safety info, critical cautions |
-| Worked solution | `:::example` | Step-by-step demonstration |
-| Student practice | `:::practice-problem` | Problems for students to solve |
-| Core concept | `:::key-concept` | Fundamental ideas to remember |
-| Self-check | `:::checkpoint` | Quick comprehension checks |
-| Wrong idea | `:::common-misconception` | Addressing common wrong beliefs |
+| Content Type       | Tag                         | When to Use                                     |
+| ------------------ | --------------------------- | ----------------------------------------------- |
+| Term being defined | `:::definition{term="..."}` | First introduction of a technical term          |
+| Important info     | `:::note`                   | Supplementary but important information         |
+| Safety/caution     | `:::warning`                | Common mistakes, safety info, critical cautions |
+| Worked solution    | `:::example`                | Step-by-step demonstration                      |
+| Student practice   | `:::practice-problem`       | Problems for students to solve                  |
+| Core concept       | `:::key-concept`            | Fundamental ideas to remember                   |
+| Self-check         | `:::checkpoint`             | Quick comprehension checks                      |
+| Wrong idea         | `:::common-misconception`   | Addressing common wrong beliefs                 |
 
 ### 3. Icelandic Titles
 
 All visible titles use Icelandic:
+
 - "Skilgreining" (Definition)
 - "Athugið" (Note)
 - "Viðvörun" (Warning)
@@ -56,9 +58,11 @@ All visible titles use Icelandic:
 
 ```markdown
 <!-- Correct -->
+
 $\ce{H2O}$, $\ce{H2SO4}$, $\ce{2H2 + O2 -> 2H2O}$
 
 <!-- Incorrect -->
+
 H₂O, $\text{H}_2\text{O}$, H<sub>2</sub>O
 ```
 

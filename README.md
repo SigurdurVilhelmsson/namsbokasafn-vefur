@@ -104,7 +104,7 @@ These are public URLs, not secrets.
 The production site is a static build served by nginx on a Linode Ubuntu server.
 
 - **Build output:** `build/` (SvelteKit static adapter with SPA fallback)
-- **Server path:** `/var/www/efnafraedi-lesari/dist`
+- **Server path:** `/var/www/namsbokasafn-vefur/build`
 - **Domain:** `namsbokasafn.is`
 - **Nginx:** `/etc/nginx/sites-available/namsbokasafn.is`
 - **SSL:** Let's Encrypt via certbot (auto-renewal)
@@ -125,7 +125,7 @@ For manual deployment:
 
 ```bash
 npm run build
-rsync -avz --delete build/ siggi@kvenno.app:/var/www/efnafraedi-lesari/dist/
+rsync -avz --delete build/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/
 ```
 
 See [docs/guides/deployment.md](docs/guides/deployment.md) for the full deployment guide including nginx configuration, SSL setup, and maintenance procedures.

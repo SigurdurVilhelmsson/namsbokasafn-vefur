@@ -6,8 +6,8 @@
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
-import { validateStoreData, isArray, isObject, isNumber, isBoolean, isNullOrString } from '$lib/utils/storeValidation';
-import type { QuizQuestion, QuizAnswer, QuizSession, QuizStats } from '$lib/types/quiz';
+import { validateStoreData, isArray, isObject, isNumber, isBoolean } from '$lib/utils/storeValidation';
+import type { QuizQuestion, QuizAnswer, QuizStats } from '$lib/types/quiz';
 import type { MasteryLevel } from '$lib/types/quiz';
 import {
 	type ProgressResult,
@@ -111,7 +111,10 @@ const defaultState: QuizState = {
 	stats: {}
 };
 
+const isNullOrObject = (v: unknown): boolean => v === null || isObject(v);
+
 const quizValidators = {
+	currentSession: isNullOrObject,
 	currentQuestionIndex: isNumber,
 	showFeedback: isBoolean,
 	practiceProblemProgress: isObject,

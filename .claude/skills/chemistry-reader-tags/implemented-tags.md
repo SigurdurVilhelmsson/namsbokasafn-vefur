@@ -1,6 +1,6 @@
 # Implemented Tags Reference
 
-Complete syntax reference for all custom markdown directives in the Chemistry Reader.
+Complete syntax reference for all custom markdown directives in the Námsbókasafn.
 
 ## Callout Blocks
 
@@ -157,6 +157,7 @@ að finna þær, ekki í ákveðnum brautum.
 **Format**: `[ref:type:id]`
 
 **Types**:
+
 - `sec` — Section reference
 - `eq` — Equation reference
 - `fig` — Figure reference

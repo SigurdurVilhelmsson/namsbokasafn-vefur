@@ -51,7 +51,7 @@ export function migrateStorageKeys(): void {
 	localStorage.setItem(MIGRATION_FLAG, new Date().toISOString());
 
 	if (migratedCount > 0) {
-		console.log(`Migrated ${migratedCount} storage keys to new namespace format`);
+		console.debug(`Migrated ${migratedCount} storage keys to new namespace format`);
 	}
 }
 
