@@ -83,6 +83,7 @@ export default tseslint.config(
       'namsbokasafn-efni/',
       'dev-dist/',
       'logs/',
+      'playwright-report/',
       '*.config.js',
       '*.config.ts',
     ],
