@@ -2,7 +2,7 @@
  * Tests for content loading utilities
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import {
 	getChapterPath,
 	getSectionPath,
@@ -11,10 +11,6 @@ import {
 	findSectionBySlug,
 	getAppendixPath,
 	findAppendixByLetter,
-	clearContentCache,
-	getCacheStats,
-	clearTocCache,
-	clearSectionCache,
 	ContentLoadError,
 	loadTableOfContents,
 	loadSectionContent
@@ -50,10 +46,6 @@ const sampleToc: TableOfContents = {
 };
 
 describe('contentLoader utilities', () => {
-	beforeEach(() => {
-		clearContentCache();
-	});
-
 	// ============================================
 	// Path generation helpers
 	// ============================================
@@ -196,58 +188,6 @@ describe('contentLoader utilities', () => {
 	});
 
 	// ============================================
-	// Cache management
-	// ============================================
-	describe('cache management', () => {
-		it('should start with empty cache', () => {
-			const stats = getCacheStats();
-			expect(stats.tocEntries).toBe(0);
-			expect(stats.sectionEntries).toBe(0);
-		});
-
-		it('should cache TOC on load', async () => {
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: () => Promise.resolve(sampleToc)
-			});
-
-			await loadTableOfContents('test-book', mockFetch as unknown as typeof fetch);
-			const stats = getCacheStats();
-			expect(stats.tocEntries).toBe(1);
-
-			// Second call should use cache (fetch not called again)
-			await loadTableOfContents('test-book', mockFetch as unknown as typeof fetch);
-			expect(mockFetch).toHaveBeenCalledTimes(1);
-		});
-
-		it('should clear TOC cache for specific book', async () => {
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: () => Promise.resolve(sampleToc)
-			});
-
-			await loadTableOfContents('book-a', mockFetch as unknown as typeof fetch);
-			await loadTableOfContents('book-b', mockFetch as unknown as typeof fetch);
-			expect(getCacheStats().tocEntries).toBe(2);
-
-			clearTocCache('book-a');
-			expect(getCacheStats().tocEntries).toBe(1);
-		});
-
-		it('should clear all caches', async () => {
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				json: () => Promise.resolve(sampleToc)
-			});
-
-			await loadTableOfContents('test', mockFetch as unknown as typeof fetch);
-			clearContentCache();
-			expect(getCacheStats().tocEntries).toBe(0);
-			expect(getCacheStats().sectionEntries).toBe(0);
-		});
-	});
-
-	// ============================================
 	// loadTableOfContents
 	// ============================================
 	describe('loadTableOfContents', () => {
@@ -337,30 +277,5 @@ describe('contentLoader utilities', () => {
 			).rejects.toThrow(ContentLoadError);
 		});
 
-		it('should cache section content', async () => {
-			const html = '<article><p>Content</p></article>';
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				text: () => Promise.resolve(html)
-			});
-
-			await loadSectionContent('book', '01', 'sec.html', mockFetch as unknown as typeof fetch);
-			await loadSectionContent('book', '01', 'sec.html', mockFetch as unknown as typeof fetch);
-			expect(mockFetch).toHaveBeenCalledTimes(1);
-		});
-
-		it('should clear section cache by book and chapter', async () => {
-			const html = '<article><p>Content</p></article>';
-			const mockFetch = vi.fn().mockResolvedValue({
-				ok: true,
-				text: () => Promise.resolve(html)
-			});
-
-			await loadSectionContent('book', '01', 'sec.html', mockFetch as unknown as typeof fetch);
-			expect(getCacheStats().sectionEntries).toBe(1);
-
-			clearSectionCache('book', '01');
-			expect(getCacheStats().sectionEntries).toBe(0);
-		});
 	});
 });
