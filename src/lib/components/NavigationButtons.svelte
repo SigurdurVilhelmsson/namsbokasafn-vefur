@@ -102,7 +102,7 @@
 			{#if next}
 				<a
 					href="/{bookSlug}/kafli/{getChapterPath(next.chapter)}/{getSectionPath(next.section)}"
-					data-sveltekit-preload-data="eager"
+					data-sveltekit-preload-data="hover"
 					class="nav-btn nav-btn-next"
 				>
 					<div class="nav-btn-text">
@@ -125,7 +125,7 @@
 			{#if previous}
 				<a
 					href="/{bookSlug}/kafli/{getChapterPath(previous.chapter)}/{getSectionPath(previous.section)}"
-					data-sveltekit-preload-data="eager"
+					data-sveltekit-preload-data="hover"
 					class="nav-btn nav-btn-prev"
 				>
 					<svg
