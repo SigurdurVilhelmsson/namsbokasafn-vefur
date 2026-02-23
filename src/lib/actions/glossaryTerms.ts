@@ -164,10 +164,10 @@ function hideTooltip() {
  */
 function shouldSkipParent(el: Element): boolean {
 	const tag = el.tagName.toLowerCase();
-	const skipTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'button', 'script', 'style', 'code', 'pre'];
+	const skipTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'button', 'script', 'style', 'code', 'pre', 'dfn'];
 	if (skipTags.includes(tag)) return true;
 	if (el.classList.contains('glossary-term')) return true;
-	if (el.closest('.equation-wrapper, .equation-content, figcaption, .figure-caption, mjx-container, .content-block-title, .content-block-icon')) return true;
+	if (el.closest('.equation-wrapper, .equation-content, figcaption, .figure-caption, mjx-container, .content-block-title, .content-block-icon, .learning-objectives')) return true;
 	return false;
 }
 
@@ -221,6 +221,41 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 
 		// Track first occurrence only
 		const markedTerms = new Set<string>();
+
+		// Pre-pass: handle <dfn class="term"> elements before the TreeWalker.
+		// These are authoritative term markers from the CNXML pipeline and should
+		// always get tooltips, regardless of learning-objectives or document order.
+		const dfnElements = node.querySelectorAll('dfn.term');
+		for (const dfn of dfnElements) {
+			if (destroyed) return;
+			const dfnEl = dfn as HTMLElement;
+			const fullText = (dfnEl.textContent || '').trim();
+
+			// Strip the "(e. ...)" English suffix to get the Icelandic term
+			const marker = ' (e. ';
+			const idx = fullText.lastIndexOf(marker);
+			const termText = idx !== -1 ? fullText.substring(0, idx).trim() : fullText;
+			const normalized = termText.toLowerCase();
+
+			const glossaryTerm = termMap.get(normalized);
+			if (!glossaryTerm) continue;
+
+			dfnEl.classList.add('glossary-term');
+			dfnEl.dataset.term = glossaryTerm.term;
+			dfnEl.setAttribute('role', 'button');
+			dfnEl.setAttribute('tabindex', '0');
+			dfnEl.setAttribute(
+				'aria-label',
+				`Skilgreining: ${glossaryTerm.term}` + (glossaryTerm.english ? ` (${glossaryTerm.english})` : '')
+			);
+
+			dfnEl.addEventListener('mouseenter', () => showTooltip(dfnEl, glossaryTerm, bookSlug));
+			dfnEl.addEventListener('mouseleave', () => hideTooltip());
+			dfnEl.addEventListener('focus', () => showTooltip(dfnEl, glossaryTerm, bookSlug));
+			dfnEl.addEventListener('blur', () => hideTooltip());
+
+			markedTerms.add(normalized);
+		}
 
 		// Collect text nodes using TreeWalker
 		const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, {
