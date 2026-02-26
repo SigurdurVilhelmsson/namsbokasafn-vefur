@@ -78,8 +78,8 @@ test.describe('Reader Flow', () => {
 			// Verify we're on a section page
 			await expect(page).toHaveURL(/\/efnafraedi\/kafli\/.+\/.+/);
 
-			// Wait for article to load
-			await expect(page.locator('article')).toBeVisible({ timeout: 15000 });
+			// Wait for article to load (use .first() since section pages have nested articles)
+			await expect(page.locator('article').first()).toBeVisible({ timeout: 15000 });
 		}
 	});
 
@@ -100,8 +100,8 @@ test.describe('Reader Flow', () => {
 			await sectionLink.click();
 			await page.waitForLoadState('networkidle');
 
-			// Verify article exists and has content
-			const article = page.locator('article');
+			// Verify article exists and has content (use .first() since section pages have nested articles)
+			const article = page.locator('article').first();
 			await expect(article).toBeVisible({ timeout: 15000 });
 
 			// Article should have meaningful content

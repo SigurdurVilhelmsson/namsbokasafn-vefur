@@ -137,6 +137,8 @@ test.describe('PWA Offline Capability', () => {
 		const bookLink = page.getByRole('link', { name: /Efnafræði/i }).first();
 		if (await bookLink.isVisible({ timeout: 5000 }).catch(() => false)) {
 			await bookLink.click();
+			// Wait for SvelteKit SPA navigation to actually update the URL
+			await page.waitForURL('**/efnafraedi');
 			await page.waitForLoadState('networkidle');
 
 			// Navigate back
