@@ -117,7 +117,7 @@
 		<!-- Main content area with max-width for comfortable reading -->
 		<main
 			id="main-content"
-			class="flex-1 overflow-x-hidden {focusMode ? '' : 'lg:ml-[280px]'}"
+			class="flex-1 overflow-x-hidden {focusMode ? '' : 'lg:ml-[320px]'}"
 		>
 			<div class="mx-auto max-w-7xl px-4 py-6">
 				<slot />
