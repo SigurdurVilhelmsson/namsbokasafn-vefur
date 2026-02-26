@@ -380,7 +380,7 @@
 		left: 0;
 		bottom: 0;
 		z-index: 50;
-		width: 280px;
+		width: 320px;
 		background: var(--bg-secondary);
 		overflow-y: auto;
 		overflow-x: hidden;
