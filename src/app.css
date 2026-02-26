@@ -149,8 +149,16 @@
 /* FONT FAMILY CLASSES                        */
 /* ========================================== */
 
+.font-serif {
+  --font-family-base: "Literata", Georgia, serif;
+}
+
+.font-sans {
+  --font-family-base: "Neue Helvetica W01", Helvetica, Arial, sans-serif;
+}
+
 .font-opendyslexic {
-  font-family: "OpenDyslexic", Arial, sans-serif;
+  --font-family-base: "OpenDyslexic", Arial, sans-serif;
 }
 
 .font-opendyslexic h1,

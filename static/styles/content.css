@@ -36,7 +36,13 @@
    ============================================== */
 
 article.cnx-module {
-  font-family: "Neue Helvetica W01", Helvetica, Arial, sans-serif;
+  font-family: var(
+    --font-family-base,
+    "Neue Helvetica W01",
+    Helvetica,
+    Arial,
+    sans-serif
+  );
   font-size: var(--font-size-base, 16px);
   line-height: 1.44;
   color: var(--os-text-body);
