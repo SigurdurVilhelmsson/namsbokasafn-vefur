@@ -51,7 +51,7 @@
 		use:crossReferences={{ bookSlug, chapterSlug, sectionSlug, chapterNumber, content }}
 		use:answerLinks={{ bookSlug, chapterSlug, sectionSlug, sectionType, chapterNumber }}
 		use:glossaryTerms={{ bookSlug }}
-		use:bionicReadingAction
+		use:bionicReadingAction={content}
 		use:lazyImages
 	>
 		<!-- SECURITY: This HTML is trusted output from the CNXML rendering pipeline in
