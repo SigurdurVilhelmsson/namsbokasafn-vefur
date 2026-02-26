@@ -194,7 +194,7 @@ test.describe('Section Page Accessibility', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Content should be in an article element
-		const article = page.locator('article');
+		const article = page.locator('article').first();
 		await expect(article).toBeVisible({ timeout: 15000 });
 	});
 
@@ -217,7 +217,7 @@ test.describe('Section Page Accessibility', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Article should have at least one heading
-		const article = page.locator('article');
+		const article = page.locator('article').first();
 		await expect(article).toBeVisible({ timeout: 15000 });
 
 		const headings = article.locator('h1, h2, h3, h4');
