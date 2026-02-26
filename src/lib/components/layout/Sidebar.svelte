@@ -383,6 +383,7 @@
 		width: 280px;
 		background: var(--bg-secondary);
 		overflow-y: auto;
+		overflow-x: hidden;
 		transform: translateX(-100%);
 		transition: transform 0.3s ease-out;
 	}
