@@ -132,9 +132,6 @@ function shouldSkipElement(element: Node): boolean {
  * Apply bionic reading formatting to a container element
  */
 function applyBionicReading(container: HTMLElement): void {
-	// Mark as processed to avoid double-processing
-	container.setAttribute('data-bionic-processed', 'true');
-
 	// Create a TreeWalker to iterate over all text nodes
 	const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
 		acceptNode: (node: Text) => {
@@ -167,6 +164,11 @@ function applyBionicReading(container: HTMLElement): void {
 			textNode.parentNode.replaceChild(fragment, textNode);
 		}
 	}
+
+	// Mark as processed AFTER traversal — setting it before would cause
+	// shouldSkipElement() to match [data-bionic-processed] on the container,
+	// rejecting every text node.
+	container.setAttribute('data-bionic-processed', 'true');
 }
 
 /**
@@ -181,7 +183,7 @@ function removeBionicReading(container: HTMLElement, originalHTML: string): void
  * Svelte action for bionic reading
  * Attach to a container element (like .reading-content) to enable bionic reading
  */
-export function bionicReadingAction(node: HTMLElement) {
+export function bionicReadingAction(node: HTMLElement, _content?: string) {
 	const state: BionicState = {
 		originalHTML: null,
 		unsubscribe: null,
@@ -212,7 +214,7 @@ export function bionicReadingAction(node: HTMLElement) {
 
 	return {
 		// Re-apply when content changes (e.g., navigation)
-		update() {
+		update(_newContent?: string) {
 			if (state.isProcessed) {
 				// Content changed, need to re-process
 				state.originalHTML = null;
