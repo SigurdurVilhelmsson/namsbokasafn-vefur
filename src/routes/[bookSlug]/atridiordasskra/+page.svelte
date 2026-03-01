@@ -462,9 +462,6 @@
 		flex-direction: column;
 		gap: 1.5rem;
 	}
-	.index-letter-section {
-		/* No extra styling needed */
-	}
 	.index-letter-heading {
 		font-family: "Bricolage Grotesque", system-ui, sans-serif;
 		font-size: 1.125rem;
