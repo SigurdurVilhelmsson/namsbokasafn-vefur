@@ -11,7 +11,7 @@
 	import { extractReviewBlocks, type ReviewBlock } from '$lib/utils/reviewExtractor';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
 	/** Icelandic labels for block types */
 	const TYPE_LABELS: Record<string, string> = {
@@ -35,13 +35,13 @@
 		blocks: ReviewBlock[];
 	}
 
-	let toc: TableOfContents | null = null;
-	let loadingToc = true;
-	let loadingBlocks = false;
-	let error: string | null = null;
-	let selectedChapterIndex: number | null = null;
-	let hasSelected = false;
-	let sectionGroups: SectionGroup[] = [];
+	let toc: TableOfContents | null = $state(null);
+	let loadingToc = $state(true);
+	let loadingBlocks = $state(false);
+	let error: string | null = $state(null);
+	let selectedChapterIndex: number | null = $state(null);
+	let hasSelected = $state(false);
+	let sectionGroups: SectionGroup[] = $state([]);
 
 	onMount(async () => {
 		try {
@@ -126,7 +126,7 @@
 		return `Kafli ${chapter.number} > ${sectionLabel}`;
 	}
 
-	$: showEmpty = hasSelected && !loadingBlocks && sectionGroups.length === 0 && !error;
+	let showEmpty = $derived(hasSelected && !loadingBlocks && sectionGroups.length === 0 && !error);
 </script>
 
 <svelte:head>
@@ -165,7 +165,7 @@
 					{selectedChapterIndex === null && hasSelected
 						? 'bg-[var(--accent-color)] text-white'
 						: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
-				on:click={() => selectChapter(null)}
+				onclick={() => selectChapter(null)}
 			>
 				Allir kaflar
 			</button>
@@ -177,7 +177,7 @@
 						{selectedChapterIndex === i
 							? 'bg-[var(--accent-color)] text-white'
 							: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
-					on:click={() => selectChapter(i)}
+					onclick={() => selectChapter(i)}
 				>
 					Kafli {chapter.number}
 				</button>

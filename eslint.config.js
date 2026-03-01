@@ -28,12 +28,14 @@ export default tseslint.config(
       // Disable typescript-eslint rules that don't work well with Svelte
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
+      // $state() assignments inside $effect() look like dead stores to ESLint
+      'no-useless-assignment': 'off',
       // Svelte-specific rules
       'svelte/no-at-html-tags': 'error',
       'svelte/require-each-key': 'warn', // 49 violations — fix incrementally
       'svelte/no-navigation-without-resolve': 'warn', // 65 violations — intentional patterns in actions
-      'svelte/no-immutable-reactive-statements': 'warn', // 16 violations — fix incrementally
-      'svelte/infinite-reactive-loop': 'warn', // 5 violations — review individually
+      'svelte/no-immutable-reactive-statements': 'error', // No violations after runes migration
+      'svelte/infinite-reactive-loop': 'error', // No violations after runes migration
       'svelte/no-unused-svelte-ignore': 'error',
       'svelte/prefer-svelte-reactivity': 'warn', // 7 violations — fix incrementally
     },

@@ -12,7 +12,7 @@
     return `${(kb / 1024).toFixed(1)} MB`;
   }
 
-  $: usageText = $storageWarning.visible ? formatBytes(getStorageUsageBytes()) : '';
+  let usageText = $derived($storageWarning.visible ? formatBytes(getStorageUsageBytes()) : '');
 </script>
 
 {#if $storageWarning.visible}
@@ -33,7 +33,7 @@
         <span>Gagnageymsla er næstum full ({usageText}). Íhugaðu að eyða gömlu efni.</span>
       {/if}
       <button
-        on:click={dismissStorageWarning}
+        onclick={dismissStorageWarning}
         class="dismiss-btn"
         aria-label="Loka"
       >

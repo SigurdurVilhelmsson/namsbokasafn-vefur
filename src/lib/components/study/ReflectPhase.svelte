@@ -2,20 +2,22 @@
   ReflectPhase - Objective confidence re-rating
 -->
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { WeakObjective } from '$lib/utils/studySession';
 	import { objectivesStore, type ConfidenceLevel } from '$lib/stores/objectives';
 
-	export let objectives: WeakObjective[];
+	interface Props {
+		objectives: WeakObjective[];
+		oncomplete?: (count: number) => void;
+	}
 
-	const dispatch = createEventDispatcher<{ complete: number }>();
+	let { objectives, oncomplete }: Props = $props();
 
-	let currentIndex = 0;
-	let completedCount = 0;
+	let currentIndex = $state(0);
+	let completedCount = $state(0);
 
-	$: currentObjective = objectives[currentIndex];
-	$: total = objectives.length;
-	$: progress = total > 0 ? Math.round((currentIndex / total) * 100) : 0;
+	let currentObjective = $derived(objectives[currentIndex]);
+	let total = $derived(objectives.length);
+	let progress = $derived(total > 0 ? Math.round((currentIndex / total) * 100) : 0);
 
 	const CONFIDENCE_OPTIONS: { level: ConfidenceLevel; label: string; description: string }[] = [
 		{ level: 1, label: '1', description: 'Ekki viss' },
@@ -39,7 +41,7 @@
 		if (currentIndex < total - 1) {
 			currentIndex++;
 		} else {
-			dispatch('complete', completedCount);
+			oncomplete?.(completedCount);
 		}
 	}
 </script>
@@ -91,7 +93,7 @@
 				<div class="grid grid-cols-5 gap-2">
 					{#each CONFIDENCE_OPTIONS as option, i}
 						<button
-							on:click={() => rate(option.level)}
+							onclick={() => rate(option.level)}
 							class="rfp-confidence-btn rfp-confidence-btn--{i + 1}"
 						>
 							<div class="text-lg font-bold">{option.label}</div>

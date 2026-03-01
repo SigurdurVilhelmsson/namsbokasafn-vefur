@@ -6,10 +6,10 @@
 	import type { PageData } from './$types';
 	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
 	// Get chapter slug for exercise linking (zero-padded)
-	$: chapterSlug = data.chapterNumber.toString().padStart(2, '0');
+	let chapterSlug = $derived(data.chapterNumber.toString().padStart(2, '0'));
 </script>
 
 <svelte:head>

@@ -7,13 +7,13 @@
 	import type { Glossary, GlossaryTerm } from '$lib/types/content';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let glossary: Glossary | null = null;
-	let loading = true;
-	let error: string | null = null;
-	let searchQuery = '';
-	let selectedLetter: string | null = null;
+	let glossary: Glossary | null = $state(null);
+	let loading = $state(true);
+	let error: string | null = $state(null);
+	let searchQuery = $state('');
+	let selectedLetter: string | null = $state(null);
 
 	onMount(async () => {
 		try {
@@ -31,19 +31,26 @@
 	// Icelandic collation for proper alphabetization
 	const icelandicCollator = new Intl.Collator('is', { sensitivity: 'base' });
 
-	$: filteredTerms = (glossary?.terms.filter((term) => {
-		const matchesSearch =
-			!searchQuery ||
-			term.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			term.definition.toLowerCase().includes(searchQuery.toLowerCase());
-		const matchesLetter =
-			!selectedLetter || term.term.toUpperCase().startsWith(selectedLetter);
-		return matchesSearch && matchesLetter;
-	}) ?? []).sort((a, b) => icelandicCollator.compare(a.term, b.term));
+	let filteredTerms = $derived.by(() => {
+		if (!glossary) return [] as GlossaryTerm[];
+		return glossary.terms
+			.filter((term: GlossaryTerm) => {
+				const matchesSearch =
+					!searchQuery ||
+					term.term.toLowerCase().includes(searchQuery.toLowerCase()) ||
+					term.definition.toLowerCase().includes(searchQuery.toLowerCase());
+				const matchesLetter =
+					!selectedLetter || term.term.toUpperCase().startsWith(selectedLetter);
+				return matchesSearch && matchesLetter;
+			})
+			.sort((a: GlossaryTerm, b: GlossaryTerm) => icelandicCollator.compare(a.term, b.term));
+	});
 
-	$: letters = glossary
-		? [...new Set(glossary.terms.map((t) => t.term[0].toUpperCase()))].sort((a, b) => icelandicCollator.compare(a, b))
-		: [];
+	let letters = $derived.by(() => {
+		if (!glossary) return [] as string[];
+		return [...new Set(glossary.terms.map((t: GlossaryTerm) => t.term[0].toUpperCase()))]
+			.sort((a: string, b: string) => icelandicCollator.compare(a, b));
+	});
 
 	function clearFilters() {
 		searchQuery = '';
@@ -104,7 +111,7 @@
 			<div class="flex flex-wrap gap-1">
 				{#each letters as letter}
 					<button
-						on:click={() => (selectedLetter = selectedLetter === letter ? null : letter)}
+						onclick={() => (selectedLetter = selectedLetter === letter ? null : letter)}
 						class="glossary-letter-btn"
 						class:glossary-letter-btn--active={selectedLetter === letter}
 					>
@@ -113,7 +120,7 @@
 				{/each}
 				{#if selectedLetter || searchQuery}
 					<button
-						on:click={clearFilters}
+						onclick={clearFilters}
 						class="glossary-clear-btn"
 					>
 						Hreinsa síu
@@ -157,7 +164,7 @@
 								<span class="glossary-related-label">Tengd orð:</span>
 								{#each term.relatedTerms as related}
 									<button
-										on:click={() => (searchQuery = related)}
+										onclick={() => (searchQuery = related)}
 										class="glossary-related-tag"
 									>
 										{related}

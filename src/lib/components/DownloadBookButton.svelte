@@ -12,33 +12,32 @@
 		formatBytes
 	} from '$lib/stores/offline';
 
-	export let bookSlug: string;
-
-	let isDownloaded = false;
-	let downloadState: { downloaded: boolean; sizeBytes: number; downloadedAt: string | null } | null =
-		null;
-	let estimatedSize = 0;
-	let isEstimating = false;
-	let showConfirmDelete = false;
-
-	// Subscribe to offline store
-	$: {
-		const state = $offline.books[bookSlug];
-		isDownloaded = state?.downloaded ?? false;
-		downloadState = state ?? null;
+	interface Props {
+		bookSlug: string;
 	}
 
+	let { bookSlug }: Props = $props();
+
+	let estimatedSize = $state(0);
+	let isEstimating = $state(false);
+	let showConfirmDelete = $state(false);
+
+	// Derive from offline store
+	let downloadState = $derived($offline.books[bookSlug] ?? null);
+	let isDownloaded = $derived(downloadState?.downloaded ?? false);
+
 	// Get current download progress
-	$: progress = $currentDownload;
-	$: isDownloading = progress?.bookSlug === bookSlug && progress?.status === 'downloading';
-	$: downloadError = progress?.bookSlug === bookSlug ? progress?.error : null;
-	$: downloadComplete = progress?.bookSlug === bookSlug && progress?.status === 'complete';
+	let progress = $derived($currentDownload);
+	let isDownloading = $derived(progress?.bookSlug === bookSlug && progress?.status === 'downloading');
+	let downloadError = $derived(progress?.bookSlug === bookSlug ? progress?.error : null);
+	let downloadComplete = $derived(progress?.bookSlug === bookSlug && progress?.status === 'complete');
 
 	// Calculate progress percentage
-	$: progressPercent =
+	let progressPercent = $derived(
 		isDownloading && progress?.totalFiles
 			? Math.round((progress.downloadedFiles / progress.totalFiles) * 100)
-			: 0;
+			: 0
+	);
 
 	onMount(async () => {
 		if (!browser || isDownloaded) return;
@@ -92,7 +91,7 @@
 
 			{#if !showConfirmDelete}
 				<button
-					on:click={() => (showConfirmDelete = true)}
+					onclick={() => (showConfirmDelete = true)}
 					class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
 					aria-label="Eyða niðurhali"
 					title="Eyða niðurhali"
@@ -110,13 +109,13 @@
 				<div class="flex items-center gap-2">
 					<span class="text-sm text-gray-600 dark:text-gray-300">Eyða?</span>
 					<button
-						on:click={handleDelete}
+						onclick={handleDelete}
 						class="rounded-lg bg-red-100 px-3 py-1 text-sm font-medium text-red-700 transition-colors hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
 					>
 						Já
 					</button>
 					<button
-						on:click={() => (showConfirmDelete = false)}
+						onclick={() => (showConfirmDelete = false)}
 						class="rounded-lg bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
 					>
 						Nei
@@ -163,7 +162,7 @@
 				<span class="text-sm font-medium">Niðurhal lokið!</span>
 			</div>
 			<button
-				on:click={dismissProgress}
+				onclick={dismissProgress}
 				class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
 			>
 				Loka
@@ -186,13 +185,13 @@
 				<span class="text-sm font-medium">{downloadError}</span>
 			</div>
 			<button
-				on:click={handleDownload}
+				onclick={handleDownload}
 				class="text-sm font-medium text-[var(--accent-color)] hover:text-[var(--accent-hover)]"
 			>
 				Reyna aftur
 			</button>
 			<button
-				on:click={dismissProgress}
+				onclick={dismissProgress}
 				class="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
 			>
 				Loka
@@ -201,7 +200,7 @@
 	{:else}
 		<!-- Not downloaded - show download button -->
 		<button
-			on:click={handleDownload}
+			onclick={handleDownload}
 			disabled={isEstimating}
 			class="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 		>

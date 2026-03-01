@@ -12,16 +12,18 @@
 	} from '$lib/stores';
 	import type { DifficultyRating } from '$lib/types/flashcard';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let isFlipped = false;
+	let isFlipped = $state(false);
 
-	$: if ($studyProgress.current !== undefined) {
-		isFlipped = false;
-	}
+	$effect(() => {
+		if ($studyProgress.current !== undefined) {
+			isFlipped = false;
+		}
+	});
 
 	// All user decks from the store
-	$: allDecks = $flashcardStore.decks;
+	let allDecks = $derived($flashcardStore.decks);
 
 	function flip() {
 		isFlipped = !isFlipped;
@@ -37,10 +39,10 @@
 		flashcardStore.startStudySession(deckId);
 	}
 
-	$: activeDeckStats = $currentDeck
+	let activeDeckStats = $derived($currentDeck
 		? flashcardStore.getDeckStats($currentDeck.id)
-		: null;
-	$: previewIntervals = $currentCard ? flashcardStore.getPreviewIntervals($currentCard.id) : null;
+		: null);
+	let previewIntervals = $derived($currentCard ? flashcardStore.getPreviewIntervals($currentCard.id) : null);
 </script>
 
 <svelte:head>
@@ -120,7 +122,7 @@
 							</div>
 						</div>
 						<button
-							on:click={() => startStudy(deck.id)}
+							onclick={() => startStudy(deck.id)}
 							class="deck-card-btn"
 							disabled={deck.cards.length === 0}
 						>
@@ -148,13 +150,13 @@
 
 			<div class="flex justify-center gap-4">
 				<button
-					on:click={() => flashcardStore.resetSession()}
+					onclick={() => flashcardStore.resetSession()}
 					class="flashcard-secondary-btn"
 				>
 					Til baka
 				</button>
 				<button
-					on:click={() => { if ($currentDeck) startStudy($currentDeck.id); }}
+					onclick={() => { if ($currentDeck) startStudy($currentDeck.id); }}
 					class="flashcard-primary-btn"
 				>
 					Æfa aftur
@@ -187,7 +189,7 @@
 
 			<!-- Card -->
 			<button
-				on:click={flip}
+				onclick={flip}
 				class="flashcard-card"
 			>
 				<div class="text-center">
@@ -212,7 +214,7 @@
 					</p>
 					<div class="grid grid-cols-4 gap-2">
 						<button
-							on:click={() => rate('again')}
+							onclick={() => rate('again')}
 							class="flashcard-rating flashcard-rating--again"
 						>
 							<div class="font-medium">Aftur</div>
@@ -221,7 +223,7 @@
 							{/if}
 						</button>
 						<button
-							on:click={() => rate('hard')}
+							onclick={() => rate('hard')}
 							class="flashcard-rating flashcard-rating--hard"
 						>
 							<div class="font-medium">Erfitt</div>
@@ -230,7 +232,7 @@
 							{/if}
 						</button>
 						<button
-							on:click={() => rate('good')}
+							onclick={() => rate('good')}
 							class="flashcard-rating flashcard-rating--good"
 						>
 							<div class="font-medium">Gott</div>
@@ -239,7 +241,7 @@
 							{/if}
 						</button>
 						<button
-							on:click={() => rate('easy')}
+							onclick={() => rate('easy')}
 							class="flashcard-rating flashcard-rating--easy"
 						>
 							<div class="font-medium">Auðvelt</div>

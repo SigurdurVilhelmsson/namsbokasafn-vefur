@@ -2,19 +2,22 @@
   SessionComplete - Summary screen showing time spent and items completed per phase
 -->
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { onMount } from 'svelte';
 	import type { PhaseId } from '$lib/utils/studySession';
 	import { PHASE_LABELS, PHASE_ICONS } from '$lib/utils/studySession';
 
-	export let completedCounts: Record<PhaseId, number>;
-	export let enabledPhases: PhaseId[];
-	export let startTime: number;
+	interface Props {
+		completedCounts: Record<PhaseId, number>;
+		enabledPhases: PhaseId[];
+		startTime: number;
+		onreset?: () => void;
+	}
 
-	const dispatch = createEventDispatcher<{ reset: void }>();
+	let { completedCounts, enabledPhases, startTime, onreset }: Props = $props();
 
-	$: elapsedMs = Date.now() - startTime;
-	$: elapsedMinutes = Math.max(1, Math.round(elapsedMs / 60000));
-	$: totalItems = enabledPhases.reduce((sum, id) => sum + (completedCounts[id] || 0), 0);
+	let elapsedMs = $derived(Date.now() - startTime);
+	let elapsedMinutes = $derived(Math.max(1, Math.round(elapsedMs / 60000)));
+	let totalItems = $derived(enabledPhases.reduce((sum, id) => sum + (completedCounts[id] || 0), 0));
 
 	// Phase display colors for inline styling
 	const PHASE_BADGE_STYLES: Record<PhaseId, { bg: string; text: string; bgDark: string; textDark: string }> = {
@@ -24,8 +27,7 @@
 		reflect: { bg: '#ecfdf5', text: '#047857', bgDark: 'rgba(6,78,59,0.3)', textDark: '#6ee7b7' }
 	};
 
-	let isDark = false;
-	import { onMount } from 'svelte';
+	let isDark = $state(false);
 	onMount(() => {
 		isDark = document.documentElement.classList.contains('dark');
 		const observer = new MutationObserver(() => {
@@ -102,7 +104,7 @@
 	<!-- Actions -->
 	<div class="flex justify-center gap-4">
 		<button
-			on:click={() => dispatch('reset')}
+			onclick={() => onreset?.()}
 			class="sc-action-btn"
 		>
 			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

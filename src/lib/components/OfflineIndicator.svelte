@@ -6,8 +6,8 @@
   import { onMount, onDestroy } from 'svelte';
   import { browser } from '$app/environment';
 
-  let isOnline = true;
-  let showBanner = false;
+  let isOnline = $state(true);
+  let showBanner = $state(false);
   let dismissTimeout: ReturnType<typeof setTimeout>;
 
   function handleOnline() {
@@ -77,7 +77,7 @@
         <span>Án nettengingar - efni lesið úr skyndiminni</span>
       {/if}
       <button
-        on:click={dismissBanner}
+        onclick={dismissBanner}
         class="dismiss-btn"
         aria-label="Loka"
       >

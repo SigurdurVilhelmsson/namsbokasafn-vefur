@@ -1,16 +1,12 @@
 <!--
   AnalyticsTabs - Tab navigation for analytics dashboard
 -->
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type TabId = 'yfirlit' | 'lestur' | 'minniskort' | 'markmiđ';
 </script>
 
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-
-	export let activeTab: TabId = 'yfirlit';
-
-	const dispatch = createEventDispatcher<{ change: TabId }>();
+	let { activeTab = $bindable('yfirlit'), onchange }: { activeTab?: TabId; onchange?: (id: TabId) => void } = $props();
 
 	const tabs: { id: TabId; label: string; icon: string }[] = [
 		{ id: 'yfirlit', label: 'Yfirlit', icon: 'chart' },
@@ -21,7 +17,7 @@
 
 	function selectTab(id: TabId) {
 		activeTab = id;
-		dispatch('change', id);
+		onchange?.(id);
 	}
 </script>
 
@@ -33,7 +29,7 @@
 				aria-selected={activeTab === tab.id}
 				aria-controls="tabpanel-{tab.id}"
 				id="tab-{tab.id}"
-				on:click={() => selectTab(tab.id)}
+				onclick={() => selectTab(tab.id)}
 				class="flex-1 flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all
 					{activeTab === tab.id
 						? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm'

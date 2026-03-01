@@ -5,11 +5,15 @@
 	import type { PhaseId } from '$lib/utils/studySession';
 	import { PHASE_LABELS } from '$lib/utils/studySession';
 
-	export let phases: PhaseId[];
-	export let currentPhase: PhaseId;
-	export let completedPhases: PhaseId[] = [];
+	interface Props {
+		phases: PhaseId[];
+		currentPhase: PhaseId;
+		completedPhases?: PhaseId[];
+	}
 
-	$: currentIndex = phases.indexOf(currentPhase);
+	let { phases, currentPhase, completedPhases = [] }: Props = $props();
+
+	let currentIndex = $derived(phases.indexOf(currentPhase));
 </script>
 
 <div class="phase-progress">

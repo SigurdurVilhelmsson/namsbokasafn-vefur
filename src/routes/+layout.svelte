@@ -2,6 +2,7 @@
   Root Layout - Global styles and theme management
 -->
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores';
 	import { browser } from '$app/environment';
@@ -11,15 +12,19 @@
 	import StorageWarning from '$lib/components/StorageWarning.svelte';
 	import '../app.css';
 
+	let { children }: { children: Snippet } = $props();
+
 	// Run storage migration on startup
 	onMount(() => {
 		migrateStorageKeys();
 	});
 
 	// Reactive theme class on html element
-	$: if (browser) {
-		document.documentElement.classList.toggle('dark', $theme === 'dark');
-	}
+	$effect(() => {
+		if (browser) {
+			document.documentElement.classList.toggle('dark', $theme === 'dark');
+		}
+	});
 </script>
 
 <svelte:head>
@@ -33,7 +38,7 @@
 	<link rel="stylesheet" href="/styles/content.css" />
 </svelte:head>
 
-<slot />
+{@render children()}
 
 <!-- PWA update prompt -->
 <PWAUpdater />
