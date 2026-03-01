@@ -83,7 +83,7 @@
 	<!-- Phase breakdown -->
 	{#if enabledPhases.length > 0}
 		<div class="mb-8 space-y-2">
-			{#each enabledPhases as phaseId}
+			{#each enabledPhases as phaseId (phaseId)}
 				{@const count = completedCounts[phaseId] || 0}
 				<div
 					class="sc-phase-badge"

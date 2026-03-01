@@ -100,7 +100,7 @@
 			{#if term.relatedTerms && term.relatedTerms.length > 0}
 				<div class="mt-3 flex flex-wrap gap-1">
 					<span class="text-xs text-gray-500 dark:text-gray-300">Tengd orð:</span>
-					{#each term.relatedTerms as related}
+					{#each term.relatedTerms as related (related)}
 						<span class="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
 							{related}
 						</span>

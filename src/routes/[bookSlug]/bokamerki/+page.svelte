@@ -132,7 +132,7 @@
 	{#if loading}
 		<div class="space-y-6">
 			<!-- Skeleton for chapter groups -->
-			{#each Array(2) as _}
+			{#each Array(2) as _, i (i)}
 				<div>
 					<!-- Chapter header skeleton -->
 					<div class="flex items-center gap-2 mb-3">
@@ -141,7 +141,7 @@
 					</div>
 					<!-- Bookmark items skeleton -->
 					<div class="space-y-2">
-						{#each Array(3) as _}
+						{#each Array(3) as _, i (i)}
 							<div class="flex items-center gap-3 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
 								<Skeleton variant="text" className="w-5 h-5 flex-shrink-0" />
 								<div class="flex-1 space-y-2">

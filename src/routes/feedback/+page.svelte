@@ -127,7 +127,7 @@
             <div class="form-group">
               <span class="form-label required">Tegund athugasemdar</span>
               <div class="type-grid">
-                {#each FEEDBACK_TYPES as feedbackType}
+                {#each FEEDBACK_TYPES as feedbackType (feedbackType.value)}
                   <label class="type-option" class:selected={selectedType === feedbackType.value}>
                     <input
                       type="radio"

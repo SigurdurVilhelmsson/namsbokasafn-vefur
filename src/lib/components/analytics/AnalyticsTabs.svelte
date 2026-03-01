@@ -23,7 +23,7 @@
 
 <div class="mb-6">
 	<div class="flex space-x-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1" role="tablist" aria-label="Námsgreining flipar">
-		{#each tabs as tab}
+		{#each tabs as tab (tab.id)}
 			<button
 				role="tab"
 				aria-selected={activeTab === tab.id}

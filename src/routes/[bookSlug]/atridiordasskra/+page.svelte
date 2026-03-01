@@ -191,7 +191,7 @@
 
 	{#if loading}
 		<div class="space-y-4">
-			{#each Array(8) as _}
+			{#each Array(8) as _, i (i)}
 				<Skeleton variant="list-item" />
 			{/each}
 		</div>
@@ -247,7 +247,7 @@
 
 			<!-- Letter filter -->
 			<div class="flex flex-wrap gap-1">
-				{#each letters as letter}
+				{#each letters as letter (letter)}
 					<button
 						onclick={() => (selectedLetter = selectedLetter === letter ? null : letter)}
 						class="index-letter-btn"
@@ -294,7 +294,7 @@
 											<span class="index-term-secondary">({term.secondaryTerm})</span>
 										{/if}
 										<span class="index-term-refs">
-											{#each term.refs as ref, i}
+											{#each term.refs as ref, i (i)}
 												{#if i > 0}<span class="index-ref-sep">,</span>{/if}
 												<a
 													href={sectionHref(ref)}

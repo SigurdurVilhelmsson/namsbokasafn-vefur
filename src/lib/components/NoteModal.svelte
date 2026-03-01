@@ -135,7 +135,7 @@
 					Litur yfirstrokunar
 				</span>
 				<div class="flex gap-2">
-					{#each HIGHLIGHT_COLORS as { color: c, label, hex }}
+					{#each HIGHLIGHT_COLORS as { color: c, label, hex } (c)}
 						<button
 							onclick={() => (color = c)}
 							class="h-8 w-8 rounded-full transition-all {color === c

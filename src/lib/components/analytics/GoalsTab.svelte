@@ -118,7 +118,7 @@
 		</div>
 	{:else}
 		<div class="grid gap-4">
-			{#each goalsProgress as progress}
+			{#each goalsProgress as progress (progress.goal.id)}
 				{@const config = getGoalTypeConfig(progress.goal.type)}
 				<div
 					class="p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700
@@ -261,7 +261,7 @@
 						onchange={onTypeChange}
 						class="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-2 text-[var(--text-primary)]"
 					>
-						{#each goalTypes as goalType}
+						{#each goalTypes as goalType (goalType.type)}
 							<option value={goalType.type}>{goalType.label}</option>
 						{/each}
 					</select>

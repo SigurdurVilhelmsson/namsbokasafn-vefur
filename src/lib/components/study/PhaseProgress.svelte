@@ -19,7 +19,7 @@
 <div class="phase-progress">
 	<!-- Phase steps -->
 	<div class="phase-steps">
-		{#each phases as phase, i}
+		{#each phases as phase, i (phase)}
 			{@const isCompleted = completedPhases.includes(phase)}
 			{@const isCurrent = phase === currentPhase}
 			{@const isPast = i < currentIndex}

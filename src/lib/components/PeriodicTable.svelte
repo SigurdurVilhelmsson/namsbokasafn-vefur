@@ -199,7 +199,7 @@
 		>
 			Allt
 		</button>
-		{#each categories as [category, label]}
+		{#each categories as [category, label] (category)}
 			{@const colors = CATEGORY_COLORS[category]}
 			<button
 				onclick={() => (filterCategory = category)}

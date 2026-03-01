@@ -138,7 +138,7 @@
 		<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Síðustu 7 dagar</h2>
 
 		<div class="flex items-end justify-between gap-2 h-40">
-			{#each $weeklyFlashcardStats as day}
+			{#each $weeklyFlashcardStats as day (day.date)}
 				{@const height = maxCardsPerDay > 0 ? (day.cardsReviewed / maxCardsPerDay) * 100 : 0}
 				{@const isToday = day.date === today}
 				{@const successRate = day.cardsReviewed > 0 ? Math.round((day.correctCount / day.cardsReviewed) * 100) : 0}
@@ -170,7 +170,7 @@
 		<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Árangurshlutfall eftir dögum</h2>
 
 		<div class="flex items-end justify-between gap-2 h-40">
-			{#each $weeklyFlashcardStats as day}
+			{#each $weeklyFlashcardStats as day (day.date)}
 				{@const successRate = day.cardsReviewed > 0 ? Math.round((day.correctCount / day.cardsReviewed) * 100) : 0}
 				{@const isToday = day.date === today}
 				<div class="flex-1 flex flex-col items-center gap-2">

@@ -75,7 +75,7 @@
 
 	{#if loading}
 		<div class="chapter-grid">
-			{#each Array(6) as _}
+			{#each Array(6) as _, i (i)}
 				<Skeleton variant="card" />
 			{/each}
 		</div>
@@ -90,7 +90,7 @@
 	{:else if toc}
 		<!-- Chapter grid -->
 		<div class="chapter-grid">
-			{#each toc.chapters as chapter}
+			{#each toc.chapters as chapter (chapter.number)}
 				{@const chapterPath = getChapterPath(chapter)}
 				{@const progressPercent = getChapterProgressPercent(chapter)}
 				{@const firstSection = chapter.sections[0]}
@@ -121,7 +121,7 @@
 					<!-- Section progress dots -->
 					{#if chapter.sections.length > 0}
 						<div class="chapter-dots" aria-label="Framvinda kafla">
-							{#each chapter.sections as section}
+							{#each chapter.sections as section (section.file)}
 								{@const sectionPath = getSectionPath(section)}
 								{@const isRead = isSectionRead(progress, chapterPath, sectionPath)}
 								<span

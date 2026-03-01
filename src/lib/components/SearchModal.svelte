@@ -308,7 +308,7 @@
 									class="w-full rounded border border-[var(--border-color)] bg-[var(--bg-secondary)] px-2 py-1.5 font-sans text-sm text-[var(--text-primary)] focus:border-[var(--accent-color)] focus:outline-none"
 								>
 									<option value="">Allir kaflar</option>
-									{#each chapters as chapter}
+									{#each chapters as chapter (chapter.slug)}
 										<option value={chapter.slug}>{chapter.title}</option>
 									{/each}
 								</select>
@@ -364,7 +364,7 @@
 										</button>
 									</div>
 									<div class="space-y-1">
-										{#each searchHistory.slice(0, 5) as item}
+										{#each searchHistory.slice(0, 5) as item (item.query)}
 											<div class="group flex items-center justify-between rounded px-2 py-1.5 hover:bg-[var(--bg-secondary)]">
 												<button
 													onclick={() => handleHistoryClick(item.query)}
@@ -424,7 +424,7 @@
 							</p>
 
 							<div class="max-h-96 space-y-2 overflow-y-auto">
-								{#each results as result, index}
+								{#each results as result, index (index)}
 									<button
 										onclick={() => handleResultClick(result)}
 										class="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 text-left transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5"

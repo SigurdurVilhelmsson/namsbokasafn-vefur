@@ -29,7 +29,7 @@
 {:else if variant === 'paragraph'}
 	<!-- Multiple lines of text -->
 	<div class="space-y-3 {className}">
-		{#each Array(lines) as _, i}
+		{#each Array(lines) as _, i (i)}
 			<div
 				class="skeleton-line h-4 rounded"
 				style="width: {i === lines - 1 ? '60%' : '100%'}"
@@ -51,7 +51,7 @@
 	<!-- Chapter with sections -->
 	<div class="space-y-2 {className}">
 		<div class="skeleton-line h-6 w-2/3 rounded mb-3"></div>
-		{#each Array(4) as _}
+		{#each Array(4) as _, i (i)}
 			<div class="flex items-center gap-3 pl-4">
 				<div class="skeleton-line h-5 w-5 rounded-full flex-shrink-0"></div>
 				<div class="skeleton-line h-4 flex-1 rounded"></div>
@@ -73,13 +73,13 @@
 {:else if variant === 'sidebar'}
 	<!-- Sidebar/TOC placeholder -->
 	<div class="space-y-6 p-4 {className}">
-		{#each Array(3) as _, chapterIndex}
+		{#each Array(3) as _, chapterIndex (chapterIndex)}
 			<div class="space-y-2">
 				<!-- Chapter title -->
 				<div class="skeleton-line h-5 w-3/4 rounded"></div>
 				<!-- Sections -->
 				<div class="space-y-2 pl-4">
-					{#each Array(chapterIndex === 0 ? 5 : 3) as _}
+					{#each Array(chapterIndex === 0 ? 5 : 3) as _, i (i)}
 						<div class="flex items-center gap-2">
 							<div class="skeleton-line h-4 w-4 rounded-full flex-shrink-0"></div>
 							<div class="skeleton-line h-3 flex-1 rounded" style="width: {60 + Math.random() * 30}%"></div>
@@ -98,7 +98,7 @@
 
 		<!-- First paragraph -->
 		<div class="space-y-3">
-			{#each Array(4) as _, i}
+			{#each Array(4) as _, i (i)}
 				<div
 					class="skeleton-line h-4 rounded"
 					style="width: {i === 3 ? '70%' : '100%'}"
@@ -111,7 +111,7 @@
 
 		<!-- Second paragraph -->
 		<div class="space-y-3">
-			{#each Array(3) as _, i}
+			{#each Array(3) as _, i (i)}
 				<div
 					class="skeleton-line h-4 rounded"
 					style="width: {i === 2 ? '85%' : '100%'}"
@@ -124,7 +124,7 @@
 
 		<!-- Third paragraph -->
 		<div class="space-y-3">
-			{#each Array(5) as _, i}
+			{#each Array(5) as _, i (i)}
 				<div
 					class="skeleton-line h-4 rounded"
 					style="width: {i === 4 ? '60%' : '100%'}"

@@ -77,7 +77,7 @@
 					role="listbox"
 					aria-label="Undirkaflar"
 				>
-					{#each current.chapter.sections as section}
+					{#each current.chapter.sections as section (section.file)}
 						{@const sectionPath = getSectionPath(section)}
 						{@const isCurrent = sectionPath === currentSectionPath}
 						<a
