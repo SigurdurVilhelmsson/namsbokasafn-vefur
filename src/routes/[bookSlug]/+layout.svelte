@@ -2,6 +2,7 @@
   Book Layout - Wraps all book-related pages with Header and Sidebar
 -->
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { settings, fontSize, fontFamily, lineHeight, lineWidth } from '$lib/stores';
@@ -16,27 +17,29 @@
 	import { trackPageView } from '$lib/utils/api';
 	import type { LayoutData } from './$types';
 
-	export let data: LayoutData;
+	let { data, children }: { data: LayoutData; children: Snippet } = $props();
 
 	// Track page views when route changes
-	let previousPath = '';
-	$: {
+	let previousPath = $state('');
+	$effect(() => {
 		const currentPath = $page.url.pathname;
 		if (currentPath !== previousPath) {
 			previousPath = currentPath;
 			const { bookSlug, chapterSlug, sectionSlug } = $page.params;
 			trackPageView(bookSlug, chapterSlug, sectionSlug);
 		}
-	}
+	});
 
-	let focusMode = false;
-	let showShortcutsModal = false;
-	let headerComponent: Header;
+	let focusMode = $state(false);
+	let showShortcutsModal = $state(false);
+	let headerComponent = $state<Header>();
 
 	// Load precomputed references when data changes
-	$: if (data.references) {
-		referenceStore.loadPrecomputedIndex(data.references);
-	}
+	$effect(() => {
+		if (data.references) {
+			referenceStore.loadPrecomputedIndex(data.references);
+		}
+	});
 
 	function toggleFocusMode() {
 		focusMode = !focusMode;
@@ -54,10 +57,10 @@
 		headerComponent?.openSearch();
 	}
 
-	$: bookSlug = $page.params.bookSlug ?? '';
+	let bookSlug = $derived($page.params.bookSlug ?? '');
 
 	// Scroll progress bar
-	let scrollProgress = 0;
+	let scrollProgress = $state(0);
 
 	function handleScrollProgress() {
 		const scrollTop = window.scrollY;
@@ -70,7 +73,7 @@
 	}
 </script>
 
-<svelte:window on:scroll={handleScrollProgress} />
+<svelte:window onscroll={handleScrollProgress} />
 
 {#if !focusMode}
 	<div class="scroll-progress" style="width: {scrollProgress}%"></div>
@@ -120,7 +123,7 @@
 			class="flex-1 overflow-x-hidden {focusMode ? '' : 'lg:ml-[320px]'}"
 		>
 			<div class="mx-auto max-w-7xl px-4 py-6">
-				<slot />
+				{@render children()}
 			</div>
 		</main>
 	</div>

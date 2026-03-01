@@ -81,11 +81,11 @@
 		return Math.round(streakScore + daysActiveScore + sessionScore);
 	}
 
-	$: timeOfDayStats = getTimeOfDayStats();
-	$: maxPeriodSeconds = Math.max(...timeOfDayStats.map((p) => p.totalSeconds), 1);
-	$: peakHour = getPeakHour();
-	$: consistencyScore = getConsistencyScore();
-	$: maxHourlySeconds = Math.max(...$hourlyReadingDistribution.map((h) => h.totalSeconds), 1);
+	let timeOfDayStats = $derived.by(() => getTimeOfDayStats());
+	let maxPeriodSeconds = $derived(Math.max(...timeOfDayStats.map((p) => p.totalSeconds), 1));
+	let peakHour = $derived.by(() => getPeakHour());
+	let consistencyScore = $derived.by(() => getConsistencyScore());
+	let maxHourlySeconds = $derived(Math.max(...$hourlyReadingDistribution.map((h) => h.totalSeconds), 1));
 </script>
 
 <div class="space-y-6">

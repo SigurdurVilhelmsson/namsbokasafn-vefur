@@ -38,9 +38,9 @@
 		};
 	}
 
-	$: distribution = getRatingDistribution();
-	$: maxCardsPerDay = Math.max(...$weeklyFlashcardStats.map((d) => d.cardsReviewed), 1);
-	$: today = getTodayDateString();
+	let distribution = $derived.by(() => getRatingDistribution());
+	let maxCardsPerDay = $derived(Math.max(...$weeklyFlashcardStats.map((d) => d.cardsReviewed), 1));
+	let today = $derived(getTodayDateString());
 </script>
 
 <div class="space-y-6">

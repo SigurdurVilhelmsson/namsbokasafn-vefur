@@ -6,8 +6,8 @@
 	import { goto } from '$app/navigation';
 	import AdaptiveQuiz from '$lib/components/AdaptiveQuiz.svelte';
 
-	$: bookSlug = $page.params.bookSlug;
-	$: chapterSlug = $page.url.searchParams.get('kafli') || undefined;
+	let bookSlug = $derived($page.params.bookSlug);
+	let chapterSlug = $derived($page.url.searchParams.get('kafli') || undefined);
 
 	function handleComplete() {
 		goto(`/${bookSlug}`);

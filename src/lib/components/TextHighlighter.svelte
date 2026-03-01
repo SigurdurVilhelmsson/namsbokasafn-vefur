@@ -8,6 +8,7 @@
 -->
 <script lang="ts">
 	import { onMount, tick } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { annotationStore } from '$lib/stores/annotation';
 	import { glossaryStore } from '$lib/stores/glossary';
@@ -20,25 +21,29 @@
 	import type { GlossaryTerm } from '$lib/types/content';
 	import { serializeRange, deserializeRange, upgradeToV2 } from '$lib/utils/textAnchor';
 
-	export let bookSlug: string;
-	export let chapterSlug: string;
-	export let sectionSlug: string;
+	interface Props {
+		bookSlug: string;
+		chapterSlug: string;
+		sectionSlug: string;
+		children?: Snippet;
+	}
+	let { bookSlug, chapterSlug, sectionSlug, children }: Props = $props();
 
 	let containerElement: HTMLDivElement;
-	let selection: TextSelection | null = null;
-	let showNoteModal = false;
-	let showFlashcardModal = false;
-	let showGlossaryTooltip = false;
-	let glossaryTerm: GlossaryTerm | null = null;
-	let glossaryPosition: { x: number; y: number } = { x: 0, y: 0 };
+	let selection: TextSelection | null = $state(null);
+	let showNoteModal = $state(false);
+	let showFlashcardModal = $state(false);
+	let showGlossaryTooltip = $state(false);
+	let glossaryTerm: GlossaryTerm | null = $state(null);
+	let glossaryPosition: { x: number; y: number } = $state({ x: 0, y: 0 });
 	let pendingHighlight: {
 		text: string;
 		range: TextRange;
 		color: HighlightColor;
-	} | null = null;
+	} | null = $state(null);
 	let pendingFlashcard: {
 		text: string;
-	} | null = null;
+	} | null = $state(null);
 
 	// Track restored highlights by annotation ID for click handling
 	let restoredHighlights: Map<string, HTMLElement[]> = new Map();
@@ -440,8 +445,8 @@
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
-<div bind:this={containerElement} on:mouseup={handleMouseUp} class="text-highlighter">
-	<slot />
+<div bind:this={containerElement} onmouseup={handleMouseUp} class="text-highlighter">
+	{@render children?.()}
 </div>
 
 <!-- Selection popup -->

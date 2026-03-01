@@ -2,7 +2,6 @@
   SessionRunner - Orchestrates active session through enabled phases
 -->
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { SessionPlan, PhaseId } from '$lib/utils/studySession';
 	import PhaseProgress from './PhaseProgress.svelte';
 	import ReviewPhase from './ReviewPhase.svelte';
@@ -10,24 +9,25 @@
 	import PracticePhase from './PracticePhase.svelte';
 	import ReflectPhase from './ReflectPhase.svelte';
 
-	export let plan: SessionPlan;
-	export let enabledPhases: PhaseId[];
-	export let bookSlug: string;
+	interface Props {
+		plan: SessionPlan;
+		enabledPhases: PhaseId[];
+		bookSlug: string;
+		oncomplete?: (counts: Record<PhaseId, number>) => void;
+	}
 
-	const dispatch = createEventDispatcher<{
-		complete: Record<PhaseId, number>;
-	}>();
+	let { plan, enabledPhases, bookSlug, oncomplete }: Props = $props();
 
-	let currentPhaseIndex = 0;
-	let completedPhases: PhaseId[] = [];
-	let completedCounts: Record<PhaseId, number> = {
+	let currentPhaseIndex = $state(0);
+	let completedPhases: PhaseId[] = $state([]);
+	let completedCounts: Record<PhaseId, number> = $state({
 		review: 0,
 		reading: 0,
 		practice: 0,
 		reflect: 0
-	};
+	});
 
-	$: currentPhase = enabledPhases[currentPhaseIndex];
+	let currentPhase = $derived(enabledPhases[currentPhaseIndex]);
 
 	function handlePhaseComplete(phaseId: PhaseId, count: number) {
 		completedCounts[phaseId] = count;
@@ -36,7 +36,7 @@
 		if (currentPhaseIndex < enabledPhases.length - 1) {
 			currentPhaseIndex++;
 		} else {
-			dispatch('complete', completedCounts);
+			oncomplete?.(completedCounts);
 		}
 	}
 
@@ -46,7 +46,7 @@
 		if (currentPhaseIndex < enabledPhases.length - 1) {
 			currentPhaseIndex++;
 		} else {
-			dispatch('complete', completedCounts);
+			oncomplete?.(completedCounts);
 		}
 	}
 </script>
@@ -64,23 +64,23 @@
 			<ReviewPhase
 				dueFlashcards={plan.review.dueFlashcards}
 				reviewProblems={plan.review.reviewProblems}
-				on:complete={(e) => handlePhaseComplete('review', e.detail)}
+				oncomplete={(count) => handlePhaseComplete('review', count)}
 			/>
 		{:else if currentPhase === 'reading'}
 			<ReadingPhase
 				sections={plan.reading.sections}
 				{bookSlug}
-				on:complete={(e) => handlePhaseComplete('reading', e.detail)}
+				oncomplete={(count) => handlePhaseComplete('reading', count)}
 			/>
 		{:else if currentPhase === 'practice'}
 			<PracticePhase
 				problems={plan.practice.problems}
-				on:complete={(e) => handlePhaseComplete('practice', e.detail)}
+				oncomplete={(count) => handlePhaseComplete('practice', count)}
 			/>
 		{:else if currentPhase === 'reflect'}
 			<ReflectPhase
 				objectives={plan.reflect.objectives}
-				on:complete={(e) => handlePhaseComplete('reflect', e.detail)}
+				oncomplete={(count) => handlePhaseComplete('reflect', count)}
 			/>
 		{/if}
 	</div>
@@ -88,7 +88,7 @@
 	<!-- Skip button -->
 	<div class="mt-4 flex justify-end">
 		<button
-			on:click={handleSkip}
+			onclick={handleSkip}
 			class="sr-skip-btn"
 		>
 			Sleppa þessum þætti

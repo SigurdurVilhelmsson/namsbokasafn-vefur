@@ -17,11 +17,11 @@
 		type TabId
 	} from '$lib/components/analytics';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let toc: TableOfContents | null = null;
-	let loading = true;
-	let activeTab: TabId = 'yfirlit';
+	let toc: TableOfContents | null = $state(null);
+	let loading = $state(true);
+	let activeTab: TabId = $state('yfirlit');
 
 	onMount(async () => {
 		try {
@@ -165,17 +165,17 @@
 	}
 
 	// Handle tab change
-	function handleTabChange(event: CustomEvent<TabId>) {
-		activeTab = event.detail;
+	function handleTabChange(id: TabId) {
+		activeTab = id;
 	}
 
 	// Reactive data
-	$: last7Days = getLast7Days();
-	$: maxSeconds = Math.max(...last7Days.map((d) => d.seconds), 1);
-	$: topSections = getTopSections(5);
-	$: recentActivity = analyticsStore.getRecentActivity(10);
-	$: totalReadingTime = analyticsStore.getTotalReadingTime();
-	$: weeklyStats = analyticsStore.getWeeklyStats();
+	let last7Days = $derived(getLast7Days());
+	let maxSeconds = $derived(Math.max(...last7Days.map((d) => d.seconds), 1));
+	let topSections = $derived(getTopSections(5));
+	let recentActivity = $derived(analyticsStore.getRecentActivity(10));
+	let totalReadingTime = $derived(analyticsStore.getTotalReadingTime());
+	let weeklyStats = $derived(analyticsStore.getWeeklyStats());
 </script>
 
 <svelte:head>
@@ -193,13 +193,13 @@
 		</h1>
 		<div class="flex gap-2">
 			<button
-				on:click={handleExport}
+				onclick={handleExport}
 				class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
 			>
 				Flytja út
 			</button>
 			<button
-				on:click={handleClearData}
+				onclick={handleClearData}
 				class="text-sm px-3 py-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
 			>
 				Hreinsa gögn
@@ -208,7 +208,7 @@
 	</div>
 
 	<!-- Tab Navigation -->
-	<AnalyticsTabs bind:activeTab on:change={handleTabChange} />
+	<AnalyticsTabs bind:activeTab onchange={handleTabChange} />
 
 	{#if loading}
 		<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

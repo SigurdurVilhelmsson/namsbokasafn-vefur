@@ -69,7 +69,7 @@ npm run format           # Prettier formatting
 - Book config defined in `src/lib/types/book.ts`; loaded via `+layout.ts` and passed to child routes
 - Landing page (`+page.ts`) dynamically reads `toc.json` to derive chapter counts — no hardcoded stats
 - Svelte actions for DOM manipulation (equations, practice problems, figure viewer)
-- **Svelte 5 with legacy syntax** — uses `$:` reactive declarations and `export let` props, not runes (`$state`, `$derived`, `$props`). Components use Svelte 5 but in legacy compatibility mode.
+- **Svelte 5 with runes** — uses `$state`, `$derived`, `$effect`, `$props()` for reactivity. Callback props (e.g., `onClose`, `oncomplete`) instead of `createEventDispatcher`. `{@render children()}` instead of `<slot />`.
 - `$store` auto-subscription syntax for store values
 - Math rendering: MathJax (pre-rendered SVG in HTML content)
 - Path alias: `$lib/` resolves to `src/lib/`

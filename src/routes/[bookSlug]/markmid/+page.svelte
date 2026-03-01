@@ -14,10 +14,10 @@
 	import { loadTableOfContents, findChapterBySlug, findSectionBySlug } from '$lib/utils/contentLoader';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let toc: TableOfContents | null = null;
-	let loading = true;
+	let toc: TableOfContents | null = $state(null);
+	let loading = $state(true);
 
 	onMount(async () => {
 		try {
@@ -59,7 +59,7 @@
 	}
 
 	// Group objectives by chapter
-	$: objectivesByChapter = (() => {
+	let objectivesByChapter = $derived.by(() => {
 		const grouped = new Map<string, typeof $objectivesStore.completedObjectives[string][]>();
 
 		for (const objective of Object.values($objectivesStore.completedObjectives)) {
@@ -72,7 +72,7 @@
 
 		// Sort by chapter slug (which usually has numeric prefix)
 		return new Map([...grouped.entries()].sort((a, b) => a[0].localeCompare(b[0])));
-	})();
+	});
 
 	// Get chapter info from TOC (supports both v1 slugs and v2 numbers)
 	function getChapterTitle(chapterSlug: string): string {
@@ -82,14 +82,14 @@
 	}
 
 	// Calculate progress percentage
-	$: progressPercent = (() => {
+	let progressPercent = $derived.by(() => {
 		const total = Object.keys($objectivesStore.completedObjectives).length;
 		const completed = Object.values($objectivesStore.completedObjectives).filter(o => o.isCompleted).length;
 		return total > 0 ? Math.round((completed / total) * 100) : 0;
-	})();
+	});
 
 	// Count by confidence level
-	$: confidenceCounts = (() => {
+	let confidenceCounts = $derived.by(() => {
 		const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, unrated: 0 };
 		for (const obj of Object.values($objectivesStore.completedObjectives)) {
 			if (obj.confidence) {
@@ -99,7 +99,7 @@
 			}
 		}
 		return counts;
-	})();
+	});
 
 	function toggleObjective(chapterSlug: string, sectionSlug: string, index: number, text: string) {
 		objectivesStore.toggleObjective(chapterSlug, sectionSlug, index, text);
@@ -131,7 +131,7 @@
 		</h1>
 		{#if $totalCompletedObjectives > 0}
 			<button
-				on:click={clearAllObjectives}
+				onclick={clearAllObjectives}
 				class="text-sm px-3 py-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
 			>
 				Hreinsa öll
@@ -261,7 +261,7 @@
 									<div class="flex items-start gap-3">
 										<!-- Checkbox -->
 										<button
-											on:click={() => toggleObjective(obj.chapterSlug, obj.sectionSlug, obj.objectiveIndex, obj.objectiveText)}
+											onclick={() => toggleObjective(obj.chapterSlug, obj.sectionSlug, obj.objectiveIndex, obj.objectiveText)}
 											class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {obj.isCompleted
 												? 'bg-green-500 border-green-500 text-white'
 												: 'border-gray-300 dark:border-gray-500 hover:border-green-400'}"
@@ -294,7 +294,7 @@
 													<span class="text-xs text-gray-500 dark:text-gray-400 mr-2 self-center">Sjálfsvissa:</span>
 													{#each [1, 2, 3, 4, 5] as level}
 														<button
-															on:click={() => setConfidence(obj.chapterSlug, obj.sectionSlug, obj.objectiveIndex, level as ConfidenceLevel)}
+															onclick={() => setConfidence(obj.chapterSlug, obj.sectionSlug, obj.objectiveIndex, level as ConfidenceLevel)}
 															class="px-2 py-1 text-xs rounded border transition-colors {obj.confidence === level
 																? confidenceColors[level as ConfidenceLevel]
 																: 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-500 hover:bg-gray-200 dark:hover:bg-gray-500'}"

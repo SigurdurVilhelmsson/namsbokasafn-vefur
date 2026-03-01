@@ -2,21 +2,23 @@
   PracticePhase - Wraps AdaptiveQuiz for practice problems within the session
 -->
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { PracticeProblem } from '$lib/stores/quiz';
 	import { quizStore } from '$lib/stores/quiz';
 
-	export let problems: PracticeProblem[];
+	interface Props {
+		problems: PracticeProblem[];
+		oncomplete?: (count: number) => void;
+	}
 
-	const dispatch = createEventDispatcher<{ complete: number }>();
+	let { problems, oncomplete }: Props = $props();
 
-	let currentIndex = 0;
-	let isShowingAnswer = false;
-	let completedCount = 0;
+	let currentIndex = $state(0);
+	let isShowingAnswer = $state(false);
+	let completedCount = $state(0);
 
-	$: currentProblem = problems[currentIndex];
-	$: total = problems.length;
-	$: progress = total > 0 ? Math.round((currentIndex / total) * 100) : 0;
+	let currentProblem = $derived(problems[currentIndex]);
+	let total = $derived(problems.length);
+	let progress = $derived(total > 0 ? Math.round((currentIndex / total) * 100) : 0);
 
 	function showAnswer() {
 		isShowingAnswer = true;
@@ -31,7 +33,7 @@
 			currentIndex++;
 			isShowingAnswer = false;
 		} else {
-			dispatch('complete', completedCount);
+			oncomplete?.(completedCount);
 		}
 	}
 </script>
@@ -74,7 +76,7 @@
 
 			{#if !isShowingAnswer}
 				<button
-					on:click={showAnswer}
+					onclick={showAnswer}
 					class="pp-show-answer-btn"
 				>
 					Sýna svar
@@ -95,7 +97,7 @@
 						<p class="pp-assess-prompt">Hvernig gekk?</p>
 						<div class="flex gap-3">
 							<button
-								on:click={() => handleAnswer(true)}
+								onclick={() => handleAnswer(true)}
 								class="pp-assess-btn pp-assess-btn--correct"
 							>
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -104,7 +106,7 @@
 								Rétt
 							</button>
 							<button
-								on:click={() => handleAnswer(false)}
+								onclick={() => handleAnswer(false)}
 								class="pp-assess-btn pp-assess-btn--wrong"
 							>
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

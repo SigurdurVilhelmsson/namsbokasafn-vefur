@@ -14,16 +14,20 @@
 		type KeyboardShortcut
 	} from '$lib/actions/keyboardShortcuts';
 
-	export let isOpen = false;
-	export let onClose: () => void;
+	interface Props {
+		isOpen?: boolean;
+		onClose: () => void;
+	}
 
-	let editingAction: ShortcutAction | null = null;
-	let pendingKey: string | null = null;
-	let keySequence: string[] = [];
+	let { isOpen = false, onClose }: Props = $props();
 
-	$: shortcuts = getShortcuts();
-	$: groupedShortcuts = groupShortcutsByCategory(shortcuts);
-	$: hasCustomizations = Object.keys($settings.shortcutPreferences).length > 0;
+	let editingAction: ShortcutAction | null = $state(null);
+	let pendingKey: string | null = $state(null);
+	let keySequence: string[] = $state([]);
+
+	let shortcuts = $derived(getShortcuts());
+	let groupedShortcuts = $derived(groupShortcutsByCategory(shortcuts));
+	let hasCustomizations = $derived(Object.keys($settings.shortcutPreferences).length > 0);
 
 	// Convert keyboard event to key string
 	function keyEventToString(event: KeyboardEvent): string {
@@ -124,13 +128,15 @@
 	}
 
 	// Prevent body scroll when modal is open (browser only)
-	$: if (browser) {
-		if (isOpen) {
-			document.body.style.overflow = 'hidden';
-		} else {
-			document.body.style.overflow = '';
+	$effect(() => {
+		if (browser) {
+			if (isOpen) {
+				document.body.style.overflow = 'hidden';
+			} else {
+				document.body.style.overflow = '';
+			}
 		}
-	}
+	});
 
 	onMount(() => {
 		window.addEventListener('keydown', handleGlobalKeyDown);
@@ -148,8 +154,8 @@
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
 		data-modal-overlay="true"
-		on:click={handleOverlayClick}
-		on:keydown={(e) => e.key === 'Escape' && !editingAction && onClose()}
+		onclick={handleOverlayClick}
+		onkeydown={(e) => e.key === 'Escape' && !editingAction && onClose()}
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="shortcuts-modal-title"
@@ -188,7 +194,7 @@
 				<div class="flex items-center gap-2">
 					{#if hasCustomizations}
 						<button
-							on:click={handleResetAll}
+							onclick={handleResetAll}
 							class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
 							title="Endurstilla allt"
 						>
@@ -204,7 +210,7 @@
 						</button>
 					{/if}
 					<button
-						on:click={onClose}
+						onclick={onClose}
 						class="rounded-lg p-2 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
 						aria-label="Loka"
 					>
@@ -246,7 +252,7 @@
 											<!-- Reset button if customized -->
 											{#if shortcut.isCustomized && !isEditing}
 												<button
-													on:click={() => handleResetShortcut(shortcut.action)}
+													onclick={() => handleResetShortcut(shortcut.action)}
 													class="rounded p-1 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--accent-color)]"
 													title="Endurstilla ({formatShortcutKey(shortcut.defaultKey)})"
 												>
@@ -268,7 +274,7 @@
 
 											<!-- Key display / edit button -->
 											<button
-												on:click={() => {
+												onclick={() => {
 													if (isEditing) {
 														handleCancelEdit();
 													} else {

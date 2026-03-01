@@ -2,17 +2,19 @@
   ReadingPhase - Section recommendation cards with navigation links
 -->
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { UnreadSection } from '$lib/utils/studySession';
 	import { reader } from '$lib/stores/reader';
 
-	export let sections: UnreadSection[];
-	export let bookSlug: string;
+	interface Props {
+		sections: UnreadSection[];
+		bookSlug: string;
+		oncomplete?: (count: number) => void;
+	}
 
-	const dispatch = createEventDispatcher<{ complete: number }>();
+	let { sections, bookSlug, oncomplete }: Props = $props();
 
-	let completedCount = 0;
-	let markedDone: Set<number> = new Set();
+	let completedCount = $state(0);
+	let markedDone: Set<number> = $state(new Set());
 
 	function markDone(index: number) {
 		if (markedDone.has(index)) return;
@@ -24,12 +26,12 @@
 
 		// Auto-complete when all sections are done
 		if (markedDone.size === sections.length) {
-			dispatch('complete', completedCount);
+			oncomplete?.(completedCount);
 		}
 	}
 
 	function finish() {
-		dispatch('complete', completedCount);
+		oncomplete?.(completedCount);
 	}
 </script>
 
@@ -81,7 +83,7 @@
 								</svg>
 							</a>
 							<button
-								on:click={() => markDone(i)}
+								onclick={() => markDone(i)}
 								class="rdp-done-btn"
 							>
 								Lesið
@@ -95,7 +97,7 @@
 
 	<!-- Finish button -->
 	<div class="mt-6 flex justify-end">
-		<button on:click={finish} class="rdp-finish-btn">
+		<button onclick={finish} class="rdp-finish-btn">
 			{markedDone.size === sections.length ? 'Áfram' : 'Halda áfram'}
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />

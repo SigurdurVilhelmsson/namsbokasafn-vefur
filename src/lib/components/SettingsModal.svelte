@@ -2,7 +2,7 @@
   SettingsModal - User settings for font size and font family
 -->
 <script lang="ts">
-	import { createEventDispatcher, onDestroy } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 	import {
 		settings,
@@ -18,9 +18,11 @@
 		type LineWidth
 	} from '$lib/stores';
 
-	export let isOpen = false;
-
-	const dispatch = createEventDispatcher<{ close: void }>();
+	interface Props {
+		isOpen?: boolean;
+		onClose?: () => void;
+	}
+	let { isOpen = false, onClose }: Props = $props();
 
 	const fontSizes: { value: FontSize; label: string }[] = [
 		{ value: 'small', label: 'Lítið' },
@@ -47,28 +49,32 @@
 		{ value: 'wide', label: 'Breitt' }
 	];
 
-	let modalRef: HTMLDivElement;
-	let previouslyFocused: HTMLElement | null = null;
+	let modalRef = $state<HTMLDivElement | undefined>(undefined);
+	let previouslyFocused: HTMLElement | null = $state(null);
 	let focusTimeout: ReturnType<typeof setTimeout>;
 
 	// Save focus when modal opens
-	$: if (isOpen) {
-		previouslyFocused = document.activeElement as HTMLElement;
-	}
+	$effect(() => {
+		if (isOpen) {
+			previouslyFocused = document.activeElement as HTMLElement;
+		}
+	});
 
 	// Auto-focus first interactive element when modal opens
-	$: if (isOpen && modalRef) {
-		clearTimeout(focusTimeout);
-		focusTimeout = setTimeout(() => {
-			const firstFocusable = modalRef?.querySelector<HTMLElement>(
-				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-			);
-			firstFocusable?.focus();
-		}, 50);
-	}
+	$effect(() => {
+		if (isOpen && modalRef) {
+			clearTimeout(focusTimeout);
+			focusTimeout = setTimeout(() => {
+				const firstFocusable = modalRef?.querySelector<HTMLElement>(
+					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+				);
+				firstFocusable?.focus();
+			}, 50);
+		}
+	});
 
 	function close() {
-		dispatch('close');
+		onClose?.();
 		previouslyFocused?.focus();
 	}
 
@@ -108,14 +114,14 @@
 	}
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 {#if isOpen}
 	<!-- Backdrop -->
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
-		on:click={handleBackdropClick}
-		on:keydown={handleModalKeydown}
+		onclick={handleBackdropClick}
+		onkeydown={handleModalKeydown}
 		role="presentation"
 		transition:fade={{ duration: 150 }}
 	>
@@ -134,7 +140,7 @@
 					Stillingar
 				</h2>
 				<button
-					on:click={close}
+					onclick={close}
 					class="-mr-2 rounded-lg p-2 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
 					aria-label="Loka"
 				>
@@ -162,7 +168,7 @@
 							<div class="flex justify-between mb-2 px-1">
 								{#each fontSizes as size, i}
 									<button
-										on:click={() => settings.setFontSize(size.value)}
+										onclick={() => settings.setFontSize(size.value)}
 										class="text-xs transition-colors {$fontSize === size.value
 											? 'text-[var(--accent-color)] font-semibold'
 											: 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}"
@@ -181,7 +187,7 @@
 								max="3"
 								step="1"
 								value={fontSizes.findIndex(s => s.value === $fontSize)}
-								on:input={(e) => {
+								oninput={(e) => {
 									const index = parseInt(e.currentTarget.value);
 									settings.setFontSize(fontSizes[index].value);
 								}}
@@ -235,7 +241,7 @@
 										type="radio"
 										name="font"
 										checked={$fontFamily === family.value}
-										on:change={() => settings.setFontFamily(family.value)}
+										onchange={() => settings.setFontFamily(family.value)}
 										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-color)] focus:ring-[var(--accent-color)]"
 									/>
 									<div>
@@ -259,7 +265,7 @@
 						<div class="grid grid-cols-3 gap-2 sm:flex">
 							{#each lineHeights as height}
 								<button
-									on:click={() => settings.setLineHeight(height.value)}
+									onclick={() => settings.setLineHeight(height.value)}
 									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineHeight === height.value
 										? 'bg-[var(--accent-color)] text-white shadow-sm'
 										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
@@ -278,7 +284,7 @@
 						<div class="grid grid-cols-3 gap-2 sm:flex">
 							{#each lineWidths as width}
 								<button
-									on:click={() => settings.setLineWidth(width.value)}
+									onclick={() => settings.setLineWidth(width.value)}
 									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineWidth === width.value
 										? 'bg-[var(--accent-color)] text-white shadow-sm'
 										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
@@ -305,7 +311,7 @@
 								role="switch"
 								aria-checked={$glossaryHighlighting}
 								aria-label={$glossaryHighlighting ? 'Slökkva á orðasafnsmerkingum' : 'Kveikja á orðasafnsmerkingum'}
-								on:click={() => settings.toggleGlossaryHighlighting()}
+								onclick={() => settings.toggleGlossaryHighlighting()}
 								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$glossaryHighlighting
 									? 'bg-[var(--accent-color)]'
 									: 'bg-gray-300 dark:bg-gray-600'}"
@@ -335,7 +341,7 @@
 								role="switch"
 								aria-checked={$bionicReading}
 								aria-label={$bionicReading ? 'Slökkva á hraðlestri' : 'Kveikja á hraðlestri'}
-								on:click={() => settings.toggleBionicReading()}
+								onclick={() => settings.toggleBionicReading()}
 								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$bionicReading
 									? 'bg-[var(--accent-color)]'
 									: 'bg-gray-300 dark:bg-gray-600'}"

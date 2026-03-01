@@ -12,14 +12,14 @@
 	import ErrorMessage from '$lib/components/ErrorMessage.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let toc: TableOfContents | null = null;
-	let loading = true;
-	let error: string | null = null;
+	let toc: TableOfContents | null = $state(null);
+	let loading = $state(true);
+	let error: string | null = $state(null);
 
 	// Subscribe to reader progress for reactivity
-	$: progress = $reader.progress;
+	let progress = $derived($reader.progress);
 
 	async function loadContent() {
 		loading = true;
@@ -44,10 +44,13 @@
 	}
 
 	// Get attribution data (supports both 'source' and 'attribution' fields with v1/v2 field names)
-	$: attribution = toc?.source || toc?.attribution;
+	let attribution = $derived.by(() => {
+		if (!toc) return undefined;
+		return toc.source || toc.attribution;
+	});
 	// Handle both v1 field names (original, authors) and v2 field names (originalTitle, originalAuthors)
-	$: originalTitle = attribution?.original || (attribution as any)?.originalTitle;
-	$: authors = attribution?.authors || (attribution as any)?.originalAuthors;
+	let originalTitle = $derived(attribution?.original || (attribution as any)?.originalTitle);
+	let authors = $derived(attribution?.authors || (attribution as any)?.originalAuthors);
 </script>
 
 <svelte:head>

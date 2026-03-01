@@ -11,10 +11,10 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { browser } from '$app/environment';
 
-	let needRefresh = false;
-	let offlineReady = false;
-	let updating = false;
-	let updateError: string | null = null;
+	let needRefresh = $state(false);
+	let offlineReady = $state(false);
+	let updating = $state(false);
+	let updateError: string | null = $state(null);
 	let intervalId: ReturnType<typeof setInterval> | null = null;
 	let offlineReadyTimeout: ReturnType<typeof setTimeout>;
 	let updateServiceWorker: (() => Promise<void>) | null = null;
@@ -106,12 +106,14 @@
 	}
 
 	// Auto-dismiss offline ready notification after 5 seconds
-	$: if (offlineReady) {
-		clearTimeout(offlineReadyTimeout);
-		offlineReadyTimeout = setTimeout(() => {
-			offlineReady = false;
-		}, 5000);
-	}
+	$effect(() => {
+		if (offlineReady) {
+			clearTimeout(offlineReadyTimeout);
+			offlineReadyTimeout = setTimeout(() => {
+				offlineReady = false;
+			}, 5000);
+		}
+	});
 </script>
 
 <!-- Offline Ready Notification -->
@@ -135,7 +137,7 @@
 				<span class="text-sm font-medium">Forritið er tilbúið til notkunar án nettengingar</span>
 			</div>
 			<button
-				on:click={handleDismissOfflineReady}
+				onclick={handleDismissOfflineReady}
 				class="rounded-lg p-1 transition-colors hover:bg-emerald-500"
 				aria-label="Loka tilkynningu"
 			>
@@ -183,7 +185,7 @@
 
 		<div class="flex gap-2">
 			<button
-				on:click={handleUpdate}
+				onclick={handleUpdate}
 				disabled={updating}
 				class="flex-1 rounded-lg bg-white px-4 py-2 text-sm font-medium text-[var(--accent-color)] transition-colors hover:bg-[var(--accent-light)] disabled:opacity-50 disabled:cursor-not-allowed"
 				data-testid="pwa-update-button"
@@ -201,7 +203,7 @@
 				{/if}
 			</button>
 			<button
-				on:click={handleDismissUpdate}
+				onclick={handleDismissUpdate}
 				disabled={updating}
 				class="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
 				data-testid="pwa-dismiss-button"

@@ -2,47 +2,41 @@
   SessionPlanner - Planning screen with diagnostics, phase toggles, chapter filter
 -->
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { SessionPlan, PhaseId } from '$lib/utils/studySession';
 	import { PHASE_LABELS, PHASE_ICONS } from '$lib/utils/studySession';
 	import type { Chapter } from '$lib/types/content';
 
-	export let plan: SessionPlan;
-	export let chapters: Chapter[] = [];
-	export let chapterFilter: number | undefined = undefined;
-	export let bookSlug: string;
+	interface Props {
+		plan: SessionPlan;
+		chapters?: Chapter[];
+		chapterFilter?: number;
+		bookSlug: string;
+		onstart?: (phases: PhaseId[]) => void;
+		onfilterchange?: (chapterNum: number | undefined) => void;
+	}
 
-	const dispatch = createEventDispatcher<{
-		start: PhaseId[];
-		filterChange: number | undefined;
-	}>();
+	let { plan, chapters = [], chapterFilter, bookSlug, onstart, onfilterchange }: Props = $props();
 
-	// Track which phases are toggled on/off
-	let phaseToggles: Record<PhaseId, boolean> = {
+	// Track which phases are toggled on/off (resets when plan changes, writable for user toggles)
+	let phaseToggles: Record<PhaseId, boolean> = $derived({
 		review: plan.review.enabled,
 		reading: plan.reading.enabled,
 		practice: plan.practice.enabled,
 		reflect: plan.reflect.enabled
-	};
+	});
 
-	// Update toggles when plan changes
-	$: {
-		phaseToggles = {
-			review: plan.review.enabled,
-			reading: plan.reading.enabled,
-			practice: plan.practice.enabled,
-			reflect: plan.reflect.enabled
-		};
-	}
+	let selectedPhases = $derived(
+		(Object.entries(phaseToggles) as [PhaseId, boolean][])
+			.filter(([, on]) => on)
+			.map(([id]) => id)
+	);
 
-	$: selectedPhases = (Object.entries(phaseToggles) as [PhaseId, boolean][])
-		.filter(([, on]) => on)
-		.map(([id]) => id);
-
-	$: selectedMinutes = selectedPhases.reduce((sum, id) => {
-		const phase = plan[id];
-		return sum + phase.estimatedMinutes;
-	}, 0);
+	let selectedMinutes = $derived(
+		selectedPhases.reduce((sum, id) => {
+			const phase = plan[id];
+			return sum + phase.estimatedMinutes;
+		}, 0)
+	);
 
 	function togglePhase(id: PhaseId) {
 		const phase = plan[id];
@@ -52,12 +46,12 @@
 
 	function handleFilterChange(e: Event) {
 		const value = (e.target as HTMLSelectElement).value;
-		dispatch('filterChange', value ? parseInt(value, 10) : undefined);
+		onfilterchange?.(value ? parseInt(value, 10) : undefined);
 	}
 
 	function handleStart() {
 		if (selectedPhases.length > 0) {
-			dispatch('start', selectedPhases);
+			onstart?.(selectedPhases);
 		}
 	}
 
@@ -92,7 +86,7 @@
 	};
 
 	// Detect dark mode
-	let isDark = false;
+	let isDark = $state(false);
 	import { onMount } from 'svelte';
 	onMount(() => {
 		isDark = document.documentElement.classList.contains('dark');
@@ -126,7 +120,7 @@
 				id="chapter-filter"
 				class="sp-select"
 				value={chapterFilter ?? ''}
-				on:change={handleFilterChange}
+				onchange={handleFilterChange}
 			>
 				<option value="">Allir kaflar</option>
 				{#each chapters as chapter}
@@ -171,7 +165,7 @@
 							? ''
 							: ''}
 					disabled={!phase.enabled}
-					on:click={() => togglePhase(phaseId)}
+					onclick={() => togglePhase(phaseId)}
 				>
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-3">
@@ -237,7 +231,7 @@
 			</div>
 
 			<button
-				on:click={handleStart}
+				onclick={handleStart}
 				disabled={selectedPhases.length === 0}
 				class="sp-start-btn"
 				class:sp-start-btn--disabled={selectedPhases.length === 0}
