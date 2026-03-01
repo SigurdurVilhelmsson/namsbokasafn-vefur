@@ -200,6 +200,13 @@ function sortSections(sections) {
 	});
 }
 
+// Strip trailing commas from JSON (handles JSONC-style files with trailing commas)
+function parseJsonLenient(text) {
+	// Remove trailing commas before } or ]
+	const cleaned = text.replace(/,\s*([\]}])/g, '$1');
+	return JSON.parse(cleaned);
+}
+
 // Load chapter metadata from efni repo status.json
 function loadChapterMetadata(efniPath, bookSlug, chapterNum) {
 	const paddedNum = String(chapterNum).padStart(2, '0');
@@ -210,8 +217,9 @@ function loadChapterMetadata(efniPath, bookSlug, chapterNum) {
 	}
 
 	try {
-		return JSON.parse(readFileSync(statusPath, 'utf-8'));
+		return parseJsonLenient(readFileSync(statusPath, 'utf-8'));
 	} catch {
+		console.warn(`    Warning: Could not parse ${statusPath}`);
 		return null;
 	}
 }

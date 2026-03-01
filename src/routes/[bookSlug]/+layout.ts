@@ -1,4 +1,5 @@
 import type { LayoutLoad } from './$types';
+import { error } from '@sveltejs/kit';
 import { loadTableOfContents } from '$lib/utils/contentLoader';
 
 // Book configurations - would be loaded from a config file in production
@@ -29,7 +30,11 @@ const BOOKS: Record<
 };
 
 export const load: LayoutLoad = async ({ params, fetch }) => {
-	const book = BOOKS[params.bookSlug] || null;
+	const book = BOOKS[params.bookSlug];
+
+	if (!book) {
+		error(404, { message: 'Bók fannst ekki' });
+	}
 
 	// Load TOC to get precomputed references
 	let references = null;
