@@ -123,7 +123,7 @@ async function testOfflineCache() {
 				const content = await response.text();
 				totalBytes += content.length;
 			}
-		} catch (e) {
+		} catch {
 			// ignore
 		}
 	}
@@ -135,7 +135,7 @@ async function testOfflineCache() {
 				const blob = await response.blob();
 				totalBytes += blob.size;
 			}
-		} catch (e) {
+		} catch {
 			// ignore
 		}
 	}

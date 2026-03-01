@@ -569,7 +569,7 @@ function createAnalyticsStore() {
 				case 'daily_flashcards':
 					current = todayStats.flashcardsReviewed;
 					break;
-				case 'weekly_sections':
+				case 'weekly_sections': {
 					// Sum sections visited for the current week
 					const weekStart = getWeekStart(new Date());
 					const weekDates: string[] = [];
@@ -584,6 +584,7 @@ function createAnalyticsStore() {
 						return sum + (stats?.sectionsVisited || 0);
 					}, 0);
 					break;
+				}
 				case 'streak_days':
 					current = state.currentStreak;
 					break;
@@ -616,7 +617,7 @@ function createAnalyticsStore() {
 					case 'daily_flashcards':
 						current = todayStats.flashcardsReviewed;
 						break;
-					case 'weekly_sections':
+					case 'weekly_sections': {
 						const weekStart = getWeekStart(new Date());
 						const weekDates: string[] = [];
 						const startDate = new Date(weekStart);
@@ -630,6 +631,7 @@ function createAnalyticsStore() {
 							return sum + (stats?.sectionsVisited || 0);
 						}, 0);
 						break;
+					}
 					case 'streak_days':
 						current = state.currentStreak;
 						break;

@@ -19,9 +19,8 @@ export default defineConfig({
 				globPatterns: ['client/**/*.{js,css,html,ico,png,svg,woff,woff2}'],
 				// MathJax bundle pushes chunks above default 2MB limit
 				maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-				// Exclude server and prerendered files (we use SPA mode)
-				// Note: Plugin warns about prerendered/** pattern not matching files - this is
-				// expected behavior for SPA-only apps. See: https://github.com/vite-pwa/sveltekit/issues/55
+				// Exclude server, prerendered, and static content dirs from precache.
+				// prerendered/** warns "no files matched" in SPA mode — expected, harmless.
 				globIgnores: ['server/**', '**/prerendered/**', '**/content/**'],
 
 				// Runtime caching for content

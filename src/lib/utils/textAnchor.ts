@@ -84,8 +84,6 @@ function getTextContext(
 	range: Range,
 	container: HTMLElement
 ): { prefix: string; suffix: string } {
-	const fullText = container.textContent || '';
-
 	// Create a range from container start to selection start
 	const preRange = document.createRange();
 	preRange.setStart(container, 0);
@@ -168,9 +166,6 @@ function findTextWithContext(
 	container: HTMLElement
 ): Range | null {
 	const fullText = container.textContent || '';
-
-	// Build search pattern: prefix + exact + suffix
-	const searchPattern = prefix + exact + suffix;
 
 	// Find all occurrences of the exact text
 	const matches: number[] = [];

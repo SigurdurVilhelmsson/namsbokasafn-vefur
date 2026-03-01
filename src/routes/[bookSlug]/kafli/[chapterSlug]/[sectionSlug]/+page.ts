@@ -4,7 +4,6 @@ import {
 	loadTableOfContents,
 	findSectionBySlug,
 	getChapterFolder,
-	getSectionPath,
 	ContentLoadError
 } from '$lib/utils/contentLoader';
 import { error } from '@sveltejs/kit';

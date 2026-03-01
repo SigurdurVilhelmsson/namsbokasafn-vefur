@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractReviewBlocks, type ReviewBlock } from './reviewExtractor';
+import { extractReviewBlocks } from './reviewExtractor';
 
 const sampleHtml = `
 <article class="cnx-module">

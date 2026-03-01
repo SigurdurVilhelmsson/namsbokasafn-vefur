@@ -2,7 +2,7 @@
  * Tests for SM-2 Spaced Repetition Algorithm
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type { FlashcardStudyRecord, StudyQuality } from '$lib/types/flashcard';
 import {
 	calculateNewEaseFactor,
