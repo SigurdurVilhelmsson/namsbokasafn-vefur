@@ -103,9 +103,8 @@
 		class="fixed inset-0 z-40 bg-black/20"
 		on:click={onClose}
 		on:keydown={(e) => e.key === 'Escape' && onClose()}
-		role="button"
+		role="presentation"
 		tabindex="-1"
-		aria-label="Loka athugasemdum"
 		transition:fade={{ duration: 150 }}
 	></div>
 
@@ -262,7 +261,7 @@
 					</svg>
 					<p class="text-gray-500 dark:text-gray-300">Engar athugasemdir fundust</p>
 					<p class="mt-2 text-sm text-gray-400 dark:text-gray-500">
-						Veldu texta til ad yfirstrika eda baeta vid athugasemd
+						Veldu texta til að yfirstrika eða bæta við athugasemd
 					</p>
 				</div>
 			{:else}

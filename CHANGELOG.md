@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `robots.txt` for search engine crawling
+- `robots.txt` and `sitemap.xml` (auto-generated from `toc.json`) for search engine crawling
 - OpenGraph meta tags on landing, book home, and section pages
 - Click/tap handler for glossary tooltips (mobile accessibility)
 - Dark mode support for content.css (CNXML-rendered content)
@@ -42,6 +42,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Content areas (exercises, tables, notes) unreadable in dark mode
 - Figure viewer lightbox unusable on touch devices (no touch event handlers)
 - Blue CSS variable fallbacks in feedback form, teacher guide, and PomodoroTimer now use correct amber/gold values
+- Division by zero in flashcard progress bar when study queue is empty
+- Equation zoom modal escape key handler leaked on backdrop/button close
+- Incorrect `role="button"` on non-focusable overlay backdrops (AnnotationSidebar, Sidebar)
+- Missing `aria-current="page"` on breadcrumb current item
+- Flashcard progress bar missing `role="progressbar"` and ARIA value attributes
+- Key terms entries missing dark mode border color in content.css
+- Icelandic typos in AnnotationSidebar placeholder text (ad→að, eda→eða)
+- npm vulnerabilities: Svelte XSS (<=5.53.4), SvelteKit DoS, rollup path traversal, serialize-javascript RCE
 
 ## [0.4.0] - 2025-12-31
 

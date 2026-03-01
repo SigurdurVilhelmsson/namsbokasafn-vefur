@@ -5,6 +5,7 @@
 interface EquationState {
 	zoomModal: HTMLDivElement | null;
 	copyTimeout: ReturnType<typeof setTimeout> | null;
+	escapeHandler: ((e: KeyboardEvent) => void) | null;
 }
 
 /**
@@ -65,13 +66,13 @@ function showZoomModal(equationWrapper: HTMLElement, state: EquationState): void
 		}
 	});
 
-	// Close on Escape key
+	// Close on Escape key (store reference for cleanup in closeZoomModal)
 	const handleEscape = (e: KeyboardEvent) => {
 		if (e.key === 'Escape') {
 			closeZoomModal(state);
-			document.removeEventListener('keydown', handleEscape);
 		}
 	};
+	state.escapeHandler = handleEscape;
 	document.addEventListener('keydown', handleEscape);
 
 	document.body.appendChild(modal);
@@ -85,6 +86,10 @@ function showZoomModal(equationWrapper: HTMLElement, state: EquationState): void
  * Closes the zoom modal
  */
 function closeZoomModal(state: EquationState): void {
+	if (state.escapeHandler) {
+		document.removeEventListener('keydown', state.escapeHandler);
+		state.escapeHandler = null;
+	}
 	if (state.zoomModal) {
 		state.zoomModal.remove();
 		state.zoomModal = null;
@@ -194,7 +199,8 @@ function enhanceEquation(eq: HTMLElement): void {
 export function equations(node: HTMLElement) {
 	const state: EquationState = {
 		zoomModal: null,
-		copyTimeout: null
+		copyTimeout: null,
+		escapeHandler: null
 	};
 
 	// Enhance all equation divs with interactive buttons
