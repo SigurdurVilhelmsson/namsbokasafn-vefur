@@ -81,12 +81,12 @@
 			: []),
 		{
 			href: `/${bookSlug}/prof`,
-			label: 'Prof',
+			label: 'Próf',
 			icon: 'quiz' as const
 		},
 		{
 			href: `/${bookSlug}/ordabok`,
-			label: 'Ordasafn',
+			label: 'Orðasafn',
 			icon: 'glossary' as const
 		},
 		{
@@ -113,7 +113,7 @@
 	<nav
 		class="fab-menu"
 		class:fab-menu-open={expanded}
-		aria-label="Verkfaeravalmynd"
+		aria-label="Verkfæravalmynd"
 	>
 		{#each tools as tool, i (tool.icon)}
 			<a
@@ -160,7 +160,7 @@
 		class="fab-button"
 		class:fab-button-expanded={expanded}
 		on:click={toggle}
-		aria-label={expanded ? 'Loka verkfaeravalmynd' : 'Opna verkfaeravalmynd'}
+		aria-label={expanded ? 'Loka verkfæravalmynd' : 'Opna verkfæravalmynd'}
 		aria-expanded={expanded}
 		aria-controls="fab-menu"
 	>

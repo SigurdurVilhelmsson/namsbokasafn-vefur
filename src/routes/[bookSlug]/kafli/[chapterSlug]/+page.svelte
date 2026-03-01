@@ -69,7 +69,7 @@
 		<!-- Chapter header -->
 		<div class="mb-8">
 			<div class="flex items-center gap-4 mb-4">
-				<span class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-2xl font-bold">
+				<span class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--accent-light)] text-[var(--accent-color)] text-2xl font-bold">
 					{data.chapter.number}
 				</span>
 				<div>
@@ -112,7 +112,7 @@
 					{@const typeIcon = getSectionIcon(sectionType)}
 					<a
 						href="/{data.bookSlug}/kafli/{chapterPath}/{sectionPath}"
-						class="group flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 p-4 transition-all hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/20"
+						class="group flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 p-4 transition-all hover:border-[var(--accent-subtle)] hover:bg-[var(--accent-light)]"
 					>
 						<!-- Read indicator -->
 						<div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
@@ -138,7 +138,7 @@
 
 						<!-- Section info -->
 						<div class="flex-1 min-w-0">
-							<h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+							<h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-color)] transition-colors truncate">
 								{#if getDisplayNumber(section)}
 									{getDisplayNumber(section)} {section.title}
 								{:else}
@@ -156,7 +156,7 @@
 
 						<!-- Arrow -->
 						<svg
-							class="flex-shrink-0 w-5 h-5 text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors"
+							class="flex-shrink-0 w-5 h-5 text-gray-400 group-hover:text-[var(--accent-color)] transition-colors"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -178,7 +178,7 @@
 		<div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
 			<a
 				href="/{data.bookSlug}"
-				class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+				class="inline-flex items-center gap-2 text-[var(--accent-color)] hover:text-[var(--accent-hover)] transition-colors"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -190,7 +190,7 @@
 			{#if targetSection}
 				<a
 					href="/{data.bookSlug}/kafli/{chapterPath}/{getSectionPath(targetSection)}"
-					class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+					class="btn-accent"
 				>
 					{firstUnread ? 'Halda áfram' : 'Byrja að lesa'}
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

@@ -673,3 +673,86 @@ article.cnx-module strong {
     padding: 8px 10px;
   }
 }
+
+/* ==============================================
+   DARK MODE
+   ============================================== */
+
+.dark {
+  /* Override OpenStax color variables for dark backgrounds */
+  --os-gray-bg: #26262f;
+  --os-gray-border: #3a3a46;
+  --os-text-dark: #e8e4de;
+  --os-text-body: #c8c4be;
+  --os-link-color: #5bb8d8;
+  --os-green: #66bb6a;
+
+  /* Note type colors — muted for dark backgrounds */
+  --note-link-learning-bg: rgba(91, 184, 216, 0.12);
+  --note-link-learning-border: rgba(91, 184, 216, 0.3);
+  --note-everyday-life-bg: rgba(240, 216, 142, 0.12);
+  --note-everyday-life-border: rgba(240, 216, 142, 0.3);
+  --note-sciences-bg: rgba(165, 214, 167, 0.12);
+  --note-sciences-border: rgba(165, 214, 167, 0.3);
+  --note-portrait-bg: rgba(244, 143, 177, 0.12);
+  --note-portrait-border: rgba(244, 143, 177, 0.3);
+}
+
+/* Exercise blocks */
+.dark article.cnx-module div.exercise {
+  background-color: #1e1e26;
+  border-color: #3a3a46;
+  border-left-color: #5bb8d8;
+}
+
+.dark article.cnx-module div.exercise .solution {
+  border-top-color: #3a3a46;
+}
+
+/* Table alternating rows */
+.dark article.cnx-module table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* Table headers and borders */
+.dark article.cnx-module table th {
+  background-color: #26262f;
+  color: var(--os-text-dark);
+}
+
+.dark article.cnx-module table td,
+.dark article.cnx-module table th {
+  border-color: #3a3a46;
+}
+
+/* Exercises page blocks */
+.dark article.cnx-module .exercises-section .exercise-item {
+  background-color: #1e1e26;
+  border-left-color: #5bb8d8;
+}
+
+/* Answer key entries */
+.dark article.cnx-module .answer-key-entry {
+  background-color: #1e1e26;
+  border-left-color: var(--os-green);
+}
+
+/* Key equations section */
+.dark article.cnx-module .key-equations-section .equation-row {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+/* Figure captions */
+.dark article.cnx-module figcaption {
+  color: var(--os-text-body);
+}
+
+/* Key terms entries */
+.dark article.chapter-resource.key-terms .term-entry {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Definition blocks */
+.dark article.cnx-module dfn {
+  color: var(--os-text-dark);
+}

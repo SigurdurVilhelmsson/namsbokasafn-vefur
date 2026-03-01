@@ -17,7 +17,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "process-content": "node scripts/process-content.js",
-    "prepare-content": "npm run process-content",
+    "prepare-content": "npm run process-content && node scripts/generate-sitemap.js",
     "validate-content": "node scripts/validate-content.js",
     "lint-content": "npm run prepare-content && node scripts/validate-content.js",
     "clean": "rm -rf build .svelte-kit static/content",
@@ -53,7 +53,8 @@
     "vitest": "^4.0.18"
   },
   "overrides": {
-    "cookie": "^0.7.0"
+    "cookie": "^0.7.0",
+    "serialize-javascript": "^7.0.3"
   },
   "lint-staged": {
     "*.{ts,js,mjs,svelte}": [

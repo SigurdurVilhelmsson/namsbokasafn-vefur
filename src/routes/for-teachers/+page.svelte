@@ -481,7 +481,7 @@
   }
 
   .book-icon.chemistry {
-    background: linear-gradient(135deg, #dbeafe, #3b82f6);
+    background: linear-gradient(135deg, var(--accent-light, #f5e6b8), var(--accent-color, #c78c20));
   }
 
   .book-icon svg {
@@ -516,7 +516,7 @@
 
   /* Highlight boxes */
   .highlight-box {
-    background: var(--accent-light, rgba(37, 99, 235, 0.1));
+    background: var(--accent-light, rgba(199, 140, 32, 0.1));
     border-left: 4px solid var(--accent-color);
     padding: 1rem 1.25rem;
     border-radius: 0 0.375rem 0.375rem 0;
@@ -636,7 +636,7 @@
   }
 
   .feedback-link:hover {
-    background: var(--accent-dark, #1d4ed8);
+    background: var(--accent-hover, #b37a1c);
   }
 
   .feedback-link svg {

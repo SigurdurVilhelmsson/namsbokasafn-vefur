@@ -50,7 +50,7 @@ test.describe('PWA Infrastructure', () => {
 		});
 
 		const themeColor = page.locator('meta[name="theme-color"]');
-		await expect(themeColor).toHaveAttribute('content', '#1a7d5c');
+		await expect(themeColor).toHaveAttribute('content', '#c78c20');
 	});
 
 	test('should have apple-touch-icon', async ({ page }) => {

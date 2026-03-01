@@ -1,9 +1,10 @@
 /**
  * Glossary Term Highlight Action
  *
- * Scans rendered content for glossary terms and wraps them in
- * hoverable spans that show definition tooltips. Only marks the
- * first occurrence of each term per section to avoid clutter.
+ * Scans rendered content for <dfn class="term"> elements (placed by the
+ * CNXML pipeline) and attaches hover/tap tooltips showing definitions.
+ * Only semantic <dfn> tags are processed — no text-matching is performed
+ * to avoid false-positive highlights on common Icelandic words.
  */
 
 import { browser } from '$app/environment';
@@ -26,13 +27,6 @@ let tooltipHoverSetUp = false;
 
 // Minimum term length to mark (avoids matching noise from very short terms)
 const MIN_TERM_LENGTH = 3;
-
-/**
- * Escape special regex characters in a string
- */
-function escapeRegex(str: string): string {
-	return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
 /**
  * Create or get the singleton tooltip element
@@ -68,12 +62,13 @@ function showTooltip(element: HTMLElement, term: GlossaryTerm, bookSlug: string)
 		hideTimeout = null;
 	}
 
-	const isDark = document.documentElement.classList.contains('dark');
-	const bgColor = isDark ? '#1e293b' : '#ffffff';
-	const borderColor = isDark ? '#334155' : '#e2e8f0';
-	const textColor = isDark ? '#e2e8f0' : '#1e293b';
-	const secondaryColor = isDark ? '#94a3b8' : '#64748b';
-	const accentColor = isDark ? '#6ee7b7' : '#1a7d5c';
+	// Read CSS custom properties from :root for theme-aware colors
+	const styles = getComputedStyle(document.documentElement);
+	const bgColor = styles.getPropertyValue('--bg-secondary').trim();
+	const borderColor = styles.getPropertyValue('--border-color').trim();
+	const textColor = styles.getPropertyValue('--text-primary').trim();
+	const secondaryColor = styles.getPropertyValue('--text-secondary').trim();
+	const accentColor = styles.getPropertyValue('--accent-color').trim();
 
 	// Build English translation line
 	const englishHtml = term.english
@@ -86,7 +81,7 @@ function showTooltip(element: HTMLElement, term: GlossaryTerm, bookSlug: string)
 		const tags = term.relatedTerms
 			.map(
 				(r) =>
-					`<span style="display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: ${isDark ? '#334155' : '#f1f5f9'}; color: ${secondaryColor};">${escapeHtml(r)}</span>`
+					`<span style="display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 4px; background: ${styles.getPropertyValue('--bg-tertiary').trim() || borderColor}; color: ${secondaryColor};">${escapeHtml(r)}</span>`
 			)
 			.join(' ');
 		relatedHtml = `<div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; align-items: center;"><span style="font-size: 11px; color: ${secondaryColor};">Tengd:</span> ${tags}</div>`;
@@ -160,19 +155,23 @@ function hideTooltip() {
 }
 
 /**
- * Check if a node should be skipped during text scanning
+ * Immediately hide the tooltip (used for click-to-dismiss)
  */
-function shouldSkipParent(el: Element): boolean {
-	const tag = el.tagName.toLowerCase();
-	const skipTags = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'a', 'button', 'script', 'style', 'code', 'pre', 'dfn'];
-	if (skipTags.includes(tag)) return true;
-	if (el.classList.contains('glossary-term')) return true;
-	if (el.closest('.equation-wrapper, .equation-content, figcaption, .figure-caption, mjx-container, .content-block-title, .content-block-icon, .learning-objectives')) return true;
-	return false;
+function hideTooltipImmediate() {
+	if (hideTimeout) {
+		clearTimeout(hideTimeout);
+		hideTimeout = null;
+	}
+	if (tooltipElement) {
+		tooltipElement.style.opacity = '0';
+		tooltipElement.style.visibility = 'hidden';
+		tooltipElement.style.pointerEvents = 'none';
+	}
+	currentSpan = null;
 }
 
 /**
- * Svelte action: scans content for glossary terms and adds hover tooltips
+ * Svelte action: scans content for <dfn class="term"> elements and adds tooltips
  */
 export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) {
 	if (!browser) {
@@ -181,6 +180,9 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 
 	const { bookSlug } = options;
 	let destroyed = false;
+
+	// Track event listeners for cleanup
+	const cleanupListeners: Array<() => void> = [];
 
 	async function init() {
 		// Check if glossary highlighting is enabled
@@ -194,7 +196,7 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 		const state = get(glossaryStore);
 		if (!state.terms.length) return;
 
-		// Filter to terms long enough to mark, sort longest-first for regex priority
+		// Filter to terms long enough to mark, sort longest-first for lookup priority
 		const validTerms = state.terms.filter((t) => t.term.length >= MIN_TERM_LENGTH);
 		const sortedTerms = validTerms.sort((a, b) => b.term.length - a.term.length);
 
@@ -209,22 +211,7 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 			}
 		}
 
-		// Build a single regex with all terms, using Unicode-aware word boundaries
-		const escaped = sortedTerms.map((t) => escapeRegex(t.term));
-		let pattern: RegExp;
-		try {
-			pattern = new RegExp(`(?<!\\p{L})(${escaped.join('|')})(?!\\p{L})`, 'giu');
-		} catch {
-			// Fallback for environments without Unicode lookbehind
-			pattern = new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi');
-		}
-
-		// Track first occurrence only
-		const markedTerms = new Set<string>();
-
-		// Pre-pass: handle <dfn class="term"> elements before the TreeWalker.
-		// These are authoritative term markers from the CNXML pipeline and should
-		// always get tooltips, regardless of learning-objectives or document order.
+		// Process <dfn class="term"> elements — authoritative term markers from the CNXML pipeline
 		const dfnElements = node.querySelectorAll('dfn.term');
 		for (const dfn of dfnElements) {
 			if (destroyed) return;
@@ -249,101 +236,40 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 				`Skilgreining: ${glossaryTerm.term}` + (glossaryTerm.english ? ` (${glossaryTerm.english})` : '')
 			);
 
-			dfnEl.addEventListener('mouseenter', () => showTooltip(dfnEl, glossaryTerm, bookSlug));
-			dfnEl.addEventListener('mouseleave', () => hideTooltip());
-			dfnEl.addEventListener('focus', () => showTooltip(dfnEl, glossaryTerm, bookSlug));
-			dfnEl.addEventListener('blur', () => hideTooltip());
+			// Desktop: hover to show
+			const onEnter = () => showTooltip(dfnEl, glossaryTerm, bookSlug);
+			const onLeave = () => hideTooltip();
+			const onFocus = () => showTooltip(dfnEl, glossaryTerm, bookSlug);
+			const onBlur = () => hideTooltip();
 
-			markedTerms.add(normalized);
-		}
+			dfnEl.addEventListener('mouseenter', onEnter);
+			dfnEl.addEventListener('mouseleave', onLeave);
+			dfnEl.addEventListener('focus', onFocus);
+			dfnEl.addEventListener('blur', onBlur);
 
-		// Collect text nodes using TreeWalker
-		const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT, {
-			acceptNode(textNode: Text) {
-				const parent = textNode.parentElement;
-				if (!parent) return NodeFilter.FILTER_REJECT;
-				if (shouldSkipParent(parent)) return NodeFilter.FILTER_REJECT;
-				return NodeFilter.FILTER_ACCEPT;
-			}
-		});
-
-		const textNodes: Text[] = [];
-		let current: Text | null;
-		while ((current = walker.nextNode() as Text | null)) {
-			textNodes.push(current);
-		}
-
-		// Process each text node
-		for (const textNode of textNodes) {
-			if (destroyed) return;
-
-			const text = textNode.textContent || '';
-			if (!text.trim()) continue;
-
-			pattern.lastIndex = 0;
-			const matches: { index: number; length: number; term: GlossaryTerm }[] = [];
-			let match: RegExpExecArray | null;
-
-			while ((match = pattern.exec(text)) !== null) {
-				const matchedText = match[1];
-				const normalized = matchedText.toLowerCase();
-
-				if (markedTerms.has(normalized)) continue;
-
-				const glossaryTerm = termMap.get(normalized);
-				if (!glossaryTerm) continue;
-
-				matches.push({
-					index: match.index,
-					length: matchedText.length,
-					term: glossaryTerm
-				});
-				markedTerms.add(normalized);
-			}
-
-			if (matches.length === 0) continue;
-
-			// Build a document fragment replacing the text node
-			const fragment = document.createDocumentFragment();
-			let lastIndex = 0;
-
-			for (const m of matches) {
-				// Text before this match
-				if (m.index > lastIndex) {
-					fragment.appendChild(document.createTextNode(text.slice(lastIndex, m.index)));
+			// Mobile: tap to toggle tooltip
+			const onClick = (e: Event) => {
+				e.preventDefault();
+				e.stopPropagation();
+				if (currentSpan === dfnEl) {
+					hideTooltipImmediate();
+				} else {
+					showTooltip(dfnEl, glossaryTerm, bookSlug);
 				}
+			};
+			dfnEl.addEventListener('click', onClick);
 
-				// Wrapped glossary term
-				const span = document.createElement('span');
-				span.className = 'glossary-term';
-				span.textContent = text.slice(m.index, m.index + m.length);
-				span.dataset.term = m.term.term;
-				span.setAttribute('role', 'button');
-				span.setAttribute('tabindex', '0');
-				span.setAttribute(
-					'aria-label',
-					`Skilgreining: ${m.term.term}` + (m.term.english ? ` (${m.term.english})` : '')
-				);
-
-				span.addEventListener('mouseenter', () => showTooltip(span, m.term, bookSlug));
-				span.addEventListener('mouseleave', () => hideTooltip());
-				span.addEventListener('focus', () => showTooltip(span, m.term, bookSlug));
-				span.addEventListener('blur', () => hideTooltip());
-
-				fragment.appendChild(span);
-				lastIndex = m.index + m.length;
-			}
-
-			// Remaining text after last match
-			if (lastIndex < text.length) {
-				fragment.appendChild(document.createTextNode(text.slice(lastIndex)));
-			}
-
-			textNode.parentNode?.replaceChild(fragment, textNode);
+			cleanupListeners.push(() => {
+				dfnEl.removeEventListener('mouseenter', onEnter);
+				dfnEl.removeEventListener('mouseleave', onLeave);
+				dfnEl.removeEventListener('focus', onFocus);
+				dfnEl.removeEventListener('blur', onBlur);
+				dfnEl.removeEventListener('click', onClick);
+			});
 		}
 	}
 
-	// Keep tooltip visible when mouse enters it
+	// Keep tooltip visible when mouse enters it, and set up tap-outside-to-dismiss
 	function setupTooltipHover() {
 		if (tooltipHoverSetUp) return;
 		const tooltip = getOrCreateTooltip();
@@ -356,6 +282,16 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 		tooltip.addEventListener('mouseleave', () => {
 			hideTooltip();
 		});
+
+		// Dismiss tooltip when clicking outside (mobile tap-away)
+		document.addEventListener('click', (e: MouseEvent) => {
+			if (!tooltipElement || tooltipElement.style.visibility === 'hidden') return;
+			const target = e.target as HTMLElement;
+			// Don't dismiss if clicking inside tooltip or on a glossary term (term handles its own toggle)
+			if (tooltipElement.contains(target) || target.closest('.glossary-term')) return;
+			hideTooltipImmediate();
+		});
+
 		tooltipHoverSetUp = true;
 	}
 
@@ -366,9 +302,14 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 		destroy() {
 			destroyed = true;
 
+			// Clean up event listeners on dfn elements
+			for (const cleanup of cleanupListeners) {
+				cleanup();
+			}
+
 			// Hide tooltip if it's showing for a term in this node
 			if (tooltipElement && currentSpan && node.contains(currentSpan)) {
-				hideTooltip();
+				hideTooltipImmediate();
 			}
 		}
 	};

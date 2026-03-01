@@ -103,9 +103,8 @@
 		class="fixed inset-0 z-40 bg-black/20"
 		on:click={onClose}
 		on:keydown={(e) => e.key === 'Escape' && onClose()}
-		role="button"
+		role="presentation"
 		tabindex="-1"
-		aria-label="Loka athugasemdum"
 		transition:fade={{ duration: 150 }}
 	></div>
 
@@ -120,7 +119,7 @@
 		<div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-4">
 			<div class="flex items-center gap-2">
 				<svg
-					class="w-5 h-5 text-blue-500"
+					class="w-5 h-5 text-[var(--accent-color)]"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -134,7 +133,7 @@
 					/>
 				</svg>
 				<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Athugasemdir</h2>
-				<span class="rounded-full bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
+				<span class="rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-xs font-medium text-[var(--accent-color)]">
 					{filteredAnnotations.length}
 				</span>
 			</div>
@@ -183,7 +182,7 @@
 								showFilterMenu = false;
 							}}
 							class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 {filter === 'all'
-								? 'text-blue-600 dark:text-blue-400'
+								? 'text-[var(--accent-color)]'
 								: 'text-gray-700 dark:text-gray-300'}"
 						>
 							Allt ({stats.total})
@@ -195,7 +194,7 @@
 									showFilterMenu = false;
 								}}
 								class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 {filter === 'current'
-									? 'text-blue-600 dark:text-blue-400'
+									? 'text-[var(--accent-color)]'
 									: 'text-gray-700 dark:text-gray-300'}"
 							>
 								Thessi kafli
@@ -209,7 +208,7 @@
 									showFilterMenu = false;
 								}}
 								class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 {filter === color
-									? 'text-blue-600 dark:text-blue-400'
+									? 'text-[var(--accent-color)]'
 									: 'text-gray-700 dark:text-gray-300'}"
 							>
 								<span
@@ -262,7 +261,7 @@
 					</svg>
 					<p class="text-gray-500 dark:text-gray-300">Engar athugasemdir fundust</p>
 					<p class="mt-2 text-sm text-gray-400 dark:text-gray-500">
-						Veldu texta til ad yfirstrika eda baeta vid athugasemd
+						Veldu texta til að yfirstrika eða bæta við athugasemd
 					</p>
 				</div>
 			{:else}

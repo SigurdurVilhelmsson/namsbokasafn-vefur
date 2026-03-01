@@ -89,7 +89,7 @@
 			{#each HIGHLIGHT_COLORS as { color, label, hex }}
 				<button
 					on:click={() => onHighlight(color)}
-					class="h-6 w-6 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+					class="h-6 w-6 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
 					style="background-color: {hex};"
 					aria-label="Yfirstrika med {label.toLowerCase()}"
 					title={label}

@@ -8,27 +8,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Keyboard shortcut customization with localStorage persistence
-- Learning analytics dashboard at `/greining` route
-- Reading time tracking per section with useReadingSession hook
-- Study streak tracking and weekly statistics
-- Comprehensive unit tests for Zustand stores (413 total tests, 90% coverage)
+
+- `robots.txt` and `sitemap.xml` (auto-generated from `toc.json`) for search engine crawling
+- OpenGraph meta tags on landing, book home, and section pages
+- Click/tap handler for glossary tooltips (mobile accessibility)
+- Dark mode support for content.css (CNXML-rendered content)
+- Self-hosted OpenDyslexic font files (`static/fonts/`) to avoid CSP issues
+- Self-hosted Google Fonts (Bricolage Grotesque, Literata, JetBrains Mono) with woff2 + unicode-range subsetting
+- Touch event support for figure viewer lightbox: pinch-to-zoom, single-finger pan, double-tap zoom
+- nginx security headers example: HSTS, Permissions-Policy, tightened CSP
+- `.btn-accent` utility class in app.css
 
 ### Changed
-- Refactored useKeyboardShortcuts to action-based system
-- Enhanced KeyboardShortcutsModal with rebinding UI
+
+- Glossary term detection now semantic-only (`<dfn class="term">` elements); removed TreeWalker text-matching pass that caused false positives on common Icelandic words
+- Flashcard study page (`minniskort`) shows all user decks dynamically instead of hardcoded sample deck
+- Glossary tooltip colors use CSS custom properties instead of hardcoded hex values
+- PWA manifest icons reference existing SVG files instead of missing PNG files
+- Theme color aligned to `#c78c20` (gold) across manifest.json and meta tags
+- GoatCounter script URL changed from protocol-relative to explicit HTTPS
+- `translatedChapters` updated from 4 to 8 in book config
+- Design system: migrated interactive/branding blue tokens to amber/accent CSS variables across 20+ files (buttons, links, badges, hover states, focus rings, charts, navigation, form controls)
+- Google Fonts loading changed from render-blocking `<link>` to self-hosted @font-face with `font-display: swap`
+- Answer link buttons and highlight animations use accent CSS variables instead of hardcoded blue hex
+- Keyboard shortcuts hint in SettingsModal changed from blue to amber theme
+- Chemistry book icon gradient on teacher guide uses accent color variables
 
 ### Fixed
-- ESLint errors across codebase for React 19 compatibility
+
+- Glossary tooltips inaccessible on mobile (no click/tap handler)
+- Sidebar progress badge and read dot invisible in dark mode
+- MobileBottomNav aria-labels missing Icelandic accented characters (Próf, Orðasafn, Verkfæravalmynd)
+- Content areas (exercises, tables, notes) unreadable in dark mode
+- Figure viewer lightbox unusable on touch devices (no touch event handlers)
+- Blue CSS variable fallbacks in feedback form, teacher guide, and PomodoroTimer now use correct amber/gold values
+- Division by zero in flashcard progress bar when study queue is empty
+- Equation zoom modal escape key handler leaked on backdrop/button close
+- Incorrect `role="button"` on non-focusable overlay backdrops (AnnotationSidebar, Sidebar)
+- Missing `aria-current="page"` on breadcrumb current item
+- Flashcard progress bar missing `role="progressbar"` and ARIA value attributes
+- Key terms entries missing dark mode border color in content.css
+- Icelandic typos in AnnotationSidebar placeholder text (ad→að, eda→eða)
+- npm vulnerabilities: Svelte XSS (<=5.53.4), SvelteKit DoS, rollup path traversal, serialize-javascript RCE
 
 ## [0.4.0] - 2025-12-31
 
 ### Added
+
 - **PWA Offline Support**: Service worker with Workbox caching
 - **Print Stylesheet**: Comprehensive `@media print` styles (~500 lines)
 - **Learning Analytics**: Reading session tracking, daily/weekly stats, streak counter
 
 ### Changed
+
 - Configured vite-plugin-pwa with NetworkFirst/CacheFirst strategies
 - Added offline indicator component with useOnlineStatus hook
 - Optimized equation and table rendering for print
@@ -36,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.0] - 2025-12-30
 
 ### Added
+
 - **Interactive Periodic Table**: Full 118 elements with detail modals at `/lotukerfi`
 - **Figure Viewer**: Zoom, pan, lightbox, and keyboard navigation
 - **Cross-Reference System**: `[ref:type:id]` syntax with hover previews
@@ -44,11 +77,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Section Metadata Component**: Displays reading time and difficulty indicators
 
 ### Changed
+
 - Extended content types with DifficultyLevel, readingTime, prerequisites
 
 ## [0.2.0] - 2025-12-29
 
 ### Added
+
 - **Annotation System**: Text highlighting with 4 colors, notes, export to markdown
 - **Text-to-Speech**: Piper TTS with 4 Icelandic voices (Steinn, Búi, Salka, Ugla)
 - **Keyboard Shortcuts**: Full navigation with `?` help modal
@@ -62,12 +97,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fuzzy Search**: Fuse.js integration with chapter filtering and search history
 
 ### Changed
+
 - Updated accent colors for WCAG contrast compliance (4.5:1+)
 - Shifted markdown heading hierarchy (h1→h2, h2→h3)
 
 ## [0.1.1] - 2025-11-30
 
 ### Changed
+
 - **MAJOR**: Upgraded React from 18.3.1 to 19.2.0
 - **MAJOR**: Upgraded Vite from 6.4.1 to 7.2.4
 - **MAJOR**: Upgraded Tailwind CSS from 3.4.18 to 4.1.17
@@ -76,12 +113,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved TypeScript strictness (removed `any` types)
 
 ### Fixed
+
 - React 19 setState in effects compatibility
 - ESLint warnings for React hooks patterns
 
 ## [0.1.0] - 2025-11-30
 
 ### Added
+
 - Initial release with core reader functionality
 - Markdown reader with KaTeX math and mhchem chemistry support
 - Light/dark theme with system preference detection
@@ -96,6 +135,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions workflow for Linode deployment
 
 ### Technical Stack
+
 - React 19, TypeScript 5.7, Vite 7
 - Tailwind CSS 4 with CSS-first configuration
 - Zustand for state management

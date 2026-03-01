@@ -266,7 +266,7 @@
 
 	.prompt-banner {
 		padding: 0.5rem 0.75rem;
-		background: var(--accent-color, #3b82f6);
+		background: var(--accent-color, #c78c20);
 		color: white;
 		font-size: 0.8125rem;
 		font-weight: 600;
@@ -290,7 +290,7 @@
 	}
 
 	.break-phase .time {
-		color: var(--accent-color, #3b82f6);
+		color: var(--accent-color, #c78c20);
 	}
 
 	.phase-label {
@@ -318,7 +318,7 @@
 	}
 
 	.btn-primary {
-		background: var(--accent-color, #3b82f6);
+		background: var(--accent-color, #c78c20);
 		color: white;
 		width: 100%;
 	}
