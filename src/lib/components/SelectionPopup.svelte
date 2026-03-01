@@ -91,7 +91,7 @@
 					on:click={() => onHighlight(color)}
 					class="h-6 w-6 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
 					style="background-color: {hex};"
-					aria-label="Yfirstrika med {label.toLowerCase()}"
+					aria-label="Yfirstrika með {label.toLowerCase()}"
 					title={label}
 				></button>
 			{/each}
@@ -101,8 +101,8 @@
 		<button
 			on:click={onAddNote}
 			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
-			aria-label="Baeta vid athugasemd"
-			title="Baeta vid athugasemd"
+			aria-label="Bæta við athugasemd"
+			title="Bæta við athugasemd"
 		>
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 				<path
@@ -119,8 +119,8 @@
 		<button
 			on:click={onCreateFlashcard}
 			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
-			aria-label="Bua til minniskort"
-			title="Bua til minniskort"
+			aria-label="Búa til minniskort"
+			title="Búa til minniskort"
 		>
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 				<path
@@ -138,8 +138,8 @@
 			<button
 				on:click={onGlossaryLookup}
 				class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
-				aria-label="Fletta upp i ordasafni"
-				title="Fletta upp i ordasafni"
+				aria-label="Fletta upp í orðasafni"
+				title="Fletta upp í orðasafni"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 					<path

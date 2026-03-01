@@ -11,13 +11,11 @@ The app uses a two-layer caching approach:
 
 ## Cache Names
 
-| Cache Name | Contents | Strategy | Expiration |
-|------------|----------|----------|------------|
-| `workbox-precache-*` | App shell (JS, CSS, HTML, fonts) | Precache | Versioned |
-| `book-content` | Markdown files, JSON (TOC, glossary) | CacheFirst | 30 days, 500 entries max |
-| `book-images` | Chapter images (jpg, png, svg, webp) | CacheFirst | 30 days, 200 entries max |
-| `google-fonts-cache` | Google Fonts stylesheets | CacheFirst | 1 year, 10 entries max |
-| `gstatic-fonts-cache` | Google Fonts files (.woff2) | CacheFirst | 1 year, 10 entries max |
+| Cache Name           | Contents                             | Strategy   | Expiration               |
+| -------------------- | ------------------------------------ | ---------- | ------------------------ |
+| `workbox-precache-*` | App shell (JS, CSS, HTML, fonts)     | Precache   | Versioned                |
+| `book-content`       | Markdown files, JSON (TOC, glossary) | CacheFirst | 30 days, 500 entries max |
+| `book-images`        | Chapter images (jpg, png, svg, webp) | CacheFirst | 30 days, 200 entries max |
 
 ## Precaching (App Shell)
 
@@ -25,13 +23,14 @@ Configured in `vite.config.ts`:
 
 ```typescript
 workbox: {
-  globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}']
+  globPatterns: ["**/*.{js,css,html,ico,png,svg,woff,woff2}"];
 }
 ```
 
 **What gets precached:**
+
 - SvelteKit route bundles (`_app/immutable/**`)
-- KaTeX fonts (`.woff`, `.woff2`)
+- Self-hosted fonts (`.woff`, `.woff2`) — Bricolage Grotesque, Literata, JetBrains Mono, OpenDyslexic
 - App icons and favicon
 - Web app manifest
 
@@ -60,6 +59,7 @@ Precached files are versioned by content hash. When the app updates, old version
 ```
 
 **Files cached:**
+
 - `toc.json` - Table of contents
 - `glossary.json` - Glossary terms
 - `chapters/{slug}/*.md` - Section markdown files
@@ -83,6 +83,7 @@ Precached files are versioned by content hash. When the app updates, old version
 ```
 
 **Files cached:**
+
 - Chapter images referenced in markdown
 - Diagrams, photos, figures
 
@@ -97,6 +98,7 @@ Request → Check Cache → Found? → Return cached
 ```
 
 **Why CacheFirst:**
+
 - Book content rarely changes
 - Faster subsequent loads
 - Works offline after first visit
@@ -165,8 +167,8 @@ Users can delete cached content via the download button UI:
 
 ```typescript
 // Clears matching entries from both caches
-const contentCache = await caches.open('book-content');
-const imagesCache = await caches.open('book-images');
+const contentCache = await caches.open("book-content");
+const imagesCache = await caches.open("book-images");
 
 const bookPattern = `/content/${bookSlug}/`;
 // Delete all entries matching the book
@@ -176,12 +178,12 @@ const bookPattern = `/content/${bookSlug}/`;
 
 For the Chemistry textbook (efnafraedi):
 
-| Content Type | Count | Size |
-|--------------|-------|------|
-| Markdown files | 25 | ~200 KB |
-| JSON files | 2 | ~17 KB |
-| Images | 68 | ~38 MB |
-| **Total** | 95 | **~38.5 MB** |
+| Content Type   | Count | Size         |
+| -------------- | ----- | ------------ |
+| Markdown files | 25    | ~200 KB      |
+| JSON files     | 2     | ~17 KB       |
+| Images         | 68    | ~38 MB       |
+| **Total**      | 95    | **~38.5 MB** |
 
 ## Offline Verification
 
@@ -193,6 +195,7 @@ node scripts/test-offline.js
 ```
 
 Expected output:
+
 ```
 ✓ All files accessible - offline caching should work correctly
 ```
@@ -200,6 +203,7 @@ Expected output:
 ## Browser Support
 
 Service workers and Cache API are supported in:
+
 - Chrome 45+
 - Firefox 44+
 - Safari 11.1+
@@ -222,12 +226,14 @@ For unsupported browsers, the app works normally but without offline support.
 caches.keys().then(console.log);
 
 // Inspect a cache
-caches.open('book-content').then(cache =>
-  cache.keys().then(keys => console.log(keys.map(k => k.url)))
-);
+caches
+  .open("book-content")
+  .then((cache) =>
+    cache.keys().then((keys) => console.log(keys.map((k) => k.url))),
+  );
 
 // Clear all caches (development only)
-caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+caches.keys().then((keys) => keys.forEach((k) => caches.delete(k)));
 ```
 
 ## PWA Update Flow
@@ -272,6 +278,7 @@ npm run test:e2e -- e2e/pwa.spec.ts
 ```
 
 Tests verify:
+
 - Web manifest is valid and accessible
 - Service worker registers successfully
 - Manifest link and theme-color meta tags present
@@ -280,6 +287,7 @@ Tests verify:
 #### Manual Testing
 
 1. **Build and serve production version:**
+
    ```bash
    npm run build
    npm run preview
