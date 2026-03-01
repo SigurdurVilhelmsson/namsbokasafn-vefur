@@ -13,12 +13,12 @@
 	const BREAK_SECONDS = 5 * 60;
 	const LONG_BREAK_SECONDS = 15 * 60;
 
-	let phase: Phase = 'idle';
-	let secondsLeft = WORK_SECONDS;
-	let pomodorosCompleted = 0;
-	let expanded = false;
-	let paused = false;
-	let pulsing = false;
+	let phase = $state<Phase>('idle');
+	let secondsLeft = $state(WORK_SECONDS);
+	let pomodorosCompleted = $state(0);
+	let expanded = $state(false);
+	let paused = $state(false);
+	let pulsing = $state(false);
 
 	let interval: ReturnType<typeof setInterval> | null = null;
 
@@ -108,16 +108,16 @@
 		stopInterval();
 	});
 
-	$: phaseLabel = phase === 'break' ? 'Hlé' : phase === 'work' ? 'Vinna' : '';
-	$: phasePrompt = phase === 'break' ? 'Tími til hléss!' : 'Aftur í lestur!';
-	$: isLongBreak = phase === 'break' && secondsLeft > BREAK_SECONDS;
+	let phaseLabel = $derived(phase === 'break' ? 'Hlé' : phase === 'work' ? 'Vinna' : '');
+	let phasePrompt = $derived(phase === 'break' ? 'Tími til hléss!' : 'Aftur í lestur!');
+	let isLongBreak = $derived(phase === 'break' && secondsLeft > BREAK_SECONDS);
 </script>
 
 <div class="fixed bottom-6 right-6 z-40" role="region" aria-label="Einbeitingartímamælir">
 	{#if !expanded}
 		<!-- Collapsed pill -->
 		<button
-			on:click={toggleExpanded}
+			onclick={toggleExpanded}
 			class="pill {pulsing ? 'pulse' : ''}"
 			aria-label="Opna tímamæli"
 			transition:fade={{ duration: 150 }}
@@ -134,7 +134,7 @@
 			<div class="card-header">
 				<span class="card-title">Einbeitingartímamælir</span>
 				<button
-					on:click={toggleExpanded}
+					onclick={toggleExpanded}
 					class="close-btn"
 					aria-label="Minnka tímamæli"
 				>
@@ -145,7 +145,7 @@
 			</div>
 
 			{#if pulsing}
-				<div class="prompt-banner" on:click={dismissPulse} on:keydown={dismissPulse} role="button" tabindex="0">
+				<div class="prompt-banner" onclick={dismissPulse} onkeydown={dismissPulse} role="button" tabindex="0">
 					{phasePrompt}
 				</div>
 			{/if}
@@ -161,13 +161,13 @@
 
 			<div class="controls">
 				{#if phase === 'idle'}
-					<button on:click={startTimer} class="btn btn-primary">Byrja</button>
+					<button onclick={startTimer} class="btn btn-primary">Byrja</button>
 				{:else}
-					<button on:click={togglePause} class="btn btn-secondary">
+					<button onclick={togglePause} class="btn btn-secondary">
 						{paused ? 'Halda áfram' : 'Hlé'}
 					</button>
-					<button on:click={skip} class="btn btn-secondary">Sleppa</button>
-					<button on:click={reset} class="btn btn-danger">Endurstilla</button>
+					<button onclick={skip} class="btn btn-secondary">Sleppa</button>
+					<button onclick={reset} class="btn btn-danger">Endurstilla</button>
 				{/if}
 			</div>
 

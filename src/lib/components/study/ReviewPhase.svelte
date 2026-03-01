@@ -2,35 +2,37 @@
   ReviewPhase - Flashcard review with flip + rate, adapted from minniskort page
 -->
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import type { DueFlashcard } from '$lib/utils/studySession';
 	import type { PracticeProblem } from '$lib/stores/quiz';
 	import type { DifficultyRating } from '$lib/types/flashcard';
 	import { flashcardStore } from '$lib/stores/flashcard';
 	import { quizStore } from '$lib/stores/quiz';
 
-	export let dueFlashcards: DueFlashcard[];
-	export let reviewProblems: PracticeProblem[];
+	interface Props {
+		dueFlashcards: DueFlashcard[];
+		reviewProblems: PracticeProblem[];
+		oncomplete?: (count: number) => void;
+	}
 
-	const dispatch = createEventDispatcher<{ complete: number }>();
+	let { dueFlashcards, reviewProblems, oncomplete }: Props = $props();
 
 	// Combined items: flashcards first, then problems
 	type ReviewItem =
 		| { type: 'flashcard'; card: DueFlashcard }
 		| { type: 'problem'; problem: PracticeProblem };
 
-	const items: ReviewItem[] = [
+	let items = $derived<ReviewItem[]>([
 		...dueFlashcards.map((card): ReviewItem => ({ type: 'flashcard', card })),
 		...reviewProblems.map((problem): ReviewItem => ({ type: 'problem', problem }))
-	];
+	]);
 
-	let currentIndex = 0;
-	let isFlipped = false;
-	let completedCount = 0;
+	let currentIndex = $state(0);
+	let isFlipped = $state(false);
+	let completedCount = $state(0);
 
-	$: currentItem = items[currentIndex];
-	$: total = items.length;
-	$: progress = total > 0 ? Math.round((currentIndex / total) * 100) : 0;
+	let currentItem = $derived(items[currentIndex]);
+	let total = $derived(items.length);
+	let progress = $derived(total > 0 ? Math.round((currentIndex / total) * 100) : 0);
 
 	function flip() {
 		isFlipped = true;
@@ -55,15 +57,16 @@
 			currentIndex++;
 			isFlipped = false;
 		} else {
-			dispatch('complete', completedCount);
+			oncomplete?.(completedCount);
 		}
 	}
 
 	// Preview intervals for flashcards
-	$: previewIntervals =
+	let previewIntervals = $derived(
 		currentItem?.type === 'flashcard'
 			? flashcardStore.getPreviewIntervals(currentItem.card.cardId)
-			: null;
+			: null
+	);
 </script>
 
 <div>
@@ -91,7 +94,7 @@
 	{#if currentItem?.type === 'flashcard'}
 		<!-- Flashcard review -->
 		<button
-			on:click={flip}
+			onclick={flip}
 			class="rp-card"
 		>
 			<div class="text-center">
@@ -115,7 +118,7 @@
 				</p>
 				<div class="grid grid-cols-4 gap-2">
 					<button
-						on:click={() => rateFlashcard('again')}
+						onclick={() => rateFlashcard('again')}
 						class="rp-rating rp-rating--again"
 					>
 						<div class="font-medium text-sm">Aftur</div>
@@ -124,7 +127,7 @@
 						{/if}
 					</button>
 					<button
-						on:click={() => rateFlashcard('hard')}
+						onclick={() => rateFlashcard('hard')}
 						class="rp-rating rp-rating--hard"
 					>
 						<div class="font-medium text-sm">Erfitt</div>
@@ -133,7 +136,7 @@
 						{/if}
 					</button>
 					<button
-						on:click={() => rateFlashcard('good')}
+						onclick={() => rateFlashcard('good')}
 						class="rp-rating rp-rating--good"
 					>
 						<div class="font-medium text-sm">Gott</div>
@@ -142,7 +145,7 @@
 						{/if}
 					</button>
 					<button
-						on:click={() => rateFlashcard('easy')}
+						onclick={() => rateFlashcard('easy')}
 						class="rp-rating rp-rating--easy"
 					>
 						<div class="font-medium text-sm">Auðvelt</div>
@@ -165,7 +168,7 @@
 
 			{#if !isFlipped}
 				<button
-					on:click={flip}
+					onclick={flip}
 					class="rp-show-answer-btn"
 				>
 					Sýna svar
@@ -180,7 +183,7 @@
 
 				<div class="flex gap-3">
 					<button
-						on:click={() => rateProblem(true)}
+						onclick={() => rateProblem(true)}
 						class="rp-assess-btn rp-assess-btn--correct"
 					>
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +192,7 @@
 						Rétt
 					</button>
 					<button
-						on:click={() => rateProblem(false)}
+						onclick={() => rateProblem(false)}
 						class="rp-assess-btn rp-assess-btn--wrong"
 					>
 						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

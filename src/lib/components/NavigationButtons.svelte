@@ -5,14 +5,20 @@
 	import type { NavigationContext } from '$lib/types/content';
 	import { getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
 
-	export let navigation: NavigationContext;
-	export let bookSlug: string;
+	interface Props {
+		navigation: NavigationContext;
+		bookSlug: string;
+	}
 
-	$: ({ previous, next, current } = navigation);
-	$: currentChapterPath = getChapterPath(current.chapter);
-	$: currentSectionPath = getSectionPath(current.section);
+	let { navigation, bookSlug }: Props = $props();
 
-	let dropdownOpen = false;
+	let previous = $derived(navigation.previous);
+	let next = $derived(navigation.next);
+	let current = $derived(navigation.current);
+	let currentChapterPath = $derived(getChapterPath(current.chapter));
+	let currentSectionPath = $derived(getSectionPath(current.section));
+
+	let dropdownOpen = $state(false);
 	let dropdownRef: HTMLDivElement;
 
 	function toggleDropdown() {
@@ -36,15 +42,15 @@
 	}
 </script>
 
-<svelte:window on:click={handleClickOutside} />
+<svelte:window onclick={handleClickOutside} />
 
 <div class="section-nav-wrapper">
 	<div class="section-nav-inner">
 		<!-- Breadcrumb with dropdown -->
 		<div class="section-nav-breadcrumb" bind:this={dropdownRef}>
 			<button
-				on:click|stopPropagation={toggleDropdown}
-				on:keydown={handleKeydown}
+				onclick={(e: MouseEvent) => { e.stopPropagation(); toggleDropdown(); }}
+				onkeydown={handleKeydown}
 				class="breadcrumb-btn"
 				aria-expanded={dropdownOpen}
 				aria-haspopup="listbox"
@@ -78,7 +84,7 @@
 							href="/{bookSlug}/kafli/{currentChapterPath}/{sectionPath}"
 							role="option"
 							aria-selected={isCurrent}
-							on:click={closeDropdown}
+							onclick={closeDropdown}
 							class="breadcrumb-option {isCurrent ? 'current' : ''}"
 						>
 							{#if isCurrent}

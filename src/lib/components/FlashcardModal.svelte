@@ -7,26 +7,32 @@
 	import { flashcardStore } from '$lib/stores/flashcard';
 	import type { Flashcard, FlashcardDeck } from '$lib/types/flashcard';
 
-	export let selectedText: string;
-	export let source: string = ''; // e.g., "Efnafræði 2e > 1.1 Efnafræði í samhengi"
-	export let onSave: () => void;
-	export let onClose: () => void;
+	interface Props {
+		selectedText: string;
+		source?: string;
+		onSave: () => void;
+		onClose: () => void;
+	}
 
-	let back = '';
-	let selectedDeckId = '';
-	let newDeckName = '';
-	let showNewDeckInput = false;
+	let { selectedText, source = '', onSave, onClose }: Props = $props();
+
+	let back = $state('');
+	let selectedDeckId = $state('');
+	let newDeckName = $state('');
+	let showNewDeckInput = $state(false);
 	let backTextarea: HTMLTextAreaElement;
 	let modalContentRef: HTMLDivElement;
 	let previouslyFocused: HTMLElement | null = null;
 
 	// Get decks from store
-	$: decks = $flashcardStore.decks;
+	let decks = $derived($flashcardStore.decks);
 
 	// Auto-select first deck if available
-	$: if (decks.length > 0 && !selectedDeckId && !showNewDeckInput) {
-		selectedDeckId = decks[0].id;
-	}
+	$effect(() => {
+		if (decks.length > 0 && !selectedDeckId && !showNewDeckInput) {
+			selectedDeckId = decks[0].id;
+		}
+	});
 
 	function generateId(): string {
 		return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
@@ -116,13 +122,13 @@
 		previouslyFocused?.focus();
 	});
 
-	$: canSave = back.trim() && (selectedDeckId || (showNewDeckInput && newDeckName.trim()));
+	let canSave = $derived(back.trim() && (selectedDeckId || (showNewDeckInput && newDeckName.trim())));
 </script>
 
 <div
 	class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-	on:click={handleOverlayClick}
-	on:keydown={handleKeyDown}
+	onclick={handleOverlayClick}
+	onkeydown={handleKeyDown}
 	role="dialog"
 	aria-modal="true"
 	aria-labelledby="flashcard-modal-title"
@@ -148,7 +154,7 @@
 				Búa til minniskort
 			</h2>
 			<button
-				on:click={onClose}
+				onclick={onClose}
 				class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-200"
 				aria-label="Loka"
 			>
@@ -231,7 +237,7 @@
 				{/if}
 
 				<button
-					on:click={toggleNewDeck}
+					onclick={toggleNewDeck}
 					class="mt-2 flex items-center gap-1 text-sm text-[var(--accent-color)] hover:underline"
 				>
 					{#if showNewDeckInput}
@@ -254,13 +260,13 @@
 			class="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 px-6 py-4"
 		>
 			<button
-				on:click={onClose}
+				onclick={onClose}
 				class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
 			>
 				Hætta við
 			</button>
 			<button
-				on:click={handleSave}
+				onclick={handleSave}
 				disabled={!canSave}
 				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
 			>

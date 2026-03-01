@@ -3,7 +3,6 @@
   Migrated from React PeriodicTable.tsx
 -->
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 	import {
 		ELEMENTS,
@@ -15,16 +14,18 @@
 	} from '$lib/data/elements';
 
 	// Props
-	export let highlightElements: number[] = [];
-	export let bookSlug: string = '';
-
-	const dispatch = createEventDispatcher<{ select: Element }>();
+	interface Props {
+		highlightElements?: number[];
+		bookSlug?: string;
+		onselect?: (element: Element) => void;
+	}
+	let { highlightElements = [], bookSlug = '', onselect }: Props = $props();
 
 	// State
-	let selectedElement: Element | null = null;
-	let filterCategory: ElementCategory | null = null;
-	let searchQuery = '';
-	let focusedIndex: number | null = null;
+	let selectedElement: Element | null = $state(null);
+	let filterCategory: ElementCategory | null = $state(null);
+	let searchQuery = $state('');
+	let focusedIndex: number | null = $state(null);
 
 	// Grid positions for standard periodic table layout
 	const ELEMENT_POSITIONS: Record<number, { row: number; col: number }> = {
@@ -81,7 +82,7 @@
 	};
 
 	// Reactive: filtered elements based on search
-	$: filteredElements = ELEMENTS.filter((el) => {
+	let filteredElements = $derived(ELEMENTS.filter((el) => {
 		if (!searchQuery) return true;
 		const q = searchQuery.toLowerCase();
 		return (
@@ -90,16 +91,16 @@
 			el.symbol.toLowerCase().includes(q) ||
 			el.atomicNumber.toString() === searchQuery
 		);
-	});
+	}));
 
-	$: searchMatchIds = new Set(filteredElements.map((el) => el.atomicNumber));
+	let searchMatchIds = $derived(new Set(filteredElements.map((el) => el.atomicNumber)));
 
 	// Categories for legend
 	const categories = Object.entries(CATEGORY_LABELS) as [ElementCategory, string][];
 
 	function handleElementClick(element: Element) {
 		selectedElement = element;
-		dispatch('select', element);
+		onselect?.(element);
 	}
 
 	function closeModal() {
@@ -163,7 +164,7 @@
 	}
 </script>
 
-<svelte:window on:keydown={selectedElement ? handleModalKeyDown : undefined} />
+<svelte:window onkeydown={selectedElement ? handleModalKeyDown : undefined} />
 
 <div class="space-y-4">
 	<!-- Search and filters -->
@@ -192,7 +193,7 @@
 	<!-- Legend -->
 	<div class="flex flex-wrap justify-center gap-2">
 		<button
-			on:click={() => (filterCategory = null)}
+			onclick={() => (filterCategory = null)}
 			class="pte-filter-btn"
 			class:pte-filter-btn--active={filterCategory === null}
 		>
@@ -201,7 +202,7 @@
 		{#each categories as [category, label]}
 			{@const colors = CATEGORY_COLORS[category]}
 			<button
-				on:click={() => (filterCategory = category)}
+				onclick={() => (filterCategory = category)}
 				class="rounded-full px-3 py-1 text-xs font-medium transition-all {filterCategory === category
 					? 'pte-filter-category--active'
 					: 'opacity-80 hover:opacity-100'}"
@@ -227,8 +228,8 @@
 				{#if pos}
 					<div style="grid-row: {pos.row + 1}; grid-column: {pos.col + 1};">
 						<button
-							on:click={() => handleElementClick(element)}
-							on:keydown={(e) => handleKeyDown(e, element)}
+							onclick={() => handleElementClick(element)}
+							onkeydown={(e) => handleKeyDown(e, element)}
 							data-atomic-number={element.atomicNumber}
 							class="group relative flex h-full w-full flex-col items-center justify-center rounded border p-0.5 text-center transition-all duration-200 focus:outline-none
 								{isFiltered ? 'opacity-25' : ''}"
@@ -257,8 +258,8 @@
 	{@const colors = CATEGORY_COLORS[selectedElement.category]}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-		on:click={closeModal}
-		on:keydown={handleModalKeyDown}
+		onclick={closeModal}
+		onkeydown={handleModalKeyDown}
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="element-modal-title"
@@ -267,8 +268,8 @@
 	>
 		<div
 			class="pte-modal"
-			on:click|stopPropagation
-			on:keydown|stopPropagation
+			onclick={(e) => e.stopPropagation()}
+			onkeydown={(e) => e.stopPropagation()}
 			role="presentation"
 			transition:scale={{ duration: 200, start: 0.95 }}
 		>
@@ -293,7 +294,7 @@
 
 				<div class="flex items-center gap-2">
 					<button
-						on:click={() => navigateElement('prev')}
+						onclick={() => navigateElement('prev')}
 						disabled={selectedElement.atomicNumber <= 1}
 						class="rounded-full p-2 transition-colors hover:bg-black/10 disabled:opacity-30"
 						aria-label="Fyrra frumefni"
@@ -303,7 +304,7 @@
 						</svg>
 					</button>
 					<button
-						on:click={() => navigateElement('next')}
+						onclick={() => navigateElement('next')}
 						disabled={selectedElement.atomicNumber >= 118}
 						class="rounded-full p-2 transition-colors hover:bg-black/10 disabled:opacity-30"
 						aria-label="Næsta frumefni"
@@ -313,7 +314,7 @@
 						</svg>
 					</button>
 					<button
-						on:click={closeModal}
+						onclick={closeModal}
 						class="rounded-full p-2 transition-colors hover:bg-black/10"
 						aria-label="Loka"
 					>

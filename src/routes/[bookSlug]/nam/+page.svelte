@@ -21,23 +21,23 @@
 	import SessionRunner from '$lib/components/study/SessionRunner.svelte';
 	import SessionComplete from '$lib/components/study/SessionComplete.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
 	type Screen = 'planner' | 'active' | 'complete';
 
-	let screen: Screen = 'planner';
-	let toc: TableOfContents | null = null;
-	let plan: SessionPlan | null = null;
-	let loading = true;
-	let chapterFilter: number | undefined = undefined;
-	let sessionStartTime = 0;
-	let completedCounts: Record<PhaseId, number> = {
+	let screen: Screen = $state('planner');
+	let toc: TableOfContents | null = $state(null);
+	let plan: SessionPlan | null = $state(null);
+	let loading = $state(true);
+	let chapterFilter: number | undefined = $state(undefined);
+	let sessionStartTime = $state(0);
+	let completedCounts: Record<PhaseId, number> = $state({
 		review: 0,
 		reading: 0,
 		practice: 0,
 		reflect: 0
-	};
-	let enabledPhases: PhaseId[] = [];
+	});
+	let enabledPhases: PhaseId[] = $state([]);
 
 	function computePlan() {
 		if (!toc) return;
@@ -152,22 +152,22 @@
 			chapters={toc?.chapters ?? []}
 			{chapterFilter}
 			bookSlug={data.bookSlug}
-			on:start={(e: CustomEvent<PhaseId[]>) => handleStart(e.detail)}
-			on:filterChange={(e: CustomEvent<number | undefined>) => handleChapterFilterChange(e.detail)}
+			onstart={(phases: PhaseId[]) => handleStart(phases)}
+			onfilterchange={(chapterNum: number | undefined) => handleChapterFilterChange(chapterNum)}
 		/>
 	{:else if screen === 'active' && plan}
 		<SessionRunner
 			{plan}
 			{enabledPhases}
 			bookSlug={data.bookSlug}
-			on:complete={(e: CustomEvent<Record<PhaseId, number>>) => handleSessionComplete(e.detail)}
+			oncomplete={(counts: Record<PhaseId, number>) => handleSessionComplete(counts)}
 		/>
 	{:else if screen === 'complete'}
 		<SessionComplete
 			{completedCounts}
 			{enabledPhases}
 			startTime={sessionStartTime}
-			on:reset={handleReset}
+			onreset={handleReset}
 		/>
 	{/if}
 </div>

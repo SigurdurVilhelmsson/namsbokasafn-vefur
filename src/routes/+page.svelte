@@ -7,9 +7,9 @@
   import { onMount, onDestroy } from 'svelte';
   import type { PageData } from './$types';
 
-  export let data: PageData;
-  $: books = data.books;
-  let mounted = false;
+  let { data }: { data: PageData } = $props();
+  let books = $derived(data.books);
+  let mounted = $state(false);
 
   const subjectIcons: Record<string, string> = {
     'efnafraedi': 'chemistry',
@@ -63,7 +63,7 @@
 
   // Intersection observer for knowledge graph performance
   let graphEl: SVGSVGElement;
-  let graphVisible = true;
+  let graphVisible = $state(true);
   let observer: IntersectionObserver | undefined;
 
   onMount(() => {
@@ -136,14 +136,14 @@
       </a>
 
       <nav class="header-nav" aria-label="Aðalvalmynd">
-        <a href="#kennslubaekur" on:click|preventDefault={() => scrollTo('kennslubaekur')}>Kennslubækur</a>
-        <a href="#verkfaeri" on:click|preventDefault={() => scrollTo('verkfaeri')}>Verkfæri</a>
-        <a href="#um" on:click|preventDefault={() => scrollTo('um')}>Um verkefnið</a>
+        <a href="#kennslubaekur" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('kennslubaekur'); }}>Kennslubækur</a>
+        <a href="#verkfaeri" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('verkfaeri'); }}>Verkfæri</a>
+        <a href="#um" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('um'); }}>Um verkefnið</a>
       </nav>
 
       <button
         class="theme-toggle"
-        on:click={() => settings.toggleTheme()}
+        onclick={() => settings.toggleTheme()}
         aria-label="Skipta um þema"
       >
         <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -168,10 +168,10 @@
         Þýddar OpenStax kennslubækur með innbyggðum námsverkfærum — gjaldfrjálst og opið öllum.
       </p>
       <div class="hero-actions anim-item" style="--anim-delay: 300ms">
-        <a href="#kennslubaekur" class="btn-primary" on:click|preventDefault={() => scrollTo('kennslubaekur')}>
+        <a href="#kennslubaekur" class="btn-primary" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('kennslubaekur'); }}>
           Skoða bækur
         </a>
-        <a href="#um" class="btn-text" on:click|preventDefault={() => scrollTo('um')}>
+        <a href="#um" class="btn-text" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('um'); }}>
           Læra meira um verkefnið
         </a>
       </div>

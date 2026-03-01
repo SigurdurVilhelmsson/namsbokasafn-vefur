@@ -7,9 +7,13 @@
 	import { quizStore, type PracticeProblem } from '$lib/stores/quiz';
 	import type { MasteryLevel } from '$lib/types/quiz';
 
-	export let chapterSlug: string | undefined = undefined;
-	export let onComplete: (() => void) | undefined = undefined;
-	export let maxProblems: number = 5;
+	interface Props {
+		chapterSlug?: string;
+		onComplete?: () => void;
+		maxProblems?: number;
+	}
+
+	let { chapterSlug, onComplete, maxProblems = 5 }: Props = $props();
 
 	interface QuizState {
 		currentIndex: number;
@@ -26,13 +30,13 @@
 		mastered: { label: 'Nad tokum', cssClass: 'aq-mastery--mastered', emoji: '🏆' }
 	};
 
-	let problems: PracticeProblem[] = [];
-	let state: QuizState = {
+	let problems: PracticeProblem[] = $state([]);
+	let quizState: QuizState = $state({
 		currentIndex: 0,
 		answers: new Map(),
 		showingAnswer: false,
 		completed: false
-	};
+	});
 
 	// Load problems on mount
 	onMount(() => {
@@ -44,15 +48,16 @@
 		}
 	});
 
-	$: currentProblem = problems[state.currentIndex];
-	$: totalProblems = problems.length;
-	$: correctCount = Array.from(state.answers.values()).filter(Boolean).length;
-	$: incorrectCount = state.answers.size - correctCount;
-	$: scorePercentage =
-		state.answers.size > 0 ? Math.round((correctCount / state.answers.size) * 100) : 0;
+	let currentProblem = $derived(problems[quizState.currentIndex]);
+	let totalProblems = $derived(problems.length);
+	let correctCount = $derived(Array.from(quizState.answers.values()).filter(Boolean).length);
+	let incorrectCount = $derived(quizState.answers.size - correctCount);
+	let scorePercentage = $derived(
+		quizState.answers.size > 0 ? Math.round((correctCount / quizState.answers.size) * 100) : 0
+	);
 
 	function handleShowAnswer() {
-		state = { ...state, showingAnswer: true };
+		quizState = { ...quizState, showingAnswer: true };
 	}
 
 	function handleAnswer(success: boolean) {
@@ -62,20 +67,20 @@
 		quizStore.markPracticeProblemAttempt(currentProblem.id, success);
 
 		// Update local state
-		const newAnswers = new Map(state.answers);
+		const newAnswers = new Map(quizState.answers);
 		newAnswers.set(currentProblem.id, success);
 
 		// Move to next or complete
-		if (state.currentIndex < totalProblems - 1) {
-			state = {
-				...state,
+		if (quizState.currentIndex < totalProblems - 1) {
+			quizState = {
+				...quizState,
 				answers: newAnswers,
-				currentIndex: state.currentIndex + 1,
+				currentIndex: quizState.currentIndex + 1,
 				showingAnswer: false
 			};
 		} else {
-			state = {
-				...state,
+			quizState = {
+				...quizState,
 				answers: newAnswers,
 				completed: true
 			};
@@ -91,7 +96,7 @@
 			problems = adaptive;
 		}
 
-		state = {
+		quizState = {
 			currentIndex: 0,
 			answers: new Map(),
 			showingAnswer: false,
@@ -135,7 +140,7 @@
 			Fardu i gegnum efnid og leystu aefingadaemi til ad byrja adlogunarprof.
 		</p>
 	</div>
-{:else if state.completed}
+{:else if quizState.completed}
 	<!-- Completed state -->
 	<div class="aq-card" transition:fade={{ duration: 200 }}>
 		<!-- Header -->
@@ -194,7 +199,7 @@
 			<div class="space-y-1">
 				{#each problems as problem}
 					{@const masteryInfo = getMasteryInfo(problem.id)}
-					{@const wasCorrect = state.answers.get(problem.id)}
+					{@const wasCorrect = quizState.answers.get(problem.id)}
 					<div class="aq-progress-row">
 						<span class="aq-progress-label">
 							{problem.content.substring(0, 50)}...
@@ -230,7 +235,7 @@
 
 		<!-- Actions -->
 		<div class="flex gap-3">
-			<button on:click={handleRestart} class="aq-secondary-btn">
+			<button onclick={handleRestart} class="aq-secondary-btn">
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
@@ -242,7 +247,7 @@
 				Byrja aftur
 			</button>
 			{#if onComplete}
-				<button on:click={onComplete} class="aq-primary-btn">
+				<button onclick={onComplete} class="aq-primary-btn">
 					Loka
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -270,12 +275,12 @@
 			</div>
 			<div class="flex items-center gap-3">
 				<span class="text-sm" style="color: var(--text-tertiary);">
-					{state.currentIndex + 1} / {totalProblems}
+					{quizState.currentIndex + 1} / {totalProblems}
 				</span>
 				<div class="aq-progress-track">
 					<div
 						class="aq-progress-fill"
-						style="width: {((state.currentIndex + 1) / totalProblems) * 100}%"
+						style="width: {((quizState.currentIndex + 1) / totalProblems) * 100}%"
 					></div>
 				</div>
 			</div>
@@ -317,7 +322,7 @@
 							d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
 						/>
 					</svg>
-					Daemi {state.currentIndex + 1}
+					Daemi {quizState.currentIndex + 1}
 				</h4>
 				<div class="prose prose-sm max-w-none dark:prose-invert" style="color: var(--text-primary);">
 					{currentProblem?.content}
@@ -325,8 +330,8 @@
 			</div>
 
 			<!-- Answer section -->
-			{#if !state.showingAnswer}
-				<button on:click={handleShowAnswer} class="aq-show-answer-btn">
+			{#if !quizState.showingAnswer}
+				<button onclick={handleShowAnswer} class="aq-show-answer-btn">
 					Syna svar
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
@@ -347,7 +352,7 @@
 						<p class="aq-assess-prompt">Hvernig gekk?</p>
 						<div class="flex gap-3">
 							<button
-								on:click={() => handleAnswer(true)}
+								onclick={() => handleAnswer(true)}
 								class="aq-assess-btn aq-assess-btn--correct"
 							>
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -361,7 +366,7 @@
 								Rett
 							</button>
 							<button
-								on:click={() => handleAnswer(false)}
+								onclick={() => handleAnswer(false)}
 								class="aq-assess-btn aq-assess-btn--wrong"
 							>
 								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -381,7 +386,7 @@
 		</div>
 
 		<!-- Footer with current score -->
-		{#if state.answers.size > 0}
+		{#if quizState.answers.size > 0}
 			<div class="aq-footer">
 				<span class="text-sm" style="color: var(--text-tertiary);">Nuverandi einkunn</span>
 				<div class="flex items-center gap-2">

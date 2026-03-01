@@ -16,15 +16,15 @@
 	import { readDetection } from '$lib/actions/readDetection';
 	import { fade, fly } from 'svelte/transition';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let showAnnotationSidebar = false;
-	let shareSuccess = false;
+	let showAnnotationSidebar = $state(false);
+	let shareSuccess = $state(false);
 	let shareTimeout: ReturnType<typeof setTimeout>;
-	let showCompletionAnimation = false;
+	let showCompletionAnimation = $state(false);
 	let completionTimeout: ReturnType<typeof setTimeout>;
-	let showContinuePrompt = false;
-	let savedPosition: { scrollY: number; percentage: number } | null = null;
+	let showContinuePrompt = $state(false);
+	let savedPosition: { scrollY: number; percentage: number } | null = $state(null);
 	let continuePromptTimeout: ReturnType<typeof setTimeout>;
 
 	// Print the current section
@@ -61,8 +61,8 @@
 	}
 
 	// Subscribe to reader state for reactivity
-	$: progress = $reader.progress;
-	$: bookmarks = $reader.bookmarks;
+	let progress = $derived($reader.progress);
+	let bookmarks = $derived($reader.bookmarks);
 
 	// Track scroll progress
 	function handleScroll() {
@@ -149,8 +149,8 @@
 	}
 
 	// Reactive checks using subscribed state
-	$: isRead = isSectionRead(progress, data.chapterSlug, data.sectionSlug);
-	$: isBookmarked = isSectionBookmarked(bookmarks, data.chapterSlug, data.sectionSlug);
+	let isRead = $derived(isSectionRead(progress, data.chapterSlug, data.sectionSlug));
+	let isBookmarked = $derived(isSectionBookmarked(bookmarks, data.chapterSlug, data.sectionSlug));
 
 	function toggleBookmark() {
 		reader.toggleBookmark(data.chapterSlug, data.sectionSlug);
@@ -172,7 +172,7 @@
 	}
 
 	// Reactive: track objectives state
-	$: objectivesState = $objectivesStore.completedObjectives;
+	let objectivesState = $derived($objectivesStore.completedObjectives);
 </script>
 
 <svelte:head>
@@ -207,13 +207,13 @@
 			</div>
 			<div class="flex items-center gap-2 w-full sm:w-auto">
 				<button
-					on:click={handleContinueReading}
+					onclick={handleContinueReading}
 					class="flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg bg-[var(--accent-color)] text-white hover:bg-[var(--accent-hover)] transition-colors"
 				>
 					Halda áfram
 				</button>
 				<button
-					on:click={dismissContinuePrompt}
+					onclick={dismissContinuePrompt}
 					class="p-2 text-[var(--accent-color)] hover:bg-[var(--accent-light)] rounded-lg transition-colors"
 					aria-label="Hunsa"
 					title="Byrja frá byrjun"
@@ -259,7 +259,7 @@
 		<div class="flex items-center gap-1 sm:gap-2">
 			<!-- Print button -->
 			<button
-				on:click={handlePrint}
+				onclick={handlePrint}
 				class="p-2 rounded-lg transition-colors text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200"
 				aria-label="Prenta kafla"
 				title="Prenta"
@@ -270,7 +270,7 @@
 			</button>
 			<!-- Share button -->
 			<button
-				on:click={handleShare}
+				onclick={handleShare}
 				class="p-2 rounded-lg transition-colors {shareSuccess
 					? 'text-green-500 bg-green-50 dark:bg-green-900/20'
 					: 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-color)]'}"
@@ -289,7 +289,7 @@
 			</button>
 			<!-- Annotations button -->
 			<button
-				on:click={() => (showAnnotationSidebar = true)}
+				onclick={() => (showAnnotationSidebar = true)}
 				class="p-2 rounded-lg transition-colors text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-color)]"
 				aria-label="Opna athugasemdir"
 				title="Athugasemdir"
@@ -299,7 +299,7 @@
 				</svg>
 			</button>
 			<button
-				on:click={toggleBookmark}
+				onclick={toggleBookmark}
 				class="p-2 rounded-lg transition-colors {isBookmarked
 					? 'text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
 					: 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}"
@@ -311,7 +311,7 @@
 			</button>
 			{#if !isRead}
 				<button
-					on:click={markAsRead}
+					onclick={markAsRead}
 					class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
 					aria-label="Merkja sem lesið"
 				>
@@ -356,7 +356,7 @@
 					{@const completed = isObjectiveCompleted(i)}
 					<li class="flex items-start gap-3 text-[var(--text-primary)]">
 						<button
-							on:click={() => toggleObjective(i, objective)}
+							onclick={() => toggleObjective(i, objective)}
 							class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {completed
 								? 'bg-green-500 border-green-500 text-white'
 								: 'border-[var(--accent-subtle)] hover:border-green-400 dark:hover:border-green-500'}"
@@ -408,7 +408,7 @@
 	{#if !isRead}
 		<div class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
 			<button
-				on:click={markAsRead}
+				onclick={markAsRead}
 				class="inline-flex items-center gap-2 px-6 py-3 text-lg font-medium rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

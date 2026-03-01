@@ -6,11 +6,15 @@
 	import { fade, scale } from 'svelte/transition';
 	import type { HighlightColor } from '$lib/types/annotation';
 
-	export let selectedText: string;
-	export let initialNote: string = '';
-	export let initialColor: HighlightColor = 'yellow';
-	export let onSave: (note: string, color: HighlightColor) => void;
-	export let onClose: () => void;
+	interface Props {
+		selectedText: string;
+		initialNote?: string;
+		initialColor?: HighlightColor;
+		onSave: (note: string, color: HighlightColor) => void;
+		onClose: () => void;
+	}
+
+	let { selectedText, initialNote = '', initialColor = 'yellow', onSave, onClose }: Props = $props();
 
 	const HIGHLIGHT_COLORS: { color: HighlightColor; label: string; hex: string }[] = [
 		{ color: 'yellow', label: 'Gulur', hex: '#f5e6b8' },
@@ -19,8 +23,8 @@
 		{ color: 'pink', label: 'Rósrauður', hex: '#f0c8c8' }
 	];
 
-	let note = initialNote;
-	let color: HighlightColor = initialColor;
+	let note = $state(initialNote);
+	let color = $state<HighlightColor>(initialColor);
 	let textareaElement: HTMLTextAreaElement;
 	let modalContentRef: HTMLDivElement;
 	let previouslyFocused: HTMLElement | null = null;
@@ -77,8 +81,8 @@
 
 <div
 	class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-	on:click={handleOverlayClick}
-	on:keydown={handleKeyDown}
+	onclick={handleOverlayClick}
+	onkeydown={handleKeyDown}
 	role="dialog"
 	aria-modal="true"
 	aria-labelledby="note-modal-title"
@@ -101,7 +105,7 @@
 				Baeta vid athugasemd
 			</h2>
 			<button
-				on:click={onClose}
+				onclick={onClose}
 				class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-200"
 				aria-label="Loka"
 			>
@@ -133,7 +137,7 @@
 				<div class="flex gap-2">
 					{#each HIGHLIGHT_COLORS as { color: c, label, hex }}
 						<button
-							on:click={() => (color = c)}
+							onclick={() => (color = c)}
 							class="h-8 w-8 rounded-full transition-all {color === c
 								? 'ring-2 ring-[var(--accent-color)] ring-offset-2'
 								: 'hover:scale-110'}"
@@ -172,13 +176,13 @@
 			class="flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 px-6 py-4"
 		>
 			<button
-				on:click={onClose}
+				onclick={onClose}
 				class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
 			>
 				Haetta vid
 			</button>
 			<button
-				on:click={handleSave}
+				onclick={handleSave}
 				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)]"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

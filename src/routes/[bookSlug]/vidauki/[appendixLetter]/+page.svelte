@@ -6,7 +6,7 @@
 	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 	import { getAppendixPath } from '$lib/utils/contentLoader';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>

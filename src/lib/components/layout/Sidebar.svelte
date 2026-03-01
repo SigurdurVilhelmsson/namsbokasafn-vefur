@@ -7,20 +7,23 @@
 	import { loadTableOfContents, getChapterPath, getSectionPath, findChapterBySlug } from '$lib/utils/contentLoader';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
-	export let bookSlug: string = '';
-	export let hasPeriodicTable: boolean = false;
+	interface Props {
+		bookSlug?: string;
+		hasPeriodicTable?: boolean;
+	}
+	let { bookSlug = '', hasPeriodicTable = false }: Props = $props();
 
-	let toc: TableOfContents | null = null;
-	let manuallyToggledChapters: Set<number> = new Set();
-	let appendicesExpanded = false;
-	let answerKeyExpanded = false;
+	let toc: TableOfContents | null = $state(null);
+	let manuallyToggledChapters: Set<number> = $state(new Set());
+	let appendicesExpanded = $state(false);
+	let answerKeyExpanded = $state(false);
 
 	// Get current route params
-	$: chapterParam = $page.params.chapterSlug;
-	$: sectionParam = $page.params.sectionSlug;
+	let chapterParam = $derived($page.params.chapterSlug);
+	let sectionParam = $derived($page.params.sectionSlug);
 
 	// Subscribe to reader progress for reactivity
-	$: progress = $reader.progress;
+	let progress = $derived($reader.progress);
 
 	// Load table of contents
 	onMount(async () => {
@@ -34,7 +37,7 @@
 	});
 
 	// Calculate which chapters should be expanded
-	$: expandedChapters = (() => {
+	let expandedChapters = $derived((() => {
 		const expanded = new Set<number>();
 		if (!toc) return expanded;
 
@@ -53,7 +56,7 @@
 		});
 
 		return expanded;
-	})();
+	})());
 
 	function toggleChapter(chapterNumber: number) {
 		const newSet = new Set(manuallyToggledChapters);
@@ -82,8 +85,8 @@
 <!-- Overlay (backdrop) -->
 <div
 	class="sidebar-overlay {$sidebarOpen ? 'sidebar-overlay--visible' : ''}"
-	on:click={closeSidebar}
-	on:keydown={(e) => e.key === 'Escape' && closeSidebar()}
+	onclick={closeSidebar}
+	onkeydown={(e) => e.key === 'Escape' && closeSidebar()}
 	role="presentation"
 	tabindex="-1"
 ></div>
@@ -98,7 +101,7 @@
 		<div class="sidebar-header">
 			<h2 class="sidebar-title">Efnisyfirlit</h2>
 			<button
-				on:click={closeSidebar}
+				onclick={closeSidebar}
 				class="sidebar-close"
 				aria-label="Loka valmynd"
 			>
@@ -121,7 +124,7 @@
 						{@const isCurrentChapter = chapterParam === chapterPath || chapterParam === chapter.slug}
 						<li>
 							<button
-								on:click={() => toggleChapter(chapter.number)}
+								onclick={() => toggleChapter(chapter.number)}
 								aria-expanded={expanded}
 								aria-controls="chapter-{chapter.number}-sections"
 								class="chapter-btn"
@@ -212,7 +215,7 @@
 				{#if toc.appendices && toc.appendices.length > 0}
 					<div class="sidebar-section">
 						<button
-							on:click={() => appendicesExpanded = !appendicesExpanded}
+							onclick={() => appendicesExpanded = !appendicesExpanded}
 							aria-expanded={appendicesExpanded}
 							aria-controls="appendices-list"
 							class="chapter-btn"
@@ -253,7 +256,7 @@
 				{#if toc.answerKey && toc.answerKey.length > 0}
 					<div class="sidebar-section">
 						<button
-							on:click={() => answerKeyExpanded = !answerKeyExpanded}
+							onclick={() => answerKeyExpanded = !answerKeyExpanded}
 							aria-expanded={answerKeyExpanded}
 							aria-controls="answer-key-list"
 							class="chapter-btn"

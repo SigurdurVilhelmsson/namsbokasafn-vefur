@@ -3,15 +3,19 @@
   Shows translation status (reviewed vs MT) for pilot content
 -->
 <script lang="ts">
-  export let showFeedbackLink: boolean = true;
+  interface Props {
+    showFeedbackLink?: boolean;
+  }
+
+  let { showFeedbackLink = true }: Props = $props();
 
   // All chapters show as MT-preview while pipeline bugfixes are in progress
   // Restore to `chapterNumber === 1` (or a list) when faithful version is ready
-  let isReviewed = false;
-  $: statusText = isReviewed ? 'Yfirfarið' : 'Vélþýtt';
-  $: statusDescription = isReviewed
+  const isReviewed = false;
+  let statusText = $derived(isReviewed ? 'Yfirfarið' : 'Vélþýtt');
+  let statusDescription = $derived(isReviewed
     ? 'Þessi kafli hefur verið yfirfarinn af fagaðila.'
-    : 'Þessi kafli er vélþýddur og hefur ekki verið yfirfarinn.';
+    : 'Þessi kafli er vélþýddur og hefur ekki verið yfirfarinn.');
 </script>
 
 <div class="pilot-banner" class:reviewed={isReviewed} class:mt={!isReviewed}>

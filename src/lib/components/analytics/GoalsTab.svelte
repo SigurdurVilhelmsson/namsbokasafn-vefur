@@ -4,9 +4,9 @@
 <script lang="ts">
 	import { analyticsStore, activeGoals, type GoalType, type GoalUnit, type GoalProgress } from '$lib/stores';
 
-	let showAddModal = false;
-	let newGoalType: GoalType = 'daily_reading_time';
-	let newGoalTarget = 30;
+	let showAddModal = $state(false);
+	let newGoalType: GoalType = $state('daily_reading_time');
+	let newGoalTarget = $state(30);
 
 	// Goal type configurations
 	const goalTypes: { type: GoalType; label: string; unit: GoalUnit; defaultTarget: number; description: string }[] = [
@@ -84,7 +84,7 @@
 		newGoalTarget = config.defaultTarget;
 	}
 
-	$: goalsProgress = analyticsStore.getAllGoalsProgress();
+	let goalsProgress = $derived.by(() => analyticsStore.getAllGoalsProgress());
 </script>
 
 <div class="space-y-6">
@@ -92,7 +92,7 @@
 	<div class="flex items-center justify-between">
 		<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Markmið</h2>
 		<button
-			on:click={() => (showAddModal = true)}
+			onclick={() => (showAddModal = true)}
 			class="flex items-center gap-2 px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-[var(--accent-hover)] transition-colors"
 		>
 			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,7 +110,7 @@
 			</svg>
 			<p class="text-gray-500 dark:text-gray-400 mb-4">Engin markmið skráð enn</p>
 			<button
-				on:click={() => (showAddModal = true)}
+				onclick={() => (showAddModal = true)}
 				class="text-[var(--accent-color)] hover:underline"
 			>
 				Bæta við fyrsta markmiðinu
@@ -142,7 +142,7 @@
 						</div>
 						<div class="flex items-center gap-2">
 							<button
-								on:click={() => handleToggleGoal(progress.goal.id, progress.goal.isActive)}
+								onclick={() => handleToggleGoal(progress.goal.id, progress.goal.isActive)}
 								class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
 								aria-label={progress.goal.isActive ? 'Gera óvirkt' : 'Gera virkt'}
 							>
@@ -158,7 +158,7 @@
 								{/if}
 							</button>
 							<button
-								on:click={() => handleRemoveGoal(progress.goal.id)}
+								onclick={() => handleRemoveGoal(progress.goal.id)}
 								class="p-1 text-gray-400 hover:text-red-500"
 								aria-label="Eyða markmiði"
 							>
@@ -222,8 +222,8 @@
 {#if showAddModal}
 	<div
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm"
-		on:click|self={() => (showAddModal = false)}
-		on:keydown={(e) => e.key === 'Escape' && (showAddModal = false)}
+		onclick={(e: MouseEvent) => { if (e.target === e.currentTarget) showAddModal = false; }}
+		onkeydown={(e: KeyboardEvent) => e.key === 'Escape' && (showAddModal = false)}
 		role="presentation"
 	>
 		<div
@@ -238,7 +238,7 @@
 					Bæta við markmiði
 				</h2>
 				<button
-					on:click={() => (showAddModal = false)}
+					onclick={() => (showAddModal = false)}
 					class="-mr-2 rounded-lg p-2 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)]"
 					aria-label="Loka"
 				>
@@ -258,7 +258,7 @@
 					<select
 						id="goal-type"
 						bind:value={newGoalType}
-						on:change={onTypeChange}
+						onchange={onTypeChange}
 						class="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-secondary)] px-4 py-2 text-[var(--text-primary)]"
 					>
 						{#each goalTypes as goalType}
@@ -294,13 +294,13 @@
 			<!-- Footer -->
 			<div class="flex justify-end gap-3 border-t border-[var(--border-color)] px-6 py-4">
 				<button
-					on:click={() => (showAddModal = false)}
+					onclick={() => (showAddModal = false)}
 					class="px-4 py-2 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] transition-colors"
 				>
 					Hætta við
 				</button>
 				<button
-					on:click={handleAddGoal}
+					onclick={handleAddGoal}
 					class="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-[var(--accent-hover)] transition-colors"
 				>
 					Bæta við

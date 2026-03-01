@@ -7,7 +7,7 @@
 	import type { PageData } from './$types';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
 	interface IndexEntry {
 		termIs: string;
@@ -27,12 +27,12 @@
 		entries: IndexEntry[];
 	}
 
-	let indexData: IndexData | null = null;
-	let loading = true;
-	let error: string | null = null;
-	let searchQuery = '';
-	let selectedLetter: string | null = null;
-	let language: 'is' | 'en' = 'is';
+	let indexData: IndexData | null = $state(null);
+	let loading = $state(true);
+	let error: string | null = $state(null);
+	let searchQuery = $state('');
+	let selectedLetter: string | null = $state(null);
+	let language: 'is' | 'en' = $state('is');
 
 	onMount(async () => {
 		try {
@@ -64,9 +64,9 @@
 		}>;
 	}
 
-	$: collator = language === 'is' ? icelandicCollator : englishCollator;
+	let collator = $derived(language === 'is' ? icelandicCollator : englishCollator);
 
-	$: groupedTerms = (() => {
+	let groupedTerms = $derived.by(() => {
 		if (!indexData) return [];
 
 		const groups = new Map<string, GroupedTerm>();
@@ -129,10 +129,10 @@
 		}
 
 		return sorted;
-	})();
+	});
 
 	// Get letters present in the data (for the active language)
-	$: letters = (() => {
+	let letters = $derived.by(() => {
 		if (!indexData) return [];
 		const letterSet = new Set<string>();
 
@@ -143,7 +143,7 @@
 		}
 
 		return [...letterSet].sort((a, b) => collator.compare(a, b));
-	})();
+	});
 
 	function clearFilters() {
 		searchQuery = '';
@@ -156,7 +156,7 @@
 	}
 
 	// Group terms by their first letter for section headers
-	$: termsByLetter = (() => {
+	let termsByLetter = $derived.by(() => {
 		const map = new Map<string, GroupedTerm[]>();
 		for (const term of groupedTerms) {
 			const letter = term.primaryTerm[0]?.toUpperCase() || '?';
@@ -164,7 +164,7 @@
 			map.get(letter)!.push(term);
 		}
 		return map;
-	})();
+	});
 
 	// Build section link
 	function sectionHref(ref: GroupedTerm['refs'][0]): string {
@@ -206,14 +206,14 @@
 			<div class="index-toggle-row">
 				<div class="index-toggle">
 					<button
-						on:click={() => setLanguage('is')}
+						onclick={() => setLanguage('is')}
 						class="index-toggle-btn"
 						class:index-toggle-btn--active={language === 'is'}
 					>
 						Íslenska
 					</button>
 					<button
-						on:click={() => setLanguage('en')}
+						onclick={() => setLanguage('en')}
 						class="index-toggle-btn"
 						class:index-toggle-btn--active={language === 'en'}
 					>
@@ -249,7 +249,7 @@
 			<div class="flex flex-wrap gap-1">
 				{#each letters as letter}
 					<button
-						on:click={() => (selectedLetter = selectedLetter === letter ? null : letter)}
+						onclick={() => (selectedLetter = selectedLetter === letter ? null : letter)}
 						class="index-letter-btn"
 						class:index-letter-btn--active={selectedLetter === letter}
 					>
@@ -258,7 +258,7 @@
 				{/each}
 				{#if selectedLetter || searchQuery}
 					<button
-						on:click={clearFilters}
+						onclick={clearFilters}
 						class="index-clear-btn"
 					>
 						Hreinsa síu

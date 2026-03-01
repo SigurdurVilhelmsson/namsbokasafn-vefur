@@ -8,17 +8,17 @@
 	import { offline } from '$lib/stores/offline';
 
 	// Check if we're offline
-	let isOffline = false;
-	let isBookDownloaded = false;
-	let bookSlug: string | null = null;
+	let isOffline = $state(false);
+	let isBookDownloaded = $state(false);
+	let bookSlug = $state<string | null>(null);
 
 	// Extract book slug from URL if we're on a book page
-	$: {
+	$effect(() => {
 		const pathParts = $page.url.pathname.split('/').filter(Boolean);
 		if (pathParts.length > 0 && pathParts[0] !== 'demo') {
 			bookSlug = pathParts[0];
 		}
-	}
+	});
 
 	onMount(() => {
 		isOffline = !navigator.onLine;
@@ -36,15 +36,17 @@
 	});
 
 	// Check if book is downloaded
-	$: if (bookSlug && browser) {
-		isBookDownloaded = offline.isDownloaded(bookSlug);
-	}
+	$effect(() => {
+		if (bookSlug && browser) {
+			isBookDownloaded = offline.isDownloaded(bookSlug);
+		}
+	});
 
 	// Determine error type and message
-	$: errorMessage = $page.error?.message || '';
-	$: is404 = $page.status === 404;
-	$: isOfflineError = $page.status === 503 || (isOffline && errorMessage.includes('nettengingar'));
-	$: isServerError = $page.status && $page.status >= 500 && !isOfflineError;
+	let errorMessage = $derived($page.error?.message || '');
+	let is404 = $derived($page.status === 404);
+	let isOfflineError = $derived($page.status === 503 || (isOffline && errorMessage.includes('nettengingar')));
+	let isServerError = $derived($page.status && $page.status >= 500 && !isOfflineError);
 
 	function retry() {
 		if (browser) {
@@ -155,7 +157,7 @@
 				</a>
 			{:else if isOffline || isServerError}
 				<button
-					on:click={retry}
+					onclick={retry}
 					class="btn-accent"
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +168,7 @@
 			{/if}
 
 			<button
-				on:click={goBack}
+				onclick={goBack}
 				class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

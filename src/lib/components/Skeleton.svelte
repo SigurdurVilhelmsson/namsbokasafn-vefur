@@ -4,14 +4,18 @@
   Provides visual placeholder content while actual content loads,
   reducing perceived loading time and layout shift.
 -->
-<script lang="ts" context="module">
+<script lang="ts" module>
 	export type SkeletonVariant = 'text' | 'heading' | 'paragraph' | 'card' | 'sidebar' | 'content' | 'list-item' | 'chapter';
 </script>
 
 <script lang="ts">
-	export let variant: SkeletonVariant = 'text';
-	export let lines: number = 3;
-	export let className: string = '';
+	interface Props {
+		variant?: SkeletonVariant;
+		lines?: number;
+		className?: string;
+	}
+
+	let { variant = 'text', lines = 3, className = '' }: Props = $props();
 </script>
 
 {#if variant === 'text'}

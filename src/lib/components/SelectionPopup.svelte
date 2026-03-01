@@ -6,12 +6,16 @@
 	import { fade, scale } from 'svelte/transition';
 	import type { HighlightColor, SelectionPosition } from '$lib/types/annotation';
 
-	export let position: SelectionPosition;
-	export let onHighlight: (color: HighlightColor) => void;
-	export let onAddNote: () => void;
-	export let onCreateFlashcard: () => void;
-	export let onGlossaryLookup: (() => void) | undefined = undefined;
-	export let onClose: () => void;
+	interface Props {
+		position: SelectionPosition;
+		onHighlight: (color: HighlightColor) => void;
+		onAddNote: () => void;
+		onCreateFlashcard: () => void;
+		onGlossaryLookup?: () => void;
+		onClose: () => void;
+	}
+
+	let { position, onHighlight, onAddNote, onCreateFlashcard, onGlossaryLookup, onClose }: Props = $props();
 
 	const HIGHLIGHT_COLORS: { color: HighlightColor; label: string; hex: string }[] = [
 		{ color: 'yellow', label: 'Gulur', hex: '#f5e6b8' },
@@ -23,10 +27,10 @@
 	let popupElement: HTMLDivElement;
 
 	// Calculate position to keep popup in viewport
-	$: adjustedPosition = {
+	let adjustedPosition = $derived({
 		x: Math.min(position.x, (typeof window !== 'undefined' ? window.innerWidth : 800) - 200),
 		y: Math.max(position.y - 50, 10)
-	};
+	});
 
 	function handleClickOutside(event: MouseEvent) {
 		if (popupElement && !popupElement.contains(event.target as Node)) {
@@ -88,7 +92,7 @@
 			</svg>
 			{#each HIGHLIGHT_COLORS as { color, label, hex }}
 				<button
-					on:click={() => onHighlight(color)}
+					onclick={() => onHighlight(color)}
 					class="h-6 w-6 rounded-full transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
 					style="background-color: {hex};"
 					aria-label="Yfirstrika með {label.toLowerCase()}"
@@ -99,7 +103,7 @@
 
 		<!-- Add note button -->
 		<button
-			on:click={onAddNote}
+			onclick={onAddNote}
 			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
 			aria-label="Bæta við athugasemd"
 			title="Bæta við athugasemd"
@@ -117,7 +121,7 @@
 
 		<!-- Create flashcard button -->
 		<button
-			on:click={onCreateFlashcard}
+			onclick={onCreateFlashcard}
 			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
 			aria-label="Búa til minniskort"
 			title="Búa til minniskort"
@@ -136,7 +140,7 @@
 		<!-- Glossary lookup button -->
 		{#if onGlossaryLookup}
 			<button
-				on:click={onGlossaryLookup}
+				onclick={onGlossaryLookup}
 				class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
 				aria-label="Fletta upp í orðasafni"
 				title="Fletta upp í orðasafni"
@@ -155,7 +159,7 @@
 
 		<!-- Close button -->
 		<button
-			on:click={onClose}
+			onclick={onClose}
 			class="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-200"
 			aria-label="Loka"
 		>

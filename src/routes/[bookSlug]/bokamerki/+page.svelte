@@ -9,11 +9,11 @@
 	import { loadTableOfContents, findSectionBySlug } from '$lib/utils/contentLoader';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
-	let toc: TableOfContents | null = null;
-	let loading = true;
-	let error: string | null = null;
+	let toc: TableOfContents | null = $state(null);
+	let loading = $state(true);
+	let error: string | null = $state(null);
 
 	interface BookmarkInfo {
 		id: string;
@@ -51,7 +51,7 @@
 	}
 
 	// Resolve bookmarks to full info with titles
-	$: resolvedBookmarks = (() => {
+	let resolvedBookmarks = $derived.by(() => {
 		if (!toc) return [];
 
 		const resolved: BookmarkInfo[] = [];
@@ -78,10 +78,10 @@
 			}
 			return a.section.number.localeCompare(b.section.number, 'is', { numeric: true });
 		});
-	})();
+	});
 
 	// Group bookmarks by chapter
-	$: bookmarksByChapter = (() => {
+	let bookmarksByChapter = $derived.by(() => {
 		const grouped = new Map<number, BookmarkInfo[]>();
 		for (const bookmark of resolvedBookmarks) {
 			const chapterNum = bookmark.chapter.number;
@@ -91,7 +91,7 @@
 			grouped.get(chapterNum)!.push(bookmark);
 		}
 		return grouped;
-	})();
+	});
 
 	function removeBookmark(chapterSlug: string, sectionSlug: string) {
 		reader.removeBookmark(chapterSlug, sectionSlug);
@@ -121,7 +121,7 @@
 		</h1>
 		{#if resolvedBookmarks.length > 0}
 			<button
-				on:click={clearAllBookmarks}
+				onclick={clearAllBookmarks}
 				class="text-sm px-3 py-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
 			>
 				Eyða öllum
@@ -258,7 +258,7 @@
 
 									<!-- Remove bookmark -->
 									<button
-										on:click={() => removeBookmark(bookmark.chapterSlug, bookmark.sectionSlug)}
+										onclick={() => removeBookmark(bookmark.chapterSlug, bookmark.sectionSlug)}
 										class="p-2 rounded-lg text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
 										aria-label="Eyða bókamerki"
 									>
