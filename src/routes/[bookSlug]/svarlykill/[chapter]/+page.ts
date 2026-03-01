@@ -4,7 +4,7 @@ import {
 	loadSectionContent,
 	ContentLoadError
 } from '$lib/utils/contentLoader';
-import { error } from '@sveltejs/kit';
+import { error, isHttpError } from '@sveltejs/kit';
 
 export const load: PageLoad = async ({ params, fetch }) => {
 	const { bookSlug, chapter } = params;
@@ -89,6 +89,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			navigation: { previous, next }
 		};
 	} catch (e) {
+		if (isHttpError(e)) throw e;
 		console.error('Failed to load answer key:', e);
 
 		if (e instanceof ContentLoadError && e.isOffline) {

@@ -5,7 +5,7 @@ import {
 	findAppendixByLetter,
 	ContentLoadError
 } from '$lib/utils/contentLoader';
-import { error, redirect } from '@sveltejs/kit';
+import { error, isHttpError, isRedirect, redirect } from '@sveltejs/kit';
 
 export const load: PageLoad = async ({ params, fetch }) => {
 	const { bookSlug, appendixLetter } = params;
@@ -44,12 +44,8 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			allAppendices: appendices
 		};
 	} catch (e) {
+		if (isHttpError(e) || isRedirect(e)) throw e;
 		console.error('Failed to load appendix:', e);
-
-		// Handle redirects
-		if (e && typeof e === 'object' && 'status' in e && e.status === 307) {
-			throw e;
-		}
 
 		// Handle offline errors with specific messaging
 		if (e instanceof ContentLoadError && e.isOffline) {
