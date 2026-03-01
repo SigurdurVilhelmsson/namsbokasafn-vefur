@@ -110,13 +110,13 @@
 
 	<!-- Sidebar -->
 	<div
-		class="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-xl"
+		class="ann-panel fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l shadow-xl"
 		role="dialog"
 		aria-label="Athugasemdir"
 		transition:slide={{ duration: 200, axis: 'x' }}
 	>
 		<!-- Header -->
-		<div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-4">
+		<div class="ann-divider flex items-center justify-between border-b px-4 py-4">
 			<div class="flex items-center gap-2">
 				<svg
 					class="w-5 h-5 text-[var(--accent-color)]"
@@ -132,14 +132,14 @@
 						d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
 					/>
 				</svg>
-				<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Athugasemdir</h2>
+				<h2 class="ann-title text-lg font-semibold">Athugasemdir</h2>
 				<span class="rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-xs font-medium text-[var(--accent-color)]">
 					{filteredAnnotations.length}
 				</span>
 			</div>
 			<button
 				on:click={onClose}
-				class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
+				class="ann-btn-ghost rounded-lg p-2 transition-colors"
 				aria-label="Loka"
 			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -149,12 +149,12 @@
 		</div>
 
 		<!-- Filter and actions bar -->
-		<div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+		<div class="ann-divider flex items-center justify-between border-b px-4 py-2">
 			<!-- Filter dropdown -->
 			<div class="relative">
 				<button
 					on:click={() => (showFilterMenu = !showFilterMenu)}
-					class="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
+					class="ann-filter-btn flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors"
 					aria-expanded={showFilterMenu}
 				>
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -173,7 +173,7 @@
 
 				{#if showFilterMenu}
 					<div
-						class="absolute left-0 top-full z-10 mt-1 w-44 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 py-1 shadow-lg"
+						class="ann-dropdown absolute left-0 top-full z-10 mt-1 w-44 rounded-lg border py-1 shadow-lg"
 						transition:slide={{ duration: 100 }}
 					>
 						<button
@@ -181,9 +181,9 @@
 								filter = 'all';
 								showFilterMenu = false;
 							}}
-							class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 {filter === 'all'
+							class="ann-dropdown-item w-full px-3 py-2 text-left text-sm {filter === 'all'
 								? 'text-[var(--accent-color)]'
-								: 'text-gray-700 dark:text-gray-300'}"
+								: ''}"
 						>
 							Allt ({stats.total})
 						</button>
@@ -193,23 +193,23 @@
 									filter = 'current';
 									showFilterMenu = false;
 								}}
-								class="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 {filter === 'current'
+								class="ann-dropdown-item w-full px-3 py-2 text-left text-sm {filter === 'current'
 									? 'text-[var(--accent-color)]'
-									: 'text-gray-700 dark:text-gray-300'}"
+									: ''}"
 							>
 								Thessi kafli
 							</button>
 						{/if}
-						<hr class="my-1 border-gray-200 dark:border-gray-700" />
+						<hr class="ann-divider my-1" />
 						{#each Object.entries(COLOR_LABELS) as [color, label]}
 							<button
 								on:click={() => {
 									filter = color as HighlightColor;
 									showFilterMenu = false;
 								}}
-								class="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-gray-700 {filter === color
+								class="ann-dropdown-item flex w-full items-center gap-2 px-3 py-2 text-left text-sm {filter === color
 									? 'text-[var(--accent-color)]'
-									: 'text-gray-700 dark:text-gray-300'}"
+									: ''}"
 							>
 								<span
 									class="h-3 w-3 rounded-full border"
@@ -226,7 +226,7 @@
 			<button
 				on:click={handleExport}
 				disabled={stats.total === 0}
-				class="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50"
+				class="ann-btn-ghost flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm transition-colors disabled:opacity-50"
 				title="Flytja ut sem Markdown"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -246,7 +246,7 @@
 			{#if filteredAnnotations.length === 0}
 				<div class="flex flex-col items-center justify-center py-12 text-center">
 					<svg
-						class="w-12 h-12 mb-4 text-gray-300 dark:text-gray-600"
+						class="ann-text-muted w-12 h-12 mb-4"
 						fill="none"
 						stroke="currentColor"
 						viewBox="0 0 24 24"
@@ -259,8 +259,8 @@
 							d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
 						/>
 					</svg>
-					<p class="text-gray-500 dark:text-gray-300">Engar athugasemdir fundust</p>
-					<p class="mt-2 text-sm text-gray-400 dark:text-gray-500">
+					<p class="ann-text">Engar athugasemdir fundust</p>
+					<p class="ann-text-muted mt-2 text-sm">
 						Veldu texta til að yfirstrika eða bæta við athugasemd
 					</p>
 				</div>
@@ -275,16 +275,16 @@
 						>
 							<!-- Header -->
 							<div class="mb-2 flex items-start justify-between">
-								<span class="text-xs font-medium text-gray-500 dark:text-gray-300">
+								<span class="ann-text text-xs font-medium">
 									{annotation.chapterSlug} / {annotation.sectionSlug}
 								</span>
-								<span class="text-xs text-gray-500 dark:text-gray-300">
+								<span class="ann-text text-xs">
 									{new Date(annotation.createdAt).toLocaleDateString('is-IS')}
 								</span>
 							</div>
 
 							<!-- Selected text -->
-							<p class="mb-2 text-sm italic text-gray-700 dark:text-gray-300">
+							<p class="ann-text mb-2 text-sm italic">
 								"{annotation.selectedText.length > 150
 									? `${annotation.selectedText.slice(0, 150)}...`
 									: annotation.selectedText}"
@@ -294,7 +294,7 @@
 							{#if annotation.note}
 								<div class="mb-2 flex items-start gap-2 rounded bg-white/50 dark:bg-black/20 p-2">
 									<svg
-										class="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-400"
+										class="ann-text-muted w-4 h-4 mt-0.5 flex-shrink-0"
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
@@ -307,7 +307,7 @@
 											d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
 										/>
 									</svg>
-									<p class="text-sm text-gray-700 dark:text-gray-300">{annotation.note}</p>
+									<p class="ann-text text-sm">{annotation.note}</p>
 								</div>
 							{/if}
 
@@ -315,16 +315,16 @@
 							<div class="flex justify-end">
 								{#if confirmDelete === annotation.id}
 									<div class="flex items-center gap-2">
-										<span class="text-xs text-red-600 dark:text-red-400">Eyda?</span>
+										<span class="text-xs text-red-600 dark:text-red-400">Eyða?</span>
 										<button
 											on:click={() => handleDelete(annotation.id)}
 											class="rounded bg-red-600 px-2 py-1 text-xs text-white hover:bg-red-700"
 										>
-											Ja
+											Já
 										</button>
 										<button
 											on:click={() => (confirmDelete = null)}
-											class="rounded border border-gray-300 dark:border-gray-600 px-2 py-1 text-xs text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-black/20"
+											class="ann-cancel-btn rounded border px-2 py-1 text-xs"
 										>
 											Nei
 										</button>
@@ -332,8 +332,8 @@
 								{:else}
 									<button
 										on:click={() => (confirmDelete = annotation.id)}
-										class="rounded p-1 text-gray-400 transition-colors hover:bg-white/50 dark:hover:bg-black/20 hover:text-red-600 dark:hover:text-red-400"
-										aria-label="Eyda athugasemd"
+										class="ann-text-muted rounded p-1 transition-colors hover:bg-white/50 dark:hover:bg-black/20 hover:text-red-600 dark:hover:text-red-400"
+										aria-label="Eyða athugasemd"
 									>
 										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 											<path
@@ -354,13 +354,13 @@
 
 		<!-- Stats footer -->
 		{#if stats.total > 0}
-			<div class="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
-				<div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-300">
+			<div class="ann-divider border-t px-4 py-3">
+				<div class="ann-text flex items-center justify-between text-sm">
 					<span>
 						{stats.total} yfirstrikun{stats.total !== 1 ? 'ar' : ''}
 					</span>
 					<span>
-						{stats.withNotes} med athugasemd{stats.withNotes !== 1 ? 'um' : ''}
+						{stats.withNotes} með athugasemd{stats.withNotes !== 1 ? 'um' : ''}
 					</span>
 				</div>
 			</div>
@@ -369,6 +369,74 @@
 {/if}
 
 <style>
+	/* Theme-aware panel and dividers */
+	.ann-panel {
+		background: var(--bg-primary);
+		border-color: var(--border-color);
+	}
+
+	.ann-divider {
+		border-color: var(--border-color);
+	}
+
+	/* Text colors */
+	.ann-title {
+		color: var(--text-primary);
+	}
+
+	.ann-text {
+		color: var(--text-secondary);
+	}
+
+	.ann-text-muted {
+		color: var(--text-tertiary);
+	}
+
+	/* Ghost button (close, export) */
+	.ann-btn-ghost {
+		color: var(--text-tertiary);
+	}
+
+	.ann-btn-ghost:hover {
+		background: var(--bg-secondary);
+		color: var(--text-secondary);
+	}
+
+	/* Filter button */
+	.ann-filter-btn {
+		color: var(--text-secondary);
+		border-color: var(--border-color);
+	}
+
+	.ann-filter-btn:hover {
+		background: var(--bg-secondary);
+	}
+
+	/* Dropdown menu */
+	.ann-dropdown {
+		background: var(--bg-primary);
+		border-color: var(--border-color);
+	}
+
+	.ann-dropdown-item {
+		color: var(--text-secondary);
+	}
+
+	.ann-dropdown-item:hover {
+		background: var(--bg-secondary);
+	}
+
+	/* Cancel button in delete confirmation */
+	.ann-cancel-btn {
+		color: var(--text-secondary);
+		border-color: var(--border-color);
+	}
+
+	.ann-cancel-btn:hover {
+		background: var(--bg-secondary);
+	}
+
+	/* Annotation cards */
 	.annotation-card {
 		background-color: var(--card-bg);
 		border-color: var(--card-border);

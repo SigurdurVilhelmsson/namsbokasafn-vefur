@@ -9,6 +9,10 @@
 <svelte:head>
   <title>Leiðbeiningar fyrir kennara - Námsbókasafn</title>
   <meta name="description" content="Handbók um notkun íslenskra kennslubóka frá Námsbókasafni fyrir kennara og nemendur." />
+  <meta property="og:title" content="Leiðbeiningar fyrir kennara - Námsbókasafn" />
+  <meta property="og:description" content="Handbók um notkun íslenskra kennslubóka frá Námsbókasafni fyrir kennara og nemendur." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://namsbokasafn.is/for-teachers" />
 </svelte:head>
 
 <div class="guide-page">

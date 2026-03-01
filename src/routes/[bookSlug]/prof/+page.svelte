@@ -15,7 +15,11 @@
 </script>
 
 <svelte:head>
-	<title>Adlogunarprof | Namsbokasafn</title>
+	<title>Aðlögunarpróf | Námsbókasafn</title>
+	<meta property="og:title" content="Aðlögunarpróf | Námsbókasafn" />
+	<meta property="og:description" content="Próf og æfingar til að meta skilning á námsefni" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://namsbokasafn.is/{bookSlug}/prof" />
 </svelte:head>
 
 <div class="quiz-page min-h-[80vh] p-6">

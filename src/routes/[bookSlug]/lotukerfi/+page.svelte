@@ -10,6 +10,10 @@
 
 <svelte:head>
 	<title>Lotukerfið | {data.book?.title ?? 'Efnafræði'}</title>
+	<meta property="og:title" content="Lotukerfið | {data.book?.title ?? 'Efnafræði'}" />
+	<meta property="og:description" content="Gagnvirkt lotukerfi frumefnanna" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/lotukerfi" />
 </svelte:head>
 
 <div class="max-w-7xl mx-auto">
