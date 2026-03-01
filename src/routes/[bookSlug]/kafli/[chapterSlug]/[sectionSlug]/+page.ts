@@ -6,7 +6,7 @@ import {
 	getChapterFolder,
 	ContentLoadError
 } from '$lib/utils/contentLoader';
-import { error } from '@sveltejs/kit';
+import { error, isHttpError } from '@sveltejs/kit';
 import type { NavigationContext } from '$lib/types/content';
 
 export const load: PageLoad = async ({ params, fetch }) => {
@@ -88,6 +88,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			chapterNumber: chapter.number
 		};
 	} catch (e) {
+		if (isHttpError(e)) throw e;
 		console.error('Failed to load section:', e);
 
 		// Handle offline errors with specific messaging
