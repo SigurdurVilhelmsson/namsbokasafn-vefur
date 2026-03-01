@@ -23,7 +23,10 @@
 		{ color: 'pink', label: 'Rósrauður', hex: '#f0c8c8' }
 	];
 
+	// One-time capture is intentional — these seed editable local state
+	// svelte-ignore state_referenced_locally
 	let note = $state(initialNote);
+	// svelte-ignore state_referenced_locally
 	let color = $state<HighlightColor>(initialColor);
 	let textareaElement: HTMLTextAreaElement;
 	let modalContentRef: HTMLDivElement;
