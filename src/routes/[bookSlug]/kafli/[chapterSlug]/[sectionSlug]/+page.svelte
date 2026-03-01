@@ -177,26 +177,30 @@
 
 <svelte:head>
 	<title>{data.section.section} {data.section.title} | Námsbókasafn</title>
+	<meta property="og:title" content="{data.section.section} {data.section.title} | Námsbókasafn" />
+	<meta property="og:description" content="{data.section.section} {data.section.title} – Efnafræði kennslubók á íslensku" />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/kafli/{data.chapterSlug}/{data.sectionSlug}" />
 </svelte:head>
 
 <article class="max-w-3xl mx-auto px-1 sm:px-0">
 	<!-- Continue where you left off prompt -->
 	{#if showContinuePrompt && savedPosition}
 		<div
-			class="mb-4 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+			class="mb-4 p-4 rounded-xl bg-[var(--accent-light)] border border-[var(--accent-subtle)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
 			role="alert"
 			aria-live="polite"
 			transition:fly={{ y: -20, duration: 300 }}
 		>
 			<div class="flex items-center gap-3">
-				<div class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
-					<svg class="w-5 h-5 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<div class="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center">
+					<svg class="w-5 h-5 text-[var(--accent-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
 					</svg>
 				</div>
 				<div>
-					<p class="font-medium text-blue-900 dark:text-blue-100">Haltu áfram að lesa</p>
-					<p class="text-sm text-blue-700 dark:text-blue-300">
+					<p class="font-medium text-[var(--text-primary)]">Haltu áfram að lesa</p>
+					<p class="text-sm text-[var(--text-secondary)]">
 						Þú varst komin(n) {savedPosition.percentage}% í gegnum þennan kafla
 					</p>
 				</div>
@@ -204,13 +208,13 @@
 			<div class="flex items-center gap-2 w-full sm:w-auto">
 				<button
 					on:click={handleContinueReading}
-					class="flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+					class="flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg bg-[var(--accent-color)] text-white hover:bg-[var(--accent-hover)] transition-colors"
 				>
 					Halda áfram
 				</button>
 				<button
 					on:click={dismissContinuePrompt}
-					class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-800 rounded-lg transition-colors"
+					class="p-2 text-[var(--accent-color)] hover:bg-[var(--accent-light)] rounded-lg transition-colors"
 					aria-label="Hunsa"
 					title="Byrja frá byrjun"
 				>
@@ -269,7 +273,7 @@
 				on:click={handleShare}
 				class="p-2 rounded-lg transition-colors {shareSuccess
 					? 'text-green-500 bg-green-50 dark:bg-green-900/20'
-					: 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-500'}"
+					: 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-color)]'}"
 				aria-label={shareSuccess ? 'Hlekkur afritaður' : 'Deila kafla'}
 				title={shareSuccess ? 'Hlekkur afritaður!' : 'Deila'}
 			>
@@ -286,7 +290,7 @@
 			<!-- Annotations button -->
 			<button
 				on:click={() => (showAnnotationSidebar = true)}
-				class="p-2 rounded-lg transition-colors text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-blue-500"
+				class="p-2 rounded-lg transition-colors text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-color)]"
 				aria-label="Opna athugasemdir"
 				title="Athugasemdir"
 			>
@@ -330,32 +334,32 @@
 	<!-- Learning Objectives -->
 	{#if data.section.objectives && data.section.objectives.length > 0}
 		{@const completedCount = data.section.objectives.filter((_, i) => isObjectiveCompleted(i)).length}
-		<div class="mb-8 p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+		<div class="mb-8 p-6 rounded-xl bg-[var(--accent-light)] border border-[var(--accent-subtle)]">
 			<div class="flex items-center justify-between mb-3">
-				<h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 flex items-center gap-2">
+				<h3 class="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
 					</svg>
 					Námsmarkmið
 				</h3>
 				{#if completedCount > 0}
-					<span class="text-sm text-blue-700 dark:text-blue-300">
+					<span class="text-sm text-[var(--text-secondary)]">
 						{completedCount}/{data.section.objectives.length} kláruð
 					</span>
 				{/if}
 			</div>
-			<p class="text-sm text-blue-800 dark:text-blue-200 mb-3">
+			<p class="text-sm text-[var(--text-secondary)] mb-3">
 				Eftir að hafa lesið þennan kafla ættirðu að geta:
 			</p>
 			<ul class="space-y-2">
 				{#each data.section.objectives as objective, i (i)}
 					{@const completed = isObjectiveCompleted(i)}
-					<li class="flex items-start gap-3 text-blue-800 dark:text-blue-200">
+					<li class="flex items-start gap-3 text-[var(--text-primary)]">
 						<button
 							on:click={() => toggleObjective(i, objective)}
 							class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {completed
 								? 'bg-green-500 border-green-500 text-white'
-								: 'border-blue-300 dark:border-blue-600 hover:border-green-400 dark:hover:border-green-500'}"
+								: 'border-[var(--accent-subtle)] hover:border-green-400 dark:hover:border-green-500'}"
 							aria-label={completed ? 'Afmerkja markmið' : 'Merkja markmið sem kláruð'}
 						>
 							{#if completed}
@@ -363,7 +367,7 @@
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
 								</svg>
 							{:else}
-								<span class="text-xs font-medium text-blue-600 dark:text-blue-400">{i + 1}</span>
+								<span class="text-xs font-medium text-[var(--accent-color)]">{i + 1}</span>
 							{/if}
 						</button>
 						<span class="{completed ? 'line-through opacity-70' : ''}">{objective}</span>

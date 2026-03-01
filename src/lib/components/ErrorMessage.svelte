@@ -43,7 +43,7 @@
 			border: 'border-gray-200 dark:border-gray-700',
 			icon: 'text-gray-600 dark:text-gray-300',
 			text: 'text-gray-800 dark:text-gray-200',
-			button: 'bg-blue-600 hover:bg-blue-700 text-white'
+			button: 'bg-[var(--accent-color)] hover:bg-[var(--accent-hover)] text-white'
 		}
 	};
 

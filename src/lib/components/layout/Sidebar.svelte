@@ -84,9 +84,8 @@
 	class="sidebar-overlay {$sidebarOpen ? 'sidebar-overlay--visible' : ''}"
 	on:click={closeSidebar}
 	on:keydown={(e) => e.key === 'Escape' && closeSidebar()}
-	role="button"
+	role="presentation"
 	tabindex="-1"
-	aria-hidden="true"
 ></div>
 
 <!-- Sidebar -->
@@ -544,6 +543,10 @@
 		flex-shrink: 0;
 	}
 
+	:global(.dark) .chapter-progress-badge {
+		color: #4ade80;
+	}
+
 	/* ====================================
 	   CHAPTER CHEVRON
 	   ==================================== */
@@ -621,6 +624,10 @@
 		width: 0.5rem;
 		height: 0.5rem;
 		background: #16a34a;
+	}
+
+	:global(.dark) .section-dot--read {
+		background: #4ade80;
 	}
 
 	.section-dot--unread {

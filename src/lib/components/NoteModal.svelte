@@ -119,7 +119,7 @@
 					Valinn texti
 				</span>
 				<blockquote
-					class="rounded-lg border-l-4 border-blue-500 bg-gray-50 dark:bg-gray-900 p-3 text-sm italic text-gray-600 dark:text-gray-300"
+					class="rounded-lg border-l-4 border-[var(--accent-color)] bg-gray-50 dark:bg-gray-900 p-3 text-sm italic text-gray-600 dark:text-gray-300"
 				>
 					"{selectedText.length > 200 ? `${selectedText.slice(0, 200)}...` : selectedText}"
 				</blockquote>
@@ -135,7 +135,7 @@
 						<button
 							on:click={() => (color = c)}
 							class="h-8 w-8 rounded-full transition-all {color === c
-								? 'ring-2 ring-blue-500 ring-offset-2'
+								? 'ring-2 ring-[var(--accent-color)] ring-offset-2'
 								: 'hover:scale-110'}"
 							style="background-color: {hex};"
 							aria-label={label}
@@ -159,7 +159,7 @@
 					bind:value={note}
 					id="annotation-note"
 					placeholder="Skrifadu athugasemd her..."
-					class="min-h-[100px] w-full resize-y rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 p-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+					class="min-h-[100px] w-full resize-y rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 p-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-[var(--accent-color)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]/20"
 				></textarea>
 				<p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
 					Yttu a Ctrl+Enter til ad vista
@@ -179,7 +179,7 @@
 			</button>
 			<button
 				on:click={handleSave}
-				class="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)]"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 					<path

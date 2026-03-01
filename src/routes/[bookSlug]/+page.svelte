@@ -52,6 +52,10 @@
 
 <svelte:head>
 	<title>{data.book?.title ?? 'Bók'} | Námsbókasafn</title>
+	<meta property="og:title" content="{data.book?.title ?? 'Bók'} | Námsbókasafn" />
+	<meta property="og:description" content="{data.book?.title ?? 'Kennslubók'} – opin kennslubók á íslensku" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.book?.slug ?? ''}" />
 </svelte:head>
 
 <div class="book-home">
