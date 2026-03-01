@@ -145,7 +145,7 @@ function getSectionType(filename) {
 }
 
 // Parse section number from frontmatter or filename
-function getSectionNumber(frontmatter, filename, chapterNum) {
+function getSectionNumber(frontmatter, filename) {
 	// Try frontmatter first
 	if (frontmatter.section && frontmatter.section !== 'intro') {
 		return frontmatter.section;
@@ -392,7 +392,7 @@ function generateToc(bookSlug, options) {
 			const frontmatter = parseHtmlMetadata(content);
 
 			const sectionType = getSectionType(contentFile);
-			const sectionNum = getSectionNumber(frontmatter, contentFile, chapterNum);
+			const sectionNum = getSectionNumber(frontmatter, contentFile);
 
 			// Get title from frontmatter or chapter metadata
 			let title = frontmatter.title;

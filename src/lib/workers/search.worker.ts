@@ -20,7 +20,7 @@ import type {
 
 let fuse: Fuse<SearchDocument> | null = null;
 let documents: SearchDocument[] = [];
-let currentBookSlug = '';
+let _currentBookSlug = '';
 
 // =============================================================================
 // CONTENT PROCESSING
@@ -61,7 +61,7 @@ function htmlToPlainText(html: string): string {
  * Build the Fuse.js search index from raw documents
  */
 function buildIndex(rawDocs: RawDocument[], bookSlug: string): void {
-	currentBookSlug = bookSlug;
+	_currentBookSlug = bookSlug;
 
 	// Process documents
 	documents = rawDocs.map((doc) => {
@@ -187,7 +187,7 @@ function search(query: string, filters?: SearchFilters): SearchResult[] {
 function clear(): void {
 	fuse = null;
 	documents = [];
-	currentBookSlug = '';
+	_currentBookSlug = '';
 }
 
 // =============================================================================
@@ -215,7 +215,7 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 			}
 			break;
 
-		case 'search':
+		case 'search': {
 			const results = search(message.query, message.filters);
 			const searchResponse: WorkerResponse = {
 				type: 'search-results',
@@ -223,11 +223,13 @@ self.onmessage = (event: MessageEvent<WorkerMessage>) => {
 			};
 			self.postMessage(searchResponse);
 			break;
+		}
 
-		case 'clear':
+		case 'clear': {
 			clear();
 			const clearResponse: WorkerResponse = { type: 'cleared' };
 			self.postMessage(clearResponse);
 			break;
+		}
 	}
 };

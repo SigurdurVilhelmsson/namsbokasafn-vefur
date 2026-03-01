@@ -133,7 +133,7 @@ export async function loadSectionContent(
 	let response: Response;
 	try {
 		response = await fetchFn(`/content/${bookSlug}/chapters/${chapterSlug}/${sectionFile}`);
-	} catch (e) {
+	} catch {
 		const isOffline = checkOffline();
 		throw new ContentLoadError(
 			isOffline
@@ -315,7 +315,7 @@ export async function loadAppendixContent(
   let response: Response;
   try {
     response = await fetchFn(`/content/${bookSlug}/chapters/${appendixFile}`);
-  } catch (e) {
+  } catch {
     const isOffline = checkOffline();
     throw new ContentLoadError(
       isOffline

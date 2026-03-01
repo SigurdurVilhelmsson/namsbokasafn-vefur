@@ -9,7 +9,6 @@
  */
 
 import { execSync } from 'child_process';
-import fs from 'fs';
 
 const colors = {
   reset: '\x1b[0m',
@@ -26,7 +25,7 @@ function log(message, color = 'reset') {
 function run(command, options = {}) {
   try {
     return execSync(command, { encoding: 'utf-8', ...options });
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -61,7 +60,7 @@ try {
       results.security.details.push(`${total} vulnerabilities found`);
     }
   }
-} catch (error) {
+} catch {
   results.security.status = 'error';
   log('  ❌ Security check failed', 'red');
 }
@@ -74,7 +73,7 @@ let qualityPassed = true;
 try {
   run('npm run check', { stdio: 'pipe' });
   log('  ✅ TypeScript: No errors', 'green');
-} catch (error) {
+} catch {
   qualityPassed = false;
   log('  ❌ TypeScript: Errors found', 'red');
   results.quality.details.push('TypeScript errors');
@@ -84,7 +83,7 @@ try {
 try {
   run('npm run lint', { stdio: 'pipe' });
   log('  ✅ ESLint: No errors', 'green');
-} catch (error) {
+} catch {
   qualityPassed = false;
   log('  ⚠️  ESLint: Issues found', 'yellow');
   results.quality.details.push('ESLint issues');
@@ -94,7 +93,7 @@ try {
 try {
   run('npx prettier --check .', { stdio: 'pipe' });
   log('  ✅ Prettier: All files formatted', 'green');
-} catch (error) {
+} catch {
   qualityPassed = false;
   log('  ⚠️  Prettier: Files need formatting', 'yellow');
   results.quality.details.push('Files need formatting');
@@ -116,7 +115,7 @@ try {
     results.dependencies.status = 'good';
     log('  ✅ All dependencies up to date', 'green');
   }
-} catch (error) {
+} catch {
   // npm outdated exits with code 1 if updates exist
   results.dependencies.status = 'warning';
   log('  ⚠️  Some packages have updates', 'yellow');
@@ -139,7 +138,7 @@ try {
   }
 
   log(`  📍 Branch: ${branch}`, 'blue');
-} catch (error) {
+} catch {
   results.git.status = 'error';
   log('  ❌ Git check failed', 'red');
 }

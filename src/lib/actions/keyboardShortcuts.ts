@@ -5,7 +5,6 @@
 
 import { goto } from '$app/navigation';
 import { settings, DEFAULT_SHORTCUTS, type ShortcutAction } from '$lib/stores/settings';
-import { get } from 'svelte/store';
 
 // =============================================================================
 // TYPES

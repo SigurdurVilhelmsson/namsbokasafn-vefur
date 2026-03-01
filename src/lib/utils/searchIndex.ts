@@ -12,7 +12,6 @@ import type {
 	WorkerMessage,
 	WorkerResponse,
 	RawDocument,
-	SearchResult as WorkerSearchResult,
 	SearchFilters as WorkerSearchFilters
 } from '$lib/workers/search.types';
 

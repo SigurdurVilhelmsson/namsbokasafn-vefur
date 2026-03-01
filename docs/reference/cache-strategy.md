@@ -14,7 +14,7 @@ The app uses a two-layer caching approach:
 | Cache Name           | Contents                             | Strategy   | Expiration               |
 | -------------------- | ------------------------------------ | ---------- | ------------------------ |
 | `workbox-precache-*` | App shell (JS, CSS, HTML, fonts)     | Precache   | Versioned                |
-| `book-content`       | Markdown files, JSON (TOC, glossary) | CacheFirst | 30 days, 500 entries max |
+| `book-content`       | HTML files, JSON (TOC, glossary)     | CacheFirst | 30 days, 500 entries max |
 | `book-images`        | Chapter images (jpg, png, svg, webp) | CacheFirst | 30 days, 200 entries max |
 
 ## Precaching (App Shell)
@@ -34,7 +34,7 @@ workbox: {
 - App icons and favicon
 - Web app manifest
 
-**Total precache size:** ~1.8 MB (81 entries)
+**Total precache size:** ~1.8 MB (141 entries)
 
 Precached files are versioned by content hash. When the app updates, old versions are automatically cleaned up.
 
@@ -42,11 +42,11 @@ Precached files are versioned by content hash. When the app updates, old version
 
 ### Book Content (`book-content`)
 
-**URL pattern:** `/content/**/*.{md,json}`
+**URL pattern:** `/content/**/*.{html,json}`
 
 ```typescript
 {
-  urlPattern: /^.*\/content\/.*\.(md|json)$/,
+  urlPattern: /^.*\/content\/.*\.(html|json)$/,
   handler: 'CacheFirst',
   options: {
     cacheName: 'book-content',
@@ -62,7 +62,7 @@ Precached files are versioned by content hash. When the app updates, old version
 
 - `toc.json` - Table of contents
 - `glossary.json` - Glossary terms
-- `chapters/{slug}/*.md` - Section markdown files
+- `chapters/{slug}/*.html` - Section HTML files
 
 ### Book Images (`book-images`)
 
@@ -84,7 +84,7 @@ Precached files are versioned by content hash. When the app updates, old version
 
 **Files cached:**
 
-- Chapter images referenced in markdown
+- Chapter images referenced in HTML content
 - Diagrams, photos, figures
 
 ## Caching Strategies
@@ -120,10 +120,10 @@ The "Download for offline" button (`DownloadBookButton.svelte`) pre-populates ca
 2. Build URL list:
    - /content/{book}/toc.json
    - /content/{book}/glossary.json
-   - /content/{book}/chapters/{chapter}/{section}.md (all sections)
-3. For each markdown file:
+   - /content/{book}/chapters/{chapter}/{section}.html (all sections)
+3. For each HTML file:
    - Fetch and cache in 'book-content'
-   - Extract image URLs from markdown
+   - Extract image URLs from HTML content
 4. For each image:
    - Fetch and cache in 'book-images'
 5. Store download state in localStorage
@@ -150,7 +150,7 @@ The "Download for offline" button (`DownloadBookButton.svelte`) pre-populates ca
 The service worker's runtime caching only caches content when it's fetched. For true offline support, we need to:
 
 1. **Pre-fetch all content** - User may not visit every section before going offline
-2. **Cache images** - Images are discovered by parsing markdown, not by navigation
+2. **Cache images** - Images are discovered by parsing HTML content, not by navigation
 3. **Show progress** - User needs feedback during download
 4. **Track state** - Know which books are available offline
 
@@ -178,12 +178,12 @@ const bookPattern = `/content/${bookSlug}/`;
 
 For the Chemistry textbook (efnafraedi):
 
-| Content Type   | Count | Size         |
-| -------------- | ----- | ------------ |
-| Markdown files | 25    | ~200 KB      |
-| JSON files     | 2     | ~17 KB       |
-| Images         | 68    | ~38 MB       |
-| **Total**      | 95    | **~38.5 MB** |
+| Content Type | Count | Size        |
+| ------------ | ----- | ----------- |
+| HTML files   | 103   | ~19 MB      |
+| JSON files   | 3     | ~208 KB     |
+| Images       | 398   | ~113 MB     |
+| **Total**    | 504   | **~132 MB** |
 
 ## Offline Verification
 

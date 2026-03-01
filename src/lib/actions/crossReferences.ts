@@ -40,7 +40,7 @@ const TYPE_ICONS: Record<ReferenceType, string> = {
 // action instances for performance (avoids re-creation on every action mount).
 let tooltipElement: HTMLDivElement | null = null;
 let hideTimeout: ReturnType<typeof setTimeout> | null = null;
-let currentLink: HTMLElement | null = null;
+let _currentLink: HTMLElement | null = null;
 
 /**
  * Create or get the tooltip element
@@ -73,7 +73,7 @@ function getOrCreateTooltip(): HTMLDivElement {
  */
 function showTooltip(link: HTMLElement, ref: ReferenceItem, bookSlug: string) {
 	const tooltip = getOrCreateTooltip();
-	currentLink = link;
+	_currentLink = link;
 
 	// Clear any pending hide
 	if (hideTimeout) {
@@ -83,7 +83,7 @@ function showTooltip(link: HTMLElement, ref: ReferenceItem, bookSlug: string) {
 
 	const icon = TYPE_ICONS[ref.type];
 	const typeLabel = TYPE_LABELS[ref.type];
-	const url = getReferenceUrl(bookSlug, ref);
+	const _url = getReferenceUrl(bookSlug, ref);
 
 	// Build tooltip content
 	let previewHtml = '';
@@ -123,7 +123,7 @@ function showTooltip(link: HTMLElement, ref: ReferenceItem, bookSlug: string) {
 
 	// Position tooltip
 	const rect = link.getBoundingClientRect();
-	const tooltipRect = tooltip.getBoundingClientRect();
+	const _tooltipRect = tooltip.getBoundingClientRect();
 
 	let left = rect.left + rect.width / 2;
 	let top = rect.bottom + 8;
@@ -158,7 +158,7 @@ function hideTooltip() {
 			tooltipElement.style.opacity = '0';
 			tooltipElement.style.visibility = 'hidden';
 		}
-		currentLink = null;
+		_currentLink = null;
 	}, 100);
 }
 

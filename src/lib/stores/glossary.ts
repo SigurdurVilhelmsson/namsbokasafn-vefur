@@ -3,7 +3,6 @@
  */
 
 import { writable, derived, get } from 'svelte/store';
-import { browser } from '$app/environment';
 import type { GlossaryTerm, Glossary } from '$lib/types/content';
 
 interface GlossaryState {
@@ -64,7 +63,7 @@ function createGlossaryStore() {
 						loading: false,
 						error: null
 					}));
-				} catch (e) {
+				} catch {
 					loadPromise = null;
 					update((s) => ({
 						...s,
