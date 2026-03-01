@@ -5,11 +5,16 @@
  * CNXML pipeline) and attaches hover/tap tooltips showing definitions.
  * Only semantic <dfn> tags are processed — no text-matching is performed
  * to avoid false-positive highlights on common Icelandic words.
+ *
+ * Term matching uses three tiers:
+ * 1. data-term attribute (from pipeline, highest confidence)
+ * 2. Icelandic text exact match (current behavior)
+ * 3. English fallback from "(e. ...)" suffix
  */
 
 import { browser } from '$app/environment';
 import { glossaryStore } from '$lib/stores/glossary';
-import { settings } from '$lib/stores/settings';
+import { glossaryHighlighting } from '$lib/stores/settings';
 import { get } from 'svelte/store';
 import type { GlossaryTerm } from '$lib/types/content';
 import { escapeHtml } from '$lib/utils/html';
@@ -171,6 +176,28 @@ function hideTooltipImmediate() {
 }
 
 /**
+ * Extract English term from text containing "(e. ...)" suffix.
+ * Returns null if no English suffix found.
+ */
+function extractEnglish(text: string): string | null {
+	const marker = ' (e. ';
+	const idx = text.lastIndexOf(marker);
+	if (idx === -1) return null;
+	// Strip trailing ")" from the English portion
+	const english = text.substring(idx + marker.length).replace(/\)\s*$/, '').trim();
+	return english || null;
+}
+
+/**
+ * Strip the "(e. ...)" English suffix to get the Icelandic term text.
+ */
+function stripEnglishSuffix(text: string): string {
+	const marker = ' (e. ';
+	const idx = text.lastIndexOf(marker);
+	return idx !== -1 ? text.substring(0, idx).trim() : text;
+}
+
+/**
  * Svelte action: scans content for <dfn class="term"> elements and adds tooltips
  */
 export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) {
@@ -180,15 +207,15 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 
 	const { bookSlug } = options;
 	let destroyed = false;
+	let isProcessed = false;
 
 	// Track event listeners for cleanup
-	const cleanupListeners: Array<() => void> = [];
+	let cleanupListeners: Array<() => void> = [];
+
+	// Track processed dfn elements for toggle-off cleanup
+	let processedDfnElements: HTMLElement[] = [];
 
 	async function init() {
-		// Check if glossary highlighting is enabled
-		const settingsState = get(settings);
-		if (!settingsState.glossaryHighlighting) return;
-
 		// Load glossary (cached if already loaded for this book)
 		await glossaryStore.load(bookSlug);
 		if (destroyed) return;
@@ -202,12 +229,23 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 
 		if (!sortedTerms.length) return;
 
-		// Build normalized lookup map
+		// Build normalized Icelandic lookup map
 		const termMap = new Map<string, GlossaryTerm>();
 		for (const term of sortedTerms) {
 			const key = term.term.toLowerCase();
 			if (!termMap.has(key)) {
 				termMap.set(key, term);
+			}
+		}
+
+		// Build English lookup map for fallback matching
+		const englishMap = new Map<string, GlossaryTerm>();
+		for (const term of sortedTerms) {
+			if (term.english) {
+				const key = term.english.toLowerCase();
+				if (!englishMap.has(key)) {
+					englishMap.set(key, term);
+				}
 			}
 		}
 
@@ -218,17 +256,37 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 			const dfnEl = dfn as HTMLElement;
 			const fullText = (dfnEl.textContent || '').trim();
 
-			// Strip the "(e. ...)" English suffix to get the Icelandic term
-			const marker = ' (e. ';
-			const idx = fullText.lastIndexOf(marker);
-			const termText = idx !== -1 ? fullText.substring(0, idx).trim() : fullText;
-			const normalized = termText.toLowerCase();
+			// Three-tier matching:
+			// 1. data-term attribute (highest confidence, from pipeline)
+			// 2. Icelandic text exact match
+			// 3. English fallback from "(e. ...)" suffix
+			let glossaryTerm: GlossaryTerm | undefined;
 
-			const glossaryTerm = termMap.get(normalized);
+			// Tier 1: data-term attribute
+			const dataTerm = dfnEl.getAttribute('data-term');
+			if (dataTerm) {
+				glossaryTerm = termMap.get(dataTerm.toLowerCase());
+			}
+
+			// Tier 2: Icelandic text match
+			if (!glossaryTerm) {
+				const icelandicText = stripEnglishSuffix(fullText);
+				const normalized = icelandicText.toLowerCase();
+				glossaryTerm = termMap.get(normalized);
+			}
+
+			// Tier 3: English fallback
+			if (!glossaryTerm) {
+				const english = extractEnglish(fullText);
+				if (english) {
+					glossaryTerm = englishMap.get(english.toLowerCase());
+				}
+			}
+
 			if (!glossaryTerm) continue;
 
 			dfnEl.classList.add('glossary-term');
-			dfnEl.dataset.term = glossaryTerm.term;
+			dfnEl.dataset.glossaryMatch = glossaryTerm.term;
 			dfnEl.setAttribute('role', 'button');
 			dfnEl.setAttribute('tabindex', '0');
 			dfnEl.setAttribute(
@@ -236,10 +294,12 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 				`Skilgreining: ${glossaryTerm.term}` + (glossaryTerm.english ? ` (${glossaryTerm.english})` : '')
 			);
 
+			processedDfnElements.push(dfnEl);
+
 			// Desktop: hover to show
-			const onEnter = () => showTooltip(dfnEl, glossaryTerm, bookSlug);
+			const onEnter = () => showTooltip(dfnEl, glossaryTerm!, bookSlug);
 			const onLeave = () => hideTooltip();
-			const onFocus = () => showTooltip(dfnEl, glossaryTerm, bookSlug);
+			const onFocus = () => showTooltip(dfnEl, glossaryTerm!, bookSlug);
 			const onBlur = () => hideTooltip();
 
 			dfnEl.addEventListener('mouseenter', onEnter);
@@ -254,7 +314,7 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 				if (currentSpan === dfnEl) {
 					hideTooltipImmediate();
 				} else {
-					showTooltip(dfnEl, glossaryTerm, bookSlug);
+					showTooltip(dfnEl, glossaryTerm!, bookSlug);
 				}
 			};
 			dfnEl.addEventListener('click', onClick);
@@ -267,6 +327,36 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 				dfnEl.removeEventListener('click', onClick);
 			});
 		}
+
+		isProcessed = true;
+	}
+
+	/**
+	 * Remove glossary styling and event listeners from all processed elements
+	 */
+	function teardown() {
+		// Remove event listeners
+		for (const cleanup of cleanupListeners) {
+			cleanup();
+		}
+		cleanupListeners = [];
+
+		// Remove glossary styling/attributes from processed dfn elements
+		for (const dfnEl of processedDfnElements) {
+			dfnEl.classList.remove('glossary-term');
+			dfnEl.removeAttribute('data-glossary-match');
+			dfnEl.removeAttribute('role');
+			dfnEl.removeAttribute('tabindex');
+			dfnEl.removeAttribute('aria-label');
+		}
+		processedDfnElements = [];
+
+		// Hide tooltip if showing
+		if (tooltipElement && currentSpan && node.contains(currentSpan)) {
+			hideTooltipImmediate();
+		}
+
+		isProcessed = false;
 	}
 
 	// Keep tooltip visible when mouse enters it, and set up tap-outside-to-dismiss
@@ -296,21 +386,21 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 	}
 
 	setupTooltipHover();
-	init();
+
+	// Subscribe to glossaryHighlighting store for reactive toggle
+	const unsubscribe = glossaryHighlighting.subscribe((enabled) => {
+		if (enabled && !isProcessed) {
+			init();
+		} else if (!enabled && isProcessed) {
+			teardown();
+		}
+	});
 
 	return {
 		destroy() {
 			destroyed = true;
-
-			// Clean up event listeners on dfn elements
-			for (const cleanup of cleanupListeners) {
-				cleanup();
-			}
-
-			// Hide tooltip if it's showing for a term in this node
-			if (tooltipElement && currentSpan && node.contains(currentSpan)) {
-				hideTooltipImmediate();
-			}
+			unsubscribe();
+			teardown();
 		}
 	};
 }
