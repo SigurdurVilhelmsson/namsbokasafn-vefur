@@ -24,7 +24,9 @@
 
 <svelte:head>
 	<meta name="description" content="Námsbókasafn - Opnar kennslubækur á íslensku" />
-	<meta name="theme-color" content="#1a7d5c" />
+	<meta name="theme-color" content="#c78c20" />
+	<meta property="og:site_name" content="Námsbókasafn" />
+	<meta property="og:locale" content="is_IS" />
 	<link rel="manifest" href="/manifest.webmanifest" />
 	<link rel="apple-touch-icon" href="/icons/icon-192.svg" />
 	<!-- CNXML content styles -->

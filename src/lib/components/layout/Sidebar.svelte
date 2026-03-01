@@ -544,6 +544,10 @@
 		flex-shrink: 0;
 	}
 
+	:global(.dark) .chapter-progress-badge {
+		color: #4ade80;
+	}
+
 	/* ====================================
 	   CHAPTER CHEVRON
 	   ==================================== */
@@ -621,6 +625,10 @@
 		width: 0.5rem;
 		height: 0.5rem;
 		background: #16a34a;
+	}
+
+	:global(.dark) .section-dot--read {
+		background: #4ade80;
 	}
 
 	.section-dot--unread {

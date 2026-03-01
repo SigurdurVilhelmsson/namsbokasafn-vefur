@@ -304,12 +304,12 @@
 									{/if}
 									<div
 										class="w-full max-w-12 rounded-t-lg transition-all duration-300 {isToday
-											? 'bg-blue-500'
+											? 'bg-[var(--accent-color)]'
 											: 'bg-gray-300 dark:bg-gray-600'}"
 										style="height: {Math.max(height, 4)}%"
 									></div>
 								</div>
-								<span class="text-xs font-medium {isToday ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}">
+								<span class="text-xs font-medium {isToday ? 'text-[var(--accent-color)]' : 'text-gray-500 dark:text-gray-400'}">
 									{day.label}
 								</span>
 							</div>
@@ -404,7 +404,7 @@
 										</p>
 										<div class="mt-1 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
 											<div
-												class="h-full bg-blue-500 rounded-full transition-all duration-300"
+												class="h-full bg-[var(--accent-color)] rounded-full transition-all duration-300"
 												style="width: {percent}%"
 											></div>
 										</div>

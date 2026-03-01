@@ -159,7 +159,7 @@
 				aria-selected={selectedChapterIndex === null && hasSelected}
 				class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
 					{selectedChapterIndex === null && hasSelected
-						? 'bg-blue-600 text-white'
+						? 'bg-[var(--accent-color)] text-white'
 						: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
 				on:click={() => selectChapter(null)}
 			>
@@ -171,7 +171,7 @@
 					aria-selected={selectedChapterIndex === i}
 					class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
 						{selectedChapterIndex === i
-							? 'bg-blue-600 text-white'
+							? 'bg-[var(--accent-color)] text-white'
 							: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
 					on:click={() => selectChapter(i)}
 				>
@@ -218,7 +218,7 @@
 					<div>
 						<a
 							href={sectionUrl(group.chapter, group.section)}
-							class="inline-flex items-center gap-1.5 text-sm text-blue-600 dark:text-blue-400 hover:underline mb-3"
+							class="inline-flex items-center gap-1.5 text-sm text-[var(--accent-color)] hover:underline mb-3"
 						>
 							<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />

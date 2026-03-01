@@ -155,7 +155,7 @@
 <!-- Update Available Prompt -->
 {#if needRefresh}
 	<div
-		class="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md rounded-lg bg-blue-600 p-4 text-white shadow-lg md:left-auto md:right-4"
+		class="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md rounded-lg bg-[var(--accent-color)] p-4 text-white shadow-lg md:left-auto md:right-4"
 		role="alertdialog"
 		aria-labelledby="pwa-update-title"
 		aria-describedby="pwa-update-desc"
@@ -185,7 +185,7 @@
 			<button
 				on:click={handleUpdate}
 				disabled={updating}
-				class="flex-1 rounded-lg bg-white px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+				class="flex-1 rounded-lg bg-white px-4 py-2 text-sm font-medium text-[var(--accent-color)] transition-colors hover:bg-[var(--accent-light)] disabled:opacity-50 disabled:cursor-not-allowed"
 				data-testid="pwa-update-button"
 			>
 				{#if updating}
@@ -203,7 +203,7 @@
 			<button
 				on:click={handleDismissUpdate}
 				disabled={updating}
-				class="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-blue-500 disabled:opacity-50"
+				class="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
 				data-testid="pwa-dismiss-button"
 			>
 				Seinna
