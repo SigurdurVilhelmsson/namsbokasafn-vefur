@@ -62,6 +62,10 @@
 
 <svelte:head>
 	<title>Kafli {data.chapter.number}: {data.chapter.title} | {data.bookTitle}</title>
+	<meta property="og:title" content="Kafli {data.chapter.number}: {data.chapter.title} | {data.bookTitle}" />
+	<meta property="og:description" content="{data.chapter.title} – kafli {data.chapter.number} í {data.bookTitle}" />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/kafli/{chapterPath}" />
 </svelte:head>
 
 <div class="chapter-view min-h-[80vh] p-6">

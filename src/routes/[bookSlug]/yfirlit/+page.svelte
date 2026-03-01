@@ -131,6 +131,10 @@
 
 <svelte:head>
 	<title>Yfirlit | {data.book?.title ?? 'Bók'}</title>
+	<meta property="og:title" content="Yfirlit | {data.book?.title ?? 'Bók'}" />
+	<meta property="og:description" content="Samantekt og yfirlit yfir kafla í {data.book?.title ?? 'kennslubók'}" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/yfirlit" />
 </svelte:head>
 
 <div class="max-w-4xl mx-auto">

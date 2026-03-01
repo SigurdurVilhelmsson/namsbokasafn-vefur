@@ -11,6 +11,10 @@
 
 <svelte:head>
 	<title>Viðauki {data.appendix.letter}: {data.appendix.title} | Námsbókasafn</title>
+	<meta property="og:title" content="Viðauki {data.appendix.letter}: {data.appendix.title} | Námsbókasafn" />
+	<meta property="og:description" content="Viðauki {data.appendix.letter}: {data.appendix.title}" />
+	<meta property="og:type" content="article" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/vidauki/{data.appendixLetter}" />
 </svelte:head>
 
 <article class="max-w-3xl mx-auto px-1 sm:px-0">

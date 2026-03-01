@@ -22,7 +22,7 @@ export default defineConfig({
 				// Exclude server and prerendered files (we use SPA mode)
 				// Note: Plugin warns about prerendered/** pattern not matching files - this is
 				// expected behavior for SPA-only apps. See: https://github.com/vite-pwa/sveltekit/issues/55
-				globIgnores: ['server/**', '**/prerendered/**'],
+				globIgnores: ['server/**', '**/prerendered/**', '**/content/**'],
 
 				// Runtime caching for content
 				runtimeCaching: [

@@ -45,6 +45,10 @@
 
 <svelte:head>
 	<title>Minniskort | {data.book?.title ?? 'Bók'}</title>
+	<meta property="og:title" content="Minniskort | {data.book?.title ?? 'Bók'}" />
+	<meta property="og:description" content="Minniskort og endurtekningarkerfi fyrir {data.book?.title ?? 'kennslubók'}" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/minniskort" />
 </svelte:head>
 
 <div class="max-w-2xl mx-auto">
