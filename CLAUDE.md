@@ -102,16 +102,49 @@ The flashcard system uses SM-2 spaced repetition in `src/lib/utils/srs.ts`:
 - Quality ratings: again(0), hard(2), good(4), easy(5)
 - Be careful modifying this algorithm as it affects learning outcomes
 
+## Design System
+
+### Accent Color Convention
+
+The site uses CSS custom properties for theming. The accent color is **amber/gold** (`#c78c20` light, `#e8a838` dark), NOT blue.
+
+- **Accent (amber/gold)**: Interactive elements — buttons, links, hover states, focus rings, active tabs, badges, navigation, form controls
+- **Blue (semantic only)**: Info/note content blocks, data visualization (heatmaps, chart legends, rating scales), study phase indicators, periodic table element categories
+
+When adding new interactive UI, use `var(--accent-color)`, `var(--accent-hover)`, `var(--accent-light)`, `var(--accent-subtle)` — never hardcoded blue hex for branding elements. Tailwind arbitrary values work: `bg-[var(--accent-color)]`.
+
+### Fonts
+
+All fonts are **self-hosted** in `static/fonts/` — no external CDN dependencies:
+
+- Bricolage Grotesque (headings), Literata (body), JetBrains Mono (code) — woff2 with unicode-range subsetting
+- OpenDyslexic (accessibility option) — woff
+
+### Glossary System
+
+`src/lib/actions/glossaryTerms.ts` uses **semantic-only** term detection — it only processes `<dfn class="term">` elements from the CNXML pipeline. A previous text-matching pass was removed to avoid false positives on common Icelandic words like "efni".
+
 ## Key Actions & Components
 
 - `src/lib/actions/equations.ts`: Equation rendering
 - `src/lib/actions/practiceProblems.ts`: Interactive problem handling
 - `src/lib/actions/crossReferences.ts`: Internal link handling
+- `src/lib/actions/figureViewer.ts`: Image lightbox with zoom, pan, keyboard nav, and touch gestures (pinch-to-zoom, double-tap)
+- `src/lib/actions/glossaryTerms.ts`: Semantic glossary term tooltips (dfn elements only)
+- `src/lib/actions/answerLinks.ts`: Bidirectional exercise↔answer key navigation
 - `src/lib/components/ContentRenderer.svelte`: Main content renderer for pre-rendered HTML
 
 ## Deployment
 
 Static site deployed to Linode via GitHub Actions. Output goes to `build/` directory. No backend - all state is client-side in localStorage.
+
+### Security Headers
+
+`nginx-config-example.conf` documents the recommended security headers:
+
+- HSTS (`max-age=63072000; includeSubDomains; preload`)
+- Permissions-Policy (camera, microphone, geolocation, payment all denied)
+- CSP (`default-src 'self'`; fonts, styles, scripts all self-hosted)
 
 ## Two-Repository Workflow
 
