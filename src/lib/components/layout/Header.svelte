@@ -115,7 +115,7 @@
 			<a href="/{bookSlug}" class="breadcrumb-item">{bookTitle}</a>
 			{#if currentChapter}
 				<span class="breadcrumb-sep" aria-hidden="true">›</span>
-				<span class="breadcrumb-item current">
+				<span class="breadcrumb-item current" aria-current="page">
 					{currentChapter.number}. {currentChapter.title}
 				</span>
 			{/if}

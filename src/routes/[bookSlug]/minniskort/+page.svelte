@@ -164,12 +164,19 @@
 			<div class="mb-6">
 				<div class="flashcard-progress-text">
 					<span>Kort {$studyProgress.current + 1} af {$studyProgress.total}</span>
-					<span>{Math.round((($studyProgress.current) / $studyProgress.total) * 100)}%</span>
+					<span>{$studyProgress.total > 0 ? Math.round(($studyProgress.current / $studyProgress.total) * 100) : 0}%</span>
 				</div>
-				<div class="flashcard-progress-track">
+				<div
+					class="flashcard-progress-track"
+					role="progressbar"
+					aria-valuenow={$studyProgress.current}
+					aria-valuemin={0}
+					aria-valuemax={$studyProgress.total}
+					aria-label="Framvinda náms"
+				>
 					<div
 						class="flashcard-progress-fill"
-						style="width: {($studyProgress.current / $studyProgress.total) * 100}%"
+						style="width: {$studyProgress.total > 0 ? ($studyProgress.current / $studyProgress.total) * 100 : 0}%"
 					></div>
 				</div>
 			</div>

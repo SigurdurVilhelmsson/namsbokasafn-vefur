@@ -84,9 +84,8 @@
 	class="sidebar-overlay {$sidebarOpen ? 'sidebar-overlay--visible' : ''}"
 	on:click={closeSidebar}
 	on:keydown={(e) => e.key === 'Escape' && closeSidebar()}
-	role="button"
+	role="presentation"
 	tabindex="-1"
-	aria-hidden="true"
 ></div>
 
 <!-- Sidebar -->
