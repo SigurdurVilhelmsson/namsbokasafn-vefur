@@ -455,7 +455,7 @@
   .form-textarea:focus {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px var(--accent-light, rgba(37, 99, 235, 0.1));
+    box-shadow: 0 0 0 3px var(--accent-light, rgba(199, 140, 32, 0.1));
   }
 
   .form-textarea {
@@ -497,7 +497,7 @@
 
   .type-option.selected {
     border-color: var(--accent-color);
-    background: var(--accent-light, rgba(37, 99, 235, 0.05));
+    background: var(--accent-light, rgba(199, 140, 32, 0.05));
   }
 
   .type-option input {
@@ -565,7 +565,7 @@
   }
 
   .btn-primary:hover:not(:disabled) {
-    background: var(--accent-dark, #1d4ed8);
+    background: var(--accent-hover, #b37a1c);
   }
 
   .btn-primary svg {

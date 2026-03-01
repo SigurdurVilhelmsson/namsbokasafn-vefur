@@ -71,9 +71,9 @@ function addStyles() {
 			padding: 0.375rem 0.75rem;
 			font-size: 0.75rem;
 			font-weight: 500;
-			color: #3b82f6;
-			background-color: #eff6ff;
-			border: 1px solid #bfdbfe;
+			color: var(--accent-color, #c78c20);
+			background-color: var(--accent-light, rgba(199, 140, 32, 0.1));
+			border: 1px solid var(--accent-subtle, rgba(199, 140, 32, 0.3));
 			border-radius: 0.5rem;
 			cursor: pointer;
 			transition: all 0.15s ease;
@@ -81,20 +81,20 @@ function addStyles() {
 		}
 
 		.answer-link-btn:hover {
-			background-color: #dbeafe;
-			border-color: #93c5fd;
-			color: #2563eb;
+			background-color: var(--accent-light, rgba(199, 140, 32, 0.15));
+			border-color: var(--accent-color, #c78c20);
+			color: var(--accent-hover, #b37a1c);
 		}
 
 		.dark .answer-link-btn {
-			color: #60a5fa;
-			background-color: rgba(59, 130, 246, 0.1);
-			border-color: rgba(59, 130, 246, 0.3);
+			color: var(--accent-color, #e8a838);
+			background-color: rgba(232, 168, 56, 0.1);
+			border-color: rgba(232, 168, 56, 0.3);
 		}
 
 		.dark .answer-link-btn:hover {
-			background-color: rgba(59, 130, 246, 0.2);
-			border-color: rgba(59, 130, 246, 0.4);
+			background-color: rgba(232, 168, 56, 0.2);
+			border-color: rgba(232, 168, 56, 0.4);
 		}
 
 		.answer-link-btn svg {
@@ -109,8 +109,8 @@ function addStyles() {
 
 		@keyframes answer-link-highlight {
 			0% {
-				background-color: rgba(59, 130, 246, 0.3);
-				box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+				background-color: rgba(199, 140, 32, 0.3);
+				box-shadow: 0 0 0 4px rgba(199, 140, 32, 0.2);
 			}
 			100% {
 				background-color: transparent;
@@ -133,7 +133,7 @@ function addStyles() {
 			left: 0;
 			top: 0;
 			font-weight: 700;
-			color: var(--accent-color, #3b82f6);
+			color: var(--accent-color, #c78c20);
 			min-width: 2.5rem;
 			text-align: right;
 			padding-right: 0.5rem;
@@ -143,7 +143,7 @@ function addStyles() {
 		}
 
 		.exercise-number-link:hover {
-			color: var(--accent-hover, #2563eb);
+			color: var(--accent-hover, #b37a1c);
 			text-decoration: underline;
 		}
 

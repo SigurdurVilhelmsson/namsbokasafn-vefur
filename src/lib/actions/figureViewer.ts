@@ -12,6 +12,12 @@ interface FigureViewerState {
 	pan: { x: number; y: number };
 	isDragging: boolean;
 	dragStart: { x: number; y: number };
+	/** Distance between two fingers at pinch start */
+	pinchStartDistance: number;
+	/** Zoom level when pinch gesture started */
+	pinchStartZoom: number;
+	/** Timestamp of last tap for double-tap detection */
+	lastTapTime: number;
 }
 
 /**
@@ -27,6 +33,9 @@ function showLightbox(img: HTMLImageElement, state: FigureViewerState): void {
 	state.zoom = 1;
 	state.pan = { x: 0, y: 0 };
 	state.isDragging = false;
+	state.pinchStartDistance = 0;
+	state.pinchStartZoom = 1;
+	state.lastTapTime = 0;
 	state.currentImage = img;
 
 	// Create lightbox
@@ -187,6 +196,81 @@ function showLightbox(img: HTMLImageElement, state: FigureViewerState): void {
 		updateZoomDisplay();
 	}
 
+	// Touch event handlers for mobile
+	function getTouchDistance(touches: TouchList): number {
+		const dx = touches[0].clientX - touches[1].clientX;
+		const dy = touches[0].clientY - touches[1].clientY;
+		return Math.sqrt(dx * dx + dy * dy);
+	}
+
+	function handleTouchStart(e: TouchEvent) {
+		if (e.touches.length === 2) {
+			// Pinch-to-zoom start
+			e.preventDefault();
+			state.isDragging = false;
+			state.pinchStartDistance = getTouchDistance(e.touches);
+			state.pinchStartZoom = state.zoom;
+		} else if (e.touches.length === 1) {
+			// Double-tap detection
+			const now = Date.now();
+			if (now - state.lastTapTime < 300) {
+				// Double-tap: toggle between 1x and 2x zoom
+				e.preventDefault();
+				if (state.zoom > 1) {
+					resetZoom();
+				} else {
+					state.zoom = 2;
+					updateZoomDisplay();
+				}
+				state.lastTapTime = 0;
+				return;
+			}
+			state.lastTapTime = now;
+
+			// Single-finger drag start (only when zoomed in)
+			if (state.zoom > 1) {
+				state.isDragging = true;
+				state.dragStart = {
+					x: e.touches[0].clientX - state.pan.x,
+					y: e.touches[0].clientY - state.pan.y
+				};
+				updateZoomDisplay();
+			}
+		}
+	}
+
+	function handleTouchMove(e: TouchEvent) {
+		if (e.touches.length === 2 && state.pinchStartDistance > 0) {
+			// Pinch-to-zoom
+			e.preventDefault();
+			const currentDistance = getTouchDistance(e.touches);
+			const scale = currentDistance / state.pinchStartDistance;
+			state.zoom = Math.max(0.5, Math.min(4, state.pinchStartZoom * scale));
+			if (state.zoom <= 1) {
+				state.pan = { x: 0, y: 0 };
+			}
+			updateZoomDisplay();
+		} else if (e.touches.length === 1 && state.isDragging) {
+			// Single-finger pan
+			e.preventDefault();
+			state.pan = {
+				x: e.touches[0].clientX - state.dragStart.x,
+				y: e.touches[0].clientY - state.dragStart.y
+			};
+			updateZoomDisplay();
+		}
+	}
+
+	function handleTouchEnd(e: TouchEvent) {
+		if (e.touches.length < 2) {
+			state.pinchStartDistance = 0;
+		}
+		if (e.touches.length === 0) {
+			state.isDragging = false;
+			updateZoomDisplay();
+		}
+	}
+
 	function handleKeyDown(e: KeyboardEvent) {
 		switch (e.key) {
 			case 'Escape':
@@ -212,6 +296,9 @@ function showLightbox(img: HTMLImageElement, state: FigureViewerState): void {
 	container.addEventListener('mousemove', handleMouseMove);
 	container.addEventListener('mouseup', handleMouseUp);
 	container.addEventListener('mouseleave', handleMouseUp);
+	container.addEventListener('touchstart', handleTouchStart, { passive: false });
+	container.addEventListener('touchmove', handleTouchMove, { passive: false });
+	container.addEventListener('touchend', handleTouchEnd);
 	document.addEventListener('keydown', handleKeyDown);
 
 	// Store cleanup function
@@ -222,6 +309,9 @@ function showLightbox(img: HTMLImageElement, state: FigureViewerState): void {
 		container.removeEventListener('mousemove', handleMouseMove);
 		container.removeEventListener('mouseup', handleMouseUp);
 		container.removeEventListener('mouseleave', handleMouseUp);
+		container.removeEventListener('touchstart', handleTouchStart);
+		container.removeEventListener('touchmove', handleTouchMove);
+		container.removeEventListener('touchend', handleTouchEnd);
 		document.removeEventListener('keydown', handleKeyDown);
 	};
 }
@@ -250,7 +340,10 @@ export function figureViewer(node: HTMLElement) {
 		zoom: 1,
 		pan: { x: 0, y: 0 },
 		isDragging: false,
-		dragStart: { x: 0, y: 0 }
+		dragStart: { x: 0, y: 0 },
+		pinchStartDistance: 0,
+		pinchStartZoom: 1,
+		lastTapTime: 0
 	};
 
 	function handleClick(event: Event) {

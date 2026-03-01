@@ -137,7 +137,7 @@
 			<!-- Progress bar -->
 			<div class="h-2.5 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
 				<div
-					class="h-full rounded-full bg-blue-600 transition-all duration-300"
+					class="h-full rounded-full bg-[var(--accent-color)] transition-all duration-300"
 					style="width: {progressPercent}%"
 				></div>
 			</div>
@@ -187,7 +187,7 @@
 			</div>
 			<button
 				on:click={handleDownload}
-				class="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+				class="text-sm font-medium text-[var(--accent-color)] hover:text-[var(--accent-hover)]"
 			>
 				Reyna aftur
 			</button>
@@ -203,7 +203,7 @@
 		<button
 			on:click={handleDownload}
 			disabled={isEstimating}
-			class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+			class="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 		>
 			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 				<path
@@ -218,7 +218,7 @@
 			{:else}
 				<span>Sækja fyrir ónettengda notkun</span>
 				{#if estimatedSize > 0}
-					<span class="text-blue-200">(~{formatBytes(estimatedSize)})</span>
+					<span class="opacity-80">(~{formatBytes(estimatedSize)})</span>
 				{/if}
 			{/if}
 		</button>

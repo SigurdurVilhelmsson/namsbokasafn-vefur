@@ -20,6 +20,9 @@
 		isFlipped = false;
 	}
 
+	// All user decks from the store
+	$: allDecks = $flashcardStore.decks;
+
 	function flip() {
 		isFlipped = !isFlipped;
 	}
@@ -30,48 +33,13 @@
 		}
 	}
 
-	function startStudy() {
-		// For now, use the first available deck or create a sample one
-		const decks = flashcardStore.getDeck('sample');
-		if (!decks) {
-			// Add a sample deck if none exists
-			flashcardStore.addDeck({
-				id: 'sample',
-				name: 'Efnafræði Minniskort',
-				description: 'Grunnhugtök í efnafræði',
-				cards: [
-					{
-						id: '1',
-						front: 'Hvað er efnafræði?',
-						back: 'Efnafræði er fræðigreinin um samsetningu, eiginleika og víxlverkun efnis.',
-						created: new Date().toISOString()
-					},
-					{
-						id: '2',
-						front: 'Hvaða þrjú svið rannsaka efnafræðingar?',
-						back: 'Stórsæja sviðið, smásæja sviðið og táknræna sviðið.',
-						created: new Date().toISOString()
-					},
-					{
-						id: '3',
-						front: 'Hvað er vísindalega aðferðin?',
-						back: 'Kerfisbundin aðferð til að rannsaka náttúruna með athugunum, tilgátum og tilraunum.',
-						created: new Date().toISOString()
-					},
-					{
-						id: '4',
-						front: 'Hver er efnaformúla vatns?',
-						back: 'H₂O - tvö vetnisatóm og eitt súrefnisatóm.',
-						created: new Date().toISOString()
-					}
-				],
-				created: new Date().toISOString()
-			});
-		}
-		flashcardStore.startStudySession('sample');
+	function startStudy(deckId: string) {
+		flashcardStore.startStudySession(deckId);
 	}
 
-	$: deckStats = flashcardStore.getDeckStats('sample');
+	$: activeDeckStats = $currentDeck
+		? flashcardStore.getDeckStats($currentDeck.id)
+		: null;
 	$: previewIntervals = $currentCard ? flashcardStore.getPreviewIntervals($currentCard.id) : null;
 </script>
 
@@ -85,60 +53,79 @@
 	</h1>
 
 	{#if !$currentDeck}
-		<!-- Start screen -->
-		<div class="text-center py-12">
-			<div class="flashcard-icon-circle">
-				<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-				</svg>
+		<!-- Deck selection / empty state -->
+		{#if allDecks.length === 0}
+			<!-- No decks yet -->
+			<div class="text-center py-12">
+				<div class="flashcard-icon-circle">
+					<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+					</svg>
+				</div>
+
+				<h2 class="flashcard-subheading">
+					Engin minniskort enn
+				</h2>
+				<p class="flashcard-description">
+					Til að búa til minniskort, veldu texta í kafla og smelltu á „Minniskort" í valmyndinni sem birtist.
+				</p>
+
+				<a
+					href="/{data.bookSlug}"
+					class="flashcard-start-btn"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+					</svg>
+					Fara í efnisyfirlit
+				</a>
 			</div>
-
-			<h2 class="flashcard-subheading">
-				Tilbúinn að læra?
-			</h2>
-			<p class="flashcard-description">
-				Endurtakning með bilum (spaced repetition) hjálpar þér að muna efnið betur.
-			</p>
-
-			<!-- Stats -->
-			<div class="grid grid-cols-3 gap-4 mb-8">
-				<div class="flashcard-stat-card">
-					<div class="flashcard-stat-value">{deckStats.new}</div>
-					<div class="flashcard-stat-label">Ný kort</div>
-				</div>
-				<div class="flashcard-stat-card">
-					<div class="flashcard-stat-value" style="color: var(--accent-color);">{deckStats.due}</div>
-					<div class="flashcard-stat-label">Til endurtekningar</div>
-				</div>
-				<div class="flashcard-stat-card">
-					<div class="flashcard-stat-value flashcard-stat-value--success">{deckStats.total}</div>
-					<div class="flashcard-stat-label">Alls</div>
-				</div>
-			</div>
-
-			<!-- Study streak -->
-			{#if $studyStats.studyStreak > 0}
-				<div class="flashcard-streak">
-					<div class="flashcard-streak-inner">
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-							<path d="M12 2c-4.42 0-8 3.58-8 8 0 4.42 5.33 9.67 7.05 11.13.38.32.91.32 1.29 0 1.72-1.46 7.05-6.71 7.05-11.13 0-4.42-3.58-8-7.39-8z" />
-						</svg>
-						<span class="font-medium">{$studyStats.studyStreak} daga námsruna!</span>
+		{:else}
+			<!-- Deck list -->
+			<div class="deck-list">
+				<!-- Study streak -->
+				{#if $studyStats.studyStreak > 0}
+					<div class="flashcard-streak">
+						<div class="flashcard-streak-inner">
+							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+								<path d="M12 2c-4.42 0-8 3.58-8 8 0 4.42 5.33 9.67 7.05 11.13.38.32.91.32 1.29 0 1.72-1.46 7.05-6.71 7.05-11.13 0-4.42-3.58-8-7.39-8z" />
+							</svg>
+							<span class="font-medium">{$studyStats.studyStreak} daga námsruna!</span>
+						</div>
 					</div>
-				</div>
-			{/if}
+				{/if}
 
-			<button
-				on:click={startStudy}
-				class="flashcard-start-btn"
-			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-				</svg>
-				Byrja námsæfingu
-			</button>
-		</div>
+				<p class="flashcard-description">Veldu stokkinn sem þú vilt æfa:</p>
+
+				{#each allDecks as deck (deck.id)}
+					{@const stats = flashcardStore.getDeckStats(deck.id)}
+					<div class="deck-card">
+						<div class="deck-card-info">
+							<h3 class="deck-card-name">{deck.name}</h3>
+							{#if deck.description}
+								<p class="deck-card-desc">{deck.description}</p>
+							{/if}
+							<div class="deck-card-stats">
+								<span>{stats.total} kort</span>
+								{#if stats.due > 0}
+									<span class="deck-card-stats-due">{stats.due} til endurtekningar</span>
+								{/if}
+								{#if stats.new > 0}
+									<span>{stats.new} ný</span>
+								{/if}
+							</div>
+						</div>
+						<button
+							on:click={() => startStudy(deck.id)}
+							class="deck-card-btn"
+							disabled={deck.cards.length === 0}
+						>
+							Æfa
+						</button>
+					</div>
+				{/each}
+			</div>
+		{/if}
 	{:else if $studyProgress.isComplete}
 		<!-- Completion screen -->
 		<div class="text-center py-12">
@@ -163,7 +150,7 @@
 					Til baka
 				</button>
 				<button
-					on:click={startStudy}
+					on:click={() => { if ($currentDeck) startStudy($currentDeck.id); }}
 					class="flashcard-primary-btn"
 				>
 					Æfa aftur
@@ -298,43 +285,69 @@
 		color: #34d399;
 	}
 
-	/* Stat cards */
-	.flashcard-stat-card {
-		padding: 1rem;
+	/* Deck list */
+	.deck-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.deck-card {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		padding: 1rem 1.25rem;
 		border-radius: var(--radius-lg);
 		background-color: var(--bg-secondary);
 		border: 1px solid var(--border-color);
 	}
-	.flashcard-stat-value {
-		font-size: 1.5rem;
-		font-weight: 700;
+
+	.deck-card-info {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.deck-card-name {
+		font-weight: 600;
 		color: var(--text-primary);
+		margin-bottom: 0.125rem;
 	}
-	.flashcard-stat-value--success {
-		color: #059669;
-	}
-	:global(.dark) .flashcard-stat-value--success {
-		color: #34d399;
-	}
-	.flashcard-stat-label {
+
+	.deck-card-desc {
 		font-size: 0.875rem;
+		color: var(--text-secondary);
+		margin-bottom: 0.25rem;
+	}
+
+	.deck-card-stats {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		font-size: 0.8125rem;
 		color: var(--text-tertiary);
 	}
 
-	/* Study streak */
-	.flashcard-streak {
-		margin-bottom: 1.5rem;
-		padding: 1rem;
-		border-radius: var(--radius-lg);
-		background-color: var(--accent-light);
-		border: 1px solid var(--border-color);
-	}
-	.flashcard-streak-inner {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
+	.deck-card-stats-due {
 		color: var(--accent-color);
+		font-weight: 500;
+	}
+
+	.deck-card-btn {
+		padding: 0.5rem 1rem;
+		border-radius: var(--radius-lg);
+		background-color: var(--accent-color);
+		color: white;
+		font-weight: 500;
+		flex-shrink: 0;
+		transition: opacity 0.15s;
+	}
+	.deck-card-btn:hover {
+		opacity: 0.9;
+	}
+	.deck-card-btn:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
 	}
 
 	/* Buttons */
@@ -348,6 +361,7 @@
 		border-radius: var(--radius-xl);
 		background-color: var(--accent-color);
 		color: white;
+		text-decoration: none;
 		transition: opacity 0.15s;
 	}
 	.flashcard-start-btn:hover {
@@ -373,6 +387,22 @@
 	}
 	.flashcard-secondary-btn:hover {
 		background-color: var(--bg-tertiary);
+	}
+
+	/* Study streak */
+	.flashcard-streak {
+		margin-bottom: 1.5rem;
+		padding: 1rem;
+		border-radius: var(--radius-lg);
+		background-color: var(--accent-light);
+		border: 1px solid var(--border-color);
+	}
+	.flashcard-streak-inner {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		color: var(--accent-color);
 	}
 
 	/* Progress bar */

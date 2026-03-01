@@ -91,6 +91,10 @@
 
 <svelte:head>
   <title>Námsbókasafn – Opnar kennslubækur á íslensku</title>
+  <meta property="og:title" content="Námsbókasafn – Opnar kennslubækur á íslensku" />
+  <meta property="og:description" content="Gagnvirkt námsefni fyrir íslenskar þýðingar á OpenStax kennslubókum. Orðasafn, minniskort og æfingar." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://namsbokasafn.is/" />
 </svelte:head>
 
 <div class="landing" class:mounted>
