@@ -1,4 +1,4 @@
-import { error } from '@sveltejs/kit';
+import { error, isHttpError } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { loadTableOfContents, findChapterBySlug } from '$lib/utils/contentLoader';
 
@@ -21,6 +21,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			bookTitle: toc.title
 		};
 	} catch (e) {
+		if (isHttpError(e)) throw e;
 		console.error('Villa við að hlaða kafla:', e);
 		error(500, {
 			message: 'Gat ekki hlaðið kafla'
