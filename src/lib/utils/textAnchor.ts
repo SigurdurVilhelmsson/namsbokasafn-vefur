@@ -69,7 +69,6 @@ export function deserializeRange(textRange: TextRange, container: HTMLElement): 
 	// Strategy 2: Fall back to exact text search without context
 	const fallbackRange = findExactText(exact, container);
 	if (fallbackRange) {
-		console.debug('Highlight restored using fallback (no context match)');
 		return fallbackRange;
 	}
 

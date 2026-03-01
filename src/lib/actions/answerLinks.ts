@@ -342,11 +342,8 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 	}
 
 	return {
-		update(newOptions: AnswerLinksOptions) {
-			// If options change, we'd need to rebuild - for now just log
-			if (newOptions.sectionSlug !== sectionSlug) {
-				console.debug('answerLinks: sectionSlug changed, consider remounting');
-			}
+		update(_newOptions: AnswerLinksOptions) {
+			// No-op: if sectionSlug changes, the component should remount the action
 		},
 		destroy() {
 			// Clean up buttons
