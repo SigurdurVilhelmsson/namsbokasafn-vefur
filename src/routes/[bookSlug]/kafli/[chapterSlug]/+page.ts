@@ -17,8 +17,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
 		return {
 			bookSlug,
-			chapter,
-			bookTitle: toc.title
+			chapter
 		};
 	} catch (e) {
 		if (isHttpError(e)) throw e;
