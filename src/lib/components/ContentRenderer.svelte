@@ -12,23 +12,29 @@
 	import { lazyImages } from '$lib/actions/lazyImages';
 	import Skeleton from './Skeleton.svelte';
 
-	export let content: string;
-	export let bookSlug: string = '';
-	export let chapterSlug: string = '';
-	export let sectionSlug: string = '';
-	export let chapterNumber: number = 1;
-	export let sectionType: string = '';
+	interface Props {
+		content: string;
+		bookSlug?: string;
+		chapterSlug?: string;
+		sectionSlug?: string;
+		chapterNumber?: number;
+		sectionType?: string;
+	}
 
-	let html = '';
-	let error: string | null = null;
+	let { content, bookSlug = '', chapterSlug = '', sectionSlug = '', chapterNumber = 1, sectionType = '' }: Props = $props();
+
+	let html = $state('');
+	let error: string | null = $state(null);
 	let lastProcessedContent = '';
 
 	// Update html when content changes (deduplication guard prevents re-processing on hydration)
-	$: if (content && content !== lastProcessedContent) {
-		lastProcessedContent = content;
-		error = null;
-		html = content;
-	}
+	$effect(() => {
+		if (content && content !== lastProcessedContent) {
+			lastProcessedContent = content;
+			error = null;
+			html = content;
+		}
+	});
 </script>
 
 {#if error}

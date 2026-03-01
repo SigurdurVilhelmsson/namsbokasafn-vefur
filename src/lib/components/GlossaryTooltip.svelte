@@ -6,18 +6,22 @@
 	import { fade, scale } from 'svelte/transition';
 	import type { GlossaryTerm } from '$lib/types/content';
 
-	export let term: GlossaryTerm;
-	export let position: { x: number; y: number };
-	export let bookSlug: string;
-	export let onClose: () => void;
+	interface Props {
+		term: GlossaryTerm;
+		position: { x: number; y: number };
+		bookSlug: string;
+		onClose: () => void;
+	}
+
+	let { term, position, bookSlug, onClose }: Props = $props();
 
 	let tooltipElement: HTMLDivElement;
 
 	// Calculate position to keep tooltip in viewport
-	$: adjustedPosition = {
+	let adjustedPosition = $derived({
 		x: Math.min(position.x, (typeof window !== 'undefined' ? window.innerWidth : 800) - 320),
 		y: Math.max(position.y + 10, 10)
-	};
+	});
 
 	function handleClickOutside(event: MouseEvent) {
 		if (tooltipElement && !tooltipElement.contains(event.target as Node)) {
@@ -67,7 +71,7 @@
 				<span class="text-sm font-medium text-gray-500 dark:text-gray-300">Orðasafn</span>
 			</div>
 			<button
-				on:click={onClose}
+				onclick={onClose}
 				class="rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-200"
 				aria-label="Loka"
 			>

@@ -11,16 +11,20 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 
-	export let message: string;
-	export let type: 'error' | 'warning' | 'offline' = 'error';
-	export let onRetry: (() => void) | undefined = undefined;
-	export let showBackLink = false;
-	export let backHref = '/';
-	export let backLabel = 'Til baka';
+	interface Props {
+		message: string;
+		type?: 'error' | 'warning' | 'offline';
+		onRetry?: () => void;
+		showBackLink?: boolean;
+		backHref?: string;
+		backLabel?: string;
+	}
+
+	let { message, type = 'error', onRetry, showBackLink = false, backHref = '/', backLabel = 'Til baka' }: Props = $props();
 
 	// Auto-detect offline status
-	$: isOffline = browser && !navigator.onLine;
-	$: effectiveType = isOffline ? 'offline' : type;
+	let isOffline = $derived(browser && !navigator.onLine);
+	let effectiveType = $derived(isOffline ? 'offline' : type);
 
 	// Style mappings
 	const styles = {
@@ -47,12 +51,12 @@
 		}
 	};
 
-	$: style = styles[effectiveType];
+	let style = $derived(styles[effectiveType]);
 
 	// Offline message override
-	$: displayMessage = isOffline
+	let displayMessage = $derived(isOffline
 		? 'Engin nettenging. Athugaðu tenginguna og reyndu aftur.'
-		: message;
+		: message);
 </script>
 
 <div
@@ -88,7 +92,7 @@
 				<div class="mt-3 flex flex-wrap gap-2">
 					{#if onRetry}
 						<button
-							on:click={onRetry}
+							onclick={onRetry}
 							class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-md {style.button} transition-colors"
 						>
 							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

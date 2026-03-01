@@ -8,11 +8,14 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
 
-	export let bookSlug: string = '';
-	export let hasPeriodicTable: boolean = false;
+	interface Props {
+		bookSlug?: string;
+		hasPeriodicTable?: boolean;
+	}
+	let { bookSlug = '', hasPeriodicTable = false }: Props = $props();
 
-	let expanded = false;
-	let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
+	let expanded = $state(false);
+	let inactivityTimer = $state<ReturnType<typeof setTimeout> | null>(null);
 
 	/** Toggle FAB expanded/collapsed state */
 	function toggle() {
@@ -53,9 +56,10 @@
 	}
 
 	/** Close on route change */
-	$: if ($page.url.pathname) {
+	$effect(() => {
+		void $page.url.pathname;
 		close();
-	}
+	});
 
 	onMount(() => {
 		window.addEventListener('scroll', handleScroll, { passive: true });
@@ -69,7 +73,7 @@
 	});
 
 	/** Study tool definitions */
-	$: tools = [
+	let tools = $derived([
 		...(hasPeriodicTable
 			? [
 					{
@@ -94,7 +98,7 @@
 			label: 'Minniskort',
 			icon: 'flashcards' as const
 		}
-	];
+	]);
 </script>
 
 <!-- FAB container — hidden on desktop -->
@@ -103,8 +107,8 @@
 	{#if expanded}
 		<div
 			class="fab-backdrop"
-			on:click={close}
-			on:keydown={close}
+			onclick={close}
+			onkeydown={close}
 			role="presentation"
 		></div>
 	{/if}
@@ -122,7 +126,7 @@
 				class:fab-menu-item-visible={expanded}
 				style="--delay: {i * 50}ms"
 				aria-label={tool.label}
-				on:click={close}
+				onclick={close}
 			>
 				{#if tool.icon === 'flashcards'}
 					<!-- Flashcards icon (cards) -->
@@ -159,7 +163,7 @@
 	<button
 		class="fab-button"
 		class:fab-button-expanded={expanded}
-		on:click={toggle}
+		onclick={toggle}
 		aria-label={expanded ? 'Loka verkfæravalmynd' : 'Opna verkfæravalmynd'}
 		aria-expanded={expanded}
 		aria-controls="fab-menu"

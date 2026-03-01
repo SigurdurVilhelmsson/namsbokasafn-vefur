@@ -8,17 +8,17 @@
   const FEEDBACK_EMAIL = 'namsbokasafn@gmail.com';
 
   // Form state
-  let selectedType: FeedbackType | '' = '';
-  let message = '';
-  let book = '';
-  let chapter = '';
-  let section = '';
-  let userName = '';
-  let userEmail = '';
+  let selectedType: FeedbackType | '' = $state('');
+  let message = $state('');
+  let book = $state('');
+  let chapter = $state('');
+  let section = $state('');
+  let userName = $state('');
+  let userEmail = $state('');
 
   // UI state
-  let submitSuccess = false;
-  let submitError = '';
+  let submitSuccess = $state(false);
+  let submitError = $state('');
 
   function handleSubmit() {
     // Validate
@@ -90,7 +90,7 @@
     <div class="container">
       {#if submitSuccess}
         <!-- Success Message -->
-        <div class="success-card" on:click={resetForm} on:keypress={resetForm} role="button" tabindex="0">
+        <div class="success-card" onclick={resetForm} onkeypress={resetForm} role="button" tabindex="0">
           <div class="success-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
@@ -110,7 +110,7 @@
             <p>Við þökkum endurgjöf frá notendum. Vinsamlegast láttu okkur vita ef þú finnur villur eða hefur tillögur að bætingum.</p>
           </div>
 
-          <form on:submit|preventDefault={handleSubmit}>
+          <form onsubmit={(e: SubmitEvent) => { e.preventDefault(); handleSubmit(); }}>
             <!-- Error message -->
             {#if submitError}
               <div class="error-message">

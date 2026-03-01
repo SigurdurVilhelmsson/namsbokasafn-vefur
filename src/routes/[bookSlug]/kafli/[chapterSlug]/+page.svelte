@@ -8,18 +8,18 @@
 	import { isSectionRead, calcChapterProgress } from '$lib/stores/reader';
 	import { getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 
 	// Get chapter path for number-based routing
-	$: chapterPath = getChapterPath(data.chapter);
+	let chapterPath = $derived(getChapterPath(data.chapter));
 
 	// Subscribe to reader progress for reactivity
-	$: progress = $reader.progress;
-	$: chapterProgress = calcChapterProgress(progress, chapterPath, data.chapter.sections.length);
+	let progress = $derived($reader.progress);
+	let chapterProgress = $derived(calcChapterProgress(progress, chapterPath, data.chapter.sections.length));
 
 	// Reactive: find first unread section or fall back to first section
-	$: firstUnread = data.chapter.sections.find(s => !isSectionRead(progress, chapterPath, getSectionPath(s)));
-	$: targetSection = firstUnread ?? data.chapter.sections[0];
+	let firstUnread = $derived(data.chapter.sections.find(s => !isSectionRead(progress, chapterPath, getSectionPath(s))));
+	let targetSection = $derived(firstUnread ?? data.chapter.sections[0]);
 
 	// Check if section is read using reactive progress
 	function isRead(section: Section): boolean {

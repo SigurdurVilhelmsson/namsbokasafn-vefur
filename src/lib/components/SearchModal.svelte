@@ -2,7 +2,7 @@
   SearchModal - Global search modal with fuzzy search (⌘K / Ctrl+K)
 -->
 <script lang="ts">
-	import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { fade, scale } from 'svelte/transition';
@@ -22,25 +22,27 @@
 	} from '$lib/utils/searchIndex';
 	import type { TableOfContents } from '$lib/types/content';
 
-	export let isOpen = false;
-	export let bookSlug: string = '';
+	interface Props {
+		isOpen?: boolean;
+		bookSlug?: string;
+		onClose?: () => void;
+	}
+	let { isOpen = false, bookSlug = '', onClose }: Props = $props();
 
-	const dispatch = createEventDispatcher<{ close: void }>();
-
-	let query = '';
-	let results: SearchResult[] = [];
-	let loading = false;
-	let indexing = false;
-	let toc: TableOfContents | null = null;
-	let chapters: { slug: string; title: string }[] = [];
-	let selectedChapter = '';
-	let showFilters = false;
-	let searchHistory: SearchHistoryItem[] = [];
-	let inputRef: HTMLInputElement;
-	let modalRef: HTMLDivElement;
+	let query = $state('');
+	let results: SearchResult[] = $state<SearchResult[]>([]);
+	let loading = $state(false);
+	let indexing = $state(false);
+	let toc = $state<TableOfContents | null>(null);
+	let chapters = $state<{ slug: string; title: string }[]>([]);
+	let selectedChapter = $state('');
+	let showFilters = $state(false);
+	let searchHistory: SearchHistoryItem[] = $state<SearchHistoryItem[]>([]);
+	let inputRef = $state<HTMLInputElement | undefined>(undefined);
+	let modalRef = $state<HTMLDivElement | undefined>(undefined);
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let focusTimeout: ReturnType<typeof setTimeout>;
-	let previouslyFocused: HTMLElement | null = null;
+	let previouslyFocused = $state<HTMLElement | null>(null);
 
 	// Initialize search on mount
 	onMount(() => {
@@ -51,20 +53,26 @@
 	});
 
 	// Re-init when bookSlug changes
-	$: if (bookSlug && isOpen) {
-		initSearch();
-	}
+	$effect(() => {
+		if (bookSlug && isOpen) {
+			initSearch();
+		}
+	});
 
 	// Save focus when modal opens, restore when closed
-	$: if (isOpen) {
-		previouslyFocused = document.activeElement as HTMLElement;
-	}
+	$effect(() => {
+		if (isOpen) {
+			previouslyFocused = document.activeElement as HTMLElement;
+		}
+	});
 
 	// Focus input when modal opens
-	$: if (isOpen && inputRef) {
-		clearTimeout(focusTimeout);
-		focusTimeout = setTimeout(() => inputRef?.focus(), 50);
-	}
+	$effect(() => {
+		if (isOpen && inputRef) {
+			clearTimeout(focusTimeout);
+			focusTimeout = setTimeout(() => inputRef?.focus(), 50);
+		}
+	});
 
 	// Keyboard shortcut handler
 	function handleKeydown(e: KeyboardEvent) {
@@ -92,14 +100,14 @@
 	}
 
 	// Debounced search
-	$: {
+	$effect(() => {
 		if (query && toc && bookSlug) {
 			clearTimeout(searchTimeout);
 			searchTimeout = setTimeout(() => performSearch(), 200);
 		} else {
 			results = [];
 		}
-	}
+	});
 
 	async function performSearch() {
 		if (!toc || query.length < 2 || !bookSlug) {
@@ -133,7 +141,7 @@
 	function close() {
 		query = '';
 		results = [];
-		dispatch('close');
+		onClose?.();
 		previouslyFocused?.focus();
 	}
 
@@ -180,7 +188,7 @@
 		}
 	}
 
-	$: hasActiveFilters = selectedChapter !== '';
+	let hasActiveFilters = $derived(selectedChapter !== '');
 
 	onDestroy(() => {
 		clearTimeout(searchTimeout);
@@ -188,14 +196,14 @@
 	});
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 {#if isOpen}
 	<!-- Backdrop -->
 	<div
 		class="fixed inset-0 z-50 flex items-start justify-center bg-black/30 p-4 pt-[10vh] backdrop-blur-sm"
-		on:click={handleBackdropClick}
-		on:keydown={handleModalKeydown}
+		onclick={handleBackdropClick}
+		onkeydown={handleModalKeydown}
 		role="presentation"
 		transition:fade={{ duration: 150 }}
 	>
@@ -214,7 +222,7 @@
 					Leita í bókinni
 				</h2>
 				<button
-					on:click={close}
+					onclick={close}
 					class="-mr-2 rounded-lg p-2 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
 					aria-label="Loka"
 				>
@@ -259,7 +267,7 @@
 								</svg>
 							{/if}
 							<button
-								on:click={() => (showFilters = !showFilters)}
+								onclick={() => (showFilters = !showFilters)}
 								class="rounded p-1 transition-colors {showFilters || hasActiveFilters
 									? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)]'
 									: 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}"
@@ -280,7 +288,7 @@
 								<span class="font-sans text-sm font-medium text-[var(--text-secondary)]">Síur</span>
 								{#if hasActiveFilters}
 									<button
-										on:click={clearFilters}
+										onclick={clearFilters}
 										class="flex items-center gap-1 rounded px-2 py-1 font-sans text-xs text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10"
 									>
 										<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -345,7 +353,7 @@
 											Nýlegar leitir
 										</div>
 										<button
-											on:click={handleClearHistory}
+											onclick={handleClearHistory}
 											class="flex items-center gap-1 rounded px-2 py-1 font-sans text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
 											title="Hreinsa sögu"
 										>
@@ -359,7 +367,7 @@
 										{#each searchHistory.slice(0, 5) as item}
 											<div class="group flex items-center justify-between rounded px-2 py-1.5 hover:bg-[var(--bg-secondary)]">
 												<button
-													on:click={() => handleHistoryClick(item.query)}
+													onclick={() => handleHistoryClick(item.query)}
 													class="flex-1 text-left font-sans text-sm text-[var(--text-primary)]"
 												>
 													{item.query}
@@ -368,7 +376,7 @@
 													</span>
 												</button>
 												<button
-													on:click={() => handleRemoveHistoryItem(item.query)}
+													onclick={() => handleRemoveHistoryItem(item.query)}
 													class="rounded p-1 text-[var(--text-secondary)] opacity-0 transition-opacity hover:text-[var(--text-primary)] group-hover:opacity-100"
 													title="Fjarlægja"
 												>
@@ -418,7 +426,7 @@
 							<div class="max-h-96 space-y-2 overflow-y-auto">
 								{#each results as result, index}
 									<button
-										on:click={() => handleResultClick(result)}
+										onclick={() => handleResultClick(result)}
 										class="w-full rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-4 text-left transition-all hover:border-[var(--accent-color)] hover:bg-[var(--accent-color)]/5"
 									>
 										<div class="mb-1 flex items-center justify-between">

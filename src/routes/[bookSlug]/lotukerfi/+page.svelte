@@ -5,7 +5,7 @@
 	import type { PageData } from './$types';
 	import PeriodicTable from '$lib/components/PeriodicTable.svelte';
 
-	export let data: PageData;
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>

@@ -7,13 +7,16 @@
 	import SearchModal from '$lib/components/SearchModal.svelte';
 	import SettingsModal from '$lib/components/SettingsModal.svelte';
 
-	export let bookSlug: string = '';
-	export let bookTitle: string = 'Lesari';
-	export let onOpenShortcuts: (() => void) | undefined = undefined;
+	interface Props {
+		bookSlug?: string;
+		bookTitle?: string;
+		onOpenShortcuts?: () => void;
+	}
+	let { bookSlug = '', bookTitle = 'Lesari', onOpenShortcuts }: Props = $props();
 
-	let toc: TableOfContents | null = null;
-	let settingsOpen = false;
-	let searchOpen = false;
+	let toc: TableOfContents | null = $state(null);
+	let settingsOpen = $state(false);
+	let searchOpen = $state(false);
 
 	// Allow parent to open search
 	export function openSearch() {
@@ -21,8 +24,8 @@
 	}
 
 	// Get current route params
-	$: chapterSlug = $page.params.chapterSlug;
-	$: sectionSlug = $page.params.sectionSlug;
+	let chapterSlug = $derived($page.params.chapterSlug);
+	let sectionSlug = $derived($page.params.sectionSlug);
 
 	// Load table of contents
 	onMount(async () => {
@@ -44,22 +47,22 @@
 	}
 
 	// Find current chapter and section titles (supports both v1 slugs and v2 numbers)
-	$: currentChapter = toc && chapterSlug ? findChapterBySlug(toc, chapterSlug) : undefined;
-	$: currentSection = toc && chapterSlug && sectionSlug ? findSectionBySlug(toc, chapterSlug, sectionSlug)?.section : undefined;
-	$: isDark = $theme === 'dark';
+	let currentChapter = $derived(toc && chapterSlug ? findChapterBySlug(toc, chapterSlug) : undefined);
+	let currentSection = $derived(toc && chapterSlug && sectionSlug ? findSectionBySlug(toc, chapterSlug, sectionSlug)?.section : undefined);
+	let isDark = $derived($theme === 'dark');
 
 	// Back navigation: section -> chapter, chapter -> book home, book home -> catalog
-	$: backHref = sectionSlug && chapterSlug
+	let backHref = $derived(sectionSlug && chapterSlug
 		? `/${bookSlug}/kafli/${chapterSlug}`
 		: chapterSlug
 			? `/${bookSlug}`
-			: '/';
+			: '/');
 
-	$: backLabel = sectionSlug && chapterSlug
+	let backLabel = $derived(sectionSlug && chapterSlug
 		? 'Til baka í kafla'
 		: chapterSlug
 			? 'Til baka á heim síðu'
-			: 'Til baka í bókasafn';
+			: 'Til baka í bókasafn');
 
 	function toggleTheme() {
 		settings.toggleTheme();
@@ -70,14 +73,14 @@
 	}
 </script>
 
-<svelte:window on:keydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown} />
 
 <header class="header">
 	<div class="header-inner">
 		<!-- Left: Mobile -->
 		<div class="left-mobile">
 			<button
-				on:click={toggleSidebar}
+				onclick={toggleSidebar}
 				class="header-btn sidebar-toggle"
 				aria-label="Opna/loka valmynd"
 			>
@@ -125,7 +128,7 @@
 		<div class="right-actions">
 			<!-- Search button -->
 			<button
-				on:click={() => (searchOpen = true)}
+				onclick={() => (searchOpen = true)}
 				class="header-btn"
 				aria-label="Leita"
 				title="Leita (Ctrl+K)"
@@ -144,7 +147,7 @@
 			<!-- Keyboard shortcuts button -->
 			{#if onOpenShortcuts}
 				<button
-					on:click={onOpenShortcuts}
+					onclick={onOpenShortcuts}
 					class="header-btn shortcuts-btn"
 					aria-label="Flýtilyklar"
 					title="Flýtilyklar (?)"
@@ -155,7 +158,7 @@
 
 			<!-- Settings button -->
 			<button
-				on:click={() => (settingsOpen = true)}
+				onclick={() => (settingsOpen = true)}
 				class="header-btn settings-btn"
 				aria-label="Stillingar"
 				title="Stillingar"
@@ -179,7 +182,7 @@
 			<!-- Theme toggle -->
 			<button
 				class="theme-toggle"
-				on:click={toggleTheme}
+				onclick={toggleTheme}
 				aria-label={isDark ? 'Skipta yfir í ljóst þema' : 'Skipta yfir í dökkt þema'}
 				title={isDark ? 'Ljóst þema' : 'Dökkt þema'}
 			>
@@ -196,10 +199,10 @@
 </header>
 
 <!-- Search Modal -->
-<SearchModal isOpen={searchOpen} {bookSlug} on:close={() => (searchOpen = false)} />
+<SearchModal isOpen={searchOpen} {bookSlug} onClose={() => (searchOpen = false)} />
 
 <!-- Settings Modal -->
-<SettingsModal isOpen={settingsOpen} on:close={() => (settingsOpen = false)} />
+<SettingsModal isOpen={settingsOpen} onClose={() => (settingsOpen = false)} />
 
 <style>
 	/* ====================================

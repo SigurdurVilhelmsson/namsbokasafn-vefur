@@ -6,11 +6,15 @@
 	import { annotationStore } from '$lib/stores/annotation';
 	import type { Annotation, HighlightColor } from '$lib/types/annotation';
 
-	export let isOpen: boolean;
-	export let onClose: () => void;
-	export let bookSlug: string;
-	export let currentChapter: string | undefined = undefined;
-	export let currentSection: string | undefined = undefined;
+	interface Props {
+		isOpen: boolean;
+		onClose: () => void;
+		bookSlug: string;
+		currentChapter?: string;
+		currentSection?: string;
+	}
+
+	let { isOpen, onClose, bookSlug, currentChapter, currentSection }: Props = $props();
 
 	type FilterType = 'all' | 'current' | HighlightColor;
 
@@ -28,37 +32,37 @@
 		pink: { bg: '#f0c8c8', border: '#dab0b0', darkBg: 'rgba(200, 100, 100, 0.2)', swatch: '#f0c8c8' }
 	};
 
-	let filter: FilterType = 'all';
-	let showFilterMenu = false;
-	let confirmDelete: string | null = null;
+	let filter: FilterType = $state('all');
+	let showFilterMenu = $state(false);
+	let confirmDelete: string | null = $state(null);
 
 	// Subscribe to annotation store
-	$: allAnnotations = $annotationStore.annotations.filter((a) => a.bookSlug === bookSlug);
+	let allAnnotations = $derived($annotationStore.annotations.filter((a: Annotation) => a.bookSlug === bookSlug));
 
 	// Filter annotations
-	$: filteredAnnotations = (() => {
+	let filteredAnnotations = $derived.by(() => {
 		let result = allAnnotations;
 
 		if (filter === 'current' && currentChapter && currentSection) {
 			result = result.filter(
-				(a) => a.chapterSlug === currentChapter && a.sectionSlug === currentSection
+				(a: Annotation) => a.chapterSlug === currentChapter && a.sectionSlug === currentSection
 			);
 		} else if (filter === 'yellow' || filter === 'green' || filter === 'blue' || filter === 'pink') {
-			result = result.filter((a) => a.color === filter);
+			result = result.filter((a: Annotation) => a.color === filter);
 		}
 
 		// Sort by date, newest first
 		return result.sort(
-			(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+			(a: Annotation, b: Annotation) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
 		);
-	})();
+	});
 
 	// Stats
-	$: stats = (() => {
+	let stats = $derived.by(() => {
 		const byColor: Record<HighlightColor, number> = { yellow: 0, green: 0, blue: 0, pink: 0 };
 		let withNotes = 0;
 
-		allAnnotations.forEach((ann) => {
+		allAnnotations.forEach((ann: Annotation) => {
 			byColor[ann.color]++;
 			if (ann.note) withNotes++;
 		});
@@ -68,7 +72,7 @@
 			byColor,
 			withNotes
 		};
-	})();
+	});
 
 	// Handle export
 	function handleExport() {
@@ -101,8 +105,8 @@
 	<!-- Backdrop -->
 	<div
 		class="fixed inset-0 z-40 bg-black/20"
-		on:click={onClose}
-		on:keydown={(e) => e.key === 'Escape' && onClose()}
+		onclick={onClose}
+		onkeydown={(e) => e.key === 'Escape' && onClose()}
 		role="presentation"
 		tabindex="-1"
 		transition:fade={{ duration: 150 }}
@@ -138,7 +142,7 @@
 				</span>
 			</div>
 			<button
-				on:click={onClose}
+				onclick={onClose}
 				class="ann-btn-ghost rounded-lg p-2 transition-colors"
 				aria-label="Loka"
 			>
@@ -153,7 +157,7 @@
 			<!-- Filter dropdown -->
 			<div class="relative">
 				<button
-					on:click={() => (showFilterMenu = !showFilterMenu)}
+					onclick={() => (showFilterMenu = !showFilterMenu)}
 					class="ann-filter-btn flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors"
 					aria-expanded={showFilterMenu}
 				>
@@ -177,7 +181,7 @@
 						transition:slide={{ duration: 100 }}
 					>
 						<button
-							on:click={() => {
+							onclick={() => {
 								filter = 'all';
 								showFilterMenu = false;
 							}}
@@ -189,7 +193,7 @@
 						</button>
 						{#if currentChapter && currentSection}
 							<button
-								on:click={() => {
+								onclick={() => {
 									filter = 'current';
 									showFilterMenu = false;
 								}}
@@ -203,7 +207,7 @@
 						<hr class="ann-divider my-1" />
 						{#each Object.entries(COLOR_LABELS) as [color, label]}
 							<button
-								on:click={() => {
+								onclick={() => {
 									filter = color as HighlightColor;
 									showFilterMenu = false;
 								}}
@@ -224,7 +228,7 @@
 
 			<!-- Export button -->
 			<button
-				on:click={handleExport}
+				onclick={handleExport}
 				disabled={stats.total === 0}
 				class="ann-btn-ghost flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm transition-colors disabled:opacity-50"
 				title="Flytja ut sem Markdown"
@@ -317,13 +321,13 @@
 									<div class="flex items-center gap-2">
 										<span class="text-xs text-red-600 dark:text-red-400">Eyða?</span>
 										<button
-											on:click={() => handleDelete(annotation.id)}
+											onclick={() => handleDelete(annotation.id)}
 											class="rounded bg-red-600 px-2 py-1 text-xs text-white hover:bg-red-700"
 										>
 											Já
 										</button>
 										<button
-											on:click={() => (confirmDelete = null)}
+											onclick={() => (confirmDelete = null)}
 											class="ann-cancel-btn rounded border px-2 py-1 text-xs"
 										>
 											Nei
@@ -331,7 +335,7 @@
 									</div>
 								{:else}
 									<button
-										on:click={() => (confirmDelete = annotation.id)}
+										onclick={() => (confirmDelete = annotation.id)}
 										class="ann-text-muted rounded p-1 transition-colors hover:bg-white/50 dark:hover:bg-black/20 hover:text-red-600 dark:hover:text-red-400"
 										aria-label="Eyða athugasemd"
 									>

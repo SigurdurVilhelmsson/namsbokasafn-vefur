@@ -1,6 +1,9 @@
 <script lang="ts">
-	export let bookSlug: string;
-	export let onExitFocusMode: () => void;
+	interface Props {
+		bookSlug: string;
+		onExitFocusMode: () => void;
+	}
+	let { bookSlug, onExitFocusMode }: Props = $props();
 </script>
 
 <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
@@ -36,7 +39,7 @@
 		></div>
 
 		<button
-			on:click={onExitFocusMode}
+			onclick={onExitFocusMode}
 			class="focus-mode-btn"
 			style="
 				display: flex;
