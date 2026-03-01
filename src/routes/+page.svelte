@@ -107,7 +107,7 @@
     preserveAspectRatio="none"
     aria-hidden="true"
   >
-    {#each graphEdges as [from, to]}
+    {#each graphEdges as [from, to], i (i)}
       <line
         class="graph-edge"
         x1={graphNodes[from].x}
@@ -116,7 +116,7 @@
         y2={graphNodes[to].y}
       />
     {/each}
-    {#each graphNodes as node, i}
+    {#each graphNodes as node, i (i)}
       <circle
         class="graph-node"
         class:highlight={node.highlight}

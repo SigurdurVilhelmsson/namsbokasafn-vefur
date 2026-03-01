@@ -201,7 +201,7 @@
 					Þessi markmið eru merkt með lágri sjálfsvissu. Íhugaðu að fara aftur í viðkomandi kafla.
 				</p>
 				<div class="space-y-2">
-					{#each $objectivesWithLowConfidence as obj}
+					{#each $objectivesWithLowConfidence as obj (`${obj.chapterSlug}-${obj.sectionSlug}-${obj.objectiveIndex}`)}
 						{@const info = getSectionInfo(obj.chapterSlug, obj.sectionSlug)}
 						<a
 							href="/{data.bookSlug}/kafli/{obj.chapterSlug}/{obj.sectionSlug}"
@@ -249,13 +249,13 @@
 		{:else}
 			<!-- Objectives by Chapter -->
 			<div class="space-y-6">
-				{#each [...objectivesByChapter.entries()] as [chapterSlug, objectives]}
+				{#each [...objectivesByChapter.entries()] as [chapterSlug, objectives] (chapterSlug)}
 					<div class="p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 						<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
 							{getChapterTitle(chapterSlug)}
 						</h2>
 						<div class="space-y-4">
-							{#each objectives.sort((a, b) => a.objectiveIndex - b.objectiveIndex) as obj}
+							{#each objectives.sort((a, b) => a.objectiveIndex - b.objectiveIndex) as obj (`${obj.chapterSlug}-${obj.sectionSlug}-${obj.objectiveIndex}`)}
 								{@const info = getSectionInfo(obj.chapterSlug, obj.sectionSlug)}
 								<div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
 									<div class="flex items-start gap-3">
@@ -292,7 +292,7 @@
 											{#if obj.isCompleted}
 												<div class="mt-3 flex flex-wrap gap-1">
 													<span class="text-xs text-gray-500 dark:text-gray-400 mr-2 self-center">Sjálfsvissa:</span>
-													{#each [1, 2, 3, 4, 5] as level}
+													{#each [1, 2, 3, 4, 5] as level (level)}
 														<button
 															onclick={() => setConfidence(obj.chapterSlug, obj.sectionSlug, obj.objectiveIndex, level as ConfidenceLevel)}
 															class="px-2 py-1 text-xs rounded border transition-colors {obj.confidence === level

@@ -166,7 +166,7 @@
 						<div class="relative">
 							<!-- Slider track labels -->
 							<div class="flex justify-between mb-2 px-1">
-								{#each fontSizes as size, i}
+								{#each fontSizes as size, i (i)}
 									<button
 										onclick={() => settings.setFontSize(size.value)}
 										class="text-xs transition-colors {$fontSize === size.value
@@ -216,7 +216,7 @@
 							/>
 							<!-- Tick marks under slider -->
 							<div class="flex justify-between mt-1 px-1">
-								{#each fontSizes as size}
+								{#each fontSizes as size (size.value)}
 									<div
 										class="w-1 h-1 rounded-full {$fontSize === size.value ? 'bg-[var(--accent-color)]' : 'bg-[var(--border-color)]'}"
 									></div>
@@ -231,7 +231,7 @@
 							Leturgerð
 						</span>
 						<div class="space-y-2">
-							{#each fontFamilies as family}
+							{#each fontFamilies as family (family.value)}
 								<label
 									class="flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-all {$fontFamily === family.value
 										? 'border-[var(--accent-color)] bg-[var(--accent-color)]/5 ring-2 ring-[var(--accent-color)]/20'
@@ -263,7 +263,7 @@
 							Línubil
 						</span>
 						<div class="grid grid-cols-3 gap-2 sm:flex">
-							{#each lineHeights as height}
+							{#each lineHeights as height (height.value)}
 								<button
 									onclick={() => settings.setLineHeight(height.value)}
 									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineHeight === height.value
@@ -282,7 +282,7 @@
 							Línubreidd
 						</span>
 						<div class="grid grid-cols-3 gap-2 sm:flex">
-							{#each lineWidths as width}
+							{#each lineWidths as width (width.value)}
 								<button
 									onclick={() => settings.setLineWidth(width.value)}
 									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineWidth === width.value

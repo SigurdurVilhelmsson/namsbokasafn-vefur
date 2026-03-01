@@ -229,7 +229,7 @@
 			<!-- Content -->
 			<div class="max-h-[60vh] overflow-y-auto p-6">
 				<div class="space-y-6">
-					{#each [...groupedShortcuts.entries()] as [category, categoryShortcuts]}
+					{#each [...groupedShortcuts.entries()] as [category, categoryShortcuts] (category)}
 						<div>
 							<h3
 								class="mb-3 font-sans text-sm font-semibold uppercase tracking-wider text-[var(--text-secondary)]"
@@ -237,7 +237,7 @@
 								{getCategoryDisplayName(category)}
 							</h3>
 							<div class="space-y-2">
-								{#each categoryShortcuts as shortcut}
+								{#each categoryShortcuts as shortcut (shortcut.action)}
 									{@const isEditing = editingAction === shortcut.action}
 									{@const displayKey = isEditing ? pendingKey || '...' : shortcut.key}
 									<div

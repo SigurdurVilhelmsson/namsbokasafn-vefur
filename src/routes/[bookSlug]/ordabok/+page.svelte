@@ -73,7 +73,7 @@
 
 	{#if loading}
 		<div class="space-y-4">
-			{#each Array(8) as _}
+			{#each Array(8) as _, i (i)}
 				<Skeleton variant="list-item" />
 			{/each}
 		</div>
@@ -109,7 +109,7 @@
 
 			<!-- Letter filter -->
 			<div class="flex flex-wrap gap-1">
-				{#each letters as letter}
+				{#each letters as letter (letter)}
 					<button
 						onclick={() => (selectedLetter = selectedLetter === letter ? null : letter)}
 						class="glossary-letter-btn"
@@ -162,7 +162,7 @@
 						{#if term.relatedTerms && term.relatedTerms.length > 0}
 							<div class="glossary-related">
 								<span class="glossary-related-label">Tengd orð:</span>
-								{#each term.relatedTerms as related}
+								{#each term.relatedTerms as related (related)}
 									<button
 										onclick={() => (searchQuery = related)}
 										class="glossary-related-tag"

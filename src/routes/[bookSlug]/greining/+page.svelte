@@ -212,7 +212,7 @@
 
 	{#if loading}
 		<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-			{#each Array(4) as _}
+			{#each Array(4) as _, i (i)}
 				<Skeleton variant="card" className="p-4" />
 			{/each}
 		</div>
@@ -296,7 +296,7 @@
 				<div class="mb-8 p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 					<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Síðustu 7 dagar</h2>
 					<div class="flex items-end justify-between gap-2 h-40">
-						{#each last7Days as day}
+						{#each last7Days as day (day.date)}
 							{@const height = maxSeconds > 0 ? (day.seconds / maxSeconds) * 100 : 0}
 							{@const isToday = day.date === getTodayDateString()}
 							<div class="flex-1 flex flex-col items-center gap-2">
@@ -330,7 +330,7 @@
 						</p>
 					{:else}
 						<div class="space-y-3 max-h-80 overflow-y-auto">
-							{#each recentActivity as activity}
+							{#each recentActivity as activity (activity.timestamp)}
 								{@const info = getActivityInfo(activity.type, activity.details.action)}
 								<div class="flex items-start gap-3 py-2">
 									<span class="text-lg">{info.icon}</span>
@@ -396,7 +396,7 @@
 						</p>
 					{:else}
 						<div class="space-y-3">
-							{#each topSections as section, i}
+							{#each topSections as section, i (i)}
 								{@const percent = maxSeconds > 0 ? (section.seconds / topSections[0].seconds) * 100 : 0}
 								<div class="flex items-center gap-3">
 									<span class="flex-shrink-0 w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xs font-medium text-gray-600 dark:text-gray-300">

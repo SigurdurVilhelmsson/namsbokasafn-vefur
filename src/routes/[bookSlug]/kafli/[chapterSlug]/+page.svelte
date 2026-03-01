@@ -109,7 +109,7 @@
 			</h2>
 
 			<div class="space-y-2">
-				{#each data.chapter.sections as section}
+				{#each data.chapter.sections as section (section.file)}
 					{@const sectionPath = getSectionPath(section)}
 					{@const sectionRead = isRead(section)}
 					{@const sectionType = getSectionType(section)}

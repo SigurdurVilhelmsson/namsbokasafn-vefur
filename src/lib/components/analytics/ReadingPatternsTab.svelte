@@ -169,7 +169,7 @@
 		<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Tímasetning lestrar</h2>
 
 		<div class="space-y-4">
-			{#each timeOfDayStats as period}
+			{#each timeOfDayStats as period (period.label)}
 				{@const percentage = maxPeriodSeconds > 0 ? (period.totalSeconds / maxPeriodSeconds) * 100 : 0}
 				<div>
 					<div class="flex justify-between items-center mb-1">
@@ -197,7 +197,7 @@
 		<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Lestrarmynstur eftir klukkutíma</h2>
 
 		<div class="grid grid-cols-12 gap-1">
-			{#each $hourlyReadingDistribution as data}
+			{#each $hourlyReadingDistribution as data, i (i)}
 				{@const intensity = maxHourlySeconds > 0 ? data.totalSeconds / maxHourlySeconds : 0}
 				<div
 					class="aspect-square rounded-sm flex items-center justify-center text-xs font-medium transition-colors

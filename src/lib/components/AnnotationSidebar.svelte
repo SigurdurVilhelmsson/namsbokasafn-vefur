@@ -205,7 +205,7 @@
 							</button>
 						{/if}
 						<hr class="ann-divider my-1" />
-						{#each Object.entries(COLOR_LABELS) as [color, label]}
+						{#each Object.entries(COLOR_LABELS) as [color, label] (color)}
 							<button
 								onclick={() => {
 									filter = color as HighlightColor;

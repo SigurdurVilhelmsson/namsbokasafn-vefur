@@ -32,12 +32,14 @@ export default tseslint.config(
       'no-useless-assignment': 'off',
       // Svelte-specific rules
       'svelte/no-at-html-tags': 'error',
-      'svelte/require-each-key': 'warn', // 49 violations — fix incrementally
-      'svelte/no-navigation-without-resolve': 'warn', // 65 violations — intentional patterns in actions
+      'svelte/require-each-key': 'error', // enforced — all loops keyed
+      // Off: all warnings are template-literal hrefs to stable routes; resolveRoute() adds complexity for zero benefit
+      'svelte/no-navigation-without-resolve': 'off',
       'svelte/no-immutable-reactive-statements': 'error', // No violations after runes migration
       'svelte/infinite-reactive-loop': 'error', // No violations after runes migration
       'svelte/no-unused-svelte-ignore': 'error',
-      'svelte/prefer-svelte-reactivity': 'warn', // 7 violations — fix incrementally
+      // Off: all warnings are false positives — Maps/Sets/Dates used as fresh local accumulators, not reactive state
+      'svelte/prefer-svelte-reactivity': 'off',
     },
   },
   {
@@ -65,8 +67,8 @@ export default tseslint.config(
       'no-case-declarations': 'warn',
       // Unnecessary escapes — 0 violations, now enforced
       'no-useless-escape': 'error',
-      // Navigation rules for actions (warn - intentional patterns)
-      'svelte/no-navigation-without-resolve': 'warn',
+      // Off: stable routes, resolveRoute() adds complexity for zero benefit
+      'svelte/no-navigation-without-resolve': 'off',
     },
   },
   {

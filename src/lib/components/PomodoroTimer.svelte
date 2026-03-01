@@ -173,7 +173,7 @@
 
 			{#if pomodorosCompleted > 0}
 				<div class="pomodoro-count">
-					{#each Array(pomodorosCompleted) as _, i}
+					{#each Array(pomodorosCompleted) as _, i (i)}
 						<span class="tomato" aria-hidden="true" title="Kláruð lota {i + 1}">&#127813;</span>
 					{/each}
 					<span class="sr-only">{pomodorosCompleted} {pomodorosCompleted === 1 ? 'lota kláruð' : 'lotur kláraðar'}</span>

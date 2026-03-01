@@ -91,7 +91,7 @@
 					Hversu viss ertu um þetta efni?
 				</p>
 				<div class="grid grid-cols-5 gap-2">
-					{#each CONFIDENCE_OPTIONS as option, i}
+					{#each CONFIDENCE_OPTIONS as option, i (option.level)}
 						<button
 							onclick={() => rate(option.level)}
 							class="rfp-confidence-btn rfp-confidence-btn--{i + 1}"

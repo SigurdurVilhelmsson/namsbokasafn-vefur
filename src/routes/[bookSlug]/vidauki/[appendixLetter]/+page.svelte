@@ -120,7 +120,7 @@
 			</svg>
 		</summary>
 		<ul class="mt-2 divide-y divide-gray-200 dark:divide-gray-700 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-			{#each data.allAppendices as appendixItem}
+			{#each data.allAppendices as appendixItem (appendixItem.letter)}
 				<li>
 					<a
 						href="/{data.bookSlug}/vidauki/{getAppendixPath(appendixItem)}"

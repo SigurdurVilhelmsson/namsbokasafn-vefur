@@ -123,7 +123,7 @@
 				onchange={handleFilterChange}
 			>
 				<option value="">Allir kaflar</option>
-				{#each chapters as chapter}
+				{#each chapters as chapter (chapter.number)}
 					<option value={chapter.number}>
 						Kafli {chapter.number}: {chapter.title}
 					</option>
@@ -153,7 +153,7 @@
 	{:else}
 		<!-- Phase cards -->
 		<div class="space-y-3 mb-8">
-			{#each (['review', 'reading', 'practice', 'reflect'] as PhaseId[]) as phaseId}
+			{#each (['review', 'reading', 'practice', 'reflect'] as PhaseId[]) as phaseId (phaseId)}
 				{@const phase = plan[phaseId]}
 				{@const colors = getPhaseColors(phaseId)}
 				<button

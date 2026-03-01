@@ -197,7 +197,7 @@
 				Framfarir
 			</h4>
 			<div class="space-y-1">
-				{#each problems as problem}
+				{#each problems as problem (problem.id)}
 					{@const masteryInfo = getMasteryInfo(problem.id)}
 					{@const wasCorrect = quizState.answers.get(problem.id)}
 					<div class="aq-progress-row">

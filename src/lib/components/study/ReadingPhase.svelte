@@ -44,7 +44,7 @@
 	</p>
 
 	<div class="space-y-3">
-		{#each sections as section, i}
+		{#each sections as section, i (i)}
 			{@const isDone = markedDone.has(i)}
 			<div class="rdp-section-card" class:rdp-section-card--done={isDone}>
 				<div class="flex items-start justify-between gap-3">
