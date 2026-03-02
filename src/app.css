@@ -73,6 +73,10 @@
     --subject-math-light: #f0e8f8;
     --subject-social: #b07040;
     --subject-social-light: #f8f0e8;
+    --subject-physics: #7c5cad;
+    --subject-astronomy: #b07040;
+    --subject-mathematics: #6366f1;
+    --subject-statistics: #059669;
   }
 
   .dark {
@@ -106,6 +110,10 @@
     --subject-math-light: #241a38;
     --subject-social: #d09060;
     --subject-social-light: #2d1e1a;
+    --subject-physics: #9c7cd0;
+    --subject-astronomy: #d09060;
+    --subject-mathematics: #818cf8;
+    --subject-statistics: #34d399;
   }
 
   body {
