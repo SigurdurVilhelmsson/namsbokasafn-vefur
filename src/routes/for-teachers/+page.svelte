@@ -56,7 +56,7 @@
 
         <p>Námsbókasafn býður upp á opnar kennslubækur á íslensku. Efnið er aðgengilegt öllum án innskráningar.</p>
 
-        <a href="/efnafraedi" class="book-link">
+        <a href="/efnafraedi-2e" class="book-link">
           <div class="book-icon chemistry">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
               <path d="M9 3h6v6l3 9H6l3-9V3z" />
@@ -80,10 +80,10 @@
         <h3>Beintenglar á kafla</h3>
         <p>Þú getur deilt beintengla á sérstaka kafla með nemendum:</p>
         <ul class="link-list">
-          <li><code>/efnafraedi/kafli/1</code> - Kafli 1: Grunnhugtök</li>
-          <li><code>/efnafraedi/kafli/2</code> - Kafli 2: Atóm, sameindir og jónir</li>
-          <li><code>/efnafraedi/kafli/3</code> - Kafli 3: Efnatengi og sameindagerð</li>
-          <li><code>/efnafraedi/kafli/4</code> - Kafli 4: Efnaformúlur</li>
+          <li><code>/efnafraedi-2e/kafli/1</code> - Kafli 1: Grunnhugtök</li>
+          <li><code>/efnafraedi-2e/kafli/2</code> - Kafli 2: Atóm, sameindir og jónir</li>
+          <li><code>/efnafraedi-2e/kafli/3</code> - Kafli 3: Efnatengi og sameindagerð</li>
+          <li><code>/efnafraedi-2e/kafli/4</code> - Kafli 4: Efnaformúlur</li>
         </ul>
       </section>
 
