@@ -8,7 +8,7 @@ export interface BookConfig {
   coverImage: string;
   translator: string;
   translatorContact?: string;
-  status: 'available' | 'in-progress' | 'coming-soon';
+  status: 'available' | 'in-progress' | 'coming-soon' | 'preview';
   source: {
     title: string;
     publisher: string;

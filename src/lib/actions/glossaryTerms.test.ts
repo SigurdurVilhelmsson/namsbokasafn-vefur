@@ -43,7 +43,7 @@ vi.mock('$lib/stores/glossary', async () => {
 	const { writable: w } = await import('svelte/store');
 
 	const store = w({
-		bookSlug: null,
+		bookSlug: null as string | null,
 		terms: [] as GlossaryTerm[],
 		loading: false,
 		error: null
