@@ -1,13 +1,23 @@
 import { getAllBooks } from '$lib/types/book';
+import { getTier1Entries, getTier2Entries, getSubjectGroups } from '$lib/data/openstax-catalogue';
 import type { TableOfContents } from '$lib/types/content';
 import type { BookConfig } from '$lib/types/book';
 
 export async function load({ fetch }: { fetch: typeof globalThis.fetch }) {
 	const allBooks = getAllBooks();
+	const tier1Entries = getTier1Entries();
 
-	// Only show books that are available or in-progress
+	// Visible books: Tier 1 catalogue entries cross-referenced with BookConfig
+	const tier1Slugs = tier1Entries
+		.filter((e) => e.bookSlug)
+		.map((e) => e.bookSlug!);
+
 	const visibleBooks = allBooks.filter(
-		(b) => b.status === 'available' || b.status === 'in-progress'
+		(b) =>
+			tier1Slugs.includes(b.slug) ||
+			b.status === 'available' ||
+			b.status === 'in-progress' ||
+			b.status === 'preview'
 	);
 
 	// Fetch actual chapter counts from toc.json for each visible book
@@ -33,5 +43,9 @@ export async function load({ fetch }: { fetch: typeof globalThis.fetch }) {
 		})
 	);
 
-	return { books };
+	return {
+		books,
+		tier2Groups: getTier2Entries(),
+		subjectGroups: getSubjectGroups()
+	};
 }

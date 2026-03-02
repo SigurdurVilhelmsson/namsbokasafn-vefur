@@ -6,9 +6,12 @@
   import { settings } from '$lib/stores/settings';
   import { onMount, onDestroy } from 'svelte';
   import type { PageData } from './$types';
+  import type { CatalogueEntry, SubjectGroup } from '$lib/data/openstax-catalogue';
 
   let { data }: { data: PageData } = $props();
   let books = $derived(data.books);
+  let tier2Groups = $derived(data.tier2Groups as Record<string, CatalogueEntry[]>);
+  let subjectGroups = $derived(data.subjectGroups as SubjectGroup[]);
   let mounted = $state(false);
 
   const subjectIcons: Record<string, string> = {
@@ -19,9 +22,16 @@
   const subjectColors: Record<string, { primary: string; light: string }> = {
     chemistry: { primary: '#2e7d9c', light: '#e8f4f8' },
     biology: { primary: '#4a8c5c', light: '#e8f4ec' },
-    math: { primary: '#7c5cad', light: '#f0e8f8' },
-    social: { primary: '#b07040', light: '#f8f0e8' }
+    physics: { primary: '#7c5cad', light: '#f0e8f8' },
+    astronomy: { primary: '#b07040', light: '#f8f0e8' },
+    mathematics: { primary: '#6366f1', light: '#eef2ff' },
+    statistics: { primary: '#059669', light: '#ecfdf5' }
   };
+
+  /** Subject groups that actually have Tier 2 entries */
+  let activeTier2Groups = $derived(
+    subjectGroups.filter((g) => tier2Groups[g.key]?.length > 0)
+  );
 
   // Knowledge graph nodes - organic spread pattern
   const graphNodes = [
@@ -180,14 +190,15 @@
 
   <!-- Book Catalog -->
   <section id="kennslubaekur" class="catalog">
+    <!-- Tier 1: Our translations -->
     <div class="section-header">
-      <h2>Kennslubækur</h2>
-      <p>Veldu bók til að byrja að læra</p>
+      <h2>Þýðingar</h2>
+      <p>Okkar þýðingar á OpenStax kennslubókum</p>
     </div>
 
     <div class="book-grid">
       {#each books as book, index (book.id)}
-        {@const isClickable = book.status === 'available' || book.status === 'in-progress'}
+        {@const isClickable = book.status === 'available' || book.status === 'in-progress' || book.status === 'preview'}
         {@const percentage = book.stats ? Math.round((book.stats.translatedChapters / book.stats.totalChapters) * 100) : 0}
         {@const subject = subjectIcons[book.slug] || 'book'}
         {@const colors = subjectColors[subject] || { primary: '#6b7280', light: '#f3f4f6' }}
@@ -200,8 +211,13 @@
           {#if isClickable}
             <a href="/{book.slug}" class="book-link">
               <div class="book-card-top">
-                <span class="book-status" class:status-available={book.status === 'available'} class:status-in-progress={book.status === 'in-progress'}>
-                  {book.status === 'available' ? 'Í boði' : book.status === 'in-progress' ? 'Í vinnslu' : 'Væntanlegt'}
+                <span
+                  class="book-status"
+                  class:status-available={book.status === 'available'}
+                  class:status-in-progress={book.status === 'in-progress'}
+                  class:status-preview={book.status === 'preview'}
+                >
+                  {book.status === 'available' ? 'Í boði' : book.status === 'in-progress' ? 'Í vinnslu' : book.status === 'preview' ? 'Forskoðun' : 'Væntanlegt'}
                 </span>
               </div>
               <h3 class="book-title">{book.title}</h3>
@@ -214,7 +230,12 @@
                 </svg>
               </p>
 
-              {#if book.stats}
+              {#if book.status === 'preview'}
+                <div class="book-preview-info">
+                  <span class="preview-label">1 kafli í forskoðun</span>
+                  <span class="preview-note">Vélþýðing — leitum að ritstjóra</span>
+                </div>
+              {:else if book.stats}
                 <div class="book-progress">
                   <div class="progress-track">
                     <div class="progress-fill" style="width: {percentage}%"></div>
@@ -225,7 +246,7 @@
                 </div>
               {/if}
 
-              {#if book.features}
+              {#if book.features && book.status !== 'preview'}
                 <div class="book-tools">
                   {#if book.features.flashcards}
                     <span class="tool-icon" title="Minniskort">
@@ -278,6 +299,64 @@
             </div>
           {/if}
         </article>
+      {/each}
+    </div>
+
+    <!-- Intro paragraph between tiers -->
+    <div class="catalogue-intro">
+      <p>
+        Þýðingarnar okkar byggjast á opnum kennslubókum frá
+        <a href="https://openstax.org" target="_blank" rel="noopener noreferrer">OpenStax</a>,
+        gefnar út af Rice University undir
+        <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>
+        leyfi. Hér fyrir neðan eru allar náttúruvísinda- og stærðfræðibækur OpenStax.
+        Hafðu samband á
+        <a href="mailto:sigurdur@namsbokasafn.is">sigurdur@namsbokasafn.is</a>
+        ef þú vilt leggja þýðingarvinnu til verkefnisins.
+      </p>
+    </div>
+
+    <!-- Tier 2: OpenStax library -->
+    <div class="tier2-section">
+      <div class="section-header">
+        <h2>OpenStax safnið</h2>
+        <p>Allar náttúruvísinda- og stærðfræðibækur frá OpenStax</p>
+      </div>
+
+      {#each activeTier2Groups as group (group.key)}
+        {@const entries = tier2Groups[group.key]}
+        {@const colors = subjectColors[group.key] || { primary: '#6b7280', light: '#f3f4f6' }}
+
+        <div class="subject-group">
+          <h3 class="subject-group-title" style="--group-color: {colors.primary}">
+            {group.label}
+          </h3>
+
+          <div class="compact-grid">
+            {#each entries as entry (entry.slug)}
+              <article class="compact-card">
+                <h4 class="compact-title">{entry.title}</h4>
+                <p class="compact-desc">{entry.description}</p>
+                <div class="compact-footer">
+                  <span class="compact-chapters">{entry.chapterCount} kaflar</span>
+                  <a
+                    href={entry.openstaxUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="compact-link"
+                  >
+                    OpenStax
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="compact-external-icon">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1="10" y1="14" x2="21" y2="3" />
+                    </svg>
+                  </a>
+                </div>
+              </article>
+            {/each}
+          </div>
+        </div>
       {/each}
     </div>
   </section>
@@ -789,6 +868,16 @@
     color: var(--accent-color);
   }
 
+  .status-preview {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  :global(.dark) .status-preview {
+    background: rgba(59, 130, 246, 0.3);
+    color: #93c5fd;
+  }
+
   .status-coming-soon {
     background: var(--bg-tertiary);
     color: var(--text-tertiary);
@@ -871,6 +960,160 @@
     color: var(--subject-color);
     margin-top: auto;
     padding-top: 0.5rem;
+  }
+
+  /* ====================================
+     PREVIEW INFO
+     ==================================== */
+  .book-preview-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+  }
+
+  .preview-label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #1e40af;
+  }
+
+  :global(.dark) .preview-label {
+    color: #93c5fd;
+  }
+
+  .preview-note {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    font-style: italic;
+  }
+
+  /* ====================================
+     CATALOGUE INTRO
+     ==================================== */
+  .catalogue-intro {
+    max-width: 48rem;
+    margin: 3rem auto;
+    padding: 0 1.5rem;
+    text-align: center;
+  }
+
+  .catalogue-intro p {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .catalogue-intro a {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .catalogue-intro a:hover {
+    text-decoration: underline;
+  }
+
+  /* ====================================
+     TIER 2: OPENSTAX LIBRARY
+     ==================================== */
+  .tier2-section {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding-top: 1rem;
+  }
+
+  .subject-group {
+    margin-bottom: 2rem;
+  }
+
+  .subject-group-title {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--group-color);
+    margin: 0 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid color-mix(in srgb, var(--group-color) 20%, transparent);
+  }
+
+  .compact-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .compact-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (min-width: 1024px) {
+    .compact-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .compact-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    transition: border-color 0.15s;
+  }
+
+  .compact-card:hover {
+    border-color: var(--text-tertiary);
+  }
+
+  .compact-title {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .compact-desc {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  .compact-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 0.375rem;
+  }
+
+  .compact-chapters {
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+  }
+
+  .compact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .compact-link:hover {
+    color: var(--accent-color);
+  }
+
+  .compact-external-icon {
+    width: 0.6875rem;
+    height: 0.6875rem;
+    flex-shrink: 0;
   }
 
   /* ====================================
@@ -1062,7 +1305,8 @@
     .book-link,
     .btn-primary,
     .tool-card-icon,
-    .theme-toggle {
+    .theme-toggle,
+    .compact-card {
       transition: none !important;
     }
   }
