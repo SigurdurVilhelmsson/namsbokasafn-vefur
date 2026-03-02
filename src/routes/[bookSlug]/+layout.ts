@@ -1,36 +1,10 @@
 import type { LayoutLoad } from './$types';
 import { error } from '@sveltejs/kit';
 import { loadTableOfContents } from '$lib/utils/contentLoader';
-
-// Book configurations - would be loaded from a config file in production
-const BOOKS: Record<
-	string,
-	{
-		title: string;
-		slug: string;
-		color: string;
-		features?: {
-			periodicTable?: boolean;
-		};
-	}
-> = {
-	efnafraedi: {
-		title: 'Efnafræði',
-		slug: 'efnafraedi',
-		color: 'blue',
-		features: {
-			periodicTable: true
-		}
-	},
-	liffraedi: {
-		title: 'Líffræði',
-		slug: 'liffraedi',
-		color: 'green'
-	}
-};
+import { getBook } from '$lib/types/book';
 
 export const load: LayoutLoad = async ({ params, fetch }) => {
-	const book = BOOKS[params.bookSlug];
+	const book = getBook(params.bookSlug);
 
 	if (!book) {
 		error(404, { message: 'Bók fannst ekki' });

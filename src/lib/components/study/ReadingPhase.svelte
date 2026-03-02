@@ -20,7 +20,7 @@
 		if (markedDone.has(index)) return;
 
 		const section = sections[index];
-		reader.markAsRead(section.chapterSlug, section.sectionSlug);
+		reader.markAsRead(bookSlug, section.chapterSlug, section.sectionSlug);
 		markedDone = new Set([...markedDone, index]);
 		completedCount++;
 

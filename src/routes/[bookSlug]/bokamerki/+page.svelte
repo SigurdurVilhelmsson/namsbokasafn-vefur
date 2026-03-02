@@ -17,6 +17,7 @@
 
 	interface BookmarkInfo {
 		id: string;
+		bookSlug: string;
 		chapterSlug: string;
 		sectionSlug: string;
 		chapter: Chapter;
@@ -35,10 +36,13 @@
 	});
 
 	// Parse bookmark ID into chapter and section slugs
-	function parseBookmarkId(bookmarkId: string): { chapterSlug: string; sectionSlug: string } | null {
+	// New format: "bookSlug/chapterSlug/sectionSlug"
+	function parseBookmarkId(bookmarkId: string): { bookSlug: string; chapterSlug: string; sectionSlug: string } | null {
 		const parts = bookmarkId.split('/');
-		if (parts.length !== 2) return null;
-		return { chapterSlug: parts[0], sectionSlug: parts[1] };
+		if (parts.length === 3) {
+			return { bookSlug: parts[0], chapterSlug: parts[1], sectionSlug: parts[2] };
+		}
+		return null;
 	}
 
 	// Find chapter and section info from TOC (supports both v1 slugs and v2 numbers)
@@ -58,12 +62,15 @@
 		for (const bookmarkId of $bookmarks) {
 			const parsed = parseBookmarkId(bookmarkId);
 			if (!parsed) continue;
+			// Only show bookmarks for the current book
+			if (parsed.bookSlug !== data.bookSlug) continue;
 
 			const info = findSectionInfo(toc, parsed.chapterSlug, parsed.sectionSlug);
 			if (!info) continue;
 
 			resolved.push({
 				id: bookmarkId,
+				bookSlug: parsed.bookSlug,
 				chapterSlug: parsed.chapterSlug,
 				sectionSlug: parsed.sectionSlug,
 				chapter: info.chapter,
@@ -93,14 +100,14 @@
 		return grouped;
 	});
 
-	function removeBookmark(chapterSlug: string, sectionSlug: string) {
-		reader.removeBookmark(chapterSlug, sectionSlug);
+	function removeBookmark(bookSlug: string, chapterSlug: string, sectionSlug: string) {
+		reader.removeBookmark(bookSlug, chapterSlug, sectionSlug);
 	}
 
 	function clearAllBookmarks() {
 		if (confirm('Ertu viss um að þú viljir eyða öllum bókamerkjum?')) {
 			for (const bookmark of resolvedBookmarks) {
-				reader.removeBookmark(bookmark.chapterSlug, bookmark.sectionSlug);
+				reader.removeBookmark(bookmark.bookSlug, bookmark.chapterSlug, bookmark.sectionSlug);
 			}
 		}
 	}
@@ -258,7 +265,7 @@
 
 									<!-- Remove bookmark -->
 									<button
-										onclick={() => removeBookmark(bookmark.chapterSlug, bookmark.sectionSlug)}
+										onclick={() => removeBookmark(bookmark.bookSlug, bookmark.chapterSlug, bookmark.sectionSlug)}
 										class="p-2 rounded-lg text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
 										aria-label="Eyða bókamerki"
 									>

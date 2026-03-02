@@ -14,7 +14,8 @@ import {
 	calculateProgressFromCounts,
 	filterItemsByChapter,
 	filterItemsBySection,
-	getCurrentTimestamp
+	getCurrentTimestamp,
+	migrateRecordKeys
 } from '$lib/utils/storeHelpers';
 
 const STORAGE_KEY = 'namsbokasafn:objectives';
@@ -50,7 +51,12 @@ function loadState(): ObjectivesState {
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return validateStoreData(JSON.parse(stored), defaultState, objectivesValidators);
+			const state = validateStoreData(JSON.parse(stored), defaultState, objectivesValidators);
+			// Migrate legacy keys that lack book-slug prefix
+			return {
+				...state,
+				completedObjectives: migrateRecordKeys(state.completedObjectives)
+			};
 		}
 	} catch (e) {
 		console.warn('Failed to load objectives state:', e);
@@ -84,12 +90,13 @@ function createObjectivesStore() {
 		subscribe,
 
 		markObjectiveComplete: (
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string,
 			objectiveIndex: number,
 			objectiveText: string
 		) => {
-			const key = createObjectiveKey(chapterSlug, sectionSlug, objectiveIndex);
+			const key = createObjectiveKey(bookSlug, chapterSlug, sectionSlug, objectiveIndex);
 			update((state) => ({
 				completedObjectives: {
 					...state.completedObjectives,
@@ -106,11 +113,12 @@ function createObjectivesStore() {
 		},
 
 		markObjectiveIncomplete: (
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string,
 			objectiveIndex: number
 		) => {
-			const key = createObjectiveKey(chapterSlug, sectionSlug, objectiveIndex);
+			const key = createObjectiveKey(bookSlug, chapterSlug, sectionSlug, objectiveIndex);
 			update((state) => {
 				const { [key]: _removed, ...rest } = state.completedObjectives;
 				return { completedObjectives: rest };
@@ -118,12 +126,13 @@ function createObjectivesStore() {
 		},
 
 		toggleObjective: (
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string,
 			objectiveIndex: number,
 			objectiveText: string
 		) => {
-			const key = createObjectiveKey(chapterSlug, sectionSlug, objectiveIndex);
+			const key = createObjectiveKey(bookSlug, chapterSlug, sectionSlug, objectiveIndex);
 			const state = get({ subscribe });
 			const isCompleted = state.completedObjectives[key]?.isCompleted ?? false;
 
@@ -150,21 +159,23 @@ function createObjectivesStore() {
 		},
 
 		isObjectiveCompleted: (
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string,
 			objectiveIndex: number
 		): boolean => {
-			const key = createObjectiveKey(chapterSlug, sectionSlug, objectiveIndex);
+			const key = createObjectiveKey(bookSlug, chapterSlug, sectionSlug, objectiveIndex);
 			return get({ subscribe }).completedObjectives[key]?.isCompleted ?? false;
 		},
 
 		getSectionObjectivesProgress: (
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string,
 			totalObjectives: number
 		): ProgressResult => {
 			const { completedObjectives } = get({ subscribe });
-			const prefix = `${createSectionKey(chapterSlug, sectionSlug)}/`;
+			const prefix = `${createSectionKey(bookSlug, chapterSlug, sectionSlug)}/`;
 			const completed = Object.keys(completedObjectives).filter(
 				(key) => key.startsWith(prefix) && completedObjectives[key].isCompleted
 			).length;
@@ -192,6 +203,7 @@ function createObjectivesStore() {
 		},
 
 		getSectionObjectives: (
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string
 		): ObjectiveProgress[] => {
@@ -201,12 +213,13 @@ function createObjectivesStore() {
 
 		// Self-assessment
 		setObjectiveConfidence: (
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string,
 			objectiveIndex: number,
 			confidence: ConfidenceLevel
 		) => {
-			const key = createObjectiveKey(chapterSlug, sectionSlug, objectiveIndex);
+			const key = createObjectiveKey(bookSlug, chapterSlug, sectionSlug, objectiveIndex);
 			update((state) => {
 				const existing = state.completedObjectives[key];
 				if (!existing) return state;
@@ -224,15 +237,17 @@ function createObjectivesStore() {
 		},
 
 		getObjectiveConfidence: (
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string,
 			objectiveIndex: number
 		): ConfidenceLevel | undefined => {
-			const key = createObjectiveKey(chapterSlug, sectionSlug, objectiveIndex);
+			const key = createObjectiveKey(bookSlug, chapterSlug, sectionSlug, objectiveIndex);
 			return get({ subscribe }).completedObjectives[key]?.confidence;
 		},
 
 		getLowConfidenceObjectives: (
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string
 		): ObjectiveProgress[] => {

@@ -76,12 +76,12 @@
 
 	// Mark section as read and start analytics session
 	onMount(() => {
-		reader.setCurrentLocation(data.chapterSlug, data.sectionSlug);
+		reader.setCurrentLocation(data.bookSlug, data.chapterSlug, data.sectionSlug);
 		reader.setScrollProgress(0); // Reset scroll progress
 		analyticsStore.startReadingSession(data.bookSlug, data.chapterSlug, data.sectionSlug);
 
 		// Check for saved scroll position
-		const saved = reader.getScrollPosition(data.chapterSlug, data.sectionSlug);
+		const saved = reader.getScrollPosition(data.bookSlug, data.chapterSlug, data.sectionSlug);
 		if (saved && saved.percentage > 10) {
 			// Only show prompt if user was past 10% of the document
 			savedPosition = { scrollY: saved.scrollY, percentage: saved.percentage };
@@ -107,7 +107,7 @@
 			const scrollTop = window.scrollY;
 			const docHeight = document.documentElement.scrollHeight - window.innerHeight;
 			const percentage = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
-			reader.saveScrollPosition(data.chapterSlug, data.sectionSlug, scrollTop, percentage);
+			reader.saveScrollPosition(data.bookSlug, data.chapterSlug, data.sectionSlug, scrollTop, percentage);
 		}
 	});
 
@@ -131,12 +131,12 @@
 		showContinuePrompt = false;
 		clearTimeout(continuePromptTimeout);
 		// Clear the saved position since user chose not to continue
-		reader.clearScrollPosition(data.chapterSlug, data.sectionSlug);
+		reader.clearScrollPosition(data.bookSlug, data.chapterSlug, data.sectionSlug);
 	}
 
 	function markAsRead() {
-		const wasAlreadyRead = isSectionRead(progress, data.chapterSlug, data.sectionSlug);
-		reader.markAsRead(data.chapterSlug, data.sectionSlug);
+		const wasAlreadyRead = isSectionRead(progress, data.bookSlug, data.chapterSlug, data.sectionSlug);
+		reader.markAsRead(data.bookSlug, data.chapterSlug, data.sectionSlug);
 
 		// Show celebration animation only if this is the first time marking as read
 		if (!wasAlreadyRead) {
@@ -149,26 +149,26 @@
 	}
 
 	// Reactive checks using subscribed state
-	let isRead = $derived(isSectionRead(progress, data.chapterSlug, data.sectionSlug));
-	let isBookmarked = $derived(isSectionBookmarked(bookmarks, data.chapterSlug, data.sectionSlug));
+	let isRead = $derived(isSectionRead(progress, data.bookSlug, data.chapterSlug, data.sectionSlug));
+	let isBookmarked = $derived(isSectionBookmarked(bookmarks, data.bookSlug, data.chapterSlug, data.sectionSlug));
 
 	function toggleBookmark() {
-		reader.toggleBookmark(data.chapterSlug, data.sectionSlug);
+		reader.toggleBookmark(data.bookSlug, data.chapterSlug, data.sectionSlug);
 	}
 
 	// Objectives tracking
 	function toggleObjective(index: number, text: string) {
-		objectivesStore.toggleObjective(data.chapterSlug, data.sectionSlug, index, text);
+		objectivesStore.toggleObjective(data.bookSlug, data.chapterSlug, data.sectionSlug, index, text);
 		analyticsStore.logActivity('objective', {
 			bookSlug: data.bookSlug,
 			chapterSlug: data.chapterSlug,
 			sectionSlug: data.sectionSlug,
-			action: objectivesStore.isObjectiveCompleted(data.chapterSlug, data.sectionSlug, index) ? 'completed' : 'uncompleted'
+			action: objectivesStore.isObjectiveCompleted(data.bookSlug, data.chapterSlug, data.sectionSlug, index) ? 'completed' : 'uncompleted'
 		});
 	}
 
 	function isObjectiveCompleted(index: number): boolean {
-		return objectivesStore.isObjectiveCompleted(data.chapterSlug, data.sectionSlug, index);
+		return objectivesStore.isObjectiveCompleted(data.bookSlug, data.chapterSlug, data.sectionSlug, index);
 	}
 
 	// Reactive: track objectives state

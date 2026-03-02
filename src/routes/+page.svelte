@@ -305,8 +305,8 @@
 
       <!-- Orðasafn -->
       <div class="tool-card">
-        <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--subject-chemistry) 12%, transparent)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--subject-chemistry)" stroke-width="2">
+        <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
             <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
             <path d="M8 7h8M8 11h6" />
           </svg>

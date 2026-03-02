@@ -73,6 +73,7 @@
 		const unreadSections = findUnreadSections(
 			toc,
 			readerState.progress,
+			data.bookSlug,
 			readerState.currentChapter,
 			chapterFilter
 		);

@@ -7,10 +7,11 @@
 
 	interface Props {
 		objectives: WeakObjective[];
+		bookSlug: string;
 		oncomplete?: (count: number) => void;
 	}
 
-	let { objectives, oncomplete }: Props = $props();
+	let { objectives, bookSlug, oncomplete }: Props = $props();
 
 	let currentIndex = $state(0);
 	let completedCount = $state(0);
@@ -31,6 +32,7 @@
 		if (!currentObjective) return;
 
 		objectivesStore.setObjectiveConfidence(
+			bookSlug,
 			currentObjective.chapterSlug,
 			currentObjective.sectionSlug,
 			currentObjective.objectiveIndex,

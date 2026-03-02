@@ -74,11 +74,11 @@
 
 	// Reactive helpers using subscribed progress (use chapter/section paths)
 	function isRead(chapterPath: string, sectionPath: string): boolean {
-		return isSectionRead(progress, chapterPath, sectionPath);
+		return isSectionRead(progress, bookSlug, chapterPath, sectionPath);
 	}
 
 	function getChapterProgressPercent(chapter: Chapter): number {
-		return calcChapterProgress(progress, getChapterPath(chapter), chapter.sections.length);
+		return calcChapterProgress(progress, bookSlug, getChapterPath(chapter), chapter.sections.length);
 	}
 </script>
 
