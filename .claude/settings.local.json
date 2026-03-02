@@ -165,7 +165,32 @@
       "Bash(git:*)",
       "mcp__chrome-devtools__list_console_messages",
       "Bash(kill %1:*)",
-      "Bash(unzip:*)"
+      "Bash(unzip:*)",
+      "Bash(npx vite-bundle-visualizer:*)",
+      "Bash(node:*)",
+      "Bash(npm view:*)",
+      "Bash(md5sum:*)",
+      "mcp__chrome-devtools__list_network_requests",
+      "mcp__chrome-devtools__resize_page",
+      "mcp__chrome-devtools__emulate",
+      "Bash(du:*)",
+      "Bash(read f:*)",
+      "Bash(fi)",
+      "Bash(else)",
+      "Bash(do:*)",
+      "Bash(read file:*)",
+      "Bash(kill:*)",
+      "Bash(npm outdated:*)",
+      "WebFetch(domain:svelte.dev)",
+      "WebFetch(domain:dev.to)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:svar.dev)",
+      "Bash(npx svelte-check:*)",
+      "Bash(gh pr:*)",
+      "Bash(test:*)",
+      "Bash(npm ci:*)",
+      "WebFetch(domain:en.wikipedia.org)",
+      "WebFetch(domain:freedomhomeschooling.com)"
     ]
   }
 }

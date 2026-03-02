@@ -1052,8 +1052,6 @@
 .equation-content {
   overflow-x: auto;
   padding: 0.5rem 0;
-  display: flex;
-  justify-content: center;
 }
 
 .equation-wrapper .equation-actions {
