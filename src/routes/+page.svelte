@@ -7,6 +7,7 @@
   import { onMount, onDestroy } from 'svelte';
   import type { PageData } from './$types';
   import type { CatalogueEntry, SubjectGroup } from '$lib/data/openstax-catalogue';
+  import { faqItems } from '$lib/data/faq';
 
   let { data }: { data: PageData } = $props();
   let books = $derived(data.books);
@@ -15,8 +16,7 @@
   let mounted = $state(false);
 
   const subjectIcons: Record<string, string> = {
-    'efnafraedi': 'chemistry',
-    'liffraedi': 'biology'
+    'efnafraedi-2e': 'chemistry'
   };
 
 
@@ -141,6 +141,7 @@
         <a href="#kennslubaekur" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('kennslubaekur'); }}>Kennslubækur</a>
         <a href="#verkfaeri" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('verkfaeri'); }}>Verkfæri</a>
         <a href="#um" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('um'); }}>Um verkefnið</a>
+        <a href="#spurt-og-svarad" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('spurt-og-svarad'); }}>Spurt og svarað</a>
       </nav>
 
       <button
@@ -439,6 +440,29 @@
           </svg>
         </a>
       </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="spurt-og-svarad" class="faq-section">
+    <div class="section-header">
+      <h2>Algengar spurningar</h2>
+      <p>Svör við algengum spurningum um verkefnið</p>
+    </div>
+    <div class="faq-list">
+      {#each faqItems as item (item.id)}
+        <details class="faq-item">
+          <summary class="faq-question">
+            <span>{item.question}</span>
+            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
+          <div class="faq-answer">
+            {@html item.answer}
+          </div>
+        </details>
+      {/each}
     </div>
   </section>
 
@@ -1253,6 +1277,91 @@
   }
 
   /* ====================================
+     FAQ SECTION
+     ==================================== */
+  .faq-section {
+    position: relative;
+    z-index: 1;
+    padding: 4rem 1.5rem 5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .faq-section { padding: 5rem 2rem 6rem; }
+  }
+
+  .faq-list {
+    max-width: 48rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .faq-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    transition: border-color 0.2s;
+  }
+
+  .faq-item[open] {
+    border-color: color-mix(in srgb, var(--accent-color) 40%, var(--border-color));
+  }
+
+  .faq-question {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    cursor: pointer;
+    list-style: none;
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    transition: color 0.15s;
+  }
+
+  .faq-question::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-question:hover {
+    color: var(--accent-color);
+  }
+
+  .faq-chevron {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    color: var(--text-tertiary);
+    transition: transform 0.2s, color 0.2s;
+  }
+
+  .faq-item[open] .faq-chevron {
+    transform: rotate(180deg);
+    color: var(--accent-color);
+  }
+
+  .faq-answer {
+    padding: 0 1.5rem 1.25rem;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  .faq-answer :global(a) {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .faq-answer :global(a:hover) {
+    text-decoration: underline;
+  }
+
+  /* ====================================
      FOOTER
      ==================================== */
   .footer {
@@ -1296,7 +1405,9 @@
     .btn-primary,
     .tool-card-icon,
     .theme-toggle,
-    .compact-card {
+    .compact-card,
+    .faq-chevron,
+    .faq-item {
       transition: none !important;
     }
   }

@@ -43,11 +43,12 @@ export default tseslint.config(
     },
   },
   {
-    // Allow {@html} in content renderer, search, and review (trusted content, XSS-safe highlighting)
+    // Allow {@html} in content renderer, search, review, and landing FAQ (trusted content, XSS-safe highlighting)
     files: [
       'src/lib/components/ContentRenderer.svelte',
       'src/lib/components/SearchModal.svelte',
       'src/routes/\\[bookSlug\\]/yfirlit/+page.svelte',
+      'src/routes/+page.svelte',
     ],
     rules: {
       'svelte/no-at-html-tags': 'off',
