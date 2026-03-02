@@ -19,14 +19,6 @@
     'liffraedi': 'biology'
   };
 
-  const subjectColors: Record<string, { primary: string; light: string }> = {
-    chemistry: { primary: '#2e7d9c', light: '#e8f4f8' },
-    biology: { primary: '#4a8c5c', light: '#e8f4ec' },
-    physics: { primary: '#7c5cad', light: '#f0e8f8' },
-    astronomy: { primary: '#b07040', light: '#f8f0e8' },
-    mathematics: { primary: '#6366f1', light: '#eef2ff' },
-    statistics: { primary: '#059669', light: '#ecfdf5' }
-  };
 
   /** Subject groups that actually have Tier 2 entries */
   let activeTier2Groups = $derived(
@@ -201,12 +193,11 @@
         {@const isClickable = book.status === 'available' || book.status === 'in-progress' || book.status === 'preview'}
         {@const percentage = book.stats ? Math.round((book.stats.translatedChapters / book.stats.totalChapters) * 100) : 0}
         {@const subject = subjectIcons[book.slug] || 'book'}
-        {@const colors = subjectColors[subject] || { primary: '#6b7280', light: '#f3f4f6' }}
 
         <article
           class="book-card"
           class:clickable={isClickable}
-          style="--subject-color: {colors.primary}; --card-delay: {index * 100}ms"
+          style="--subject-color: var(--subject-{subject}, #6b7280); --card-delay: {index * 100}ms"
         >
           {#if isClickable}
             <a href="/{book.slug}" class="book-link">
@@ -325,10 +316,9 @@
 
       {#each activeTier2Groups as group (group.key)}
         {@const entries = tier2Groups[group.key]}
-        {@const colors = subjectColors[group.key] || { primary: '#6b7280', light: '#f3f4f6' }}
 
         <div class="subject-group">
-          <h3 class="subject-group-title" style="--group-color: {colors.primary}">
+          <h3 class="subject-group-title" style="--group-color: var(--subject-{group.key}, #6b7280)">
             {group.label}
           </h3>
 
