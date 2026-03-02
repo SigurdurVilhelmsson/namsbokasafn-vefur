@@ -13,7 +13,8 @@ import {
 	getTodayDateString,
 	getYesterdayDateString,
 	formatLocalDate,
-	generateId
+	generateId,
+	migrateRecordKeys
 } from '$lib/utils/storeHelpers';
 
 const STORAGE_KEY = 'namsbokasafn:analytics';
@@ -161,7 +162,12 @@ function loadState(): AnalyticsState {
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return validateStoreData(JSON.parse(stored), defaultState, analyticsValidators);
+			const state = validateStoreData(JSON.parse(stored), defaultState, analyticsValidators);
+			// Migrate legacy keys that lack book-slug prefix
+			return {
+				...state,
+				sectionReadingTimes: migrateRecordKeys(state.sectionReadingTimes)
+			};
 		}
 	} catch (e) {
 		console.warn('Failed to load analytics state:', e);
@@ -329,7 +335,7 @@ function createAnalyticsStore() {
 					}
 				}
 
-				const sectionKey = createSectionKey(chapterSlug, sectionSlug);
+				const sectionKey = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 				const now = new Date();
 				const newSession: ReadingSession = {
 					sectionKey,
@@ -445,16 +451,17 @@ function createAnalyticsStore() {
 		},
 
 		getSectionReadingTime: (
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string
 		): SectionReadingTime | null => {
-			const sectionKey = createSectionKey(chapterSlug, sectionSlug);
+			const sectionKey = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			return get({ subscribe }).sectionReadingTimes[sectionKey] || null;
 		},
 
-		getChapterReadingTime: (chapterSlug: string): number => {
+		getChapterReadingTime: (bookSlug: string, chapterSlug: string): number => {
 			const { sectionReadingTimes } = get({ subscribe });
-			const prefix = `${chapterSlug}/`;
+			const prefix = `${bookSlug}/${chapterSlug}/`;
 			return Object.entries(sectionReadingTimes)
 				.filter(([key]) => key.startsWith(prefix))
 				.reduce((total, [, section]) => total + section.totalSeconds, 0);

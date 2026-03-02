@@ -40,7 +40,7 @@
 
 	// Reactive helper using subscribed progress
 	function getChapterProgressPercent(chapter: Chapter): number {
-		return calcChapterProgress(progress, getChapterPath(chapter), chapter.sections.length);
+		return calcChapterProgress(progress, data.bookSlug, getChapterPath(chapter), chapter.sections.length);
 	}
 
 	// Get attribution data (supports both 'source' and 'attribution' fields with v1/v2 field names)
@@ -123,7 +123,7 @@
 						<div class="chapter-dots" aria-label="Framvinda kafla">
 							{#each chapter.sections as section (section.file)}
 								{@const sectionPath = getSectionPath(section)}
-								{@const isRead = isSectionRead(progress, chapterPath, sectionPath)}
+								{@const isRead = isSectionRead(progress, data.bookSlug, chapterPath, sectionPath)}
 								<span
 									class="chapter-dot {isRead ? 'read' : ''}"
 									title="{section.number} {section.title}{isRead ? ' (lesið)' : ''}"

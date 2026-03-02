@@ -309,7 +309,7 @@ describe('findUnreadSections', () => {
 	it('returns unread content sections, skipping non-content types', () => {
 		const progress: ReadingProgress = {};
 
-		const unread = findUnreadSections(basicToc, progress, null);
+		const unread = findUnreadSections(basicToc, progress, 'efnafraedi', null);
 
 		// Should skip introduction and glossary
 		const titles = unread.map((s) => s.sectionTitle);
@@ -323,10 +323,10 @@ describe('findUnreadSections', () => {
 
 	it('excludes already-read sections', () => {
 		const progress: ReadingProgress = {
-			'01/1-1': { read: true, lastVisited: '2025-01-01' }
+			'efnafraedi/01/1-1': { read: true, lastVisited: '2025-01-01' }
 		};
 
-		const unread = findUnreadSections(basicToc, progress, null);
+		const unread = findUnreadSections(basicToc, progress, 'efnafraedi', null);
 
 		const slugs = unread.map((s) => s.sectionSlug);
 		expect(slugs).not.toContain('1-1');
@@ -336,7 +336,7 @@ describe('findUnreadSections', () => {
 	it('filters by chapter when chapterFilter is set', () => {
 		const progress: ReadingProgress = {};
 
-		const unread = findUnreadSections(basicToc, progress, null, 2);
+		const unread = findUnreadSections(basicToc, progress, 'efnafraedi', null, 2);
 
 		expect(unread.every((s) => s.chapterNumber === 2)).toBe(true);
 		expect(unread).toHaveLength(2);
@@ -345,7 +345,7 @@ describe('findUnreadSections', () => {
 	it('prioritizes current chapter', () => {
 		const progress: ReadingProgress = {};
 
-		const unread = findUnreadSections(basicToc, progress, '02');
+		const unread = findUnreadSections(basicToc, progress, 'efnafraedi', '02');
 
 		// Chapter 2 sections should come first
 		expect(unread[0].chapterNumber).toBe(2);
@@ -353,13 +353,13 @@ describe('findUnreadSections', () => {
 
 	it('returns empty array when all sections are read', () => {
 		const progress: ReadingProgress = {
-			'01/1-1': { read: true, lastVisited: '2025-01-01' },
-			'01/1-2': { read: true, lastVisited: '2025-01-01' },
-			'02/2-1': { read: true, lastVisited: '2025-01-01' },
-			'02/2-2': { read: true, lastVisited: '2025-01-01' }
+			'efnafraedi/01/1-1': { read: true, lastVisited: '2025-01-01' },
+			'efnafraedi/01/1-2': { read: true, lastVisited: '2025-01-01' },
+			'efnafraedi/02/2-1': { read: true, lastVisited: '2025-01-01' },
+			'efnafraedi/02/2-2': { read: true, lastVisited: '2025-01-01' }
 		};
 
-		const unread = findUnreadSections(basicToc, progress, null);
+		const unread = findUnreadSections(basicToc, progress, 'efnafraedi', null);
 
 		expect(unread).toHaveLength(0);
 	});
@@ -367,7 +367,7 @@ describe('findUnreadSections', () => {
 	it('includes correct chapter/section slugs', () => {
 		const progress: ReadingProgress = {};
 
-		const unread = findUnreadSections(basicToc, progress, null);
+		const unread = findUnreadSections(basicToc, progress, 'efnafraedi', null);
 
 		const first = unread[0];
 		expect(first.chapterSlug).toBe('01');
@@ -377,7 +377,7 @@ describe('findUnreadSections', () => {
 	it('defaults reading time to 5 when metadata is missing', () => {
 		const progress: ReadingProgress = {};
 
-		const unread = findUnreadSections(basicToc, progress, null);
+		const unread = findUnreadSections(basicToc, progress, 'efnafraedi', null);
 
 		expect(unread[0].readingTime).toBe(5);
 	});

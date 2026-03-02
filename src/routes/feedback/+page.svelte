@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
   import { FEEDBACK_TYPES, type FeedbackType } from '$lib/config';
+  import { getAllBooks } from '$lib/types/book';
 
   const FEEDBACK_EMAIL = 'namsbokasafn@gmail.com';
 
@@ -171,7 +172,9 @@
                 <label class="form-label" for="book">Bók (valfrjálst)</label>
                 <select id="book" bind:value={book} class="form-select">
                   <option value="">-- Veldu bók --</option>
-                  <option value="efnafraedi">Efnafræði</option>
+                  {#each getAllBooks() as bookOption (bookOption.slug)}
+                    <option value={bookOption.slug}>{bookOption.title}</option>
+                  {/each}
                 </select>
               </div>
               <div class="form-group">

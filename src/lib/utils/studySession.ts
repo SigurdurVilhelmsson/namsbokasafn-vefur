@@ -208,6 +208,7 @@ export function buildSessionPlan(input: SessionPlanInput): SessionPlan {
 export function findUnreadSections(
 	toc: TableOfContents,
 	readingProgress: ReadingProgress,
+	bookSlug: string,
 	currentChapter: string | null,
 	chapterFilter?: number
 ): UnreadSection[] {
@@ -240,7 +241,7 @@ export function findUnreadSections(
 			}
 
 			const sectionSlug = getSectionPath(section);
-			const key = createSectionKey(chapterSlug, sectionSlug);
+			const key = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 
 			if (!readingProgress[key]?.read) {
 				unread.push({

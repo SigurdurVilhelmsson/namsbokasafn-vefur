@@ -80,6 +80,7 @@
 		{:else if currentPhase === 'reflect'}
 			<ReflectPhase
 				objectives={plan.reflect.objectives}
+				{bookSlug}
 				oncomplete={(count) => handlePhaseComplete('reflect', count)}
 			/>
 		{/if}

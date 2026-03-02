@@ -16,7 +16,8 @@ import {
 	filterByChapterPrefix,
 	filterItemsByChapter,
 	filterItemsBySection,
-	generateId
+	generateId,
+	migrateRecordKeys
 } from '$lib/utils/storeHelpers';
 
 const STORAGE_KEY = 'namsbokasafn:quiz';
@@ -89,6 +90,7 @@ interface QuizSessionInternal {
 	questions: string[];
 	answers: QuizAnswer[];
 	score: number;
+	bookSlug?: string;
 	chapterSlug?: string;
 	sectionSlug?: string;
 }
@@ -128,7 +130,12 @@ function loadState(): QuizState {
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return validateStoreData(JSON.parse(stored), defaultState, quizValidators);
+			const state = validateStoreData(JSON.parse(stored), defaultState, quizValidators);
+			// Migrate legacy keys that lack book-slug prefix
+			return {
+				...state,
+				stats: migrateRecordKeys(state.stats)
+			};
 		}
 	} catch (e) {
 		console.warn('Failed to load quiz state:', e);
@@ -164,6 +171,7 @@ function createQuizStore() {
 		// Start a new quiz session
 		startQuizSession: (
 			questions: QuizQuestion[],
+			bookSlug?: string,
 			chapterSlug?: string,
 			sectionSlug?: string
 		) => {
@@ -173,6 +181,7 @@ function createQuizStore() {
 				questions: questions.map((q) => q.id),
 				answers: [],
 				score: 0,
+				bookSlug,
 				chapterSlug,
 				sectionSlug
 			};
@@ -254,6 +263,7 @@ function createQuizStore() {
 				};
 
 				const statsKey = createStatsKey(
+					state.currentSession.bookSlug || 'efnafraedi',
 					state.currentSession.chapterSlug,
 					state.currentSession.sectionSlug
 				);
@@ -419,14 +429,14 @@ function createQuizStore() {
 		},
 
 		// Stats
-		getSectionStats: (chapterSlug: string, sectionSlug: string): QuizStats => {
-			const key = createStatsKey(chapterSlug, sectionSlug);
+		getSectionStats: (bookSlug: string, chapterSlug: string, sectionSlug: string): QuizStats => {
+			const key = createStatsKey(bookSlug, chapterSlug, sectionSlug);
 			return get({ subscribe }).stats[key] || createEmptyStats();
 		},
 
-		getChapterStats: (chapterSlug: string): QuizStats => {
+		getChapterStats: (bookSlug: string, chapterSlug: string): QuizStats => {
 			const { stats } = get({ subscribe });
-			const sectionStats = filterByChapterPrefix(stats, chapterSlug).map(([, value]) => value);
+			const sectionStats = filterByChapterPrefix(stats, bookSlug, chapterSlug).map(([, value]) => value);
 
 			if (sectionStats.length === 0) return createEmptyStats();
 

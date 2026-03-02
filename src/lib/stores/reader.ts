@@ -8,7 +8,9 @@ import { browser } from '$app/environment';
 import {
 	createSectionKey,
 	createChapterPrefix,
-	getCurrentTimestamp
+	getCurrentTimestamp,
+	migrateRecordKeys,
+	migrateBookmarkKeys
 } from '$lib/utils/storeHelpers';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isObject, isNullOrString, isArray, isNumber } from '$lib/utils/storeValidation';
@@ -67,7 +69,14 @@ function loadState(): ReaderState {
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			return validateStoreData(JSON.parse(stored), defaultState, readerValidators);
+			const state = validateStoreData(JSON.parse(stored), defaultState, readerValidators);
+			// Migrate legacy keys that lack book-slug prefix
+			return {
+				...state,
+				progress: migrateRecordKeys(state.progress),
+				bookmarks: migrateBookmarkKeys(state.bookmarks),
+				scrollPositions: migrateRecordKeys(state.scrollPositions)
+			};
 		}
 	} catch (e) {
 		console.warn('Failed to load reader state:', e);
@@ -101,8 +110,8 @@ function createReaderStore() {
 		subscribe,
 
 		// Mark as read
-		markAsRead: (chapterSlug: string, sectionSlug: string) => {
-			const sectionId = createSectionKey(chapterSlug, sectionSlug);
+		markAsRead: (bookSlug: string, chapterSlug: string, sectionSlug: string) => {
+			const sectionId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			update((state) => ({
 				...state,
 				progress: {
@@ -116,17 +125,17 @@ function createReaderStore() {
 		},
 
 		// Check if read
-		isRead: (chapterSlug: string, sectionSlug: string): boolean => {
-			const sectionId = createSectionKey(chapterSlug, sectionSlug);
+		isRead: (bookSlug: string, chapterSlug: string, sectionSlug: string): boolean => {
+			const sectionId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			return get({ subscribe }).progress[sectionId]?.read || false;
 		},
 
 		// Get chapter progress as percentage
-		getChapterProgress: (chapterSlug: string, totalSections: number): number => {
+		getChapterProgress: (bookSlug: string, chapterSlug: string, totalSections: number): number => {
 			if (totalSections <= 0) return 0;
 
 			const { progress } = get({ subscribe });
-			const chapterPrefix = createChapterPrefix(chapterSlug);
+			const chapterPrefix = createChapterPrefix(bookSlug, chapterSlug);
 
 			const readCount = Object.entries(progress).filter(
 				([sectionId, data]) => sectionId.startsWith(chapterPrefix) && data.read
@@ -136,8 +145,8 @@ function createReaderStore() {
 		},
 
 		// Set current location
-		setCurrentLocation: (chapterSlug: string, sectionSlug: string) => {
-			const sectionId = createSectionKey(chapterSlug, sectionSlug);
+		setCurrentLocation: (bookSlug: string, chapterSlug: string, sectionSlug: string) => {
+			const sectionId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 
 			update((state) => ({
 				...state,
@@ -154,8 +163,8 @@ function createReaderStore() {
 		},
 
 		// Add bookmark
-		addBookmark: (chapterSlug: string, sectionSlug: string) => {
-			const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
+		addBookmark: (bookSlug: string, chapterSlug: string, sectionSlug: string) => {
+			const bookmarkId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			update((state) => {
 				if (state.bookmarks.includes(bookmarkId)) return state;
 				return {
@@ -166,8 +175,8 @@ function createReaderStore() {
 		},
 
 		// Remove bookmark
-		removeBookmark: (chapterSlug: string, sectionSlug: string) => {
-			const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
+		removeBookmark: (bookSlug: string, chapterSlug: string, sectionSlug: string) => {
+			const bookmarkId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			update((state) => ({
 				...state,
 				bookmarks: state.bookmarks.filter((id) => id !== bookmarkId)
@@ -175,14 +184,14 @@ function createReaderStore() {
 		},
 
 		// Check if bookmarked
-		isBookmarked: (chapterSlug: string, sectionSlug: string): boolean => {
-			const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
+		isBookmarked: (bookSlug: string, chapterSlug: string, sectionSlug: string): boolean => {
+			const bookmarkId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			return get({ subscribe }).bookmarks.includes(bookmarkId);
 		},
 
 		// Toggle bookmark
-		toggleBookmark: (chapterSlug: string, sectionSlug: string) => {
-			const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
+		toggleBookmark: (bookSlug: string, chapterSlug: string, sectionSlug: string) => {
+			const bookmarkId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			const state = get({ subscribe });
 			if (state.bookmarks.includes(bookmarkId)) {
 				update((s) => ({
@@ -208,8 +217,8 @@ function createReaderStore() {
 		},
 
 		// Save scroll position for a section (for reading position persistence)
-		saveScrollPosition: (chapterSlug: string, sectionSlug: string, scrollY: number, percentage: number) => {
-			const sectionId = createSectionKey(chapterSlug, sectionSlug);
+		saveScrollPosition: (bookSlug: string, chapterSlug: string, sectionSlug: string, scrollY: number, percentage: number) => {
+			const sectionId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			// Only save if user has scrolled past the first 5% (to avoid saving initial positions)
 			if (percentage < 5) return;
 
@@ -227,14 +236,14 @@ function createReaderStore() {
 		},
 
 		// Get saved scroll position for a section
-		getScrollPosition: (chapterSlug: string, sectionSlug: string): ScrollPosition | null => {
-			const sectionId = createSectionKey(chapterSlug, sectionSlug);
+		getScrollPosition: (bookSlug: string, chapterSlug: string, sectionSlug: string): ScrollPosition | null => {
+			const sectionId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			return get({ subscribe }).scrollPositions[sectionId] || null;
 		},
 
 		// Clear scroll position for a section (e.g., when user completes reading)
-		clearScrollPosition: (chapterSlug: string, sectionSlug: string) => {
-			const sectionId = createSectionKey(chapterSlug, sectionSlug);
+		clearScrollPosition: (bookSlug: string, chapterSlug: string, sectionSlug: string) => {
+			const sectionId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			update((state) => {
 				const { [sectionId]: _, ...rest } = state.scrollPositions;
 				return {
@@ -264,28 +273,30 @@ export const scrollPositions = derived(reader, ($reader) => $reader.scrollPositi
 
 /**
  * Pure function to check if a section is read.
- * Use with $reader.progress for reactivity: isSectionRead($reader.progress, chapter, section)
+ * Use with $reader.progress for reactivity: isSectionRead($reader.progress, bookSlug, chapter, section)
  */
 export function isSectionRead(
 	progress: ReadingProgress,
+	bookSlug: string,
 	chapterSlug: string,
 	sectionSlug: string
 ): boolean {
-	const sectionId = createSectionKey(chapterSlug, sectionSlug);
+	const sectionId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 	return progress[sectionId]?.read || false;
 }
 
 /**
  * Pure function to calculate chapter progress percentage.
- * Use with $reader.progress for reactivity: calcChapterProgress($reader.progress, chapter, total)
+ * Use with $reader.progress for reactivity: calcChapterProgress($reader.progress, bookSlug, chapter, total)
  */
 export function calcChapterProgress(
 	progress: ReadingProgress,
+	bookSlug: string,
 	chapterSlug: string,
 	totalSections: number
 ): number {
 	if (totalSections <= 0) return 0;
-	const chapterPrefix = createChapterPrefix(chapterSlug);
+	const chapterPrefix = createChapterPrefix(bookSlug, chapterSlug);
 	const readCount = Object.entries(progress).filter(
 		([sectionId, data]) => sectionId.startsWith(chapterPrefix) && data.read
 	).length;
@@ -294,26 +305,28 @@ export function calcChapterProgress(
 
 /**
  * Pure function to check if a section is bookmarked.
- * Use with $reader.bookmarks for reactivity: isSectionBookmarked($reader.bookmarks, chapter, section)
+ * Use with $reader.bookmarks for reactivity: isSectionBookmarked($reader.bookmarks, bookSlug, chapter, section)
  */
 export function isSectionBookmarked(
-	bookmarks: string[],
+	bookmarksList: string[],
+	bookSlug: string,
 	chapterSlug: string,
 	sectionSlug: string
 ): boolean {
-	const bookmarkId = createSectionKey(chapterSlug, sectionSlug);
-	return bookmarks.includes(bookmarkId);
+	const bookmarkId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
+	return bookmarksList.includes(bookmarkId);
 }
 
 /**
  * Pure function to get saved scroll position for a section.
- * Use with $reader.scrollPositions for reactivity: getSavedScrollPosition($reader.scrollPositions, chapter, section)
+ * Use with $reader.scrollPositions for reactivity: getSavedScrollPosition($reader.scrollPositions, bookSlug, chapter, section)
  */
 export function getSavedScrollPosition(
 	scrollPositions: ScrollPositions,
+	bookSlug: string,
 	chapterSlug: string,
 	sectionSlug: string
 ): ScrollPosition | null {
-	const sectionId = createSectionKey(chapterSlug, sectionSlug);
+	const sectionId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 	return scrollPositions[sectionId] || null;
 }

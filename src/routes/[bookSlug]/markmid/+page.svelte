@@ -102,11 +102,11 @@
 	});
 
 	function toggleObjective(chapterSlug: string, sectionSlug: string, index: number, text: string) {
-		objectivesStore.toggleObjective(chapterSlug, sectionSlug, index, text);
+		objectivesStore.toggleObjective(data.bookSlug, chapterSlug, sectionSlug, index, text);
 	}
 
 	function setConfidence(chapterSlug: string, sectionSlug: string, index: number, level: ConfidenceLevel) {
-		objectivesStore.setObjectiveConfidence(chapterSlug, sectionSlug, index, level);
+		objectivesStore.setObjectiveConfidence(data.bookSlug, chapterSlug, sectionSlug, index, level);
 	}
 
 	function clearAllObjectives() {

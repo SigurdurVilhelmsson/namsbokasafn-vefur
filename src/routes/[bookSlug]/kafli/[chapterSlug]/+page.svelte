@@ -15,15 +15,15 @@
 
 	// Subscribe to reader progress for reactivity
 	let progress = $derived($reader.progress);
-	let chapterProgress = $derived(calcChapterProgress(progress, chapterPath, data.chapter.sections.length));
+	let chapterProgress = $derived(calcChapterProgress(progress, data.bookSlug, chapterPath, data.chapter.sections.length));
 
 	// Reactive: find first unread section or fall back to first section
-	let firstUnread = $derived(data.chapter.sections.find(s => !isSectionRead(progress, chapterPath, getSectionPath(s))));
+	let firstUnread = $derived(data.chapter.sections.find(s => !isSectionRead(progress, data.bookSlug, chapterPath, getSectionPath(s))));
 	let targetSection = $derived(firstUnread ?? data.chapter.sections[0]);
 
 	// Check if section is read using reactive progress
 	function isRead(section: Section): boolean {
-		return isSectionRead(progress, chapterPath, getSectionPath(section));
+		return isSectionRead(progress, data.bookSlug, chapterPath, getSectionPath(section));
 	}
 
 	// Get section type from section (with type assertion)

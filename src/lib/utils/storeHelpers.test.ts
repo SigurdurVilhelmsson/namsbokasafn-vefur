@@ -9,7 +9,9 @@ import {
 	createChapterPrefix,
 	calculateProgress,
 	calculateProgressFromCounts,
-	generateId
+	generateId,
+	migrateRecordKeys,
+	migrateBookmarkKeys
 } from './storeHelpers';
 
 describe('formatLocalDate', () => {
@@ -84,34 +86,34 @@ describe('getYesterdayDateString', () => {
 });
 
 describe('createSectionKey', () => {
-	it('should join chapter and section with /', () => {
-		expect(createSectionKey('ch-1', 'sec-1')).toBe('ch-1/sec-1');
+	it('should join book, chapter and section with /', () => {
+		expect(createSectionKey('efnafraedi', 'ch-1', 'sec-1')).toBe('efnafraedi/ch-1/sec-1');
 	});
 });
 
 describe('createStatsKey', () => {
 	it('should return section key when both provided', () => {
-		expect(createStatsKey('ch-1', 'sec-1')).toBe('ch-1/sec-1');
+		expect(createStatsKey('efnafraedi', 'ch-1', 'sec-1')).toBe('efnafraedi/ch-1/sec-1');
 	});
 
-	it('should return chapter slug when only chapter provided', () => {
-		expect(createStatsKey('ch-1')).toBe('ch-1');
+	it('should return book/chapter key when only chapter provided', () => {
+		expect(createStatsKey('efnafraedi', 'ch-1')).toBe('efnafraedi/ch-1');
 	});
 
-	it('should return global when neither provided', () => {
-		expect(createStatsKey()).toBe('global');
+	it('should return book/global when neither chapter nor section provided', () => {
+		expect(createStatsKey('efnafraedi')).toBe('efnafraedi/global');
 	});
 });
 
 describe('createObjectiveKey', () => {
-	it('should include chapter, section, and index', () => {
-		expect(createObjectiveKey('ch-1', 'sec-1', 0)).toBe('ch-1/sec-1/0');
+	it('should include book, chapter, section, and index', () => {
+		expect(createObjectiveKey('efnafraedi', 'ch-1', 'sec-1', 0)).toBe('efnafraedi/ch-1/sec-1/0');
 	});
 });
 
 describe('createChapterPrefix', () => {
-	it('should append /', () => {
-		expect(createChapterPrefix('ch-1')).toBe('ch-1/');
+	it('should return book/chapter/', () => {
+		expect(createChapterPrefix('efnafraedi', 'ch-1')).toBe('efnafraedi/ch-1/');
 	});
 });
 
@@ -141,5 +143,80 @@ describe('generateId', () => {
 	it('should generate unique IDs', () => {
 		const ids = new Set(Array.from({ length: 100 }, () => generateId()));
 		expect(ids.size).toBe(100);
+	});
+});
+
+describe('migrateRecordKeys', () => {
+	it('should prefix legacy keys with efnafraedi/', () => {
+		const legacy = {
+			'ch-1/sec-1': { read: true },
+			'ch-2/sec-3': { read: false }
+		};
+		const result = migrateRecordKeys(legacy);
+		expect(result).toEqual({
+			'efnafraedi/ch-1/sec-1': { read: true },
+			'efnafraedi/ch-2/sec-3': { read: false }
+		});
+	});
+
+	it('should leave already-migrated keys untouched', () => {
+		const modern = {
+			'efnafraedi/ch-1/sec-1': { read: true }
+		};
+		const result = migrateRecordKeys(modern);
+		expect(result).toBe(modern); // same reference — no migration needed
+	});
+
+	it('should handle mixed legacy and modern keys', () => {
+		const mixed = {
+			'ch-1/sec-1': { read: true },
+			'efnafraedi/ch-2/sec-3': { read: false }
+		};
+		const result = migrateRecordKeys(mixed);
+		expect(result).toEqual({
+			'efnafraedi/ch-1/sec-1': { read: true },
+			'efnafraedi/ch-2/sec-3': { read: false }
+		});
+	});
+
+	it('should handle chapter-only keys (e.g. stats keys)', () => {
+		const legacy = { 'ch-1': { totalAttempts: 5 } };
+		const result = migrateRecordKeys(legacy);
+		expect(result).toEqual({ 'efnafraedi/ch-1': { totalAttempts: 5 } });
+	});
+
+	it('should handle global key', () => {
+		const legacy = { 'global': { totalAttempts: 10 } };
+		const result = migrateRecordKeys(legacy);
+		expect(result).toEqual({ 'efnafraedi/global': { totalAttempts: 10 } });
+	});
+
+	it('should return original object when no migration needed', () => {
+		const modern = { 'efnafraedi/ch-1/sec-1': { read: true } };
+		expect(migrateRecordKeys(modern)).toBe(modern);
+	});
+
+	it('should handle empty record', () => {
+		const empty = {};
+		expect(migrateRecordKeys(empty)).toBe(empty);
+	});
+});
+
+describe('migrateBookmarkKeys', () => {
+	it('should prefix legacy bookmark keys', () => {
+		const legacy = ['ch-1/sec-1', 'ch-2/sec-3'];
+		const result = migrateBookmarkKeys(legacy);
+		expect(result).toEqual(['efnafraedi/ch-1/sec-1', 'efnafraedi/ch-2/sec-3']);
+	});
+
+	it('should leave already-migrated keys untouched', () => {
+		const modern = ['efnafraedi/ch-1/sec-1'];
+		const result = migrateBookmarkKeys(modern);
+		expect(result).toBe(modern);
+	});
+
+	it('should handle empty array', () => {
+		const empty: string[] = [];
+		expect(migrateBookmarkKeys(empty)).toBe(empty);
 	});
 });
