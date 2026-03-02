@@ -31,13 +31,13 @@ export interface BookConfig {
 
 export const books: BookConfig[] = [
   {
-    id: 'efnafraedi',
-    slug: 'efnafraedi',
+    id: 'efnafraedi-2e',
+    slug: 'efnafraedi-2e',
     title: 'Efnafræði',
     subtitle: 'Þýðing á OpenStax Chemistry 2e',
     description: 'Gagnvirkur veflesari fyrir efnafræðinám á framhaldsskólastigi.',
     subject: 'raunvisindi',
-    coverImage: '/covers/efnafraedi.svg',
+    coverImage: '/covers/efnafraedi-2e.svg',
     translator: 'Sigurður E. Vilhelmsson',
     status: 'available',
     source: {
@@ -57,30 +57,6 @@ export const books: BookConfig[] = [
       flashcards: true,
       exercises: true,
       periodicTable: true
-    }
-  },
-  {
-    id: 'liffraedi',
-    slug: 'liffraedi',
-    title: 'Líffræði',
-    subtitle: 'Þýðing á OpenStax Biology 2e',
-    description: 'Gagnvirkur veflesari fyrir líffræðinám á framhaldsskólastigi.',
-    subject: 'raunvisindi',
-    coverImage: '/covers/liffraedi.svg',
-    translator: 'Sigurður E. Vilhelmsson',
-    status: 'coming-soon',
-    source: {
-      title: 'Biology 2e',
-      publisher: 'OpenStax',
-      url: 'https://openstax.org/details/books/biology-2e',
-      authors: ['Mary Ann Clark', 'Matthew Douglas', 'Jung Choi'],
-      license: 'CC BY 4.0',
-      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
-    },
-    features: {
-      glossary: true,
-      flashcards: true,
-      exercises: true
     }
   }
 ];

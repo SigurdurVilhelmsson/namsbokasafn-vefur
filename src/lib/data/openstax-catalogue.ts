@@ -40,7 +40,7 @@ const catalogue: CatalogueEntry[] = [
 		subject: 'chemistry',
 		openstaxUrl: 'https://openstax.org/details/books/chemistry-2e',
 		status: 'available',
-		bookSlug: 'efnafraedi'
+		bookSlug: 'efnafraedi-2e'
 	},
 	{
 		slug: 'chemistry-atoms-first-2e',
