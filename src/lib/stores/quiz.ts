@@ -263,7 +263,7 @@ function createQuizStore() {
 				};
 
 				const statsKey = createStatsKey(
-					state.currentSession.bookSlug || 'efnafraedi',
+					state.currentSession.bookSlug || 'efnafraedi-2e',
 					state.currentSession.chapterSlug,
 					state.currentSession.sectionSlug
 				);

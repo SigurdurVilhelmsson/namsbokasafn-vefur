@@ -33,7 +33,7 @@ async function testOfflineCache() {
 
 	// 1. Fetch the TOC
 	console.log('1. Fetching table of contents...');
-	const tocResponse = await fetch(`${BASE_URL}/content/efnafraedi/toc.json`);
+	const tocResponse = await fetch(`${BASE_URL}/content/efnafraedi-2e/toc.json`);
 	if (!tocResponse.ok) {
 		console.error('   FAIL: Could not fetch TOC');
 		return false;
@@ -42,12 +42,12 @@ async function testOfflineCache() {
 	console.log(`   OK: Found ${toc.chapters.length} chapters`);
 
 	// 2. Collect all content URLs (simulating downloadBook)
-	const contentUrls = [`/content/efnafraedi/toc.json`, `/content/efnafraedi/glossary.json`];
+	const contentUrls = [`/content/efnafraedi-2e/toc.json`, `/content/efnafraedi-2e/glossary.json`];
 	const allImageUrls = new Set();
 
 	for (const chapter of toc.chapters) {
 		for (const section of chapter.sections) {
-			const sectionUrl = `/content/efnafraedi/chapters/${chapter.slug}/${section.file}`;
+			const sectionUrl = `/content/efnafraedi-2e/chapters/${chapter.slug}/${section.file}`;
 			contentUrls.push(sectionUrl);
 		}
 	}

@@ -942,7 +942,7 @@ Use `var(--bg-tertiary)` for background. Typography updates for Bricolage Grotes
 
 **Step 3: Verify book home page**
 
-Navigate to /efnafraedi — confirm chapter grid renders with new card styles, progress bars work, attribution section is clean.
+Navigate to /efnafraedi-2e — confirm chapter grid renders with new card styles, progress bars work, attribution section is clean.
 
 **Step 4: Commit**
 

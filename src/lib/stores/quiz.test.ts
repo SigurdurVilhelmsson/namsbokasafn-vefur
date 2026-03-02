@@ -66,7 +66,7 @@ describe('quiz store', () => {
 	describe('quiz session lifecycle', () => {
 		it('should start a quiz session', () => {
 			const questions = [makeQuestion('q1'), makeQuestion('q2')];
-			quizStore.startQuizSession(questions, 'efnafraedi', '01', '1-1');
+			quizStore.startQuizSession(questions, 'efnafraedi-2e', '01', '1-1');
 
 			const session = get(currentQuizSession);
 			expect(session).not.toBeNull();
@@ -132,7 +132,7 @@ describe('quiz store', () => {
 		});
 
 		it('should end session and update stats', () => {
-			quizStore.startQuizSession([makeQuestion('q1'), makeQuestion('q2')], 'efnafraedi', '01', '1-1');
+			quizStore.startQuizSession([makeQuestion('q1'), makeQuestion('q2')], 'efnafraedi-2e', '01', '1-1');
 			quizStore.answerQuestion(makeAnswer('q1', true));
 			quizStore.answerQuestion(makeAnswer('q2', false));
 
@@ -141,7 +141,7 @@ describe('quiz store', () => {
 			expect(get(currentQuizSession)).toBeNull();
 			expect(get(quizStore).sessions).toHaveLength(1);
 
-			const stats = quizStore.getSectionStats('efnafraedi', '01', '1-1');
+			const stats = quizStore.getSectionStats('efnafraedi-2e', '01', '1-1');
 			expect(stats.totalAttempts).toBe(1);
 			expect(stats.correctAnswers).toBe(1);
 			expect(stats.averageScore).toBe(50);
@@ -249,28 +249,28 @@ describe('quiz store', () => {
 
 	describe('stats', () => {
 		it('should return empty stats for sections with no data', () => {
-			const stats = quizStore.getSectionStats('efnafraedi', '01', '1-1');
+			const stats = quizStore.getSectionStats('efnafraedi-2e', '01', '1-1');
 			expect(stats.totalAttempts).toBe(0);
 			expect(stats.averageScore).toBe(0);
 		});
 
 		it('should aggregate chapter stats from sections', () => {
 			// End two sessions in different sections of chapter 01
-			quizStore.startQuizSession([makeQuestion('q1')], 'efnafraedi', '01', '1-1');
+			quizStore.startQuizSession([makeQuestion('q1')], 'efnafraedi-2e', '01', '1-1');
 			quizStore.answerQuestion(makeAnswer('q1', true));
 			quizStore.endSession();
 
-			quizStore.startQuizSession([makeQuestion('q2')], 'efnafraedi', '01', '1-2');
+			quizStore.startQuizSession([makeQuestion('q2')], 'efnafraedi-2e', '01', '1-2');
 			quizStore.answerQuestion(makeAnswer('q2', true));
 			quizStore.endSession();
 
-			const stats = quizStore.getChapterStats('efnafraedi', '01');
+			const stats = quizStore.getChapterStats('efnafraedi-2e', '01');
 			expect(stats.totalAttempts).toBe(2);
 			expect(stats.correctAnswers).toBe(2);
 		});
 
 		it('should return empty stats for chapters with no data', () => {
-			const stats = quizStore.getChapterStats('efnafraedi', '99');
+			const stats = quizStore.getChapterStats('efnafraedi-2e', '99');
 			expect(stats.totalAttempts).toBe(0);
 		});
 	});

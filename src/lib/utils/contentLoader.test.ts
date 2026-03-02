@@ -197,9 +197,9 @@ describe('contentLoader utilities', () => {
 				json: () => Promise.resolve(sampleToc)
 			});
 
-			const toc = await loadTableOfContents('efnafraedi', mockFetch as unknown as typeof fetch);
+			const toc = await loadTableOfContents('efnafraedi-2e', mockFetch as unknown as typeof fetch);
 			expect(toc.title).toBe('Efnafræði');
-			expect(mockFetch).toHaveBeenCalledWith('/content/efnafraedi/toc.json');
+			expect(mockFetch).toHaveBeenCalledWith('/content/efnafraedi-2e/toc.json');
 		});
 
 		it('should throw ContentLoadError on HTTP error', async () => {

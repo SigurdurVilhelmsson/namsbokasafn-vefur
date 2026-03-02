@@ -3,7 +3,7 @@ name: check-content
 description: Validate book content files for correctness
 arguments:
   - name: book
-    description: Book slug to check (e.g., "efnafraedi"). Omit to check all books.
+    description: Book slug to check (e.g., "efnafraedi-2e"). Omit to check all books.
     required: false
 ---
 
@@ -14,13 +14,17 @@ Validate book content files for structural correctness and consistency.
 ## Checks to Perform
 
 ### 1. Directory Structure
+
 For each book in `static/content/`:
+
 - [ ] Has `toc.json`
 - [ ] Has `glossary.json` (can be empty `{"terms": []}`)
 - [ ] Has `chapters/` directory
 
 ### 2. TOC Validation
+
 Parse each `toc.json` and verify:
+
 - [ ] Valid JSON syntax
 - [ ] Has required fields: `title`, `chapters`
 - [ ] Has `attribution` object with license info
@@ -28,24 +32,32 @@ Parse each `toc.json` and verify:
 - [ ] Each section has: `number`, `title`, `file`
 
 ### 3. File Existence
+
 For each section in toc.json:
+
 - [ ] Referenced markdown file exists in `chapters/{chapterNum}/`
 - [ ] Chapter directory uses zero-padded numbers (01, 02, etc.)
 
 ### 4. Frontmatter Validation
+
 For each markdown file:
+
 - [ ] Has YAML frontmatter between `---` markers
 - [ ] Has required fields: `title`, `section`, `chapter`
 - [ ] `section` matches toc.json entry
 - [ ] `chapter` is correct number
 
 ### 5. Image References
+
 For each markdown file:
+
 - [ ] Image references use relative paths (`images/...`)
 - [ ] Referenced images exist in chapter's `images/` directory
 
 ### 6. Glossary Validation
+
 Parse `glossary.json`:
+
 - [ ] Valid JSON syntax
 - [ ] Has `terms` array
 - [ ] Each term has: `term`, `definition`
@@ -54,7 +66,7 @@ Parse `glossary.json`:
 ## Output Format
 
 ```
-Checking: efnafraedi
+Checking: efnafraedi-2e
   ✓ toc.json valid
   ✓ glossary.json valid
   ✓ 4 chapters found

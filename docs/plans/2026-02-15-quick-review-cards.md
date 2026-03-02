@@ -464,7 +464,7 @@ Expected: All tests pass (340 existing + 6 new = 346)
 **Step 3: Manual smoke test**
 
 1. Start dev server: `npm run dev`
-2. Navigate to `/efnafraedi/yfirlit`
+2. Navigate to `/efnafraedi-2e/yfirlit`
 3. Verify chapter chips render
 4. Click a chapter — cards should appear with colored badges
 5. Click "Allir kaflar" — cards from all chapters

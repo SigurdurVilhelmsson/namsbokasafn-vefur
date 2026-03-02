@@ -47,7 +47,7 @@ test.describe('Reader Flow', () => {
 		await bookLink.click();
 
 		// Verify navigation
-		await expect(page).toHaveURL(/\/efnafraedi/);
+		await expect(page).toHaveURL(/\/efnafraedi-2e/);
 
 		// Wait for content
 		await page.waitForLoadState('networkidle');
@@ -76,7 +76,7 @@ test.describe('Reader Flow', () => {
 			await sectionLink.click();
 
 			// Verify we're on a section page
-			await expect(page).toHaveURL(/\/efnafraedi\/kafli\/.+\/.+/);
+			await expect(page).toHaveURL(/\/efnafraedi-2e\/kafli\/.+\/.+/);
 
 			// Wait for article to load (use .first() since section pages have nested articles)
 			await expect(page.locator('article').first()).toBeVisible({ timeout: 15000 });

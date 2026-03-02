@@ -135,7 +135,7 @@ The "Download for offline" button (`DownloadBookButton.svelte`) pre-populates ca
 // localStorage key: 'namsbokasafn:offline'
 {
   books: {
-    'efnafraedi': {
+    'efnafraedi-2e': {
       downloaded: true,
       downloadedAt: '2025-01-08T12:00:00.000Z',
       version: '1.0',
@@ -176,7 +176,7 @@ const bookPattern = `/content/${bookSlug}/`;
 
 ## Content Size Reference
 
-For the Chemistry textbook (efnafraedi):
+For the Chemistry textbook (efnafraedi-2e):
 
 | Content Type | Count | Size        |
 | ------------ | ----- | ----------- |

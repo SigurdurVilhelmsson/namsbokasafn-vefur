@@ -51,13 +51,13 @@ function ThemeToggle() {
 
   return (
     <button onClick={toggleTheme}>
-      {theme === 'dark' ? <Sun /> : <Moon />}
+      {theme === "dark" ? <Sun /> : <Moon />}
     </button>
   );
 }
 ```
 
-**Persistence Key:** `efnafraedi-settings`
+**Persistence Key:** `namsbokasafn:settings`
 
 ---
 
@@ -102,7 +102,7 @@ function ProgressIndicator({ sectionId }: { sectionId: string }) {
 }
 ```
 
-**Persistence Key:** `efnafraedi-reading`
+**Persistence Key:** `namsbokasafn:reader`
 
 ---
 
@@ -156,13 +156,8 @@ resetSession(): void
 
 ```tsx
 function StudyCard() {
-  const {
-    studyQueue,
-    currentCardIndex,
-    showAnswer,
-    toggleAnswer,
-    rateCard
-  } = useFlashcardStore();
+  const { studyQueue, currentCardIndex, showAnswer, toggleAnswer, rateCard } =
+    useFlashcardStore();
 
   const currentCardId = studyQueue[currentCardIndex];
 
@@ -170,10 +165,12 @@ function StudyCard() {
     <div>
       {showAnswer ? (
         <div className="rating-buttons">
-          <button onClick={() => rateCard(currentCardId, 'again')}>Again</button>
-          <button onClick={() => rateCard(currentCardId, 'hard')}>Hard</button>
-          <button onClick={() => rateCard(currentCardId, 'good')}>Good</button>
-          <button onClick={() => rateCard(currentCardId, 'easy')}>Easy</button>
+          <button onClick={() => rateCard(currentCardId, "again")}>
+            Again
+          </button>
+          <button onClick={() => rateCard(currentCardId, "hard")}>Hard</button>
+          <button onClick={() => rateCard(currentCardId, "good")}>Good</button>
+          <button onClick={() => rateCard(currentCardId, "easy")}>Easy</button>
         </div>
       ) : (
         <button onClick={toggleAnswer}>Show Answer</button>
@@ -183,7 +180,7 @@ function StudyCard() {
 }
 ```
 
-**Persistence Key:** `efnafraedi-flashcards`
+**Persistence Key:** `namsbokasafn:flashcards`
 
 ---
 
@@ -194,7 +191,7 @@ function StudyCard() {
 Provides book context to child components.
 
 ```typescript
-import { useBook, useBookFromParams } from '@/hooks/useBook';
+import { useBook, useBookFromParams } from "@/hooks/useBook";
 
 // Context Value
 interface BookContextValue {
@@ -205,10 +202,10 @@ interface BookContextValue {
 }
 
 // Hook for consuming context
-function useBook(): BookContextValue
+function useBook(): BookContextValue;
 
 // Hook for creating context from URL params
-function useBookFromParams(): BookContextValue
+function useBookFromParams(): BookContextValue;
 ```
 
 **Usage Example:**
@@ -222,7 +219,7 @@ function ChapterList() {
 
   return (
     <ul>
-      {toc?.chapters.map(chapter => (
+      {toc?.chapters.map((chapter) => (
         <li key={chapter.slug}>{chapter.title}</li>
       ))}
     </ul>
@@ -237,10 +234,10 @@ function ChapterList() {
 Applies theme on mount and listens for system preference changes.
 
 ```typescript
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from "@/hooks/useTheme";
 
 // Called at App root to initialize theme
-function useTheme(): void
+function useTheme(): void;
 ```
 
 **Usage Example:**
@@ -260,7 +257,7 @@ function App() {
 Loads glossary data for a book.
 
 ```typescript
-import { useGlossary } from '@/hooks/useGlossary';
+import { useGlossary } from "@/hooks/useGlossary";
 
 interface UseGlossaryReturn {
   terms: GlossaryTerm[];
@@ -268,7 +265,7 @@ interface UseGlossaryReturn {
   error: string | null;
 }
 
-function useGlossary(bookSlug: string): UseGlossaryReturn
+function useGlossary(bookSlug: string): UseGlossaryReturn;
 ```
 
 **Usage Example:**
@@ -276,13 +273,13 @@ function useGlossary(bookSlug: string): UseGlossaryReturn
 ```tsx
 function GlossaryList() {
   const { book } = useBook();
-  const { terms, loading } = useGlossary(book?.slug ?? '');
+  const { terms, loading } = useGlossary(book?.slug ?? "");
 
   if (loading) return <Spinner />;
 
   return (
     <dl>
-      {terms.map(term => (
+      {terms.map((term) => (
         <div key={term.id}>
           <dt>{term.term}</dt>
           <dd>{term.definition}</dd>
@@ -306,31 +303,31 @@ import {
   loadTableOfContents,
   loadSectionContent,
   findChapterBySlug,
-  findSectionBySlug
-} from '@/utils/contentLoader';
+  findSectionBySlug,
+} from "@/utils/contentLoader";
 
 // Load table of contents
-async function loadTableOfContents(bookSlug: string): Promise<TableOfContents>
+async function loadTableOfContents(bookSlug: string): Promise<TableOfContents>;
 
 // Load section markdown content
 async function loadSectionContent(
   bookSlug: string,
   chapterSlug: string,
-  sectionFile: string
-): Promise<SectionContent>
+  sectionFile: string,
+): Promise<SectionContent>;
 
 // Find chapter in TOC by slug
 function findChapterBySlug(
   toc: TableOfContents,
-  slug: string
-): Chapter | undefined
+  slug: string,
+): Chapter | undefined;
 
 // Find section and its parent chapter
 function findSectionBySlug(
   toc: TableOfContents,
   chapterSlug: string,
-  sectionSlug: string
-): { chapter: Chapter; section: Section } | null
+  sectionSlug: string,
+): { chapter: Chapter; section: Section } | null;
 ```
 
 **Usage Example:**
@@ -338,14 +335,14 @@ function findSectionBySlug(
 ```typescript
 // Load content for a section
 const content = await loadSectionContent(
-  'efnafraedi',
-  '01-grunnhugmyndir',
-  '1-1-efnafraedi.md'
+  "efnafraedi-2e",
+  "01-grunnhugmyndir",
+  "1-1-efnafraedi-i-samhengi.md",
 );
 
-console.log(content.title);      // "Hvað er efnafræði?"
+console.log(content.title); // "Hvað er efnafræði?"
 console.log(content.objectives); // ["Skilið skilgreiningu..."]
-console.log(content.content);    // Markdown content string
+console.log(content.content); // Markdown content string
 ```
 
 ---
@@ -362,67 +359,68 @@ import {
   getDueCards,
   getNewCards,
   calculateDeckStats,
-  previewRatingIntervals
-} from '@/utils/srs';
+  previewRatingIntervals,
+} from "@/utils/srs";
 
 // Process a card review and return updated study record
 function processReview(
   cardId: string,
-  quality: StudyQuality,        // 0-5
-  existingRecord?: FlashcardStudyRecord
-): FlashcardStudyRecord
+  quality: StudyQuality, // 0-5
+  existingRecord?: FlashcardStudyRecord,
+): FlashcardStudyRecord;
 
 // Check if card is due for review
-function isCardDue(record: FlashcardStudyRecord | undefined): boolean
+function isCardDue(record: FlashcardStudyRecord | undefined): boolean;
 
 // Sort cards by study priority
 function sortCardsByPriority(
   cardIds: string[],
-  records: Record<string, FlashcardStudyRecord>
-): string[]
+  records: Record<string, FlashcardStudyRecord>,
+): string[];
 
 // Get cards due today
 function getDueCards(
   cardIds: string[],
-  records: Record<string, FlashcardStudyRecord>
-): string[]
+  records: Record<string, FlashcardStudyRecord>,
+): string[];
 
 // Get new (never reviewed) cards
 function getNewCards(
   cardIds: string[],
-  records: Record<string, FlashcardStudyRecord>
-): string[]
+  records: Record<string, FlashcardStudyRecord>,
+): string[];
 
 // Calculate deck statistics
 function calculateDeckStats(
   cardIds: string[],
-  records: Record<string, FlashcardStudyRecord>
+  records: Record<string, FlashcardStudyRecord>,
 ): {
   total: number;
   new: number;
   due: number;
-  learning: number;  // interval < 7 days
-  review: number;    // interval >= 7 days
-}
+  learning: number; // interval < 7 days
+  review: number; // interval >= 7 days
+};
 
 // Preview intervals for each rating
 function previewRatingIntervals(
-  existingRecord?: FlashcardStudyRecord
-): Record<DifficultyRating, string>
+  existingRecord?: FlashcardStudyRecord,
+): Record<DifficultyRating, string>;
 ```
 
 **Algorithm Details:**
 
-| Quality | Meaning | Next Interval |
-|---------|---------|---------------|
-| 0 (Again) | Complete blackout | Reset to 1 day |
-| 1 | Incorrect, but recognized | Reset to 1 day |
-| 2 (Hard) | Incorrect, easy to recall | Reset to 1 day |
-| 3 | Correct, difficult | Continue progression |
-| 4 (Good) | Correct, some hesitation | Continue progression |
-| 5 (Easy) | Perfect response | Continue progression |
+| Quality   | Meaning                   | Next Interval        |
+| --------- | ------------------------- | -------------------- |
+| 0 (Again) | Complete blackout         | Reset to 1 day       |
+| 1         | Incorrect, but recognized | Reset to 1 day       |
+| 2 (Hard)  | Incorrect, easy to recall | Reset to 1 day       |
+| 3         | Correct, difficult        | Continue progression |
+| 4 (Good)  | Correct, some hesitation  | Continue progression |
+| 5 (Easy)  | Perfect response          | Continue progression |
 
 **Interval Progression:**
+
 - First correct: 1 day
 - Second correct: 6 days
 - Subsequent: previous × ease factor (default 2.5)
@@ -435,7 +433,7 @@ function previewRatingIntervals(
 Full-text search across content.
 
 ```typescript
-import { searchContent, buildSearchIndex } from '@/utils/searchIndex';
+import { searchContent, buildSearchIndex } from "@/utils/searchIndex";
 
 interface SearchResult {
   chapterSlug: string;
@@ -450,14 +448,14 @@ interface SearchResult {
 async function searchContent(
   query: string,
   toc: TableOfContents,
-  bookSlug: string
-): Promise<SearchResult[]>
+  bookSlug: string,
+): Promise<SearchResult[]>;
 ```
 
 **Usage Example:**
 
 ```typescript
-const results = await searchContent('efnafræði', toc, 'efnafraedi');
+const results = await searchContent("efnafræði", toc, "efnafraedi-2e");
 // Returns sections containing the search term with highlighted snippets
 ```
 
@@ -471,28 +469,28 @@ const results = await searchContent('efnafræði', toc, 'efnafraedi');
 // src/types/content.ts
 
 interface SourceAttribution {
-  original: string;       // Original work title
-  authors: string;        // Author names
-  license: string;        // License name (e.g., "CC BY 4.0")
-  licenseUrl: string;     // URL to license
-  originalUrl: string;    // URL to original work
-  translator: string;     // Translator name
+  original: string; // Original work title
+  authors: string; // Author names
+  license: string; // License name (e.g., "CC BY 4.0")
+  licenseUrl: string; // URL to license
+  originalUrl: string; // URL to original work
+  translator: string; // Translator name
   translationYear: number;
-  modifications: string;  // Description of changes
+  modifications: string; // Description of changes
 }
 
 interface Section {
-  number: string;   // e.g., "1.1"
-  title: string;    // Section title
-  slug: string;     // URL slug
-  file: string;     // Filename (e.g., "1-1-section.md")
+  number: string; // e.g., "1.1"
+  title: string; // Section title
+  slug: string; // URL slug
+  file: string; // Filename (e.g., "1-1-section.md")
 }
 
 interface Chapter {
-  number: number;        // Chapter number
-  title: string;         // Chapter title
-  slug: string;          // URL slug
-  sections: Section[];   // Sections in chapter
+  number: number; // Chapter number
+  title: string; // Chapter title
+  slug: string; // URL slug
+  sections: Section[]; // Sections in chapter
 }
 
 interface TableOfContents {
@@ -503,11 +501,11 @@ interface TableOfContents {
 
 interface SectionContent {
   title: string;
-  section: string;        // Section number
-  chapter: number;        // Chapter number
-  objectives?: string[];  // Learning objectives
+  section: string; // Section number
+  chapter: number; // Chapter number
+  objectives?: string[]; // Learning objectives
   source?: SourceAttribution;
-  content: string;        // Markdown content
+  content: string; // Markdown content
 }
 
 interface NavigationContext {
@@ -522,15 +520,15 @@ interface NavigationContext {
 ```typescript
 // src/types/flashcard.ts
 
-type DifficultyRating = 'again' | 'hard' | 'good' | 'easy';
+type DifficultyRating = "again" | "hard" | "good" | "easy";
 type StudyQuality = 0 | 1 | 2 | 3 | 4 | 5;
 
 interface Flashcard {
   id: string;
-  front: string;     // Question/term
-  back: string;      // Answer/definition
-  tags?: string[];   // Optional categorization
-  source?: string;   // Where the card came from
+  front: string; // Question/term
+  back: string; // Answer/definition
+  tags?: string[]; // Optional categorization
+  source?: string; // Where the card came from
 }
 
 interface FlashcardDeck {
@@ -544,11 +542,11 @@ interface FlashcardDeck {
 
 interface FlashcardStudyRecord {
   cardId: string;
-  lastReviewed: string;      // ISO date
-  nextReview: string;        // ISO date
-  ease: number;              // Ease factor (default 2.5)
-  interval: number;          // Current interval in days
-  reviewCount: number;       // Total reviews
+  lastReviewed: string; // ISO date
+  nextReview: string; // ISO date
+  ease: number; // Ease factor (default 2.5)
+  interval: number; // Current interval in days
+  reviewCount: number; // Total reviews
   consecutiveCorrect: number; // Streak of correct answers
 }
 
@@ -557,7 +555,7 @@ const DIFFICULTY_TO_QUALITY: Record<DifficultyRating, StudyQuality> = {
   again: 0,
   hard: 2,
   good: 4,
-  easy: 5
+  easy: 5,
 };
 ```
 
@@ -568,19 +566,19 @@ const DIFFICULTY_TO_QUALITY: Record<DifficultyRating, StudyQuality> = {
 
 interface BookConfig {
   id: string;
-  slug: string;              // URL slug
-  title: string;             // Display title
+  slug: string; // URL slug
+  title: string; // Display title
   subtitle: string;
   description: string;
-  subject: 'raunvisindi' | 'staerdfraedi' | 'felagsvisindi' | 'annað';
-  coverImage: string;        // Path to cover image
+  subject: "raunvisindi" | "staerdfraedi" | "felagsvisindi" | "annað";
+  coverImage: string; // Path to cover image
   translator: string;
   translatorContact?: string;
-  status: 'available' | 'in-progress' | 'coming-soon';
+  status: "available" | "in-progress" | "coming-soon";
   source: {
-    title: string;           // Original work title
-    publisher: string;       // e.g., "OpenStax"
-    url: string;             // Link to original
+    title: string; // Original work title
+    publisher: string; // e.g., "OpenStax"
+    url: string; // Link to original
     authors: string[];
     license: string;
     licenseUrl: string;
@@ -621,6 +619,7 @@ Wrapper component providing book context and page structure.
 ```
 
 **Features:**
+
 - Applies font size/family from settings
 - Provides skip-to-content link for accessibility
 - Redirects to landing if book not found
@@ -636,11 +635,11 @@ Navigation header with search, settings, and theme toggle.
 // Uses: useBook(), useSettingsStore()
 
 <Header>
-  <Hamburger />        {/* Mobile sidebar toggle */}
-  <BookTitle />        {/* Current book/section title */}
-  <SearchButton />     {/* Opens SearchModal */}
-  <SettingsButton />   {/* Opens SettingsModal */}
-  <ThemeToggle />      {/* Light/dark mode */}
+  <Hamburger /> {/* Mobile sidebar toggle */}
+  <BookTitle /> {/* Current book/section title */}
+  <SearchButton /> {/* Opens SearchModal */}
+  <SettingsButton /> {/* Opens SettingsModal */}
+  <ThemeToggle /> {/* Light/dark mode */}
 </Header>
 ```
 
@@ -656,7 +655,9 @@ Collapsible table of contents with progress indicators.
 
 <Sidebar>
   <ChapterList>
-    <ChapterItem>     {/* Expandable chapter header */}
+    <ChapterItem>
+      {" "}
+      {/* Expandable chapter header */}
       <SectionLink /> {/* Link with progress checkmark */}
     </ChapterItem>
   </ChapterList>
@@ -691,13 +692,14 @@ Custom markdown processor with extensions.
 
 ```tsx
 interface Props {
-  content: string;  // Markdown content
+  content: string; // Markdown content
 }
 
-<MarkdownRenderer content={markdown} />
+<MarkdownRenderer content={markdown} />;
 ```
 
 **Supported Features:**
+
 - GitHub Flavored Markdown (tables, strikethrough)
 - Math equations (KaTeX): `$inline$` and `$$block$$`
 - Custom directives: `::: note`, `::: warning`, `::: example`
@@ -717,10 +719,11 @@ interface Props {
   onClose: () => void;
 }
 
-<FlashcardDeck deckId="glossary-terms" onClose={handleClose} />
+<FlashcardDeck deckId="glossary-terms" onClose={handleClose} />;
 ```
 
 **Features:**
+
 - Card flip animation
 - Rating buttons with interval preview
 - Progress indicator
@@ -744,10 +747,11 @@ interface Props {
 
 <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Settings">
   <ModalContent />
-</Modal>
+</Modal>;
 ```
 
 **Features:**
+
 - Focus trap
 - ESC to close
 - Click outside to close
@@ -761,15 +765,15 @@ Styled button component.
 
 ```tsx
 interface Props {
-  variant?: 'primary' | 'secondary' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "sm" | "md" | "lg";
   children: ReactNode;
   // ...standard button props
 }
 
 <Button variant="primary" size="md" onClick={handleClick}>
   Click me
-</Button>
+</Button>;
 ```
 
 ---
@@ -784,10 +788,11 @@ interface Props {
   onClose: () => void;
 }
 
-<SearchModal isOpen={showSearch} onClose={() => setShowSearch(false)} />
+<SearchModal isOpen={showSearch} onClose={() => setShowSearch(false)} />;
 ```
 
 **Features:**
+
 - Keyboard shortcut: Ctrl/Cmd+K
 - Debounced input (300ms)
 - Highlighted search snippets
@@ -805,10 +810,11 @@ interface Props {
   onClose: () => void;
 }
 
-<SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />
+<SettingsModal isOpen={showSettings} onClose={() => setShowSettings(false)} />;
 ```
 
 **Settings Available:**
+
 - Font size (small, medium, large, xlarge)
 - Font family (serif, sans-serif)
 - Theme toggle (also in header)

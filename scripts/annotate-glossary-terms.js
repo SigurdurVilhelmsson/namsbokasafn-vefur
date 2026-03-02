@@ -13,7 +13,7 @@
  *
  * Usage:
  *   node scripts/annotate-glossary-terms.js                  # Annotate all books
- *   node scripts/annotate-glossary-terms.js efnafraedi       # Specific book
+ *   node scripts/annotate-glossary-terms.js efnafraedi-2e      # Specific book
  *   node scripts/annotate-glossary-terms.js --dry-run        # Preview without writing
  *   node scripts/annotate-glossary-terms.js --verbose        # Show each match
  */
@@ -203,7 +203,7 @@ Options:
 
 Examples:
   node scripts/annotate-glossary-terms.js                  # All books
-  node scripts/annotate-glossary-terms.js efnafraedi       # Specific book
+  node scripts/annotate-glossary-terms.js efnafraedi-2e      # Specific book
   node scripts/annotate-glossary-terms.js --dry-run        # Preview mode`);
 		process.exit(0);
 	}

@@ -138,7 +138,7 @@ test.describe('PWA Offline Capability', () => {
 		if (await bookLink.isVisible({ timeout: 5000 }).catch(() => false)) {
 			await bookLink.click();
 			// Wait for SvelteKit SPA navigation to actually update the URL
-			await page.waitForURL('**/efnafraedi');
+			await page.waitForURL('**/efnafraedi-2e');
 			await page.waitForLoadState('networkidle');
 
 			// Navigate back

@@ -47,7 +47,7 @@ describe('annotation store', () => {
 	describe('addAnnotation', () => {
 		it('should add a new annotation and return its id', () => {
 			const id = annotationStore.addAnnotation(
-				'efnafraedi', '01', '1-1', 'highlighted text', makeRange(), 'yellow'
+				'efnafraedi-2e', '01', '1-1', 'highlighted text', makeRange(), 'yellow'
 			);
 			expect(id).toBeDefined();
 			expect(typeof id).toBe('string');
@@ -56,10 +56,10 @@ describe('annotation store', () => {
 
 		it('should store all annotation fields', () => {
 			annotationStore.addAnnotation(
-				'efnafraedi', '01', '1-1', 'text', makeRange(), 'green', 'a note'
+				'efnafraedi-2e', '01', '1-1', 'text', makeRange(), 'green', 'a note'
 			);
 			const ann = get(annotationStore).annotations[0];
-			expect(ann.bookSlug).toBe('efnafraedi');
+			expect(ann.bookSlug).toBe('efnafraedi-2e');
 			expect(ann.chapterSlug).toBe('01');
 			expect(ann.sectionSlug).toBe('1-1');
 			expect(ann.selectedText).toBe('text');

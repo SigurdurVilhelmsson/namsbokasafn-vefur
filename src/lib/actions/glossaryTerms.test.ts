@@ -129,7 +129,7 @@ describe('glossaryTerms action', () => {
 				{ text: 'tilgátuna', dataTerm: 'tilgáta' } // inflected form, but data-term has base
 			]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -144,7 +144,7 @@ describe('glossaryTerms action', () => {
 				{ text: 'gas' } // exact match, no English suffix, no data-term
 			]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -159,7 +159,7 @@ describe('glossaryTerms action', () => {
 				{ text: 'efni (e. matter)' } // Icelandic "efni" matches exactly
 			]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -174,7 +174,7 @@ describe('glossaryTerms action', () => {
 				{ text: 'tilgátu (e. hypothesis)' } // "tilgátu" is inflected, won't match "tilgáta"
 			]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -190,7 +190,7 @@ describe('glossaryTerms action', () => {
 				{ text: 'efni (e. matter)', dataTerm: 'sameind' }
 			]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -204,7 +204,7 @@ describe('glossaryTerms action', () => {
 				{ text: 'efni (e. matter)', dataTerm: 'nonexistent-term' }
 			]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -220,7 +220,7 @@ describe('glossaryTerms action', () => {
 				{ text: 'Dalton' } // a name, not in our mock glossary
 			]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -237,7 +237,7 @@ describe('glossaryTerms action', () => {
 				{ text: 'efni (e. matter)', dataTerm: 'efni' } // data-term
 			]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfns = getDfnElements(node);
@@ -254,7 +254,7 @@ describe('glossaryTerms action', () => {
 				{ text: 'Lögmál (e. laws)' } // uppercase L should match "lögmál"
 			]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -269,7 +269,7 @@ describe('glossaryTerms action', () => {
 		it('should set role, tabindex, and aria-label on matched terms', async () => {
 			const node = createContentNode([{ text: 'efni (e. matter)' }]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -283,7 +283,7 @@ describe('glossaryTerms action', () => {
 		it('should omit English from aria-label when term has no english field', async () => {
 			const node = createContentNode([{ text: 'gas' }]);
 
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -298,7 +298,7 @@ describe('glossaryTerms action', () => {
 			mockGlossaryHighlighting.set(false);
 
 			const node = createContentNode([{ text: 'efni (e. matter)' }]);
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -311,7 +311,7 @@ describe('glossaryTerms action', () => {
 			mockGlossaryHighlighting.set(false);
 
 			const node = createContentNode([{ text: 'efni (e. matter)' }]);
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			// Should not be processed yet
@@ -329,7 +329,7 @@ describe('glossaryTerms action', () => {
 
 		it('should remove styling when toggled off', async () => {
 			const node = createContentNode([{ text: 'efni (e. matter)' }]);
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -351,7 +351,7 @@ describe('glossaryTerms action', () => {
 				{ text: 'gas' },
 				{ text: 'tilgátu (e. hypothesis)' }
 			]);
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfns = getDfnElements(node);
@@ -376,7 +376,7 @@ describe('glossaryTerms action', () => {
 	describe('cleanup on destroy', () => {
 		it('should remove glossary-term class on destroy', async () => {
 			const node = createContentNode([{ text: 'efni (e. matter)' }]);
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -392,10 +392,10 @@ describe('glossaryTerms action', () => {
 
 		it('should load glossary for the specified book', async () => {
 			const node = createContentNode([{ text: 'gas' }]);
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
-			expect(mockLoadFn).toHaveBeenCalledWith('efnafraedi');
+			expect(mockLoadFn).toHaveBeenCalledWith('efnafraedi-2e');
 
 			action.destroy();
 		});
@@ -404,7 +404,7 @@ describe('glossaryTerms action', () => {
 	describe('event listeners', () => {
 		it('should attach click handler to matched terms', async () => {
 			const node = createContentNode([{ text: 'efni (e. matter)' }]);
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
@@ -423,7 +423,7 @@ describe('glossaryTerms action', () => {
 
 		it('should remove event listeners on destroy', async () => {
 			const node = createContentNode([{ text: 'efni (e. matter)' }]);
-			const action = glossaryTerms(node, { bookSlug: 'efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
 			await flush();
 
 			const dfn = getDfnElements(node)[0];
