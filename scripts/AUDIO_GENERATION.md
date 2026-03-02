@@ -65,6 +65,7 @@ docker run \
 ```
 
 Verify it's running:
+
 ```bash
 curl http://localhost:8080/v0/voices
 ```
@@ -99,7 +100,7 @@ npx tsx scripts/generate-audio.ts --voice=Alfur
 Audio files are saved alongside markdown files:
 
 ```
-static/content/efnafraedi/chapters/
+static/content/efnafraedi-2e/chapters/
   01-grunnhugmyndir/
     1-1-efnafraedi-i-samhengi.md
     1-1-efnafraedi-i-samhengi.mp3  ← generated
@@ -110,6 +111,7 @@ static/content/efnafraedi/chapters/
 ### "TTS server not available"
 
 Make sure Docker is running and the container is started:
+
 ```bash
 docker ps  # Should show tiro-tts container
 ```

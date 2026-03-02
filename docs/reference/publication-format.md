@@ -3,6 +3,7 @@
 This document describes the unified format for book content shared between namsbokasafn-efni and namsbokasafn-vefur.
 
 **Design principles:**
+
 - Minimize transformation burden on efni
 - Use number-based paths for URL stability
 - Keep file naming in efni's natural workflow
@@ -24,7 +25,7 @@ This document describes the unified format for book content shared between namsb
 ### Examples
 
 ```
-efnafraedi/
+efnafraedi-2e/
 ├── toc.json
 ├── glossary.json
 └── chapters/
@@ -42,14 +43,15 @@ efnafraedi/
 
 ### Naming Conventions
 
-| Element | Format | Examples |
-|---------|--------|----------|
-| Book slug | lowercase, no accents | `efnafraedi` |
-| Chapter folder | zero-padded number | `01`, `02`, `10` |
-| Section file | `{chapter}-{section}-{name}.md` | `2-1-early-ideas.md` |
-| Introduction | `{chapter}-0-introduction.md` | `1-0-introduction.md` |
+| Element        | Format                          | Examples              |
+| -------------- | ------------------------------- | --------------------- |
+| Book slug      | lowercase, no accents           | `efnafraedi-2e`       |
+| Chapter folder | zero-padded number              | `01`, `02`, `10`      |
+| Section file   | `{chapter}-{section}-{name}.md` | `2-1-early-ideas.md`  |
+| Introduction   | `{chapter}-0-introduction.md`   | `1-0-introduction.md` |
 
 **File names:**
+
 - Use lowercase with hyphens
 - English-based names are acceptable (no Icelandic slug requirement)
 - Must be URL-safe (no spaces, accents, or special characters)
@@ -101,31 +103,31 @@ efnafraedi/
 
 ### Chapter Object
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `number` | integer | Yes | Chapter number (1, 2, 3...) |
-| `title` | string | Yes | Chapter title in Icelandic |
-| `sections` | array | Yes | Array of section objects |
+| Field      | Type    | Required | Description                 |
+| ---------- | ------- | -------- | --------------------------- |
+| `number`   | integer | Yes      | Chapter number (1, 2, 3...) |
+| `title`    | string  | Yes      | Chapter title in Icelandic  |
+| `sections` | array   | Yes      | Array of section objects    |
 
 ### Section Object
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `number` | string | Yes | Section number ("1.0", "1.1", "2.3") |
-| `title` | string | Yes | Section title in Icelandic |
-| `file` | string | Yes | Filename (relative to chapter folder) |
-| `type` | string | No | Section type (see below) |
+| Field    | Type   | Required | Description                           |
+| -------- | ------ | -------- | ------------------------------------- |
+| `number` | string | Yes      | Section number ("1.0", "1.1", "2.3")  |
+| `title`  | string | Yes      | Section title in Icelandic            |
+| `file`   | string | Yes      | Filename (relative to chapter folder) |
+| `type`   | string | No       | Section type (see below)              |
 
 ### Section Types
 
-| Type | Description | Icelandic Title |
-|------|-------------|-----------------|
-| *(default)* | Regular content section | — |
-| `glossary` | Key terms | Lykilhugtök |
-| `equations` | Key equations | Lykiljöfnur |
-| `summary` | Chapter summary | Samantekt |
-| `exercises` | Practice problems | Dæmi |
-| `answer-key` | Answers to exercises | Svör |
+| Type         | Description             | Icelandic Title |
+| ------------ | ----------------------- | --------------- |
+| _(default)_  | Regular content section | —               |
+| `glossary`   | Key terms               | Lykilhugtök     |
+| `equations`  | Key equations           | Lykiljöfnur     |
+| `summary`    | Chapter summary         | Samantekt       |
+| `exercises`  | Practice problems       | Dæmi            |
+| `answer-key` | Answers to exercises    | Svör            |
 
 ## Markdown Files
 
@@ -139,17 +141,18 @@ chapter: 1
 ---
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `title` | string | Yes | Section title (without section number prefix) |
-| `section` | string | Yes | Section number |
-| `chapter` | integer | Yes | Chapter number |
+| Field     | Type    | Required | Description                                   |
+| --------- | ------- | -------- | --------------------------------------------- |
+| `title`   | string  | Yes      | Section title (without section number prefix) |
+| `section` | string  | Yes      | Section number                                |
+| `chapter` | integer | Yes      | Chapter number                                |
 
 **Note:** Learning objectives remain in the content body as `:::note` blocks. Attribution comes from `toc.json`. Working metadata (status, translation type, lastUpdated) should be stripped before publication.
 
 ### Content
 
 Standard markdown with:
+
 - Images: `![Alt text](images/filename.jpg)`
 - Math: `$inline$` and `$$display$$`
 - Chemical equations: `$\ce{H2O}$`
@@ -181,27 +184,28 @@ Can be empty initially and populated incrementally.
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `term` | string | Yes | Icelandic term |
-| `english` | string | No | English term (add when available) |
-| `definition` | string | Yes | Icelandic definition |
-| `chapter` | string | Yes | Chapter where introduced |
-| `section` | string | Yes | Section where introduced |
+| Field        | Type   | Required | Description                       |
+| ------------ | ------ | -------- | --------------------------------- |
+| `term`       | string | Yes      | Icelandic term                    |
+| `english`    | string | No       | English term (add when available) |
+| `definition` | string | Yes      | Icelandic definition              |
+| `chapter`    | string | Yes      | Chapter where introduced          |
+| `section`    | string | Yes      | Section where introduced          |
 
 ## URL Routing (vefur)
 
 Vefur generates URLs from chapter and section numbers:
 
-| Content | URL Pattern |
-|---------|-------------|
-| Book home | `/{bookSlug}` |
-| Chapter | `/{bookSlug}/kafli/{NN}` |
-| Section | `/{bookSlug}/kafli/{NN}/{N-N}` |
+| Content   | URL Pattern                    |
+| --------- | ------------------------------ |
+| Book home | `/{bookSlug}`                  |
+| Chapter   | `/{bookSlug}/kafli/{NN}`       |
+| Section   | `/{bookSlug}/kafli/{NN}/{N-N}` |
 
 Examples:
-- `/efnafraedi/kafli/01` — Chapter 1
-- `/efnafraedi/kafli/02/2-1` — Section 2.1
+
+- `/efnafraedi-2e/kafli/01` — Chapter 1
+- `/efnafraedi-2e/kafli/02/2-1` — Section 2.1
 
 Display titles (for breadcrumbs, navigation) come from `toc.json`.
 
@@ -209,15 +213,15 @@ Display titles (for breadcrumbs, navigation) come from `toc.json`.
 
 If migrating from the original spec:
 
-| v1 Requirement | v2 Change |
-|----------------|-----------|
-| Icelandic folder slugs (`02-atom-og-sameindir/`) | Number only (`02/`) |
-| Icelandic file slugs | English-based names OK |
-| `slug` field in toc.json | Removed (derived from number) |
-| `source` in frontmatter | Removed (use toc.json attribution) |
-| `objectives` in frontmatter | Keep in content as `:::note` |
-| Populated glossary.json | Optional, can be empty |
-| image-mapping.json | Optional |
+| v1 Requirement                                   | v2 Change                          |
+| ------------------------------------------------ | ---------------------------------- |
+| Icelandic folder slugs (`02-atom-og-sameindir/`) | Number only (`02/`)                |
+| Icelandic file slugs                             | English-based names OK             |
+| `slug` field in toc.json                         | Removed (derived from number)      |
+| `source` in frontmatter                          | Removed (use toc.json attribution) |
+| `objectives` in frontmatter                      | Keep in content as `:::note`       |
+| Populated glossary.json                          | Optional, can be empty             |
+| image-mapping.json                               | Optional                           |
 
 ## Sync Script
 
@@ -228,7 +232,7 @@ The sync script in namsbokasafn-vefur syncs from:
 
 ```bash
 npm run sync-content              # Sync all books
-npm run sync-content efnafraedi   # Sync specific book
+npm run sync-content efnafraedi-2e   # Sync specific book
 npm run sync-content --dry-run    # Preview changes
 ```
 
@@ -244,7 +248,7 @@ Books with multiple publication tracks use a root-level `toc.json` for version s
 
 ```json
 {
-  "bookId": "efnafraedi",
+  "bookId": "efnafraedi-2e",
   "title": "Efnafræði",
   "versions": [
     {
@@ -267,21 +271,21 @@ Books with multiple publication tracks use a root-level `toc.json` for version s
 
 ### Root toc.json Fields
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `bookId` | string | Yes | URL-safe book identifier |
-| `title` | string | Yes | Book title in Icelandic |
-| `versions` | array | Yes | Available publication tracks |
+| Field      | Type   | Required | Description                  |
+| ---------- | ------ | -------- | ---------------------------- |
+| `bookId`   | string | Yes      | URL-safe book identifier     |
+| `title`    | string | Yes      | Book title in Icelandic      |
+| `versions` | array  | Yes      | Available publication tracks |
 
 ### Version Object
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `id` | string | Yes | Track identifier |
-| `label` | string | Yes | Display label in Icelandic |
-| `description` | string | No | Extended description |
-| `path` | string | Yes | Path to track folder (trailing slash) |
-| `priority` | integer | Yes | Selection priority (1 = highest) |
+| Field         | Type    | Required | Description                           |
+| ------------- | ------- | -------- | ------------------------------------- |
+| `id`          | string  | Yes      | Track identifier                      |
+| `label`       | string  | Yes      | Display label in Icelandic            |
+| `description` | string  | No       | Extended description                  |
+| `path`        | string  | Yes      | Path to track folder (trailing slash) |
+| `priority`    | integer | Yes      | Selection priority (1 = highest)      |
 
 The sync script uses priority to select which track to display when both exist for the same chapter.
 
@@ -295,6 +299,7 @@ Minimal requirements for valid publication:
 - [ ] Chapter folders match pattern `{NN}/`
 
 Optional (add as needed):
+
 - [ ] `glossary.json` has valid schema (if present)
 - [ ] Images referenced in markdown exist
 - [ ] No broken internal links

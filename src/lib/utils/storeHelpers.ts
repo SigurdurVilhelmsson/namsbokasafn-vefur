@@ -147,27 +147,32 @@ export function generateId(): string {
 }
 
 /**
- * Default book slug for migrating legacy localStorage data that lacked a book prefix.
- * All existing data belongs to 'efnafraedi' since it was the only available book.
+ * Current book slug used for migrating legacy localStorage data.
+ * Legacy data (no book prefix) and data under the old 'efnafraedi' slug
+ * are both migrated to 'efnafraedi-2e'.
  */
-const LEGACY_BOOK_SLUG = 'efnafraedi';
+const CURRENT_BOOK_SLUG = 'efnafraedi-2e';
+const OLD_BOOK_SLUG = 'efnafraedi';
+const OLD_SLUG_PREFIX = `${OLD_BOOK_SLUG}/`;
 
 /**
- * Migrate a Record's keys from legacy format (chapterSlug/sectionSlug)
- * to new format (bookSlug/chapterSlug/sectionSlug).
- * Keys already containing 3+ segments are left untouched.
+ * Migrate a Record's keys through two stages:
+ * 1. Legacy keys (no book prefix) → prefixed with current book slug
+ * 2. Old slug keys (efnafraedi/...) → renamed to efnafraedi-2e/...
  */
 export function migrateRecordKeys<T>(record: Record<string, T>): Record<string, T> {
   const migrated: Record<string, T> = {};
   let needsMigration = false;
 
   for (const [key, value] of Object.entries(record)) {
-    // Legacy keys have format "chapterSlug/sectionSlug" (1 slash) or "chapterSlug" (0 slashes)
-    // New keys have format "bookSlug/chapterSlug/sectionSlug" (2+ slashes)
-    // Special case: "global" key becomes "bookSlug/global"
     const slashCount = (key.match(/\//g) || []).length;
     if (slashCount < 2 && key !== '') {
-      migrated[`${LEGACY_BOOK_SLUG}/${key}`] = value;
+      // Legacy key without book prefix
+      migrated[`${CURRENT_BOOK_SLUG}/${key}`] = value;
+      needsMigration = true;
+    } else if (key.startsWith(OLD_SLUG_PREFIX)) {
+      // Old slug: efnafraedi/... → efnafraedi-2e/...
+      migrated[`${CURRENT_BOOK_SLUG}/${key.slice(OLD_SLUG_PREFIX.length)}`] = value;
       needsMigration = true;
     } else {
       migrated[key] = value;
@@ -178,8 +183,7 @@ export function migrateRecordKeys<T>(record: Record<string, T>): Record<string, 
 }
 
 /**
- * Migrate a bookmarks array from legacy format to new format.
- * Legacy: ["chapterSlug/sectionSlug"], New: ["bookSlug/chapterSlug/sectionSlug"]
+ * Migrate a bookmarks array from legacy or old-slug format to current format.
  */
 export function migrateBookmarkKeys(bookmarks: string[]): string[] {
   let needsMigration = false;
@@ -187,7 +191,11 @@ export function migrateBookmarkKeys(bookmarks: string[]): string[] {
     const slashCount = (key.match(/\//g) || []).length;
     if (slashCount < 2) {
       needsMigration = true;
-      return `${LEGACY_BOOK_SLUG}/${key}`;
+      return `${CURRENT_BOOK_SLUG}/${key}`;
+    }
+    if (key.startsWith(OLD_SLUG_PREFIX)) {
+      needsMigration = true;
+      return `${CURRENT_BOOK_SLUG}/${key.slice(OLD_SLUG_PREFIX.length)}`;
     }
     return key;
   });

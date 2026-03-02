@@ -14,7 +14,7 @@
  *
  * Usage:
  *   node scripts/sync-content.js                    # Sync all books
- *   node scripts/sync-content.js efnafraedi         # Sync specific book
+ *   node scripts/sync-content.js efnafraedi-2e        # Sync specific book
  *   node scripts/sync-content.js --dry-run          # Preview changes
  *   node scripts/sync-content.js --source ../path   # Custom source path
  *
@@ -78,7 +78,7 @@ Usage:
 
 Examples:
   node scripts/sync-content.js                    Sync all books
-  node scripts/sync-content.js efnafraedi         Sync specific book
+  node scripts/sync-content.js efnafraedi-2e        Sync specific book
   node scripts/sync-content.js -n                 Preview changes (dry-run)
   node scripts/sync-content.js -v                 Sync and validate
   node scripts/sync-content.js -s ../my-content   Custom source path

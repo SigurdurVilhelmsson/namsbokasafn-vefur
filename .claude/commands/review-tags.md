@@ -3,7 +3,7 @@ name: review-tags
 description: Audit existing tags in a chemistry content file for consistency and correctness
 arguments:
   - name: file
-    description: Path to the markdown file to review (e.g., static/content/efnafraedi/chapters/1/1.md)
+    description: Path to the markdown file to review (e.g., static/content/efnafraedi-2e/chapters/1/1.md)
     required: true
 ---
 
@@ -91,33 +91,33 @@ Audit existing markdown tags in a chemistry content file for consistency, correc
 
 ### Critical (Must Fix)
 
-| Issue | Example |
-|-------|---------|
-| Syntax error | `:::definition` without closing `:::` |
-| Missing required attribute | `:::definition` without `term="..."` |
-| Invalid nesting | `:::answer` outside `:::practice-problem` |
-| Broken cross-reference | `[ref:eq:missing]` |
+| Issue                      | Example                                   |
+| -------------------------- | ----------------------------------------- |
+| Syntax error               | `:::definition` without closing `:::`     |
+| Missing required attribute | `:::definition` without `term="..."`      |
+| Invalid nesting            | `:::answer` outside `:::practice-problem` |
+| Broken cross-reference     | `[ref:eq:missing]`                        |
 
 ### Warnings (Should Fix)
 
-| Issue | Example |
-|-------|---------|
-| Wrong tag type | Using `:::note` for a definition |
-| Plain-text chemistry | `H2O` instead of `$\ce{H2O}$` |
+| Issue                          | Example                           |
+| ------------------------------ | --------------------------------- |
+| Wrong tag type                 | Using `:::note` for a definition  |
+| Plain-text chemistry           | `H2O` instead of `$\ce{H2O}$`     |
 | Practice problem without hints | Just answer, no progressive hints |
-| Orphaned anchor | `{#eq:unused}` never referenced |
+| Orphaned anchor                | `{#eq:unused}` never referenced   |
 
 ### Suggestions (Optional)
 
-| Issue | Example |
-|-------|---------|
-| Missing explanation | Answer without showing work |
-| Could add checkpoint | Long section without comprehension check |
-| Potential key concept | Important principle not tagged |
+| Issue                 | Example                                  |
+| --------------------- | ---------------------------------------- |
+| Missing explanation   | Answer without showing work              |
+| Could add checkpoint  | Long section without comprehension check |
+| Potential key concept | Important principle not tagged           |
 
 ## Example Output
 
-```
+````
 ## Tag Audit Report for 2.3.md
 
 ### Summary
@@ -131,10 +131,12 @@ Audit existing markdown tags in a chemistry content file for consistency, correc
    Massi eins móls af efni.
 
    Næsti málsgrein byrjar hér...
-   ```
-   Suggestion: Add `:::` after the definition text
+````
+
+Suggestion: Add `:::` after the definition text
 
 ### Warnings (should fix)
+
 1. Line 23: Plain-text formula should use mhchem
    Current: `NaCl`
    Suggested: `$\ce{NaCl}$`
@@ -143,10 +145,12 @@ Audit existing markdown tags in a chemistry content file for consistency, correc
    Suggestion: Add 1-2 progressive hints before the answer
 
 ### Suggestions (optional improvements)
+
 1. Line 112: Important principle could be tagged as key-concept
    "Massavarðveislulögmálið segir að..."
 
 ### Tag Statistics
+
 - Definitions: 3
 - Notes: 2
 - Warnings: 1
@@ -157,4 +161,7 @@ Audit existing markdown tags in a chemistry content file for consistency, correc
 - Common misconceptions: 0
 
 Would you like me to fix the critical issues?
+
+```
+
 ```

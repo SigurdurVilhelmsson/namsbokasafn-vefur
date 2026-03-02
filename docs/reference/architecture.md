@@ -157,7 +157,7 @@ sequenceDiagram
     participant StaticContent
     participant Component
 
-    User->>Router: Navigate to /efnafraedi/kafli/01/1-1
+    User->>Router: Navigate to /efnafraedi-2e/kafli/01/1-1
     Router->>LoadFn: Call load function
     LoadFn->>ContentLoader: loadSectionContent(book, chapter, section)
     ContentLoader->>StaticContent: fetch /content/.../section.md

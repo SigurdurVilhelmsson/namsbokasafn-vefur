@@ -65,6 +65,7 @@ Create `static/content/{bookSlug}/toc.json`:
 ### Section Types
 
 Sections can have optional `type` values:
+
 - `glossary` - Key terms for the chapter
 - `equations` - Key equations
 - `summary` - Chapter summary
@@ -94,22 +95,24 @@ Mikilvæg athugasemd hér.
 :::
 
 :::example
+
 ### Dæmi um efnahvörf
+
 Innihald dæmis...
 :::
 ```
 
 ### Frontmatter Fields
 
-| Field | Required | Description |
-|-------|----------|-------------|
-| `title` | Yes | Section title |
-| `section` | Yes | Section number (e.g., "1.1") |
-| `chapter` | Yes | Chapter number |
-| `objectives` | No | Learning objectives (array) |
-| `difficulty` | No | `beginner`, `intermediate`, or `advanced` |
-| `keywords` | No | Search keywords (array) |
-| `prerequisites` | No | Prerequisite section numbers (array) |
+| Field           | Required | Description                               |
+| --------------- | -------- | ----------------------------------------- |
+| `title`         | Yes      | Section title                             |
+| `section`       | Yes      | Section number (e.g., "1.1")              |
+| `chapter`       | Yes      | Chapter number                            |
+| `objectives`    | No       | Learning objectives (array)               |
+| `difficulty`    | No       | `beginner`, `intermediate`, or `advanced` |
+| `keywords`      | No       | Search keywords (array)                   |
+| `prerequisites` | No       | Prerequisite section numbers (array)      |
 
 ## 4. Create Glossary (Optional)
 
@@ -149,8 +152,8 @@ The content loader automatically transforms these to absolute paths.
 Add an SVG cover image to `static/covers/{bookSlug}.svg`.
 
 Existing covers can be used as templates:
-- `static/covers/efnafraedi.svg`
-- `static/covers/liffraedi.svg`
+
+- `static/covers/efnafraedi-2e.svg`
 
 ## 7. Test Locally
 

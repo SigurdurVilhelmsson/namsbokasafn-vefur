@@ -12,7 +12,7 @@
  *
  * Usage:
  *   node scripts/generate-toc.js                    # Generate for all books
- *   node scripts/generate-toc.js efnafraedi         # Generate for specific book
+ *   node scripts/generate-toc.js efnafraedi-2e        # Generate for specific book
  *   node scripts/generate-toc.js --efni-path ../x   # Custom efni repo path
  *   node scripts/generate-toc.js --dry-run          # Preview without writing
  */
@@ -61,7 +61,7 @@ Usage:
 
 Examples:
   node scripts/generate-toc.js                    Generate for all books
-  node scripts/generate-toc.js efnafraedi         Generate for specific book
+  node scripts/generate-toc.js efnafraedi-2e        Generate for specific book
   node scripts/generate-toc.js -n                 Preview without writing
   node scripts/generate-toc.js --efni-path ../x   Custom efni repo path
 

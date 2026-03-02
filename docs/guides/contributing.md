@@ -61,18 +61,18 @@ The application will be available at `http://localhost:5173`.
 
 ### Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `npm run dev` | Start development server with HMR |
-| `npm run build` | Build production bundle |
-| `npm run preview` | Preview production build locally |
-| `npm run lint` | Run ESLint (fails on warnings) |
-| `npm run lint:fix` | Auto-fix ESLint issues |
-| `npm run format` | Format code with Prettier |
-| `npm run type-check` | TypeScript type checking |
-| `npm run test` | Run unit tests |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run test:coverage` | Generate coverage report |
+| Script                  | Description                       |
+| ----------------------- | --------------------------------- |
+| `npm run dev`           | Start development server with HMR |
+| `npm run build`         | Build production bundle           |
+| `npm run preview`       | Preview production build locally  |
+| `npm run lint`          | Run ESLint (fails on warnings)    |
+| `npm run lint:fix`      | Auto-fix ESLint issues            |
+| `npm run format`        | Format code with Prettier         |
+| `npm run type-check`    | TypeScript type checking          |
+| `npm run test`          | Run unit tests                    |
+| `npm run test:watch`    | Run tests in watch mode           |
+| `npm run test:coverage` | Generate coverage report          |
 
 ### Environment Configuration
 
@@ -102,13 +102,13 @@ src/
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/config/books.ts` | Book configuration registry |
-| `src/App.tsx` | Route definitions |
-| `src/stores/*.ts` | State management |
-| `src/utils/srs.ts` | Spaced repetition algorithm |
-| `src/utils/contentLoader.ts` | Content loading utilities |
+| File                         | Purpose                     |
+| ---------------------------- | --------------------------- |
+| `src/config/books.ts`        | Book configuration registry |
+| `src/App.tsx`                | Route definitions           |
+| `src/stores/*.ts`            | State management            |
+| `src/utils/srs.ts`           | Spaced repetition algorithm |
+| `src/utils/contentLoader.ts` | Content loading utilities   |
 
 ---
 
@@ -136,7 +136,7 @@ fix(sidebar): correct chapter collapse behavior
 docs(readme): update installation instructions
 style(header): adjust spacing on mobile
 refactor(srs): extract interval calculation
-content(efnafraedi): add chapter 3 translation
+content(efnafraedi-2e): add chapter 3 translation
 ```
 
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `content`
@@ -155,15 +155,15 @@ interface ComponentProps {
 }
 
 // Use type for unions/intersections
-type Status = 'loading' | 'success' | 'error';
+type Status = "loading" | "success" | "error";
 
 // Always type function parameters and returns
 function calculateScore(answers: Answer[]): number {
-  return answers.filter(a => a.correct).length;
+  return answers.filter((a) => a.correct).length;
 }
 
 // Use const assertions for readonly arrays
-const RATINGS = ['again', 'hard', 'good', 'easy'] as const;
+const RATINGS = ["again", "hard", "good", "easy"] as const;
 ```
 
 ### React Guidelines
@@ -196,7 +196,7 @@ function MyComponent() {
 // Memoize expensive computations
 const sortedItems = useMemo(
   () => items.sort((a, b) => a.name.localeCompare(b.name)),
-  [items]
+  [items],
 );
 ```
 
@@ -405,17 +405,20 @@ See [Content Format](../reference/content-format.md) for full formatting referen
 ### Pull Request Process
 
 1. **Create a feature branch**:
+
    ```bash
    git checkout -b feature/my-feature
    ```
 
 2. **Make your changes** and commit:
+
    ```bash
    git add .
    git commit -m "feat(scope): description"
    ```
 
 3. **Run quality checks**:
+
    ```bash
    npm run lint
    npm run type-check
@@ -424,6 +427,7 @@ See [Content Format](../reference/content-format.md) for full formatting referen
    ```
 
 4. **Push and create PR**:
+
    ```bash
    git push -u origin feature/my-feature
    ```
@@ -462,6 +466,7 @@ Your changes will be automatically deployed via GitHub Actions.
 ## Recognition
 
 Contributors are recognized in:
+
 - Git history
 - Release notes (for significant contributions)
 - README acknowledgments (for major features)

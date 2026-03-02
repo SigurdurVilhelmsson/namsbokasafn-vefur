@@ -17,7 +17,7 @@ async function navigateToBook(page: import('@playwright/test').Page) {
 	await expect(bookLink).toBeVisible({ timeout: 10000 });
 	await bookLink.click();
 	await page.waitForLoadState('networkidle');
-	await expect(page).toHaveURL(/\/efnafraedi/);
+	await expect(page).toHaveURL(/\/efnafraedi-2e/);
 }
 
 test.describe('Search Modal', () => {
