@@ -263,6 +263,13 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 }
 
 function main() {
+	if (process.getuid?.() === 0) {
+		console.error('Error: Do not run this script as root (sudo).');
+		console.error('The build process needs to write to files created by this script.');
+		console.error('Run as your normal user instead: node scripts/sync-content.js');
+		process.exit(1);
+	}
+
 	const args = process.argv.slice(2);
 	const options = parseArgs(args);
 
