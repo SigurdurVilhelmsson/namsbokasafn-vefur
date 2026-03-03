@@ -10,7 +10,7 @@ export interface CatalogueEntry {
 	title: string;
 	description: string;
 	chapterCount: number;
-	subject: 'chemistry' | 'biology' | 'physics' | 'astronomy' | 'mathematics' | 'statistics';
+	subject: 'chemistry' | 'biology' | 'physics' | 'astronomy' | 'mathematics' | 'statistics' | 'computer-science' | 'college-success';
 	openstaxUrl: string;
 	status: 'available' | 'in-progress' | 'preview' | 'not-started';
 	bookSlug?: string;
@@ -27,7 +27,9 @@ const subjectGroups: SubjectGroup[] = [
 	{ key: 'physics', label: 'Eðlisfræði / Physics' },
 	{ key: 'astronomy', label: 'Stjarnvísindi / Astronomy' },
 	{ key: 'mathematics', label: 'Stærðfræði / Mathematics' },
-	{ key: 'statistics', label: 'Tölfræði / Statistics' }
+	{ key: 'statistics', label: 'Tölfræði / Statistics' },
+	{ key: 'computer-science', label: 'Tölvunarfræði / Computer Science' },
+	{ key: 'college-success', label: 'Námsaðstoð / College Success' }
 ];
 
 const catalogue: CatalogueEntry[] = [
@@ -51,6 +53,15 @@ const catalogue: CatalogueEntry[] = [
 		openstaxUrl: 'https://openstax.org/details/books/chemistry-atoms-first-2e',
 		status: 'not-started'
 	},
+	{
+		slug: 'organic-chemistry',
+		title: 'Organic Chemistry',
+		description: 'Structure, reactions, mechanisms, and spectroscopy of carbon compounds.',
+		chapterCount: 30,
+		subject: 'chemistry',
+		openstaxUrl: 'https://openstax.org/details/books/organic-chemistry',
+		status: 'not-started'
+	},
 
 	// ── Biology ────────────────────────────────────────────────
 	{
@@ -60,6 +71,15 @@ const catalogue: CatalogueEntry[] = [
 		chapterCount: 47,
 		subject: 'biology',
 		openstaxUrl: 'https://openstax.org/details/books/biology-2e',
+		status: 'not-started'
+	},
+	{
+		slug: 'biology-ap-courses',
+		title: 'Biology for AP Courses',
+		description: 'AP-aligned biology covering all four Big Ideas for exam preparation.',
+		chapterCount: 47,
+		subject: 'biology',
+		openstaxUrl: 'https://openstax.org/details/books/biology-ap-courses',
 		status: 'not-started'
 	},
 	{
@@ -91,6 +111,15 @@ const catalogue: CatalogueEntry[] = [
 	},
 
 	// ── Physics ────────────────────────────────────────────────
+	{
+		slug: 'physics',
+		title: 'Physics',
+		description: 'Algebra-based physics — mechanics, thermodynamics, electromagnetism, and optics.',
+		chapterCount: 34,
+		subject: 'physics',
+		openstaxUrl: 'https://openstax.org/details/books/physics',
+		status: 'not-started'
+	},
 	{
 		slug: 'university-physics-volume-1',
 		title: 'University Physics Volume 1',
@@ -266,6 +295,55 @@ const catalogue: CatalogueEntry[] = [
 		chapterCount: 13,
 		subject: 'statistics',
 		openstaxUrl: 'https://openstax.org/details/books/introductory-business-statistics',
+		status: 'not-started'
+	},
+
+	// ── Computer Science ──────────────────────────────────────
+	{
+		slug: 'workplace-software-skills',
+		title: 'Workplace Software and Skills',
+		description: 'Practical computer skills — productivity software, data management, and workplace technology.',
+		chapterCount: 16,
+		subject: 'computer-science',
+		openstaxUrl: 'https://openstax.org/details/books/workplace-software-skills',
+		status: 'not-started'
+	},
+	{
+		slug: 'introduction-python-programming',
+		title: 'Introduction to Python Programming',
+		description: 'Python fundamentals — variables, control structures, functions, and data structures.',
+		chapterCount: 15,
+		subject: 'computer-science',
+		openstaxUrl: 'https://openstax.org/details/books/introduction-python-programming',
+		status: 'not-started'
+	},
+
+	// ── College Success ───────────────────────────────────────
+	{
+		slug: 'college-success',
+		title: 'College Success',
+		description: 'Study skills, time management, critical thinking, and strategies for academic success.',
+		chapterCount: 11,
+		subject: 'college-success',
+		openstaxUrl: 'https://openstax.org/details/books/college-success',
+		status: 'not-started'
+	},
+	{
+		slug: 'college-success-concise',
+		title: 'College Success Concise',
+		description: 'Essential college success strategies in a streamlined format.',
+		chapterCount: 11,
+		subject: 'college-success',
+		openstaxUrl: 'https://openstax.org/details/books/college-success-concise',
+		status: 'not-started'
+	},
+	{
+		slug: 'preparing-for-college-success',
+		title: 'Preparing for College Success',
+		description: 'Pre-college preparation — academic readiness, goal setting, and transitioning to higher education.',
+		chapterCount: 8,
+		subject: 'college-success',
+		openstaxUrl: 'https://openstax.org/details/books/preparing-for-college-success',
 		status: 'not-started'
 	}
 ];

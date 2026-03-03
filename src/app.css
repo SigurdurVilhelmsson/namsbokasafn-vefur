@@ -77,6 +77,10 @@
     --subject-astronomy: #b07040;
     --subject-mathematics: #6366f1;
     --subject-statistics: #059669;
+    --subject-computer-science: #4b8bbf;
+    --subject-computer-science-light: #e8f0f8;
+    --subject-college-success: #10a860;
+    --subject-college-success-light: #e8f8f0;
   }
 
   .dark {
@@ -114,6 +118,10 @@
     --subject-astronomy: #d09060;
     --subject-mathematics: #818cf8;
     --subject-statistics: #34d399;
+    --subject-computer-science: #6ba8d6;
+    --subject-computer-science-light: #1a2838;
+    --subject-college-success: #34c87c;
+    --subject-college-success-light: #1a2d1e;
   }
 
   body {

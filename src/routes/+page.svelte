@@ -301,7 +301,7 @@
         <a href="https://openstax.org" target="_blank" rel="noopener noreferrer">OpenStax</a>,
         gefnar út af Rice University undir
         <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>
-        leyfi. Hér fyrir neðan eru allar náttúruvísinda- og stærðfræðibækur OpenStax.
+        leyfi. Hér fyrir neðan eru allar námsbækur OpenStax.
         Hafðu samband á
         <a href="mailto:sigurdur@namsbokasafn.is">sigurdur@namsbokasafn.is</a>
         ef þú vilt leggja verkefninu lið.
@@ -312,7 +312,7 @@
     <div class="tier2-section">
       <div class="section-header">
         <h2>OpenStax safnið</h2>
-        <p>Allar náttúruvísinda- og stærðfræðibækur frá OpenStax</p>
+        <p>Allar námsbækur frá OpenStax</p>
       </div>
 
       {#each activeTier2Groups as group (group.key)}
