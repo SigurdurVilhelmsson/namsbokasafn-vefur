@@ -94,7 +94,7 @@
 <svelte:head>
   <title>Námsbókasafn – Opnar kennslubækur á íslensku</title>
   <meta property="og:title" content="Námsbókasafn – Opnar kennslubækur á íslensku" />
-  <meta property="og:description" content="Gagnvirkt námsefni fyrir íslenskar þýðingar á OpenStax kennslubókum. Orðasafn, minniskort og æfingar." />
+  <meta property="og:description" content="Gagnvirkt námsefni með íslenskum þýðingum á OpenStax kennslubókum. Orðasafn, minniskort og æfingar." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://namsbokasafn.is/" />
 </svelte:head>
@@ -165,17 +165,17 @@
     <div class="hero-content">
       <p class="hero-eyebrow anim-item" style="--anim-delay: 0ms">OPIN NÁMSGÖGN Á ÍSLENSKU</p>
       <h1 class="hero-title anim-item" style="--anim-delay: 100ms">
-        Námsbækur þýddar og gefnar öllum
+        Þýddar námsbækur í opnum aðgangi
       </h1>
       <p class="hero-sub anim-item" style="--anim-delay: 200ms">
-        Þýddar OpenStax kennslubækur með innbyggðum námsverkfærum — gjaldfrjálst og opið öllum.
+        Þýddar OpenStax námsbækur með innbyggðum námsverkfærum — gjaldfrjálst og opið öllum.
       </p>
       <div class="hero-actions anim-item" style="--anim-delay: 300ms">
         <a href="#kennslubaekur" class="btn-primary" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('kennslubaekur'); }}>
           Skoða bækur
         </a>
         <a href="#um" class="btn-text" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('um'); }}>
-          Læra meira um verkefnið
+          Meira um verkefnið
         </a>
       </div>
     </div>
@@ -186,7 +186,7 @@
     <!-- Tier 1: Our translations -->
     <div class="section-header">
       <h2>Þýðingar</h2>
-      <p>Okkar þýðingar á OpenStax kennslubókum</p>
+      <p>Þýðingar okkar á OpenStax námsbókum</p>
     </div>
 
     <div class="book-grid">
@@ -304,7 +304,7 @@
         leyfi. Hér fyrir neðan eru allar náttúruvísinda- og stærðfræðibækur OpenStax.
         Hafðu samband á
         <a href="mailto:sigurdur@namsbokasafn.is">sigurdur@namsbokasafn.is</a>
-        ef þú vilt leggja þýðingarvinnu til verkefnisins.
+        ef þú vilt leggja verkefninu lið.
       </p>
     </div>
 
@@ -355,7 +355,7 @@
   <!-- Study Tools -->
   <section id="verkfaeri" class="tools-section">
     <div class="section-header">
-      <h2>Verkfæri til náms</h2>
+      <h2>Hjálpartæki fyrir nemendur</h2>
       <p>Innbyggð verkfæri sem hjálpa þér að læra betur</p>
     </div>
 
@@ -394,7 +394,7 @@
           </svg>
         </div>
         <h3>Próf</h3>
-        <p>Aðlöguð próf til að prófa þekkingu</p>
+        <p>Aðlöguð verkefni til að prófa þekkingu</p>
       </div>
 
       <!-- Framvinda -->
@@ -407,7 +407,7 @@
           </svg>
         </div>
         <h3>Framvinda</h3>
-        <p>Fylgstu með hvar þú ert stödd/staðinn</p>
+        <p>Fylgstu með hvar þú ert í bókinni</p>
       </div>
     </div>
   </section>
@@ -418,7 +418,7 @@
       <div class="about-card">
         <h3>Um Námsbókasafn</h3>
         <p>
-          Námsbókasafn er safn íslenskra þýðinga á opnum kennslubókum.
+          Námsbókasafn er safn íslenskra þýðinga á opnum námsbókum.
           Verkefnið miðar að því að gera hágæða námsefni aðgengilegt
           öllum íslenskum nemendum og kennurum, gjaldfrjálst og á móðurmálinu.
         </p>
