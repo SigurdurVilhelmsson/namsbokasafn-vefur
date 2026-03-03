@@ -208,6 +208,7 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 	const { bookSlug } = options;
 	let destroyed = false;
 	let isProcessed = false;
+	let initPending = false;
 
 	// Track event listeners for cleanup
 	let cleanupListeners: Array<() => void> = [];
@@ -216,119 +217,127 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 	let processedDfnElements: HTMLElement[] = [];
 
 	async function init() {
-		// Load glossary (cached if already loaded for this book)
-		await glossaryStore.load(bookSlug);
-		if (destroyed) return;
+		if (initPending) return;
+		initPending = true;
 
-		const state = get(glossaryStore);
-		if (!state.terms.length) return;
-
-		// Filter to terms long enough to mark, sort longest-first for lookup priority
-		const validTerms = state.terms.filter((t) => t.term.length >= MIN_TERM_LENGTH);
-		const sortedTerms = validTerms.sort((a, b) => b.term.length - a.term.length);
-
-		if (!sortedTerms.length) return;
-
-		// Build normalized Icelandic lookup map
-		const termMap = new Map<string, GlossaryTerm>();
-		for (const term of sortedTerms) {
-			const key = term.term.toLowerCase();
-			if (!termMap.has(key)) {
-				termMap.set(key, term);
-			}
-		}
-
-		// Build English lookup map for fallback matching
-		const englishMap = new Map<string, GlossaryTerm>();
-		for (const term of sortedTerms) {
-			if (term.english) {
-				const key = term.english.toLowerCase();
-				if (!englishMap.has(key)) {
-					englishMap.set(key, term);
-				}
-			}
-		}
-
-		// Process <dfn class="term"> elements — authoritative term markers from the CNXML pipeline
-		const dfnElements = node.querySelectorAll('dfn.term');
-		for (const dfn of dfnElements) {
+		try {
+			// Load glossary (cached if already loaded for this book)
+			await glossaryStore.load(bookSlug);
 			if (destroyed) return;
-			const dfnEl = dfn as HTMLElement;
-			const fullText = (dfnEl.textContent || '').trim();
 
-			// Three-tier matching:
-			// 1. data-term attribute (highest confidence, from pipeline)
-			// 2. Icelandic text exact match
-			// 3. English fallback from "(e. ...)" suffix
-			let glossaryTerm: GlossaryTerm | undefined;
+			const state = get(glossaryStore);
+			if (!state.terms.length) return;
 
-			// Tier 1: data-term attribute
-			const dataTerm = dfnEl.getAttribute('data-term');
-			if (dataTerm) {
-				glossaryTerm = termMap.get(dataTerm.toLowerCase());
-			}
+			// Filter to terms long enough to mark, sort longest-first for lookup priority
+			const validTerms = state.terms.filter((t) => t.term.length >= MIN_TERM_LENGTH);
+			const sortedTerms = validTerms.sort((a, b) => b.term.length - a.term.length);
 
-			// Tier 2: Icelandic text match
-			if (!glossaryTerm) {
-				const icelandicText = stripEnglishSuffix(fullText);
-				const normalized = icelandicText.toLowerCase();
-				glossaryTerm = termMap.get(normalized);
-			}
+			if (!sortedTerms.length) return;
 
-			// Tier 3: English fallback
-			if (!glossaryTerm) {
-				const english = extractEnglish(fullText);
-				if (english) {
-					glossaryTerm = englishMap.get(english.toLowerCase());
+			// Build normalized Icelandic lookup map
+			const termMap = new Map<string, GlossaryTerm>();
+			for (const term of sortedTerms) {
+				const key = term.term.toLowerCase();
+				if (!termMap.has(key)) {
+					termMap.set(key, term);
 				}
 			}
 
-			if (!glossaryTerm) continue;
-
-			dfnEl.classList.add('glossary-term');
-			dfnEl.dataset.glossaryMatch = glossaryTerm.term;
-			dfnEl.setAttribute('role', 'button');
-			dfnEl.setAttribute('tabindex', '0');
-			dfnEl.setAttribute(
-				'aria-label',
-				`Skilgreining: ${glossaryTerm.term}` + (glossaryTerm.english ? ` (${glossaryTerm.english})` : '')
-			);
-
-			processedDfnElements.push(dfnEl);
-
-			// Desktop: hover to show
-			const onEnter = () => showTooltip(dfnEl, glossaryTerm!, bookSlug);
-			const onLeave = () => hideTooltip();
-			const onFocus = () => showTooltip(dfnEl, glossaryTerm!, bookSlug);
-			const onBlur = () => hideTooltip();
-
-			dfnEl.addEventListener('mouseenter', onEnter);
-			dfnEl.addEventListener('mouseleave', onLeave);
-			dfnEl.addEventListener('focus', onFocus);
-			dfnEl.addEventListener('blur', onBlur);
-
-			// Mobile: tap to toggle tooltip
-			const onClick = (e: Event) => {
-				e.preventDefault();
-				e.stopPropagation();
-				if (currentSpan === dfnEl) {
-					hideTooltipImmediate();
-				} else {
-					showTooltip(dfnEl, glossaryTerm!, bookSlug);
+			// Build English lookup map for fallback matching
+			const englishMap = new Map<string, GlossaryTerm>();
+			for (const term of sortedTerms) {
+				if (term.english) {
+					const key = term.english.toLowerCase();
+					if (!englishMap.has(key)) {
+						englishMap.set(key, term);
+					}
 				}
-			};
-			dfnEl.addEventListener('click', onClick);
+			}
 
-			cleanupListeners.push(() => {
-				dfnEl.removeEventListener('mouseenter', onEnter);
-				dfnEl.removeEventListener('mouseleave', onLeave);
-				dfnEl.removeEventListener('focus', onFocus);
-				dfnEl.removeEventListener('blur', onBlur);
-				dfnEl.removeEventListener('click', onClick);
-			});
+			// Process <dfn class="term"> elements — authoritative term markers from the CNXML pipeline
+			const dfnElements = node.querySelectorAll('dfn.term');
+			for (const dfn of dfnElements) {
+				if (destroyed) return;
+				const dfnEl = dfn as HTMLElement;
+				const fullText = (dfnEl.textContent || '').trim();
+
+				// Three-tier matching:
+				// 1. data-term attribute (highest confidence, from pipeline)
+				// 2. Icelandic text exact match
+				// 3. English fallback from "(e. ...)" suffix
+				let glossaryTerm: GlossaryTerm | undefined;
+
+				// Tier 1: data-term attribute
+				const dataTerm = dfnEl.getAttribute('data-term');
+				if (dataTerm) {
+					glossaryTerm = termMap.get(dataTerm.toLowerCase());
+				}
+
+				// Tier 2: Icelandic text match
+				if (!glossaryTerm) {
+					const icelandicText = stripEnglishSuffix(fullText);
+					const normalized = icelandicText.toLowerCase();
+					glossaryTerm = termMap.get(normalized);
+				}
+
+				// Tier 3: English fallback
+				if (!glossaryTerm) {
+					const english = extractEnglish(fullText);
+					if (english) {
+						glossaryTerm = englishMap.get(english.toLowerCase());
+					}
+				}
+
+				if (!glossaryTerm) continue;
+
+				dfnEl.classList.add('glossary-term');
+				dfnEl.dataset.glossaryMatch = glossaryTerm.term;
+				dfnEl.setAttribute('role', 'button');
+				dfnEl.setAttribute('tabindex', '0');
+				dfnEl.setAttribute(
+					'aria-label',
+					`Skilgreining: ${glossaryTerm.term}` +
+						(glossaryTerm.english ? ` (${glossaryTerm.english})` : '')
+				);
+
+				processedDfnElements.push(dfnEl);
+
+				// Desktop: hover to show
+				const onEnter = () => showTooltip(dfnEl, glossaryTerm!, bookSlug);
+				const onLeave = () => hideTooltip();
+				const onFocus = () => showTooltip(dfnEl, glossaryTerm!, bookSlug);
+				const onBlur = () => hideTooltip();
+
+				dfnEl.addEventListener('mouseenter', onEnter);
+				dfnEl.addEventListener('mouseleave', onLeave);
+				dfnEl.addEventListener('focus', onFocus);
+				dfnEl.addEventListener('blur', onBlur);
+
+				// Mobile: tap to toggle tooltip
+				const onClick = (e: Event) => {
+					e.preventDefault();
+					e.stopPropagation();
+					if (currentSpan === dfnEl) {
+						hideTooltipImmediate();
+					} else {
+						showTooltip(dfnEl, glossaryTerm!, bookSlug);
+					}
+				};
+				dfnEl.addEventListener('click', onClick);
+
+				cleanupListeners.push(() => {
+					dfnEl.removeEventListener('mouseenter', onEnter);
+					dfnEl.removeEventListener('mouseleave', onLeave);
+					dfnEl.removeEventListener('focus', onFocus);
+					dfnEl.removeEventListener('blur', onBlur);
+					dfnEl.removeEventListener('click', onClick);
+				});
+			}
+
+			isProcessed = true;
+		} finally {
+			initPending = false;
 		}
-
-		isProcessed = true;
 	}
 
 	/**
@@ -387,6 +396,21 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 
 	setupTooltipHover();
 
+	// Re-process glossary terms when content changes (client-side navigation
+	// replaces innerHTML but doesn't remount the action)
+	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+	const observer = new MutationObserver(() => {
+		if (destroyed || !get(glossaryHighlighting)) return;
+		if (debounceTimer) clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(() => {
+			debounceTimer = null;
+			if (destroyed || !get(glossaryHighlighting)) return;
+			teardown();
+			init();
+		}, 50);
+	});
+	observer.observe(node, { childList: true });
+
 	// Subscribe to glossaryHighlighting store for reactive toggle
 	const unsubscribe = glossaryHighlighting.subscribe((enabled) => {
 		if (enabled && !isProcessed) {
@@ -399,6 +423,8 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 	return {
 		destroy() {
 			destroyed = true;
+			if (debounceTimer) clearTimeout(debounceTimer);
+			observer.disconnect();
 			unsubscribe();
 			teardown();
 		}
