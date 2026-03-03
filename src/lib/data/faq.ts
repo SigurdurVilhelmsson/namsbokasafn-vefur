@@ -51,7 +51,7 @@ export const faqItems: FaqItem[] = [
 		id: 'studningur',
 		question: 'Hvernig get ég stutt verkefnið?',
 		answer:
-			'Besta leiðin er að nota efnið og deila því! Ef þú ert kennari, segðu samstarfsfólki frá. Ef þú hefur áhuga á að aðstoða við þýðingar eða yfirlestur, sendu póst á <a href="mailto:sigurdurev@kvenno.is">sigurdurev@kvenno.is</a>. Við erum alltaf að leita að fólki sem vill leggja sitt af mörkum.'
+			'Besta leiðin er að nota efnið og deila því! Ef þú ert kennari, segðu samstarfsfólki frá. Ef þú hefur áhuga á að aðstoða við þýðingar eða yfirlestur, sendu póst á <a href="mailto:sigurdur@namsbokasafn.is">sigurdur@namsbokasafn.is</a>. Við erum alltaf að leita að fólki sem vill leggja sitt af mörkum.'
 	},
 	{
 		id: 'hvers-vegna-openstax',
