@@ -313,7 +313,7 @@
 	   ==================================== */
 	.left-desktop {
 		display: none;
-		align-items: center;
+		align-items: baseline;
 		gap: 0.5rem;
 		min-width: 0;
 		flex: 1;
