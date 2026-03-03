@@ -341,6 +341,28 @@ function main() {
 		}
 	}
 
+	// Clean up stale content directories no longer present in source
+	if (existsSync(destDir)) {
+		const existingContentDirs = readdirSync(destDir).filter((name) => {
+			const fullPath = resolve(destDir, name);
+			return statSync(fullPath).isDirectory();
+		});
+
+		const staleDirs = existingContentDirs.filter((dir) => !availableBooks.includes(dir));
+
+		if (staleDirs.length > 0) {
+			console.log('\nCleaning up stale content directories...');
+			for (const stale of staleDirs) {
+				if (options.dryRun) {
+					console.log(`  [DRY-RUN] Would remove stale content: ${stale}/`);
+				} else {
+					console.log(`  Removing stale content: ${stale}/`);
+					rmSync(resolve(destDir, stale), { recursive: true, force: true });
+				}
+			}
+		}
+	}
+
 	console.log(`\nSync complete: ${success} succeeded, ${failed} failed`);
 
 	// Run validation if requested
