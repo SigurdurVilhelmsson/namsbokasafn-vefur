@@ -318,10 +318,14 @@
       {#each activeTier2Groups as group (group.key)}
         {@const entries = tier2Groups[group.key]}
 
-        <div class="subject-group">
-          <h3 class="subject-group-title" style="--group-color: var(--subject-{group.key}, #6b7280)">
-            {group.label}
-          </h3>
+        <details class="subject-accordion" style="--group-color: var(--subject-{group.key}, #6b7280)">
+          <summary class="subject-accordion-header">
+            <span class="subject-accordion-title">{group.label}</span>
+            <span class="subject-accordion-count">{entries.length} {entries.length === 1 ? 'bók' : 'bækur'}</span>
+            <svg class="subject-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 9l-7 7-7-7" />
+            </svg>
+          </summary>
 
           <div class="compact-grid">
             {#each entries as entry (entry.slug)}
@@ -347,7 +351,7 @@
               </article>
             {/each}
           </div>
-        </div>
+        </details>
       {/each}
     </div>
   </section>
@@ -1038,24 +1042,71 @@
     padding-top: 1rem;
   }
 
-  .subject-group {
-    margin-bottom: 2rem;
+  .subject-accordion {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    margin-bottom: 0.75rem;
+    transition: border-color 0.2s;
   }
 
-  .subject-group-title {
+  .subject-accordion[open] {
+    border-color: color-mix(in srgb, var(--group-color) 40%, var(--border-color));
+  }
+
+  .subject-accordion-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    list-style: none;
+    transition: color 0.15s;
+  }
+
+  .subject-accordion-header::-webkit-details-marker {
+    display: none;
+  }
+
+  .subject-accordion-header:hover {
+    color: var(--group-color);
+  }
+
+  .subject-accordion-title {
     font-family: "Bricolage Grotesque", system-ui, sans-serif;
     font-size: 1.0625rem;
     font-weight: 600;
     color: var(--group-color);
-    margin: 0 0 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid color-mix(in srgb, var(--group-color) 20%, transparent);
+  }
+
+  .subject-accordion-count {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    background: color-mix(in srgb, var(--group-color) 10%, transparent);
+    padding: 0.125rem 0.625rem;
+    border-radius: 999px;
+    margin-left: auto;
+  }
+
+  .subject-accordion-chevron {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+    color: var(--text-tertiary);
+    transition: transform 0.2s, color 0.2s;
+  }
+
+  .subject-accordion[open] .subject-accordion-chevron {
+    transform: rotate(180deg);
+    color: var(--group-color);
   }
 
   .compact-grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.75rem;
+    padding: 0 1.25rem 1.25rem;
   }
 
   @media (min-width: 640px) {
@@ -1406,6 +1457,8 @@
     .tool-card-icon,
     .theme-toggle,
     .compact-card,
+    .subject-accordion,
+    .subject-accordion-chevron,
     .faq-chevron,
     .faq-item {
       transition: none !important;
