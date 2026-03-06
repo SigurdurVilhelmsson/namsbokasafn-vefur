@@ -45,6 +45,63 @@ function parseArgs(args) {
 }
 
 /**
+ * Split a composite term like "SI-einingar (Alþjóðlega einingakerfið)" into parts.
+ * Returns all parts: the full string, and each piece split by parentheses.
+ */
+function splitCompositeParts(text) {
+	const parts = [];
+	// Match "prefix (suffix)" pattern
+	const parenMatch = text.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+	if (parenMatch) {
+		parts.push(parenMatch[1].trim());
+		parts.push(parenMatch[2].trim());
+	}
+	return parts;
+}
+
+/**
+ * Singularize a common English plural form.
+ * Handles the most common patterns; not a full morphological analyzer.
+ */
+/**
+ * Singularize a common English plural form.
+ * Returns an array of candidates (may include multiple for ambiguous cases).
+ */
+function singularize(word) {
+	const lower = word.toLowerCase();
+	if (lower.length <= 3) return [];
+
+	const candidates = [];
+
+	// -ies → -y (e.g., "theories" → "theory")
+	if (/[^aeiou]ies$/i.test(word)) {
+		candidates.push(word.slice(0, -3) + 'y');
+	}
+
+	// -ses, -xes, -zes, -ches, -shes → drop -es, and also try drop -s
+	// ("bases" → "base" via -s, "gases" → "gas" via -es)
+	if (/(?:s|x|z|ch|sh)es$/i.test(word)) {
+		candidates.push(word.slice(0, -2)); // gas, match, etc.
+		candidates.push(word.slice(0, -1)); // base, etc.
+	}
+
+	// Generic -s → drop -s (but not -ss like "mass")
+	if (candidates.length === 0 && /[^s]s$/i.test(word)) {
+		candidates.push(word.slice(0, -1));
+	}
+
+	return candidates;
+}
+
+/**
+ * Strip inner parentheticals from extracted English text.
+ * e.g., "alpha particles (α particles)" → "alpha particles"
+ */
+function stripInnerParenthetical(text) {
+	return text.replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+}
+
+/**
  * Load glossary.json and build lookup maps
  */
 function buildGlossaryMaps(glossaryPath) {
@@ -62,10 +119,37 @@ function buildGlossaryMaps(glossaryPath) {
 		if (!icelandicMap.has(icKey)) {
 			icelandicMap.set(icKey, term);
 		}
+
+		// Also index composite Icelandic parts
+		for (const part of splitCompositeParts(term.term)) {
+			const partKey = part.toLowerCase();
+			if (!icelandicMap.has(partKey)) {
+				icelandicMap.set(partKey, term);
+			}
+		}
+
 		if (term.english) {
 			const enKey = term.english.toLowerCase();
 			if (!englishMap.has(enKey)) {
 				englishMap.set(enKey, term);
+			}
+
+			// Also index composite English parts
+			for (const part of splitCompositeParts(term.english)) {
+				const partKey = part.toLowerCase();
+				if (!englishMap.has(partKey)) {
+					englishMap.set(partKey, term);
+				}
+			}
+		}
+
+		// Index alternate English forms
+		if (term.alternateEnglish) {
+			for (const alt of term.alternateEnglish) {
+				const altKey = alt.toLowerCase();
+				if (!englishMap.has(altKey)) {
+					englishMap.set(altKey, term);
+				}
 			}
 		}
 	}
@@ -130,10 +214,34 @@ function processFile(filePath, icelandicMap, englishMap, options) {
 		// Try matching
 		let glossaryTerm = null;
 
-		// Tier 1: English fallback (higher priority since Icelandic is often inflected)
+		// Tier 1: English match (higher priority since Icelandic is often inflected)
 		const english = extractEnglish(plainText);
 		if (english) {
-			glossaryTerm = englishMap.get(english.toLowerCase());
+			const enLower = english.toLowerCase();
+			glossaryTerm = englishMap.get(enLower);
+
+			// Tier 1b: Strip inner parentheticals, e.g. "alpha particles (α particles)" → "alpha particles"
+			if (!glossaryTerm) {
+				const stripped = stripInnerParenthetical(enLower);
+				if (stripped !== enLower) {
+					glossaryTerm = englishMap.get(stripped);
+					// Also try singularizing the stripped form
+					if (!glossaryTerm) {
+						for (const s of singularize(stripped)) {
+							glossaryTerm = englishMap.get(s.toLowerCase());
+							if (glossaryTerm) break;
+						}
+					}
+				}
+			}
+
+			// Tier 1c: Singularize English, e.g. "units" → "unit", "compounds" → "compound"
+			if (!glossaryTerm) {
+				for (const s of singularize(enLower)) {
+					glossaryTerm = englishMap.get(s.toLowerCase());
+					if (glossaryTerm) break;
+				}
+			}
 		}
 
 		// Tier 2: Icelandic exact match

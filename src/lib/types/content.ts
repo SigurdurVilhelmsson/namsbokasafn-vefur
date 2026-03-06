@@ -136,6 +136,7 @@ export interface GlossaryTerm {
   term: string;
   definition: string;
   english?: string;
+  alternateEnglish?: string[];
   chapter?: number;
   section?: string;
   relatedTerms?: string[];

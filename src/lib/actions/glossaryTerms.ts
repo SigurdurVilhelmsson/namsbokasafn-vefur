@@ -189,6 +189,46 @@ function extractEnglish(text: string): string | null {
 }
 
 /**
+ * Split a composite term like "SI-einingar (Alþjóðlega einingakerfið)" into sub-parts.
+ */
+function splitCompositeParts(text: string): string[] {
+	const parts: string[] = [];
+	const parenMatch = text.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+	if (parenMatch) {
+		parts.push(parenMatch[1].trim());
+		parts.push(parenMatch[2].trim());
+	}
+	return parts;
+}
+
+/**
+ * Singularize a common English plural form.
+ */
+function singularize(word: string): string[] {
+	if (word.length <= 3) return [];
+	const candidates: string[] = [];
+	if (/[^aeiou]ies$/i.test(word)) {
+		candidates.push(word.slice(0, -3) + 'y');
+	}
+	if (/(?:s|x|z|ch|sh)es$/i.test(word)) {
+		candidates.push(word.slice(0, -2));
+		candidates.push(word.slice(0, -1));
+	}
+	if (candidates.length === 0 && /[^s]s$/i.test(word)) {
+		candidates.push(word.slice(0, -1));
+	}
+	return candidates;
+}
+
+/**
+ * Strip inner parentheticals from English text.
+ * e.g., "alpha particles (α particles)" → "alpha particles"
+ */
+function stripInnerParenthetical(text: string): string {
+	return text.replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+}
+
+/**
  * Strip the "(e. ...)" English suffix to get the Icelandic term text.
  */
 function stripEnglishSuffix(text: string): string {
@@ -234,22 +274,42 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 
 			if (!sortedTerms.length) return;
 
-			// Build normalized Icelandic lookup map
+			// Build normalized Icelandic lookup map (with composite part indexing)
 			const termMap = new Map<string, GlossaryTerm>();
 			for (const term of sortedTerms) {
 				const key = term.term.toLowerCase();
 				if (!termMap.has(key)) {
 					termMap.set(key, term);
 				}
+				for (const part of splitCompositeParts(term.term)) {
+					const partKey = part.toLowerCase();
+					if (!termMap.has(partKey)) {
+						termMap.set(partKey, term);
+					}
+				}
 			}
 
-			// Build English lookup map for fallback matching
+			// Build English lookup map for fallback matching (with composite part indexing)
 			const englishMap = new Map<string, GlossaryTerm>();
 			for (const term of sortedTerms) {
 				if (term.english) {
 					const key = term.english.toLowerCase();
 					if (!englishMap.has(key)) {
 						englishMap.set(key, term);
+					}
+					for (const part of splitCompositeParts(term.english)) {
+						const partKey = part.toLowerCase();
+						if (!englishMap.has(partKey)) {
+							englishMap.set(partKey, term);
+						}
+					}
+				}
+				if (term.alternateEnglish) {
+					for (const alt of term.alternateEnglish) {
+						const altKey = alt.toLowerCase();
+						if (!englishMap.has(altKey)) {
+							englishMap.set(altKey, term);
+						}
 					}
 				}
 			}
@@ -280,11 +340,34 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 					glossaryTerm = termMap.get(normalized);
 				}
 
-				// Tier 3: English fallback
+				// Tier 3: English fallback (with singularization and parenthetical stripping)
 				if (!glossaryTerm) {
 					const english = extractEnglish(fullText);
 					if (english) {
-						glossaryTerm = englishMap.get(english.toLowerCase());
+						const enLower = english.toLowerCase();
+						glossaryTerm = englishMap.get(enLower);
+
+						// Try stripping inner parentheticals
+						if (!glossaryTerm) {
+							const stripped = stripInnerParenthetical(enLower);
+							if (stripped !== enLower) {
+								glossaryTerm = englishMap.get(stripped);
+								if (!glossaryTerm) {
+									for (const sg of singularize(stripped)) {
+										glossaryTerm = englishMap.get(sg.toLowerCase());
+										if (glossaryTerm) break;
+									}
+								}
+							}
+						}
+
+						// Try singularizing
+						if (!glossaryTerm) {
+							for (const sg of singularize(enLower)) {
+								glossaryTerm = englishMap.get(sg.toLowerCase());
+								if (glossaryTerm) break;
+							}
+						}
 					}
 				}
 
