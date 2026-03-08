@@ -1,14 +1,10 @@
 import type { PageLoad } from './$types';
+import { books } from '$lib/types/book';
 
 export const prerender = true;
 
 export async function entries() {
-	const fs = await import('node:fs');
-	const books = fs
-		.readdirSync('static/content', { withFileTypes: true })
-		.filter((d) => d.isDirectory())
-		.map((d) => d.name);
-	return books.map((slug) => ({ bookSlug: slug }));
+	return books.map((b) => ({ bookSlug: b.slug }));
 }
 
 export const load: PageLoad = async () => {
