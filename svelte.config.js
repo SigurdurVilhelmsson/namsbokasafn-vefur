@@ -11,7 +11,7 @@ const config = {
     adapter: adapter({
       pages: 'build',
       assets: 'build',
-      fallback: 'index.html', // SPA fallback
+      fallback: '200.html', // SPA fallback for unprerendered routes
       precompress: false,
       strict: false // Allow gitignored static files (content is generated)
     }),

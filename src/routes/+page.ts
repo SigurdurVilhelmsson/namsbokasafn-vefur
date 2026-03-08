@@ -3,6 +3,8 @@ import { getTier1Entries, getTier2Entries, getSubjectGroups } from '$lib/data/op
 import type { TableOfContents } from '$lib/types/content';
 import type { BookConfig } from '$lib/types/book';
 
+export const prerender = true;
+
 export async function load({ fetch }: { fetch: typeof globalThis.fetch }) {
 	const allBooks = getAllBooks();
 	const tier1Entries = getTier1Entries();
