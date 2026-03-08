@@ -7,6 +7,19 @@ import {
 } from '$lib/utils/contentLoader';
 import { error, isHttpError, isRedirect, redirect } from '@sveltejs/kit';
 
+export const prerender = true;
+
+export async function entries() {
+	const { readFileSync } = await import('node:fs');
+	const toc = JSON.parse(readFileSync('static/content/efnafraedi-2e/toc.json', 'utf-8'));
+	return (toc.appendices || [])
+		.filter((a: { isInteractive?: boolean }) => !a.isInteractive)
+		.map((a: { letter: string }) => ({
+			bookSlug: 'efnafraedi-2e',
+			appendixLetter: a.letter
+		}));
+}
+
 export const load: PageLoad = async ({ params, fetch }) => {
 	const { bookSlug, appendixLetter } = params;
 

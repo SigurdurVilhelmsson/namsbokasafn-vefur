@@ -9,6 +9,30 @@ import {
 import { error, isHttpError } from '@sveltejs/kit';
 import type { NavigationContext } from '$lib/types/content';
 
+export const prerender = true;
+
+export async function entries() {
+	const { readFileSync } = await import('node:fs');
+	const toc = JSON.parse(readFileSync('static/content/efnafraedi-2e/toc.json', 'utf-8'));
+	const entries: Array<{ bookSlug: string; chapterSlug: string; sectionSlug: string }> = [];
+	for (const ch of toc.chapters) {
+		const chapterSlug = String(ch.number).padStart(2, '0');
+		for (const sec of ch.sections) {
+			// Match getSectionPath logic: numbered sections use "1-1", unnumbered use file basename
+			const sectionSlug =
+				sec.number && sec.number !== ''
+					? sec.number.replace('.', '-')
+					: sec.file.replace(/\.html$/, '');
+			entries.push({
+				bookSlug: 'efnafraedi-2e',
+				chapterSlug,
+				sectionSlug
+			});
+		}
+	}
+	return entries;
+}
+
 export const load: PageLoad = async ({ params, fetch }) => {
 	const { bookSlug, chapterSlug, sectionSlug } = params;
 
