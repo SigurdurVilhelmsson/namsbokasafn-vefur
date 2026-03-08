@@ -1,16 +1,25 @@
 import { error, isHttpError } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { loadTableOfContents, findChapterBySlug } from '$lib/utils/contentLoader';
+import { books } from '$lib/types/book';
 
 export const prerender = true;
 
 export async function entries() {
-	const { readFileSync } = await import('node:fs');
-	const toc = JSON.parse(readFileSync('static/content/efnafraedi-2e/toc.json', 'utf-8'));
-	return toc.chapters.map((ch: { number: number }) => ({
-		bookSlug: 'efnafraedi-2e',
-		chapterSlug: String(ch.number).padStart(2, '0')
-	}));
+	const { readFileSync, existsSync } = await import('node:fs');
+	const entries: Array<{ bookSlug: string; chapterSlug: string }> = [];
+	for (const book of books) {
+		const tocPath = `static/content/${book.slug}/toc.json`;
+		if (!existsSync(tocPath)) continue;
+		const toc = JSON.parse(readFileSync(tocPath, 'utf-8'));
+		for (const ch of toc.chapters) {
+			entries.push({
+				bookSlug: book.slug,
+				chapterSlug: String(ch.number).padStart(2, '0')
+			});
+		}
+	}
+	return entries;
 }
 
 export const load: PageLoad = async ({ params, fetch }) => {
