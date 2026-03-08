@@ -14,6 +14,9 @@
 
 <svelte:head>
 	<title>Svarlykill - {data.chapterTitle} | Námsbókasafn</title>
+	<meta name="description" content="Svarlykill fyrir kafla {data.chapterNumber}: {data.chapterTitle}" />
+	<meta name="robots" content="index, follow" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/svarlykill/{data.chapterNumber}" />
 	<meta property="og:title" content="Svarlykill - {data.chapterTitle} | Námsbókasafn" />
 	<meta property="og:description" content="Svarlykill fyrir kafla {data.chapterNumber}: {data.chapterTitle}" />
 	<meta property="og:type" content="article" />

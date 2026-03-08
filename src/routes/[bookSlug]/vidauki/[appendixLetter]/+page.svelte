@@ -11,6 +11,9 @@
 
 <svelte:head>
 	<title>Viðauki {data.appendix.letter}: {data.appendix.title} | Námsbókasafn</title>
+	<meta name="description" content="Viðauki {data.appendix.letter}: {data.appendix.title}" />
+	<meta name="robots" content="index, follow" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/vidauki/{data.appendixLetter}" />
 	<meta property="og:title" content="Viðauki {data.appendix.letter}: {data.appendix.title} | Námsbókasafn" />
 	<meta property="og:description" content="Viðauki {data.appendix.letter}: {data.appendix.title}" />
 	<meta property="og:type" content="article" />

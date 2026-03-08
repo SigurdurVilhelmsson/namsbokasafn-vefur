@@ -55,10 +55,13 @@
 
 <svelte:head>
 	<title>{data.book?.title ?? 'Bók'} | Námsbókasafn</title>
+	<meta name="description" content="Opið námsefni í efnafræði fyrir framhaldsskóla. Íslensk þýðing á OpenStax Chemistry 2e, gefið út með CC BY 4.0 leyfi." />
+	<meta name="robots" content="index, follow" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}" />
 	<meta property="og:title" content="{data.book?.title ?? 'Bók'} | Námsbókasafn" />
-	<meta property="og:description" content="{data.book?.title ?? 'Kennslubók'} – opin kennslubók á íslensku" />
+	<meta property="og:description" content="Opið námsefni í efnafræði fyrir framhaldsskóla. Íslensk þýðing á OpenStax Chemistry 2e." />
 	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://namsbokasafn.is/{data.book?.slug ?? ''}" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}" />
 </svelte:head>
 
 <div class="book-home">
