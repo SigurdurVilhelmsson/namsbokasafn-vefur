@@ -181,7 +181,18 @@ function sortSections(sections) {
 
 		// If both are special, sort by type order
 		if (aIsSpecial && bIsSpecial) {
-			return specialTypes.indexOf(a.type) - specialTypes.indexOf(b.type);
+			const typeDiff = specialTypes.indexOf(a.type) - specialTypes.indexOf(b.type);
+			if (typeDiff !== 0) return typeDiff;
+			// Same type (e.g., multiple exercise types) — sort by OpenStax order
+			const exerciseOrder = ['multiple-choice', 'fill-in-the-blank', 'short-answer', 'critical-thinking', 'true-false', 'matching', 'visual-exercise'];
+			const aSlug = getBasenameWithoutExt(a.file).replace(/^\d+-/, '');
+			const bSlug = getBasenameWithoutExt(b.file).replace(/^\d+-/, '');
+			const aIdx = exerciseOrder.indexOf(aSlug);
+			const bIdx = exerciseOrder.indexOf(bSlug);
+			if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+			if (aIdx !== -1) return -1;
+			if (bIdx !== -1) return 1;
+			return a.file.localeCompare(b.file);
 		}
 
 		// If only one is special, regular sections come first
