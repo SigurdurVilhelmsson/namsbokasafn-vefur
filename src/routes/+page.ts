@@ -45,8 +45,15 @@ export async function load({ fetch }: { fetch: typeof globalThis.fetch }) {
 		})
 	);
 
+	const translationBooks = books.filter(
+		(b) => b.status === 'available' || b.status === 'in-progress'
+	);
+	const sampleBooks = books.filter((b) => b.status === 'preview');
+
 	return {
 		books,
+		translationBooks,
+		sampleBooks,
 		tier2Groups: getTier2Entries(),
 		subjectGroups: getSubjectGroups()
 	};

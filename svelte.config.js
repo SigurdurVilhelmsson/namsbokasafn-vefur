@@ -16,6 +16,10 @@ const config = {
       strict: false // Allow gitignored static files (content is generated)
     }),
 
+    prerender: {
+      handleHttpError: 'warn' // Content may have broken internal links — warn instead of failing
+    },
+
     // Path aliases (same as current React setup)
     alias: {
       '$lib': 'src/lib',

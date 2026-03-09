@@ -71,7 +71,8 @@ const catalogue: CatalogueEntry[] = [
 		chapterCount: 47,
 		subject: 'biology',
 		openstaxUrl: 'https://openstax.org/details/books/biology-2e',
-		status: 'not-started'
+		status: 'in-progress',
+		bookSlug: 'liffraedi-2e'
 	},
 	{
 		slug: 'biology-ap-courses',
@@ -98,7 +99,8 @@ const catalogue: CatalogueEntry[] = [
 		chapterCount: 26,
 		subject: 'biology',
 		openstaxUrl: 'https://openstax.org/details/books/microbiology',
-		status: 'not-started'
+		status: 'preview',
+		bookSlug: 'orverufraedi'
 	},
 	{
 		slug: 'anatomy-and-physiology-2e',

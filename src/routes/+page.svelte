@@ -10,13 +10,16 @@
   import { faqItems } from '$lib/data/faq';
 
   let { data }: { data: PageData } = $props();
-  let books = $derived(data.books);
+  let translationBooks = $derived(data.translationBooks);
+  let sampleBooks = $derived(data.sampleBooks);
   let tier2Groups = $derived(data.tier2Groups as Record<string, CatalogueEntry[]>);
   let subjectGroups = $derived(data.subjectGroups as SubjectGroup[]);
   let mounted = $state(false);
 
   const subjectIcons: Record<string, string> = {
-    'efnafraedi-2e': 'chemistry'
+    'efnafraedi-2e': 'chemistry',
+    'liffraedi-2e': 'biology',
+    'orverufraedi': 'biology'
   };
 
 
@@ -190,27 +193,109 @@
     </div>
 
     <div class="book-grid">
-      {#each books as book, index (book.id)}
-        {@const isClickable = book.status === 'available' || book.status === 'in-progress' || book.status === 'preview'}
+      {#each translationBooks as book, index (book.id)}
         {@const percentage = book.stats ? Math.round((book.stats.translatedChapters / book.stats.totalChapters) * 100) : 0}
         {@const subject = subjectIcons[book.slug] || 'book'}
 
         <article
-          class="book-card"
-          class:clickable={isClickable}
+          class="book-card clickable"
           style="--subject-color: var(--subject-{subject}, #6b7280); --card-delay: {index * 100}ms"
         >
-          {#if isClickable}
+          <a href="/{book.slug}" class="book-link">
+            <div class="book-card-top">
+              <span
+                class="book-status"
+                class:status-available={book.status === 'available'}
+                class:status-in-progress={book.status === 'in-progress'}
+              >
+                {book.status === 'available' ? 'Í boði' : 'Í vinnslu'}
+              </span>
+            </div>
+            <h3 class="book-title">{book.title}</h3>
+            <p class="book-source">
+              Byggt á {book.source.title}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="external-icon">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+            </p>
+
+            {#if book.stats}
+              <div class="book-progress">
+                <div class="progress-track">
+                  <div class="progress-fill" style="width: {percentage}%"></div>
+                </div>
+                <span class="progress-label">
+                  {book.stats.translatedChapters} / {book.stats.totalChapters} kaflar — {percentage}%
+                </span>
+              </div>
+            {/if}
+
+            {#if book.features}
+              <div class="book-tools">
+                {#if book.features.flashcards}
+                  <span class="tool-icon" title="Minniskort">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="2" y="4" width="20" height="16" rx="2" />
+                      <path d="M12 8v8M8 12h8" />
+                    </svg>
+                  </span>
+                {/if}
+                {#if book.features.glossary}
+                  <span class="tool-icon" title="Orðasafn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+                      <path d="M8 7h8M8 11h6" />
+                    </svg>
+                  </span>
+                {/if}
+                {#if book.features.exercises}
+                  <span class="tool-icon" title="Æfingarverkefni">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M9 11l3 3L22 4" />
+                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                    </svg>
+                  </span>
+                {/if}
+                {#if book.features.periodicTable}
+                  <span class="tool-icon" title="Lotukerfið">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="7" height="7" rx="1" />
+                      <rect x="14" y="3" width="7" height="7" rx="1" />
+                      <rect x="3" y="14" width="7" height="7" rx="1" />
+                      <rect x="14" y="14" width="7" height="7" rx="1" />
+                    </svg>
+                  </span>
+                {/if}
+              </div>
+            {/if}
+
+            <div class="book-cta">
+              <span>Opna bók →</span>
+            </div>
+          </a>
+        </article>
+      {/each}
+    </div>
+
+    {#if sampleBooks.length > 0}
+      <div class="section-header samples-header">
+        <h2>Sýnishorn</h2>
+        <p>Vélþýddir kaflar til kynningar</p>
+      </div>
+
+      <div class="book-grid">
+        {#each sampleBooks as book, index (book.id)}
+          {@const subject = subjectIcons[book.slug] || 'book'}
+
+          <article
+            class="book-card clickable"
+            style="--subject-color: var(--subject-{subject}, #6b7280); --card-delay: {index * 100}ms"
+          >
             <a href="/{book.slug}" class="book-link">
               <div class="book-card-top">
-                <span
-                  class="book-status"
-                  class:status-available={book.status === 'available'}
-                  class:status-in-progress={book.status === 'in-progress'}
-                  class:status-preview={book.status === 'preview'}
-                >
-                  {book.status === 'available' ? 'Í boði' : book.status === 'in-progress' ? 'Í vinnslu' : book.status === 'preview' ? 'Forskoðun' : 'Væntanlegt'}
-                </span>
+                <span class="book-status status-preview">Forskoðun</span>
               </div>
               <h3 class="book-title">{book.title}</h3>
               <p class="book-source">
@@ -222,77 +307,19 @@
                 </svg>
               </p>
 
-              {#if book.status === 'preview'}
-                <div class="book-preview-info">
-                  <span class="preview-label">1 kafli í forskoðun</span>
-                  <span class="preview-note">Vélþýðing — leitum að ritstjóra</span>
-                </div>
-              {:else if book.stats}
-                <div class="book-progress">
-                  <div class="progress-track">
-                    <div class="progress-fill" style="width: {percentage}%"></div>
-                  </div>
-                  <span class="progress-label">
-                    {book.stats.translatedChapters} / {book.stats.totalChapters} kaflar — {percentage}%
-                  </span>
-                </div>
-              {/if}
-
-              {#if book.features && book.status !== 'preview'}
-                <div class="book-tools">
-                  {#if book.features.flashcards}
-                    <span class="tool-icon" title="Minniskort">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="2" y="4" width="20" height="16" rx="2" />
-                        <path d="M12 8v8M8 12h8" />
-                      </svg>
-                    </span>
-                  {/if}
-                  {#if book.features.glossary}
-                    <span class="tool-icon" title="Orðasafn">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-                        <path d="M8 7h8M8 11h6" />
-                      </svg>
-                    </span>
-                  {/if}
-                  {#if book.features.exercises}
-                    <span class="tool-icon" title="Æfingarverkefni">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 11l3 3L22 4" />
-                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                      </svg>
-                    </span>
-                  {/if}
-                  {#if book.features.periodicTable}
-                    <span class="tool-icon" title="Lotukerfið">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="7" height="7" rx="1" />
-                        <rect x="14" y="3" width="7" height="7" rx="1" />
-                        <rect x="3" y="14" width="7" height="7" rx="1" />
-                        <rect x="14" y="14" width="7" height="7" rx="1" />
-                      </svg>
-                    </span>
-                  {/if}
-                </div>
-              {/if}
+              <div class="book-preview-info">
+                <span class="preview-label">{book.stats?.translatedChapters ?? 1} kafli í forskoðun</span>
+                <span class="preview-note">Vélþýðing — leitum að ritstjóra</span>
+              </div>
 
               <div class="book-cta">
                 <span>Opna bók →</span>
               </div>
             </a>
-          {:else}
-            <div class="book-link disabled">
-              <div class="book-card-top">
-                <span class="book-status status-coming-soon">Væntanlegt</span>
-              </div>
-              <h3 class="book-title">{book.title}</h3>
-              <p class="book-source">Byggt á {book.source.title}</p>
-            </div>
-          {/if}
-        </article>
-      {/each}
-    </div>
+          </article>
+        {/each}
+      </div>
+    {/if}
 
     <!-- Intro paragraph between tiers -->
     <div class="catalogue-intro">
@@ -782,6 +809,10 @@
     margin-bottom: 2.5rem;
   }
 
+  .samples-header {
+    margin-top: 3rem;
+  }
+
   .section-header h2 {
     font-family: "Bricolage Grotesque", system-ui, sans-serif;
     font-size: 1.75rem;
@@ -852,11 +883,6 @@
     transform: translateY(-2px);
   }
 
-  .book-link.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
   .book-card-top {
     display: flex;
     justify-content: flex-end;
@@ -894,11 +920,6 @@
   :global(.dark) .status-preview {
     background: rgba(59, 130, 246, 0.3);
     color: #93c5fd;
-  }
-
-  .status-coming-soon {
-    background: var(--bg-tertiary);
-    color: var(--text-tertiary);
   }
 
   .book-title {
