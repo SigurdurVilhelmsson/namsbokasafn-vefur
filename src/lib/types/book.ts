@@ -58,6 +58,62 @@ export const books: BookConfig[] = [
       exercises: true,
       periodicTable: true
     }
+  },
+  {
+    id: 'liffraedi-2e',
+    slug: 'liffraedi-2e',
+    title: 'Líffræði',
+    subtitle: 'Þýðing á OpenStax Biology 2e',
+    description: 'Gagnvirkur veflesari fyrir líffræðinám á framhaldsskólastigi.',
+    subject: 'raunvisindi',
+    coverImage: '/covers/liffraedi-2e.svg',
+    translator: 'Þórhallur Halldórsson',
+    status: 'in-progress',
+    source: {
+      title: 'Biology 2e',
+      publisher: 'OpenStax',
+      url: 'https://openstax.org/details/books/biology-2e',
+      authors: ['Mary Ann Clark', 'Matthew Douglas', 'Jung Choi'],
+      license: 'CC BY 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
+    },
+    stats: {
+      totalChapters: 47,
+      translatedChapters: 1
+    },
+    features: {
+      glossary: true,
+      flashcards: false,
+      exercises: true
+    }
+  },
+  {
+    id: 'orverufraedi',
+    slug: 'orverufraedi',
+    title: 'Örverufræði',
+    subtitle: 'Sýnishorn úr OpenStax Microbiology',
+    description: 'Vélþýddur sýniskafli úr Microbiology.',
+    subject: 'raunvisindi',
+    coverImage: '/covers/orverufraedi.svg',
+    translator: 'Sigurður E. Vilhelmsson',
+    status: 'preview',
+    source: {
+      title: 'Microbiology',
+      publisher: 'OpenStax',
+      url: 'https://openstax.org/details/books/microbiology',
+      authors: ['Nina Parker', 'Mark Schneegurt', 'Anh-Hue Thi Tu', 'Philip Lister', 'Brian M. Forster'],
+      license: 'CC BY 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
+    },
+    stats: {
+      totalChapters: 26,
+      translatedChapters: 1
+    },
+    features: {
+      glossary: true,
+      flashcards: false,
+      exercises: false
+    }
   }
 ];
 
