@@ -20,15 +20,29 @@
   --os-link-color: #027eb5;
   --os-green: #4caf50;
 
-  /* Note type colors */
-  --note-link-learning-bg: #e8f4f8;
-  --note-link-learning-border: #b8d4e3;
-  --note-everyday-life-bg: #fff8e6;
-  --note-everyday-life-border: #f0d88e;
-  --note-sciences-bg: #e8f5e9;
-  --note-sciences-border: #a5d6a7;
-  --note-portrait-bg: #fce4ec;
-  --note-portrait-border: #f48fb1;
+  /* Note type color categories (6 categories, shared across all books) */
+  --note-blue-bg: #e8f4f8;
+  --note-blue-border: #b8d4e3;
+  --note-green-bg: #e8f5e9;
+  --note-green-border: #a5d6a7;
+  --note-yellow-bg: #fff8e6;
+  --note-yellow-border: #f0d88e;
+  --note-pink-bg: #fce4ec;
+  --note-pink-border: #f48fb1;
+  --note-orange-bg: #fff3e0;
+  --note-orange-border: #ffcc80;
+  --note-purple-bg: #f3e5f5;
+  --note-purple-border: #ce93d8;
+
+  /* Legacy aliases (keep for backwards compatibility) */
+  --note-link-learning-bg: var(--note-blue-bg);
+  --note-link-learning-border: var(--note-blue-border);
+  --note-everyday-life-bg: var(--note-yellow-bg);
+  --note-everyday-life-border: var(--note-yellow-border);
+  --note-sciences-bg: var(--note-green-bg);
+  --note-sciences-border: var(--note-green-border);
+  --note-portrait-bg: var(--note-pink-bg);
+  --note-portrait-border: var(--note-pink-border);
 }
 
 /* ==============================================
@@ -234,6 +248,98 @@ article.cnx-module aside.note-chemist-portrait,
 article.cnx-module aside.note.chemist-portrait {
   background-color: var(--note-portrait-bg);
   border-color: var(--note-portrait-border);
+}
+
+/* Chemistry: Green Chemistry - Green tint */
+article.cnx-module aside.note.green-chemistry {
+  background-color: var(--note-green-bg);
+  border-color: var(--note-green-border);
+}
+
+/* Chemistry: Safety Hazard - Orange tint */
+article.cnx-module aside.note.safety-hazard {
+  background-color: var(--note-orange-bg);
+  border-color: var(--note-orange-border);
+}
+
+/* Chemistry: Lab Equipment - Orange tint */
+article.cnx-module aside.note.lab-equipment {
+  background-color: var(--note-orange-bg);
+  border-color: var(--note-orange-border);
+}
+
+/* Chemistry: Chem Connections - Green tint */
+article.cnx-module aside.note.chem-connections {
+  background-color: var(--note-green-bg);
+  border-color: var(--note-green-border);
+}
+
+/* ==============================================
+   NOTES — BIOLOGY
+   ============================================== */
+
+/* Biology: Visual Connection - Blue tint */
+article.cnx-module aside.note.visual-connection {
+  background-color: var(--note-blue-bg);
+  border-color: var(--note-blue-border);
+}
+
+/* Biology: Evolution - Green tint */
+article.cnx-module aside.note.evolution {
+  background-color: var(--note-green-bg);
+  border-color: var(--note-green-border);
+}
+
+/* Biology: Career - Pink tint */
+article.cnx-module aside.note.career {
+  background-color: var(--note-pink-bg);
+  border-color: var(--note-pink-border);
+}
+
+/* Biology: Interactive - Blue tint */
+article.cnx-module aside.note.interactive {
+  background-color: var(--note-blue-bg);
+  border-color: var(--note-blue-border);
+}
+
+/* ==============================================
+   NOTES — MICROBIOLOGY
+   ============================================== */
+
+/* Microbiology: Check Your Understanding - Purple tint */
+article.cnx-module aside.note.check-your-understanding {
+  background-color: var(--note-purple-bg);
+  border-color: var(--note-purple-border);
+}
+
+/* Microbiology: Clinical Focus - Yellow tint */
+article.cnx-module aside.note.clinical-focus {
+  background-color: var(--note-yellow-bg);
+  border-color: var(--note-yellow-border);
+}
+
+/* Microbiology: Micro Connection - Green tint */
+article.cnx-module aside.note.micro-connection {
+  background-color: var(--note-green-bg);
+  border-color: var(--note-green-border);
+}
+
+/* Microbiology: Disease Profile - Pink tint */
+article.cnx-module aside.note.disease-profile {
+  background-color: var(--note-pink-bg);
+  border-color: var(--note-pink-border);
+}
+
+/* Microbiology: Eye on Ethics - Orange tint */
+article.cnx-module aside.note.eye-on-ethics {
+  background-color: var(--note-orange-bg);
+  border-color: var(--note-orange-border);
+}
+
+/* Microbiology: Case in Point - Yellow tint */
+article.cnx-module aside.note.case-in-point {
+  background-color: var(--note-yellow-bg);
+  border-color: var(--note-yellow-border);
 }
 
 /* ==============================================
@@ -576,6 +682,34 @@ article.chapter-resource.exercises .exercises-section h2:first-child {
   margin-top: 0;
 }
 
+/* Exercise type groups (multi-type books like Biology/Microbiology) */
+article.chapter-resource.exercises .exercise-type-group {
+  margin-bottom: 40px;
+}
+
+article.chapter-resource.exercises .exercise-type-heading {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 40px 0 20px;
+  padding-bottom: 12px;
+  color: var(--os-text-dark);
+  border-bottom: 2px solid var(--os-link-color);
+}
+
+article.chapter-resource.exercises
+  .exercise-type-group:first-child
+  .exercise-type-heading {
+  margin-top: 0;
+}
+
+article.chapter-resource.exercises .exercise-type-group .exercises-section h3 {
+  font-size: 18px;
+  margin: 25px 0 12px;
+  color: var(--os-text-dark);
+  border-bottom: 1px solid var(--os-gray-border);
+  padding-bottom: 8px;
+}
+
 /* ==============================================
    ANSWER KEY PAGE
    ============================================== */
@@ -690,15 +824,19 @@ article.cnx-module strong {
   --os-link-color: #5bb8d8;
   --os-green: #66bb6a;
 
-  /* Note type colors — muted for dark backgrounds */
-  --note-link-learning-bg: rgba(91, 184, 216, 0.12);
-  --note-link-learning-border: rgba(91, 184, 216, 0.3);
-  --note-everyday-life-bg: rgba(240, 216, 142, 0.12);
-  --note-everyday-life-border: rgba(240, 216, 142, 0.3);
-  --note-sciences-bg: rgba(165, 214, 167, 0.12);
-  --note-sciences-border: rgba(165, 214, 167, 0.3);
-  --note-portrait-bg: rgba(244, 143, 177, 0.12);
-  --note-portrait-border: rgba(244, 143, 177, 0.3);
+  /* Note type color categories — muted for dark backgrounds */
+  --note-blue-bg: rgba(91, 184, 216, 0.12);
+  --note-blue-border: rgba(91, 184, 216, 0.3);
+  --note-green-bg: rgba(165, 214, 167, 0.12);
+  --note-green-border: rgba(165, 214, 167, 0.3);
+  --note-yellow-bg: rgba(240, 216, 142, 0.12);
+  --note-yellow-border: rgba(240, 216, 142, 0.3);
+  --note-pink-bg: rgba(244, 143, 177, 0.12);
+  --note-pink-border: rgba(244, 143, 177, 0.3);
+  --note-orange-bg: rgba(255, 204, 128, 0.12);
+  --note-orange-border: rgba(255, 204, 128, 0.3);
+  --note-purple-bg: rgba(206, 147, 216, 0.12);
+  --note-purple-border: rgba(206, 147, 216, 0.3);
 }
 
 /* Exercise blocks */
