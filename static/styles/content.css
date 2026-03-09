@@ -103,6 +103,44 @@ article.cnx-module header h1 {
 }
 
 /* ==============================================
+   CHAPTER OUTLINE (intro pages)
+   ============================================== */
+
+.chapter-outline {
+  background-color: var(--os-gray-bg);
+  border: 2px solid var(--os-gray-border);
+  padding: 15px 20px;
+  margin: 20px 0 30px;
+}
+
+.chapter-outline h2 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--os-text-body);
+  margin: 0 0 10px;
+}
+
+.chapter-outline ul {
+  margin: 0;
+  padding-left: 25px;
+  list-style-type: none;
+}
+
+.chapter-outline li {
+  margin-bottom: 5px;
+}
+
+.chapter-outline a {
+  color: var(--os-link);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.chapter-outline a:hover {
+  text-decoration: underline;
+}
+
+/* ==============================================
    SECTION HEADINGS
    ============================================== */
 
