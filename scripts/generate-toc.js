@@ -134,6 +134,11 @@ function getSectionType(filename) {
 	if (name.includes('exercises') || name.includes('aefingar') || name.endsWith('-exercises')) {
 		return 'exercises';
 	}
+	// Per-type exercise files (microbiology split: multiple-choice, fill-in-the-blank, etc.)
+	const exerciseTypeSlugs = ['multiple-choice', 'fill-in-the-blank', 'short-answer', 'critical-thinking', 'true-false', 'matching', 'visual-exercise'];
+	if (exerciseTypeSlugs.some(slug => name.endsWith('-' + slug))) {
+		return 'exercises';
+	}
 	if (name.includes('answer-key') || name.includes('svarlykill')) {
 		return 'answer-key';
 	}
