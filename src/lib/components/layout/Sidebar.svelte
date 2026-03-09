@@ -72,6 +72,23 @@
 		settings.setSidebarOpen(false);
 	}
 
+	// Track which chapters have their review sections expanded
+	let reviewExpandedChapters: Set<number> = $state(new Set());
+
+	function toggleReview(chapterNumber: number) {
+		const newSet = new Set(reviewExpandedChapters);
+		if (newSet.has(chapterNumber)) {
+			newSet.delete(chapterNumber);
+		} else {
+			newSet.add(chapterNumber);
+		}
+		reviewExpandedChapters = newSet;
+	}
+
+	// End-of-chapter section types that go into the "Upprifjun" foldout
+	// Summary, glossary, and equations stay in the main list (like OpenStax)
+	const reviewTypes = new Set(['exercises']);
+
 	// Reactive helpers using subscribed progress (use chapter/section paths)
 	function isRead(chapterPath: string, sectionPath: string): boolean {
 		return isSectionRead(progress, bookSlug, chapterPath, sectionPath);
@@ -150,8 +167,11 @@
 
 							<!-- Sections -->
 							{#if expanded}
+								{@const bodySections = chapter.sections.filter(s => !s.type || !reviewTypes.has(s.type))}
+								{@const reviewSections = chapter.sections.filter(s => s.type && reviewTypes.has(s.type))}
+								{@const reviewExpanded = reviewExpandedChapters.has(chapter.number)}
 								<ul id="chapter-{chapter.number}-sections" class="section-list">
-									{#each chapter.sections as section (section.file)}
+									{#each bodySections as section (section.file)}
 										{@const sectionPath = getSectionPath(section)}
 										{@const isCurrent = isCurrentChapter && (sectionParam === sectionPath || sectionParam === section.slug)}
 										{@const isReadSection = isRead(chapterPath, sectionPath)}
@@ -205,6 +225,112 @@
 											</a>
 										</li>
 									{/each}
+
+									<!-- Review sections: foldout if 2+ exercise types, otherwise inline -->
+									{#if reviewSections.length > 1}
+										<li class="review-foldout">
+											<button
+												onclick={() => toggleReview(chapter.number)}
+												aria-expanded={reviewExpanded}
+												aria-controls="chapter-{chapter.number}-review"
+												class="review-toggle"
+											>
+												<span class="review-toggle-label">Upprifjun</span>
+												<svg
+													class="review-chevron {reviewExpanded ? 'review-chevron--open' : ''}"
+													fill="none"
+													stroke="currentColor"
+													viewBox="0 0 24 24"
+												>
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+												</svg>
+											</button>
+
+											{#if reviewExpanded}
+												<ul id="chapter-{chapter.number}-review" class="section-list review-list">
+													{#each reviewSections as section (section.file)}
+														{@const sectionPath = getSectionPath(section)}
+														{@const isCurrent = isCurrentChapter && (sectionParam === sectionPath || sectionParam === section.slug)}
+														{@const isReadSection = isRead(chapterPath, sectionPath)}
+														{@const readingTime = section.metadata?.readingTime}
+														<li>
+															<a
+																href="/{bookSlug}/kafli/{chapterPath}/{sectionPath}"
+																class="section-link {isCurrent ? 'section-link--current' : ''}"
+															>
+																<span class="section-dot-wrap">
+																	{#if isReadSection}
+																		<span class="section-dot section-dot--read"></span>
+																	{:else if isCurrent}
+																		<span class="section-progress-ring">
+																			<svg class="section-ring-svg" viewBox="0 0 20 20">
+																				<circle cx="10" cy="10" r="8" fill="none" stroke="var(--border-color)" stroke-width="2" />
+																				<circle cx="10" cy="10" r="8" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-dasharray="50.27" stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)} stroke-linecap="round" class="section-ring-progress" />
+																			</svg>
+																			<span class="section-dot section-dot--current"></span>
+																		</span>
+																	{:else}
+																		<span class="section-dot section-dot--unread"></span>
+																	{/if}
+																</span>
+																<div class="flex-1 min-w-0">
+																	<span class="section-title">{section.title}</span>
+																	{#if readingTime && !isReadSection}
+																		<span class="section-meta">
+																			<svg class="section-meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+																			</svg>
+																			{readingTime} min
+																		</span>
+																	{/if}
+																</div>
+															</a>
+														</li>
+													{/each}
+												</ul>
+											{/if}
+										</li>
+									{:else}
+										{#each reviewSections as section (section.file)}
+											{@const sectionPath = getSectionPath(section)}
+											{@const isCurrent = isCurrentChapter && (sectionParam === sectionPath || sectionParam === section.slug)}
+											{@const isReadSection = isRead(chapterPath, sectionPath)}
+											{@const readingTime = section.metadata?.readingTime}
+											<li>
+												<a
+													href="/{bookSlug}/kafli/{chapterPath}/{sectionPath}"
+													class="section-link {isCurrent ? 'section-link--current' : ''}"
+												>
+													<span class="section-dot-wrap">
+														{#if isReadSection}
+															<span class="section-dot section-dot--read"></span>
+														{:else if isCurrent}
+															<span class="section-progress-ring">
+																<svg class="section-ring-svg" viewBox="0 0 20 20">
+																	<circle cx="10" cy="10" r="8" fill="none" stroke="var(--border-color)" stroke-width="2" />
+																	<circle cx="10" cy="10" r="8" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-dasharray="50.27" stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)} stroke-linecap="round" class="section-ring-progress" />
+																</svg>
+																<span class="section-dot section-dot--current"></span>
+															</span>
+														{:else}
+															<span class="section-dot section-dot--unread"></span>
+														{/if}
+													</span>
+													<div class="flex-1 min-w-0">
+														<span class="section-title">{section.title}</span>
+														{#if readingTime && !isReadSection}
+															<span class="section-meta">
+																<svg class="section-meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+																	<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+																</svg>
+																{readingTime} min
+															</span>
+														{/if}
+													</div>
+												</a>
+											</li>
+										{/each}
+									{/if}
 								</ul>
 							{/if}
 						</li>
@@ -668,6 +794,58 @@
 
 	.section-ring-progress {
 		transition: stroke-dashoffset 0.15s;
+	}
+
+	/* ====================================
+	   REVIEW FOLDOUT (end-of-chapter sections)
+	   ==================================== */
+	.review-foldout {
+		margin-top: 0.25rem;
+	}
+
+	.review-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: calc(100% - 1rem);
+		padding: 0.375rem 0.75rem;
+		margin: 0 0.5rem;
+		border: none;
+		border-radius: var(--radius-md);
+		background: transparent;
+		color: var(--text-tertiary);
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		cursor: pointer;
+		transition: background 0.15s, color 0.15s;
+	}
+
+	.review-toggle:hover {
+		background: var(--bg-tertiary);
+		color: var(--text-secondary);
+	}
+
+	.review-toggle-label {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	.review-chevron {
+		width: 0.75rem;
+		height: 0.75rem;
+		flex-shrink: 0;
+		transition: transform 0.2s;
+	}
+
+	.review-chevron--open {
+		transform: rotate(90deg);
+	}
+
+	.review-list {
+		padding-left: 0;
 	}
 
 	/* ====================================
