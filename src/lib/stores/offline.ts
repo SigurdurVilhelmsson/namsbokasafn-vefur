@@ -22,6 +22,7 @@ export interface DownloadProgress {
 	status: 'idle' | 'estimating' | 'downloading' | 'complete' | 'error';
 	totalFiles: number;
 	downloadedFiles: number;
+	failedFiles: number;
 	totalBytes: number;
 	downloadedBytes: number;
 	error: string | null;
@@ -114,6 +115,7 @@ function createOfflineStore() {
 					status: 'downloading',
 					totalFiles,
 					downloadedFiles: 0,
+					failedFiles: 0,
 					totalBytes: 0,
 					downloadedBytes: 0,
 					error: null
@@ -280,7 +282,7 @@ export function extractImageUrls(content: string, basePath: string): string[] {
 export async function downloadBook(
 	bookSlug: string,
 	onProgress?: (downloaded: number, total: number) => void
-): Promise<{ success: boolean; error?: string; sizeBytes: number }> {
+): Promise<{ success: boolean; error?: string; sizeBytes: number; failedCount?: number }> {
 	if (!browser) {
 		return { success: false, error: 'Not in browser', sizeBytes: 0 };
 	}
@@ -301,6 +303,7 @@ export async function downloadBook(
 		const imagesCache = await caches.open(IMAGES_CACHE);
 
 		let downloadedFiles = 0;
+		let failedCount = 0;
 		let totalBytes = 0;
 		const allImageUrls = new Set<string>();
 
@@ -313,6 +316,7 @@ export async function downloadBook(
 				const response = await fetch(url);
 				if (!response.ok) {
 					console.warn(`Failed to fetch ${url}`);
+					failedCount++;
 					continue;
 				}
 
@@ -334,6 +338,7 @@ export async function downloadBook(
 				onProgress?.(downloadedFiles, contentUrls.length + allImageUrls.size);
 			} catch (e) {
 				console.warn(`Error fetching ${url}:`, e);
+				failedCount++;
 			}
 		}
 
@@ -346,6 +351,7 @@ export async function downloadBook(
 				const response = await fetch(url);
 				if (!response.ok) {
 					console.warn(`Failed to fetch image ${url}`);
+					failedCount++;
 					continue;
 				}
 
@@ -359,13 +365,25 @@ export async function downloadBook(
 				onProgress?.(downloadedFiles, totalFiles);
 			} catch (e) {
 				console.warn(`Error fetching image ${url}:`, e);
+				failedCount++;
 			}
 		}
 
-		// Mark as complete
+		// Check if too many files failed (>20% of total)
+		if (failedCount > 0 && totalFiles > 0) {
+			const failureRate = failedCount / totalFiles;
+			if (failureRate > 0.2) {
+				offline.setError(
+					`Niðurhal mistókst að hluta: ${failedCount} af ${totalFiles} skrám tókust ekki`
+				);
+				return { success: false, error: `${failedCount} files failed`, sizeBytes: totalBytes, failedCount };
+			}
+		}
+
+		// Mark as complete (may have minor failures)
 		offline.completeDownload(bookSlug, totalBytes);
 
-		return { success: true, sizeBytes: totalBytes };
+		return { success: true, sizeBytes: totalBytes, failedCount: failedCount > 0 ? failedCount : undefined };
 	} catch (e) {
 		const error = e instanceof Error ? e.message : 'Villa við niðurhal';
 		offline.setError(error);
