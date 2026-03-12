@@ -197,7 +197,8 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 	}
 
 	const { bookSlug, chapterSlug, sectionSlug, sectionType, chapterNumber } = options;
-	const buttons: HTMLButtonElement[] = [];
+	let buttons: HTMLButtonElement[] = [];
+	let links: HTMLAnchorElement[] = [];
 
 	// Add styles
 	addStyles();
@@ -211,151 +212,164 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 		sectionSlug.includes('answer-key') ||
 		sectionSlug.includes('svarlykill');
 
-	// Track created link elements for cleanup
-	const links: HTMLAnchorElement[] = [];
-
 	// Determine the exercises section slug for linking back from answer key
 	const exercisesSectionSlug = sectionSlug
 		.replace('answer-key', 'exercises')
 		.replace('svarlykill', 'aefingar');
 
-	// Find exercise/answer containers
-	if (isExercisePage && chapterNumber) {
-		// On exercises page - add "See answer" links to odd-numbered exercises
-		// Answer keys are now at /svarlykill/[chapter] route
-		const exercises = node.querySelectorAll<HTMLElement>('.practice-problem-container, .eoc-exercise');
+	function cleanup() {
+		buttons.forEach((b) => b.remove());
+		links.forEach((l) => {
+			l.parentElement?.classList.remove('has-answer-link', 'has-exercise-link');
+			l.remove();
+		});
+		buttons = [];
+		links = [];
+	}
 
-		exercises.forEach((exercise) => {
-			// Get exercise ID and number
-			const exerciseId = exercise.dataset.problemId || exercise.id || exercise.dataset.exerciseId;
-			const exerciseNum = exercise.dataset.exerciseNumber;
-			if (!exerciseId) return;
+	function initialize() {
+		cleanup();
 
-			// Only odd-numbered exercises have answers in OpenStax
-			// Exercise numbers are now in format "1.1", "9.105" (chapter.exerciseNum)
-			// Extract just the exercise number after the decimal point
-			const numStr = exerciseNum || '0';
-			const num = numStr.includes('.')
-				? parseInt(numStr.split('.')[1], 10)
-				: parseInt(numStr, 10);
-			if (num > 0 && num % 2 === 0) return; // Skip even numbers
+		// Find exercise/answer containers
+		if (isExercisePage && chapterNumber) {
+			// On exercises page - add "See answer" links to odd-numbered exercises
+			// Answer keys are now at /svarlykill/[chapter] route
+			const exercises = node.querySelectorAll<HTMLElement>('.practice-problem-container, .eoc-exercise');
 
-			// For eoc-exercise, make the number itself a link (OpenStax style)
-			// Link to the new answer key route: /svarlykill/[chapter]#[exerciseId]
-			if (exercise.classList.contains('eoc-exercise') && exerciseNum) {
-				const url = `/${bookSlug}/svarlykill/${chapterNumber}#${exerciseId}`;
-				const numberLink = createNumberLink(
-					exerciseNum,
-					`Fara í svar við æfingu ${exerciseNum}`,
-					url
-				);
+			exercises.forEach((exercise) => {
+				// Get exercise ID and number
+				const exerciseId = exercise.dataset.problemId || exercise.id || exercise.dataset.exerciseId;
+				const exerciseNum = exercise.dataset.exerciseNumber;
+				if (!exerciseId) return;
 
-				// Add class to hide the ::before pseudo-element
-				exercise.classList.add('has-answer-link');
+				// Only odd-numbered exercises have answers in OpenStax
+				// Exercise numbers are now in format "1.1", "9.105" (chapter.exerciseNum)
+				// Extract just the exercise number after the decimal point
+				const numStr = exerciseNum || '0';
+				const num = numStr.includes('.')
+					? parseInt(numStr.split('.')[1], 10)
+					: parseInt(numStr, 10);
+				if (num > 0 && num % 2 === 0) return; // Skip even numbers
 
-				// Prepend the number link to the exercise
-				exercise.insertBefore(numberLink, exercise.firstChild);
-				links.push(numberLink);
-			} else {
-				// For practice-problem-container, use button in footer
-				const button = createLinkButton(
-					'Svar',
-					'Fara í svar við þessari æfingu',
-					() => {
-						const url = `/${bookSlug}/svarlykill/${chapterNumber}#${exerciseId}`;
-						goto(url);
+				// For eoc-exercise, make the number itself a link (OpenStax style)
+				// Link to the new answer key route: /svarlykill/[chapter]#[exerciseId]
+				if (exercise.classList.contains('eoc-exercise') && exerciseNum) {
+					const url = `/${bookSlug}/svarlykill/${chapterNumber}#${exerciseId}`;
+					const numberLink = createNumberLink(
+						exerciseNum,
+						`Fara í svar við æfingu ${exerciseNum}`,
+						url
+					);
+
+					// Add class to hide the ::before pseudo-element
+					exercise.classList.add('has-answer-link');
+
+					// Prepend the number link to the exercise
+					exercise.insertBefore(numberLink, exercise.firstChild);
+					links.push(numberLink);
+				} else {
+					// For practice-problem-container, use button in footer
+					const button = createLinkButton(
+						'Svar',
+						'Fara í svar við þessari æfingu',
+						() => {
+							const url = `/${bookSlug}/svarlykill/${chapterNumber}#${exerciseId}`;
+							goto(url);
+						}
+					);
+
+					let footer = exercise.querySelector('.practice-problem-footer');
+					if (!footer) {
+						footer = document.createElement('div');
+						footer.className = 'practice-problem-footer';
+						exercise.appendChild(footer);
 					}
-				);
-
-				let footer = exercise.querySelector('.practice-problem-footer');
-				if (!footer) {
-					footer = document.createElement('div');
-					footer.className = 'practice-problem-footer';
-					exercise.appendChild(footer);
+					footer.appendChild(button);
+					buttons.push(button);
 				}
-				footer.appendChild(button);
-				buttons.push(button);
-			}
-		});
-	}
+			});
+		}
 
-	if (isAnswerKeyPage && chapterSlug) {
-		// On answer-key page - make numbers link back to exercises
-		// Link back to /kafli/[chapterSlug]/[exercises-slug]#[exerciseId]
-		const answers = node.querySelectorAll<HTMLElement>('.answer-entry');
+		if (isAnswerKeyPage && chapterSlug) {
+			// On answer-key page - make numbers link back to exercises
+			// Link back to /kafli/[chapterSlug]/[exercises-slug]#[exerciseId]
+			const answers = node.querySelectorAll<HTMLElement>('.answer-entry');
 
-		answers.forEach((answer) => {
-			const exerciseId = answer.dataset.exerciseId || answer.id;
-			const exerciseNum = answer.dataset.exerciseNumber;
-			if (!exerciseId) return;
+			answers.forEach((answer) => {
+				const exerciseId = answer.dataset.exerciseId || answer.id;
+				const exerciseNum = answer.dataset.exerciseNumber;
+				if (!exerciseId) return;
 
-			// Make the number itself a link back to the exercise (OpenStax style)
-			// Exercises are at /kafli/[chapterSlug]/[chapter]-exercises
-			if (exerciseNum) {
-				const exercisesSlug = chapterNumber ? `${chapterNumber}-exercises` : exercisesSectionSlug;
-				const url = `/${bookSlug}/kafli/${chapterSlug}/${exercisesSlug}#${exerciseId}`;
-				const numberLink = createNumberLink(
-					exerciseNum,
-					`Fara í æfingu ${exerciseNum}`,
-					url
-				);
+				// Make the number itself a link back to the exercise (OpenStax style)
+				// Exercises are at /kafli/[chapterSlug]/[chapter]-exercises
+				if (exerciseNum) {
+					const exercisesSlug = chapterNumber ? `${chapterNumber}-exercises` : exercisesSectionSlug;
+					const url = `/${bookSlug}/kafli/${chapterSlug}/${exercisesSlug}#${exerciseId}`;
+					const numberLink = createNumberLink(
+						exerciseNum,
+						`Fara í æfingu ${exerciseNum}`,
+						url
+					);
 
-				// Add class to hide the ::before pseudo-element
-				answer.classList.add('has-exercise-link');
+					// Add class to hide the ::before pseudo-element
+					answer.classList.add('has-exercise-link');
 
-				// Prepend the number link to the answer
-				answer.insertBefore(numberLink, answer.firstChild);
-				links.push(numberLink);
-			} else {
-				// Fallback to button if no number
-				const button = createLinkButton(
-					'Æfing',
-					'Fara í æfinguna sem þetta svar tilheyrir',
-					() => {
-						const exercisesSlug = chapterNumber ? `${chapterNumber}-exercises` : exercisesSectionSlug;
-						const url = `/${bookSlug}/kafli/${chapterSlug}/${exercisesSlug}#${exerciseId}`;
-						goto(url);
-					}
-				);
+					// Prepend the number link to the answer
+					answer.insertBefore(numberLink, answer.firstChild);
+					links.push(numberLink);
+				} else {
+					// Fallback to button if no number
+					const button = createLinkButton(
+						'Æfing',
+						'Fara í æfinguna sem þetta svar tilheyrir',
+						() => {
+							const exercisesSlug = chapterNumber ? `${chapterNumber}-exercises` : exercisesSectionSlug;
+							const url = `/${bookSlug}/kafli/${chapterSlug}/${exercisesSlug}#${exerciseId}`;
+							goto(url);
+						}
+					);
 
-				button.classList.add('answer-link-inline');
-				answer.appendChild(button);
-				buttons.push(button);
-			}
-		});
-	}
+					button.classList.add('answer-link-inline');
+					answer.appendChild(button);
+					buttons.push(button);
+				}
+			});
+		}
 
-	// Check if we arrived at this page with a hash - highlight the target
-	if (window.location.hash) {
-		const targetId = window.location.hash.slice(1);
-		const targetElement = document.getElementById(targetId);
-		if (targetElement) {
-			// Scroll to element
-			setTimeout(() => {
-				targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-				targetElement.classList.add('answer-link-highlight');
+		// Check if we arrived at this page with a hash - highlight the target
+		if (window.location.hash) {
+			const targetId = window.location.hash.slice(1);
+			const targetElement = document.getElementById(targetId);
+			if (targetElement) {
+				// Scroll to element
 				setTimeout(() => {
-					targetElement.classList.remove('answer-link-highlight');
-				}, 2000);
-			}, 100);
+					targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					targetElement.classList.add('answer-link-highlight');
+					setTimeout(() => {
+						targetElement.classList.remove('answer-link-highlight');
+					}, 2000);
+				}, 100);
+			}
 		}
 	}
+
+	initialize();
+
+	// Re-initialize when {@html} content changes (client-side navigation)
+	const observer = new MutationObserver(() => {
+		observer.disconnect();
+		initialize();
+		observer.observe(node, { childList: true });
+	});
+	observer.observe(node, { childList: true });
 
 	return {
 		update(_newOptions: AnswerLinksOptions) {
 			// No-op: if sectionSlug changes, the component should remount the action
 		},
 		destroy() {
-			// Clean up buttons
-			buttons.forEach((button) => {
-				button.remove();
-			});
-			// Clean up links
-			links.forEach((link) => {
-				// Remove the has-answer-link class from parent before removing link
-				link.parentElement?.classList.remove('has-answer-link', 'has-exercise-link');
-				link.remove();
-			});
+			observer.disconnect();
+			cleanup();
 		}
 	};
 }
