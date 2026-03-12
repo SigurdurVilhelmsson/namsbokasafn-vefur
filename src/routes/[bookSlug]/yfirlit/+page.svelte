@@ -134,6 +134,7 @@
 	<meta property="og:title" content="Yfirlit | {data.book?.title ?? 'Bók'}" />
 	<meta property="og:description" content="Samantekt og yfirlit yfir kafla í {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/yfirlit" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/yfirlit" />
 </svelte:head>
 

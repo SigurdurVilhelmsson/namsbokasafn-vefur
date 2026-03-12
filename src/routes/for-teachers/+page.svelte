@@ -12,6 +12,7 @@
   <meta property="og:title" content="Leiðbeiningar fyrir kennara - Námsbókasafn" />
   <meta property="og:description" content="Handbók um notkun íslenskra kennslubóka frá Námsbókasafni fyrir kennara og nemendur." />
   <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://namsbokasafn.is/for-teachers" />
   <meta property="og:url" content="https://namsbokasafn.is/for-teachers" />
 </svelte:head>
 

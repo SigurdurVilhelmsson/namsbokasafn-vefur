@@ -99,6 +99,7 @@
   <meta property="og:title" content="Námsbókasafn – Opnar kennslubækur á íslensku" />
   <meta property="og:description" content="Gagnvirkt námsefni með íslenskum þýðingum á OpenStax kennslubókum. Orðasafn, minniskort og æfingar." />
   <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://namsbokasafn.is/" />
   <meta property="og:url" content="https://namsbokasafn.is/" />
 </svelte:head>
 

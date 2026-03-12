@@ -63,6 +63,7 @@
 	<meta property="og:title" content="Orðasafn | {data.book?.title ?? 'Bók'}" />
 	<meta property="og:description" content="Orðasafn og skilgreiningar úr {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/ordabok" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/ordabok" />
 </svelte:head>
 

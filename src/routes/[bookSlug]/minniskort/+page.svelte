@@ -50,6 +50,7 @@
 	<meta property="og:title" content="Minniskort | {data.book?.title ?? 'Bók'}" />
 	<meta property="og:description" content="Minniskort og endurtekningarkerfi fyrir {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/minniskort" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/minniskort" />
 </svelte:head>
 

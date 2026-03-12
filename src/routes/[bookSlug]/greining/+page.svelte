@@ -183,6 +183,7 @@
 	<meta property="og:title" content="Námsgreining | {data.book?.title ?? 'Bók'}" />
 	<meta property="og:description" content="Námsgreining og framvinduyfirlit fyrir {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/greining" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/greining" />
 </svelte:head>
 
