@@ -135,6 +135,7 @@
 	<meta property="og:title" content="Námslota | {data.book?.title ?? 'Bók'}" />
 	<meta property="og:description" content="Skipulögð námslota fyrir {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/nam" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/nam" />
 </svelte:head>
 

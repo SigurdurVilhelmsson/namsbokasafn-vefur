@@ -121,6 +121,7 @@
 	<meta property="og:title" content="Námsmarkmið | {data.book?.title ?? 'Bók'}" />
 	<meta property="og:description" content="Námsmarkmið og yfirsýn yfir kafla í {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/markmid" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/markmid" />
 </svelte:head>
 

@@ -181,6 +181,7 @@
 	<meta property="og:title" content="Atriðisorðaskrá | {data.book?.title ?? 'Bók'}" />
 	<meta property="og:description" content="Atriðisorðaskrá fyrir {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/atridiordasskra" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/atridiordasskra" />
 </svelte:head>
 

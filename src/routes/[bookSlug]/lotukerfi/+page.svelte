@@ -13,6 +13,7 @@
 	<meta property="og:title" content="Lotukerfið | {data.book?.title ?? 'Efnafræði'}" />
 	<meta property="og:description" content="Gagnvirkt lotukerfi frumefnanna" />
 	<meta property="og:type" content="website" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/lotukerfi" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/lotukerfi" />
 </svelte:head>
 

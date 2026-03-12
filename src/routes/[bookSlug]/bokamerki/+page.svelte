@@ -118,6 +118,7 @@
 	<meta property="og:title" content="Bókamerki | {data.book?.title ?? 'Bók'}" />
 	<meta property="og:description" content="Vistuð bókamerki í {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/bokamerki" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/bokamerki" />
 </svelte:head>
 

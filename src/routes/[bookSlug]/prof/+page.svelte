@@ -19,6 +19,7 @@
 	<meta property="og:title" content="Aðlögunarpróf | Námsbókasafn" />
 	<meta property="og:description" content="Próf og æfingar til að meta skilning á námsefni" />
 	<meta property="og:type" content="website" />
+	<link rel="canonical" href="https://namsbokasafn.is/{bookSlug}/prof" />
 	<meta property="og:url" content="https://namsbokasafn.is/{bookSlug}/prof" />
 </svelte:head>
 
