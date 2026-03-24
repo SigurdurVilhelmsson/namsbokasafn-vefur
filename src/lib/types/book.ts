@@ -50,7 +50,7 @@ export const books: BookConfig[] = [
     },
     stats: {
       totalChapters: 21,
-      translatedChapters: 8
+      translatedChapters: 21
     },
     features: {
       glossary: true,
@@ -79,7 +79,7 @@ export const books: BookConfig[] = [
     },
     stats: {
       totalChapters: 47,
-      translatedChapters: 1
+      translatedChapters: 2
     },
     features: {
       glossary: true,
@@ -113,6 +113,62 @@ export const books: BookConfig[] = [
       glossary: true,
       flashcards: false,
       exercises: false
+    }
+  },
+  {
+    id: 'lifraen-efnafraedi',
+    slug: 'lifraen-efnafraedi',
+    title: 'Lífræn efnafræði',
+    subtitle: 'Sýnishorn úr OpenStax Organic Chemistry',
+    description: 'Vélþýddur sýniskafli úr Organic Chemistry.',
+    subject: 'raunvisindi',
+    coverImage: '/covers/lifraen-efnafraedi.svg',
+    translator: 'Sigurður E. Vilhelmsson',
+    status: 'preview',
+    source: {
+      title: 'Organic Chemistry',
+      publisher: 'OpenStax',
+      url: 'https://openstax.org/details/books/organic-chemistry',
+      authors: ['David Klein'],
+      license: 'CC BY 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
+    },
+    stats: {
+      totalChapters: 30,
+      translatedChapters: 1
+    },
+    features: {
+      glossary: true,
+      flashcards: false,
+      exercises: true
+    }
+  },
+  {
+    id: 'edlisfraedi-2e',
+    slug: 'edlisfraedi-2e',
+    title: 'Eðlisfræði',
+    subtitle: 'Sýnishorn úr OpenStax College Physics 2e',
+    description: 'Vélþýddur sýniskafli úr College Physics 2e.',
+    subject: 'raunvisindi',
+    coverImage: '/covers/edlisfraedi-2e.svg',
+    translator: 'Sigurður E. Vilhelmsson',
+    status: 'preview',
+    source: {
+      title: 'College Physics 2e',
+      publisher: 'OpenStax',
+      url: 'https://openstax.org/details/books/college-physics-2e',
+      authors: ['Paul Peter Urone', 'Roger Hinrichs'],
+      license: 'CC BY 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
+    },
+    stats: {
+      totalChapters: 34,
+      translatedChapters: 1
+    },
+    features: {
+      glossary: true,
+      flashcards: false,
+      exercises: true
     }
   }
 ];

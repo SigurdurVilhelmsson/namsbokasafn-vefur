@@ -60,7 +60,8 @@ const catalogue: CatalogueEntry[] = [
 		chapterCount: 30,
 		subject: 'chemistry',
 		openstaxUrl: 'https://openstax.org/details/books/organic-chemistry',
-		status: 'not-started'
+		status: 'preview',
+		bookSlug: 'lifraen-efnafraedi'
 	},
 
 	// ── Biology ────────────────────────────────────────────────
@@ -156,7 +157,8 @@ const catalogue: CatalogueEntry[] = [
 		chapterCount: 34,
 		subject: 'physics',
 		openstaxUrl: 'https://openstax.org/details/books/college-physics-2e',
-		status: 'not-started'
+		status: 'preview',
+		bookSlug: 'edlisfraedi-2e'
 	},
 	{
 		slug: 'college-physics-ap-courses-2e',

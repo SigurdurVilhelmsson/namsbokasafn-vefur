@@ -134,10 +134,19 @@ function getSectionType(filename) {
 	if (name.includes('exercises') || name.includes('aefingar') || name.endsWith('-exercises')) {
 		return 'exercises';
 	}
-	// Per-type exercise files (microbiology split: multiple-choice, fill-in-the-blank, etc.)
-	const exerciseTypeSlugs = ['multiple-choice', 'fill-in-the-blank', 'short-answer', 'critical-thinking', 'true-false', 'matching', 'visual-exercise'];
+	// Per-type exercise files (split across multiple books)
+	const exerciseTypeSlugs = [
+		'multiple-choice', 'fill-in-the-blank', 'short-answer', 'critical-thinking',
+		'true-false', 'matching', 'visual-exercise',
+		'conceptual-questions', 'problems-exercises', 'ap-test-prep',
+		'additional-problems'
+	];
 	if (exerciseTypeSlugs.some(slug => name.endsWith('-' + slug))) {
 		return 'exercises';
+	}
+	// Organic Chemistry: Chemistry Matters (supplementary section, not exercises)
+	if (name.endsWith('-chemistry-matters')) {
+		return 'supplementary';
 	}
 	if (name.includes('answer-key') || name.includes('svarlykill')) {
 		return 'answer-key';
@@ -175,7 +184,7 @@ function sortSections(sections) {
 		if (b.type === 'introduction') return 1;
 
 		// Special sections (summary, exercises, etc.) always come last, regardless of number
-		const specialTypes = ['glossary', 'equations', 'summary', 'exercises', 'answer-key'];
+		const specialTypes = ['glossary', 'equations', 'summary', 'supplementary', 'exercises', 'answer-key'];
 		const aIsSpecial = a.type && specialTypes.includes(a.type);
 		const bIsSpecial = b.type && specialTypes.includes(b.type);
 
@@ -184,7 +193,12 @@ function sortSections(sections) {
 			const typeDiff = specialTypes.indexOf(a.type) - specialTypes.indexOf(b.type);
 			if (typeDiff !== 0) return typeDiff;
 			// Same type (e.g., multiple exercise types) — sort by OpenStax order
-			const exerciseOrder = ['multiple-choice', 'fill-in-the-blank', 'short-answer', 'critical-thinking', 'true-false', 'matching', 'visual-exercise'];
+			const exerciseOrder = [
+				'multiple-choice', 'fill-in-the-blank', 'short-answer', 'critical-thinking',
+				'true-false', 'matching', 'visual-exercise',
+				'conceptual-questions', 'problems-exercises', 'ap-test-prep',
+				'additional-problems'
+			];
 			const aSlug = getBasenameWithoutExt(a.file).replace(/^\d+-/, '');
 			const bSlug = getBasenameWithoutExt(b.file).replace(/^\d+-/, '');
 			const aIdx = exerciseOrder.indexOf(aSlug);
@@ -464,7 +478,7 @@ function generateToc(bookSlug, options) {
 		const finalSections = sortedSections.map((s) => {
 			// Special sections (intro, glossary, etc.) use empty string for number
 			// to match OpenStax structure where these are unnumbered
-			const specialTypes = ['introduction', 'glossary', 'equations', 'summary', 'exercises', 'answer-key'];
+			const specialTypes = ['introduction', 'glossary', 'equations', 'summary', 'supplementary', 'exercises', 'answer-key'];
 			const isSpecial = s.type && specialTypes.includes(s.type);
 
 			const entry = {
