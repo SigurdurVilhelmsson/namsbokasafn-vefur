@@ -19,7 +19,9 @@
   const subjectIcons: Record<string, string> = {
     'efnafraedi-2e': 'chemistry',
     'liffraedi-2e': 'biology',
-    'orverufraedi': 'biology'
+    'orverufraedi': 'biology',
+    'lifraen-efnafraedi': 'chemistry',
+    'edlisfraedi-2e': 'physics'
   };
 
 

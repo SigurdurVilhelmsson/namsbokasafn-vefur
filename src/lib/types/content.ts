@@ -98,7 +98,8 @@ export type SectionType =
   | 'equations'      // Key equations / Lykilformúlur
   | 'summary'        // Chapter summary / Samantekt
   | 'exercises'      // Practice exercises / Æfingar
-  | 'answer-key';    // Answer key / Svarlykill (separate from exercises)
+  | 'answer-key'     // Answer key / Svarlykill (separate from exercises)
+  | 'supplementary'; // Supplementary content (e.g., Chemistry Matters)
 
 // Section content with metadata
 export interface SectionContent {
