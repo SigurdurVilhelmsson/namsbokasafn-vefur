@@ -84,6 +84,7 @@ function parseHtmlMetadata(content) {
 			if (pageData.title) metadata.title = pageData.title;
 			if (pageData.section) metadata.section = pageData.section;
 			if (pageData.chapter) metadata.chapter = pageData.chapter;
+			if (pageData.chapterTitle) metadata.chapterTitle = pageData.chapterTitle;
 			return metadata;
 		} catch {
 			// Fall through to HTML parsing
@@ -492,8 +493,21 @@ function generateToc(bookSlug, options) {
 			return entry;
 		});
 
-		// Get chapter title
-		let chapterTitle = chapterMeta?.titleIs || chapterMeta?.titleEn;
+		// Get chapter title: prefer translated title from rendered intro page,
+		// then status.json, then existing TOC, then fallback
+		let chapterTitle = null;
+
+		// Try intro page's chapterTitle (from pipeline: collection.xml → extract → translate → render)
+		const introFile = contentFiles.find((f) => f.match(/^\d+-0-/));
+		if (introFile) {
+			const introContent = readFileSync(resolve(chapterPath, introFile), 'utf-8');
+			const introMeta = parseHtmlMetadata(introContent);
+			chapterTitle = introMeta.chapterTitle;
+		}
+
+		if (!chapterTitle) {
+			chapterTitle = chapterMeta?.titleIs || chapterMeta?.titleEn;
+		}
 		if (!chapterTitle && existingToc) {
 			const existingChapter = existingToc.chapters?.find((c) => c.number === chapterNum);
 			chapterTitle = existingChapter?.title;

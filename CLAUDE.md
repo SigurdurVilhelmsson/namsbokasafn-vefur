@@ -45,6 +45,11 @@ npm run format           # Prettier formatting
 - `flashcard.ts`: SM-2 spaced repetition, study sessions, card ratings
 - `quiz.ts`: Quiz attempts and scores
 - `annotation.ts`: Text highlights and notes with export capability
+- `analytics.ts`: Study analytics and reading patterns
+- `glossary.ts`: Glossary state and term lookup
+- `objectives.ts`: Learning objectives tracking
+- `offline.ts`: PWA offline state
+- `reference.ts`: Reference/citation management
 
 ### Content Loading
 
@@ -56,13 +61,23 @@ npm run format           # Prettier formatting
 ### Routing (SvelteKit file-based)
 
 - `/` - Book catalog (`src/routes/+page.svelte`)
+- `/feedback` - User feedback form
+- `/for-teachers` - Teacher resources
 - `/:bookSlug` - Book home (`src/routes/[bookSlug]/+page.svelte`)
 - `/:bookSlug/kafli/:chapterSlug` - Chapter view
 - `/:bookSlug/kafli/:chapterSlug/:sectionSlug` - Section reading view
 - `/:bookSlug/ordabok` - Glossary
+- `/:bookSlug/atridiordasskra` - Subject index
 - `/:bookSlug/minniskort` - Flashcards
 - `/:bookSlug/lotukerfi` - Periodic table
 - `/:bookSlug/prof` - Quizzes
+- `/:bookSlug/nam` - Guided study sessions
+- `/:bookSlug/greining` - Study analytics
+- `/:bookSlug/bokamerki` - Bookmarks
+- `/:bookSlug/markmid` - Learning objectives
+- `/:bookSlug/svarlykill` - Answer key
+- `/:bookSlug/vidauki` - Appendix
+- `/:bookSlug/yfirlit` - Overview/dashboard
 
 ### Key Patterns
 
@@ -88,11 +103,14 @@ Example:
 
 ## Tech Stack
 
-- SvelteKit 2, Svelte 5, TypeScript 5.7, Vite 6
+- SvelteKit 2, Svelte 5, TypeScript 5.7, Vite 7, Tailwind CSS 4
 - MathJax for math rendering (pre-rendered SVG in HTML content)
 - Svelte stores for state, @sveltejs/adapter-static for static site generation
 - @vite-pwa/sveltekit for PWA support
+- date-fns (date formatting), fuse.js (fuzzy search)
+- Husky + lint-staged pre-commit hooks (ESLint + Prettier)
 - Vitest + Playwright for tests
+- Node >= 20.19.0 required
 
 ## SRS Algorithm
 
@@ -132,7 +150,15 @@ All fonts are **self-hosted** in `static/fonts/` — no external CDN dependencie
 - `src/lib/actions/figureViewer.ts`: Image lightbox with zoom, pan, keyboard nav, and touch gestures (pinch-to-zoom, double-tap)
 - `src/lib/actions/glossaryTerms.ts`: Semantic glossary term tooltips (dfn elements only)
 - `src/lib/actions/answerLinks.ts`: Bidirectional exercise↔answer key navigation
+- `src/lib/actions/keyboardShortcuts.ts`: Global keyboard shortcut handling
+- `src/lib/actions/bionicReading.ts`: Bionic reading text transformation
+- `src/lib/actions/lazyImages.ts`: Lazy loading for content images
+- `src/lib/actions/readDetection.ts`: Tracks which sections the user has read
 - `src/lib/components/ContentRenderer.svelte`: Main content renderer for pre-rendered HTML
+- `src/lib/components/layout/`: Header, Sidebar, MobileBottomNav, FocusModeNav
+- `src/lib/components/study/`: Guided study session phases (reading, practice, review, reflect)
+- `src/lib/components/analytics/`: Study analytics tabs and visualizations
+- `src/lib/workers/search.worker.ts`: Web worker for full-text search indexing
 
 ## Deployment
 
@@ -173,9 +199,13 @@ Run `node scripts/generate-toc.js` to regenerate `toc.json` from the chapter dir
 
 - `scripts/generate-toc.js`: Scans chapter directories and generates `toc.json` from `.html` files. Run after syncing new content.
 - `scripts/process-content.js`: Enriches `toc.json` with metadata (reading time). Runs automatically before `dev` and `build` via `prepare-content`.
+- `scripts/generate-sitemap.js`: Generates `sitemap.xml` from `toc.json`. Runs automatically as part of `prepare-content`.
 - `scripts/validate-content.js`: Validates TOC structure and glossary consistency. HTML content is validated upstream in the CNXML pipeline. Runs before production builds.
 - `scripts/sync-content.js`: Syncs content from namsbokasafn-efni repo.
+- `scripts/generate-component-inventory.js`: Generates component documentation (`npm run docs:generate`).
+
+**Pre-commit hooks:** Husky runs lint-staged on commit, which auto-fixes ESLint and Prettier issues on staged files. If a commit is blocked, check the lint-staged output for the specific error.
 
 ## Migration Note
 
-This project was migrated from React to SvelteKit in January 2025. The original React implementation is preserved in the `archive/react-v1` branch for reference.
+Migrated from React to SvelteKit in January 2025. Original React code in `archive/react-v1` branch.
