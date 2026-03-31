@@ -16,6 +16,10 @@ const config = {
       strict: false // Allow gitignored static files (content is generated)
     }),
 
+    paths: {
+      relative: false // Force absolute asset paths — required for deep URLs served via SPA fallback
+    },
+
     prerender: {
       handleHttpError: 'warn' // Content may have broken internal links — warn instead of failing
     },
