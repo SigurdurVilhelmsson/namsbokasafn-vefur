@@ -186,7 +186,7 @@
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/kafli/{data.chapterSlug}/{data.sectionSlug}" />
 </svelte:head>
 
-<article class="max-w-3xl mx-auto px-1 sm:px-0">
+<article class="max-w-4xl mx-auto px-1 sm:px-0">
 	<!-- Continue where you left off prompt -->
 	{#if showContinuePrompt && savedPosition}
 		<div

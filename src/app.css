@@ -21,8 +21,8 @@
 
     /* Line widths (max-width for reading content) */
     --line-width-narrow: 38rem;
-    --line-width-medium: 48rem;
-    --line-width-wide: 60rem;
+    --line-width-medium: 52rem;
+    --line-width-wide: 62rem;
 
     /* Spacing scale (4px base) */
     --space-1: 0.25rem;
@@ -416,7 +416,7 @@
 
 /* Reading content styles */
 .reading-content {
-  max-width: 48rem;
+  max-width: 52rem;
   margin: 0 auto;
   padding: 3rem 1.5rem;
   font-size: var(--font-size-base);

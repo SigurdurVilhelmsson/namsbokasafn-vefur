@@ -23,7 +23,7 @@
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/svarlykill/{data.chapterNumber}" />
 </svelte:head>
 
-<article class="max-w-3xl mx-auto px-1 sm:px-0">
+<article class="max-w-4xl mx-auto px-1 sm:px-0">
 	<!-- Header -->
 	<header class="mb-8">
 		<nav class="text-sm text-gray-500 dark:text-gray-400 mb-2">
