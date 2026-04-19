@@ -386,6 +386,20 @@ function main() {
 		}
 	}
 
+	// Always run the post-sync content audit (non-blocking report).
+	// Flags defect patterns in synced HTML so regressions are caught before deploy.
+	if (!options.dryRun && failed === 0) {
+		console.log('\nRunning post-sync content audit...\n');
+		try {
+			execSync('node scripts/audit-content.js', {
+				cwd: projectRoot,
+				stdio: 'inherit'
+			});
+		} catch (err) {
+			console.error('\nAudit script errored (non-blocking):', err.message);
+		}
+	}
+
 	process.exit(failed > 0 ? 1 : 0);
 }
 
