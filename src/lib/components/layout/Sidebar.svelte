@@ -146,11 +146,11 @@
 								aria-controls="chapter-{chapter.number}-sections"
 								class="chapter-btn"
 							>
-								<span class="flex items-center gap-2">
+								<span class="flex min-w-0 flex-1 items-center gap-2">
 									<span class="chapter-number">{chapter.number}</span>
 									<span class="chapter-title">{chapter.title}</span>
 								</span>
-								<span class="flex items-center gap-2">
+								<span class="flex shrink-0 items-center gap-2">
 									{#if progressPercent > 0}
 										<span class="chapter-progress-badge">{progressPercent}%</span>
 									{/if}
@@ -599,6 +599,7 @@
 	.sidebar-nav {
 		flex: 1;
 		overflow-y: auto;
+		overflow-x: hidden;
 		padding: 0.75rem 0;
 	}
 
@@ -657,9 +658,8 @@
 	}
 
 	.chapter-title {
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
+		overflow-wrap: anywhere;
+		min-width: 0;
 	}
 
 	/* ====================================
@@ -854,9 +854,8 @@
 	.section-title {
 		font-size: 0.8125rem;
 		display: block;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+		overflow-wrap: anywhere;
+		min-width: 0;
 	}
 
 	.section-meta {
