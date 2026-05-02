@@ -22,7 +22,7 @@ const config = {
 
     prerender: {
       handleHttpError: 'warn', // Content may have broken internal links — warn instead of failing
-      handleMissingId: 'warn' // Translated content occasionally references anchors that weren't carried over — warn rather than fail the build
+      handleMissingId: 'warn' // A handful of cross-chapter anchor refs (e.g. "viðauka A") aren't resolvable yet — needs a book-wide id map in the CNXML renderer (tracked in namsbokasafn-efni)
     },
 
     // Path aliases (same as current React setup)
