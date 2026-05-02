@@ -21,7 +21,8 @@ const config = {
     },
 
     prerender: {
-      handleHttpError: 'warn' // Content may have broken internal links — warn instead of failing
+      handleHttpError: 'warn', // Content may have broken internal links — warn instead of failing
+      handleMissingId: 'warn' // Translated content occasionally references anchors that weren't carried over — warn rather than fail the build
     },
 
     // Path aliases (same as current React setup)

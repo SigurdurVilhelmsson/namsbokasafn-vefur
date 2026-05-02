@@ -13,6 +13,7 @@
 	import TextHighlighter from '$lib/components/TextHighlighter.svelte';
 	import AnnotationSidebar from '$lib/components/AnnotationSidebar.svelte';
 	import PilotBanner from '$lib/components/PilotBanner.svelte';
+	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
 	import { fade, fly } from 'svelte/transition';
 
@@ -271,6 +272,14 @@
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
 				</svg>
 			</button>
+			<!-- Download chapter PDF -->
+			<PdfDownloadButton
+				manifest={data.pdfManifest}
+				bookSlug={data.bookSlug}
+				target="chapter"
+				chapterNum={data.chapterNumber}
+				variant="icon"
+			/>
 			<!-- Share button -->
 			<button
 				onclick={handleShare}
