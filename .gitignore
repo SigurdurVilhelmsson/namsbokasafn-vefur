@@ -33,6 +33,7 @@ coverage
 .svelte-kit
 build
 static/content
+static/downloads
 dev-dist/
 
 # Test artifacts

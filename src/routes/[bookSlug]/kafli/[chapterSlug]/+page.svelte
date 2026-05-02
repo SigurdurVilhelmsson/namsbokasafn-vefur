@@ -7,6 +7,7 @@
 	import { reader } from '$lib/stores';
 	import { isSectionRead, calcChapterProgress } from '$lib/stores/reader';
 	import { getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
+	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -103,6 +104,17 @@
 					</span>
 				</div>
 			{/if}
+
+			<!-- Download chapter as PDF -->
+			<div class="mt-4">
+				<PdfDownloadButton
+					manifest={data.pdfManifest}
+					bookSlug={data.bookSlug}
+					target="chapter"
+					chapterNum={data.chapter.number}
+					variant="compact"
+				/>
+			</div>
 		</div>
 
 		<!-- Section list -->

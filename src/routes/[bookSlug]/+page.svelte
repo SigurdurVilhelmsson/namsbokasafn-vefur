@@ -9,6 +9,7 @@
 	import { reader } from '$lib/stores';
 	import { calcChapterProgress, isSectionRead } from '$lib/stores/reader';
 	import DownloadBookButton from '$lib/components/DownloadBookButton.svelte';
+	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import ErrorMessage from '$lib/components/ErrorMessage.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
@@ -73,7 +74,15 @@
 		<p class="book-home-subtitle">
 			Veldu kafla til að byrja að lesa
 		</p>
-		<DownloadBookButton bookSlug={data.bookSlug} />
+		<div class="book-home-actions">
+			<DownloadBookButton bookSlug={data.bookSlug} />
+			<PdfDownloadButton
+				manifest={data.pdfManifest}
+				bookSlug={data.bookSlug}
+				target="full"
+				variant="primary"
+			/>
+		</div>
 	</div>
 
 	{#if loading}
@@ -197,6 +206,13 @@
 	.book-home-subtitle {
 		color: var(--text-secondary);
 		margin-bottom: 1rem;
+	}
+
+	.book-home-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		align-items: center;
 	}
 
 	/* Chapter grid */

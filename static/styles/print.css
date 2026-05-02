@@ -1,0 +1,328 @@
+/**
+ * Print stylesheet for PDF generation.
+ *
+ * Loaded only by /print/* routes (alongside content.css). These rules apply
+ * unconditionally on the print routes — both screen preview and Playwright
+ * page.pdf() output use the same layout. We don't gate with @media print
+ * because the print routes exist solely for PDF rendering.
+ */
+
+/* =====================================================================
+   Page setup — A4 with comfortable textbook margins.
+   ===================================================================== */
+
+@page {
+  size: A4;
+  margin: 22mm 18mm 22mm 18mm;
+}
+
+@page :first {
+  /* Cover/title page: no header, slightly larger top margin */
+  margin-top: 28mm;
+}
+
+/* =====================================================================
+   Document defaults
+   ===================================================================== */
+
+html,
+body {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+  font-size: 11pt;
+  line-height: 1.55;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* The print layout sets data-theme="light" — but enforce here too in case
+   the user has dark-mode preferred-color-scheme. */
+.dark,
+[data-theme="dark"] {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+}
+
+/* =====================================================================
+   Page breaks
+   ===================================================================== */
+
+/* Each pre-rendered article (one HTML file = one section/EOC page) starts
+   on a new page. */
+article.cnx-module {
+  break-before: page;
+  page-break-before: always;
+}
+
+/* The very first article shouldn't force a leading blank page. */
+article.cnx-module:first-of-type {
+  break-before: auto;
+  page-break-before: avoid;
+}
+
+/* Cover / front-matter wrappers always start fresh and end with a break. */
+.print-cover,
+.print-toc {
+  break-before: page;
+  page-break-before: always;
+  break-after: page;
+  page-break-after: always;
+}
+.print-cover:first-child {
+  break-before: auto;
+  page-break-before: avoid;
+}
+
+/* Headings should not be orphaned at the bottom of a page. */
+h1,
+h2,
+h3,
+h4 {
+  break-after: avoid;
+  page-break-after: avoid;
+  break-inside: avoid;
+}
+
+/* Blocks that shouldn't split mid-element. */
+figure,
+table,
+aside.note,
+aside.example,
+div.exercise,
+div.equation,
+.learning-objectives,
+.mathjax-display,
+mjx-container {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+/* Paragraphs: don't leave a single line at top/bottom of page. */
+p {
+  orphans: 3;
+  widows: 3;
+}
+
+/* =====================================================================
+   Images and figures
+   ===================================================================== */
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+figure {
+  margin: 1em 0;
+  text-align: center;
+}
+
+figure img {
+  /* Constrain to roughly half the page height so figures don't dominate. */
+  max-height: 14cm;
+  object-fit: contain;
+}
+
+figcaption {
+  font-size: 0.9em;
+  color: #444;
+  margin-top: 0.4em;
+}
+
+/* =====================================================================
+   Math (MathJax SVG)
+   ===================================================================== */
+
+mjx-container[jax="SVG"] {
+  break-inside: avoid;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 0.6em 0;
+}
+
+/* Inline equations are inline. */
+mjx-container[jax="SVG"]:not([display="true"]) {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* =====================================================================
+   Links — show URLs only for cross-document references, keep
+   in-page anchors quiet (anchor links are common in textbooks).
+   ===================================================================== */
+
+a {
+  color: #0a4f88;
+  text-decoration: none;
+}
+
+a[href]:not([href^="#"]):not([href^="/"])::after {
+  /* External absolute URLs — append the URL in a footnote-like style. */
+  content: " (" attr(href) ")";
+  font-size: 0.85em;
+  color: #555;
+  word-break: break-all;
+}
+
+/* =====================================================================
+   Hide screen-only chrome and interactive affordances.
+   ===================================================================== */
+
+[data-print-hidden],
+button,
+.no-print,
+/* Root-layout chrome that should never appear in a PDF. */
+.storage-warning,
+.offline-indicator,
+[data-pwa-updater],
+[role='dialog'][aria-live] {
+  display: none !important;
+}
+
+/* Practice-problem JS toggles use ARIA buttons; if any wrappers were ever
+   added by the practiceProblems action, ensure underlying content remains
+   visible. We don't run actions in the print route, so this is a safety net. */
+.practice-answer-container,
+.practice-explanation-container,
+.practice-hint-container {
+  display: block !important;
+}
+
+/* =====================================================================
+   Print-cover and TOC styling
+   ===================================================================== */
+
+.print-cover {
+  text-align: center;
+  padding-top: 4cm;
+}
+
+.print-cover .cover-eyebrow {
+  font-size: 1rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 1.2cm;
+}
+
+.print-cover .cover-chapter-number {
+  font-size: 4.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #c78c20;
+  margin-bottom: 0.3cm;
+}
+
+.print-cover .cover-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  margin: 0.4cm auto 1.6cm;
+  max-width: 14cm;
+  line-height: 1.2;
+}
+
+.print-cover .cover-book-title {
+  font-size: 1.1rem;
+  color: #4b5563;
+  margin-bottom: 0.4cm;
+}
+
+.print-cover .cover-meta {
+  margin-top: 3cm;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.print-toc h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.2cm;
+}
+
+.print-toc ol {
+  list-style: none;
+  padding-left: 0;
+}
+
+.print-toc li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.25cm 0;
+  border-bottom: 1px dotted #d1d5db;
+  font-size: 1rem;
+}
+
+.print-toc .toc-chapter-num {
+  font-weight: 600;
+  margin-right: 0.6cm;
+  color: #c78c20;
+  min-width: 1.5cm;
+  display: inline-block;
+}
+
+/* =====================================================================
+   Tighten oversized content.css spacing for print density.
+   ===================================================================== */
+
+article.cnx-module {
+  font-size: 11pt;
+}
+
+article.cnx-module header h1 {
+  font-size: 1.7rem;
+  margin-top: 0;
+}
+
+article.cnx-module section h2 {
+  font-size: 1.25rem;
+  margin-top: 1.2em;
+}
+
+article.cnx-module section h3 {
+  font-size: 1.1rem;
+}
+
+article.cnx-module p {
+  margin: 0.5em 0;
+}
+
+/* Learning objectives: keep visually distinct but compact. */
+article.cnx-module .learning-objectives {
+  background: #fdf6e7;
+  border-left: 4px solid #c78c20;
+  padding: 0.6cm 0.8cm;
+  margin: 0.6cm 0;
+}
+
+article.cnx-module .learning-objectives h2 {
+  margin-top: 0;
+  font-size: 1.05rem;
+}
+
+/* Tables: ensure they fit page width. */
+article.cnx-module table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+article.cnx-module table th,
+article.cnx-module table td {
+  border: 1px solid #d1d5db;
+  padding: 4pt 6pt;
+}
+
+article.cnx-module table thead {
+  display: table-header-group; /* Repeat header row when table breaks across pages. */
+}
+
+article.cnx-module table tr {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
