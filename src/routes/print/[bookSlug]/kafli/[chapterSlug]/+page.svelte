@@ -22,7 +22,13 @@
 	<p class="cover-meta">namsbokasafn.is</p>
 </section>
 
-<!-- Concatenated content blocks -->
+<!--
+  block.content is HTML extracted from files in static/content/ — committed
+  to the repo and reviewed via PR, never user input. {@html} renders only
+  that trusted source whether the page is served prerendered (URLs in
+  entries()) or via the adapter-static SPA fallback (load() 404s anything
+  not in entries()). Trust comes from the content source, not the runtime.
+-->
 {#each data.blocks as block, i (i)}
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html block.content}
