@@ -22,7 +22,12 @@
 	<p class="cover-meta">namsbokasafn.is</p>
 </section>
 
-<!-- Concatenated content blocks -->
+<!--
+  Concatenated content blocks. block.content is HTML extracted from files in
+  static/content/ — committed to the repo and reviewed via PR, not user input
+  at runtime. Combined with prerender = true in +page.ts (route loaded only
+  by Playwright at PDF generation), {@html} here has no live-browser surface.
+-->
 {#each data.blocks as block, i (i)}
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html block.content}

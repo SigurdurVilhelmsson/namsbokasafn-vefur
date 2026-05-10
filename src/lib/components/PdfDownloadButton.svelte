@@ -38,7 +38,10 @@
 		return manifest.chapters.find((c) => c.chapterNum === chapterNum) ?? null;
 	});
 
-	let href = $derived(entry ? `/downloads/${bookSlug}/${entry.file}` : null);
+	const SAFE_PDF_FILENAME = /^[a-zA-Z0-9._-]+\.pdf$/;
+	let href = $derived(
+		entry && SAFE_PDF_FILENAME.test(entry.file) ? `/downloads/${bookSlug}/${entry.file}` : null
+	);
 	let sizeLabel = $derived(entry ? formatBytes(entry.sizeBytes) : '');
 
 	let label = $derived.by(() => {
