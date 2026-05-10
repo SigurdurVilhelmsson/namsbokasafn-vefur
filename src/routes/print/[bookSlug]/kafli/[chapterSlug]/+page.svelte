@@ -23,10 +23,11 @@
 </section>
 
 <!--
-  Concatenated content blocks. block.content is HTML extracted from files in
-  static/content/ — committed to the repo and reviewed via PR, not user input
-  at runtime. Combined with prerender = true in +page.ts (route loaded only
-  by Playwright at PDF generation), {@html} here has no live-browser surface.
+  block.content is HTML extracted from files in static/content/ — committed
+  to the repo and reviewed via PR, never user input. {@html} renders only
+  that trusted source whether the page is served prerendered (URLs in
+  entries()) or via the adapter-static SPA fallback (load() 404s anything
+  not in entries()). Trust comes from the content source, not the runtime.
 -->
 {#each data.blocks as block, i (i)}
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
