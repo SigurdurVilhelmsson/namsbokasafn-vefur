@@ -355,11 +355,19 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 
 	initialize();
 
-	// Re-initialize when {@html} content changes (client-side navigation)
+	// Re-initialize when {@html} content changes (client-side navigation).
+	// Use finally so the observer always re-attaches even if initialize throws.
 	const observer = new MutationObserver(() => {
 		observer.disconnect();
-		initialize();
-		observer.observe(node, { childList: true });
+		try {
+			initialize();
+		} catch (e) {
+			// warn (not error) — a transient init failure is non-fatal: the
+			// observer reattaches in finally and a later mutation will retry.
+			console.warn('answerLinks: initialize failed during mutation', e);
+		} finally {
+			observer.observe(node, { childList: true });
+		}
 	});
 	observer.observe(node, { childList: true });
 
