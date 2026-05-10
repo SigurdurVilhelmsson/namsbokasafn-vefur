@@ -362,7 +362,9 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 		try {
 			initialize();
 		} catch (e) {
-			console.error('answerLinks: initialize failed during mutation', e);
+			// warn (not error) — a transient init failure is non-fatal: the
+			// observer reattaches in finally and a later mutation will retry.
+			console.warn('answerLinks: initialize failed during mutation', e);
 		} finally {
 			observer.observe(node, { childList: true });
 		}
