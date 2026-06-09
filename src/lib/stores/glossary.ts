@@ -26,7 +26,11 @@ const defaultState: GlossaryState = {
 function createGlossaryStore() {
 	const { subscribe, set, update } = writable<GlossaryState>(defaultState);
 
-	let loadPromise: Promise<void> | null = null;
+	// In-flight load, keyed by slug so a load for book B is never satisfied
+	// by book A's promise (which previously left A's terms cached forever)
+	let activeLoad: { slug: string; promise: Promise<void> } | null = null;
+	// Monotonic token: only the most recent request may write state
+	let requestCounter = 0;
 
 	return {
 		subscribe,
@@ -42,10 +46,11 @@ function createGlossaryStore() {
 				return Promise.resolve();
 			}
 
-			// Already loading - return the existing promise so callers wait
-			if (loadPromise) return loadPromise;
+			// A load for this same book is already in flight
+			if (activeLoad?.slug === bookSlug) return activeLoad.promise;
 
-			loadPromise = (async () => {
+			const requestId = ++requestCounter;
+			const promise = (async () => {
 				update((s) => ({ ...s, loading: true, error: null }));
 
 				try {
@@ -56,6 +61,9 @@ function createGlossaryStore() {
 
 					const glossary: Glossary = await response.json();
 
+					// Superseded by a newer load (or clear()) — drop the result
+					if (requestId !== requestCounter) return;
+
 					update((s) => ({
 						...s,
 						bookSlug,
@@ -64,16 +72,21 @@ function createGlossaryStore() {
 						error: null
 					}));
 				} catch {
-					loadPromise = null;
+					if (requestId !== requestCounter) return;
 					update((s) => ({
 						...s,
 						loading: false,
 						error: 'Villa við að hlaða orðasafni'
 					}));
+				} finally {
+					if (requestId === requestCounter) {
+						activeLoad = null;
+					}
 				}
 			})();
 
-			return loadPromise;
+			activeLoad = { slug: bookSlug, promise };
+			return promise;
 		},
 
 		/**
@@ -132,7 +145,9 @@ function createGlossaryStore() {
 		 * Clear the cached glossary
 		 */
 		clear(): void {
-			loadPromise = null;
+			// Invalidate any in-flight load so its result is dropped
+			requestCounter++;
+			activeLoad = null;
 			set(defaultState);
 		}
 	};
