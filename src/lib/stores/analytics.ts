@@ -19,6 +19,11 @@ import {
 
 const STORAGE_KEY = 'namsbokasafn:analytics';
 
+// Cap recorded session length: there is no idle detection, so a tab left
+// open (laptop lid closed, background tab) would otherwise record hours of
+// "reading" for a single section
+const MAX_SESSION_SECONDS = 30 * 60;
+
 export interface ReadingSession {
 	sectionKey: string;
 	startTime: string;
@@ -163,10 +168,14 @@ function loadState(): AnalyticsState {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
 			const state = validateStoreData(JSON.parse(stored), defaultState, analyticsValidators);
-			// Migrate legacy keys that lack book-slug prefix
+			// Migrate legacy keys that lack book-slug prefix.
+			// currentSession is transient and never restored: a session left
+			// over from a killed tab would be "ended" on the next visit with a
+			// duration spanning the whole absence, inflating reading stats.
 			return {
 				...state,
-				sectionReadingTimes: migrateRecordKeys(state.sectionReadingTimes)
+				sectionReadingTimes: migrateRecordKeys(state.sectionReadingTimes),
+				currentSession: null
 			};
 		}
 	} catch (e) {
@@ -178,20 +187,23 @@ function loadState(): AnalyticsState {
 function createAnalyticsStore() {
 	const { subscribe, set, update } = writable<AnalyticsState>(loadState());
 
-	// Persist to localStorage
+	// Persist to localStorage. currentSession is excluded: it's transient
+	// per-tab state (see loadState), and persisting it let crashed tabs
+	// inflate reading time and other tabs adopt/double-end the session.
 	let _externalUpdate = false;
 	if (browser) {
 		subscribe((state) => {
 			if (!_externalUpdate) {
-				safeSetItem(STORAGE_KEY, JSON.stringify(state));
+				safeSetItem(STORAGE_KEY, JSON.stringify({ ...state, currentSession: null }));
 			}
 		});
 
-		// Cross-tab synchronization
+		// Cross-tab synchronization — keep this tab's own in-flight session
 		onStorageChange(STORAGE_KEY, (newValue) => {
 			try {
 				_externalUpdate = true;
-				set(validateStoreData(JSON.parse(newValue), defaultState, analyticsValidators));
+				const incoming = validateStoreData(JSON.parse(newValue), defaultState, analyticsValidators);
+				update((current) => ({ ...incoming, currentSession: current.currentSession }));
 			} catch { /* ignore */ }
 			finally { _externalUpdate = false; }
 		});
@@ -271,9 +283,12 @@ function createAnalyticsStore() {
 				let updatedState = state;
 				if (state.currentSession) {
 					const endTime = getCurrentTimestamp();
-					const durationSeconds = Math.round(
-						(new Date(endTime).getTime() - new Date(state.currentSession.startTime).getTime()) /
-							1000
+					const durationSeconds = Math.min(
+						MAX_SESSION_SECONDS,
+						Math.round(
+							(new Date(endTime).getTime() - new Date(state.currentSession.startTime).getTime()) /
+								1000
+						)
 					);
 
 					if (durationSeconds >= 5) {
@@ -369,8 +384,11 @@ function createAnalyticsStore() {
 				if (!state.currentSession) return state;
 
 				const endTime = getCurrentTimestamp();
-				const durationSeconds = Math.round(
-					(new Date(endTime).getTime() - new Date(state.currentSession.startTime).getTime()) / 1000
+				const durationSeconds = Math.min(
+					MAX_SESSION_SECONDS,
+					Math.round(
+						(new Date(endTime).getTime() - new Date(state.currentSession.startTime).getTime()) / 1000
+					)
 				);
 
 				if (durationSeconds < 5) {
