@@ -22,9 +22,26 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
 	try {
 		const toc = await loadTableOfContents(bookSlug, fetch);
+
+		// Chapter start pages, written by scripts/generate-pdfs.js after it has
+		// measured the chapter PDFs (two-pass TOC). Missing on the first pass
+		// and during plain builds — the TOC then renders without page numbers.
+		let tocPages: {
+			chapters: Array<{ number: number; page: number }>;
+			appendicesPage: number | null;
+		} | null = null;
+		try {
+			const res = await fetch(`/downloads/${bookSlug}/toc-pages.json`);
+			if (res.ok) tocPages = await res.json();
+		} catch {
+			// tolerate — page numbers are optional
+		}
+
 		return {
 			book,
-			chapters: toc.chapters ?? []
+			chapters: toc.chapters ?? [],
+			appendices: toc.appendices ?? [],
+			tocPages
 		};
 	} catch (e) {
 		if (isHttpError(e)) throw e;

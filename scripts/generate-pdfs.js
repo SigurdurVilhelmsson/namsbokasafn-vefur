@@ -4,13 +4,25 @@
  * Generate downloadable PDFs for each book in static/content/.
  *
  * For every book + chapter found, prints the dedicated /print/<slug>/kafli/<NN>
- * route to a PDF using Playwright Chromium, then merges the per-chapter PDFs
- * with the front-matter (/print/<slug>/bok) into a single full-book PDF using
- * pdf-lib. Writes a manifest.json describing all generated files.
+ * route to a PDF using Playwright Chromium, then assembles a full book PDF
+ * (front matter + chapters + appendices) with pdf-lib. The assembly pass adds
+ * the book-layout features Chromium can't do on its own:
+ *
+ *   - continuous page numbering across the whole book (folios on the outer
+ *     edge: left on verso/even pages, right on recto/odd pages)
+ *   - running headers (book title on verso, chapter title on recto)
+ *   - a table of contents with real page numbers (two-pass: chapters are
+ *     measured first, then the front matter is re-printed with page numbers
+ *     fed in via downloads/<slug>/toc-pages.json)
+ *   - PDF bookmarks (outline) for the TOC, every chapter and the appendices
+ *
+ * Standalone chapter PDFs are stamped with the same book-absolute page
+ * numbers, so a printed chapter matches the full book and its TOC.
  *
  * Output: static/downloads/<slug>/
  *   - <slug>-kafli-NN.pdf       (one per chapter)
  *   - <slug>-bok.pdf            (full book)
+ *   - toc-pages.json            (chapter start pages, read by /print/<slug>/bok)
  *   - manifest.json
  *
  * The script uses `vite dev` rather than `vite preview`. The reason:
@@ -24,7 +36,8 @@
  *   sync-content → generate-pdfs → vite build
  *
  * Prerequisites:
- *   - Playwright browsers installed (`npx playwright install chromium`).
+ *   - Playwright browsers installed (`npx playwright install chromium`),
+ *     or PDF_CHROMIUM_PATH pointing at a system Chromium binary.
  *
  * Usage:
  *   node scripts/generate-pdfs.js                # all books with content
@@ -32,18 +45,35 @@
  *   node scripts/generate-pdfs.js --port 5180    # custom dev port
  */
 
-import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync, rmSync } from 'node:fs';
+import {
+	existsSync,
+	mkdirSync,
+	readFileSync,
+	readdirSync,
+	statSync,
+	writeFileSync,
+	rmSync
+} from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
 import { chromium } from '@playwright/test';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFHexString, StandardFonts, rgb } from 'pdf-lib';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const CONTENT_DIR = join(ROOT, 'static', 'content');
 const OUTPUT_DIR = join(ROOT, 'static', 'downloads');
 const TMP_DIR = join(ROOT, '.svelte-kit', 'pdf-tmp');
+
+// Stamp geometry (PDF points; A4 = 595.28 × 841.89). Must stay inside the
+// 22mm top/bottom + 18mm side margins set in printToPdf().
+const MARGIN_X = 51; // 18mm
+const FOOTER_BASELINE = 34;
+const HEADER_BASELINE = 806;
+const STAMP_FONT_SIZE = 9;
+const HEADER_COLOR = rgb(0.42, 0.42, 0.42);
+const FOLIO_COLOR = rgb(0.2, 0.2, 0.2);
 
 function parseArgs(argv) {
 	const args = { book: null, port: 5180 };
@@ -88,19 +118,14 @@ async function printToPdf(page, url, outFile) {
 	await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
 	await page.evaluate(() => document.fonts?.ready);
 
+	// Headers/footers are stamped afterwards with pdf-lib (continuous book
+	// numbering, running headers), so Chromium prints content only.
 	await page.pdf({
 		path: outFile,
 		format: 'A4',
 		printBackground: true,
 		preferCSSPageSize: true, // honor @page rules in print.css
-		displayHeaderFooter: true,
-		headerTemplate: '<div></div>',
-		footerTemplate: `
-			<div style="width: 100%; font-size: 9pt; color: #6b7280; padding: 0 18mm; display: flex; justify-content: space-between;">
-				<span>namsbokasafn.is</span>
-				<span><span class="pageNumber"></span> / <span class="totalPages"></span></span>
-			</div>
-		`,
+		displayHeaderFooter: false,
 		margin: { top: '22mm', bottom: '22mm', left: '18mm', right: '18mm' }
 	});
 }
@@ -111,16 +136,103 @@ async function getPdfPageCount(file) {
 	return doc.getPageCount();
 }
 
-async function mergePdfs(files, outFile) {
-	const merged = await PDFDocument.create();
-	for (const file of files) {
-		const bytes = readFileSync(file);
-		const src = await PDFDocument.load(bytes);
-		const pages = await merged.copyPages(src, src.getPageIndices());
-		for (const p of pages) merged.addPage(p);
+/**
+ * Drop characters the standard Helvetica font can't encode (WinAnsi covers
+ * all Icelandic letters; this guards against stray symbols in titles).
+ */
+function encodableText(font, text) {
+	let out = '';
+	for (const ch of text) {
+		try {
+			font.encodeText(ch);
+			out += ch;
+		} catch {
+			out += '?';
+		}
 	}
-	const out = await merged.save();
-	writeFileSync(outFile, out);
+	return out;
+}
+
+/**
+ * Stamp running headers and folios onto a loaded PDFDocument.
+ *
+ * pageInfo(i) is called for each page index and returns null (leave the page
+ * untouched — e.g. front matter) or:
+ *   { pageNumber, headerText | null }
+ *
+ * Book conventions: odd page numbers are recto (folio + header on the right),
+ * even are verso (on the left). Chapter openers pass headerText: null.
+ */
+async function stampPages(doc, pageInfo) {
+	const font = await doc.embedFont(StandardFonts.Helvetica);
+	const fontItalic = await doc.embedFont(StandardFonts.HelveticaOblique);
+	const pages = doc.getPages();
+
+	for (let i = 0; i < pages.length; i++) {
+		const info = pageInfo(i);
+		if (!info) continue;
+
+		const page = pages[i];
+		const { width } = page.getSize();
+		const isRecto = info.pageNumber % 2 === 1;
+
+		const folio = String(info.pageNumber);
+		const folioWidth = font.widthOfTextAtSize(folio, STAMP_FONT_SIZE);
+		page.drawText(folio, {
+			x: isRecto ? width - MARGIN_X - folioWidth : MARGIN_X,
+			y: FOOTER_BASELINE,
+			size: STAMP_FONT_SIZE,
+			font,
+			color: FOLIO_COLOR
+		});
+
+		if (info.headerText) {
+			const text = encodableText(fontItalic, info.headerText);
+			const textWidth = fontItalic.widthOfTextAtSize(text, STAMP_FONT_SIZE);
+			page.drawText(text, {
+				x: isRecto ? width - MARGIN_X - textWidth : MARGIN_X,
+				y: HEADER_BASELINE,
+				size: STAMP_FONT_SIZE,
+				font: fontItalic,
+				color: HEADER_COLOR
+			});
+		}
+	}
+}
+
+/**
+ * Add a flat PDF outline (bookmarks) to the document.
+ * items: [{ title, pageIndex }]
+ */
+function addOutline(doc, items) {
+	if (items.length === 0) return;
+	const ctx = doc.context;
+	const pageRefs = doc.getPages().map((p) => p.ref);
+
+	const outlineRef = ctx.nextRef();
+	const itemRefs = items.map(() => ctx.nextRef());
+
+	items.forEach((item, i) => {
+		const dict = ctx.obj({
+			Title: PDFHexString.fromText(item.title),
+			Parent: outlineRef,
+			Dest: [pageRefs[item.pageIndex], PDFName.of('XYZ'), null, null, null]
+		});
+		if (i > 0) dict.set(PDFName.of('Prev'), itemRefs[i - 1]);
+		if (i < items.length - 1) dict.set(PDFName.of('Next'), itemRefs[i + 1]);
+		ctx.assign(itemRefs[i], dict);
+	});
+
+	ctx.assign(
+		outlineRef,
+		ctx.obj({
+			Type: 'Outlines',
+			First: itemRefs[0],
+			Last: itemRefs[items.length - 1],
+			Count: items.length
+		})
+	);
+	doc.catalog.set(PDFName.of('Outlines'), outlineRef);
 }
 
 async function generateForBook(page, baseUrl, bookSlug) {
@@ -136,50 +248,174 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		return null;
 	}
 
-	const chapterEntries = [];
+	// Stale page numbers from a previous run must not leak into pass-1 prints.
+	const tocPagesFile = join(bookOutDir, 'toc-pages.json');
+	rmSync(tocPagesFile, { force: true });
+
+	// --- Pass 1: print raw chapter/appendix PDFs and measure them ------------
+
+	const chapterParts = [];
 	for (const chapter of chapters) {
 		const chSlug = pad2(chapter.number);
 		const url = `${baseUrl}/print/${bookSlug}/kafli/${chSlug}`;
-		const outFile = join(bookOutDir, `${bookSlug}-kafli-${chSlug}.pdf`);
+		const rawFile = join(bookTmpDir, `${bookSlug}-kafli-${chSlug}-raw.pdf`);
 		console.log(`  ${bookSlug} kafli ${chSlug}: ${chapter.title}`);
-		await printToPdf(page, url, outFile);
-		const pageCount = await getPdfPageCount(outFile);
-		const sizeBytes = statSync(outFile).size;
-		chapterEntries.push({
+		await printToPdf(page, url, rawFile);
+		chapterParts.push({
 			chapterNum: chapter.number,
 			title: chapter.title,
-			file: `${bookSlug}-kafli-${chSlug}.pdf`,
-			sizeBytes,
-			pageCount
+			rawFile,
+			outFile: `${bookSlug}-kafli-${chSlug}.pdf`,
+			pageCount: await getPdfPageCount(rawFile)
 		});
 	}
 
-	// Front-matter for full-book PDF
+	let appendixPart = null;
+	if ((toc.appendices ?? []).length > 0) {
+		const rawFile = join(bookTmpDir, `${bookSlug}-vidauki-raw.pdf`);
+		console.log(`  ${bookSlug}: appendices (${toc.appendices.length})`);
+		await printToPdf(page, `${baseUrl}/print/${bookSlug}/vidauki`, rawFile);
+		appendixPart = { rawFile, pageCount: await getPdfPageCount(rawFile) };
+	}
+
+	// Body page numbering starts at 1 on the first page of chapter 1.
+	let nextStart = 1;
+	for (const part of chapterParts) {
+		part.startPage = nextStart;
+		nextStart += part.pageCount;
+	}
+	if (appendixPart) appendixPart.startPage = nextStart;
+
+	// --- Pass 2: front matter with TOC page numbers --------------------------
+
+	// The /print/<slug>/bok route reads this file to fill in TOC page numbers.
+	writeFileSync(
+		tocPagesFile,
+		JSON.stringify(
+			{
+				chapters: chapterParts.map((p) => ({
+					number: p.chapterNum,
+					page: p.startPage
+				})),
+				appendicesPage: appendixPart?.startPage ?? null
+			},
+			null,
+			2
+		)
+	);
+
 	const frontMatterFile = join(bookTmpDir, `${bookSlug}-front.pdf`);
 	console.log(`  ${bookSlug}: front matter (title + TOC)`);
 	await printToPdf(page, `${baseUrl}/print/${bookSlug}/bok`, frontMatterFile);
+	const frontPageCount = await getPdfPageCount(frontMatterFile);
 
-	// Merge: front-matter + chapter PDFs
+	// --- Stamp + write standalone chapter PDFs, assemble the full book -------
+
+	const bookTitle = toc.title ?? bookSlug;
+	const merged = await PDFDocument.create();
+	merged.setTitle(bookTitle, { showInWindowTitleBar: true });
+	merged.setLanguage('is');
+
+	const front = await PDFDocument.load(readFileSync(frontMatterFile));
+	for (const p of await merged.copyPages(front, front.getPageIndices())) merged.addPage(p);
+
+	const outlineItems = [];
+	if (frontPageCount > 1) outlineItems.push({ title: 'Efnisyfirlit', pageIndex: 1 });
+
+	const chapterEntries = [];
+	for (const part of chapterParts) {
+		const headerForPage = (localIndex) => ({
+			pageNumber: part.startPage + localIndex,
+			// Chapter opener (cover page) carries a folio but no running header.
+			headerText:
+				localIndex === 0
+					? null
+					: (part.startPage + localIndex) % 2 === 1
+						? `${part.chapterNum}. ${part.title}`
+						: bookTitle
+		});
+
+		// Standalone chapter file — book-absolute page numbers so a printed
+		// chapter matches the full book and its TOC.
+		const standalone = await PDFDocument.load(readFileSync(part.rawFile));
+		standalone.setTitle(`${bookTitle} — ${part.chapterNum}. ${part.title}`, {
+			showInWindowTitleBar: true
+		});
+		standalone.setLanguage('is');
+		await stampPages(standalone, headerForPage);
+		const standaloneFile = join(bookOutDir, part.outFile);
+		writeFileSync(standaloneFile, await standalone.save());
+
+		// Same pages into the full book.
+		outlineItems.push({
+			title: `${part.chapterNum}. ${part.title}`,
+			pageIndex: merged.getPageCount()
+		});
+		const src = await PDFDocument.load(readFileSync(part.rawFile));
+		const copied = await merged.copyPages(src, src.getPageIndices());
+		for (const p of copied) merged.addPage(p);
+
+		chapterEntries.push({
+			chapterNum: part.chapterNum,
+			title: part.title,
+			file: part.outFile,
+			sizeBytes: statSync(standaloneFile).size,
+			pageCount: part.pageCount,
+			startPage: part.startPage
+		});
+	}
+
+	if (appendixPart) {
+		outlineItems.push({ title: 'Viðaukar', pageIndex: merged.getPageCount() });
+		const src = await PDFDocument.load(readFileSync(appendixPart.rawFile));
+		const copied = await merged.copyPages(src, src.getPageIndices());
+		for (const p of copied) merged.addPage(p);
+	}
+
+	// Continuous folios + running headers across the whole assembled book.
+	const partStarts = chapterParts.map((p) => ({
+		header: (n) => (n % 2 === 1 ? `${p.chapterNum}. ${p.title}` : bookTitle),
+		startPage: p.startPage
+	}));
+	if (appendixPart) {
+		partStarts.push({
+			header: (n) => (n % 2 === 1 ? 'Viðaukar' : bookTitle),
+			startPage: appendixPart.startPage
+		});
+	}
+	await stampPages(merged, (i) => {
+		if (i < frontPageCount) return null; // front matter is unnumbered
+		const pageNumber = i - frontPageCount + 1;
+		const part = [...partStarts].reverse().find((p) => pageNumber >= p.startPage);
+		if (!part) return null;
+		return {
+			pageNumber,
+			headerText: pageNumber === part.startPage ? null : part.header(pageNumber)
+		};
+	});
+
+	addOutline(merged, outlineItems);
+
 	const fullBookFile = join(bookOutDir, `${bookSlug}-bok.pdf`);
-	console.log(`  ${bookSlug}: merging ${chapterEntries.length} chapters into bok.pdf`);
-	const filesToMerge = [
-		frontMatterFile,
-		...chapterEntries.map((c) => join(bookOutDir, c.file))
-	];
-	await mergePdfs(filesToMerge, fullBookFile);
-	const fullSize = statSync(fullBookFile).size;
-	const fullPages = await getPdfPageCount(fullBookFile);
+	console.log(`  ${bookSlug}: assembling bok.pdf (${merged.getPageCount()} pages)`);
+	writeFileSync(fullBookFile, await merged.save());
 
 	const manifest = {
 		generatedAt: new Date().toISOString(),
 		bookSlug,
 		full: {
 			file: `${bookSlug}-bok.pdf`,
-			sizeBytes: fullSize,
-			pageCount: fullPages
+			sizeBytes: statSync(fullBookFile).size,
+			pageCount: merged.getPageCount()
 		},
 		chapters: chapterEntries
 	};
+	if (appendixPart) {
+		manifest.appendices = {
+			pageCount: appendixPart.pageCount,
+			startPage: appendixPart.startPage
+		};
+	}
 	writeFileSync(join(bookOutDir, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
 	return manifest;
@@ -204,12 +440,23 @@ async function main() {
 	const { server, url } = await startDevServer(args.port);
 	console.log(`  Dev server at ${url}`);
 
-	const browser = await chromium.launch();
+	// PDF_CHROMIUM_PATH lets CI/sandboxes point at a system Chromium instead of
+	// the Playwright-managed download.
+	const browser = await chromium.launch({
+		executablePath: process.env.PDF_CHROMIUM_PATH || undefined
+	});
 	const context = await browser.newContext({
 		viewport: { width: 794, height: 1123 }, // A4 at 96 DPI
 		deviceScaleFactor: 1
 	});
 	const page = await context.newPage();
+	// Render PDFs with *screen* styles. The /print routes are styled
+	// unconditionally by print.css, while app.css carries a global
+	// `@media print` block meant for users printing the reading view — it
+	// hides <header>/<aside> (killing section titles and note boxes) and
+	// flattens colors. Emulating screen media keeps it out of the PDFs;
+	// Chromium still honors break-* and @page rules when printing.
+	await page.emulateMedia({ media: 'screen' });
 
 	let exitCode = 0;
 	try {

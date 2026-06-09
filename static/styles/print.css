@@ -4,7 +4,10 @@
  * Loaded only by /print/* routes (alongside content.css). These rules apply
  * unconditionally on the print routes — both screen preview and Playwright
  * page.pdf() output use the same layout. We don't gate with @media print
- * because the print routes exist solely for PDF rendering.
+ * because the print routes exist solely for PDF rendering. The generator
+ * (scripts/generate-pdfs.js) emulates *screen* media so that app.css's
+ * global `@media print` block (for users printing the reading view) never
+ * applies here.
  */
 
 /* =====================================================================
@@ -74,6 +77,14 @@ article.cnx-module:first-of-type {
 .print-cover:first-child {
   break-before: auto;
   page-break-before: avoid;
+}
+
+/* No forced break after the last front-matter section — avoids a trailing
+   blank page in the front-matter PDF. */
+.print-cover:last-child,
+.print-toc:last-child {
+  break-after: auto;
+  page-break-after: auto;
 }
 
 /* Headings should not be orphaned at the bottom of a page. */
@@ -264,6 +275,38 @@ button,
   color: #c78c20;
   min-width: 1.5cm;
   display: inline-block;
+}
+
+.print-toc .toc-page {
+  font-variant-numeric: tabular-nums;
+  color: #4b5563;
+  margin-left: 0.6cm;
+}
+
+/* =====================================================================
+   Appendix part (print vidauki route)
+   ===================================================================== */
+
+/* Each appendix wrapper starts on a fresh page. (The article.cnx-module
+   first-of-type break rule doesn't apply here because every article is the
+   first of its wrapper div.) */
+.print-appendix {
+  break-before: page;
+  page-break-before: always;
+}
+
+.print-appendix article.cnx-module {
+  break-before: auto;
+  page-break-before: avoid;
+}
+
+.print-appendix .appendix-eyebrow {
+  font-size: 0.85rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c78c20;
+  font-weight: 600;
+  margin: 0 0 0.2cm;
 }
 
 /* =====================================================================
