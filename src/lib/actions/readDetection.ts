@@ -37,7 +37,9 @@ export function readDetection(node: HTMLElement, options: ReadDetectionOptions) 
 	let visibilityTimer: ReturnType<typeof setTimeout> | null = null;
 	let hasTriggered = false;
 
-	const { onRead, threshold = 0.5, minVisibleTime = 1000, enabled = true } = options;
+	// Kept current via update() so setup/intersection always read the latest
+	// options rather than the ones captured at mount
+	let currentOptions = options;
 
 	function handleIntersection(entries: IntersectionObserverEntry[]) {
 		const entry = entries[0];
@@ -47,8 +49,8 @@ export function readDetection(node: HTMLElement, options: ReadDetectionOptions) 
 			if (!visibilityTimer) {
 				visibilityTimer = setTimeout(() => {
 					hasTriggered = true;
-					onRead();
-				}, minVisibleTime);
+					currentOptions.onRead();
+				}, currentOptions.minVisibleTime ?? 1000);
 			}
 		} else {
 			// Element left viewport - cancel timer
@@ -60,10 +62,10 @@ export function readDetection(node: HTMLElement, options: ReadDetectionOptions) 
 	}
 
 	function setup() {
-		if (!enabled || hasTriggered) return;
+		if (!(currentOptions.enabled ?? true) || hasTriggered) return;
 
 		observer = new IntersectionObserver(handleIntersection, {
-			threshold,
+			threshold: currentOptions.threshold ?? 0.5,
 			// Slightly reduce the root margin to ensure user has actually scrolled down
 			rootMargin: '-50px 0px 0px 0px'
 		});
@@ -86,6 +88,7 @@ export function readDetection(node: HTMLElement, options: ReadDetectionOptions) 
 
 	return {
 		update(newOptions: ReadDetectionOptions) {
+			currentOptions = newOptions;
 			const newEnabled = newOptions.enabled ?? true;
 
 			// If disabled or already triggered, teardown
@@ -95,7 +98,7 @@ export function readDetection(node: HTMLElement, options: ReadDetectionOptions) 
 			}
 
 			// If becoming enabled, setup
-			if (newEnabled && !observer) {
+			if (!observer) {
 				setup();
 			}
 		},
