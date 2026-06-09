@@ -216,7 +216,11 @@ export function bionicReadingAction(node: HTMLElement, _content?: string) {
 		// Re-apply when content changes (e.g., navigation)
 		update(_newContent?: string) {
 			if (state.isProcessed) {
-				// Content changed, need to re-process
+				// Content changed, need to re-process. The container still
+				// carries data-bionic-processed from the previous content,
+				// which would make applyBionicReading skip every text node —
+				// clear it first.
+				node.removeAttribute('data-bionic-processed');
 				state.originalHTML = null;
 				state.isProcessed = false;
 				const enabled = get(bionicReading);
