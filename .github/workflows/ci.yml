@@ -24,6 +24,10 @@ jobs:
         with:
           repository: SigurdurVilhelmsson/namsbokasafn-efni
           path: namsbokasafn-efni
+          # namsbokasafn-efni is private; the default CI token only sees this
+          # repo. EFNI_TOKEN is a fine-grained PAT with read access to the
+          # content repo (falls back to the default token if unset).
+          token: ${{ secrets.EFNI_TOKEN || github.token }}
 
       - name: Install dependencies
         run: npm ci
@@ -63,6 +67,10 @@ jobs:
         with:
           repository: SigurdurVilhelmsson/namsbokasafn-efni
           path: namsbokasafn-efni
+          # namsbokasafn-efni is private; the default CI token only sees this
+          # repo. EFNI_TOKEN is a fine-grained PAT with read access to the
+          # content repo (falls back to the default token if unset).
+          token: ${{ secrets.EFNI_TOKEN || github.token }}
 
       - name: Install dependencies
         run: npm ci
