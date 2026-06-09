@@ -9,6 +9,8 @@ export interface PdfManifestChapter {
 	file: string;
 	sizeBytes: number;
 	pageCount: number;
+	/** First page number of the chapter in the full book's continuous numbering. */
+	startPage?: number;
 }
 
 export interface PdfManifestFull {
@@ -22,4 +24,6 @@ export interface PdfManifest {
 	bookSlug: string;
 	full: PdfManifestFull;
 	chapters: PdfManifestChapter[];
+	/** Present when the book's appendices are included in the full PDF. */
+	appendices?: { pageCount: number; startPage: number };
 }
