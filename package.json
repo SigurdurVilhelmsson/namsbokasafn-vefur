@@ -69,8 +69,8 @@
     ]
   },
   "dependencies": {
-    "date-fns": "^4.1.0",
-    "fuse.js": "^7.3.0"
+    "date-fns": "^4.4.0",
+    "fuse.js": "^7.4.0"
   },
   "engines": {
     "node": ">=20.19.0"
