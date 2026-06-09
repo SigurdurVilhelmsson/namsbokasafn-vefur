@@ -25,7 +25,7 @@
  *   --help, -h        Show this help message
  */
 
-import { execSync, spawnSync } from 'child_process';
+import { execFileSync, execSync, spawnSync } from 'child_process';
 import { existsSync, readdirSync, statSync, rmSync, cpSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -195,7 +195,9 @@ function syncBook(sourceDir, bookSlug, dryRun) {
 	if (!dryRun) {
 		console.log(`  Regenerating toc.json...`);
 		try {
-			execSync(`node scripts/generate-toc.js ${bookSlug}`, {
+			// execFileSync (not execSync) so the slug is passed as an argument,
+			// never interpreted by a shell
+			execFileSync('node', ['scripts/generate-toc.js', bookSlug], {
 				cwd: projectRoot,
 				stdio: 'inherit'
 			});
@@ -246,7 +248,9 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 		// Regenerate toc.json based on actual content
 		console.log(`  Regenerating toc.json...`);
 		try {
-			execSync(`node scripts/generate-toc.js ${bookSlug}`, {
+			// execFileSync (not execSync) so the slug is passed as an argument,
+			// never interpreted by a shell
+			execFileSync('node', ['scripts/generate-toc.js', bookSlug], {
 				cwd: projectRoot,
 				stdio: 'inherit'
 			});
