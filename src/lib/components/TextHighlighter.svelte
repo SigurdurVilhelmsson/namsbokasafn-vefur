@@ -281,11 +281,12 @@
 			return;
 		}
 
-		// Get position for popup
+		// Position for the popup: viewport coordinates, since SelectionPopup
+		// and GlossaryTooltip render with position: fixed (no scrollY offset)
 		const rect = range.getBoundingClientRect();
 		const position = {
 			x: rect.left + rect.width / 2,
-			y: rect.top + window.scrollY
+			y: rect.top
 		};
 
 		selection = {
