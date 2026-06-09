@@ -202,6 +202,7 @@ Run `node scripts/generate-toc.js` to regenerate `toc.json` from the chapter dir
 - `scripts/generate-sitemap.js`: Generates `sitemap.xml` from `toc.json`. Runs automatically as part of `prepare-content`.
 - `scripts/validate-content.js`: Validates TOC structure and glossary consistency. HTML content is validated upstream in the CNXML pipeline. Runs before production builds.
 - `scripts/sync-content.js`: Syncs content from namsbokasafn-efni repo.
+- `scripts/generate-pdfs.js`: Renders per-chapter and full-book PDFs from the `/print/*` routes (Playwright Chromium + pdf-lib): continuous page numbering, running headers, TOC with page numbers, PDF outline, appendices. Run after `sync-content`, before `build` (`npm run pdfs`). Set `PDF_CHROMIUM_PATH` to use a system Chromium instead of the Playwright-managed download.
 - `scripts/generate-component-inventory.js`: Generates component documentation (`npm run docs:generate`).
 
 **Pre-commit hooks:** Husky runs lint-staged on commit, which auto-fixes ESLint and Prettier issues on staged files. If a commit is blocked, check the lint-staged output for the specific error.
