@@ -53,7 +53,8 @@ test.describe('Reader Flow', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Verify book title visible
-		await expect(page.getByRole('heading', { name: /Efnafræði/i })).toBeVisible({ timeout: 10000 });
+		// level: 1 — chapter cards also render headings containing "efnafræði"
+		await expect(page.getByRole('heading', { level: 1, name: /Efnafræði/i })).toBeVisible({ timeout: 10000 });
 	});
 
 	test('should navigate to section from book home', async ({ page }) => {
