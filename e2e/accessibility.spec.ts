@@ -21,7 +21,8 @@ test.describe('Landing Page Accessibility', () => {
 
 		// h1 should contain the hero title
 		const h1Text = await page.locator('h1').textContent();
-		expect(h1Text).toContain('Námsbækur');
+		// Case-insensitive: the hero title is "Þýddar námsbækur í opnum aðgangi"
+		expect(h1Text?.toLowerCase()).toContain('námsbækur');
 	});
 
 	test('should have lang attribute set to Icelandic', async ({ page }) => {
@@ -126,7 +127,8 @@ test.describe('Book Page Accessibility', () => {
 		await page.waitForLoadState('networkidle');
 
 		// Book page should have a heading with the book title
-		const heading = page.getByRole('heading', { name: /Efnafræði/i });
+		// level: 1 — chapter cards also render headings containing "efnafræði"
+		const heading = page.getByRole('heading', { level: 1, name: /Efnafræði/i });
 		await expect(heading).toBeVisible({ timeout: 10000 });
 	});
 
