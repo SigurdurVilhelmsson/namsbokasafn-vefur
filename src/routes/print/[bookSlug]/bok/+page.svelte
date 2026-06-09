@@ -11,6 +11,10 @@
 		year: 'numeric',
 		month: 'long'
 	});
+
+	function chapterPage(chapterNum: number): number | null {
+		return data.tocPages?.chapters.find((c) => c.number === chapterNum)?.page ?? null;
+	}
 </script>
 
 <svelte:head>
@@ -40,7 +44,22 @@
 					<span class="toc-chapter-num">{chapter.number}.</span>
 					{chapter.title}
 				</span>
+				{#if chapterPage(chapter.number) !== null}
+					<span class="toc-page">{chapterPage(chapter.number)}</span>
+				{/if}
 			</li>
 		{/each}
+		{#if data.appendices.length > 0}
+			<li>
+				<span>
+					<span class="toc-chapter-num" aria-hidden="true"></span>
+					Viðaukar
+					({data.appendices.map((a) => a.letter).join(', ')})
+				</span>
+				{#if data.tocPages?.appendicesPage != null}
+					<span class="toc-page">{data.tocPages.appendicesPage}</span>
+				{/if}
+			</li>
+		{/if}
 	</ol>
 </section>
