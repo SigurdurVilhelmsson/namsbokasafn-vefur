@@ -25,7 +25,12 @@
 	let pendingKey: string | null = $state(null);
 	let keySequence: string[] = $state([]);
 
-	let shortcuts = $derived(getShortcuts());
+	// getShortcuts reads settings via get() and registers no reactive
+	// dependencies, so read $settings here to recompute after rebinding a key
+	let shortcuts = $derived.by(() => {
+		void $settings.shortcutPreferences;
+		return getShortcuts();
+	});
 	let groupedShortcuts = $derived(groupShortcutsByCategory(shortcuts));
 	let hasCustomizations = $derived(Object.keys($settings.shortcutPreferences).length > 0);
 
