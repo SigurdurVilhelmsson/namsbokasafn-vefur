@@ -3,7 +3,7 @@
 -->
 <script lang="ts">
 	import { onMount, onDestroy, tick } from 'svelte';
-	import { beforeNavigate } from '$app/navigation';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
@@ -75,13 +75,28 @@
 		}
 	}
 
-	// Mark section as read and start analytics session
-	onMount(() => {
+	// Identifies the section currently shown; also used by {#key} below to
+	// remount content components (and their actions) on section navigation
+	let sectionKey = $derived(`${data.bookSlug}/${data.chapterSlug}/${data.sectionSlug}`);
+
+	// Per-section setup. SvelteKit reuses this component when only params
+	// change (prev/next navigation), so this must run per navigation, not in
+	// onMount. afterNavigate also fires on initial mount; the key guard skips
+	// hash-only navigations within the same section.
+	let activeSectionKey = '';
+	afterNavigate(() => {
+		if (sectionKey === activeSectionKey) return;
+		activeSectionKey = sectionKey;
+
 		reader.setCurrentLocation(data.bookSlug, data.chapterSlug, data.sectionSlug);
 		reader.setScrollProgress(0); // Reset scroll progress
+		// Also ends any session from the previous section
 		analyticsStore.startReadingSession(data.bookSlug, data.chapterSlug, data.sectionSlug);
 
-		// Check for saved scroll position
+		// Reset the continue-reading prompt, then check this section's saved position
+		clearTimeout(continuePromptTimeout);
+		showContinuePrompt = false;
+		savedPosition = null;
 		const saved = reader.getScrollPosition(data.bookSlug, data.chapterSlug, data.sectionSlug);
 		if (saved && saved.percentage > 10) {
 			// Only show prompt if user was past 10% of the document
@@ -92,13 +107,13 @@
 				showContinuePrompt = false;
 			}, 8000);
 		}
+	});
 
-		// Add scroll listener
+	onMount(() => {
 		window.addEventListener('scroll', handleScroll, { passive: true });
 
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
-			clearTimeout(continuePromptTimeout);
 		};
 	});
 
@@ -116,6 +131,8 @@
 	onDestroy(() => {
 		analyticsStore.endReadingSession();
 		clearTimeout(continuePromptTimeout);
+		clearTimeout(shareTimeout);
+		clearTimeout(completionTimeout);
 	});
 
 	// Handle "Continue where you left off" action
@@ -389,32 +406,37 @@
 		</div>
 	{/if}
 
-	<!-- Main content wrapped in TextHighlighter for annotation support -->
-	<TextHighlighter
-		bookSlug={data.bookSlug}
-		chapterSlug={data.chapterSlug}
-		sectionSlug={data.sectionSlug}
-	>
-		<ContentRenderer
-			content={data.section.content}
+	<!-- Main content wrapped in TextHighlighter for annotation support.
+	     {#key} remounts the content components and their actions on section
+	     navigation: highlight restoration, equation/figure enhancement, lazy
+	     images and read detection all run their mount-time setup per section. -->
+	{#key sectionKey}
+		<TextHighlighter
 			bookSlug={data.bookSlug}
 			chapterSlug={data.chapterSlug}
 			sectionSlug={data.sectionSlug}
-			chapterNumber={data.chapterNumber}
-			sectionType={data.section.type || ''}
-		/>
-	</TextHighlighter>
+		>
+			<ContentRenderer
+				content={data.section.content}
+				bookSlug={data.bookSlug}
+				chapterSlug={data.chapterSlug}
+				sectionSlug={data.sectionSlug}
+				chapterNumber={data.chapterNumber}
+				sectionType={data.section.type || ''}
+			/>
+		</TextHighlighter>
 
-	<!-- End of section detection - auto-marks as read when user scrolls here -->
-	<div
-		use:readDetection={{
-			onRead: markAsRead,
-			enabled: !isRead,
-			minVisibleTime: 1500
-		}}
-		class="h-4"
-		aria-hidden="true"
-	></div>
+		<!-- End of section detection - auto-marks as read when user scrolls here -->
+		<div
+			use:readDetection={{
+				onRead: markAsRead,
+				enabled: !isRead,
+				minVisibleTime: 1500
+			}}
+			class="h-4"
+			aria-hidden="true"
+		></div>
+	{/key}
 
 	<!-- Mark as read button at bottom -->
 	{#if !isRead}
