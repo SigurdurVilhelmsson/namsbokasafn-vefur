@@ -28,9 +28,11 @@ function makeQuestion(id: string): QuizQuestion {
 }
 
 // Helper to create quiz answers
-function makeAnswer(id: string, isCorrect: boolean): QuizAnswer {
+function makeAnswer(questionId: string, isCorrect: boolean): QuizAnswer {
 	return {
-		id,
+		// Answer-option id differs per choice; questionId identifies the question
+		id: isCorrect ? `${questionId}-A` : `${questionId}-B`,
+		questionId,
 		text: isCorrect ? 'Option A' : 'Option B',
 		isCorrect
 	};
@@ -164,8 +166,7 @@ describe('quiz store', () => {
 
 	describe('practice problem tracking', () => {
 		it('should mark a problem as viewed', () => {
-			quizStore.markPracticeProblemViewed(
-				'pp-1', '01', '1-1', 'question?', 'answer'
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'question?', 'answer'
 			);
 			const progress = quizStore.getPracticeProblemProgress('pp-1');
 			expect(progress).toBeDefined();
@@ -174,16 +175,16 @@ describe('quiz store', () => {
 		});
 
 		it('should not overwrite existing progress on re-view', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
 			quizStore.markPracticeProblemCompleted('pp-1');
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
 
 			const progress = quizStore.getPracticeProblemProgress('pp-1');
 			expect(progress!.isCompleted).toBe(true); // not reset
 		});
 
 		it('should mark a problem as completed', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
 			quizStore.markPracticeProblemCompleted('pp-1');
 
 			const progress = quizStore.getPracticeProblemProgress('pp-1');
@@ -193,7 +194,7 @@ describe('quiz store', () => {
 		});
 
 		it('should track attempt results', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
 			quizStore.markPracticeProblemAttempt('pp-1', false);
 			quizStore.markPracticeProblemAttempt('pp-1', true);
 			quizStore.markPracticeProblemAttempt('pp-1', true);
@@ -217,7 +218,7 @@ describe('quiz store', () => {
 		});
 
 		it('should return learning after first attempt', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
 			quizStore.markPracticeProblemAttempt('pp-1', false);
 
 			const mastery = quizStore.getProblemMastery('pp-1');
@@ -225,7 +226,7 @@ describe('quiz store', () => {
 		});
 
 		it('should return mastered with high success rate and enough attempts', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
 			quizStore.markPracticeProblemAttempt('pp-1', true);
 			quizStore.markPracticeProblemAttempt('pp-1', true);
 			quizStore.markPracticeProblemAttempt('pp-1', true);
@@ -236,12 +237,12 @@ describe('quiz store', () => {
 		});
 
 		it('should calculate section mastery across problems', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q1', 'a1');
-			quizStore.markPracticeProblemViewed('pp-2', '01', '1-1', 'q2', 'a2');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q1', 'a1');
+			quizStore.markPracticeProblemViewed('pp-2', 'efnafraedi-2e', '01', '1-1', 'q2', 'a2');
 			quizStore.markPracticeProblemAttempt('pp-1', true);
 			quizStore.markPracticeProblemAttempt('pp-2', false);
 
-			const mastery = quizStore.getSectionMastery('01', '1-1');
+			const mastery = quizStore.getSectionMastery('efnafraedi-2e', '01', '1-1');
 			expect(mastery.attempts).toBe(2);
 			expect(mastery.successRate).toBe(50);
 		});
@@ -277,23 +278,23 @@ describe('quiz store', () => {
 
 	describe('progress', () => {
 		it('should calculate section progress', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
-			quizStore.markPracticeProblemViewed('pp-2', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-2', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
 			quizStore.markPracticeProblemCompleted('pp-1');
 
-			const progress = quizStore.getSectionProgress('01', '1-1');
+			const progress = quizStore.getSectionProgress('efnafraedi-2e', '01', '1-1');
 			expect(progress.completed).toBe(1);
 			expect(progress.total).toBe(2);
 			expect(progress.percentage).toBe(50);
 		});
 
 		it('should calculate chapter progress', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
-			quizStore.markPracticeProblemViewed('pp-2', '01', '1-2', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-2', 'efnafraedi-2e', '01', '1-2', 'q', 'a');
 			quizStore.markPracticeProblemCompleted('pp-1');
 			quizStore.markPracticeProblemCompleted('pp-2');
 
-			const progress = quizStore.getChapterProgress('01');
+			const progress = quizStore.getChapterProgress('efnafraedi-2e', '01');
 			expect(progress.completed).toBe(2);
 			expect(progress.total).toBe(2);
 			expect(progress.percentage).toBe(100);
@@ -303,56 +304,56 @@ describe('quiz store', () => {
 	describe('adaptive problems', () => {
 		it('should prioritize novice problems', () => {
 			// pp-1: novice (no attempts), pp-2: mastered
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q1', 'a1');
-			quizStore.markPracticeProblemViewed('pp-2', '01', '1-1', 'q2', 'a2');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q1', 'a1');
+			quizStore.markPracticeProblemViewed('pp-2', 'efnafraedi-2e', '01', '1-1', 'q2', 'a2');
 			quizStore.markPracticeProblemAttempt('pp-2', true);
 			quizStore.markPracticeProblemAttempt('pp-2', true);
 			quizStore.markPracticeProblemAttempt('pp-2', true);
 
-			const adaptive = quizStore.getAdaptiveProblems('01', 5);
+			const adaptive = quizStore.getAdaptiveProblems('efnafraedi-2e', '01', 5);
 			expect(adaptive[0].id).toBe('pp-1'); // novice first
 		});
 
 		it('should filter by chapter', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q1', 'a1');
-			quizStore.markPracticeProblemViewed('pp-2', '02', '2-1', 'q2', 'a2');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q1', 'a1');
+			quizStore.markPracticeProblemViewed('pp-2', 'efnafraedi-2e', '02', '2-1', 'q2', 'a2');
 
-			const ch01 = quizStore.getAdaptiveProblems('01');
+			const ch01 = quizStore.getAdaptiveProblems('efnafraedi-2e', '01');
 			expect(ch01).toHaveLength(1);
 			expect(ch01[0].id).toBe('pp-1');
 		});
 
 		it('should limit results to maxProblems', () => {
 			for (let i = 0; i < 10; i++) {
-				quizStore.markPracticeProblemViewed(`pp-${i}`, '01', '1-1', `q${i}`, `a${i}`);
+				quizStore.markPracticeProblemViewed(`pp-${i}`, 'efnafraedi-2e', '01', '1-1', `q${i}`, `a${i}`);
 			}
-			const problems = quizStore.getAdaptiveProblems('01', 3);
+			const problems = quizStore.getAdaptiveProblems('efnafraedi-2e', '01', 3);
 			expect(problems).toHaveLength(3);
 		});
 	});
 
 	describe('problems for review', () => {
 		it('should include problems with no lastAttempted', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
-			const problems = quizStore.getProblemsForReview();
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
+			const problems = quizStore.getProblemsForReview('efnafraedi-2e');
 			expect(problems).toHaveLength(1);
 		});
 	});
 
 	describe('getProblemsForChapter', () => {
 		it('should return all problems for a given chapter', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q1', 'a1');
-			quizStore.markPracticeProblemViewed('pp-2', '01', '1-2', 'q2', 'a2');
-			quizStore.markPracticeProblemViewed('pp-3', '02', '2-1', 'q3', 'a3');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q1', 'a1');
+			quizStore.markPracticeProblemViewed('pp-2', 'efnafraedi-2e', '01', '1-2', 'q2', 'a2');
+			quizStore.markPracticeProblemViewed('pp-3', 'efnafraedi-2e', '02', '2-1', 'q3', 'a3');
 
-			const ch01 = quizStore.getProblemsForChapter('01');
+			const ch01 = quizStore.getProblemsForChapter('efnafraedi-2e', '01');
 			expect(ch01).toHaveLength(2);
 		});
 	});
 
 	describe('persistence', () => {
 		it('should persist to localStorage', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
 			expect(localStorage.setItem).toHaveBeenCalled();
 		});
 
@@ -366,6 +367,7 @@ describe('quiz store', () => {
 							id: 'pp-saved',
 							content: 'saved',
 							answer: 'a',
+							bookSlug: 'efnafraedi-2e',
 							chapterSlug: '01',
 							sectionSlug: '1-1',
 							isCompleted: true,
@@ -385,9 +387,46 @@ describe('quiz store', () => {
 		});
 	});
 
+	describe('cross-book isolation', () => {
+		it('does not leak problems between books sharing chapter slugs', () => {
+			quizStore.markPracticeProblemViewed('a/01/1-1#0', 'book-a', '01', '1-1', 'qa', 'aa');
+			quizStore.markPracticeProblemViewed('b/01/1-1#0', 'book-b', '01', '1-1', 'qb', 'ab');
+
+			expect(quizStore.getAdaptiveProblems('book-a', '01')).toHaveLength(1);
+			expect(quizStore.getProblemsForChapter('book-a', '01')).toHaveLength(1);
+			expect(quizStore.getProblemsForReview('book-a')).toHaveLength(1);
+			expect(quizStore.getSectionProgress('book-a', '01', '1-1').total).toBe(1);
+			expect(quizStore.getChapterProgress('book-a', '01').total).toBe(1);
+		});
+
+		it('section mastery only counts the requested book', () => {
+			quizStore.markPracticeProblemViewed('a/01/1-1#0', 'book-a', '01', '1-1', 'qa', 'aa');
+			quizStore.markPracticeProblemViewed('b/01/1-1#0', 'book-b', '01', '1-1', 'qb', 'ab');
+			quizStore.markPracticeProblemAttempt('b/01/1-1#0', false);
+
+			const mastery = quizStore.getSectionMastery('book-a', '01', '1-1');
+			expect(mastery.attempts).toBe(0);
+			expect(mastery.level).toBe('novice');
+		});
+	});
+
+	describe('answer dedupe by question', () => {
+		it('replaces the previous answer when a different option is chosen', () => {
+			quizStore.startQuizSession([makeQuestion('q1'), makeQuestion('q2')]);
+
+			// Same question, different answer-option ids
+			quizStore.answerQuestion(makeAnswer('q1', false)); // id q1-B
+			quizStore.answerQuestion(makeAnswer('q1', true)); // id q1-A
+
+			const session = get(currentQuizSession);
+			expect(session!.answers).toHaveLength(1);
+			expect(session!.score).toBe(50); // 1 of 2 questions correct
+		});
+	});
+
 	describe('reset', () => {
 		it('should reset to default state', () => {
-			quizStore.markPracticeProblemViewed('pp-1', '01', '1-1', 'q', 'a');
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
 			quizStore.startQuizSession([makeQuestion('q1')]);
 			quizStore.reset();
 
