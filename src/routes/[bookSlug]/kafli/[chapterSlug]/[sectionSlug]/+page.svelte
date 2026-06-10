@@ -7,6 +7,7 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
+	import { readingMode } from '$lib/stores/settings';
 	import { isSectionRead, isSectionBookmarked, getSavedScrollPosition, type ScrollPositions } from '$lib/stores/reader';
 	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
@@ -15,6 +16,7 @@
 	import PilotBanner from '$lib/components/PilotBanner.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import RecallPrompt from '$lib/components/RecallPrompt.svelte';
+	import PagedReaderControls from '$lib/components/PagedReaderControls.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
 	import { fade, fly } from 'svelte/transition';
 
@@ -24,6 +26,8 @@
 	let shareSuccess = $state(false);
 	let shareTimeout: ReturnType<typeof setTimeout>;
 	let showRecallPrompt = $state(false);
+	// Bound to the content wrapper inside {#key}; paged mode operates on it
+	let contentWrapper: HTMLElement | undefined = $state();
 	let showContinuePrompt = $state(false);
 	let savedPosition: { scrollY: number; percentage: number } | null = $state(null);
 	let continuePromptTimeout: ReturnType<typeof setTimeout>;
@@ -409,26 +413,36 @@
 	     navigation: highlight restoration, equation/figure enhancement, lazy
 	     images and read detection all run their mount-time setup per section. -->
 	{#key sectionKey}
-		<TextHighlighter
-			bookSlug={data.bookSlug}
-			chapterSlug={data.chapterSlug}
-			sectionSlug={data.sectionSlug}
-		>
-			<ContentRenderer
-				content={data.section.content}
+		<div bind:this={contentWrapper}>
+			<TextHighlighter
 				bookSlug={data.bookSlug}
 				chapterSlug={data.chapterSlug}
 				sectionSlug={data.sectionSlug}
-				chapterNumber={data.chapterNumber}
-				sectionType={data.section.type || ''}
-			/>
-		</TextHighlighter>
+			>
+				<ContentRenderer
+					content={data.section.content}
+					bookSlug={data.bookSlug}
+					chapterSlug={data.chapterSlug}
+					sectionSlug={data.sectionSlug}
+					chapterNumber={data.chapterNumber}
+					sectionType={data.section.type || ''}
+				/>
+			</TextHighlighter>
+		</div>
 
-		<!-- End of section detection - auto-marks as read when user scrolls here -->
+		{#if $readingMode === 'paged'}
+			<!-- Paged mode: completion comes from advancing past the last
+			     page, not from scroll position -->
+			<PagedReaderControls container={contentWrapper} oncomplete={markAsRead} />
+		{/if}
+
+		<!-- End of section detection - auto-marks as read when user scrolls here
+		     (scrolled mode only; in paged mode the whole page fits the viewport
+		     so the marker would be visible immediately) -->
 		<div
 			use:readDetection={{
 				onRead: markAsRead,
-				enabled: !isRead,
+				enabled: !isRead && $readingMode !== 'paged',
 				minVisibleTime: 1500
 			}}
 			class="h-4"

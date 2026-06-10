@@ -14,6 +14,7 @@ export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 export type FontFamily = 'serif' | 'sans' | 'opendyslexic';
 export type LineHeight = 'normal' | 'relaxed' | 'loose';
 export type LineWidth = 'narrow' | 'medium' | 'wide';
+export type ReadingMode = 'paged' | 'scrolled';
 
 export type ShortcutAction =
 	| 'prevSection'
@@ -50,6 +51,7 @@ interface SettingsState {
 	fontFamily: FontFamily;
 	lineHeight: LineHeight;
 	lineWidth: LineWidth;
+	readingMode: ReadingMode;
 	sidebarOpen: boolean;
 	shortcutPreferences: ShortcutPreferences;
 	bionicReading: boolean;
@@ -67,6 +69,11 @@ const defaultSettings: SettingsState = {
 	// band the readability literature recommends (reader plan P0.1);
 	// users who prefer wider text can still pick medium/wide in settings
 	lineWidth: 'narrow',
+	// Paged is the default: eliminating required scrolling within a reading
+	// unit is the highest-evidence intervention in the reader plan (P0.4).
+	// 'scrolled' ("Samfellt skrun") preserves the previous behavior and is
+	// the better choice for screen-reader users.
+	readingMode: 'paged',
 	sidebarOpen: false,
 	shortcutPreferences: {},
 	bionicReading: false,
@@ -79,6 +86,7 @@ const settingsValidators = {
 	fontFamily: isOneOf('serif', 'sans', 'opendyslexic'),
 	lineHeight: isOneOf('normal', 'relaxed', 'loose'),
 	lineWidth: isOneOf('narrow', 'medium', 'wide'),
+	readingMode: isOneOf('paged', 'scrolled'),
 	sidebarOpen: isBoolean,
 	shortcutPreferences: isObject,
 	bionicReading: isBoolean,
@@ -151,6 +159,9 @@ function createSettingsStore() {
 		// Line width methods
 		setLineWidth: (lineWidth: LineWidth) => update((s) => ({ ...s, lineWidth })),
 
+		// Reading mode methods
+		setReadingMode: (readingMode: ReadingMode) => update((s) => ({ ...s, readingMode })),
+
 		// Sidebar methods
 		setSidebarOpen: (sidebarOpen: boolean) => update((s) => ({ ...s, sidebarOpen })),
 
@@ -200,6 +211,7 @@ export const fontSize = derived(settings, ($settings) => $settings.fontSize);
 export const fontFamily = derived(settings, ($settings) => $settings.fontFamily);
 export const lineHeight = derived(settings, ($settings) => $settings.lineHeight);
 export const lineWidth = derived(settings, ($settings) => $settings.lineWidth);
+export const readingMode = derived(settings, ($settings) => $settings.readingMode);
 export const sidebarOpen = derived(settings, ($settings) => $settings.sidebarOpen);
 export const bionicReading = derived(settings, ($settings) => $settings.bionicReading);
 export const glossaryHighlighting = derived(settings, ($settings) => $settings.glossaryHighlighting);
