@@ -37,6 +37,9 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
+		// Registered on both document and the overlay div, so a keydown inside
+		// the modal arrives twice; without this guard Ctrl+Enter saved twice
+		if (event.defaultPrevented) return;
 		// Focus trap
 		if (event.key === 'Tab' && modalContentRef) {
 			const focusable = modalContentRef.querySelectorAll<HTMLElement>(
@@ -60,6 +63,7 @@
 		}
 		// Close on Escape
 		if (event.key === 'Escape') {
+			event.preventDefault();
 			onClose();
 		}
 	}

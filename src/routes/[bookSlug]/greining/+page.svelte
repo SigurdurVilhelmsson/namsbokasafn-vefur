@@ -173,9 +173,21 @@
 	let last7Days = $derived(getLast7Days());
 	let maxSeconds = $derived(Math.max(...last7Days.map((d) => d.seconds), 1));
 	let topSections = $derived(getTopSections(5));
-	let recentActivity = $derived(analyticsStore.getRecentActivity(10));
-	let totalReadingTime = $derived(analyticsStore.getTotalReadingTime());
-	let weeklyStats = $derived(analyticsStore.getWeeklyStats());
+	// These store methods read state via get() and register no reactive
+	// dependencies, so read $analyticsStore to recompute on store changes
+	// (new sessions, "Hreinsa gögn", cross-tab updates)
+	let recentActivity = $derived.by(() => {
+		void $analyticsStore;
+		return analyticsStore.getRecentActivity(10);
+	});
+	let totalReadingTime = $derived.by(() => {
+		void $analyticsStore;
+		return analyticsStore.getTotalReadingTime();
+	});
+	let weeklyStats = $derived.by(() => {
+		void $analyticsStore;
+		return analyticsStore.getWeeklyStats();
+	});
 </script>
 
 <svelte:head>

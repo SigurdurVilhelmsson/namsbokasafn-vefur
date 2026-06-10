@@ -2,7 +2,7 @@
   GoalsTab - Goal management with progress tracking
 -->
 <script lang="ts">
-	import { analyticsStore, activeGoals, type GoalType, type GoalUnit, type GoalProgress } from '$lib/stores';
+	import { analyticsStore, type GoalType, type GoalUnit, type GoalProgress } from '$lib/stores';
 
 	let showAddModal = $state(false);
 	let newGoalType: GoalType = $state('daily_reading_time');
@@ -84,7 +84,13 @@
 		newGoalTarget = config.defaultTarget;
 	}
 
-	let goalsProgress = $derived.by(() => analyticsStore.getAllGoalsProgress());
+	// getAllGoalsProgress reads the store via get() and registers no reactive
+	// dependencies, so read $analyticsStore here to recompute on store changes
+	// (goal add/remove/toggle, reading/flashcard progress)
+	let goalsProgress = $derived.by(() => {
+		void $analyticsStore;
+		return analyticsStore.getAllGoalsProgress();
+	});
 </script>
 
 <div class="space-y-6">
