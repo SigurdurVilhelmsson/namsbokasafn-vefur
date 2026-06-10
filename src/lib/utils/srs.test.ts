@@ -32,9 +32,15 @@ function makeRecord(overrides: Partial<FlashcardStudyRecord> = {}): FlashcardStu
 
 describe('srs utilities', () => {
 	describe('calculateNewEaseFactor', () => {
-		it('should increase ease for perfect quality (5)', () => {
+		it('should cap ease at 2.5 even for perfect quality (5)', () => {
+			// Documented SM-2 range is 1.3-2.5; "easy" at the cap stays there
 			const newEase = calculateNewEaseFactor(2.5, 5);
-			expect(newEase).toBeGreaterThan(2.5);
+			expect(newEase).toBe(2.5);
+		});
+
+		it('should increase ease toward the cap for perfect quality below it', () => {
+			const newEase = calculateNewEaseFactor(2.2, 5);
+			expect(newEase).toBeCloseTo(2.3);
 		});
 
 		it('should keep ease roughly the same for good quality (4)', () => {
