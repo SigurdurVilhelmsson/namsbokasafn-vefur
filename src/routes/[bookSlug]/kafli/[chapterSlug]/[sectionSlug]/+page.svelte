@@ -14,6 +14,7 @@
 	import AnnotationSidebar from '$lib/components/AnnotationSidebar.svelte';
 	import PilotBanner from '$lib/components/PilotBanner.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
+	import RecallPrompt from '$lib/components/RecallPrompt.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
 	import { fade, fly } from 'svelte/transition';
 
@@ -22,8 +23,7 @@
 	let showAnnotationSidebar = $state(false);
 	let shareSuccess = $state(false);
 	let shareTimeout: ReturnType<typeof setTimeout>;
-	let showCompletionAnimation = $state(false);
-	let completionTimeout: ReturnType<typeof setTimeout>;
+	let showRecallPrompt = $state(false);
 	let showContinuePrompt = $state(false);
 	let savedPosition: { scrollY: number; percentage: number } | null = $state(null);
 	let continuePromptTimeout: ReturnType<typeof setTimeout>;
@@ -93,6 +93,8 @@
 		// Also ends any session from the previous section
 		analyticsStore.startReadingSession(data.bookSlug, data.chapterSlug, data.sectionSlug);
 
+		showRecallPrompt = false;
+
 		// Reset the continue-reading prompt, then check this section's saved position
 		clearTimeout(continuePromptTimeout);
 		showContinuePrompt = false;
@@ -132,7 +134,6 @@
 		analyticsStore.endReadingSession();
 		clearTimeout(continuePromptTimeout);
 		clearTimeout(shareTimeout);
-		clearTimeout(completionTimeout);
 	});
 
 	// Handle "Continue where you left off" action
@@ -156,13 +157,10 @@
 		const wasAlreadyRead = isSectionRead(progress, data.bookSlug, data.chapterSlug, data.sectionSlug);
 		reader.markAsRead(data.bookSlug, data.chapterSlug, data.sectionSlug);
 
-		// Show celebration animation only if this is the first time marking as read
+		// First completion: prompt free recall instead of a celebration —
+		// retrieval practice is the intervention (reader plan P0.2)
 		if (!wasAlreadyRead) {
-			showCompletionAnimation = true;
-			clearTimeout(completionTimeout);
-			completionTimeout = setTimeout(() => {
-				showCompletionAnimation = false;
-			}, 2000);
+			showRecallPrompt = true;
 		}
 	}
 
@@ -438,6 +436,16 @@
 		></div>
 	{/key}
 
+	<!-- Free-recall prompt: shown when the section is first marked read -->
+	{#if showRecallPrompt}
+		<RecallPrompt
+			bookSlug={data.bookSlug}
+			chapterSlug={data.chapterSlug}
+			sectionSlug={data.sectionSlug}
+			onclose={() => (showRecallPrompt = false)}
+		/>
+	{/if}
+
 	<!-- Mark as read button at bottom -->
 	{#if !isRead}
 		<div class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
@@ -457,53 +465,6 @@
 <!-- Navigation buttons -->
 <NavigationButtons navigation={data.navigation} bookSlug={data.bookSlug} />
 
-<!-- Section Completion Animation -->
-{#if showCompletionAnimation}
-	<div
-		class="fixed inset-0 z-50 pointer-events-none flex items-center justify-center"
-		aria-hidden="true"
-	>
-		<!-- Floating particles with predefined positions -->
-		<div class="completion-particle particle-1">
-			<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-				<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-			</svg>
-		</div>
-		<div class="completion-particle particle-2">
-			<div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-		</div>
-		<div class="completion-particle particle-3">
-			<div class="w-3 h-3 rounded-full bg-teal-400"></div>
-		</div>
-		<div class="completion-particle particle-4">
-			<svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
-				<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-			</svg>
-		</div>
-		<div class="completion-particle particle-5">
-			<div class="w-2 h-2 rounded-full bg-emerald-400"></div>
-		</div>
-		<div class="completion-particle particle-6">
-			<div class="w-3 h-3 rounded-full bg-teal-400"></div>
-		</div>
-		<div class="completion-particle particle-7">
-			<svg class="w-3 h-3 text-teal-500" fill="currentColor" viewBox="0 0 20 20">
-				<path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-			</svg>
-		</div>
-		<div class="completion-particle particle-8">
-			<div class="w-2 h-2 rounded-full bg-green-400"></div>
-		</div>
-
-		<!-- Central message -->
-		<div class="completion-message bg-emerald-500 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2">
-			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-			</svg>
-			<span class="font-semibold">Vel gert!</span>
-		</div>
-	</div>
-{/if}
 
 <!-- Annotation Sidebar -->
 <AnnotationSidebar
@@ -515,86 +476,4 @@
 />
 
 <style>
-	/* Completion animation particles */
-	.completion-particle {
-		position: absolute;
-		opacity: 0;
-	}
-
-	.particle-1 { animation: burst-up-right 1.2s ease-out 0s forwards; }
-	.particle-2 { animation: burst-up 1.2s ease-out 0.05s forwards; }
-	.particle-3 { animation: burst-up-left 1.2s ease-out 0.1s forwards; }
-	.particle-4 { animation: burst-right 1.2s ease-out 0.15s forwards; }
-	.particle-5 { animation: burst-left 1.2s ease-out 0.2s forwards; }
-	.particle-6 { animation: burst-down-right 1.2s ease-out 0.25s forwards; }
-	.particle-7 { animation: burst-down 1.2s ease-out 0.3s forwards; }
-	.particle-8 { animation: burst-down-left 1.2s ease-out 0.35s forwards; }
-
-	@keyframes burst-up {
-		0% { opacity: 1; transform: translate(0, 0) scale(0); }
-		20% { opacity: 1; transform: translate(0, 0) scale(1); }
-		100% { opacity: 0; transform: translate(0, -100px) scale(0.3); }
-	}
-	@keyframes burst-up-right {
-		0% { opacity: 1; transform: translate(0, 0) scale(0); }
-		20% { opacity: 1; transform: translate(0, 0) scale(1); }
-		100% { opacity: 0; transform: translate(70px, -70px) scale(0.3); }
-	}
-	@keyframes burst-up-left {
-		0% { opacity: 1; transform: translate(0, 0) scale(0); }
-		20% { opacity: 1; transform: translate(0, 0) scale(1); }
-		100% { opacity: 0; transform: translate(-70px, -70px) scale(0.3); }
-	}
-	@keyframes burst-right {
-		0% { opacity: 1; transform: translate(0, 0) scale(0); }
-		20% { opacity: 1; transform: translate(0, 0) scale(1); }
-		100% { opacity: 0; transform: translate(100px, 0) scale(0.3); }
-	}
-	@keyframes burst-left {
-		0% { opacity: 1; transform: translate(0, 0) scale(0); }
-		20% { opacity: 1; transform: translate(0, 0) scale(1); }
-		100% { opacity: 0; transform: translate(-100px, 0) scale(0.3); }
-	}
-	@keyframes burst-down {
-		0% { opacity: 1; transform: translate(0, 0) scale(0); }
-		20% { opacity: 1; transform: translate(0, 0) scale(1); }
-		100% { opacity: 0; transform: translate(0, 80px) scale(0.3); }
-	}
-	@keyframes burst-down-right {
-		0% { opacity: 1; transform: translate(0, 0) scale(0); }
-		20% { opacity: 1; transform: translate(0, 0) scale(1); }
-		100% { opacity: 0; transform: translate(70px, 50px) scale(0.3); }
-	}
-	@keyframes burst-down-left {
-		0% { opacity: 1; transform: translate(0, 0) scale(0); }
-		20% { opacity: 1; transform: translate(0, 0) scale(1); }
-		100% { opacity: 0; transform: translate(-70px, 50px) scale(0.3); }
-	}
-
-	/* Central completion message */
-	.completion-message {
-		animation: message-pop 2s ease-out forwards;
-	}
-
-	@keyframes message-pop {
-		0% {
-			opacity: 0;
-			transform: scale(0.5);
-		}
-		15% {
-			opacity: 1;
-			transform: scale(1.1);
-		}
-		25% {
-			transform: scale(1);
-		}
-		80% {
-			opacity: 1;
-			transform: scale(1);
-		}
-		100% {
-			opacity: 0;
-			transform: scale(0.9);
-		}
-	}
 </style>
