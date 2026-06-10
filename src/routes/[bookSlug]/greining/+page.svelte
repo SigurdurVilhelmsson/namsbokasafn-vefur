@@ -14,6 +14,7 @@
 		FlashcardStatsTab,
 		ReadingPatternsTab,
 		GoalsTab,
+		CalibrationTab,
 		type TabId
 	} from '$lib/components/analytics';
 
@@ -445,6 +446,17 @@
 		>
 			{#if activeTab === 'minniskort'}
 				<FlashcardStatsTab />
+			{/if}
+		</div>
+
+		<div
+			id="tabpanel-kvordun"
+			role="tabpanel"
+			aria-labelledby="tab-kvordun"
+			hidden={activeTab !== 'kvordun'}
+		>
+			{#if activeTab === 'kvordun'}
+				<CalibrationTab bookSlug={data.bookSlug} {getSectionTitle} />
 			{/if}
 		</div>
 
