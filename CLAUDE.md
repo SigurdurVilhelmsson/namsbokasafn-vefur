@@ -86,6 +86,10 @@ npm run format           # Prettier formatting
 - Svelte actions for DOM manipulation (equations, practice problems, figure viewer)
 - **Svelte 5 with runes** — uses `$state`, `$derived`, `$effect`, `$props()` for reactivity. Callback props (e.g., `onClose`, `oncomplete`) instead of `createEventDispatcher`. `{@render children()}` instead of `<slot />`.
 - `$store` auto-subscription syntax for store values
+- **Reactivity pitfalls** (each caused real bugs, fixed June 2026):
+  - Never wrap a store method that reads via `get({ subscribe })` in `$derived` — it registers no dependencies and computes exactly once. Read the store (`$storeName`) inside the derived so it recomputes.
+  - Never mutate a property on a `$derived` object — reassign the whole object (writable derived).
+  - Per-section page logic must not live in `onMount`: SvelteKit reuses the page component when only params change. Use `afterNavigate` with a key guard and/or `{#key}`.
 - Math rendering: MathJax (pre-rendered SVG in HTML content)
 - Path alias: `$lib/` resolves to `src/lib/`
 

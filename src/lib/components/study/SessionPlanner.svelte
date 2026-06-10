@@ -41,7 +41,9 @@
 	function togglePhase(id: PhaseId) {
 		const phase = plan[id];
 		if (!phase.enabled) return; // Can't toggle disabled phases
-		phaseToggles[id] = !phaseToggles[id];
+		// Reassign (don't mutate): property writes on a derived's plain object
+		// don't notify the signal, so the UI and selectedPhases never update
+		phaseToggles = { ...phaseToggles, [id]: !phaseToggles[id] };
 	}
 
 	function handleFilterChange(e: Event) {
