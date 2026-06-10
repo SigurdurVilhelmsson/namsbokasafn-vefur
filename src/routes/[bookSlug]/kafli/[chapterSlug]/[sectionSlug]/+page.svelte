@@ -16,6 +16,7 @@
 	import PilotBanner from '$lib/components/PilotBanner.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import RecallPrompt from '$lib/components/RecallPrompt.svelte';
+	import PreQuestionPrompt from '$lib/components/PreQuestionPrompt.svelte';
 	import PagedReaderControls from '$lib/components/PagedReaderControls.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
 	import { fade, fly } from 'svelte/transition';
@@ -26,6 +27,7 @@
 	let shareSuccess = $state(false);
 	let shareTimeout: ReturnType<typeof setTimeout>;
 	let showRecallPrompt = $state(false);
+	let showPreQuestion = $state(false);
 	// Bound to the content wrapper inside {#key}; paged mode operates on it
 	let contentWrapper: HTMLElement | undefined = $state();
 	let showContinuePrompt = $state(false);
@@ -98,6 +100,11 @@
 		analyticsStore.startReadingSession(data.bookSlug, data.chapterSlug, data.sectionSlug);
 
 		showRecallPrompt = false;
+		// Pre-question (P1.2): pose one objective before reading, first
+		// visits only — already-read sections skip straight to the text
+		showPreQuestion =
+			!isSectionRead($reader.progress, data.bookSlug, data.chapterSlug, data.sectionSlug) &&
+			(data.section.objectives?.length ?? 0) > 0;
 
 		// Reset the continue-reading prompt, then check this section's saved position
 		clearTimeout(continuePromptTimeout);
@@ -412,6 +419,15 @@
 	     {#key} remounts the content components and their actions on section
 	     navigation: highlight restoration, equation/figure enhancement, lazy
 	     images and read detection all run their mount-time setup per section. -->
+	<!-- Pre-question: covert retrieval attempt before reading (P1.2) -->
+	{#if showPreQuestion && data.section.objectives}
+		<PreQuestionPrompt
+			objectives={data.section.objectives}
+			{sectionKey}
+			onclose={() => (showPreQuestion = false)}
+		/>
+	{/if}
+
 	{#key sectionKey}
 		<div bind:this={contentWrapper}>
 			<TextHighlighter
