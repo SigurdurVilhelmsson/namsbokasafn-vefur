@@ -64,7 +64,7 @@
 		});
 
 		// Get review problems from quiz store
-		const reviewProblems = quizStore.getProblemsForReview(5);
+		const reviewProblems = quizStore.getProblemsForReview(data.bookSlug, 5);
 
 		// Find unread sections from TOC
 		const chapterSlug = chapterFilter
@@ -79,13 +79,13 @@
 		);
 
 		// Get adaptive problems
-		const adaptiveProblems = quizStore.getAdaptiveProblems(chapterSlug, 5);
+		const adaptiveProblems = quizStore.getAdaptiveProblems(data.bookSlug, chapterSlug, 5);
 
 		// Find weak objectives
-		const weakObjectives = findWeakObjectives(
-			objState.completedObjectives,
+		const weakObjectives = findWeakObjectives(objState.completedObjectives, {
+			bookSlug: data.bookSlug,
 			chapterSlug
-		);
+		});
 
 		plan = buildSessionPlan({
 			dueFlashcards,
