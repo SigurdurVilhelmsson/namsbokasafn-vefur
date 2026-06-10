@@ -11,11 +11,12 @@
 		onHighlight: (color: HighlightColor) => void;
 		onAddNote: () => void;
 		onCreateFlashcard: () => void;
+		onCreateCloze?: () => void;
 		onGlossaryLookup?: () => void;
 		onClose: () => void;
 	}
 
-	let { position, onHighlight, onAddNote, onCreateFlashcard, onGlossaryLookup, onClose }: Props = $props();
+	let { position, onHighlight, onAddNote, onCreateFlashcard, onCreateCloze, onGlossaryLookup, onClose }: Props = $props();
 
 	const HIGHLIGHT_COLORS: { color: HighlightColor; label: string; hex: string }[] = [
 		{ color: 'yellow', label: 'Gulur', hex: '#f5e6b8' },
@@ -136,6 +137,26 @@
 			</svg>
 			<span class="hidden sm:inline">Minniskort</span>
 		</button>
+
+		<!-- One-tap cloze card button -->
+		{#if onCreateCloze}
+			<button
+				onclick={onCreateCloze}
+				class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
+				aria-label="Búa til eyðukort með einum smelli"
+				title="Eyðukort: setningin með eyðu í stað valda textans"
+			>
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4 6h16M4 12h5m6 0h5M4 18h16"
+					/>
+				</svg>
+				<span class="hidden sm:inline">Eyðukort</span>
+			</button>
+		{/if}
 
 		<!-- Glossary lookup button -->
 		{#if onGlossaryLookup}

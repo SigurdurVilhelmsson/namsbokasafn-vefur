@@ -12,6 +12,10 @@
 	import { goto } from '$app/navigation';
 	import { annotationStore } from '$lib/stores/annotation';
 	import { glossaryStore } from '$lib/stores/glossary';
+	import { flashcardStore } from '$lib/stores/flashcard';
+	import { buildClozeFront } from '$lib/utils/cloze';
+	import { generateId } from '$lib/utils/storeHelpers';
+	import type { Flashcard, FlashcardDeck } from '$lib/types/flashcard';
 	import SelectionPopup from './SelectionPopup.svelte';
 	import NoteModal from './NoteModal.svelte';
 	import FlashcardModal from './FlashcardModal.svelte';
@@ -44,11 +48,17 @@
 	let pendingFlashcard: {
 		text: string;
 	} | null = $state(null);
+	let clozeSaved = $state(false);
+	let clozeToastTimeout: ReturnType<typeof setTimeout> | undefined;
 
 	// Track restored highlights by annotation ID for click handling
 	let restoredHighlights: Map<string, HTMLElement[]> = new Map();
 
 	// Load glossary and restore highlights on mount
+	onMount(() => {
+		return () => clearTimeout(clozeToastTimeout);
+	});
+
 	onMount(async () => {
 		glossaryStore.load(bookSlug);
 
@@ -412,6 +422,67 @@
 		window.getSelection()?.removeAllRanges();
 	}
 
+	// Deck that collects one-tap cloze cards
+	const CLOZE_DECK_NAME = 'Eyðukort';
+
+	/** Text of the nearest block element around the selection */
+	function blockTextAround(range: Range): string {
+		let node: Node | null = range.commonAncestorContainer;
+		while (node && node !== containerElement) {
+			if (
+				node instanceof HTMLElement &&
+				/^(P|LI|TD|TH|BLOCKQUOTE|FIGCAPTION|DIV|SECTION)$/.test(node.tagName)
+			) {
+				return node.textContent || '';
+			}
+			node = node.parentNode;
+		}
+		return range.commonAncestorContainer.textContent || '';
+	}
+
+	/**
+	 * One-tap cloze card (reader plan P1.3): the sentence around the
+	 * selection becomes the front with the selection blanked; the selection
+	 * is the back. No modal — the card lands in the 'Eyðukort' deck.
+	 */
+	function handleCreateCloze() {
+		if (!selection) return;
+
+		const front = buildClozeFront(blockTextAround(selection.range), selection.text);
+		if (!front) {
+			// Couldn't build a meaningful cloze — fall back to the modal
+			handleCreateFlashcard();
+			return;
+		}
+
+		let deck = $flashcardStore.decks.find((d) => d.name === CLOZE_DECK_NAME);
+		if (!deck) {
+			const newDeck: FlashcardDeck = {
+				id: generateId(),
+				name: CLOZE_DECK_NAME,
+				cards: [],
+				created: new Date().toISOString()
+			};
+			flashcardStore.addDeck(newDeck);
+			deck = newDeck;
+		}
+
+		const card: Flashcard = {
+			id: generateId(),
+			front,
+			back: selection.text,
+			source: `${bookSlug} > ${chapterSlug} > ${sectionSlug}`,
+			created: new Date().toISOString()
+		};
+		flashcardStore.addCardToDeck(deck.id, card);
+
+		window.getSelection()?.removeAllRanges();
+		selection = null;
+		clozeSaved = true;
+		clearTimeout(clozeToastTimeout);
+		clozeToastTimeout = setTimeout(() => (clozeSaved = false), 2500);
+	}
+
 	/**
 	 * Handle glossary lookup action
 	 */
@@ -457,9 +528,20 @@
 		onHighlight={handleHighlight}
 		onAddNote={handleAddNote}
 		onCreateFlashcard={handleCreateFlashcard}
+		onCreateCloze={handleCreateCloze}
 		onGlossaryLookup={handleGlossaryLookup}
 		onClose={handleClosePopup}
 	/>
+{/if}
+
+<!-- Cloze saved confirmation -->
+{#if clozeSaved}
+	<div
+		class="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white shadow-lg"
+		role="status"
+	>
+		Eyðukort vistað í „Eyðukort“
+	</div>
 {/if}
 
 <!-- Glossary tooltip -->
