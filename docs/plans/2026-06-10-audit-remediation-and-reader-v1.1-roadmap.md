@@ -1,7 +1,22 @@
 # Roadmap — June 2026: audit remediation → production, then Reader v1.1
 
-**Date:** 2026-06-10
+**Date:** 2026-06-10 (status updated 2026-06-11)
 **Context:** Follows the full codebase review in `docs/code-review-2026-06.md` (PR #108) and the reader development plan in `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`.
+
+## Status summary (2026-06-11)
+
+| Track                     | State                                                                                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Phase 1 (audit → main)    | **Complete** — all items below merged (#115 pipeline, #116 SRS, #117 Icelandic, #118 delivery, plus #126 CI gate, #130 audit-1.3 fix, #131 P2.4) |
+| Reader v1.1 / plan P0     | **Complete** on `feature/reader-v1.1` (#119–#122) — gated on QA batches D–E + 3 judgment calls                                                   |
+| Reader v1.2 / plan P1     | **Complete** on `feature/reader-v1.2` (#124, #125, #127, #128) — gated on QA batch G                                                             |
+| Production deploy         | Pending: server pull/build/rsync + apply nginx changes (QA batch F)                                                                              |
+| Releases                  | v1.1.0 after D–E verdicts; v1.2.0 after G, following v1.1.0                                                                                      |
+| Reader plan P2.1–P2.3     | Not started (P2.4 done in #131; P2.1 label shipped inside P0.4, scroll-bar replacement open)                                                     |
+| Reader plan P3 (AI tutor) | Deferred pending classroom feedback on P0/P1                                                                                                     |
+
+Manual verification lives in `docs/manual-qa-2026-06.md`. The sections below
+are the original plan, kept for the record.
 
 ## Phase 1 — Finish audit remediation, ship to production
 
@@ -16,7 +31,7 @@
 | #112 | Reactivity sweep: planner toggles, duplicate modal saves, frozen `$derived`-over-`get()` views; CLAUDE.md pitfalls note    |
 | #113 | Glossary book switching; analytics session no longer persisted/adopted cross-tab, 30-min duration cap                      |
 
-### Remaining before the production push
+### Remaining before the production push (all complete as of 2026-06-11 — see status summary)
 
 1. **Wire up the practice-tracking pipeline** (audit 1.4 + M1–M4, M6).
    Decision: **wire up, not delete** — the reader plan's P1.1 calibration tab and
@@ -55,11 +70,10 @@ changes in the same maintenance window.
 
 ## Phase 2 — Reader v1.1 (screen-vs-paper plan)
 
-Implements `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`, none of
-which has shipped as of 2026-06-10 (verified: the `lineWidth` setting
-infrastructure exists but defaults to `medium`/52rem; everything else —
-free-recall prompt, predict-first ratings, pagination, calibration tab,
-typography corrections — is unimplemented).
+Implements `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`. (At the
+time of writing nothing had shipped; as of 2026-06-11, P0 is complete on
+`feature/reader-v1.1` and P1 on `feature/reader-v1.2` — see the status
+summary above.)
 
 **Branch strategy:** long-lived integration branch `feature/reader-v1.1`,
 created from main after Phase 1 merges. Individual P0 items land on it as
