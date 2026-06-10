@@ -12,10 +12,17 @@
 
     <!-- GoatCounter analytics - privacy-friendly, no cookies, GDPR compliant -->
     <!-- Dashboard: https://namsbokasafn.goatcounter.com -->
-    <script
-      data-goatcounter="https://namsbokasafn.goatcounter.com/count"
-      async
-      src="https://gc.zgo.at/count.js"
-    ></script>
+    <!-- Injected after the load event: even an async script delays window
+         'load' while its request is pending, so a slow or hung analytics CDN
+         would block page readiness (it stalled CI's e2e run on 2026-06-09) -->
+    <script>
+      window.addEventListener("load", function () {
+        var s = document.createElement("script");
+        s.async = true;
+        s.src = "https://gc.zgo.at/count.js";
+        s.dataset.goatcounter = "https://namsbokasafn.goatcounter.com/count";
+        document.body.appendChild(s);
+      });
+    </script>
   </body>
 </html>
