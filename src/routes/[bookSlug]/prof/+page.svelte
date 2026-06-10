@@ -6,7 +6,8 @@
 	import { goto } from '$app/navigation';
 	import AdaptiveQuiz from '$lib/components/AdaptiveQuiz.svelte';
 
-	let bookSlug = $derived($page.params.bookSlug);
+	// Param is always present on this route; fallback satisfies the type
+	let bookSlug = $derived($page.params.bookSlug ?? '');
 	let chapterSlug = $derived($page.url.searchParams.get('kafli') || undefined);
 
 	function handleComplete() {
@@ -44,7 +45,7 @@
 		</div>
 
 		<!-- Quiz component -->
-		<AdaptiveQuiz {chapterSlug} onComplete={handleComplete} maxProblems={5} />
+		<AdaptiveQuiz {bookSlug} {chapterSlug} onComplete={handleComplete} maxProblems={5} />
 
 		<!-- Help section -->
 		<div class="quiz-help">

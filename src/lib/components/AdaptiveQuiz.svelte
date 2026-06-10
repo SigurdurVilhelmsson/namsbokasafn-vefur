@@ -8,12 +8,13 @@
 	import type { MasteryLevel } from '$lib/types/quiz';
 
 	interface Props {
+		bookSlug: string;
 		chapterSlug?: string;
 		onComplete?: () => void;
 		maxProblems?: number;
 	}
 
-	let { chapterSlug, onComplete, maxProblems = 5 }: Props = $props();
+	let { bookSlug, chapterSlug, onComplete, maxProblems = 5 }: Props = $props();
 
 	interface QuizState {
 		currentIndex: number;
@@ -40,9 +41,9 @@
 
 	// Load problems on mount
 	onMount(() => {
-		const adaptive = quizStore.getAdaptiveProblems(chapterSlug, maxProblems);
+		const adaptive = quizStore.getAdaptiveProblems(bookSlug, chapterSlug, maxProblems);
 		if (adaptive.length === 0) {
-			problems = quizStore.getProblemsForReview(maxProblems);
+			problems = quizStore.getProblemsForReview(bookSlug, maxProblems);
 		} else {
 			problems = adaptive;
 		}
@@ -89,9 +90,9 @@
 
 	function handleRestart() {
 		// Reload problems
-		const adaptive = quizStore.getAdaptiveProblems(chapterSlug, maxProblems);
+		const adaptive = quizStore.getAdaptiveProblems(bookSlug, chapterSlug, maxProblems);
 		if (adaptive.length === 0) {
-			problems = quizStore.getProblemsForReview(maxProblems);
+			problems = quizStore.getProblemsForReview(bookSlug, maxProblems);
 		} else {
 			problems = adaptive;
 		}
