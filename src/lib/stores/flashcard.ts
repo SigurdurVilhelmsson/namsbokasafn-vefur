@@ -43,6 +43,9 @@ export interface FlashcardReviewEntry {
 	timestamp: string;
 	rating: DifficultyRating;
 	wasCorrect: boolean; // quality >= 3 (good or easy)
+	/** Pre-reveal self-prediction ("do I know this?"), when the user gave one.
+	 *  Compared against wasCorrect for confidence calibration. */
+	predictedKnown?: boolean;
 }
 
 // Daily flashcard stats for tracking
@@ -275,7 +278,7 @@ function createFlashcardStore() {
 		},
 
 		// SRS functions
-		rateCard: (cardId: string, rating: DifficultyRating) => {
+		rateCard: (cardId: string, rating: DifficultyRating, predictedKnown?: boolean) => {
 			const quality = DIFFICULTY_TO_QUALITY[rating];
 			const state = get({ subscribe });
 			const existingRecord = state.studyRecords[cardId];
@@ -293,7 +296,8 @@ function createFlashcardStore() {
 				cardId,
 				timestamp: getCurrentTimestamp(),
 				rating,
-				wasCorrect: quality >= 3 // good or easy
+				wasCorrect: quality >= 3, // good or easy
+				...(predictedKnown !== undefined ? { predictedKnown } : {})
 			};
 
 			// Update daily stats
