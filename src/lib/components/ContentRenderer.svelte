@@ -51,7 +51,7 @@
 		 lazyImages is safe after it because it only observes existing elements. -->
 	<div
 		class="reading-content"
-		use:practiceProblems
+		use:practiceProblems={{ bookSlug, chapterSlug, sectionSlug }}
 		use:equations
 		use:figureViewer
 		use:crossReferences={{ bookSlug, chapterSlug, sectionSlug, chapterNumber, content }}
