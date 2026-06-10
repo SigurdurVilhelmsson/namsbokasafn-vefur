@@ -109,7 +109,7 @@
 				id="note-modal-title"
 				class="text-lg font-semibold text-gray-900 dark:text-gray-100"
 			>
-				Baeta vid athugasemd
+				Bæta við athugasemd
 			</h2>
 			<button
 				onclick={onClose}
@@ -163,17 +163,17 @@
 					for="annotation-note"
 					class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-300"
 				>
-					Athugasemd (valfrjalst)
+					Athugasemd (valfrjálst)
 				</label>
 				<textarea
 					bind:this={textareaElement}
 					bind:value={note}
 					id="annotation-note"
-					placeholder="Skrifadu athugasemd her..."
+					placeholder="Skrifaðu athugasemd hér..."
 					class="min-h-[100px] w-full resize-y rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 p-3 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-[var(--accent-color)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]/20"
 				></textarea>
 				<p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-					Yttu a Ctrl+Enter til ad vista
+					Ýttu á Ctrl+Enter til að vista
 				</p>
 			</div>
 		</div>
@@ -186,7 +186,7 @@
 				onclick={onClose}
 				class="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700"
 			>
-				Haetta vid
+				Hætta við
 			</button>
 			<button
 				onclick={handleSave}
