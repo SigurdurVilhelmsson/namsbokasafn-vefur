@@ -2,9 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    # feature/** are long-lived integration branches (e.g. reader v1.x);
+    # they merge to main wholesale, so they need the same gate
+    branches: [main, 'feature/**']
   pull_request:
-    branches: [main]
+    branches: [main, 'feature/**']
 
 jobs:
   lint-and-test:
