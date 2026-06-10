@@ -11,7 +11,7 @@ import { validateStoreData, isOneOf, isBoolean, isObject } from '$lib/utils/stor
 // Types
 export type Theme = 'light' | 'dark';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
-export type FontFamily = 'serif' | 'sans' | 'opendyslexic';
+export type FontFamily = 'serif' | 'sans' | 'opendyslexic' | 'hyperlegible';
 export type LineHeight = 'normal' | 'relaxed' | 'loose';
 export type LineWidth = 'narrow' | 'medium' | 'wide';
 export type ReadingMode = 'paged' | 'scrolled';
@@ -83,7 +83,7 @@ const defaultSettings: SettingsState = {
 const settingsValidators = {
 	theme: isOneOf('light', 'dark'),
 	fontSize: isOneOf('small', 'medium', 'large', 'xlarge'),
-	fontFamily: isOneOf('serif', 'sans', 'opendyslexic'),
+	fontFamily: isOneOf('serif', 'sans', 'opendyslexic', 'hyperlegible'),
 	lineHeight: isOneOf('normal', 'relaxed', 'loose'),
 	lineWidth: isOneOf('narrow', 'medium', 'wide'),
 	readingMode: isOneOf('paged', 'scrolled'),
@@ -103,6 +103,12 @@ function loadSettings(): SettingsState {
 		}
 	} catch (e) {
 		console.warn('Failed to load settings:', e);
+	}
+
+	// First visit (nothing stored): respect the OS color-scheme preference.
+	// Once the user saves any settings, their stored theme always wins.
+	if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+		return { ...defaultSettings, theme: 'dark' };
 	}
 	return defaultSettings;
 }
