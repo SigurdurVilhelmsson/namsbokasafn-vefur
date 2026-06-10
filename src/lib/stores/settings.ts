@@ -63,7 +63,10 @@ const defaultSettings: SettingsState = {
 	fontSize: 'medium',
 	fontFamily: 'serif',
 	lineHeight: 'normal',
-	lineWidth: 'medium',
+	// 'narrow' (38rem ≈ 71 chars) keeps the measure inside the 50-75 char
+	// band the readability literature recommends (reader plan P0.1);
+	// users who prefer wider text can still pick medium/wide in settings
+	lineWidth: 'narrow',
 	sidebarOpen: false,
 	shortcutPreferences: {},
 	bionicReading: false,
