@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-22
 **Branch of origin:** `claude/evaluate-reader-research-aCOVa`
-**Status:** Plan only — no code changes yet
+**Status:** Plan only as of 2026-06-10 — no items implemented (the `lineWidth` setting infrastructure has since landed, but the default remains `medium`). Implementation tracked in `2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md` (Phase 2, branch `feature/reader-v1.1`).
 **Source research:** "Why screens lose to paper — and how to build a reader that closes the gap" (Claude-generated literature review, April 2026), drawing on Delgado et al. 2018, Clinton 2019, Salmerón et al. 2024, Dunlosky et al. 2013, Ackerman & Lauterman 2012, Roediger & Karpicke 2006, and others.
 
 ## Executive summary
@@ -22,57 +22,57 @@ This plan addresses each, sized in **Claude Code sessions** (one focused 1–3 h
 
 Full audit lives in conversation history; the structural findings are:
 
-| Area | Current state | File:line |
-|---|---|---|
-| Section render | One scrollable `<article>` | `[sectionSlug]/+page.svelte:189`, `ContentRenderer.svelte:52-67` |
-| Default measure | `--content-width: 52rem` ≈ 97 chars | `app.css:23-25,344-345` |
-| Default theme | `'light'`, no `prefers-color-scheme` | `settings.ts:62` |
-| Body font | Literata 16px, line-height 1.75 | `app.css:130,265,466-467` |
-| OpenDyslexic | Offered as "Letur hannað fyrir lesblinda" | `SettingsModal.svelte:34-38` |
-| Atkinson Hyperlegible | Not offered | — |
-| Section markers in HTML | `<section>` with h2/h3 present | `content.css:147-161` |
-| Read detection | IntersectionObserver + 1500ms | `readDetection.ts:31-106` |
-| Section-end behavior | "Vel gert!" particle burst, no retrieval | `[sectionSlug]/+page.svelte:137-149` |
-| Flashcard rating | Post-reveal only, no pre-prediction | `ReviewPhase.svelte:120-150` |
-| Confidence ↔ performance | Stored separately, never compared | `objectives.ts:215-237`, `analytics.ts` |
-| Highlights | Visual + Markdown export, no card path | `TextHighlighter.svelte`, `annotation.ts` |
-| AI integration | None | — |
+| Area                     | Current state                             | File:line                                                        |
+| ------------------------ | ----------------------------------------- | ---------------------------------------------------------------- |
+| Section render           | One scrollable `<article>`                | `[sectionSlug]/+page.svelte:189`, `ContentRenderer.svelte:52-67` |
+| Default measure          | `--content-width: 52rem` ≈ 97 chars       | `app.css:23-25,344-345`                                          |
+| Default theme            | `'light'`, no `prefers-color-scheme`      | `settings.ts:62`                                                 |
+| Body font                | Literata 16px, line-height 1.75           | `app.css:130,265,466-467`                                        |
+| OpenDyslexic             | Offered as "Letur hannað fyrir lesblinda" | `SettingsModal.svelte:34-38`                                     |
+| Atkinson Hyperlegible    | Not offered                               | —                                                                |
+| Section markers in HTML  | `<section>` with h2/h3 present            | `content.css:147-161`                                            |
+| Read detection           | IntersectionObserver + 1500ms             | `readDetection.ts:31-106`                                        |
+| Section-end behavior     | "Vel gert!" particle burst, no retrieval  | `[sectionSlug]/+page.svelte:137-149`                             |
+| Flashcard rating         | Post-reveal only, no pre-prediction       | `ReviewPhase.svelte:120-150`                                     |
+| Confidence ↔ performance | Stored separately, never compared         | `objectives.ts:215-237`, `analytics.ts`                          |
+| Highlights               | Visual + Markdown export, no card path    | `TextHighlighter.svelte`, `annotation.ts`                        |
+| AI integration           | None                                      | —                                                                |
 
 ## Prioritized roadmap
 
 ### P0 — Closes the highest-evidence gaps
 
-| # | Item | Sessions | Research basis |
-|---|---|---|---|
-| P0.1 | Tighten default measure to 38rem (~71 chars) | 1 | Baymard / NN-G / Bringhurst 50–75 char band |
-| P0.2 | Replace section-completion celebration with free-recall prompt | 1 | Roediger & Karpicke 2006; Dunlosky 2013 |
-| P0.3 | Predict-first flashcard rating (2-point pre-prediction) | 1 | Ackerman & Lauterman 2012; Clinton 2019 |
-| P0.4 | Hybrid viewport-aware pagination (Option C — see detailed spec below) | 5 | Salmerón et al. 2024 (g 0.35–0.48 → 0.03–0.12) |
+| #    | Item                                                                  | Sessions | Research basis                                 |
+| ---- | --------------------------------------------------------------------- | -------- | ---------------------------------------------- |
+| P0.1 | Tighten default measure to 38rem (~71 chars)                          | 1        | Baymard / NN-G / Bringhurst 50–75 char band    |
+| P0.2 | Replace section-completion celebration with free-recall prompt        | 1        | Roediger & Karpicke 2006; Dunlosky 2013        |
+| P0.3 | Predict-first flashcard rating (2-point pre-prediction)               | 1        | Ackerman & Lauterman 2012; Clinton 2019        |
+| P0.4 | Hybrid viewport-aware pagination (Option C — see detailed spec below) | 5        | Salmerón et al. 2024 (g 0.35–0.48 → 0.03–0.12) |
 
 ### P1 — Closes the metacognitive loop
 
-| # | Item | Sessions | Research basis |
-|---|---|---|---|
-| P1.1 | Calibration tab on `/greining` (confidence vs. actual perf) | 2 | Ackerman; Clinton |
-| P1.2 | Pre-question on section load | 1 | Pre-questions branch of testing-effect literature |
-| P1.3 | Highlight → cloze card in one tap | 2 | Dunlosky 2013 (couple highlights to active use) |
-| P1.4 | Typography corrections: relabel OpenDyslexic, add Atkinson Hyperlegible Next, `prefers-color-scheme` only when unset | 1 | Rello & Baeza-Yates 2013; Wery & Diliberto 2017 |
+| #    | Item                                                                                                                 | Sessions | Research basis                                    |
+| ---- | -------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------- |
+| P1.1 | Calibration tab on `/greining` (confidence vs. actual perf)                                                          | 2        | Ackerman; Clinton                                 |
+| P1.2 | Pre-question on section load                                                                                         | 1        | Pre-questions branch of testing-effect literature |
+| P1.3 | Highlight → cloze card in one tap                                                                                    | 2        | Dunlosky 2013 (couple highlights to active use)   |
+| P1.4 | Typography corrections: relabel OpenDyslexic, add Atkinson Hyperlegible Next, `prefers-color-scheme` only when unset | 1        | Rello & Baeza-Yates 2013; Wery & Diliberto 2017   |
 
 ### P2 — Polish
 
-| # | Item | Sessions |
-|---|---|---|
-| P2.1 | Bounded progress label ("Hluti N af M") replaces 2px scroll bar | 0.5 |
-| P2.2 | Spaced-review surfacing in study planner | 1.5 |
-| P2.3 | Recall-review tab in `/bokamerki` | 1 |
-| P2.4 | `CLAUDE.md` note: optimize for expository, not narrative | 0 |
+| #    | Item                                                            | Sessions |
+| ---- | --------------------------------------------------------------- | -------- |
+| P2.1 | Bounded progress label ("Hluti N af M") replaces 2px scroll bar | 0.5      |
+| P2.2 | Spaced-review surfacing in study planner                        | 1.5      |
+| P2.3 | Recall-review tab in `/bokamerki`                               | 1        |
+| P2.4 | `CLAUDE.md` note: optimize for expository, not narrative        | 0        |
 
 ### P3 — Larger bets, evaluate after P0–P1
 
-| # | Item | Sessions | Note |
-|---|---|---|---|
-| P3.1 | Socratic-only AI tutor | 8–12 | Build only after P0.2/P0.3 ship; constraints in research |
-| P3.2 | Social annotation | — | Probably skip; not justified at current scale |
+| #    | Item                   | Sessions | Note                                                     |
+| ---- | ---------------------- | -------- | -------------------------------------------------------- |
+| P3.1 | Socratic-only AI tutor | 8–12     | Build only after P0.2/P0.3 ship; constraints in research |
+| P3.2 | Social annotation      | —        | Probably skip; not justified at current scale            |
 
 ---
 
@@ -94,22 +94,22 @@ This is the only item in P0 that crosses architectural boundaries. Every other i
 
 ```ts
 type SubsectionState = {
-  index: number;          // 0..N-1 over article.cnx-module > section
+  index: number; // 0..N-1 over article.cnx-module > section
   innerPages: PageBreak[]; // empty if no split needed
-  currentPage: number;    // 0..innerPages.length - 1, or 0 if no split
+  currentPage: number; // 0..innerPages.length - 1, or 0 if no split
   read: boolean;
 };
 
 type PageBreak = {
   startNodeIndex: number; // child index into the sub-section's element list
-  endNodeIndex: number;   // exclusive
+  endNodeIndex: number; // exclusive
   approxHeightPx: number;
 };
 
 type ReaderViewState = {
   subsections: SubsectionState[];
   currentSubsection: number;
-  layoutKey: string;      // `${fontSizePx}|${measurePx}|${viewportH}|${lineHeight}`
+  layoutKey: string; // `${fontSizePx}|${measurePx}|${viewportH}|${lineHeight}`
 };
 ```
 
@@ -153,7 +153,7 @@ walk children in order:
 
 - `figure`, `table`, `pre`, `.equation`, `.math-display`, `mjx-container[display="true"]`
 - `.note`, `.example`, `.exercise`, `.checkpoint`, `.learning-objectives`, `.chapter-outline`
-- `h2`, `h3` — atomic *and* "keep with next" (a heading at end of page moves to top of next)
+- `h2`, `h3` — atomic _and_ "keep with next" (a heading at end of page moves to top of next)
 
 `looksLikeParagraph`: `p`, `ul > li`, `ol > li` — these can sit at page boundaries without harm.
 
@@ -190,7 +190,7 @@ Pagination changes the contract:
 
 ### Cross-references and in-page links
 
-- On click of an internal anchor (`#fig-1.2`, `#eq-3.4`, glossary term jumps): resolve the target's sub-section index and inner page; navigate to that page; scroll target into view *within* the page if internally scrollable.
+- On click of an internal anchor (`#fig-1.2`, `#eq-3.4`, glossary term jumps): resolve the target's sub-section index and inner page; navigate to that page; scroll target into view _within_ the page if internally scrollable.
 - Glossary tooltips and figure-viewer lightbox already use absolute-positioned overlays; unaffected by pagination.
 - Cross-section links (e.g. "see chapter 4.2") work as before — full SvelteKit navigation.
 
@@ -218,7 +218,7 @@ Pagination changes the contract:
 ### Figure and table handling
 
 - `<figure>` + `<figcaption>` treated as one atomic unit.
-- If a figure exceeds viewport height: figure gets its own page. Within that page, allow internal vertical scroll *and* the existing zoom action (`figureViewer.ts`) — user can tap to lightbox at full size.
+- If a figure exceeds viewport height: figure gets its own page. Within that page, allow internal vertical scroll _and_ the existing zoom action (`figureViewer.ts`) — user can tap to lightbox at full size.
 - Wide tables: same atomic-with-internal-scroll pattern. Long tables (> viewport height) get their own page; horizontal scroll within if wide.
 
 ### Fallback behavior
@@ -250,17 +250,17 @@ Pagination changes the contract:
 
 ### Effort breakdown (sessions)
 
-| Sub-task | Sessions |
-|---|---|
-| Sub-section segmentation + outer Prev/Next + state model | 1 |
-| Page-break algorithm + caching by layoutKey | 1.5 |
-| Settings toggle + scrolled-mode fallback path | 0.5 |
-| URL scheme + deep-link routing + cross-reference resolver | 0.5 |
-| Read-detection rewire + free-recall integration with P0.2 | 0.5 |
-| Keyboard / touch / focus management / aria-live | 0.5 |
-| ResizeObserver + recompute + position preservation | 0.5 |
-| Vitest + Playwright tests | 1 |
-| **Total** | **~6 sessions** |
+| Sub-task                                                  | Sessions        |
+| --------------------------------------------------------- | --------------- |
+| Sub-section segmentation + outer Prev/Next + state model  | 1               |
+| Page-break algorithm + caching by layoutKey               | 1.5             |
+| Settings toggle + scrolled-mode fallback path             | 0.5             |
+| URL scheme + deep-link routing + cross-reference resolver | 0.5             |
+| Read-detection rewire + free-recall integration with P0.2 | 0.5             |
+| Keyboard / touch / focus management / aria-live           | 0.5             |
+| ResizeObserver + recompute + position preservation        | 0.5             |
+| Vitest + Playwright tests                                 | 1               |
+| **Total**                                                 | **~6 sessions** |
 
 (Slightly over the earlier "5" estimate once tests are included honestly.)
 
@@ -284,11 +284,11 @@ Recommended order: **P0.1 → P0.3 → P0.2 (scaffold against scrolled mode) →
 
 ## Effort summary
 
-| Tier | Items | Sessions | Calendar (evenings) |
-|---|---|---|---|
-| P0 | 4 items | ~8 | ~2 weeks |
-| P1 | 4 items | ~6 | ~1.5 weeks |
-| P2 | 3 items + 1 doc note | ~3 | ~0.5 week |
-| P3 | AI tutor (deferred) | 8–12 | 2–3 weeks when started |
+| Tier | Items                | Sessions | Calendar (evenings)    |
+| ---- | -------------------- | -------- | ---------------------- |
+| P0   | 4 items              | ~8       | ~2 weeks               |
+| P1   | 4 items              | ~6       | ~1.5 weeks             |
+| P2   | 3 items + 1 doc note | ~3       | ~0.5 week              |
+| P3   | AI tutor (deferred)  | 8–12     | 2–3 weeks when started |
 
 After P0 ships, the defensible claim is: every documented driver of the screen-inferiority effect — required scrolling, excess line length, unprompted completion, uncalibrated self-monitoring — has been directly designed against. That is the specification the literature implies.
