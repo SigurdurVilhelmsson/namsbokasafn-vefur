@@ -210,12 +210,12 @@
 			<!-- Deck selection -->
 			<div>
 				<label for="deck-select" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
-					Velja stokkur <span class="text-red-500">*</span>
+					Velja stokk <span class="text-red-500">*</span>
 				</label>
 
 				{#if decks.length === 0 && !showNewDeckInput}
 					<p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-						Enginn stokkur til. Búðu til nýjan stokkur til að vista minniskortið.
+						Enginn stokkur til. Búðu til nýjan stokk til að vista minniskortið.
 					</p>
 				{/if}
 
@@ -235,7 +235,7 @@
 					<input
 						type="text"
 						bind:value={newDeckName}
-						placeholder="Nafn á nýjum stokkur..."
+						placeholder="Nafn á nýjum stokk..."
 						class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:border-[var(--accent-color)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]/20"
 					/>
 				{/if}
@@ -248,12 +248,12 @@
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
 						</svg>
-						Velja fyrirliggjandi stokkur
+						Velja fyrirliggjandi stokk
 					{:else}
 						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 						</svg>
-						Búa til nýjan stokkur
+						Búa til nýjan stokk
 					{/if}
 				</button>
 			</div>

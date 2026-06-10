@@ -33,12 +33,12 @@
 				</svg>
 				Til baka
 			</a>
-			<h1 class="quiz-heading">Adlogunarprof</h1>
+			<h1 class="quiz-heading">Aðlögunarpróf</h1>
 			<p class="quiz-subtext">
 				{#if chapterSlug}
-					Aefingadaemi ur kafla: {chapterSlug}
+					Æfingadæmi úr kafla: {chapterSlug}
 				{:else}
-					Adlagad ad thinum framforum - fokus a daemi sem thu tharft ad aefa
+					Aðlagað að þínum framförum – áhersla á dæmi sem þú þarft að æfa
 				{/if}
 			</p>
 		</div>
@@ -57,13 +57,13 @@
 						d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
 					/>
 				</svg>
-				Hvernig virkar adlogunarprof?
+				Hvernig virkar aðlögunarpróf?
 			</h3>
 			<ul class="quiz-help-list">
-				<li>Profid velur daemi sem passa vid thar sem thu ert staddur</li>
-				<li>Daemi sem thu hefur ekki leyst fa forgang</li>
-				<li>Eftir ad thu svarar er naesti spurning adlögud</li>
-				<li>Markmidin er ad hjalpa ther ad laera, ekki ad meta thig</li>
+				<li>Prófið velur dæmi sem passa við það sem þú ert að læra</li>
+				<li>Dæmi sem þú hefur ekki leyst fá forgang</li>
+				<li>Eftir að þú svarar er næsta spurning aðlöguð</li>
+				<li>Markmiðið er að hjálpa þér að læra, ekki að meta þig</li>
 			</ul>
 		</div>
 	</div>
