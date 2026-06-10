@@ -151,6 +151,34 @@ equation-heavy section.
 - [ ] The "Samfellt skrun" setting is discoverable and its explanation read.
 - [ ] In scrolled mode the section reads top-to-bottom normally.
 
+## Batch G — Reader v1.2: P1 features (~20 min)
+
+Run against a `feature/reader-v1.2` build. Gates the v1.2.0 merge
+(after v1.1.0 ships).
+
+- [ ] **P1.4 fonts:** Settings → Leturgerð shows "Atkinson Hyperlegible"
+      ("Hannað fyrir hámarks læsileika") and it renders in the preview and
+      the reading view. OpenDyslexic now reads "Sumir lesendur kjósa þetta
+      letur".
+- [ ] **P1.4 theme:** private window with the OS in dark mode → site starts
+      dark; your normal profile keeps its saved theme.
+- [ ] **P1.2 Forspurning:** opening an _unread_ section shows the
+      pre-question card with one of its objectives; "Ég hugleiddi þetta"
+      dismisses it; an already-read section shows none; the same section
+      poses the same question on revisit.
+- [ ] **P1.3 Eyðukort:** select a phrase mid-sentence → "Eyðukort" → toast
+      confirms; `/minniskort` has an "Eyðukort" deck whose card front is the
+      sentence with `______` and back is your selection. Selecting an entire
+      short sentence falls back to the regular flashcard modal.
+- [ ] **P1.1 Kvörðun (needs data):** after several predict-first reviews
+      and a few practice problems + objective confidence ratings, the
+      `/greining` → Kvörðun tab shows the 2×2 prediction matrix and the
+      per-section Ofmat/Vanmat/Í jafnvægi list; both empty states read
+      sensibly on a fresh profile.
+- [ ] **P1 judgment call:** does the Forspurning card feel helpful or
+      naggy on every unread section? (Option: limit to first section per
+      chapter, or per-day.)
+
 ## Batch F — Server (Linode, during the deploy window)
 
 - [ ] Apply the new nginx config (from `nginx-config-example.conf`),
