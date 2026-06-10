@@ -12,8 +12,6 @@ import {
 	createObjectiveKey,
 	createSectionKey,
 	calculateProgressFromCounts,
-	filterItemsByChapter,
-	filterItemsBySection,
 	getCurrentTimestamp,
 	migrateRecordKeys
 } from '$lib/utils/storeHelpers';
@@ -183,12 +181,14 @@ function createObjectivesStore() {
 			return calculateProgressFromCounts(completed, totalObjectives);
 		},
 
-		getChapterObjectivesProgress: (chapterSlug: string): ProgressResult => {
+		getChapterObjectivesProgress: (bookSlug: string, chapterSlug: string): ProgressResult => {
 			const { completedObjectives } = get({ subscribe });
-			const chapterObjectives = filterItemsByChapter(
-				Object.values(completedObjectives),
-				chapterSlug
-			);
+			// Filter by key prefix: stored values carry only chapter/section
+			// slugs, and v2 chapter slugs ("01") are shared across books
+			const prefix = `${bookSlug}/${chapterSlug}/`;
+			const chapterObjectives = Object.entries(completedObjectives)
+				.filter(([key]) => key.startsWith(prefix))
+				.map(([, value]) => value);
 			const completed = chapterObjectives.filter((obj) => obj.isCompleted).length;
 
 			return calculateProgressFromCounts(completed, chapterObjectives.length);
@@ -208,7 +208,10 @@ function createObjectivesStore() {
 			sectionSlug: string
 		): ObjectiveProgress[] => {
 			const { completedObjectives } = get({ subscribe });
-			return filterItemsBySection(Object.values(completedObjectives), chapterSlug, sectionSlug);
+			const prefix = `${createSectionKey(bookSlug, chapterSlug, sectionSlug)}/`;
+			return Object.entries(completedObjectives)
+				.filter(([key]) => key.startsWith(prefix))
+				.map(([, value]) => value);
 		},
 
 		// Self-assessment
@@ -252,9 +255,11 @@ function createObjectivesStore() {
 			sectionSlug: string
 		): ObjectiveProgress[] => {
 			const { completedObjectives } = get({ subscribe });
-			return filterItemsBySection(Object.values(completedObjectives), chapterSlug, sectionSlug).filter(
-				(obj) => obj.confidence !== undefined && obj.confidence <= 2
-			);
+			const prefix = `${createSectionKey(bookSlug, chapterSlug, sectionSlug)}/`;
+			return Object.entries(completedObjectives)
+				.filter(([key]) => key.startsWith(prefix))
+				.map(([, value]) => value)
+				.filter((obj) => obj.confidence !== undefined && obj.confidence <= 2);
 		},
 
 		reset: () => set(defaultState)
