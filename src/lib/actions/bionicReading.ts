@@ -33,7 +33,6 @@ const MIN_WORD_LENGTH = 3;
 const BOLD_FRACTION = 0.4;
 
 interface BionicState {
-	originalHTML: string | null;
 	unsubscribe: (() => void) | null;
 	isProcessed: boolean;
 }
@@ -172,10 +171,19 @@ function applyBionicReading(container: HTMLElement): void {
 }
 
 /**
- * Remove bionic reading formatting by restoring original HTML
+ * Remove bionic reading formatting by unwrapping the injected <b> elements
+ * in place. Deliberately NOT an innerHTML snapshot/restore: replacing the
+ * markup would orphan every event listener other content actions
+ * (practiceProblems, answerLinks, equations, ...) attached to the same DOM
+ * (audit finding 1.3 — answer/hint buttons rendered dead after toggle-off).
  */
-function removeBionicReading(container: HTMLElement, originalHTML: string): void {
-	container.innerHTML = originalHTML;
+export function removeBionicReading(container: HTMLElement): void {
+	for (const b of Array.from(container.querySelectorAll('b.bionic-bold'))) {
+		// Preserve children (a highlight <mark> can live inside), not just text
+		b.replaceWith(...Array.from(b.childNodes));
+	}
+	// Merge the text nodes the unwrapping left behind
+	container.normalize();
 	container.removeAttribute('data-bionic-processed');
 }
 
@@ -185,20 +193,16 @@ function removeBionicReading(container: HTMLElement, originalHTML: string): void
  */
 export function bionicReadingAction(node: HTMLElement, _content?: string) {
 	const state: BionicState = {
-		originalHTML: null,
 		unsubscribe: null,
 		isProcessed: false
 	};
 
 	function updateBionicReading(enabled: boolean) {
 		if (enabled && !state.isProcessed) {
-			// Store original HTML before processing
-			state.originalHTML = node.innerHTML;
 			applyBionicReading(node);
 			state.isProcessed = true;
-		} else if (!enabled && state.isProcessed && state.originalHTML !== null) {
-			// Restore original HTML
-			removeBionicReading(node, state.originalHTML);
+		} else if (!enabled && state.isProcessed) {
+			removeBionicReading(node);
 			state.isProcessed = false;
 		}
 	}
@@ -221,11 +225,9 @@ export function bionicReadingAction(node: HTMLElement, _content?: string) {
 				// which would make applyBionicReading skip every text node —
 				// clear it first.
 				node.removeAttribute('data-bionic-processed');
-				state.originalHTML = null;
 				state.isProcessed = false;
 				const enabled = get(bionicReading);
 				if (enabled) {
-					state.originalHTML = node.innerHTML;
 					applyBionicReading(node);
 					state.isProcessed = true;
 				}
@@ -235,9 +237,8 @@ export function bionicReadingAction(node: HTMLElement, _content?: string) {
 			if (state.unsubscribe) {
 				state.unsubscribe();
 			}
-			// Restore original HTML on destroy if processed
-			if (state.isProcessed && state.originalHTML !== null) {
-				removeBionicReading(node, state.originalHTML);
+			if (state.isProcessed) {
+				removeBionicReading(node);
 			}
 		}
 	};
