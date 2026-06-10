@@ -33,6 +33,30 @@ function createTestDeck(id: string, name: string, cards: Flashcard[] = []): Flas
 }
 
 describe('flashcard store', () => {
+	describe('predict-first review recording', () => {
+		it('stores the pre-reveal prediction in review history', async () => {
+			const deck = createTestDeck('d1', 'Deck', [createTestCard('c1')]);
+			flashcardStore.addDeck(deck);
+			flashcardStore.startStudySession('d1');
+			flashcardStore.rateCard('c1', 'good', true);
+
+			const reviews = flashcardStore.getRecentReviews(1);
+			expect(reviews[0].predictedKnown).toBe(true);
+			expect(reviews[0].wasCorrect).toBe(true);
+		});
+
+		it('leaves prediction undefined when none was given', () => {
+			const deck = createTestDeck('d1', 'Deck', [createTestCard('c1')]);
+			flashcardStore.addDeck(deck);
+			flashcardStore.startStudySession('d1');
+			flashcardStore.rateCard('c1', 'again');
+
+			const reviews = flashcardStore.getRecentReviews(1);
+			expect(reviews[0].predictedKnown).toBeUndefined();
+			expect(reviews[0].wasCorrect).toBe(false);
+		});
+	});
+
 	beforeEach(async () => {
 		localStorage.clear();
 		vi.resetModules();
