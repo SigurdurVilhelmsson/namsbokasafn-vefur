@@ -10,6 +10,7 @@ export {
 	fontFamily,
 	lineHeight,
 	lineWidth,
+	readingMode,
 	sidebarOpen,
 	bionicReading,
 	glossaryHighlighting,
@@ -19,6 +20,7 @@ export {
 	type FontFamily,
 	type LineHeight,
 	type LineWidth,
+	type ReadingMode,
 	type ShortcutAction,
 	type ShortcutPreferences
 } from './settings';

@@ -10,12 +10,14 @@
 		fontFamily,
 		lineHeight,
 		lineWidth,
+		readingMode,
 		bionicReading,
 		glossaryHighlighting,
 		type FontSize,
 		type FontFamily,
 		type LineHeight,
-		type LineWidth
+		type LineWidth,
+		type ReadingMode
 	} from '$lib/stores';
 
 	interface Props {
@@ -41,6 +43,11 @@
 		{ value: 'normal', label: 'Venjulegt' },
 		{ value: 'relaxed', label: 'Rýmra' },
 		{ value: 'loose', label: 'Rúmt' }
+	];
+
+	const readingModes: { value: ReadingMode; label: string }[] = [
+		{ value: 'paged', label: 'Síðuskipt' },
+		{ value: 'scrolled', label: 'Samfellt skrun' }
 	];
 
 	const lineWidths: { value: LineWidth; label: string }[] = [
@@ -293,6 +300,28 @@
 								</button>
 							{/each}
 						</div>
+					</div>
+
+					<!-- Reading Mode -->
+					<div>
+						<span class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
+							Lestrarstilling
+						</span>
+						<div class="grid grid-cols-2 gap-2 sm:flex">
+							{#each readingModes as mode (mode.value)}
+								<button
+									onclick={() => settings.setReadingMode(mode.value)}
+									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$readingMode === mode.value
+										? 'bg-[var(--accent-color)] text-white shadow-sm'
+										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
+								>
+									{mode.label}
+								</button>
+							{/each}
+						</div>
+						<p class="text-xs text-[var(--text-secondary)] mt-2">
+							Síðuskipt stilling sýnir efnið í síðum án skruns. Samfellt skrun hentar betur með skjálesurum.
+						</p>
 					</div>
 
 					<!-- Glossary Highlighting -->
