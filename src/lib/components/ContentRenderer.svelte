@@ -42,13 +42,9 @@
 		<p class="text-red-600 dark:text-red-400">{error}</p>
 	</div>
 {:else if html}
-	<!-- ACTION ORDERING CONSTRAINT: bionicReadingAction must be the last action that
-		 modifies innerHTML. It stores a snapshot of innerHTML on activation and restores
-		 it on deactivation. Any action listed after it that adds DOM event listeners
-		 (e.g., practiceProblems, glossaryTerms) would have those listeners orphaned when
-		 bionic reading restores the original HTML. Actions listed before it are safe
-		 because their listeners are already attached before the snapshot is taken.
-		 lazyImages is safe after it because it only observes existing elements. -->
+	<!-- bionicReadingAction wraps/unwraps <b> elements in place (no innerHTML
+		 snapshot), so it cannot orphan listeners attached by the other actions
+		 and the action order carries no constraints. -->
 	<div
 		class="reading-content"
 		use:practiceProblems={{ bookSlug, chapterSlug, sectionSlug }}
