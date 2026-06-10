@@ -255,6 +255,36 @@
   font-display: swap;
 }
 
+/* Atkinson Hyperlegible — high-legibility option (self-hosted woff2, SIL OFL) */
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("/fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("/fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("/fonts/AtkinsonHyperlegible-Italic.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Atkinson Hyperlegible";
+  src: url("/fonts/AtkinsonHyperlegible-BoldItalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* Variables are now in @layer base above */
 
 /* ========================================== */
@@ -271,6 +301,19 @@
 
 .font-opendyslexic {
   --font-family-base: "OpenDyslexic", Arial, sans-serif;
+}
+
+.font-hyperlegible {
+  --font-family-base: "Atkinson Hyperlegible", Arial, sans-serif;
+}
+
+.font-hyperlegible h1,
+.font-hyperlegible h2,
+.font-hyperlegible h3,
+.font-hyperlegible h4,
+.font-hyperlegible h5,
+.font-hyperlegible h6 {
+  font-family: "Atkinson Hyperlegible", Arial, sans-serif;
 }
 
 .font-opendyslexic h1,

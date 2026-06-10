@@ -36,7 +36,11 @@
 	const fontFamilies: { value: FontFamily; label: string; description: string }[] = [
 		{ value: 'serif', label: 'Serif', description: 'Klassískt letur fyrir lestur' },
 		{ value: 'sans', label: 'Sans-serif', description: 'Nútímalegt letur' },
-		{ value: 'opendyslexic', label: 'OpenDyslexic', description: 'Letur hannað fyrir lesblinda' }
+		{ value: 'hyperlegible', label: 'Atkinson Hyperlegible', description: 'Hannað fyrir hámarks læsileika' },
+		// Honest label: research does not show a reading benefit from
+		// dyslexia-specific fonts (Wery & Diliberto 2017) — offered as a
+		// preference, not a treatment
+		{ value: 'opendyslexic', label: 'OpenDyslexic', description: 'Sumir lesendur kjósa þetta letur' }
 	];
 
 	const lineHeights: { value: LineHeight; label: string }[] = [
@@ -252,7 +256,7 @@
 										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-color)] focus:ring-[var(--accent-color)]"
 									/>
 									<div>
-										<span class="text-[var(--text-primary)] font-medium {family.value === 'serif' ? 'font-serif' : family.value === 'opendyslexic' ? 'font-opendyslexic' : 'font-sans'}">
+										<span class="text-[var(--text-primary)] font-medium {family.value === 'serif' ? 'font-serif' : family.value === 'opendyslexic' ? 'font-opendyslexic' : family.value === 'hyperlegible' ? 'font-hyperlegible' : 'font-sans'}">
 											{family.label}
 										</span>
 										<p class="mt-0.5 text-sm text-[var(--text-secondary)]">
@@ -390,7 +394,7 @@
 							Forskoðun
 						</span>
 						<div
-							class="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 font-size-{$fontSize} {$fontFamily === 'opendyslexic' ? 'font-opendyslexic' : $fontFamily === 'serif' ? 'font-serif' : 'font-sans'}"
+							class="rounded-xl border border-[var(--border-color)] bg-[var(--bg-secondary)] p-5 font-size-{$fontSize} {$fontFamily === 'opendyslexic' ? 'font-opendyslexic' : $fontFamily === 'hyperlegible' ? 'font-hyperlegible' : $fontFamily === 'serif' ? 'font-serif' : 'font-sans'}"
 							style="max-width: var(--line-width-{$lineWidth})"
 						>
 							<p
