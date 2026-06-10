@@ -11,6 +11,7 @@ import { addDays, isAfter, startOfDay } from 'date-fns';
 // Algorithm constants
 const DEFAULT_EASE_FACTOR = 2.5;
 const MIN_EASE_FACTOR = 1.3;
+const MAX_EASE_FACTOR = 2.5;
 const MAX_INTERVAL_DAYS = 365;
 const INITIAL_INTERVAL = 1;
 const SECOND_INTERVAL = 6;
@@ -39,7 +40,9 @@ export function calculateNewEaseFactor(currentEase: number, quality: StudyQualit
     EASE_BASE_ADJUSTMENT -
     qualityDelta * (EASE_LINEAR_COEFFICIENT + qualityDelta * EASE_QUADRATIC_COEFFICIENT);
 
-  return Math.max(MIN_EASE_FACTOR, currentEase + adjustment);
+  // Clamp to the documented 1.3-2.5 range; without the upper bound every
+  // "easy" rating grows the ease (and the intervals) without limit
+  return Math.min(MAX_EASE_FACTOR, Math.max(MIN_EASE_FACTOR, currentEase + adjustment));
 }
 
 /**
