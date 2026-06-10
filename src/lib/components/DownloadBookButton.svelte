@@ -179,7 +179,7 @@
 				</svg>
 				<span class="text-sm font-medium">
 					{#if failedFileCount > 0}
-						Niðurhal lokið ({failedFileCount} {failedFileCount === 1 ? 'skrá vantar' : 'skrár vantaðar'})
+						Niðurhal lokið ({failedFileCount === 1 ? '1 skrá vantar' : `${failedFileCount} skrár vantar`})
 					{:else}
 						Niðurhal lokið!
 					{/if}

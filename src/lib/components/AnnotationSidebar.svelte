@@ -96,7 +96,7 @@
 
 	function getFilterLabel(f: FilterType): string {
 		if (f === 'all') return 'Allt';
-		if (f === 'current') return 'Thessi kafli';
+		if (f === 'current') return 'Þessi kafli';
 		return COLOR_LABELS[f as HighlightColor];
 	}
 </script>
@@ -201,7 +201,7 @@
 									? 'text-[var(--accent-color)]'
 									: ''}"
 							>
-								Thessi kafli
+								Þessi kafli
 							</button>
 						{/if}
 						<hr class="ann-divider my-1" />
@@ -231,7 +231,7 @@
 				onclick={handleExport}
 				disabled={stats.total === 0}
 				class="ann-btn-ghost flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm transition-colors disabled:opacity-50"
-				title="Flytja ut sem Markdown"
+				title="Flytja út sem Markdown"
 			>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
 					<path
@@ -241,7 +241,7 @@
 						d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
 					/>
 				</svg>
-				<span class="hidden sm:inline">Flytja ut</span>
+				<span class="hidden sm:inline">Flytja út</span>
 			</button>
 		</div>
 
@@ -361,7 +361,7 @@
 			<div class="ann-divider border-t px-4 py-3">
 				<div class="ann-text flex items-center justify-between text-sm">
 					<span>
-						{stats.total} yfirstrikun{stats.total !== 1 ? 'ar' : ''}
+						{stats.total} {stats.total !== 1 ? 'yfirstrikanir' : 'yfirstrikun'}
 					</span>
 					<span>
 						{stats.withNotes} með athugasemd{stats.withNotes !== 1 ? 'um' : ''}

@@ -24,11 +24,11 @@
 	}
 
 	const MASTERY_LABELS: Record<MasteryLevel, { label: string; cssClass: string; emoji: string }> = {
-		novice: { label: 'Nybyrjadur', cssClass: 'aq-mastery--novice', emoji: '🌱' },
-		learning: { label: 'Ad laera', cssClass: 'aq-mastery--learning', emoji: '📚' },
-		practicing: { label: 'Ad aefa', cssClass: 'aq-mastery--practicing', emoji: '💪' },
-		proficient: { label: 'God tok', cssClass: 'aq-mastery--proficient', emoji: '🎯' },
-		mastered: { label: 'Nad tokum', cssClass: 'aq-mastery--mastered', emoji: '🏆' }
+		novice: { label: 'Nýbyrjandi', cssClass: 'aq-mastery--novice', emoji: '🌱' },
+		learning: { label: 'Að læra', cssClass: 'aq-mastery--learning', emoji: '📚' },
+		practicing: { label: 'Að æfa', cssClass: 'aq-mastery--practicing', emoji: '💪' },
+		proficient: { label: 'Góð tök', cssClass: 'aq-mastery--proficient', emoji: '🎯' },
+		mastered: { label: 'Náð tökum', cssClass: 'aq-mastery--mastered', emoji: '🏆' }
 	};
 
 	let problems: PracticeProblem[] = $state([]);
@@ -135,10 +135,10 @@
 			/>
 		</svg>
 		<h3 class="aq-empty-title">
-			Engin aefingadaemi tiltaek
+			Engin æfingadæmi tiltæk
 		</h3>
 		<p class="aq-empty-text">
-			Fardu i gegnum efnid og leystu aefingadaemi til ad byrja adlogunarprof.
+			Farðu í gegnum efnið og leystu æfingadæmi til að byrja aðlögunarpróf.
 		</p>
 	</div>
 {:else if quizState.completed}
@@ -147,9 +147,9 @@
 		<!-- Header -->
 		<div class="mb-6 text-center">
 			<span class="text-5xl mb-4 block">🏆</span>
-			<h3 class="aq-complete-title">Profi lokid!</h3>
+			<h3 class="aq-complete-title">Prófi lokið!</h3>
 			<p class="aq-complete-text">
-				Thu hefur lokid vid {totalProblems} daemi
+				Þú hefur lokið við {totalProblems} dæmi
 			</p>
 		</div>
 
@@ -168,7 +168,7 @@
 							d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 						/>
 					</svg>
-					{correctCount} rett
+					{correctCount} rétt
 				</span>
 				<span class="aq-wrong-indicator">
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,7 +272,7 @@
 						d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
 					/>
 				</svg>
-				<span class="text-sm font-semibold" style="color: var(--text-primary);">Adlogunarprof</span>
+				<span class="text-sm font-semibold" style="color: var(--text-primary);">Aðlögunarpróf</span>
 			</div>
 			<div class="flex items-center gap-3">
 				<span class="text-sm" style="color: var(--text-tertiary);">
@@ -305,7 +305,7 @@
 				</div>
 				{#if mastery.attempts > 0}
 					<span class="text-xs" style="color: var(--text-tertiary);">
-						{mastery.successRate}% nakvaemni ({mastery.attempts} tilraunir)
+						{mastery.successRate}% nákvæmni ({mastery.attempts} tilraunir)
 					</span>
 				{/if}
 			</div>
@@ -323,7 +323,7 @@
 							d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
 						/>
 					</svg>
-					Daemi {quizState.currentIndex + 1}
+					Dæmi {quizState.currentIndex + 1}
 				</h4>
 				<div class="prose prose-sm max-w-none dark:prose-invert" style="color: var(--text-primary);">
 					{currentProblem?.content}
@@ -333,7 +333,7 @@
 			<!-- Answer section -->
 			{#if !quizState.showingAnswer}
 				<button onclick={handleShowAnswer} class="aq-show-answer-btn">
-					Syna svar
+					Sýna svar
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
 					</svg>
@@ -364,7 +364,7 @@
 										d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
 									/>
 								</svg>
-								Rett
+								Rétt
 							</button>
 							<button
 								onclick={() => handleAnswer(false)}
