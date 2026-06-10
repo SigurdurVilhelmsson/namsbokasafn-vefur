@@ -14,10 +14,7 @@ import {
 	createStatsKey,
 	calculateProgress,
 	filterByChapterPrefix,
-	filterItemsByChapter,
-	filterItemsBySection,
-	generateId,
-	migrateRecordKeys
+	generateId
 } from '$lib/utils/storeHelpers';
 
 const STORAGE_KEY = 'namsbokasafn:quiz';
@@ -33,6 +30,7 @@ export interface PracticeProblem {
 	id: string;
 	content: string;
 	answer: string;
+	bookSlug: string;
 	chapterSlug: string;
 	sectionSlug: string;
 	isCompleted: boolean;
@@ -130,17 +128,34 @@ function loadState(): QuizState {
 	try {
 		const stored = localStorage.getItem(STORAGE_KEY);
 		if (stored) {
-			const state = validateStoreData(JSON.parse(stored), defaultState, quizValidators);
-			// Migrate legacy keys that lack book-slug prefix
-			return {
-				...state,
-				stats: migrateRecordKeys(state.stats)
-			};
+			// No key migration here: quiz stats keys legitimately contain a
+			// single slash ("<book>/global", "<book>/<chapter>"), which the
+			// generic legacy-key migration would corrupt by double-prefixing
+			return validateStoreData(JSON.parse(stored), defaultState, quizValidators);
 		}
 	} catch (e) {
 		console.warn('Failed to load quiz state:', e);
 	}
 	return defaultState;
+}
+
+/**
+ * Filter problems by book (+ optional chapter/section). v2 chapter slugs are
+ * zero-padded numbers shared by every book, so chapter-only filtering would
+ * bleed progress across books.
+ */
+function filterProblems(
+	problems: PracticeProblem[],
+	bookSlug: string,
+	chapterSlug?: string,
+	sectionSlug?: string
+): PracticeProblem[] {
+	return problems.filter(
+		(p) =>
+			p.bookSlug === bookSlug &&
+			(chapterSlug === undefined || p.chapterSlug === chapterSlug) &&
+			(sectionSlug === undefined || p.sectionSlug === sectionSlug)
+	);
 }
 
 function createQuizStore() {
@@ -199,8 +214,12 @@ function createQuizStore() {
 			update((state) => {
 				if (!state.currentSession) return state;
 
+				// Replace a previous answer to the same question (dedupe by
+				// question, not by chosen answer option — re-answering with a
+				// different choice must not double-count the question)
+				const answerKey = answer.questionId ?? answer.id;
 				const existingAnswerIndex = state.currentSession.answers.findIndex(
-					(a) => a.id === answer.id
+					(a) => (a.questionId ?? a.id) === answerKey
 				);
 
 				let newAnswers: QuizAnswer[];
@@ -304,6 +323,7 @@ function createQuizStore() {
 		// Practice problem tracking
 		markPracticeProblemViewed: (
 			id: string,
+			bookSlug: string,
 			chapterSlug: string,
 			sectionSlug: string,
 			content: string,
@@ -320,6 +340,7 @@ function createQuizStore() {
 							id,
 							content,
 							answer,
+							bookSlug,
 							chapterSlug,
 							sectionSlug,
 							isCompleted: false,
@@ -397,10 +418,11 @@ function createQuizStore() {
 			};
 		},
 
-		getSectionMastery: (chapterSlug: string, sectionSlug: string): MasteryInfo => {
+		getSectionMastery: (bookSlug: string, chapterSlug: string, sectionSlug: string): MasteryInfo => {
 			const { practiceProblemProgress } = get({ subscribe });
-			const problems = filterItemsBySection(
+			const problems = filterProblems(
 				Object.values(practiceProblemProgress),
+				bookSlug,
 				chapterSlug,
 				sectionSlug
 			);
@@ -420,8 +442,11 @@ function createQuizStore() {
 				.sort()
 				.pop();
 
+			// Level, successRate and attempts all use the same totals so the
+			// numbers shown can reproduce the level shown (one merely-viewed
+			// problem no longer pins the whole section at novice)
 			return {
-				level: calculateMasteryLevel(successRate, Math.min(...problems.map((p) => p.attempts))),
+				level: calculateMasteryLevel(successRate, totalAttempts),
 				successRate,
 				attempts: totalAttempts,
 				lastAttempted
@@ -458,31 +483,43 @@ function createQuizStore() {
 		},
 
 		// Progress
-		getSectionProgress: (chapterSlug: string, sectionSlug: string): ProgressResult => {
+		getSectionProgress: (
+			bookSlug: string,
+			chapterSlug: string,
+			sectionSlug: string
+		): ProgressResult => {
 			const { practiceProblemProgress } = get({ subscribe });
-			const problems = filterItemsBySection(
+			const problems = filterProblems(
 				Object.values(practiceProblemProgress),
+				bookSlug,
 				chapterSlug,
 				sectionSlug
 			);
 			return calculateProgress(problems);
 		},
 
-		getChapterProgress: (chapterSlug: string): ProgressResult => {
+		getChapterProgress: (bookSlug: string, chapterSlug: string): ProgressResult => {
 			const { practiceProblemProgress } = get({ subscribe });
-			const problems = filterItemsByChapter(Object.values(practiceProblemProgress), chapterSlug);
+			const problems = filterProblems(
+				Object.values(practiceProblemProgress),
+				bookSlug,
+				chapterSlug
+			);
 			return calculateProgress(problems);
 		},
 
 		// Get adaptive problems based on mastery - prioritize problems that need work
-		getAdaptiveProblems: (chapterSlug?: string, maxProblems: number = 5): PracticeProblem[] => {
+		getAdaptiveProblems: (
+			bookSlug: string,
+			chapterSlug?: string,
+			maxProblems: number = 5
+		): PracticeProblem[] => {
 			const { practiceProblemProgress } = get({ subscribe });
-			let problems = Object.values(practiceProblemProgress);
-
-			// Filter by chapter if specified
-			if (chapterSlug) {
-				problems = filterItemsByChapter(problems, chapterSlug);
-			}
+			const problems = filterProblems(
+				Object.values(practiceProblemProgress),
+				bookSlug,
+				chapterSlug
+			);
 
 			// Sort by priority: novice > learning > practicing > proficient > mastered
 			// Also consider time since last attempt (older = higher priority)
@@ -521,9 +558,9 @@ function createQuizStore() {
 		},
 
 		// Get problems due for review (spaced repetition style)
-		getProblemsForReview: (maxProblems: number = 5): PracticeProblem[] => {
+		getProblemsForReview: (bookSlug: string, maxProblems: number = 5): PracticeProblem[] => {
 			const { practiceProblemProgress } = get({ subscribe });
-			const problems = Object.values(practiceProblemProgress);
+			const problems = filterProblems(Object.values(practiceProblemProgress), bookSlug);
 
 			// Calculate review intervals based on mastery
 			const reviewIntervals: Record<MasteryLevel, number> = {
@@ -560,9 +597,9 @@ function createQuizStore() {
 		},
 
 		// Get all problems for a chapter
-		getProblemsForChapter: (chapterSlug: string): PracticeProblem[] => {
+		getProblemsForChapter: (bookSlug: string, chapterSlug: string): PracticeProblem[] => {
 			const { practiceProblemProgress } = get({ subscribe });
-			return filterItemsByChapter(Object.values(practiceProblemProgress), chapterSlug);
+			return filterProblems(Object.values(practiceProblemProgress), bookSlug, chapterSlug);
 		},
 
 		reset: () => set(defaultState)

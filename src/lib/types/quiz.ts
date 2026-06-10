@@ -4,6 +4,9 @@
 
 export interface QuizAnswer {
   id: string;
+  /** Id of the question this answer belongs to; used to replace a previous
+   *  answer when the user changes their choice */
+  questionId?: string;
   text: string;
   isCorrect: boolean;
   explanation?: string;

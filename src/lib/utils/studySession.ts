@@ -277,11 +277,14 @@ export function findWeakObjectives(
 			confidence?: number;
 		}
 	>,
-	chapterFilter?: string
+	filter?: { bookSlug?: string; chapterSlug?: string }
 ): WeakObjective[] {
 	return Object.entries(completedObjectives)
-		.filter(([, obj]) => {
-			if (chapterFilter && obj.chapterSlug !== chapterFilter) return false;
+		.filter(([key, obj]) => {
+			// Record keys are book-prefixed; values only carry chapter/section
+			// slugs, which v2 books share — filter by key for the book
+			if (filter?.bookSlug && !key.startsWith(`${filter.bookSlug}/`)) return false;
+			if (filter?.chapterSlug && obj.chapterSlug !== filter.chapterSlug) return false;
 			// Include if no confidence set, or confidence <= 2
 			return obj.confidence === undefined || obj.confidence <= 2;
 		})
