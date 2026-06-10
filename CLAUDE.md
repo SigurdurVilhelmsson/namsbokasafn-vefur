@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Námsbókasafn (Textbook Library) is an interactive web-based reader for Icelandic translations of OpenStax educational textbooks. It's a SvelteKit static site with integrated study tools (flashcards with SM-2 spaced repetition, glossary, progress tracking).
 
+**Design principle:** optimize for _expository_ reading (studying textbooks), not narrative reading. Features that interrupt flow — pre-questions, recall prompts, predict-first ratings, pagination — are deliberate learning interventions backed by the testing-effect literature (see `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`); don't "streamline" them away as friction.
+
 ## Notes for Code Reviewers
 
 - Migrated from React to SvelteKit January 2025 — some patterns may be carry-overs
@@ -107,7 +109,7 @@ Example:
 
 ## Tech Stack
 
-- SvelteKit 2, Svelte 5, TypeScript 5.7, Vite 7, Tailwind CSS 4
+- SvelteKit 2, Svelte 5, TypeScript 6, Vite 8, Tailwind CSS 4
 - MathJax for math rendering (pre-rendered SVG in HTML content)
 - Svelte stores for state, @sveltejs/adapter-static for static site generation
 - @vite-pwa/sveltekit for PWA support
