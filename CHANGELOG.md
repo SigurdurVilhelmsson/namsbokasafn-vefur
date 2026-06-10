@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### June 2026 audit remediation (PRs #108–#118, #126, #130–#131)
+
+- **Security:** content-sync book slugs passed via `execFileSync` argv (no shell interpolation); CI no longer persists the content-repo PAT into the workspace; CSP hardened (`object-src`, `base-uri`, `frame-ancestors`, `form-action`, narrowed `img-src`); nginx `immutable` caching scoped to hashed `/_app/` bundles only
+- **Fixed:** per-section lifecycle on client-side navigation (reading analytics, read detection, highlight restore, equation/lazy-image enhancement, bionic reading across sections); selection popup/glossary tooltip positioning on scrolled pages; Svelte 5 reactivity bugs (dead study-planner toggles, duplicate Ctrl+Enter flashcard saves, frozen goals/shortcuts/analytics views); glossary loading for a second book; stale analytics sessions inflating reading time (no longer persisted, 30-min cap, cross-tab safe); bionic-reading toggle-off orphaning practice-problem/answer-link listeners (in-place unwrap instead of innerHTML restore); SRS ease factor capped at the documented 2.5; restored proper Icelandic on quiz/note/annotation surfaces
+- **Added:** practice-problem tracking wired into the quiz store — in-text self-assessments now feed the adaptive quiz (`/prof`), study-session phases, and per-problem mastery, with cross-book isolation; GoatCounter injected after the `load` event so analytics can never block page readiness; CI runs on `feature/**` integration branches; full audit report (`docs/code-review-2026-06.md`), roadmap, and manual QA checklist in `docs/`
+- **Note:** Reader v1.1 (P0) and v1.2 (P1) features are complete on `feature/reader-v1.1` / `feature/reader-v1.2` and will get their own entries when released
+
 ### Added
 
 - `robots.txt` and `sitemap.xml` (auto-generated from `toc.json`) for search engine crawling

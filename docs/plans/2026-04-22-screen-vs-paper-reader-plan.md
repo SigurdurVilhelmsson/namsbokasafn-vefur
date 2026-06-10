@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-22
 **Branch of origin:** `claude/evaluate-reader-research-aCOVa`
-**Status:** Plan only as of 2026-06-10 — no items implemented (the `lineWidth` setting infrastructure has since landed, but the default remains `medium`). Implementation tracked in `2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md` (Phase 2, branch `feature/reader-v1.1`).
+**Status (2026-06-11):** P0 implemented on `feature/reader-v1.1` (P0.1–P0.4); P1 implemented on `feature/reader-v1.2` (P1.1–P1.4); P2.4 done; P2.1 partially shipped with P0.4 (position label; scroll-bar replacement open); P2.2/P2.3 not started; P3 deferred pending classroom feedback. Releases gated on `docs/manual-qa-2026-06.md`. Tracking: `2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md`.
 **Source research:** "Why screens lose to paper — and how to build a reader that closes the gap" (Claude-generated literature review, April 2026), drawing on Delgado et al. 2018, Clinton 2019, Salmerón et al. 2024, Dunlosky et al. 2013, Ackerman & Lauterman 2012, Roediger & Karpicke 2006, and others.
 
 ## Executive summary
