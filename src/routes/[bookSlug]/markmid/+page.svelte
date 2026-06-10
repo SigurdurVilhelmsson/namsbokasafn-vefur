@@ -5,16 +5,23 @@
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import type { TableOfContents } from '$lib/types/content';
-	import {
-		objectivesStore,
-		totalCompletedObjectives,
-		objectivesWithLowConfidence,
-		type ConfidenceLevel
-	} from '$lib/stores/objectives';
+	import { objectivesStore, type ConfidenceLevel } from '$lib/stores/objectives';
 	import { loadTableOfContents, findChapterBySlug, findSectionBySlug } from '$lib/utils/contentLoader';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let { data }: { data: PageData } = $props();
+
+	// Only this book's objectives: stored values carry chapter/section slugs
+	// shared across books, but the record keys are book-prefixed
+	let bookObjectives = $derived(
+		Object.entries($objectivesStore.completedObjectives)
+			.filter(([key]) => key.startsWith(`${data.bookSlug}/`))
+			.map(([, value]) => value)
+	);
+	let completedCount = $derived(bookObjectives.filter((o) => o.isCompleted).length);
+	let lowConfidenceObjectives = $derived(
+		bookObjectives.filter((o) => o.confidence !== undefined && o.confidence <= 2)
+	);
 
 	let toc: TableOfContents | null = $state(null);
 	let loading = $state(true);
@@ -60,9 +67,9 @@
 
 	// Group objectives by chapter
 	let objectivesByChapter = $derived.by(() => {
-		const grouped = new Map<string, typeof $objectivesStore.completedObjectives[string][]>();
+		const grouped = new Map<string, typeof bookObjectives>();
 
-		for (const objective of Object.values($objectivesStore.completedObjectives)) {
+		for (const objective of bookObjectives) {
 			const key = objective.chapterSlug;
 			if (!grouped.has(key)) {
 				grouped.set(key, []);
@@ -83,15 +90,15 @@
 
 	// Calculate progress percentage
 	let progressPercent = $derived.by(() => {
-		const total = Object.keys($objectivesStore.completedObjectives).length;
-		const completed = Object.values($objectivesStore.completedObjectives).filter(o => o.isCompleted).length;
+		const total = bookObjectives.length;
+		const completed = completedCount;
 		return total > 0 ? Math.round((completed / total) * 100) : 0;
 	});
 
 	// Count by confidence level
 	let confidenceCounts = $derived.by(() => {
 		const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, unrated: 0 };
-		for (const obj of Object.values($objectivesStore.completedObjectives)) {
+		for (const obj of bookObjectives) {
 			if (obj.confidence) {
 				counts[obj.confidence]++;
 			} else {
@@ -130,7 +137,7 @@
 		<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
 			Námsmarkmið
 		</h1>
-		{#if $totalCompletedObjectives > 0}
+		{#if completedCount > 0}
 			<button
 				onclick={clearAllObjectives}
 				class="text-sm px-3 py-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
@@ -150,10 +157,10 @@
 		<div class="mb-8 p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 			<div class="flex items-center justify-between mb-4">
 				<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Framvinda</h2>
-				<span class="text-2xl font-bold text-[var(--accent-color)]">{$totalCompletedObjectives}</span>
+				<span class="text-2xl font-bold text-[var(--accent-color)]">{completedCount}</span>
 			</div>
 
-			{#if $totalCompletedObjectives === 0}
+			{#if completedCount === 0}
 				<p class="text-gray-500 dark:text-gray-400 text-sm">
 					Engin námsmarkmið skráð enn. Farðu í kafla til að sjá og merkja námsmarkmið.
 				</p>
@@ -190,7 +197,7 @@
 		</div>
 
 		<!-- Low Confidence Section -->
-		{#if $objectivesWithLowConfidence.length > 0}
+		{#if lowConfidenceObjectives.length > 0}
 			<div class="mb-8 p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
 				<h2 class="text-lg font-semibold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2">
 					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,7 +209,7 @@
 					Þessi markmið eru merkt með lágri sjálfsvissu. Íhugaðu að fara aftur í viðkomandi kafla.
 				</p>
 				<div class="space-y-2">
-					{#each $objectivesWithLowConfidence as obj (`${obj.chapterSlug}-${obj.sectionSlug}-${obj.objectiveIndex}`)}
+					{#each lowConfidenceObjectives as obj (`${obj.chapterSlug}-${obj.sectionSlug}-${obj.objectiveIndex}`)}
 						{@const info = getSectionInfo(obj.chapterSlug, obj.sectionSlug)}
 						<a
 							href="/{data.bookSlug}/kafli/{obj.chapterSlug}/{obj.sectionSlug}"
@@ -221,7 +228,7 @@
 		{/if}
 
 		<!-- Empty state -->
-		{#if $totalCompletedObjectives === 0}
+		{#if completedCount === 0}
 			<div class="text-center py-16">
 				<svg
 					class="w-20 h-20 mx-auto text-gray-300 dark:text-gray-600 mb-6"

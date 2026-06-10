@@ -1,7 +1,19 @@
 /**
  * Svelte action to add interactivity to practice problems rendered via {@html}
- * This handles practice problems that come from markdown content
+ * This handles practice problems that come from markdown content.
+ *
+ * When location options are provided, problems are registered with the quiz
+ * store and self-assessments are recorded — this feeds the adaptive quiz
+ * (/prof) and the study session's practice/review phases.
  */
+
+import { quizStore } from '$lib/stores/quiz';
+
+export interface PracticeProblemsOptions {
+	bookSlug?: string;
+	chapterSlug?: string;
+	sectionSlug?: string;
+}
 
 interface PracticeProblemState {
 	showAnswer: boolean;
@@ -9,8 +21,36 @@ interface PracticeProblemState {
 	revealedHints: number;
 }
 
-export function practiceProblems(node: HTMLElement) {
+// Stored problem text is for re-display in the adaptive quiz; cap lengths so
+// every visited section doesn't eat into the localStorage quota
+const MAX_STORED_CONTENT = 4000;
+const MAX_STORED_ANSWER = 2000;
+
+export function practiceProblems(node: HTMLElement, options: PracticeProblemsOptions = {}) {
 	const states = new Map<HTMLElement, PracticeProblemState>();
+	let currentOptions = options;
+
+	/**
+	 * Stable identity for a problem across visits: location plus the
+	 * element's own id when the pipeline provides one, falling back to the
+	 * problem's position in the section.
+	 */
+	function problemTrackingId(problem: HTMLElement, index: number): string | null {
+		const { bookSlug, chapterSlug, sectionSlug } = currentOptions;
+		if (!bookSlug || !chapterSlug || !sectionSlug) return null;
+		return `${bookSlug}/${chapterSlug}/${sectionSlug}#${problem.id || index}`;
+	}
+
+	/** Question text without the hidden answer/explanation/hint blocks */
+	function extractProblemText(problem: HTMLElement): string {
+		const clone = problem.cloneNode(true) as HTMLElement;
+		clone
+			.querySelectorAll(
+				'.practice-answer-container, .practice-explanation-container, .practice-hint-container, .practice-problem-header, .practice-hints-section, .practice-answer-section'
+			)
+			.forEach((el) => el.remove());
+		return (clone.textContent || '').trim().slice(0, MAX_STORED_CONTENT);
+	}
 
 	function initializePracticeProblems() {
 		const problems = node.querySelectorAll('.practice-problem-container');
@@ -31,12 +71,28 @@ export function practiceProblems(node: HTMLElement) {
 			const explanationContainer = problem.querySelector('.practice-explanation-container');
 			const hintContainers = problem.querySelectorAll('.practice-hint-container');
 
+			// Register with the quiz store so the adaptive quiz and study
+			// sessions know this problem exists
+			const trackingId = problemTrackingId(problem as HTMLElement, index);
+			if (trackingId && currentOptions.bookSlug && currentOptions.chapterSlug && currentOptions.sectionSlug) {
+				quizStore.markPracticeProblemViewed(
+					trackingId,
+					currentOptions.bookSlug,
+					currentOptions.chapterSlug,
+					currentOptions.sectionSlug,
+					extractProblemText(problem as HTMLElement),
+					((answerContainer as HTMLElement | null)?.textContent || '')
+						.trim()
+						.slice(0, MAX_STORED_ANSWER)
+				);
+			}
+
 			// Wrap the problem content
 			wrapProblemContent(problem as HTMLElement, state, {
 				answerContainer: answerContainer as HTMLElement | null,
 				explanationContainer: explanationContainer as HTMLElement | null,
 				hintContainers: Array.from(hintContainers) as HTMLElement[],
-				problemId: `practice-${index}`
+				trackingId
 			});
 		});
 	}
@@ -48,7 +104,7 @@ export function practiceProblems(node: HTMLElement) {
 			answerContainer: HTMLElement | null;
 			explanationContainer: HTMLElement | null;
 			hintContainers: HTMLElement[];
-			problemId: string;
+			trackingId: string | null;
 		}
 	) {
 		// Add wrapper class
@@ -260,6 +316,9 @@ export function practiceProblems(node: HTMLElement) {
 
 			correctBtn.addEventListener('click', () => {
 				state.selfAssessment = 'correct';
+				if (parts.trackingId) {
+					quizStore.markPracticeProblemAttempt(parts.trackingId, true);
+				}
 				assessmentPrompt.style.display = 'none';
 				assessmentFeedback.style.display = 'block';
 				assessmentFeedback.className =
@@ -278,6 +337,9 @@ export function practiceProblems(node: HTMLElement) {
 
 			incorrectBtn.addEventListener('click', () => {
 				state.selfAssessment = 'incorrect';
+				if (parts.trackingId) {
+					quizStore.markPracticeProblemAttempt(parts.trackingId, false);
+				}
 				assessmentPrompt.style.display = 'none';
 				assessmentFeedback.style.display = 'block';
 				assessmentFeedback.className =
@@ -371,6 +433,9 @@ export function practiceProblems(node: HTMLElement) {
 	observer.observe(node, { childList: true, subtree: true });
 
 	return {
+		update(newOptions: PracticeProblemsOptions = {}) {
+			currentOptions = newOptions;
+		},
 		destroy() {
 			observer.disconnect();
 			states.clear();

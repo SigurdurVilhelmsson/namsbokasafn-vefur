@@ -28,6 +28,7 @@ function makePracticeProblem(id: string, chapter = '01', section = '1-1'): Pract
 		id,
 		content: `Problem ${id}`,
 		answer: `Solution ${id}`,
+		bookSlug: 'efnafraedi-2e',
 		chapterSlug: chapter,
 		sectionSlug: section,
 		isCompleted: false,
@@ -475,7 +476,7 @@ describe('findWeakObjectives', () => {
 			}
 		};
 
-		const weak = findWeakObjectives(objectives, '01');
+		const weak = findWeakObjectives(objectives, { chapterSlug: '01' });
 
 		expect(weak).toHaveLength(1);
 		expect(weak[0].objectiveText).toBe('Ch1 objective');
