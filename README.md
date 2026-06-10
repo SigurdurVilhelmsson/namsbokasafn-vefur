@@ -12,10 +12,12 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 
 ### Available books
 
-| Book                         | Status    | Progress         |
-| ---------------------------- | --------- | ---------------- |
-| **Efnafræði** (Chemistry 2e) | Available | 4 of 21 chapters |
-| **Líffræði** (Biology 2e)    | Planned   | —                |
+| Book                                     | Status      | Progress          |
+| ---------------------------------------- | ----------- | ----------------- |
+| **Efnafræði** (Chemistry 2e)             | Available   | 21 of 21 chapters |
+| **Líffræði** (Biology 2e)                | In progress | 2 chapters        |
+| **Lífræn efnafræði** (Organic Chemistry) | Preview     | 1 chapter         |
+| **Örverufræði** (Microbiology)           | Preview     | 1 chapter         |
 
 ## Demo / Live Version
 
@@ -24,13 +26,13 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 ## Tech Stack
 
 - **Runtime:** Node.js >= 20 (see `.nvmrc`)
-- **Framework:** SvelteKit 2 + Svelte 5, TypeScript 5.7
-- **Build:** Vite 7, `@sveltejs/adapter-static` → outputs to `build/`
+- **Framework:** SvelteKit 2 + Svelte 5, TypeScript 6
+- **Build:** Vite 8, `@sveltejs/adapter-static` → outputs to `build/`
 - **Styling:** Tailwind CSS 4 + PostCSS
 - **Math:** MathJax (pre-rendered SVG in content HTML)
 - **Search:** Fuse.js (client-side full-text search)
 - **PWA:** `@vite-pwa/sveltekit` with Workbox (offline-first)
-- **Testing:** Vitest (173+ unit tests) + Playwright (E2E)
+- **Testing:** Vitest (370+ unit tests) + Playwright (E2E)
 - **CI:** GitHub Actions (lint, test, build, security audit)
 - **Linting:** ESLint + Prettier + svelte-check, Husky pre-commit hooks
 
@@ -39,10 +41,11 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 - **Textbook reader** — Clean reading layout for long study sessions, light/dark theme, adjustable font size
 - **Flashcards (SRS)** — Spaced repetition using the SM-2 algorithm (`src/lib/utils/srs.ts`)
 - **Glossary** — Per-book terminology lookup with Icelandic alphabetical sorting
-- **Reading progress** — Chapter completion tracking, bookmarks
+- **Reading progress** — Per-section read detection, completion tracking, bookmarks, continue-where-you-left-off
+- **Guided study sessions** — Planner with review/reading/practice/reflect phases (`/nam`), study analytics (`/greining`), learning objectives with confidence ratings
 - **Search** — Full-text search across all content (Ctrl/Cmd+K)
 - **Periodic table** — Interactive 118-element table with detailed info
-- **Quizzes** — Chapter-based practice questions
+- **Adaptive practice** — In-text practice problems with self-assessment feed an adaptive quiz (`/prof`) and spaced review, with per-problem mastery tracking
 - **Annotations** — Text highlights and notes with export
 - **PWA** — Works offline after first visit, installable as an app
 - **Responsive** — Designed for phones, tablets, and desktops
@@ -112,16 +115,11 @@ The production site is a static build served by nginx on a Linode Ubuntu server.
 
 ### Deploy
 
-Deployment is handled by GitHub Actions CI. On push to `main`:
-
-1. Checks out both this repo and `namsbokasafn-efni`
-2. Syncs content
-3. Runs lint, type-check, and unit tests
-4. Builds with content validation
-5. Runs Playwright E2E tests
-6. Deploys static output to the server
-
-For manual deployment:
+CI (GitHub Actions) gates every push and PR — on `main` and the
+`feature/**` integration branches it checks out both repos, syncs content,
+and runs lint, type-check, unit tests, the production build, and Playwright
+E2E. **CI does not deploy.** Deployment is manual, from a machine with
+server access:
 
 ```bash
 npm run build
@@ -234,6 +232,30 @@ Translated by Sigurdur E. Vilhelmsson. Licensed under CC BY 4.0.
 ## Status
 
 Actively maintained. The reader is stable and in use. New chapters are added as translations are completed in the sister repo.
+
+### Current development (June 2026)
+
+A full codebase audit and remediation landed on `main` in June 2026 — see
+[`docs/code-review-2026-06.md`](docs/code-review-2026-06.md) for the findings
+and [`docs/plans/2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md`](docs/plans/2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md)
+for the roadmap and what shipped.
+
+Two release branches implement the research-driven reader plan
+([`docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`](docs/plans/2026-04-22-screen-vs-paper-reader-plan.md)),
+each gated on the manual QA in [`docs/manual-qa-2026-06.md`](docs/manual-qa-2026-06.md):
+
+- **`feature/reader-v1.1`** (→ v1.1.0): narrow default measure,
+  predict-first flashcard ratings, free-recall prompts on section
+  completion, and hybrid viewport-aware pagination with a
+  continuous-scroll fallback.
+- **`feature/reader-v1.2`** (→ v1.2.0, after v1.1.0): confidence-calibration
+  analytics tab, pre-questions on section load, one-tap cloze cards from
+  highlights, and typography corrections (Atkinson Hyperlegible, OS
+  color-scheme default).
+
+Planned next: spaced-review surfacing in the study planner, a recall-review
+tab, and a bounded progress label (reader plan P2); a Socratic AI tutor is
+deferred pending classroom feedback (P3).
 
 ## Related Projects
 

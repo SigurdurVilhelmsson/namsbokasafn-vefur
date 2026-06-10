@@ -42,7 +42,7 @@ npm run format           # Prettier formatting
 ### State Management
 
 - **Svelte stores** (`src/lib/stores/`) with localStorage persistence
-- `settings.ts`: Theme, font size, sidebar state
+- `settings.ts`: Theme, typography (font family/size, line height/width), reading mode, keyboard shortcuts, sidebar state
 - `reader.ts`: Reading progress, bookmarks, current location
 - `flashcard.ts`: SM-2 spaced repetition, study sessions, card ratings
 - `quiz.ts`: Quiz attempts and scores
@@ -52,6 +52,7 @@ npm run format           # Prettier formatting
 - `objectives.ts`: Learning objectives tracking
 - `offline.ts`: PWA offline state
 - `reference.ts`: Reference/citation management
+- `recall.ts`: Free-recall entries written after completing a section (reader v1.1 branch)
 
 ### Content Loading
 
@@ -168,7 +169,9 @@ All fonts are **self-hosted** in `static/fonts/` — no external CDN dependencie
 
 ## Deployment
 
-Static site deployed to Linode via GitHub Actions. Output goes to `build/` directory. No backend - all state is client-side in localStorage.
+Static site on a Linode server (nginx). Output goes to the `build/` directory. No backend — all state is client-side in localStorage.
+
+**CI does not deploy.** GitHub Actions (`ci.yml`) runs lint/type-check/tests/build/E2E on pushes and PRs for `main` and the `feature/**` integration branches; deployment is a manual rsync from a machine with server access (see README). nginx changes must be applied on the server to match `nginx-config-example.conf`.
 
 ### Security Headers
 
@@ -212,6 +215,14 @@ Run `node scripts/generate-toc.js` to regenerate `toc.json` from the chapter dir
 - `scripts/generate-component-inventory.js`: Generates component documentation (`npm run docs:generate`).
 
 **Pre-commit hooks:** Husky runs lint-staged on commit, which auto-fixes ESLint and Prettier issues on staged files. If a commit is blocked, check the lint-staged output for the specific error.
+
+## Current Development Status (June 2026)
+
+- **`main`**: fully remediated per the June 2026 audit (`docs/code-review-2026-06.md`) — all high-severity findings closed; practice-problem tracking wired to the quiz store; CI gates `feature/**` branches.
+- **`feature/reader-v1.1`** (→ v1.1.0): reader plan P0 — narrow measure default, predict-first ratings, free-recall prompt (`recall` store, `RecallPrompt`), hybrid pagination (`utils/paginate.ts`, `PagedReaderControls`, `readingMode` setting). Gated on manual QA batches D–E (`docs/manual-qa-2026-06.md`).
+- **`feature/reader-v1.2`** (→ v1.2.0, after v1.1.0): reader plan P1 — Kvörðun calibration tab (`CalibrationTab`), pre-questions (`PreQuestionPrompt`), one-tap cloze cards (`utils/cloze.ts`), Atkinson Hyperlegible + theme/typography corrections. Gated on QA batch G.
+- **Planned**: reader plan P2.1–P2.3 (progress label, spaced-review surfacing, recall-review tab); P3 AI tutor deferred pending classroom feedback.
+- Authoritative plan/status: `docs/plans/2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md` (update it when the release branches merge).
 
 ## Migration Note
 

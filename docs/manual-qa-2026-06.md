@@ -12,10 +12,13 @@ you go. Each batch is independent.
 - **Batch D–E:** a build of `feature/reader-v1.1` (all four P0 items merged).
   These gate the v1.1.0 merge to main.
 - **Batch F:** on the Linode server itself.
+- **Batch G:** a build of `feature/reader-v1.2` (all four P1 items merged).
+  Gates the v1.2.0 merge, after v1.1.0 ships.
 
 Automated coverage already in place (no need to re-verify by hand):
-svelte-check, ESLint, 383 unit tests, Playwright e2e incl. the new
-pagination spec — all green in CI.
+svelte-check, ESLint, the full Vitest suite, and Playwright e2e (incl. the
+pagination spec) — all green in CI, which also gates the `feature/**`
+branches.
 
 ---
 
