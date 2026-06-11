@@ -171,7 +171,7 @@ All fonts are **self-hosted** in `static/fonts/` — no external CDN dependencie
 
 Static site on a Linode server (nginx). Output goes to the `build/` directory. No backend — all state is client-side in localStorage.
 
-**CI does not deploy.** GitHub Actions (`ci.yml`) runs lint/type-check/tests/build/E2E on pushes and PRs for `main` and the `feature/**` integration branches; deployment is a manual rsync from a machine with server access (see README). nginx changes must be applied on the server to match `nginx-config-example.conf`.
+**CI does not deploy.** GitHub Actions (`ci.yml`) runs lint/type-check/tests/build/E2E on pushes and PRs for `main` and the `feature/**` integration branches. Deployment is the separate `deploy.yml` workflow — manual trigger or release tag (`v*.*.*`), rsync over a directory-restricted SSH key (setup in `docs/guides/deployment.md`) — with manual rsync as fallback. nginx changes must be applied on the server to match `nginx-config-example.conf`; the workflow never touches nginx.
 
 ### Security Headers
 
