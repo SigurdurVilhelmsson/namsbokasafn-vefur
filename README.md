@@ -18,6 +18,7 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 | **Líffræði** (Biology 2e)                | In progress | 2 chapters        |
 | **Lífræn efnafræði** (Organic Chemistry) | Preview     | 1 chapter         |
 | **Örverufræði** (Microbiology)           | Preview     | 1 chapter         |
+| **Eðlisfræði** (Physics)                 | Preview     | 1 chapter         |
 
 ## Demo / Live Version
 
@@ -129,7 +130,7 @@ Manual fallback from a machine with server access:
 
 ```bash
 npm run build
-rsync -avz --delete build/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/
+rsync -avz --delete --exclude=downloads/ build/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/
 ```
 
 See [docs/guides/deployment.md](docs/guides/deployment.md) for the full deployment guide including nginx configuration, SSL setup, and maintenance procedures.
