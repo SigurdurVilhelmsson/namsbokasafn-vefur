@@ -84,8 +84,11 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
           # The forced rrsync command on the server roots the remote path at
-          # the build directory, so the destination is "/"
-          rsync -az --delete \
+          # the build directory, so the destination is "/".
+          # --exclude=downloads/ : PDFs are generated separately (npm run
+          # build:full) and live on the server; this build doesn't produce
+          # them, and without the exclude --delete would wipe them.
+          rsync -az --delete --exclude=downloads/ \
             -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts -o IdentitiesOnly=yes" \
             build/ "$DEPLOY_USER@$DEPLOY_HOST:/"
           echo "Deployed $(git rev-parse --short HEAD) to https://namsbokasafn.is"
