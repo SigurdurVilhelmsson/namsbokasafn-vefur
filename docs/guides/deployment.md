@@ -86,8 +86,26 @@ is restored by simply re-running the deploy.
 
 ```bash
 npm run build
-rsync -avz --delete build/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/
+rsync -avz --delete --exclude=downloads/ build/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/
 ```
+
+`--exclude=downloads/` matters: `npm run build` does **not** generate the
+per-book PDFs (`static/downloads/` is gitignored and only produced by
+`npm run pdfs`), so without the exclude `--delete` would remove the PDFs
+already on the server and break the download buttons.
+
+### Refreshing the PDFs
+
+PDFs are regenerated only when content changes warrant it (needs Chromium;
+set `PDF_CHROMIUM_PATH` to use a system browser):
+
+```bash
+npm run build:full       # pdfs + build
+rsync -avz build/downloads/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/downloads/
+```
+
+The GitHub Actions deploy uses the same exclude and therefore never
+touches `/downloads/` — PDF refreshes are always this manual step.
 
 ## Server details (manual, root-only — never automated)
 
