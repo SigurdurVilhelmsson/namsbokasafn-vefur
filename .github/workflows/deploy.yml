@@ -1,0 +1,91 @@
+# Production deploy — manual trigger or release tag, never on plain pushes.
+#
+# Security model: the SSH key in the `production` environment is a dedicated
+# deploy key whose authorized_keys entry on the server carries a forced
+# rrsync command locked to the build directory — it can write
+# /var/www/namsbokasafn-vefur/build and nothing else (no shell, no other
+# paths). Setup instructions: docs/guides/deployment.md
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*.*.*']
+
+# Never run two deploys at once; queue instead of cancelling so a release
+# tag and a manual run can't interleave half-synced output
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://namsbokasafn.is
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Checkout content repo
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: SigurdurVilhelmsson/namsbokasafn-efni
+          path: namsbokasafn-efni
+          token: ${{ secrets.EFNI_TOKEN || github.token }}
+          # Don't write the PAT into the workspace git config
+          persist-credentials: false
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Sync content
+        run: |
+          mkdir -p static/content
+          node scripts/sync-content.js --source ./namsbokasafn-efni
+
+      # The artifact that ships is verified right here, in this run —
+      # not assumed from an earlier CI run on a different commit
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Type check
+        run: npm run check
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Build (with content validation)
+        run: npm run build
+
+      - name: Deploy to server
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS }}
+          DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+          DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+        run: |
+          if [ -z "$SSH_KEY" ] || [ -z "$KNOWN_HOSTS" ] || [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_HOST" ]; then
+            echo "Deploy credentials are not configured (production environment" \
+                 "secret DEPLOY_SSH_KEY; variables DEPLOY_KNOWN_HOSTS," \
+                 "DEPLOY_USER, DEPLOY_HOST). See docs/guides/deployment.md"
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          # The forced rrsync command on the server roots the remote path at
+          # the build directory, so the destination is "/"
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts -o IdentitiesOnly=yes" \
+            build/ "$DEPLOY_USER@$DEPLOY_HOST:/"
+          echo "Deployed $(git rev-parse --short HEAD) to https://namsbokasafn.is"

@@ -118,8 +118,14 @@ The production site is a static build served by nginx on a Linode Ubuntu server.
 CI (GitHub Actions) gates every push and PR — on `main` and the
 `feature/**` integration branches it checks out both repos, syncs content,
 and runs lint, type-check, unit tests, the production build, and Playwright
-E2E. **CI does not deploy.** Deployment is manual, from a machine with
-server access:
+E2E. **CI does not deploy.**
+
+Deployment runs via the separate **Deploy workflow** (`deploy.yml`):
+triggered manually from the Actions tab or by pushing a release tag
+(`v*.*.*`), it re-verifies the commit and rsyncs the build to the server
+over a directory-restricted SSH key. One-time setup and the security model
+are documented in [docs/guides/deployment.md](docs/guides/deployment.md).
+Manual fallback from a machine with server access:
 
 ```bash
 npm run build
