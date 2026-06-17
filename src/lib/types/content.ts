@@ -35,6 +35,7 @@ export interface Section {
   file: string;
   type?: SectionType;  // Special section type for rendering/navigation
   metadata?: SectionMetadata;
+  reviewed?: boolean;  // True when a human-reviewed (faithful) version exists; absent/false = machine-translated preview (shows the MT banner)
 }
 
 // Chapter in a book

@@ -13,6 +13,7 @@
 	import TextHighlighter from '$lib/components/TextHighlighter.svelte';
 	import AnnotationSidebar from '$lib/components/AnnotationSidebar.svelte';
 	import PilotBanner from '$lib/components/PilotBanner.svelte';
+	import PreviewBanner from '$lib/components/PreviewBanner.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
 	import { fade, fly } from 'svelte/transition';
@@ -249,6 +250,11 @@
 
 	<!-- Pilot status banner -->
 	<PilotBanner />
+
+	<!-- Machine-translation notice on modules that haven't been human-reviewed -->
+	{#if !data.navigation.current.section.reviewed}
+		<PreviewBanner />
+	{/if}
 
 	<!-- Reading progress bar -->
 	<div class="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2">
