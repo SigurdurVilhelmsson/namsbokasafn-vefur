@@ -6,8 +6,13 @@
  * to the web application's static/content directory.
  *
  * Source structure (namsbokasafn-efni):
- *   books/{bookSlug}/05-publication/faithful/   <- preferred source
- *   books/{bookSlug}/05-publication/mt-preview/ <- fallback source
+ *   books/{bookSlug}/05-publication/mt-preview/ <- complete baseline (machine-translated)
+ *   books/{bookSlug}/05-publication/faithful/   <- reviewed overlay (replaces modules as completed)
+ *
+ * mt-preview is mirrored first (with --delete); faithful is then copied on top
+ * WITHOUT --delete, so a partial reviewed translation never wipes baseline
+ * chapters. generate-toc.js marks each module `reviewed: true` when a faithful
+ * version exists, which drives the machine-translation banner in the reader.
  *
  * Destination structure (namsbokasafn-vefur):
  *   static/content/{bookSlug}/
@@ -36,9 +41,6 @@ const destDir = resolve(projectRoot, 'static', 'content');
 
 // Default source: sibling directory
 const DEFAULT_SOURCE = resolve(projectRoot, '..', 'namsbokasafn-efni');
-
-// Publication variants in priority order
-const PUBLICATION_VARIANTS = ['faithful', 'mt-preview'];
 
 // Parse command line arguments
 function parseArgs(args) {
@@ -90,12 +92,13 @@ Options:
   --help, -h        Show this help message
 
 Source structure:
-  The script looks for publication content in:
-    books/{bookSlug}/05-publication/faithful/   (preferred)
-    books/{bookSlug}/05-publication/mt-preview/ (fallback)
+  The script merges two publication variants:
+    books/{bookSlug}/05-publication/mt-preview/ (complete baseline)
+    books/{bookSlug}/05-publication/faithful/   (reviewed overlay, copied on top)
 
   Each publication directory must contain a chapters/ directory.
-  toc.json is auto-generated after sync based on actual content.
+  toc.json is auto-generated after sync based on actual content; modules with a
+  faithful version are marked reviewed (no machine-translation banner).
 `);
 }
 
@@ -109,26 +112,52 @@ function hasRsync() {
 	}
 }
 
-// Get the publication source path for a book (faithful preferred, mt-preview fallback)
-function getPublicationPath(sourceDir, bookSlug) {
+// Check that a variant directory has a chapters/ dir with numbered chapter
+// subdirectories (01/, 02/, …). Returns its absolute path, or null.
+function variantWithChapters(bookDir, variant) {
+	const variantPath = resolve(bookDir, variant);
+	const chaptersPath = resolve(variantPath, 'chapters');
+
+	if (existsSync(variantPath) && existsSync(chaptersPath) && statSync(chaptersPath).isDirectory()) {
+		const chapterDirs = readdirSync(chaptersPath).filter((name) => {
+			const fullPath = resolve(chaptersPath, name);
+			return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name);
+		});
+		if (chapterDirs.length > 0) {
+			return variantPath;
+		}
+	}
+
+	return null;
+}
+
+// Resolve the publication layers for a book.
+//
+// The complete machine-translated `mt-preview` is the BASELINE; the
+// human-reviewed `faithful` is an OVERLAY that replaces individual modules as
+// they are completed. The sync mirrors the baseline (with --delete) and then
+// copies the overlay on top WITHOUT --delete, so a partial `faithful` can
+// never wipe chapters that only exist in `mt-preview`.
+//
+// Falls back gracefully: a book with only one variant uses that variant as the
+// baseline (no overlay). Returns null if neither variant has chapters.
+function getPublicationLayers(sourceDir, bookSlug) {
 	const bookDir = resolve(sourceDir, 'books', bookSlug, '05-publication');
 
-	for (const variant of PUBLICATION_VARIANTS) {
-		const variantPath = resolve(bookDir, variant);
-		const chaptersPath = resolve(variantPath, 'chapters');
+	const mtPath = variantWithChapters(bookDir, 'mt-preview');
+	const faithfulPath = variantWithChapters(bookDir, 'faithful');
 
-		// Check that variant has a chapters directory with actual chapter subdirectories
-		if (existsSync(variantPath) && existsSync(chaptersPath) && statSync(chaptersPath).isDirectory()) {
-			// Check for numbered chapter directories (01/, 02/, etc.)
-			const chapterDirs = readdirSync(chaptersPath).filter((name) => {
-				const fullPath = resolve(chaptersPath, name);
-				return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name);
-			});
-
-			if (chapterDirs.length > 0) {
-				return { path: variantPath, variant };
-			}
-		}
+	if (mtPath && faithfulPath) {
+		return {
+			baseline: { path: mtPath, variant: 'mt-preview' },
+			overlay: { path: faithfulPath, variant: 'faithful' }
+		};
+	}
+	if (mtPath) {
+		return { baseline: { path: mtPath, variant: 'mt-preview' }, overlay: null };
+	}
+	if (faithfulPath) {
+		return { baseline: { path: faithfulPath, variant: 'faithful' }, overlay: null };
 	}
 
 	return null;
@@ -147,48 +176,62 @@ function getSourceBooks(sourceDir) {
 		if (!statSync(path).isDirectory()) {
 			return false;
 		}
-		// A valid book has a publication variant with toc.json
-		return getPublicationPath(sourceDir, name) !== null;
+		// A valid book has at least one publication variant with chapters
+		return getPublicationLayers(sourceDir, name) !== null;
 	});
 }
 
-// Sync a single book using rsync
+// Editor/working artifacts that must never reach published content.
+const SYNC_EXCLUDES = [
+	'--exclude', '.DS_Store',
+	'--exclude', '*.bak',
+	'--exclude', '*~',
+	'--exclude', '*.backup.*', // e.g. 1-summary.html.backup.2026-06-16T14-48-50
+	'--exclude', '*.pre-fix-*', // e.g. 21-2-kjarnajofnur.html.pre-fix-20260418T135933
+	'--exclude', '*.orig'
+];
+
+// Sync a single book using rsync: mirror the baseline, then overlay reviewed
+// modules on top (without --delete) so a partial overlay can't remove baseline
+// chapters.
 function syncBook(sourceDir, bookSlug, dryRun) {
-	const publication = getPublicationPath(sourceDir, bookSlug);
+	const layers = getPublicationLayers(sourceDir, bookSlug);
 	const bookDest = resolve(destDir, bookSlug);
 
-	if (!publication) {
+	if (!layers) {
 		console.error(`  Error: No publication found for: ${bookSlug}`);
 		return false;
 	}
 
-	console.log(`  Syncing ${bookSlug} (${publication.variant})...`);
+	const label = layers.overlay
+		? `${layers.baseline.variant} + ${layers.overlay.variant} overlay`
+		: layers.baseline.variant;
+	console.log(`  Syncing ${bookSlug} (${label})...`);
 
-	// Build rsync command
-	const rsyncArgs = [
-		'-av', // Archive mode, verbose
-		'--delete', // Remove files in dest that don't exist in source
-		'--exclude', '.DS_Store',
-		'--exclude', '*.bak',
-		'--exclude', '*~'
-	];
+	// 1. Baseline — mirror with --delete so dest matches the complete source.
+	const baseArgs = ['-av', '--delete', ...SYNC_EXCLUDES];
+	if (dryRun) baseArgs.push('--dry-run');
+	// Source must end with / to sync contents, not the directory itself
+	baseArgs.push(`${layers.baseline.path}/`, `${bookDest}/`);
 
-	if (dryRun) {
-		rsyncArgs.push('--dry-run');
+	let result = spawnSync('rsync', baseArgs, { stdio: 'inherit', encoding: 'utf-8' });
+	if (result.status !== 0) {
+		console.error(`  Error syncing ${bookSlug} (baseline)`);
+		return false;
 	}
 
-	// Source must end with / to sync contents, not the directory itself
-	rsyncArgs.push(`${publication.path}/`);
-	rsyncArgs.push(`${bookDest}/`);
+	// 2. Overlay — copy reviewed modules on top WITHOUT --delete, replacing the
+	// matching baseline files but leaving everything else intact.
+	if (layers.overlay) {
+		const overlayArgs = ['-av', ...SYNC_EXCLUDES];
+		if (dryRun) overlayArgs.push('--dry-run');
+		overlayArgs.push(`${layers.overlay.path}/`, `${bookDest}/`);
 
-	const result = spawnSync('rsync', rsyncArgs, {
-		stdio: 'inherit',
-		encoding: 'utf-8'
-	});
-
-	if (result.status !== 0) {
-		console.error(`  Error syncing ${bookSlug}`);
-		return false;
+		result = spawnSync('rsync', overlayArgs, { stdio: 'inherit', encoding: 'utf-8' });
+		if (result.status !== 0) {
+			console.error(`  Error syncing ${bookSlug} (${layers.overlay.variant} overlay)`);
+			return false;
+		}
 	}
 
 	// Regenerate toc.json based on actual content
@@ -209,24 +252,43 @@ function syncBook(sourceDir, bookSlug, dryRun) {
 	return true;
 }
 
-// Fallback sync using cp (if rsync not available)
+// True if a path is an editor/working artifact that must not be published.
+function isExcludedArtifact(path) {
+	const name = path.split('/').pop() || '';
+	return (
+		name === '.DS_Store' ||
+		name.endsWith('.bak') ||
+		name.endsWith('~') ||
+		name.endsWith('.orig') ||
+		name.includes('.backup.') ||
+		name.includes('.pre-fix-')
+	);
+}
+
+// Fallback sync using cp (if rsync not available). Mirrors the rsync path:
+// copy the baseline, then overlay reviewed modules on top.
 function syncBookFallback(sourceDir, bookSlug, dryRun) {
-	const publication = getPublicationPath(sourceDir, bookSlug);
+	const layers = getPublicationLayers(sourceDir, bookSlug);
 	const bookDest = resolve(destDir, bookSlug);
 
-	if (!publication) {
+	if (!layers) {
 		console.error(`  Error: No publication found for: ${bookSlug}`);
 		return false;
 	}
 
+	const label = layers.overlay
+		? `${layers.baseline.variant} + ${layers.overlay.variant} overlay`
+		: layers.baseline.variant;
+
 	if (dryRun) {
-		console.log(`  [DRY-RUN] Would sync ${bookSlug} (${publication.variant}):`);
-		console.log(`    From: ${publication.path}`);
-		console.log(`    To:   ${bookDest}`);
+		console.log(`  [DRY-RUN] Would sync ${bookSlug} (${label}):`);
+		console.log(`    Baseline: ${layers.baseline.path}`);
+		if (layers.overlay) console.log(`    Overlay:  ${layers.overlay.path}`);
+		console.log(`    To:       ${bookDest}`);
 		return true;
 	}
 
-	console.log(`  Syncing ${bookSlug} (${publication.variant})...`);
+	console.log(`  Syncing ${bookSlug} (${label})...`);
 
 	try {
 		// Safety: verify bookDest is inside the expected destination directory
@@ -237,13 +299,18 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 			return false;
 		}
 
-		// Remove existing destination
+		const copyOpts = { recursive: true, force: true, filter: (src) => !isExcludedArtifact(src) };
+
+		// Remove existing destination, then copy the baseline fresh
 		if (existsSync(bookDest)) {
 			rmSync(bookDest, { recursive: true, force: true });
 		}
+		cpSync(layers.baseline.path, bookDest, copyOpts);
 
-		// Copy source to destination
-		cpSync(publication.path, bookDest, { recursive: true });
+		// Overlay reviewed modules on top (force overwrite, no deletion)
+		if (layers.overlay) {
+			cpSync(layers.overlay.path, bookDest, copyOpts);
+		}
 
 		// Regenerate toc.json based on actual content
 		console.log(`  Regenerating toc.json...`);
@@ -314,7 +381,7 @@ function main() {
 
 	if (availableBooks.length === 0) {
 		console.error('No valid books found in source directory.');
-		console.error('Expected structure: books/{bookSlug}/05-publication/{faithful|mt-preview}/toc.json');
+		console.error('Expected structure: books/{bookSlug}/05-publication/{mt-preview|faithful}/chapters/');
 		process.exit(1);
 	}
 
