@@ -241,7 +241,7 @@ These are heuristics you apply with judgment, not hard gates.
 
 ## Current Development Status (June 2026)
 
-- **`main`**: fully remediated per the June 2026 audit (`docs/code-review-2026-06.md`) — all high-severity findings closed; practice-problem tracking wired to the quiz store; CI gates `feature/**` branches.
+- **`main`**: fully remediated per the June 2026 audit (`docs/code-review-2026-06.md`) — all high-severity findings closed; practice-problem tracking wired to the quiz store; CI gates `feature/**` branches. Content-pipeline overlay work also landed on main June 15–17 (faithful-on-mt-preview overlay + MT banner, rollup gating by chapter completeness / `rollups-complete` marker, long-form section-slug routing); mechanics are documented in the Build Scripts and Routing sections above.
 - **`feature/reader-v1.1`** (→ v1.1.0): reader plan P0 — narrow measure default, predict-first ratings, free-recall prompt (`recall` store, `RecallPrompt`), hybrid pagination (`utils/paginate.ts`, `PagedReaderControls`, `readingMode` setting). Gated on manual QA batches D–E (`docs/manual-qa-2026-06.md`).
 - **`feature/reader-v1.2`** (→ v1.2.0, after v1.1.0): reader plan P1 — Kvörðun calibration tab (`CalibrationTab`), pre-questions (`PreQuestionPrompt`), one-tap cloze cards (`utils/cloze.ts`), Atkinson Hyperlegible + theme/typography corrections. Gated on QA batch G.
 - **Planned**: reader plan P2.1–P2.3 (progress label, spaced-review surfacing, recall-review tab); P3 AI tutor deferred pending classroom feedback.
