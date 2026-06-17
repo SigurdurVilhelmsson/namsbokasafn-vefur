@@ -32,8 +32,9 @@
 
 import { execFileSync, execSync, spawnSync } from 'child_process';
 import { existsSync, readdirSync, statSync, rmSync, cpSync } from 'fs';
-import { resolve, dirname } from 'path';
+import { resolve, dirname, relative, sep } from 'path';
 import { fileURLToPath } from 'url';
+import { chapterFullyFaithful, faithfulFileWins } from './lib/overlay.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -220,18 +221,12 @@ function syncBook(sourceDir, bookSlug, dryRun) {
 		return false;
 	}
 
-	// 2. Overlay — copy reviewed modules on top WITHOUT --delete, replacing the
-	// matching baseline files but leaving everything else intact.
-	if (layers.overlay) {
-		const overlayArgs = ['-av', ...SYNC_EXCLUDES];
-		if (dryRun) overlayArgs.push('--dry-run');
-		overlayArgs.push(`${layers.overlay.path}/`, `${bookDest}/`);
-
-		result = spawnSync('rsync', overlayArgs, { stdio: 'inherit', encoding: 'utf-8' });
-		if (result.status !== 0) {
-			console.error(`  Error syncing ${bookSlug} (${layers.overlay.variant} overlay)`);
-			return false;
-		}
+	// 2. Overlay reviewed modules on top of the baseline (no deletion), gating
+	// chapter-level aggregation pages so a partial faithful chapter can't
+	// replace the complete mt-preview rollup. (cpSync, not rsync, so the
+	// per-file gating logic lives in one place for both sync paths.)
+	if (layers.overlay && !dryRun) {
+		overlayFaithful(layers.overlay.path, layers.baseline.path, bookDest);
 	}
 
 	// Regenerate toc.json based on actual content
@@ -263,6 +258,60 @@ function isExcludedArtifact(path) {
 		name.includes('.backup.') ||
 		name.includes('.pre-fix-')
 	);
+}
+
+// Overlay the faithful tree on top of the already-synced baseline in bookDest.
+// Reading modules replace their mt-preview counterparts per-file; chapter
+// aggregation pages (summary/key-terms/exercises/answer-key) are only taken
+// from faithful when the WHOLE chapter is faithful, so a partial review can't
+// clobber the complete mt-preview rollup. Book-level rollups (glossary.json,
+// index.json) likewise only overlay when every chapter is faithful.
+function overlayFaithful(faithfulPath, mtPath, bookDest) {
+	const faithfulChapters = resolve(faithfulPath, 'chapters');
+	const mtChapters = resolve(mtPath, 'chapters');
+
+	// Precompute per-chapter completeness once.
+	const chapterComplete = new Map();
+	if (existsSync(faithfulChapters)) {
+		for (const ch of readdirSync(faithfulChapters)) {
+			const chPath = resolve(faithfulChapters, ch);
+			if (statSync(chPath).isDirectory() && /^\d{2}$/.test(ch)) {
+				chapterComplete.set(ch, chapterFullyFaithful(faithfulChapters, mtChapters, ch));
+			}
+		}
+	}
+
+	// The book is fully faithful only if every mt-preview chapter is complete.
+	const bookComplete =
+		existsSync(mtChapters) &&
+		readdirSync(mtChapters)
+			.filter((d) => /^\d{2}$/.test(d) && statSync(resolve(mtChapters, d)).isDirectory())
+			.every((ch) => chapterComplete.get(ch) === true);
+
+	cpSync(faithfulPath, bookDest, {
+		recursive: true,
+		force: true,
+		filter: (src) => {
+			if (statSync(src).isDirectory()) return true;
+			if (isExcludedArtifact(src)) return false;
+
+			const rel = relative(faithfulPath, src).split(sep).join('/');
+
+			// Chapter aggregation pages: only overlay when the chapter is complete.
+			const m = rel.match(/^chapters\/(\d{2})\/([^/]+\.html)$/);
+			if (m) {
+				const [, ch, file] = m;
+				return faithfulFileWins(file, chapterComplete.get(ch) !== false);
+			}
+
+			// Book-level rollups: only overlay when the whole book is faithful.
+			if ((rel === 'glossary.json' || rel === 'index.json') && !bookComplete) {
+				return false;
+			}
+
+			return true;
+		}
+	});
 }
 
 // Fallback sync using cp (if rsync not available). Mirrors the rsync path:
@@ -307,9 +356,9 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 		}
 		cpSync(layers.baseline.path, bookDest, copyOpts);
 
-		// Overlay reviewed modules on top (force overwrite, no deletion)
+		// Overlay reviewed modules on top, gating chapter aggregation pages
 		if (layers.overlay) {
-			cpSync(layers.overlay.path, bookDest, copyOpts);
+			overlayFaithful(layers.overlay.path, layers.baseline.path, bookDest);
 		}
 
 		// Regenerate toc.json based on actual content

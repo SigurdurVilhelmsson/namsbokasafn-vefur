@@ -20,6 +20,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync, statSync } from 'fs';
 import { resolve, dirname, basename, extname } from 'path';
 import { fileURLToPath } from 'url';
+import { isAggregationFile, chapterFullyFaithful } from './lib/overlay.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -255,24 +256,26 @@ function loadChapterMetadata(efniPath, bookSlug, chapterNum) {
 	}
 }
 
-// A module is "reviewed" when a human-reviewed `faithful` version of the file
-// exists in the efni repo. The sync overlays faithful files on top of the
-// mt-preview baseline, so the same filename appears in static/content; here we
-// check provenance against the source to set the flag that drives the
-// machine-translation banner in the reader. If efni / faithful isn't present,
-// nothing is marked reviewed (the banner shows — the safe default).
+// A module is "reviewed" when a human-reviewed `faithful` version is what the
+// sync actually serves. Reading modules: reviewed iff a faithful file exists.
+// Chapter aggregation pages (summary/key-terms/exercises/answer-key): the sync
+// only takes faithful's rollup when the whole chapter is faithful (otherwise it
+// keeps the complete mt-preview rollup), so they count as reviewed only then.
+// This mirrors scripts/lib/overlay.js so the banner matches the served file.
+// If efni / faithful isn't present, nothing is reviewed (banner shows — safe).
 function isReviewedModule(efniPath, bookSlug, chapterDir, contentFile) {
-	const faithfulFile = resolve(
-		efniPath,
-		'books',
-		bookSlug,
-		'05-publication',
-		'faithful',
-		'chapters',
-		chapterDir,
-		contentFile
-	);
-	return existsSync(faithfulFile);
+	const publication = resolve(efniPath, 'books', bookSlug, '05-publication');
+	const faithfulChapters = resolve(publication, 'faithful', 'chapters');
+	const mtChapters = resolve(publication, 'mt-preview', 'chapters');
+
+	if (!existsSync(resolve(faithfulChapters, chapterDir, contentFile))) {
+		return false;
+	}
+	if (!isAggregationFile(contentFile)) {
+		return true;
+	}
+	// Aggregation page: only reviewed when the whole chapter is faithful.
+	return chapterFullyFaithful(faithfulChapters, mtChapters, chapterDir);
 }
 
 // Load existing toc.json for book metadata
