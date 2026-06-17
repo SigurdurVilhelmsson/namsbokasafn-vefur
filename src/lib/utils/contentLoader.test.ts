@@ -72,6 +72,12 @@ describe('contentLoader utilities', () => {
 			expect(getSectionPath({ number: '', file: '1-key-terms.html' })).toBe('1-key-terms');
 		});
 
+		it('should use file basename for numbered sections too (canonical long-form)', () => {
+			expect(getSectionPath({ number: '1.1', file: '1-1-efnafraedi-i-samhengi.html' })).toBe(
+				'1-1-efnafraedi-i-samhengi'
+			);
+		});
+
 		it('should fall back to slug', () => {
 			expect(getSectionPath({ number: '', slug: 'my-section' })).toBe('my-section');
 		});
@@ -121,7 +127,13 @@ describe('contentLoader utilities', () => {
 			expect(result?.section.number).toBe('1.1');
 		});
 
-		it('should find by v2 number (hyphen notation)', () => {
+		it('should find numbered sections by canonical file basename', () => {
+			// Chapter 2 section has no slug field — exercises the file-basename path
+			const result = findSectionBySlug(sampleToc, '02', '2-1-atomkenningin');
+			expect(result?.section.number).toBe('2.1');
+		});
+
+		it('should still find by legacy short number (hyphen notation)', () => {
 			const result = findSectionBySlug(sampleToc, '01', '1-1');
 			expect(result?.section.title).toBe('Efnafræði');
 		});
