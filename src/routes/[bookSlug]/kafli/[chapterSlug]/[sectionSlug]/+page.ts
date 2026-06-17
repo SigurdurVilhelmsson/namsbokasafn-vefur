@@ -4,6 +4,7 @@ import {
 	loadTableOfContents,
 	findSectionBySlug,
 	getChapterFolder,
+	getSectionPath,
 	ContentLoadError
 } from '$lib/utils/contentLoader';
 import { error, isHttpError } from '@sveltejs/kit';
@@ -22,11 +23,8 @@ export async function entries() {
 		for (const ch of toc.chapters) {
 			const chapterSlug = String(ch.number).padStart(2, '0');
 			for (const sec of ch.sections) {
-				// Match getSectionPath logic: numbered sections use "1-1", unnumbered use file basename
-				const sectionSlug =
-					sec.number && sec.number !== ''
-						? sec.number.replace('.', '-')
-						: sec.file.replace(/\.html$/, '');
+				// Canonical slug = file basename for all sections (see getSectionPath)
+				const sectionSlug = getSectionPath(sec);
 				entries.push({
 					bookSlug: book.slug,
 					chapterSlug,
