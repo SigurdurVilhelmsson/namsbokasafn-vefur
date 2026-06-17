@@ -99,7 +99,7 @@ User-adjustable type (defaults in `src/lib/stores/settings.ts`):
 - `analytics/` — AnalyticsTabs + Reading-patterns / Flashcard-stats / Goals tabs
 - Reader core — ContentRenderer, TextHighlighter, SelectionPopup, GlossaryTooltip, AnnotationSidebar
 - Modals — Settings, Search, KeyboardShortcuts, Note, Flashcard
-- Feature — AdaptiveQuiz, PeriodicTable, PomodoroTimer, PWAUpdater, OfflineIndicator, PilotBanner, etc.
+- Feature — AdaptiveQuiz, PeriodicTable, PomodoroTimer, PWAUpdater, OfflineIndicator, PreviewBanner (per-section MT notice), etc.
 
 ---
 
