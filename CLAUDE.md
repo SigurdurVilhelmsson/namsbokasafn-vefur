@@ -206,11 +206,11 @@ Run `node scripts/generate-toc.js` to regenerate `toc.json` from the chapter dir
 
 ## Build Scripts
 
-- `scripts/generate-toc.js`: Scans chapter directories and generates `toc.json` from `.html` files. Run after syncing new content.
+- `scripts/generate-toc.js`: Scans chapter directories and generates `toc.json` from `.html` files. Run after syncing new content. Marks each section `reviewed: true` when a human-reviewed `faithful` version of that file exists in the efni repo; absence means a machine-translated preview (drives the MT banner in the reader).
 - `scripts/process-content.js`: Enriches `toc.json` with metadata (reading time). Runs automatically before `dev` and `build` via `prepare-content`.
 - `scripts/generate-sitemap.js`: Generates `sitemap.xml` from `toc.json`. Runs automatically as part of `prepare-content`.
 - `scripts/validate-content.js`: Validates TOC structure and glossary consistency. HTML content is validated upstream in the CNXML pipeline. Runs before production builds.
-- `scripts/sync-content.js`: Syncs content from namsbokasafn-efni repo.
+- `scripts/sync-content.js`: Syncs content from namsbokasafn-efni repo. **Overlay model:** `mt-preview` is the complete baseline (mirrored with `--delete`); `faithful` is copied on top **without** `--delete`, so reviewed modules replace their machine-translated counterparts one at a time and a partial `faithful` can never wipe baseline chapters. Editor artifacts (`*.backup.*`, `*.pre-fix-*`, `*.orig`, `*.bak`, `*~`) are excluded.
 - `scripts/generate-pdfs.js`: Renders per-chapter and full-book PDFs from the `/print/*` routes (Playwright Chromium + pdf-lib): continuous page numbering, running headers, TOC with page numbers, PDF outline, appendices. Run after `sync-content`, before `build` (`npm run pdfs`). Set `PDF_CHROMIUM_PATH` to use a system Chromium instead of the Playwright-managed download.
 - `scripts/generate-component-inventory.js`: Generates component documentation (`npm run docs:generate`).
 
