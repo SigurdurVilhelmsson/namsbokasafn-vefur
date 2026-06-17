@@ -34,7 +34,7 @@ import { execFileSync, execSync, spawnSync } from 'child_process';
 import { existsSync, readdirSync, statSync, rmSync, cpSync } from 'fs';
 import { resolve, dirname, relative, sep } from 'path';
 import { fileURLToPath } from 'url';
-import { chapterFullyFaithful, faithfulFileWins } from './lib/overlay.js';
+import { chapterFullyFaithful, faithfulFileWins, faithfulRollupsComplete, ROLLUPS_COMPLETE_MARKER } from './lib/overlay.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -288,6 +288,10 @@ function overlayFaithful(faithfulPath, mtPath, bookDest) {
 			.filter((d) => /^\d{2}$/.test(d) && statSync(resolve(mtChapters, d)).isDirectory())
 			.every((ch) => chapterComplete.get(ch) === true);
 
+	// When efni signals its faithful rollups are built complete (faithful +
+	// MT fallback), serve them regardless of per-chapter review state.
+	const rollupsComplete = faithfulRollupsComplete(faithfulPath);
+
 	cpSync(faithfulPath, bookDest, {
 		recursive: true,
 		force: true,
@@ -297,15 +301,21 @@ function overlayFaithful(faithfulPath, mtPath, bookDest) {
 
 			const rel = relative(faithfulPath, src).split(sep).join('/');
 
-			// Chapter aggregation pages: only overlay when the chapter is complete.
+			// The completeness marker is metadata — never publish it.
+			if (rel === ROLLUPS_COMPLETE_MARKER) return false;
+
+			// Chapter aggregation pages: overlay when the chapter is fully
+			// faithful, or when efni signals complete rollups.
 			const m = rel.match(/^chapters\/(\d{2})\/([^/]+\.html)$/);
 			if (m) {
 				const [, ch, file] = m;
-				return faithfulFileWins(file, chapterComplete.get(ch) !== false);
+				const aggregationAllowed = rollupsComplete || chapterComplete.get(ch) !== false;
+				return faithfulFileWins(file, aggregationAllowed);
 			}
 
-			// Book-level rollups: only overlay when the whole book is faithful.
-			if ((rel === 'glossary.json' || rel === 'index.json') && !bookComplete) {
+			// Book-level rollups: overlay when the whole book is faithful, or
+			// when efni signals complete rollups.
+			if ((rel === 'glossary.json' || rel === 'index.json') && !(bookComplete || rollupsComplete)) {
 				return false;
 			}
 
