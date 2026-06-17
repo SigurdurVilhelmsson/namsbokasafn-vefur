@@ -204,19 +204,24 @@ export function getChapterPath(chapter: { number: number; slug?: string }): stri
  * For unnumbered sections (intro, EOC pages), uses file basename
  */
 export function getSectionPath(section: { number: string; slug?: string; file?: string; type?: string }): string {
-  // For numbered sections, use the number
-  if (section.number && section.number !== '') {
-    return section.number.replace('.', '-');
-  }
-
-  // For unnumbered sections (intro, glossary, etc.), derive from filename
-  // e.g., "1-key-terms.html" → "1-key-terms"
+  // Canonical slug = the rendered HTML filename basename, for ALL sections
+  // (numbered and unnumbered alike). This matches the filenames produced by the
+  // content repo's cnxml-render and OpenStax's own URL scheme
+  // (e.g. "1-1-chemistry-in-context"). Numbered sections previously used the
+  // bare number ("1-1"), which diverged from both and broke intra-content links.
   if (section.file) {
     return section.file.replace(/\.html$/, '');
   }
 
-  // Fallback to slug if available
-  return section.slug || '';
+  // Fallbacks for sections without a file (e.g. synthetic entries / test fixtures):
+  // explicit slug, then the numbered form, then empty.
+  if (section.slug) {
+    return section.slug;
+  }
+  if (section.number && section.number !== '') {
+    return section.number.replace('.', '-');
+  }
+  return '';
 }
 
 /**
@@ -261,24 +266,23 @@ export function findSectionBySlug(toc: TableOfContents, chapterPath: string, sec
   const chapter = findChapterBySlug(toc, chapterPath);
   if (!chapter) return null;
 
-  // First try exact slug match (v1)
-  let section = chapter.sections.find((s) => s.slug === sectionPath);
+  // Canonical match: file basename for ANY section (numbered or not), matching
+  // getSectionPath. e.g. sectionPath "1-1-efnafraedi" ↔ file "1-1-efnafraedi.html".
+  let section = chapter.sections.find((s) => {
+    if (!s.file) return false;
+    return s.file.replace(/\.html$/, '') === sectionPath;
+  });
   if (section) return { chapter, section };
 
-  // Then try number match (v2) - convert "2-1" back to "2.1"
+  // Explicit slug field (older TOCs / fixtures that carry a `slug`).
+  section = chapter.sections.find((s) => s.slug === sectionPath);
+  if (section) return { chapter, section };
+
+  // Legacy short numbered form ("1-1" → "1.1"). Retained so the handful of
+  // pre-cutover short links still resolve via the SPA fallback; not emitted by
+  // getSectionPath or prerendered anymore.
   const sectionNumber = sectionPath.replaceAll('-', '.');
   section = chapter.sections.find((s) => s.number === sectionNumber);
-  if (section) return { chapter, section };
-
-  // For unnumbered sections (intro, EOC pages), try matching by file basename
-  // e.g., sectionPath "1-0-introduction" matches file "1-0-introduction.md" or "1-0-introduction.html"
-  section = chapter.sections.find((s) => {
-    if (s.number === '' && s.file) {
-      const fileBasename = s.file.replace(/\.html$/, '');
-      return fileBasename === sectionPath;
-    }
-    return false;
-  });
   if (section) return { chapter, section };
 
   return null;
