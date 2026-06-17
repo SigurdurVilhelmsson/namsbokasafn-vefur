@@ -255,6 +255,26 @@ function loadChapterMetadata(efniPath, bookSlug, chapterNum) {
 	}
 }
 
+// A module is "reviewed" when a human-reviewed `faithful` version of the file
+// exists in the efni repo. The sync overlays faithful files on top of the
+// mt-preview baseline, so the same filename appears in static/content; here we
+// check provenance against the source to set the flag that drives the
+// machine-translation banner in the reader. If efni / faithful isn't present,
+// nothing is marked reviewed (the banner shows — the safe default).
+function isReviewedModule(efniPath, bookSlug, chapterDir, contentFile) {
+	const faithfulFile = resolve(
+		efniPath,
+		'books',
+		bookSlug,
+		'05-publication',
+		'faithful',
+		'chapters',
+		chapterDir,
+		contentFile
+	);
+	return existsSync(faithfulFile);
+}
+
 // Load existing toc.json for book metadata
 function loadExistingToc(bookPath) {
 	const tocPath = resolve(bookPath, 'toc.json');
@@ -454,7 +474,8 @@ function generateToc(bookSlug, options) {
 				number: sectionNum, // May be null, will be assigned after sorting
 				title,
 				file: contentFile,
-				type: sectionType
+				type: sectionType,
+				reviewed: isReviewedModule(options.efniPath, bookSlug, chapterDir, contentFile)
 			};
 
 			sections.push(section);
@@ -489,6 +510,10 @@ function generateToc(bookSlug, options) {
 			};
 			if (s.type) {
 				entry.type = s.type;
+			}
+			// Only stamp reviewed modules; absence means machine-translated preview.
+			if (s.reviewed) {
+				entry.reviewed = true;
 			}
 			return entry;
 		});
