@@ -90,8 +90,29 @@ export function chapterFullyFaithful(faithfulChaptersDir, mtChaptersDir, chapter
 
 /**
  * Should this faithful file replace the mt-preview baseline?
- * Reading modules: always. Aggregation pages: only when the chapter is complete.
+ * Reading modules: always. Aggregation pages: only when allowed (the chapter is
+ * fully faithful, or efni has signalled its rollups are built complete — see
+ * faithfulRollupsComplete).
  */
-export function faithfulFileWins(filename, chapterIsComplete) {
-	return isAggregationFile(filename) ? chapterIsComplete : true;
+export function faithfulFileWins(filename, aggregationAllowed) {
+	return isAggregationFile(filename) ? aggregationAllowed : true;
+}
+
+// Marker file efni writes into a book's faithful publication dir
+// (05-publication/faithful/) to signal that its faithful aggregation pages —
+// chapter rollups (summary/key-terms/exercises/answer-key) and the book
+// glossary/index — are built COMPLETE: faithful content for reviewed modules,
+// machine-translated fallback for the rest. When present, the overlay serves
+// those faithful rollups even before a chapter is fully reviewed, so reviewed
+// modules' content flows into the compilations. Absent (today's state), the
+// overlay keeps the complete mt-preview rollups (gated by chapter completeness)
+// so a partial faithful rollup can never garble a mixed chapter.
+//
+// Note: this only governs which file is *served*. The machine-translation
+// banner is driven separately (a rollup stays "unreviewed" until every module
+// in its chapter is faithful), so a mixed rollup still shows the banner.
+export const ROLLUPS_COMPLETE_MARKER = 'rollups-complete';
+
+export function faithfulRollupsComplete(faithfulPublicationDir) {
+	return existsSync(resolve(faithfulPublicationDir, ROLLUPS_COMPLETE_MARKER));
 }
