@@ -204,6 +204,29 @@ Run `node scripts/generate-toc.js` to regenerate `toc.json` from the chapter dir
 
 **Important**: Avoid adding workarounds here that compensate for content problems. Fix content at the source in namsbokasafn-efni. Always verify changes render correctly in both repositories.
 
+### Cross-repo sessions (sister repo: ../namsbokasafn-efni)
+
+A single fix often spans both repos (routing/slug/deploy here + content/render there).
+The harness only auto-loads **this** repo's CLAUDE.md, memory, skills, and permissions —
+never the sister's. So when work crosses over:
+
+1. **Before editing any file under `../namsbokasafn-efni/`**, first read its `CLAUDE.md`
+   and its memory index
+   (`~/.claude/projects/-home-siggi-dev-repos-namsbokasafn-efni/memory/MEMORY.md`).
+2. **Record learnings in the repo they belong to.** A fact about the content/translation
+   pipeline, `cnxml-render`, or rendered HTML goes in efni's memory and, if it's a
+   durable rule, efni's CLAUDE.md — not here. Update both only when the fact is
+   genuinely cross-repo.
+3. **Recommend relaunching in the sister repo** (then pause for the user's choice) when
+   the work's center of gravity is there — ANY of: more than ~2 files to change in the
+   sister repo; the task needs the sister's skills/permissions/auto-recalled memory;
+   it's an iterative edit→test/build loop there; or you're about to *design/architect*
+   there rather than apply a known edit. Phrase it: *"This is now mostly efni work —
+   consider relaunching Claude in namsbokasafn-efni for full context. Continue here, or
+   relaunch?"* Do **not** nag for a one- or two-file cross-repo touch.
+
+These are heuristics you apply with judgment, not hard gates.
+
 ## Build Scripts
 
 - `scripts/generate-toc.js`: Scans chapter directories and generates `toc.json` from `.html` files. Run after syncing new content. Marks each section `reviewed: true` when a human-reviewed `faithful` version of that file exists in the efni repo; absence means a machine-translated preview (drives the MT banner in the reader).
