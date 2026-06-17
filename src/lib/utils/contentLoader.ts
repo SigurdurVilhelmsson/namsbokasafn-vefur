@@ -187,7 +187,8 @@ export async function loadSectionContent(
 }
 
 // ============================================
-// Path generation helpers (v2 number-based routing)
+// Path generation helpers
+// (chapters: zero-padded number; sections: HTML filename basename)
 // ============================================
 
 /**
@@ -199,9 +200,10 @@ export function getChapterPath(chapter: { number: number; slug?: string }): stri
 }
 
 /**
- * Get URL path segment for a section (number with hyphen)
- * Example: "2.1" → "2-1", "1.10" → "1-10"
- * For unnumbered sections (intro, EOC pages), uses file basename
+ * Get URL path segment for a section: the rendered HTML filename basename
+ * (matches efni's filenames + OpenStax URLs, e.g. "1-1-chemistry-in-context").
+ * Example: file "1-1-efnafraedi.html" → "1-1-efnafraedi".
+ * Fallbacks for fileless sections: explicit slug, then the numbered form.
  */
 export function getSectionPath(section: { number: string; slug?: string; file?: string; type?: string }): string {
   // Canonical slug = the rendered HTML filename basename, for ALL sections
