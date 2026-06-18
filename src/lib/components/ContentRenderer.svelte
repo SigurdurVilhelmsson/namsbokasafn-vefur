@@ -10,6 +10,7 @@
 	import { bionicReadingAction } from '$lib/actions/bionicReading';
 	import { glossaryTerms } from '$lib/actions/glossaryTerms';
 	import { lazyImages } from '$lib/actions/lazyImages';
+	import { practiceReveal } from '$lib/actions/practiceReveal';
 	import Skeleton from './Skeleton.svelte';
 
 	interface Props {
@@ -54,6 +55,7 @@
 		use:answerLinks={{ bookSlug, chapterSlug, sectionSlug, sectionType, chapterNumber }}
 		use:glossaryTerms={{ bookSlug }}
 		use:bionicReadingAction={content}
+		use:practiceReveal={content}
 		use:lazyImages
 	>
 		<!-- SECURITY: This HTML is trusted output from the CNXML rendering pipeline in
