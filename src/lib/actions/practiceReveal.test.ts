@@ -70,6 +70,35 @@ describe('practiceReveal action', () => {
 		el.remove();
 	});
 
+	it('reveals an answer marked .check-knowledge-answer regardless of its heading (renderer marker, path a)', () => {
+		const el = document.createElement('div');
+		el.innerHTML =
+			'<aside class="example">' +
+			'  <p class="para-title"><strong>Kannaðu þekkingu þína</strong></p>' +
+			'  <p>Spurning?</p>' +
+			'  <aside class="note note-default check-knowledge-answer"><h4>Niðurstaða</h4><p>Svarið.</p></aside>' +
+			'</aside>';
+		document.body.appendChild(el);
+		const answer = el.querySelector('aside.check-knowledge-answer') as HTMLElement;
+
+		practiceReveal(el);
+
+		expect(answer.classList.contains('practice-answer--hidden')).toBe(true);
+		expect(el.querySelectorAll('button.practice-answer-toggle').length).toBe(1);
+
+		el.remove();
+	});
+
+	it('processes an answer matched by BOTH marker and heuristic only once', () => {
+		const el = makeContainer(); // note-default + "Svar:" heading
+		el.querySelector('aside.note-default')!.classList.add('check-knowledge-answer');
+
+		practiceReveal(el);
+
+		expect(el.querySelectorAll('button.practice-answer-toggle').length).toBe(1);
+		el.remove();
+	});
+
 	it('is idempotent — re-processing does not insert a second toggle', () => {
 		const el = makeContainer();
 		const action = practiceReveal(el);

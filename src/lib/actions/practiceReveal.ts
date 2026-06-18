@@ -3,11 +3,14 @@
  * answer inside Example blocks behind a "Sýna svar" toggle, so students
  * attempt the practice question before the answer is revealed.
  *
- * The CNXML pipeline renders that answer as `<aside class="note note-default">`
- * whose heading is "Svar:", placed right after the practice question. We
- * collapse that note and inject a toggle button before it. The worked Example
- * solution (a `.para-title`, not a note) and other note types (link-to-learning,
- * etc.) are left untouched and visible.
+ * The CNXML renderer marks that answer with `class="check-knowledge-answer"`
+ * (a classless note inside a worked example). We collapse it and inject a toggle
+ * button before it. The worked Example solution (a `.para-title`, not a note)
+ * and other note types (link-to-learning, etc.) are left untouched and visible.
+ *
+ * Transition fallback: content not yet re-rendered with the marker is still
+ * matched heuristically as a `.note-default` aside headed "Svar:". Once all
+ * content carries the marker, the fallback (and `isAnswerNote`) can be removed.
  *
  * Vefur-only: the hidden class and toggle button are reader presentation, not
  * pipeline output — styles are injected here rather than added to the
@@ -107,6 +110,13 @@ export function practiceReveal(node: HTMLElement, _content?: string) {
 	const state: RevealState = { id: 0, cleanups: [] };
 
 	function scan(): void {
+		// Preferred: the explicit marker emitted by the CNXML renderer (path a).
+		node.querySelectorAll('aside.check-knowledge-answer').forEach((aside) => {
+			processAnswer(aside as HTMLElement, state);
+		});
+		// Fallback for content not yet re-rendered with the marker: a default
+		// note headed "Svar:" inside a worked example. The PROCESSED_ATTR guard
+		// keeps an element matched by both selectors from being processed twice.
 		node.querySelectorAll('aside.note-default').forEach((aside) => {
 			if (isAnswerNote(aside)) processAnswer(aside as HTMLElement, state);
 		});
