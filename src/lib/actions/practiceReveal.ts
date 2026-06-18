@@ -39,7 +39,9 @@ function injectStyles(): void {
 			display: inline-flex;
 			align-items: center;
 			gap: 0.375rem;
-			margin: 0.5rem 0 0.75rem;
+			/* Align the button's left edge with the practice question text
+			   (the .example container has padding:0; its body paras sit at 30px). */
+			margin: 0.5rem 0 0.75rem 30px;
 			padding: 0.4rem 0.85rem;
 			font-size: 0.875rem;
 			font-weight: 500;
