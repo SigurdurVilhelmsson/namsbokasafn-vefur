@@ -107,9 +107,11 @@ The reactivity sweep (#112), store fixes (#113, #115, #116) and Icelandic (#117)
       ("Flytja út", "…yfirstrikanir") and deck picker ("Velja stokk") all render
       þ/ð/æ/ö with no mojibake. ("Þessi kafli" is an annotations-present filter,
       hidden on a fresh profile.)_
-- [ ] Two tabs open: studying flashcards in tab A doesn't yank tab B's
+      _manual ✓ (2026-06-18): "Þessi kafli" filter confirmed with a real highlight._
+- [x] Two tabs open: studying flashcards in tab A doesn't yank tab B's
       position; reading in A while B is open doesn't double-count time.
-      _Manual: cross-tab `localStorage` timing not reliably automatable headless._
+      _manual ✓ (2026-06-18): confirmed by developer (cross-tab timing not
+      reliably automatable headless)._
 
 ## Batch C — Delivery/analytics (production after deploy, ~5 min)
 
