@@ -20,56 +20,96 @@ svelte-check, ESLint, the full Vitest suite, and Playwright e2e (incl. the
 pagination spec) — all green in CI, which also gates the `feature/**`
 branches.
 
+**Automated verification of Batches A & B (2026-06-17):** driven end-to-end with
+Playwright/Chromium against `npm run dev`, using **in-app SPA navigation**
+(clicking Næsta / book links) so the SvelteKit component-reuse path the
+PR #110/#112/#113 fixes target is actually exercised (a full reload per section
+would mask the bug). Boxes ticked below carry inline `_auto ✓_` evidence. Two
+items could **not** be auto-verified and remain unticked: the practice-problem
+checks — no `.practice-problem-container` / "Sýna svar" content exists in any
+synced book (it uses `.example` blocks) — and the two-tab isolation check
+(cross-tab `localStorage` timing). Both need manual follow-up.
+
 ---
 
 ## Batch A — Core reading flow (main, ~10 min)
 
 The PR #110 fixes. Read with dev tools closed, like a student would.
 
-- [ ] Open a section, read to the bottom, click **Næsta** through 2–3 more
+- [x] Open a section, read to the bottom, click **Næsta** through 2–3 more
       sections. Each section auto-marks as read when you linger at the end
       (check the sidebar checkmarks) — not just the first one.
-- [ ] In one of the _later_ sections: equations have copy/zoom buttons,
+      _auto ✓: 4 sections marked read across soft-nav (not just the first)._
+- [x] In one of the _later_ sections: equations have copy/zoom buttons,
       images lazy-load, and previously saved highlights render. (Make a
       highlight in section 2, navigate away and back without a full reload —
       it should reappear.)
-- [ ] Scroll halfway down a long section and select text — the highlight
+      _auto ✓: 12 copy/zoom buttons + 3/3 lazy imgs on §1‑4 reached by soft-nav;
+      a highlight created on §1‑6 re-rendered after soft-nav away & back._
+- [x] Scroll halfway down a long section and select text — the highlight
       popup appears **at the selection**, not below the viewport.
-- [ ] `/greining`: reading time is attributed to each section you visited,
+      _auto ✓: popup top=280 within viewport (vh=768), adjacent to the selection._
+- [x] `/greining`: reading time is attributed to each section you visited,
       not all lumped on the first one.
-- [ ] Turn bionic reading on, navigate to the next section — bolding still
+      _auto ✓: distinct per-section times recorded (1‑1=11s, 1‑2=8s, 1‑3=8s)._
+- [x] Turn bionic reading on, navigate to the next section — bolding still
       applies there. Turn it off — practice-problem "Sýna svar" buttons in
       that section still work, and exercises don't get duplicate number links.
-- [ ] "Halda áfram að lesa" prompt appears when returning to a section you
+      _auto ✓: bionic `<b>` present on the next (soft-nav) section, cleared when
+      off; exercise answer-number links stayed at 50 (no duplication) across a
+      soft-nav round-trip. **N/A:** no "Sýna svar" practice content in any book._
+- [x] "Halda áfram að lesa" prompt appears when returning to a section you
       left mid-way (past ~10%).
+      _auto ✓: "Haltu áfram að lesa" prompt + button appear on return mid-section._
 
 ## Batch B — Study tools (main, ~15 min)
 
 The reactivity sweep (#112), store fixes (#113, #115, #116) and Icelandic (#117).
 
-- [ ] `/nam` planner: clicking phase cards visibly toggles them, and the
+- [x] `/nam` planner: clicking phase cards visibly toggles them, and the
       session starts with exactly the phases you selected.
-- [ ] Select text → create flashcard → **Ctrl+Enter**: exactly one card (and
+      _auto ✓: phase count toggled 1→0→1 (reactive); session started with the
+      selected phase._
+- [x] Select text → create flashcard → **Ctrl+Enter**: exactly one card (and
       if "new deck" was open, exactly one deck) is created.
-- [ ] `/greining` → Markmið: add a goal — it appears immediately; toggle and
+      _auto ✓: decks 0→1, cards 0→1 — no double-fire (#115 guard holds)._
+- [x] `/greining` → Markmið: add a goal — it appears immediately; toggle and
       remove — list updates without leaving the tab.
-- [ ] Keyboard-shortcuts modal: rebind a key — the displayed binding and
+      _auto ✓: goals 0→1 on add, →0 on remove, stayed on `/greining`._
+- [x] Keyboard-shortcuts modal: rebind a key — the displayed binding and
       amber "customized" styling update immediately.
-- [ ] `/greining` → "Hreinsa gögn": the summary cards (Heildartími, Nýleg
+      _auto ✓: binding "←"→"M", shortcutPreferences 0→1, reset (customized)
+      buttons appeared._
+- [x] `/greining` → "Hreinsa gögn": the summary cards (Heildartími, Nýleg
       virkni, weekly) clear along with the chart.
+      _auto ✓: seeded 11s reading time (Heildartími) → 0 after Hreinsa gögn._
 - [ ] Solve 2–3 practice problems in a section using "Rétt hjá mér" /
       "Þarf að æfa meira", then open `/prof` — the adaptive quiz now offers
       those problems with mastery badges. `/nam` practice/review phases pick
       them up too.
-- [ ] Open the _other_ book's glossary after using the first book's — terms
+      _N/A (not auto-verifiable): no `.practice-problem-container` content in any
+      synced book, so the practice→quiz path can't be driven. Needs manual /
+      content check._
+- [x] Open the _other_ book's glossary after using the first book's — terms
       belong to the right book (tooltips too).
-- [ ] `/markmid` shows only the current book's objectives (check both books
+      _auto ✓: in-app SPA round-trip Chemistry→Biology→Chemistry showed
+      288→0→288 terms — the store refreshes on book switch with no stale
+      carry-over (#113). (Biology has no glossary file; in-content tooltips not
+      separately driven.)_
+- [x] `/markmid` shows only the current book's objectives (check both books
       if you have objectives in each).
-- [ ] Icelandic spot-check: `/prof` page text, the note modal, annotation
+      _auto ✓: seeded one objective per book — book A's page didn't leak B's and
+      vice-versa._
+- [x] Icelandic spot-check: `/prof` page text, the note modal, annotation
       sidebar ("Þessi kafli", "Flytja út", "N yfirstrikanir"), flashcard
       deck picker ("Velja stokk") — no ASCII pseudo-Icelandic anywhere.
+      _auto ✓: `/prof`, note modal ("Bæta við athugasemd"), annotation sidebar
+      ("Flytja út", "…yfirstrikanir") and deck picker ("Velja stokk") all render
+      þ/ð/æ/ö with no mojibake. ("Þessi kafli" is an annotations-present filter,
+      hidden on a fresh profile.)_
 - [ ] Two tabs open: studying flashcards in tab A doesn't yank tab B's
       position; reading in A while B is open doesn't double-count time.
+      _Manual: cross-tab `localStorage` timing not reliably automatable headless._
 
 ## Batch C — Delivery/analytics (production after deploy, ~5 min)
 
