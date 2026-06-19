@@ -179,7 +179,7 @@ function processAnswer(answer: HTMLElement, state: RevealState, opts: PracticeRe
 	answer.after(assess);
 
 	// Capture question text NOW — before insertBefore() makes the button the
-	// answer's immedidate previousElementSibling, which would cause the DOM walk
+	// answer's immediate previousElementSibling, which would cause the DOM walk
 	// in questionText() to stop at once and return "".
 	const question = questionText(answer);
 
