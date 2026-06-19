@@ -15,6 +15,7 @@
 	import PreviewBanner from '$lib/components/PreviewBanner.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
+	import { createObjectiveKey } from '$lib/utils/storeHelpers';
 	import { fade, fly } from 'svelte/transition';
 
 	let { data }: { data: PageData } = $props();
@@ -189,8 +190,19 @@
 		return objectivesStore.isObjectiveCompleted(data.bookSlug, data.chapterSlug, data.sectionSlug, index);
 	}
 
-	// Reactive: track objectives state
-	let objectivesState = $derived($objectivesStore.completedObjectives);
+	// Reactive: which objective indices are completed for this section (drives the checkboxes + counter)
+	let completedObjectiveIndices = $derived(
+		new Set(
+			(data.section.objectives ?? [])
+				.map((_, i) => i)
+				.filter(
+					(i) =>
+						$objectivesStore.completedObjectives[
+							createObjectiveKey(data.bookSlug, data.chapterSlug, data.sectionSlug, i)
+						]?.isCompleted
+				)
+		)
+	);
 </script>
 
 <svelte:head>
@@ -365,7 +377,7 @@
 
 	<!-- Learning Objectives -->
 	{#if data.section.objectives && data.section.objectives.length > 0}
-		{@const completedCount = data.section.objectives.filter((_, i) => isObjectiveCompleted(i)).length}
+		{@const completedCount = data.section.objectives.filter((_, i) => completedObjectiveIndices.has(i)).length}
 		<div class="mb-8 p-6 rounded-xl bg-[var(--accent-light)] border border-[var(--accent-subtle)]">
 			<div class="flex items-center justify-between mb-3">
 				<h3 class="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
@@ -385,7 +397,7 @@
 			</p>
 			<ul class="space-y-2">
 				{#each data.section.objectives as objective, i (i)}
-					{@const completed = isObjectiveCompleted(i)}
+					{@const completed = completedObjectiveIndices.has(i)}
 					<li class="flex items-start gap-3 text-[var(--text-primary)]">
 						<button
 							onclick={() => toggleObjective(i, objective)}
