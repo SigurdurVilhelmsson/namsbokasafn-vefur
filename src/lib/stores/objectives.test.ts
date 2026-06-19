@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { get } from "svelte/store";
 
 let store: typeof import("./objectives").objectivesStore;
 beforeEach(async () => {
