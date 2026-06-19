@@ -7,6 +7,7 @@
 	import type { TableOfContents } from '$lib/types/content';
 	import { objectivesStore, type ConfidenceLevel } from '$lib/stores/objectives';
 	import { loadTableOfContents, findChapterBySlug, findSectionBySlug } from '$lib/utils/contentLoader';
+	import { countBookObjectives, coverage } from '$lib/utils/objectivesProgress';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -88,12 +89,9 @@
 		return chapter ? `${chapter.number}. ${chapter.title}` : chapterSlug;
 	}
 
-	// Calculate progress percentage
-	let progressPercent = $derived.by(() => {
-		const total = bookObjectives.length;
-		const completed = completedCount;
-		return total > 0 ? Math.round((completed / total) * 100) : 0;
-	});
+	// Coverage bar: assessed objectives vs real book total
+	let totalObjectives = $derived(toc ? countBookObjectives(toc) : 0);
+	let coverageResult = $derived(coverage(completedCount, totalObjectives));
 
 	// Count by confidence level
 	let confidenceCounts = $derived.by(() => {
@@ -165,19 +163,19 @@
 					Engin námsmarkmið skráð enn. Farðu í kafla til að sjá og merkja námsmarkmið.
 				</p>
 			{:else}
-				<!-- Progress bar -->
+				<!-- Coverage bar (assessed of all objectives in the book) -->
+				{#if totalObjectives > 0}
 				<div class="mb-4">
 					<div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
-						<span>Kláruð markmið</span>
-						<span>{progressPercent}%</span>
+						<span>Metin markmið</span>
+						<span>{Math.min(coverageResult.completed, coverageResult.total)}/{coverageResult.total}</span>
 					</div>
 					<div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-						<div
-							class="h-full bg-green-500 rounded-full transition-all duration-300"
-							style="width: {progressPercent}%"
-						></div>
+						<div class="h-full bg-green-500 rounded-full transition-all duration-300"
+							style="width: {Math.min(coverageResult.percentage, 100)}%"></div>
 					</div>
 				</div>
+				{/if}
 
 				<!-- Confidence distribution -->
 				<div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
