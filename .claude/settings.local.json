@@ -190,21 +190,7 @@
       "Bash(test:*)",
       "Bash(npm ci:*)",
       "WebFetch(domain:en.wikipedia.org)",
-      "WebFetch(domain:freedomhomeschooling.com)",
-      "Bash(sudo node:*)",
-      "Bash(for f in ../namsbokasafn-efni/books/efnafraedi-2e/01-source/ch02/*.cnxml)",
-      "Bash(then echo \"=== $f ===\")",
-      "Read(//home/siggi/dev/repos/namsbokasafn-vefur/**)",
-      "Bash(do echo:*)",
-      "Bash(npx:*)",
-      "Bash(SvelteKit_LOG=verbose npm run:*)",
-      "Bash(find /home/siggi/dev/repos/namsbokasafn-vefur/static/content/edlisfraedi-2e -type f \\\\\\(-name *.png -o -name *.jpg -o -name *.jpeg -o -name *.svg -o -name *.gif -o -name *.webp \\\\\\))",
-      "Bash(for book:*)",
-      "Read(//home/siggi/dev/repos/namsbokasafn-efni/books/$book/01-source/**)",
-      "Bash(BOOK_SLUG=edlisfraedi-2e node tools/cnxml-render.js --chapter 4 --track mt-preview)",
-      "Bash(rm:*)",
-      "Bash(awk '/\\\\.example[ ,{]/{f=1} f{print} /}/{if\\(f\\)c++; if\\(c>=1 && f && /}/\\){}}' static/styles/content.css)",
-      "Bash(awk '/renderCnxmlToHtml\\\\\\(/{found=NR} found && NR>=found-4 && NR<=found+12' tools/__tests__/cnxml-render.test.js)"
+      "WebFetch(domain:freedomhomeschooling.com)"
     ]
   }
 }
