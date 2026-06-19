@@ -17,8 +17,28 @@
  * cross-repo content.css contract.
  */
 
+import { quizStore } from '$lib/stores/quiz';
+
 const PROCESSED_ATTR = 'data-practice-reveal';
 const STYLE_ID = 'practice-reveal-styles';
+
+export interface PracticeRevealOptions {
+	bookSlug?: string;
+	chapterSlug?: string;
+	sectionSlug?: string;
+	content?: string;
+}
+
+/** Walk back over question paragraphs preceding the answer note to build question text. */
+function questionText(answer: HTMLElement): string {
+	const parts: string[] = [];
+	let el = answer.previousElementSibling;
+	while (el && el.tagName === 'P' && !el.classList.contains('para-title')) {
+		parts.unshift((el.textContent || '').trim());
+		el = el.previousElementSibling;
+	}
+	return parts.join(' ');
+}
 
 /** A check-your-knowledge answer is a `.note-default` aside headed "Svar:". */
 function isAnswerNote(aside: Element): boolean {
@@ -72,7 +92,7 @@ interface RevealState {
 	cleanups: Array<() => void>;
 }
 
-function processAnswer(answer: HTMLElement, state: RevealState): void {
+function processAnswer(answer: HTMLElement, state: RevealState, opts: PracticeRevealOptions): void {
 	if (answer.hasAttribute(PROCESSED_ATTR)) return;
 	answer.setAttribute(PROCESSED_ATTR, 'true');
 
@@ -85,9 +105,28 @@ function processAnswer(answer: HTMLElement, state: RevealState): void {
 	button.setAttribute('aria-controls', answer.id);
 	setToggleLabel(button, false);
 
+	const { bookSlug, chapterSlug, sectionSlug } = opts;
+	const trackingId =
+		bookSlug && chapterSlug && sectionSlug
+			? `${bookSlug}/${chapterSlug}/${sectionSlug}#${answer.id}`
+			: null;
+	let registered = false;
+
 	const onClick = () => {
 		const nowHidden = answer.classList.toggle('practice-answer--hidden');
 		setToggleLabel(button, !nowHidden);
+		if (!nowHidden && trackingId && !registered) {
+			registered = true;
+			quizStore.markPracticeProblemViewed(
+				trackingId,
+				bookSlug!,
+				chapterSlug!,
+				sectionSlug!,
+				questionText(answer),
+				(answer.textContent || '').trim().slice(0, 2000),
+				'inline'
+			);
+		}
 	};
 	button.addEventListener('click', onClick);
 	answer.parentNode?.insertBefore(button, answer);
@@ -101,34 +140,38 @@ function processAnswer(answer: HTMLElement, state: RevealState): void {
 }
 
 /**
- * Svelte action: attach to the `.reading-content` container. Pass `content`
- * so it re-scans after client-side navigation (the container is reused and
- * its innerHTML swapped). Idempotent via {@link PROCESSED_ATTR}.
+ * Svelte action: attach to the `.reading-content` container. Pass `opts`
+ * (bookSlug, chapterSlug, sectionSlug, content) so the action can register
+ * revealed answers with the quiz store and re-scan after client-side navigation
+ * (the container is reused and its innerHTML swapped). Idempotent via
+ * {@link PROCESSED_ATTR}. All opts fields are optional so existing call-sites
+ * that omit them continue to work.
  */
-export function practiceReveal(node: HTMLElement, _content?: string) {
+export function practiceReveal(node: HTMLElement, opts: PracticeRevealOptions = {}) {
 	injectStyles();
 	const state: RevealState = { id: 0, cleanups: [] };
 
 	function scan(): void {
 		// Preferred: the explicit marker emitted by the CNXML renderer (path a).
 		node.querySelectorAll('aside.check-knowledge-answer').forEach((aside) => {
-			processAnswer(aside as HTMLElement, state);
+			processAnswer(aside as HTMLElement, state, opts);
 		});
 		// Fallback for content not yet re-rendered with the marker: a default
 		// note headed "Svar:" inside a worked example. The PROCESSED_ATTR guard
 		// keeps an element matched by both selectors from being processed twice.
 		node.querySelectorAll('aside.note-default').forEach((aside) => {
-			if (isAnswerNote(aside)) processAnswer(aside as HTMLElement, state);
+			if (isAnswerNote(aside)) processAnswer(aside as HTMLElement, state, opts);
 		});
 	}
 
 	scan();
 
 	return {
-		update(_newContent?: string) {
+		update(newOpts: PracticeRevealOptions) {
 			// On soft-nav the container's innerHTML was replaced, so previously
-			// processed nodes (and their toggles) are gone with it. Re-scan; the
-			// PROCESSED_ATTR guard keeps a redundant update from double-inserting.
+			// processed nodes (and their toggles) are gone with it. Re-assign opts
+			// so the new section's slugs are used for registration, then re-scan.
+			opts = newOpts;
 			scan();
 		},
 		destroy() {

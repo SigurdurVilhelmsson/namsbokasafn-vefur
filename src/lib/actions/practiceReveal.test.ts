@@ -9,6 +9,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { get } from 'svelte/store';
+import { quizStore } from '$lib/stores/quiz';
 import { practiceReveal } from './practiceReveal';
 
 function makeContainer(): HTMLElement {
@@ -102,12 +104,30 @@ describe('practiceReveal action', () => {
 	it('is idempotent — re-processing does not insert a second toggle', () => {
 		const el = makeContainer();
 		const action = practiceReveal(el);
-		action.update?.('changed');
-		action.update?.('changed again');
+		action.update?.({ content: 'changed' });
+		action.update?.({ content: 'changed again' });
 
 		expect(el.querySelectorAll('button.practice-answer-toggle').length).toBe(1);
 
 		action.destroy?.();
 		el.remove();
 	});
+});
+
+it('registers the answer with the quiz store on first reveal', () => {
+	localStorage.clear();
+	quizStore.reset();
+	const el = makeContainer(); // answer note has id "fs-a1"
+	el.querySelector('aside.note-default')!.id = 'fs-a1';
+	practiceReveal(el, {
+		bookSlug: 'efnafraedi-2e',
+		chapterSlug: '01',
+		sectionSlug: '1-4'
+	});
+	el.querySelector<HTMLButtonElement>('button.practice-answer-toggle')!.dispatchEvent(
+		new MouseEvent('click', { bubbles: true })
+	);
+	const id = 'efnafraedi-2e/01/1-4#fs-a1';
+	expect(get(quizStore).practiceProblemProgress[id]).toBeTruthy();
+	el.remove();
 });

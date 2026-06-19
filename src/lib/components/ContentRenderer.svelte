@@ -55,7 +55,7 @@
 		use:answerLinks={{ bookSlug, chapterSlug, sectionSlug, sectionType, chapterNumber }}
 		use:glossaryTerms={{ bookSlug }}
 		use:bionicReadingAction={content}
-		use:practiceReveal={content}
+		use:practiceReveal={{ bookSlug, chapterSlug, sectionSlug, content }}
 		use:lazyImages
 	>
 		<!-- SECURITY: This HTML is trusted output from the CNXML rendering pipeline in
