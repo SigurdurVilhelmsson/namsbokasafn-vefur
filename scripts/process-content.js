@@ -18,7 +18,7 @@
 
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'fs';
 import { resolve, dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -59,7 +59,7 @@ function calculateReadingTimeHtml(content) {
 /**
  * Parse metadata from HTML page-data JSON
  */
-function parseHtmlPageData(content) {
+export function parseHtmlPageData(content) {
 	const match = content.match(/<script[^>]*id="page-data"[^>]*>([\s\S]*?)<\/script>/);
 	if (!match) return null;
 
@@ -127,7 +127,7 @@ function processBook(bookSlug) {
 					chapter: pageData?.chapter || chapter.number,
 					readingTime,
 					difficulty: undefined,
-					objectives: []
+					objectives: pageData?.objectives || []
 				};
 
 				sectionsProcessed++;
@@ -164,4 +164,6 @@ function main() {
 	console.log('\nContent processing complete!');
 }
 
-main();
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+	main();
+}
