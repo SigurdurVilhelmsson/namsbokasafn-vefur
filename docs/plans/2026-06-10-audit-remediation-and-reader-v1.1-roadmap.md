@@ -40,6 +40,13 @@ are the original plan, kept for the record.
    store; add `bookSlug` to `PracticeProblem`/objectives chapter queries
    _before_ real data accumulates; fix the stats key migration corruption,
    answer dedupe by question id, and section-mastery aggregation.
+   **Update (2026-06-19):** the wiring + M1/M3 fixes shipped (PR #115), but this item
+   assumed `.practice-problem-container` content would supply the data — the CNXML
+   decision removed that source, so the pipeline stayed empty. The data source has been
+   re-established via the Example "Kannaðu þekkingu þína" reveal (inline self-assessment):
+   see `docs/plans/2026-06-19-rec7-practice-self-assessment.md`. The dead
+   `.practice-problem-container` writer is being removed there. (M4 still deferred —
+   see below; M2 revisits with the Phase-2 quiz bank.)
 2. **SRS ease-factor cap** — add the documented 2.5 upper clamp in
    `utils/srs.ts` (CLAUDE.md and standard SM-2 both specify 1.3–2.5); update
    the test that codified the unbounded behavior.
@@ -95,6 +102,12 @@ the practice-pipeline data wired up in Phase 1.
 **Audit↔plan interactions already accounted for:**
 
 - The practice pipeline is wired up (Phase 1) because P1.1/P2.2 need its data.
+  **(2026-06-19)** Its data source is the inline self-assessment on the Example reveal
+  (`source:'inline'` in `practiceProblemProgress`), per
+  `docs/plans/2026-06-19-rec7-practice-self-assessment.md`. Coordination when these branches merge:
+  **P0.3** (predict-first) — upgrade the inline rating to the same predict-first pattern, don't
+  build a parallel one; **P1.1** (Kvörðun / CalibrationTab) — include `source:'inline'` attempts
+  in the prediction-vs-outcome matrix, not just flashcards; **P2.2** — draws on the same inline data.
 - The completion celebration gets no cleanup investment — P0.2 replaces it.
 - Section-page lifecycle fixes (PR #110) are the foundation P0.4's
   read-detection rewire builds on.
