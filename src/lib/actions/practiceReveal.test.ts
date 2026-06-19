@@ -152,7 +152,7 @@ describe('practiceReveal action', () => {
 		el.remove();
 	});
 
-	it('registers the answer with the quiz store on first reveal', () => {
+	it('registers the answer with the quiz store on first reveal, with non-empty question content', () => {
 		localStorage.clear();
 		quizStore.reset();
 		const el = makeContainer(); // answer note has id "fs-a1"
@@ -166,7 +166,12 @@ describe('practiceReveal action', () => {
 			new MouseEvent('click', { bubbles: true })
 		);
 		const id = 'efnafraedi-2e/01/1-4#fs-a1';
-		expect(get(quizStore).practiceProblemProgress[id]).toBeTruthy();
+		const record = get(quizStore).practiceProblemProgress[id];
+		expect(record).toBeTruthy();
+		// content must be the question paragraph text, NOT "" — the toggle button
+		// is inserted before the answer, so questionText() must be captured before
+		// that insertion or it hits the button as the first previousElementSibling.
+		expect(record.content).toBe('(a) Hvert er rúmmálið?');
 		el.remove();
 	});
 

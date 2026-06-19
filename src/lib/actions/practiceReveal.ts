@@ -178,6 +178,11 @@ function processAnswer(answer: HTMLElement, state: RevealState, opts: PracticeRe
 	assess.append(mkAssessBtn('Rétt hjá mér', true), mkAssessBtn('Þarf að æfa meira', false));
 	answer.after(assess);
 
+	// Capture question text NOW — before insertBefore() makes the button the
+	// answer's immedidate previousElementSibling, which would cause the DOM walk
+	// in questionText() to stop at once and return "".
+	const question = questionText(answer);
+
 	const onClick = () => {
 		const nowHidden = answer.classList.toggle('practice-answer--hidden');
 		assess.hidden = nowHidden;
@@ -189,7 +194,7 @@ function processAnswer(answer: HTMLElement, state: RevealState, opts: PracticeRe
 				bookSlug!,
 				chapterSlug!,
 				sectionSlug!,
-				questionText(answer),
+				question,
 				(answer.textContent || '').trim().slice(0, 2000),
 				'inline'
 			);
