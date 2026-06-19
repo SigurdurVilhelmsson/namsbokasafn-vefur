@@ -45,4 +45,11 @@ describe("rateObjective upserts (assessed + confidence)", () => {
     expect(store.isObjectiveCompleted("b", "01", "1-1", 0)).toBe(true);
     expect(store.getObjectiveConfidence("b", "01", "1-1", 0)).toBe(5);
   });
+
+  it("preserves completedAt when re-rating an existing entry", () => {
+    store.markObjectiveComplete("b", "01", "1-1", 0, "X");
+    const first = store.getSectionObjectives("b", "01", "1-1")[0].completedAt;
+    store.rateObjective("b", "01", "1-1", 0, "X", 4);
+    expect(store.getSectionObjectives("b", "01", "1-1")[0].completedAt).toBe(first);
+  });
 });

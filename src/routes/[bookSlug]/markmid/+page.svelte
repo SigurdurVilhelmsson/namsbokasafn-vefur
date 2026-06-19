@@ -164,16 +164,18 @@
 				</p>
 			{:else}
 				<!-- Coverage bar (assessed of all objectives in the book) -->
+				{#if totalObjectives > 0}
 				<div class="mb-4">
 					<div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
 						<span>Metin markmið</span>
-						<span>{coverageResult.completed}/{coverageResult.total}</span>
+						<span>{Math.min(coverageResult.completed, coverageResult.total)}/{coverageResult.total}</span>
 					</div>
 					<div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
 						<div class="h-full bg-green-500 rounded-full transition-all duration-300"
-							style="width: {coverageResult.percentage}%"></div>
+							style="width: {Math.min(coverageResult.percentage, 100)}%"></div>
 					</div>
 				</div>
+				{/if}
 
 				<!-- Confidence distribution -->
 				<div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">

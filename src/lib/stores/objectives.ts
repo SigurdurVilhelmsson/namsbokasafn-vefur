@@ -135,6 +135,7 @@ function createObjectivesStore() {
 			const isCompleted = state.completedObjectives[key]?.isCompleted ?? false;
 
 			if (isCompleted) {
+				// Un-marking deletes the whole entry, including any confidence rating — one entry per objective by design (re-mark + re-rate to restore).
 				update((s) => {
 					const { [key]: _removed, ...rest } = s.completedObjectives;
 					return { completedObjectives: rest };
