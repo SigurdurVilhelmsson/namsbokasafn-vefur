@@ -26,6 +26,7 @@ export interface PracticeRevealOptions {
 	bookSlug?: string;
 	chapterSlug?: string;
 	sectionSlug?: string;
+	/** Passed only to trigger Svelte's `update()` on soft-nav; the action scans the DOM, not this value. */
 	content?: string;
 }
 
@@ -221,6 +222,10 @@ export function practiceReveal(node: HTMLElement, opts: PracticeRevealOptions = 
 	const state: RevealState = { id: 0, cleanups: [] };
 
 	function scan(): void {
+		// Reset the position counter so a freshly-rebuilt innerHTML (soft-nav)
+		// deterministically re-derives the same `practice-answer-N` fallback ids
+		// rather than incrementing into a new series each visit.
+		state.id = 0;
 		// Preferred: the explicit marker emitted by the CNXML renderer (path a).
 		node.querySelectorAll('aside.check-knowledge-answer').forEach((aside) => {
 			processAnswer(aside as HTMLElement, state, opts);
@@ -236,7 +241,7 @@ export function practiceReveal(node: HTMLElement, opts: PracticeRevealOptions = 
 	scan();
 
 	return {
-		update(newOpts: PracticeRevealOptions) {
+		update(newOpts: PracticeRevealOptions = {}) {
 			// On soft-nav the container's innerHTML was replaced, so previously
 			// processed nodes (and their toggles) are gone with it. Re-assign opts
 			// so the new section's slugs are used for registration, then re-scan.

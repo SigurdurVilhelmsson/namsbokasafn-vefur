@@ -151,22 +151,46 @@ describe('practiceReveal action', () => {
 
 		el.remove();
 	});
-});
 
-it('registers the answer with the quiz store on first reveal', () => {
-	localStorage.clear();
-	quizStore.reset();
-	const el = makeContainer(); // answer note has id "fs-a1"
-	el.querySelector('aside.note-default')!.id = 'fs-a1';
-	practiceReveal(el, {
-		bookSlug: 'efnafraedi-2e',
-		chapterSlug: '01',
-		sectionSlug: '1-4'
+	it('registers the answer with the quiz store on first reveal', () => {
+		localStorage.clear();
+		quizStore.reset();
+		const el = makeContainer(); // answer note has id "fs-a1"
+		el.querySelector('aside.note-default')!.id = 'fs-a1';
+		practiceReveal(el, {
+			bookSlug: 'efnafraedi-2e',
+			chapterSlug: '01',
+			sectionSlug: '1-4'
+		});
+		el.querySelector<HTMLButtonElement>('button.practice-answer-toggle')!.dispatchEvent(
+			new MouseEvent('click', { bubbles: true })
+		);
+		const id = 'efnafraedi-2e/01/1-4#fs-a1';
+		expect(get(quizStore).practiceProblemProgress[id]).toBeTruthy();
+		el.remove();
 	});
-	el.querySelector<HTMLButtonElement>('button.practice-answer-toggle')!.dispatchEvent(
-		new MouseEvent('click', { bubbles: true })
-	);
-	const id = 'efnafraedi-2e/01/1-4#fs-a1';
-	expect(get(quizStore).practiceProblemProgress[id]).toBeTruthy();
-	el.remove();
+
+	it('generates a stable auto-id across soft-nav re-scan (counter resets to 0 each scan)', () => {
+		const el = document.createElement('div');
+		// No id on the answer aside — falls through to the auto-id fallback.
+		const noIdHTML =
+			'<aside class="note note-default"><h4>Svar:</h4><p>Svarið.</p></aside>';
+		el.innerHTML = noIdHTML;
+		document.body.appendChild(el);
+
+		const action = practiceReveal(el, { bookSlug: 'b', chapterSlug: '01', sectionSlug: '1-1' });
+		const idAfterFirst = el.querySelector('aside.note-default')!.id;
+		expect(idAfterFirst).toBe('practice-answer-1');
+
+		// Simulate soft-nav: rebuild innerHTML from scratch (PROCESSED_ATTR gone with old nodes).
+		el.innerHTML = noIdHTML;
+		action.update({ bookSlug: 'b', chapterSlug: '01', sectionSlug: '1-1' });
+
+		const idAfterRescan = el.querySelector('aside.note-default')!.id;
+		// Without the state.id reset this would be 'practice-answer-2' — same key required.
+		expect(idAfterRescan).toBe('practice-answer-1');
+
+		action.destroy?.();
+		el.remove();
+	});
 });
