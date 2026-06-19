@@ -376,7 +376,7 @@
 				</h3>
 				{#if completedCount > 0}
 					<span class="text-sm text-[var(--text-secondary)]">
-						{completedCount}/{data.section.objectives.length} kláruð
+						{completedCount}/{data.section.objectives.length} metin
 					</span>
 				{/if}
 			</div>
