@@ -33,6 +33,7 @@ export interface PracticeProblem {
 	bookSlug: string;
 	chapterSlug: string;
 	sectionSlug: string;
+	source: 'inline' | 'bank';
 	isCompleted: boolean;
 	attempts: number;
 	successfulAttempts: number;
@@ -327,7 +328,8 @@ function createQuizStore() {
 			chapterSlug: string,
 			sectionSlug: string,
 			content: string,
-			answer: string
+			answer: string,
+			source: 'inline' | 'bank' = 'inline'
 		) => {
 			update((state) => {
 				if (state.practiceProblemProgress[id]) return state;
@@ -343,6 +345,7 @@ function createQuizStore() {
 							bookSlug,
 							chapterSlug,
 							sectionSlug,
+							source,
 							isCompleted: false,
 							attempts: 0,
 							successfulAttempts: 0

@@ -234,7 +234,7 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 		if (isExercisePage && chapterNumber) {
 			// On exercises page - add "See answer" links to odd-numbered exercises
 			// Answer keys are now at /svarlykill/[chapter] route
-			const exercises = node.querySelectorAll<HTMLElement>('.practice-problem-container, .eoc-exercise');
+			const exercises = node.querySelectorAll<HTMLElement>('.eoc-exercise');
 
 			exercises.forEach((exercise) => {
 				// Get exercise ID and number
@@ -251,9 +251,9 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 					: parseInt(numStr, 10);
 				if (num > 0 && num % 2 === 0) return; // Skip even numbers
 
-				// For eoc-exercise, make the number itself a link (OpenStax style)
+				// Make the number itself a link (OpenStax style)
 				// Link to the new answer key route: /svarlykill/[chapter]#[exerciseId]
-				if (exercise.classList.contains('eoc-exercise') && exerciseNum) {
+				if (exerciseNum) {
 					const url = `/${bookSlug}/svarlykill/${chapterNumber}#${exerciseId}`;
 					const numberLink = createNumberLink(
 						exerciseNum,
@@ -267,25 +267,6 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 					// Prepend the number link to the exercise
 					exercise.insertBefore(numberLink, exercise.firstChild);
 					links.push(numberLink);
-				} else {
-					// For practice-problem-container, use button in footer
-					const button = createLinkButton(
-						'Svar',
-						'Fara í svar við þessari æfingu',
-						() => {
-							const url = `/${bookSlug}/svarlykill/${chapterNumber}#${exerciseId}`;
-							goto(url);
-						}
-					);
-
-					let footer = exercise.querySelector('.practice-problem-footer');
-					if (!footer) {
-						footer = document.createElement('div');
-						footer.className = 'practice-problem-footer';
-						exercise.appendChild(footer);
-					}
-					footer.appendChild(button);
-					buttons.push(button);
 				}
 			});
 		}

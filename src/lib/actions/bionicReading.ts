@@ -174,7 +174,7 @@ function applyBionicReading(container: HTMLElement): void {
  * Remove bionic reading formatting by unwrapping the injected <b> elements
  * in place. Deliberately NOT an innerHTML snapshot/restore: replacing the
  * markup would orphan every event listener other content actions
- * (practiceProblems, answerLinks, equations, ...) attached to the same DOM
+ * (answerLinks, equations, ...) attached to the same DOM
  * (audit finding 1.3 — answer/hint buttons rendered dead after toggle-off).
  */
 export function removeBionicReading(container: HTMLElement): void {

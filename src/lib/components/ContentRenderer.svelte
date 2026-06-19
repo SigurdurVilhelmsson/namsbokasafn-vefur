@@ -2,7 +2,6 @@
   ContentRenderer - Renders pre-rendered HTML content from the CNXML pipeline
 -->
 <script lang="ts">
-	import { practiceProblems } from '$lib/actions/practiceProblems';
 	import { equations } from '$lib/actions/equations';
 	import { figureViewer } from '$lib/actions/figureViewer';
 	import { crossReferences } from '$lib/actions/crossReferences';
@@ -48,14 +47,13 @@
 		 and the action order carries no constraints. -->
 	<div
 		class="reading-content"
-		use:practiceProblems={{ bookSlug, chapterSlug, sectionSlug }}
 		use:equations
 		use:figureViewer
 		use:crossReferences={{ bookSlug, chapterSlug, sectionSlug, chapterNumber, content }}
 		use:answerLinks={{ bookSlug, chapterSlug, sectionSlug, sectionType, chapterNumber }}
 		use:glossaryTerms={{ bookSlug }}
 		use:bionicReadingAction={content}
-		use:practiceReveal={content}
+		use:practiceReveal={{ bookSlug, chapterSlug, sectionSlug, content }}
 		use:lazyImages
 	>
 		<!-- SECURITY: This HTML is trusted output from the CNXML rendering pipeline in
