@@ -112,6 +112,20 @@ describe('practiceReveal action', () => {
 		action.destroy?.();
 		el.remove();
 	});
+
+	it('records a successful attempt when "Rétt hjá mér" is clicked', () => {
+		localStorage.clear();
+		quizStore.reset();
+		const el = makeContainer();
+		el.querySelector('aside.note-default')!.id = 'fs-a1';
+		practiceReveal(el, { bookSlug: 'b', chapterSlug: '01', sectionSlug: '1-4' });
+		el.querySelector<HTMLButtonElement>('button.practice-answer-toggle')!.click(); // reveal
+		el.querySelector<HTMLButtonElement>('button.practice-assess-btn[data-success="true"]')!.click();
+		const p = get(quizStore).practiceProblemProgress['b/01/1-4#fs-a1'];
+		expect(p.attempts).toBe(1);
+		expect(p.successfulAttempts).toBe(1);
+		el.remove();
+	});
 });
 
 it('registers the answer with the quiz store on first reveal', () => {

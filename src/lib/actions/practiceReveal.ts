@@ -83,6 +83,40 @@ function injectStyles(): void {
 			outline: 2px solid var(--accent-color);
 			outline-offset: 2px;
 		}
+		.practice-self-assess {
+			display: flex;
+			gap: 0.5rem;
+			margin: 0.25rem 0 0.75rem 30px;
+		}
+		.practice-assess-btn {
+			display: inline-flex;
+			align-items: center;
+			padding: 0.3rem 0.75rem;
+			font-size: 0.8125rem;
+			font-weight: 500;
+			color: var(--accent-color);
+			background: var(--accent-subtle, transparent);
+			border: 1px solid var(--accent-color);
+			border-radius: var(--radius-md, 0.5rem);
+			cursor: pointer;
+			transition: background-color 0.15s, color 0.15s;
+		}
+		.practice-assess-btn:hover {
+			background: var(--accent-color);
+			color: #fff;
+		}
+		.practice-assess-btn:focus-visible {
+			outline: 2px solid var(--accent-color);
+			outline-offset: 2px;
+		}
+		/* Dim the unchosen button after one has been selected */
+		.practice-self-assess[data-answered] .practice-assess-btn:not(:focus-visible) {
+			opacity: 0.4;
+		}
+		.practice-self-assess[data-answered="right"] .practice-assess-btn[data-success="true"],
+		.practice-self-assess[data-answered="more"] .practice-assess-btn[data-success="false"] {
+			opacity: 1;
+		}
 	`;
 	document.head.appendChild(style);
 }
@@ -112,8 +146,28 @@ function processAnswer(answer: HTMLElement, state: RevealState, opts: PracticeRe
 			: null;
 	let registered = false;
 
+	// Build the self-assessment row (shown with the answer, hidden when collapsed).
+	const assess = document.createElement('div');
+	assess.className = 'practice-self-assess';
+	assess.hidden = true;
+	const mkAssessBtn = (label: string, success: boolean) => {
+		const b = document.createElement('button');
+		b.type = 'button';
+		b.className = 'practice-assess-btn';
+		b.dataset.success = String(success);
+		b.textContent = label;
+		b.addEventListener('click', () => {
+			if (trackingId) quizStore.markPracticeProblemAttempt(trackingId, success);
+			assess.dataset.answered = success ? 'right' : 'more';
+		});
+		return b;
+	};
+	assess.append(mkAssessBtn('Rétt hjá mér', true), mkAssessBtn('Þarf að æfa meira', false));
+	answer.after(assess);
+
 	const onClick = () => {
 		const nowHidden = answer.classList.toggle('practice-answer--hidden');
+		assess.hidden = nowHidden;
 		setToggleLabel(button, !nowHidden);
 		if (!nowHidden && trackingId && !registered) {
 			registered = true;
@@ -134,6 +188,7 @@ function processAnswer(answer: HTMLElement, state: RevealState, opts: PracticeRe
 	state.cleanups.push(() => {
 		button.removeEventListener('click', onClick);
 		button.remove();
+		assess.remove();
 		answer.classList.remove('practice-answer--hidden');
 		answer.removeAttribute(PROCESSED_ATTR);
 	});
