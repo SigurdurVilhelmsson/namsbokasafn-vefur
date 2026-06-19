@@ -117,6 +117,14 @@ function injectStyles(): void {
 		.practice-self-assess[data-answered="more"] .practice-assess-btn[data-success="false"] {
 			opacity: 1;
 		}
+		.practice-assess-btn:disabled {
+			cursor: default;
+			opacity: 0.45;
+		}
+		.practice-self-assess[data-answered="right"] .practice-assess-btn[data-success="true"]:disabled,
+		.practice-self-assess[data-answered="more"] .practice-assess-btn[data-success="false"]:disabled {
+			opacity: 1;
+		}
 	`;
 	document.head.appendChild(style);
 }
@@ -159,6 +167,10 @@ function processAnswer(answer: HTMLElement, state: RevealState, opts: PracticeRe
 		b.addEventListener('click', () => {
 			if (trackingId) quizStore.markPracticeProblemAttempt(trackingId, success);
 			assess.dataset.answered = success ? 'right' : 'more';
+			// Disable both buttons — one self-assessment per answer note.
+			assess
+				.querySelectorAll('.practice-assess-btn')
+				.forEach((btn) => ((btn as HTMLButtonElement).disabled = true));
 		});
 		return b;
 	};
@@ -188,6 +200,8 @@ function processAnswer(answer: HTMLElement, state: RevealState, opts: PracticeRe
 	state.cleanups.push(() => {
 		button.removeEventListener('click', onClick);
 		button.remove();
+		// assess.remove() is sufficient — its button listeners need no explicit
+		// removeEventListener because nothing outside holds a reference to them.
 		assess.remove();
 		answer.classList.remove('practice-answer--hidden');
 		answer.removeAttribute(PROCESSED_ATTR);

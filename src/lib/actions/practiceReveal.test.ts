@@ -126,6 +126,31 @@ describe('practiceReveal action', () => {
 		expect(p.successfulAttempts).toBe(1);
 		el.remove();
 	});
+
+	it('records a needs-practice attempt when "Þarf að æfa meira" is clicked and locks both buttons', () => {
+		localStorage.clear();
+		quizStore.reset();
+		const el = makeContainer();
+		el.querySelector('aside.note-default')!.id = 'fs-b1';
+		practiceReveal(el, { bookSlug: 'b', chapterSlug: '01', sectionSlug: '1-4' });
+		el.querySelector<HTMLButtonElement>('button.practice-answer-toggle')!.click(); // reveal
+
+		const assessEl = el.querySelector<HTMLElement>('div.practice-self-assess')!;
+		const falseBtn = el.querySelector<HTMLButtonElement>('button.practice-assess-btn[data-success="false"]')!;
+		falseBtn.click();
+
+		const p = get(quizStore).practiceProblemProgress['b/01/1-4#fs-b1'];
+		expect(p.attempts).toBe(1);
+		expect(p.successfulAttempts).toBe(0);
+		expect(assessEl.dataset.answered).toBe('more');
+
+		// Both buttons are disabled — a second click must not increment attempts.
+		el.querySelectorAll<HTMLButtonElement>('button.practice-assess-btn').forEach((b) => b.click());
+		const p2 = get(quizStore).practiceProblemProgress['b/01/1-4#fs-b1'];
+		expect(p2.attempts).toBe(1);
+
+		el.remove();
+	});
 });
 
 it('registers the answer with the quiz store on first reveal', () => {
