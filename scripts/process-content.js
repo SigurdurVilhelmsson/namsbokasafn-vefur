@@ -18,7 +18,7 @@
 
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'fs';
 import { resolve, dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -164,4 +164,6 @@ function main() {
 	console.log('\nContent processing complete!');
 }
 
-main();
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+	main();
+}
