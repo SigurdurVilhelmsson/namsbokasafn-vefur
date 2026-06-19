@@ -3,7 +3,7 @@
  *
  * Toggle-off must not orphan listeners that other content actions attached
  * to the same DOM: previously the action restored an innerHTML snapshot,
- * which left practice-problem/answer buttons rendered but dead.
+ * which left answer buttons rendered but dead.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -23,7 +23,7 @@ describe('bionicReading action', () => {
 		const el = document.createElement('div');
 		el.innerHTML =
 			'<p>Rafeindir sveima um kjarnann í rafeindaskýi atómsins.</p>' +
-			'<div class="practice-problem-container"><button class="show-answer-btn">Sýna svar</button></div>';
+			'<div><button class="show-answer-btn">Sýna svar</button></div>';
 		document.body.appendChild(el);
 		return el;
 	}
@@ -50,7 +50,7 @@ describe('bionicReading action', () => {
 		const el = makeContainer();
 		const button = el.querySelector('button')!;
 		const onClick = vi.fn();
-		// An enhancer (practiceProblems) attached this before bionic ran
+		// A pre-existing enhancer attached this listener before bionic ran
 		button.addEventListener('click', onClick);
 
 		settings.setBionicReading(true);

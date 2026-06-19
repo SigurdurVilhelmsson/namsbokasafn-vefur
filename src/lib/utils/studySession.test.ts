@@ -31,6 +31,7 @@ function makePracticeProblem(id: string, chapter = '01', section = '1-1'): Pract
 		bookSlug: 'efnafraedi-2e',
 		chapterSlug: chapter,
 		sectionSlug: section,
+		source: 'inline',
 		isCompleted: false,
 		attempts: 1,
 		successfulAttempts: 0

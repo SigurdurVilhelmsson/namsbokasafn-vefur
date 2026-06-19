@@ -9,6 +9,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { get } from 'svelte/store';
+import { quizStore } from '$lib/stores/quiz';
 import { practiceReveal } from './practiceReveal';
 
 function makeContainer(): HTMLElement {
@@ -102,10 +104,96 @@ describe('practiceReveal action', () => {
 	it('is idempotent — re-processing does not insert a second toggle', () => {
 		const el = makeContainer();
 		const action = practiceReveal(el);
-		action.update?.('changed');
-		action.update?.('changed again');
+		action.update?.({ content: 'changed' });
+		action.update?.({ content: 'changed again' });
 
 		expect(el.querySelectorAll('button.practice-answer-toggle').length).toBe(1);
+
+		action.destroy?.();
+		el.remove();
+	});
+
+	it('records a successful attempt when "Rétt hjá mér" is clicked', () => {
+		localStorage.clear();
+		quizStore.reset();
+		const el = makeContainer();
+		el.querySelector('aside.note-default')!.id = 'fs-a1';
+		practiceReveal(el, { bookSlug: 'b', chapterSlug: '01', sectionSlug: '1-4' });
+		el.querySelector<HTMLButtonElement>('button.practice-answer-toggle')!.click(); // reveal
+		el.querySelector<HTMLButtonElement>('button.practice-assess-btn[data-success="true"]')!.click();
+		const p = get(quizStore).practiceProblemProgress['b/01/1-4#fs-a1'];
+		expect(p.attempts).toBe(1);
+		expect(p.successfulAttempts).toBe(1);
+		el.remove();
+	});
+
+	it('records a needs-practice attempt when "Þarf að æfa meira" is clicked and locks both buttons', () => {
+		localStorage.clear();
+		quizStore.reset();
+		const el = makeContainer();
+		el.querySelector('aside.note-default')!.id = 'fs-b1';
+		practiceReveal(el, { bookSlug: 'b', chapterSlug: '01', sectionSlug: '1-4' });
+		el.querySelector<HTMLButtonElement>('button.practice-answer-toggle')!.click(); // reveal
+
+		const assessEl = el.querySelector<HTMLElement>('div.practice-self-assess')!;
+		const falseBtn = el.querySelector<HTMLButtonElement>('button.practice-assess-btn[data-success="false"]')!;
+		falseBtn.click();
+
+		const p = get(quizStore).practiceProblemProgress['b/01/1-4#fs-b1'];
+		expect(p.attempts).toBe(1);
+		expect(p.successfulAttempts).toBe(0);
+		expect(assessEl.dataset.answered).toBe('more');
+
+		// Both buttons are disabled — a second click must not increment attempts.
+		el.querySelectorAll<HTMLButtonElement>('button.practice-assess-btn').forEach((b) => b.click());
+		const p2 = get(quizStore).practiceProblemProgress['b/01/1-4#fs-b1'];
+		expect(p2.attempts).toBe(1);
+
+		el.remove();
+	});
+
+	it('registers the answer with the quiz store on first reveal, with non-empty question content', () => {
+		localStorage.clear();
+		quizStore.reset();
+		const el = makeContainer(); // answer note has id "fs-a1"
+		el.querySelector('aside.note-default')!.id = 'fs-a1';
+		practiceReveal(el, {
+			bookSlug: 'efnafraedi-2e',
+			chapterSlug: '01',
+			sectionSlug: '1-4'
+		});
+		el.querySelector<HTMLButtonElement>('button.practice-answer-toggle')!.dispatchEvent(
+			new MouseEvent('click', { bubbles: true })
+		);
+		const id = 'efnafraedi-2e/01/1-4#fs-a1';
+		const record = get(quizStore).practiceProblemProgress[id];
+		expect(record).toBeTruthy();
+		// content must be the question paragraph text, NOT "" — the toggle button
+		// is inserted before the answer, so questionText() must be captured before
+		// that insertion or it hits the button as the first previousElementSibling.
+		expect(record.content).toBe('(a) Hvert er rúmmálið?');
+		el.remove();
+	});
+
+	it('generates a stable auto-id across soft-nav re-scan (counter resets to 0 each scan)', () => {
+		const el = document.createElement('div');
+		// No id on the answer aside — falls through to the auto-id fallback.
+		const noIdHTML =
+			'<aside class="note note-default"><h4>Svar:</h4><p>Svarið.</p></aside>';
+		el.innerHTML = noIdHTML;
+		document.body.appendChild(el);
+
+		const action = practiceReveal(el, { bookSlug: 'b', chapterSlug: '01', sectionSlug: '1-1' });
+		const idAfterFirst = el.querySelector('aside.note-default')!.id;
+		expect(idAfterFirst).toBe('practice-answer-1');
+
+		// Simulate soft-nav: rebuild innerHTML from scratch (PROCESSED_ATTR gone with old nodes).
+		el.innerHTML = noIdHTML;
+		action.update({ bookSlug: 'b', chapterSlug: '01', sectionSlug: '1-1' });
+
+		const idAfterRescan = el.querySelector('aside.note-default')!.id;
+		// Without the state.id reset this would be 'practice-answer-2' — same key required.
+		expect(idAfterRescan).toBe('practice-answer-1');
 
 		action.destroy?.();
 		el.remove();
