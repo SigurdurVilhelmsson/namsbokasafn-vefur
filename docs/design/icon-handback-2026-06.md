@@ -205,6 +205,13 @@ in `icons.ts`. All are real, current Lucide names (verified against the bundled 
 > `flame` (reading streak). The `Minniskort` tab's archive-box glyph was **unified to
 > `credit-card`** (the canonical flashcard glyph) rather than registering `archive`. One w-12
 > empty-state illustration stays inline — it's outside the 16/20/24 icon scale.
+>
+> **Study sweep (2026-06-23):** the guided-study phases added `circle-x` (incorrect answer,
+> paired with `circle-check` for correct) and `circle-play` (start session). The shared
+> `PHASE_ICONS` map (review/reading/practice/reflect) was refactored from raw SVG paths to
+> canonical names (`refresh-cw` / `book-open` / `lightbulb` / `circle-check`). `Icon.svelte`
+> gained an optional **`style`** prop for per-instance dynamic color (e.g. phase tint). Two
+> w-10 celebration-header icons stay inline (outside the scale).
 
 **Holdouts (deliberately still inline, judgment calls for Design):**
 
