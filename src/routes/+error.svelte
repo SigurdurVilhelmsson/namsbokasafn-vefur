@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { page } from '$app/stores';
+	import Icon from '$lib/components/Icon.svelte';
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { offline } from '$lib/stores/offline';
@@ -128,9 +129,7 @@
 		{#if (isOfflineError || isOffline) && bookSlug && !isBookDownloaded}
 			<div class="mb-6 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
 				<div class="flex items-start gap-3 text-left">
-					<svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-					</svg>
+					<Icon name="info" class="text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
 					<div>
 						<p class="text-sm font-medium text-blue-800 dark:text-blue-200 mb-1">
 							Viltu lesa án nettengingar?
@@ -150,9 +149,7 @@
 					href="/{bookSlug}"
 					class="btn-accent"
 				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-					</svg>
+					<Icon name="download" size="sm" />
 					Fara í bók
 				</a>
 			{:else if isOffline || isServerError}
@@ -160,9 +157,7 @@
 					onclick={retry}
 					class="btn-accent"
 				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-					</svg>
+					<Icon name="refresh-cw" size="sm" />
 					Reyna aftur
 				</button>
 			{/if}
@@ -171,9 +166,7 @@
 				onclick={goBack}
 				class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-				</svg>
+				<Icon name="arrow-left" size="sm" />
 				Til baka
 			</button>
 
@@ -181,9 +174,7 @@
 				href="/"
 				class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-				</svg>
+				<Icon name="house" size="sm" />
 				Forsíða
 			</a>
 		</div>
