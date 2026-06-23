@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import type { PhaseId } from '$lib/utils/studySession';
 	import { PHASE_LABELS, PHASE_ICONS } from '$lib/utils/studySession';
 
@@ -90,9 +91,7 @@
 					style={getBadgeStyle(phaseId)}
 				>
 					<div class="flex items-center gap-2">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={PHASE_ICONS[phaseId]} />
-						</svg>
+						<Icon name={PHASE_ICONS[phaseId]} size="sm" />
 						<span class="text-sm font-medium">{PHASE_LABELS[phaseId]}</span>
 					</div>
 					<span class="text-sm font-bold">{count}</span>
@@ -107,9 +106,7 @@
 			onclick={() => onreset?.()}
 			class="sc-action-btn"
 		>
-			<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-			</svg>
+			<Icon name="refresh-cw" />
 			Ný námslota
 		</button>
 	</div>

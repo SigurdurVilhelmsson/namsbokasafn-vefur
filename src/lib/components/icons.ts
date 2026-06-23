@@ -61,6 +61,8 @@ import {
 	Star,
 	BadgeCheck,
 	Flame,
+	CircleX,
+	CirclePlay,
 	type IconNode
 } from 'lucide';
 
@@ -128,7 +130,9 @@ export const ICON_NODES = {
 	'eye-off': EyeOff,
 	star: Star,
 	'badge-check': BadgeCheck,
-	flame: Flame
+	flame: Flame,
+	'circle-x': CircleX,
+	'circle-play': CirclePlay
 } satisfies Record<string, IconNode>;
 
 export type IconName = keyof typeof ICON_NODES;

@@ -61,7 +61,9 @@ describe('icon registry', () => {
 			'eye-off',
 			'star',
 			'badge-check',
-			'flame'
+			'flame',
+			'circle-x',
+			'circle-play'
 		];
 		expect([...ICON_NAMES].sort()).toEqual([...expected].sort());
 	});
