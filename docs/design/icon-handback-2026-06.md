@@ -212,6 +212,12 @@ in `icons.ts`. All are real, current Lucide names (verified against the bundled 
 > canonical names (`refresh-cw` / `book-open` / `lightbulb` / `circle-check`). `Icon.svelte`
 > gained an optional **`style`** prop for per-instance dynamic color (e.g. phase tint). Two
 > w-10 celebration-header icons stay inline (outside the scale).
+>
+> **Quiz + periodic-table sweep (2026-06-23):** `trending-up` (difficulty trend),
+> `flask-conical` (element properties), `circle-dot` (property header), `zap` (reactivity),
+> `box` (group). AdaptiveQuiz's `.aq-icon-correct/wrong` color rules were made `:global` so the
+> class reaches the wrapped `<Icon>` svg (the mastery classes were already global). Two oversized
+> w-12 header illustrations stay inline.
 
 **Holdouts (deliberately still inline, judgment calls for Design):**
 
