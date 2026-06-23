@@ -36,6 +36,22 @@ import {
 	CircleHelp,
 	Target,
 	RectangleEllipsis,
+	Atom,
+	Check,
+	Clock,
+	RefreshCw,
+	Sparkles,
+	Trash2,
+	Funnel,
+	Plus,
+	FileText,
+	List,
+	House,
+	Minimize,
+	LayoutGrid,
+	Keyboard,
+	ArrowLeft,
+	ArrowRight,
 	type IconNode
 } from 'lucide';
 
@@ -76,7 +92,25 @@ export const ICON_NODES = {
 	// Learning interventions
 	'circle-help': CircleHelp,
 	target: Target,
-	'rectangle-ellipsis': RectangleEllipsis
+	'rectangle-ellipsis': RectangleEllipsis,
+	// Extended set — discretionary additions (2026-06-23); see icon-handback §8.
+	// Lucide glyphs for app roles the §4 inventory didn't cover (`atom` ratified §7).
+	atom: Atom,
+	check: Check,
+	clock: Clock,
+	'refresh-cw': RefreshCw,
+	sparkles: Sparkles,
+	'trash-2': Trash2,
+	funnel: Funnel,
+	plus: Plus,
+	'file-text': FileText,
+	list: List,
+	house: House,
+	minimize: Minimize,
+	'layout-grid': LayoutGrid,
+	keyboard: Keyboard,
+	'arrow-left': ArrowLeft,
+	'arrow-right': ArrowRight
 } satisfies Record<string, IconNode>;
 
 export type IconName = keyof typeof ICON_NODES;
