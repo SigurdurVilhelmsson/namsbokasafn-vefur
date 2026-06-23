@@ -63,7 +63,12 @@ describe('icon registry', () => {
 			'badge-check',
 			'flame',
 			'circle-x',
-			'circle-play'
+			'circle-play',
+			'trending-up',
+			'flask-conical',
+			'circle-dot',
+			'zap',
+			'box'
 		];
 		expect([...ICON_NAMES].sort()).toEqual([...expected].sort());
 	});
