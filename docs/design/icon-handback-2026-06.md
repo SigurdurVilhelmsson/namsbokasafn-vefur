@@ -115,3 +115,51 @@ Two spots in the spec don't match the codebase; suggested edits:
 
 Until step 1, further component migration would be partial and require a second pass — so
 Code is pausing the sweep here (PR #154: `layout/` + `SettingsModal`) pending the expanded set.
+
+---
+
+## 6. Answers to Design's follow-up (2026-06-23)
+
+**1. Icon source strategy — decided and shipped (no CDN).** Code uses the `lucide` **core**
+package, _not_ `lucide-svelte`. Reason: core exports each glyph as path-_data_ (`IconNode`),
+which `Icon.svelte` renders inside its **own single `<svg>`** — that's what guarantees every
+icon shares the identical four attributes. `lucide-svelte` would emit N separate components,
+each with its own `<svg>`, defeating the one-wrapper goal. The package is **bundled and
+tree-shaken by Vite at build time** → compiled into the JS bundle, **no runtime CDN / network
+fetch** (same standard as the self-hosted fonts). So there's no need to extract SVGs to a local
+folder — bundling the package _is_ "self-hosted/bundled."
+_Re your `Icon Inventory.dc.html`:_ it inlines Lucide path-data as static SVG markup (no CDN
+either). Both it and the vefur registry draw from Lucide, so they **match by construction** —
+e.g. `search` is `circle r=8` + the corner path in both. (Minor: the DC carries a rounded copy,
+`m21 21-4.3-4.3`; the package has full precision, `-4.34-4.34`. Same glyph.)
+
+**2. `size` prop — string enum, with a `class` escape hatch.** It's `'sm' | 'md' | 'lg'` only,
+mapping to `--icon-sm/md/lg` (16/20/24). **No pixel prop by design** — keeping it to the three
+tokens enforces the scale (your spec said three sizes cover every surface). Genuine edge cases
+use the `class` prop for a CSS override (already done for the theme-toggle and the rotating
+chevrons). Recommendation: keep it enum-only; if a real fourth size appears, add a _token_, not
+a pixel value.
+
+**3. Content-block icons — rules exist, but the icons are efni-owned (this is handback §4.1).**
+The `.content-block.* .content-block-icon` rules **do exist in vefur's `src/app.css`** (the
+contract's source of truth, §6.1) — currently colored by hardcoded hex, not `--block-*` tokens
+(your DC uses `--block-note` etc.; that token reconciliation is the separate F3 item, not icon
+work). **But the content-block icons themselves are emitted by the namsbokasafn-efni CNXML
+pipeline**, not by `Icon.svelte` — and today's content emits `note note-default` / `example`
+with **no glyph at all**. So content-block icons are **out of scope for this wrapper**; they're
+the cross-repo efni task. No action in PR #154.
+
+**4. Aria-labels — at the call site (on the button), not in the component.** The interactive
+element is the `<button>`; the icon is decorative (`aria-hidden`). So the label lives on the
+button at each call site — already the pattern (`aria-label="Leita"` / `"Stillingar"` /
+`"Loka"`). `Icon.svelte` exposes an optional `label` prop **only** for the rare standalone icon
+that _is_ the interactive element (→ `role="img"` + `aria-label`); most icons never use it.
+Don't centralize copy in the component — labels are context-specific (a modal close vs a chip
+remove differ). Keep the existing concise Icelandic ("Loka", not "Loka gluggann").
+
+**5. Visual regression — vefur side verified; the DC re-render is yours to run.** On the vefur
+side every icon renders the identical four attributes (proven via SSR HTML + real-browser E2E).
+Because both the registry and the DC draw from Lucide, a re-render of `Icon Inventory.dc.html`
+should confirm zero stroke/sizing drift. The only real drift was the **Heroicons-solid fill
+icons** (`SettingsModal` fixed; `analytics/GoalsTab` still pending — see §4.2). If useful, Code
+can supply the exact attribute string the wrapper emits for a byte-level diff.
