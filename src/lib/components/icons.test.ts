@@ -68,7 +68,9 @@ describe('icon registry', () => {
 			'flask-conical',
 			'circle-dot',
 			'zap',
-			'box'
+			'box',
+			'highlighter',
+			'message-square-text'
 		];
 		expect([...ICON_NAMES].sort()).toEqual([...expected].sort());
 	});

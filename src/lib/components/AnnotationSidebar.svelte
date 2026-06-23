@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { slide, fade } from 'svelte/transition';
+	import Icon from '$lib/components/Icon.svelte';
 	import { annotationStore } from '$lib/stores/annotation';
 	import type { Annotation, HighlightColor } from '$lib/types/annotation';
 
@@ -122,20 +123,7 @@
 		<!-- Header -->
 		<div class="ann-divider flex items-center justify-between border-b px-4 py-4">
 			<div class="flex items-center gap-2">
-				<svg
-					class="w-5 h-5 text-[var(--accent-color)]"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					aria-hidden="true"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-					/>
-				</svg>
+				<Icon name="square-pen" class="text-[var(--accent-color)]" />
 				<h2 class="ann-title text-lg font-semibold">Athugasemdir</h2>
 				<span class="rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-xs font-medium text-[var(--accent-color)]">
 					{filteredAnnotations.length}
@@ -146,9 +134,7 @@
 				class="ann-btn-ghost rounded-lg p-2 transition-colors"
 				aria-label="Loka"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-				</svg>
+				<Icon name="x" />
 			</button>
 		</div>
 
@@ -161,18 +147,9 @@
 					class="ann-filter-btn flex items-center gap-2 rounded-lg border px-3 py-1.5 text-sm transition-colors"
 					aria-expanded={showFilterMenu}
 				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-						/>
-					</svg>
+					<Icon name="funnel" size="sm" />
 					<span>{getFilterLabel(filter)}</span>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-					</svg>
+					<Icon name="chevron-down" size="sm" />
 				</button>
 
 				{#if showFilterMenu}
@@ -233,14 +210,7 @@
 				class="ann-btn-ghost flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm transition-colors disabled:opacity-50"
 				title="Flytja út sem Markdown"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-					/>
-				</svg>
+				<Icon name="download" size="sm" />
 				<span class="hidden sm:inline">Flytja út</span>
 			</button>
 		</div>
@@ -297,20 +267,7 @@
 							<!-- Note if present -->
 							{#if annotation.note}
 								<div class="mb-2 flex items-start gap-2 rounded bg-white/50 dark:bg-black/20 p-2">
-									<svg
-										class="ann-text-muted w-4 h-4 mt-0.5 flex-shrink-0"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-										aria-hidden="true"
-									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-										/>
-									</svg>
+									<Icon name="message-square-text" size="sm" class="ann-text-muted mt-0.5 flex-shrink-0" />
 									<p class="ann-text text-sm">{annotation.note}</p>
 								</div>
 							{/if}
@@ -339,14 +296,7 @@
 										class="ann-text-muted rounded p-1 transition-colors hover:bg-white/50 dark:hover:bg-black/20 hover:text-red-600 dark:hover:text-red-400"
 										aria-label="Eyða athugasemd"
 									>
-										<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-											<path
-												stroke-linecap="round"
-												stroke-linejoin="round"
-												stroke-width="2"
-												d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-											/>
-										</svg>
+										<Icon name="trash-2" size="sm" />
 									</button>
 								{/if}
 							</div>
@@ -392,7 +342,7 @@
 		color: var(--text-secondary);
 	}
 
-	.ann-text-muted {
+	:global(.ann-text-muted) {
 		color: var(--text-tertiary);
 	}
 

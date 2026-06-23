@@ -218,6 +218,11 @@ in `icons.ts`. All are real, current Lucide names (verified against the bundled 
 > `box` (group). AdaptiveQuiz's `.aq-icon-correct/wrong` color rules were made `:global` so the
 > class reaches the wrapped `<Icon>` svg (the mastery classes were already global). Two oversized
 > w-12 header illustrations stay inline.
+>
+> **Annotation sweep (2026-06-23):** `highlighter` (the highlight action — distinct from
+> `square-pen` which now means edit/note) and `message-square-text` (add comment). Made the
+> scoped `.ann-text-muted` color utility `:global` so it reaches the wrapped `<Icon>`. One w-12
+> empty-state pencil illustration stays inline.
 
 **Holdouts (deliberately still inline, judgment calls for Design):**
 
