@@ -399,10 +399,7 @@
 				<!-- Index (Atriðisorðaskrá) -->
 				<div class="sidebar-section index-link-section">
 					<a href="/{bookSlug}/atridiordasskra" class="study-tool-link">
-						<svg class="study-tool-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 6V4m0 16v-2" />
-						</svg>
+						<Icon name="list" />
 						<span>Atriðisorðaskrá</span>
 					</a>
 				</div>
@@ -428,12 +425,7 @@
 
 					{#if hasPeriodicTable}
 						<a href="/{bookSlug}/lotukerfi" class="study-tool-link">
-							<svg class="study-tool-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<circle cx="12" cy="12" r="3" stroke-width="2" />
-								<ellipse cx="12" cy="12" rx="9" ry="4" stroke-width="2" />
-								<ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(60 12 12)" stroke-width="2" />
-								<ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(120 12 12)" stroke-width="2" />
-							</svg>
+							<Icon name="atom" />
 							<span>Lotukerfi</span>
 						</a>
 					{/if}
@@ -889,9 +881,4 @@
 		color: var(--text-primary);
 	}
 
-	.study-tool-icon {
-		width: 1.25rem;
-		height: 1.25rem;
-		flex-shrink: 0;
-	}
 </style>
