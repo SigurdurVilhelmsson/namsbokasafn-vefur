@@ -68,6 +68,8 @@ import {
 	CircleDot,
 	Zap,
 	Box,
+	Highlighter,
+	MessageSquareText,
 	type IconNode
 } from 'lucide';
 
@@ -142,7 +144,9 @@ export const ICON_NODES = {
 	'flask-conical': FlaskConical,
 	'circle-dot': CircleDot,
 	zap: Zap,
-	box: Box
+	box: Box,
+	highlighter: Highlighter,
+	'message-square-text': MessageSquareText
 } satisfies Record<string, IconNode>;
 
 export type IconName = keyof typeof ICON_NODES;
