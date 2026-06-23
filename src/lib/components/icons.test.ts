@@ -52,7 +52,10 @@ describe('icon registry', () => {
 			'layout-grid',
 			'keyboard',
 			'arrow-left',
-			'arrow-right'
+			'arrow-right',
+			'circle-alert',
+			'wifi',
+			'wifi-off'
 		];
 		expect([...ICON_NAMES].sort()).toEqual([...expected].sort());
 	});

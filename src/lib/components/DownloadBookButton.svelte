@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import { browser } from '$app/environment';
 	import {
 		offline,
@@ -85,14 +86,7 @@
 			<div
 				class="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-2 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
 			>
-				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M5 13l4 4L19 7"
-					/>
-				</svg>
+				<Icon name="check" />
 				<span class="text-sm font-medium">Sótt ({formatBytes(downloadState?.sizeBytes ?? 0)})</span>
 			</div>
 
@@ -103,14 +97,7 @@
 					aria-label="Eyða niðurhali"
 					title="Eyða niðurhali"
 				>
-					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-						/>
-					</svg>
+					<Icon name="trash-2" />
 				</button>
 			{:else}
 				<div class="flex items-center gap-2">
@@ -160,23 +147,7 @@
 					? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
 					: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'}"
 			>
-				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					{#if failedFileCount > 0}
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-						/>
-					{:else}
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M5 13l4 4L19 7"
-						/>
-					{/if}
-				</svg>
+				{#if failedFileCount > 0}<Icon name="triangle-alert" />{:else}<Icon name="check" />{/if}
 				<span class="text-sm font-medium">
 					{#if failedFileCount > 0}
 						Niðurhal lokið ({failedFileCount === 1 ? '1 skrá vantar' : `${failedFileCount} skrár vantar`})
@@ -198,14 +169,7 @@
 			<div
 				class="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-red-700 dark:bg-red-900/30 dark:text-red-400"
 			>
-				<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-					/>
-				</svg>
+				<Icon name="circle-alert" />
 				<span class="text-sm font-medium">{downloadError}</span>
 			</div>
 			<button
@@ -228,14 +192,7 @@
 			disabled={isEstimating}
 			class="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 		>
-			<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					stroke-width="2"
-					d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-				/>
-			</svg>
+			<Icon name="download" />
 			{#if isEstimating}
 				<span>Reikna stærð...</span>
 			{:else}

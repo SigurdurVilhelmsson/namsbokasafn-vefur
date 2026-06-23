@@ -52,6 +52,9 @@ import {
 	Keyboard,
 	ArrowLeft,
 	ArrowRight,
+	CircleAlert,
+	Wifi,
+	WifiOff,
 	type IconNode
 } from 'lucide';
 
@@ -110,7 +113,10 @@ export const ICON_NODES = {
 	'layout-grid': LayoutGrid,
 	keyboard: Keyboard,
 	'arrow-left': ArrowLeft,
-	'arrow-right': ArrowRight
+	'arrow-right': ArrowRight,
+	'circle-alert': CircleAlert,
+	wifi: Wifi,
+	'wifi-off': WifiOff
 } satisfies Record<string, IconNode>;
 
 export type IconName = keyof typeof ICON_NODES;
