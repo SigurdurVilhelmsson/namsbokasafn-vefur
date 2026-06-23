@@ -175,23 +175,30 @@ already-present `circle-check`). With the maintainer's go-ahead — and under th
 in `icons.ts`. All are real, current Lucide names (verified against the bundled package).
 **Design: please fold these into §4's authoritative inventory, or push back on any name.**
 
-| Role                              | Lucide name                  | Status                                                               |
-| --------------------------------- | ---------------------------- | -------------------------------------------------------------------- |
-| Periodic table                    | `atom`                       | **migrated** (Sidebar, MobileBottomNav) — ratified §7                |
-| Subject index (`atriðisorðaskrá`) | `list`                       | **migrated** (Sidebar)                                               |
-| Back to home (focus mode)         | `house`                      | **migrated** (FocusModeNav)                                          |
-| Exit focus / collapse             | `minimize`                   | **migrated** (FocusModeNav)                                          |
-| Correct / completed               | `check`                      | registered (ahead of use) — bare check, distinct from `circle-check` |
-| Reading-time / recency            | `clock`                      | registered                                                           |
-| Reset / retry                     | `refresh-cw`                 | registered                                                           |
-| Fuzzy / smart search              | `sparkles`                   | registered                                                           |
-| Delete / clear                    | `trash-2`                    | registered                                                           |
-| Filter                            | `funnel`                     | registered                                                           |
-| Add / new                         | `plus`                       | registered                                                           |
-| Result document                   | `file-text`                  | registered                                                           |
-| Keyboard shortcuts                | `keyboard`                   | registered                                                           |
-| Tools-menu FAB                    | `layout-grid`                | registered (see holdout below)                                       |
-| Directional (≠ chevrons)          | `arrow-left` / `arrow-right` | registered                                                           |
+| Role                              | Lucide name                  | Status                                                                 |
+| --------------------------------- | ---------------------------- | ---------------------------------------------------------------------- |
+| Periodic table                    | `atom`                       | **migrated** (Sidebar, MobileBottomNav) — ratified §7                  |
+| Subject index (`atriðisorðaskrá`) | `list`                       | **migrated** (Sidebar)                                                 |
+| Back to home (focus mode)         | `house`                      | **migrated** (FocusModeNav)                                            |
+| Exit focus / collapse             | `minimize`                   | **migrated** (FocusModeNav)                                            |
+| Correct / completed               | `check`                      | registered (ahead of use) — bare check, distinct from `circle-check`   |
+| Reading-time / recency            | `clock`                      | registered                                                             |
+| Reset / retry                     | `refresh-cw`                 | registered                                                             |
+| Fuzzy / smart search              | `sparkles`                   | registered                                                             |
+| Delete / clear                    | `trash-2`                    | registered                                                             |
+| Filter                            | `funnel`                     | registered                                                             |
+| Add / new                         | `plus`                       | registered                                                             |
+| Result document                   | `file-text`                  | registered                                                             |
+| Keyboard shortcuts                | `keyboard`                   | registered                                                             |
+| Tools-menu FAB                    | `layout-grid`                | registered (see holdout below)                                         |
+| Directional (≠ chevrons)          | `arrow-left` / `arrow-right` | registered                                                             |
+| Error / alert state               | `circle-alert`               | **migrated** (ErrorMessage, DownloadBookButton) — distinct from `info` |
+| Connectivity status               | `wifi` / `wifi-off`          | **migrated** (OfflineIndicator); `wifi` registered ahead of use        |
+
+> **Component sweep (2026-06-23):** migrating the modals and small components surfaced three
+> more roles not in §4 — `circle-alert` (error/alert circle, distinct from the `info` circle),
+> and `wifi` / `wifi-off` (offline banner). Registered under the same discretion; folded into
+> the table above. Loading spinners (`animate-spin`) remain excluded as state indicators.
 
 **Holdouts (deliberately still inline, judgment calls for Design):**
 
