@@ -199,6 +199,12 @@ in `icons.ts`. All are real, current Lucide names (verified against the bundled 
 > more roles not in §4 — `circle-alert` (error/alert circle, distinct from the `info` circle),
 > and `wifi` / `wifi-off` (offline banner). Registered under the same discretion; folded into
 > the table above. Loading spinners (`animate-spin`) remain excluded as state indicators.
+>
+> **Analytics sweep (2026-06-23):** the analytics dashboard added six more — `shield-check`
+> (goals), `eye` / `eye-off` (active toggle), `star` (achievement), `badge-check` (milestone),
+> `flame` (reading streak). The `Minniskort` tab's archive-box glyph was **unified to
+> `credit-card`** (the canonical flashcard glyph) rather than registering `archive`. One w-12
+> empty-state illustration stays inline — it's outside the 16/20/24 icon scale.
 
 **Holdouts (deliberately still inline, judgment calls for Design):**
 

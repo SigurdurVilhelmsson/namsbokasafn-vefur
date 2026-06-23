@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { analyticsStore, hourlyReadingDistribution, streakInfo } from '$lib/stores';
+	import Icon from '$lib/components/Icon.svelte';
 
 	// Format seconds to readable time
 	function formatTime(seconds: number): string {
@@ -95,9 +96,7 @@
 		<div class="p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 			<div class="flex items-center gap-3">
 				<div class="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
-					<svg class="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-					</svg>
+					<Icon name="clock" class="text-purple-600 dark:text-purple-400" />
 				</div>
 				<div>
 					<p class="text-xs text-gray-500 dark:text-gray-400">Virkasti tíminn</p>
@@ -116,9 +115,7 @@
 		<div class="p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 			<div class="flex items-center gap-3">
 				<div class="p-2 rounded-lg bg-green-100 dark:bg-green-900/30">
-					<svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-					</svg>
+					<Icon name="badge-check" class="text-green-600 dark:text-green-400" />
 				</div>
 				<div>
 					<p class="text-xs text-gray-500 dark:text-gray-400">Samræmi</p>
@@ -133,9 +130,7 @@
 		<div class="p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 			<div class="flex items-center gap-3">
 				<div class="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-					<svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-					</svg>
+					<Icon name="flame" class="text-amber-600 dark:text-amber-400" />
 				</div>
 				<div>
 					<p class="text-xs text-gray-500 dark:text-gray-400">Núverandi röð</p>
@@ -150,9 +145,7 @@
 		<div class="p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 			<div class="flex items-center gap-3">
 				<div class="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-					<svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-					</svg>
+					<Icon name="sparkles" class="text-blue-600 dark:text-blue-400" />
 				</div>
 				<div>
 					<p class="text-xs text-gray-500 dark:text-gray-400">Lengsta röð</p>

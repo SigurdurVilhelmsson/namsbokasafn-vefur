@@ -55,7 +55,13 @@ describe('icon registry', () => {
 			'arrow-right',
 			'circle-alert',
 			'wifi',
-			'wifi-off'
+			'wifi-off',
+			'shield-check',
+			'eye',
+			'eye-off',
+			'star',
+			'badge-check',
+			'flame'
 		];
 		expect([...ICON_NAMES].sort()).toEqual([...expected].sort());
 	});

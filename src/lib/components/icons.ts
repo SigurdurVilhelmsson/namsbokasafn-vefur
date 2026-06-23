@@ -55,6 +55,12 @@ import {
 	CircleAlert,
 	Wifi,
 	WifiOff,
+	ShieldCheck,
+	Eye,
+	EyeOff,
+	Star,
+	BadgeCheck,
+	Flame,
 	type IconNode
 } from 'lucide';
 
@@ -116,7 +122,13 @@ export const ICON_NODES = {
 	'arrow-right': ArrowRight,
 	'circle-alert': CircleAlert,
 	wifi: Wifi,
-	'wifi-off': WifiOff
+	'wifi-off': WifiOff,
+	'shield-check': ShieldCheck,
+	eye: Eye,
+	'eye-off': EyeOff,
+	star: Star,
+	'badge-check': BadgeCheck,
+	flame: Flame
 } satisfies Record<string, IconNode>;
 
 export type IconName = keyof typeof ICON_NODES;
