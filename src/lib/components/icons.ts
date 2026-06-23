@@ -70,6 +70,8 @@ import {
 	Box,
 	Highlighter,
 	MessageSquareText,
+	Bookmark,
+	Calendar,
 	type IconNode
 } from 'lucide';
 
@@ -146,7 +148,9 @@ export const ICON_NODES = {
 	zap: Zap,
 	box: Box,
 	highlighter: Highlighter,
-	'message-square-text': MessageSquareText
+	'message-square-text': MessageSquareText,
+	bookmark: Bookmark,
+	calendar: Calendar
 } satisfies Record<string, IconNode>;
 
 export type IconName = keyof typeof ICON_NODES;

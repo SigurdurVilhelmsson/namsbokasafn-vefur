@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import type { PageData } from './$types';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
@@ -225,19 +226,7 @@
 
 			<!-- Search input -->
 			<div class="relative">
-				<svg
-					class="index-search-icon"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-					/>
-				</svg>
+				<span class="index-search-icon"><Icon name="search" /></span>
 				<input
 					type="text"
 					bind:value={searchQuery}
@@ -377,8 +366,7 @@
 		left: 0.75rem;
 		top: 50%;
 		transform: translateY(-50%);
-		width: 1.25rem;
-		height: 1.25rem;
+		display: inline-flex;
 		color: var(--text-tertiary);
 	}
 	.index-search-input {

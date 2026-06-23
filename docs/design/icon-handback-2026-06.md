@@ -223,6 +223,12 @@ in `icons.ts`. All are real, current Lucide names (verified against the bundled 
 > `square-pen` which now means edit/note) and `message-square-text` (add comment). Made the
 > scoped `.ann-text-muted` color utility `:global` so it reaches the wrapped `<Icon>`. One w-12
 > empty-state pencil illustration stays inline.
+>
+> **Route-pages sweep (2026-06-23):** `trending-up` was joined by `bookmark` (bokamerki —
+> filled item indicator converted to stroke) and `calendar` (greining study-time). Positioned
+> search-input icons (glossary/index pages) were span-wrapped like `pte-search-icon`. Numerous
+> oversized empty-state illustrations (w-12 to w-20 "no results" faces, bookmarks, clipboards)
+> stay inline — they're outside the 16/20/24 scale.
 
 **Holdouts (deliberately still inline, judgment calls for Design):**
 

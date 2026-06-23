@@ -70,7 +70,9 @@ describe('icon registry', () => {
 			'zap',
 			'box',
 			'highlighter',
-			'message-square-text'
+			'message-square-text',
+			'bookmark',
+			'calendar'
 		];
 		expect([...ICON_NAMES].sort()).toEqual([...expected].sort());
 	});
