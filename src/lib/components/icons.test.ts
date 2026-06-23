@@ -35,7 +35,24 @@ describe('icon registry', () => {
 			'timer',
 			'circle-help',
 			'target',
-			'rectangle-ellipsis'
+			'rectangle-ellipsis',
+			// Extended set — discretionary additions (icon-handback §8)
+			'atom',
+			'check',
+			'clock',
+			'refresh-cw',
+			'sparkles',
+			'trash-2',
+			'funnel',
+			'plus',
+			'file-text',
+			'list',
+			'house',
+			'minimize',
+			'layout-grid',
+			'keyboard',
+			'arrow-left',
+			'arrow-right'
 		];
 		expect([...ICON_NAMES].sort()).toEqual([...expected].sort());
 	});

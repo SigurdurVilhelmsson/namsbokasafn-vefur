@@ -163,3 +163,46 @@ Because both the registry and the DC draw from Lucide, a re-render of `Icon Inve
 should confirm zero stroke/sizing drift. The only real drift was the **Heroicons-solid fill
 icons** (`SettingsModal` fixed; `analytics/GoalsTab` still pending — see §4.2). If useful, Code
 can supply the exact attribute string the wrapper emits for a byte-level diff.
+
+---
+
+## 7. Discretionary glyph additions (Code, 2026-06-23)
+
+Design's §7 ratified the **`atom`** override and greenlit the merge, but didn't expand the §4
+inventory for the ~16 gap roles from §2 above (the `check` ask appears to have been read as the
+already-present `circle-check`). With the maintainer's go-ahead — and under the guidance's own
+§5 "pick the closest Lucide concept" rule — Code has **registered the following Lucide glyphs**
+in `icons.ts`. All are real, current Lucide names (verified against the bundled package).
+**Design: please fold these into §4's authoritative inventory, or push back on any name.**
+
+| Role                              | Lucide name                  | Status                                                               |
+| --------------------------------- | ---------------------------- | -------------------------------------------------------------------- |
+| Periodic table                    | `atom`                       | **migrated** (Sidebar, MobileBottomNav) — ratified §7                |
+| Subject index (`atriðisorðaskrá`) | `list`                       | **migrated** (Sidebar)                                               |
+| Back to home (focus mode)         | `house`                      | **migrated** (FocusModeNav)                                          |
+| Exit focus / collapse             | `minimize`                   | **migrated** (FocusModeNav)                                          |
+| Correct / completed               | `check`                      | registered (ahead of use) — bare check, distinct from `circle-check` |
+| Reading-time / recency            | `clock`                      | registered                                                           |
+| Reset / retry                     | `refresh-cw`                 | registered                                                           |
+| Fuzzy / smart search              | `sparkles`                   | registered                                                           |
+| Delete / clear                    | `trash-2`                    | registered                                                           |
+| Filter                            | `funnel`                     | registered                                                           |
+| Add / new                         | `plus`                       | registered                                                           |
+| Result document                   | `file-text`                  | registered                                                           |
+| Keyboard shortcuts                | `keyboard`                   | registered                                                           |
+| Tools-menu FAB                    | `layout-grid`                | registered (see holdout below)                                       |
+| Directional (≠ chevrons)          | `arrow-left` / `arrow-right` | registered                                                           |
+
+**Holdouts (deliberately still inline, judgment calls for Design):**
+
+- **Reading-time clock** in the Sidebar section list renders at **12px** — below the scale's
+  smallest token (`--icon-sm` = 16px). Bumping it to 16px is visibly heavy next to 11px meta
+  text. Left inline pending either a sub-`sm` token or acceptance of `sm`. (The Search-history
+  clock _is_ 16px and will adopt `clock` cleanly.)
+- **FAB tools-menu toggle** (MobileBottomNav) is currently a **filled** grid — the one place a
+  fill reads as a primary-action affordance. `layout-grid` is registered for it; converting
+  filled→stroke on the most prominent mobile control is a visible change. Your call: adopt the
+  stroke glyph, or bless the filled FAB as an explicit exception to the no-fill rule.
+
+This unblocks the remaining component migration (modals, `study/`, `analytics/`, route pages),
+which proceeds in a separate PR using these names.
