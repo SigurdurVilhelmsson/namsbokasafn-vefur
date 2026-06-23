@@ -7,6 +7,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import { page } from '$app/stores';
+	import Icon from '$lib/components/Icon.svelte';
 
 	interface Props {
 		bookSlug?: string;
@@ -129,23 +130,11 @@
 				onclick={close}
 			>
 				{#if tool.icon === 'flashcards'}
-					<!-- Flashcards icon (cards) -->
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<rect x="2" y="4" width="16" height="14" rx="2" />
-						<path d="M6 2h12a2 2 0 012 2v12" />
-					</svg>
+					<Icon name="credit-card" />
 				{:else if tool.icon === 'glossary'}
-					<!-- Glossary icon (book) -->
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-					</svg>
+					<Icon name="book-open" />
 				{:else if tool.icon === 'quiz'}
-					<!-- Quiz icon (clipboard check) -->
-					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" />
-						<rect x="9" y="3" width="6" height="4" rx="1" />
-						<path d="M9 14l2 2 4-4" />
-					</svg>
+					<Icon name="clipboard-check" />
 				{:else if tool.icon === 'periodic-table'}
 					<!-- Periodic table icon (atom) -->
 					<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
