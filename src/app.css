@@ -42,6 +42,12 @@
     --radius-xl: 1rem;
     --radius-full: 9999px;
 
+    /* Icon sizing scale (docs/design/icon-guidance-2026-06.md §2).
+       stroke-width stays 2 at every size; only the box scales. */
+    --icon-sm: 1rem; /* 16px — inline in text, chips, dense lists */
+    --icon-md: 1.25rem; /* 20px — buttons, header actions, kickers (default) */
+    --icon-lg: 1.5rem; /* 24px — content-block icons, feature tiles, touch targets */
+
     /* Light theme colors */
     --bg-primary: #f7f4ef;
     --bg-secondary: #ffffff;
