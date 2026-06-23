@@ -5,6 +5,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import type { PageData } from './$types';
 	import type { TableOfContents, Chapter, Section } from '$lib/types/content';
 	import { loadTableOfContents, getChapterFolder, getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
@@ -225,9 +226,7 @@
 							href={sectionUrl(group.chapter, group.section)}
 							class="inline-flex items-center gap-1.5 text-sm text-[var(--accent-color)] hover:underline mb-3"
 						>
-							<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-							</svg>
+							<Icon name="arrow-right" size="sm" class="flex-shrink-0" />
 							{sectionBreadcrumb(group.chapter, group.section)}
 						</a>
 
