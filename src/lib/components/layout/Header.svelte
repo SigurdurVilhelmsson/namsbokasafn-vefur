@@ -6,6 +6,7 @@
 	import { loadTableOfContents, findChapterBySlug, findSectionBySlug } from '$lib/utils/contentLoader';
 	import SearchModal from '$lib/components/SearchModal.svelte';
 	import SettingsModal from '$lib/components/SettingsModal.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 
 	interface Props {
 		bookSlug?: string;
@@ -84,25 +85,11 @@
 				class="header-btn sidebar-toggle"
 				aria-label="Opna/loka valmynd"
 			>
-				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 6h16M4 12h16M4 18h16"
-					/>
-				</svg>
+				<Icon name="menu" />
 			</button>
 
 			<a href={backHref} class="header-btn" aria-label={backLabel} title={backLabel}>
-				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 19l-7-7 7-7"
-					/>
-				</svg>
+				<Icon name="chevron-left" />
 			</a>
 		</div>
 
@@ -133,14 +120,7 @@
 				aria-label="Leita"
 				title="Leita (Ctrl+K)"
 			>
-				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-					/>
-				</svg>
+				<Icon name="search" />
 				<kbd class="kbd-hint">Ctrl+K</kbd>
 			</button>
 
@@ -163,20 +143,7 @@
 				aria-label="Stillingar"
 				title="Stillingar"
 			>
-				<svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-					/>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-					/>
-				</svg>
+				<Icon name="settings" />
 			</button>
 
 			<!-- Theme toggle -->
@@ -186,13 +153,8 @@
 				aria-label={isDark ? 'Skipta yfir í ljóst þema' : 'Skipta yfir í dökkt þema'}
 				title={isDark ? 'Ljóst þema' : 'Dökkt þema'}
 			>
-				<svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<circle cx="12" cy="12" r="5" />
-					<path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-				</svg>
-				<svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-				</svg>
+				<span class="sun-icon"><Icon name="sun" size="sm" /></span>
+				<span class="moon-icon"><Icon name="moon" size="sm" /></span>
 			</button>
 		</div>
 	</div>
@@ -229,13 +191,8 @@
 	}
 
 	/* ====================================
-	   ICON & BUTTON BASE
+	   BUTTON BASE
 	   ==================================== */
-	.icon {
-		width: 1.25rem;
-		height: 1.25rem;
-	}
-
 	.header-btn {
 		display: inline-flex;
 		align-items: center;
@@ -454,11 +411,11 @@
 		transform: rotate(15deg);
 	}
 
-	.theme-toggle svg {
-		width: 1rem;
-		height: 1rem;
-		color: var(--text-secondary);
+	.theme-toggle .sun-icon,
+	.theme-toggle .moon-icon {
 		position: absolute;
+		display: inline-flex;
+		color: var(--text-secondary);
 		transition: opacity 0.2s, transform 0.3s;
 	}
 
