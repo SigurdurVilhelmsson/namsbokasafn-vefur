@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import { fade, scale } from 'svelte/transition';
+	import Icon from '$lib/components/Icon.svelte';
 	import {
 		ELEMENTS,
 		CATEGORY_LABELS,
@@ -170,9 +171,7 @@
 	<!-- Search and filters -->
 	<div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 		<div class="relative">
-			<svg class="pte-search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-			</svg>
+			<span class="pte-search-icon"><Icon name="search" size="sm" /></span>
 			<input
 				type="text"
 				bind:value={searchQuery}
@@ -183,9 +182,7 @@
 		</div>
 
 		<div class="flex items-center gap-2 text-sm" style="color: var(--text-tertiary);">
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-			</svg>
+			<Icon name="flask-conical" size="sm" />
 			<span>{searchQuery ? `${filteredElements.length} fundust` : '118 frumefni'}</span>
 		</div>
 	</div>
@@ -299,9 +296,7 @@
 						class="rounded-full p-2 transition-colors hover:bg-black/10 disabled:opacity-30"
 						aria-label="Fyrra frumefni"
 					>
-						<svg class="w-5 h-5" style="color: {colors.text};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-						</svg>
+						<Icon name="chevron-left" style="color: {colors.text};" />
 					</button>
 					<button
 						onclick={() => navigateElement('next')}
@@ -309,18 +304,14 @@
 						class="rounded-full p-2 transition-colors hover:bg-black/10 disabled:opacity-30"
 						aria-label="Næsta frumefni"
 					>
-						<svg class="w-5 h-5" style="color: {colors.text};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-						</svg>
+						<Icon name="chevron-right" style="color: {colors.text};" />
 					</button>
 					<button
 						onclick={closeModal}
 						class="rounded-full p-2 transition-colors hover:bg-black/10"
 						aria-label="Loka"
 					>
-						<svg class="w-5 h-5" style="color: {colors.text};" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-						</svg>
+						<Icon name="x" style="color: {colors.text};" />
 					</button>
 				</div>
 			</div>
@@ -335,10 +326,7 @@
 					<!-- Atomic properties -->
 					<div class="pte-detail-card">
 						<h3 class="pte-detail-title">
-							<svg class="w-4 h-4" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<circle cx="12" cy="12" r="10" />
-								<circle cx="12" cy="12" r="3" />
-							</svg>
+							<Icon name="circle-dot" size="sm" style="color: var(--accent-color);" />
 							Eiginleikar
 						</h3>
 						<dl class="pte-detail-list">
@@ -368,9 +356,7 @@
 					<!-- Electronic properties -->
 					<div class="pte-detail-card">
 						<h3 class="pte-detail-title">
-							<svg class="w-4 h-4" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-							</svg>
+							<Icon name="zap" size="sm" style="color: var(--accent-color);" />
 							Rafeindir
 						</h3>
 						<dl class="pte-detail-list">
@@ -394,9 +380,7 @@
 					<!-- Physical properties -->
 					<div class="pte-detail-card">
 						<h3 class="pte-detail-title">
-							<svg class="w-4 h-4" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-							</svg>
+							<Icon name="chart-column" size="sm" style="color: var(--accent-color);" />
 							Eðliseiginleikar
 						</h3>
 						<dl class="pte-detail-list">
@@ -424,9 +408,7 @@
 					<!-- Classification -->
 					<div class="pte-detail-card">
 						<h3 class="pte-detail-title">
-							<svg class="w-4 h-4" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-							</svg>
+							<Icon name="box" size="sm" style="color: var(--accent-color);" />
 							Flokkun
 						</h3>
 						<dl class="pte-detail-list">
@@ -448,9 +430,7 @@
 						href="/{bookSlug}/ordabok?search={encodeURIComponent(selectedElement.nameIs)}"
 						class="pte-glossary-link"
 					>
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-						</svg>
+						<Icon name="external-link" size="sm" />
 						Leita í orðabók
 					</a>
 				</div>
@@ -466,8 +446,7 @@
 		left: 0.75rem;
 		top: 50%;
 		transform: translateY(-50%);
-		width: 1rem;
-		height: 1rem;
+		display: inline-flex;
 		color: var(--text-tertiary);
 	}
 	.pte-search-input {
