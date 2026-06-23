@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { page } from '$app/stores';
+	import Icon from '$lib/components/Icon.svelte';
 	import { goto } from '$app/navigation';
 	import AdaptiveQuiz from '$lib/components/AdaptiveQuiz.svelte';
 
@@ -29,9 +30,7 @@
 		<!-- Header -->
 		<div class="mb-6">
 			<a href="/{bookSlug}" class="quiz-back-link">
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-				</svg>
+				<Icon name="chevron-left" size="sm" />
 				Til baka
 			</a>
 			<h1 class="quiz-heading">Aðlögunarpróf</h1>
@@ -50,14 +49,7 @@
 		<!-- Help section -->
 		<div class="quiz-help">
 			<h3 class="quiz-help-title">
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-					/>
-				</svg>
+				<Icon name="info" size="sm" />
 				Hvernig virkar aðlögunarpróf?
 			</h3>
 			<ul class="quiz-help-list">
