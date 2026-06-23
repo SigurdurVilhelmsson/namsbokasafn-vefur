@@ -23,9 +23,11 @@
 		label?: string;
 		/** Extra class(es), e.g. `content-block-icon` for semantic colouring. */
 		class?: string;
+		/** Inline style, e.g. a dynamic `color:` for per-instance theming. */
+		style?: string;
 	}
 
-	let { name, size = 'md', label, class: className = '' }: Props = $props();
+	let { name, size = 'md', label, class: className = '', style }: Props = $props();
 
 	const node = $derived(getIconNode(name));
 	const sizeClass = $derived(`ds-icon ds-icon-${resolveIconSize(size)}`);
@@ -35,6 +37,7 @@
 {#if node}
 	<svg
 		class={`${sizeClass} ${className}`.trim()}
+		{style}
 		viewBox="0 0 24 24"
 		fill="none"
 		stroke="currentColor"
