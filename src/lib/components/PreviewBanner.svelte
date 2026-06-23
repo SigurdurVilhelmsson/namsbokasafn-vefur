@@ -9,21 +9,12 @@
   the styling is governed by the design system and the banner is excluded from
   print/PDF.
 -->
+<script lang="ts">
+	import Icon from '$lib/components/Icon.svelte';
+</script>
+
 <aside class="preview-banner" role="note" aria-label="Vélþýtt efni">
-	<svg
-		class="preview-banner__icon"
-		viewBox="0 0 24 24"
-		fill="none"
-		stroke="currentColor"
-		aria-hidden="true"
-	>
-		<path
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			stroke-width="2"
-			d="M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
-		/>
-	</svg>
+	<Icon name="triangle-alert" class="preview-banner__icon" />
 	<p class="preview-banner__text">
 		<strong>Vélþýtt efni.</strong>
 		Þessi eining hefur ekki enn verið yfirlesin og kann að innihalda þýðingarvillur.
@@ -45,10 +36,8 @@
 		color: var(--text-primary);
 	}
 
-	.preview-banner__icon {
+	:global(.preview-banner__icon) {
 		flex-shrink: 0;
-		width: 1.25rem;
-		height: 1.25rem;
 		margin-top: 0.1rem;
 		color: #d97706;
 	}
@@ -70,7 +59,7 @@
 		color: var(--text-primary);
 	}
 
-	:global(.dark) .preview-banner__icon {
+	:global(.dark .preview-banner__icon) {
 		color: #e8a838;
 	}
 

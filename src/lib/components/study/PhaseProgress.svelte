@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import type { PhaseId } from '$lib/utils/studySession';
+	import Icon from '$lib/components/Icon.svelte';
 	import { PHASE_LABELS } from '$lib/utils/studySession';
 
 	interface Props {
@@ -38,9 +39,7 @@
 					class:phase-dot--upcoming={!isCompleted && !isCurrent}
 				>
 					{#if isCompleted}
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-						</svg>
+						<Icon name="check" size="sm" />
 					{:else}
 						{i + 1}
 					{/if}
