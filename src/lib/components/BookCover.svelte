@@ -34,8 +34,9 @@
 			<svelte:element this={tag} {...attrs} />
 		{/each}
 	</svg>
-	<span class="cover-title" class:long={titleSize === 'long'}>{book.title}</span>
-	<span class="cover-attr">OpenStax {book.source.title}</span>
+	<div class="cover-scrim" aria-hidden="true"></div>
+	<span class="cover-title" class:long={titleSize === 'long'} aria-hidden="true">{book.title}</span>
+	<span class="cover-attr" aria-hidden="true">OpenStax {book.source.title}</span>
 </div>
 
 <style>
@@ -60,6 +61,24 @@
 		background: linear-gradient(90deg, rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.1) 60%, rgba(0, 0, 0, 0));
 		z-index: 3;
 	}
+	/* Dark scrim for WCAG AA contrast — ensures white text passes 4.5:1
+	   over all subject colors in both light and dark mode.
+	   Darkest at top (title) and bottom (attribution), fades in the middle
+	   so the cover color and motif stay visible. */
+	.cover-scrim {
+		position: absolute;
+		inset: 0;
+		z-index: 1;
+		pointer-events: none;
+		background: linear-gradient(
+			to bottom,
+			rgba(0, 0, 0, 0.55) 0%,
+			rgba(0, 0, 0, 0.15) 32%,
+			transparent 52%,
+			transparent 70%,
+			rgba(0, 0, 0, 0.4) 100%
+		);
+	}
 	.cover-motif {
 		position: absolute;
 		bottom: -36px;
@@ -68,6 +87,7 @@
 		height: 160px;
 		opacity: 0.2;
 		color: #fff;
+		/* z-index intentionally not set (auto/0) — stays below cover-scrim */
 	}
 	.cover-title {
 		position: absolute;

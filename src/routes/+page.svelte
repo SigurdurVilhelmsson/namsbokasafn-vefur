@@ -781,7 +781,7 @@
     box-shadow: var(--shadow-xl);
   }
 
-  :global(.book-cover) {
+  .book-card :global(.book-cover) {
     transition:
       transform 0.2s,
       box-shadow 0.2s;
@@ -1289,7 +1289,7 @@
       opacity: 1 !important;
     }
 
-    .book-link,
+    .book-card :global(.book-cover),
     .btn-primary,
     .tool-card-icon,
     .theme-toggle,
