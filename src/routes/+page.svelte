@@ -6,6 +6,7 @@
   import { settings } from '$lib/stores/settings';
   import { onMount, onDestroy } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
+  import BookCover from '$lib/components/BookCover.svelte';
   import type { PageData } from './$types';
   import type { CatalogueEntry, SubjectGroup } from '$lib/data/openstax-catalogue';
   import { faqItems } from '$lib/data/faq';
@@ -201,59 +202,26 @@
           style="--subject-color: var(--subject-{subject}, #6b7280); --card-delay: {index * 100}ms"
         >
           <a href="/{book.slug}" class="book-link">
-            <div class="book-card-top">
-              <span
-                class="book-status"
-                class:status-available={book.status === 'available'}
-                class:status-in-progress={book.status === 'in-progress'}
-              >
-                {book.status === 'available' ? 'Í boði' : 'Í vinnslu'}
-              </span>
-            </div>
-            <h3 class="book-title">{book.title}</h3>
-            <p class="book-source">
-              Byggt á {book.source.title}
-              <Icon name="external-link" size="sm" class="external-icon" />
-            </p>
-
-            {#if book.stats}
-              <div class="book-progress">
+            <BookCover {book} {subject} />
+            <div class="book-caption">
+              <h3 class="book-name">{book.title}</h3>
+              {#if book.stats}
                 <div class="progress-track">
                   <div class="progress-fill" style="width: {percentage}%"></div>
                 </div>
-                <span class="progress-label">
-                  {book.stats.translatedChapters} / {book.stats.totalChapters} kaflar — {percentage}%
+              {/if}
+              <div class="caption-row">
+                <span class="caption-meta">
+                  {#if book.stats}{book.stats.translatedChapters}/{book.stats.totalChapters} kaflar{/if}
+                </span>
+                <span
+                  class="book-status"
+                  class:status-available={book.status === 'available'}
+                  class:status-in-progress={book.status === 'in-progress'}
+                >
+                  {book.status === 'available' ? 'Í boði' : 'Í vinnslu'}
                 </span>
               </div>
-            {/if}
-
-            {#if book.features}
-              <div class="book-tools">
-                {#if book.features.flashcards}
-                  <span class="tool-icon" title="Minniskort">
-                    <Icon name="credit-card" size="lg" />
-                  </span>
-                {/if}
-                {#if book.features.glossary}
-                  <span class="tool-icon" title="Orðasafn">
-                    <Icon name="book-open" size="lg" />
-                  </span>
-                {/if}
-                {#if book.features.exercises}
-                  <span class="tool-icon" title="Æfingarverkefni">
-                    <Icon name="clipboard-check" size="lg" />
-                  </span>
-                {/if}
-                {#if book.features.periodicTable}
-                  <span class="tool-icon" title="Lotukerfið">
-                    <Icon name="grid-2x2" size="lg" />
-                  </span>
-                {/if}
-              </div>
-            {/if}
-
-            <div class="book-cta">
-              <span>Opna bók →</span>
             </div>
           </a>
         </article>
@@ -275,22 +243,13 @@
             style="--subject-color: var(--subject-{subject}, #6b7280); --card-delay: {index * 100}ms"
           >
             <a href="/{book.slug}" class="book-link">
-              <div class="book-card-top">
-                <span class="book-status status-preview">Forskoðun</span>
-              </div>
-              <h3 class="book-title">{book.title}</h3>
-              <p class="book-source">
-                Byggt á {book.source.title}
-                <Icon name="external-link" size="sm" class="external-icon" />
-              </p>
-
-              <div class="book-preview-info">
-                <span class="preview-label">{book.stats?.translatedChapters ?? 1} kafli í forskoðun</span>
-                <span class="preview-note">Vélþýðing — leitum að ritstjóra</span>
-              </div>
-
-              <div class="book-cta">
-                <span>Opna bók →</span>
+              <BookCover {book} {subject} />
+              <div class="book-caption">
+                <h3 class="book-name">{book.title}</h3>
+                <div class="caption-row">
+                  <span class="caption-meta">{book.stats?.translatedChapters ?? 1} kafli í forskoðun</span>
+                  <span class="book-status status-preview">Forskoðun</span>
+                </div>
               </div>
             </a>
           </article>
@@ -796,12 +755,8 @@
     max-width: 72rem;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  @media (min-width: 640px) {
-    .book-grid { grid-template-columns: repeat(2, 1fr); }
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.75rem 1.4rem;
   }
 
   /* ====================================
@@ -816,27 +771,46 @@
   .book-link {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 1.5rem;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-left: 3px solid var(--subject-color);
-    border-radius: var(--radius-lg);
+    gap: 0.7rem;
     text-decoration: none;
     color: inherit;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-    height: 100%;
   }
 
-  .book-card.clickable .book-link:hover {
-    border-color: var(--subject-color);
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+  .book-card.clickable .book-link:hover :global(.book-cover) {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl);
   }
 
-  .book-card-top {
+  :global(.book-cover) {
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .book-caption {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .book-name {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .caption-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .caption-meta {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
   }
 
   .book-status {
@@ -873,27 +847,6 @@
     color: #93c5fd;
   }
 
-  .book-title {
-    font-family: "Bricolage Grotesque", system-ui, sans-serif;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-  }
-
-  .book-source {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    margin: 0;
-  }
-
-  .book-progress {
-    margin-top: 0.25rem;
-  }
-
   .progress-track {
     height: 5px;
     background: var(--border-color);
@@ -906,65 +859,6 @@
     background: var(--subject-color);
     border-radius: 3px;
     transition: width 0.5s ease;
-  }
-
-  .progress-label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-top: 0.375rem;
-  }
-
-  .book-tools {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .tool-icon {
-    width: 1.5rem;
-    height: 1.5rem;
-    color: var(--text-tertiary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .book-cta {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--subject-color);
-    margin-top: auto;
-    padding-top: 0.5rem;
-  }
-
-  /* ====================================
-     PREVIEW INFO
-     ==================================== */
-  .book-preview-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    margin-top: 0.25rem;
-  }
-
-  .preview-label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #1e40af;
-  }
-
-  :global(.dark) .preview-label {
-    color: #93c5fd;
-  }
-
-  .preview-note {
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-    font-style: italic;
   }
 
   /* ====================================
