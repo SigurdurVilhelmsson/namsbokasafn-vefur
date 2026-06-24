@@ -78,6 +78,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		return {
 			bookTitle: book.title,
 			bookSubtitle: book.subtitle,
+			attribution: book.attribution,
 			chapter,
 			chapterFolder: folder,
 			blocks

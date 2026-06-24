@@ -251,6 +251,27 @@ button,
   color: #6b7280;
 }
 
+.print-cover .cover-notice {
+  margin-top: 0.6cm;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.print-attribution {
+  margin-top: 1cm;
+  padding-top: 0.5cm;
+  border-top: 1px solid #d1d5db;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #6b7280;
+  break-inside: avoid;
+}
+
+.print-attribution p {
+  margin: 0 0 0.2cm;
+}
+
 .print-toc h1 {
   font-size: 1.8rem;
   margin-bottom: 1.2cm;
