@@ -5,7 +5,8 @@ export interface BookConfig {
   subtitle: string;
   description: string;
   subject: 'raunvisindi' | 'staerdfraedi' | 'felagsvisindi' | 'annað';
-  coverImage: string;
+  /** Decorative cover motif key (see bookCover.ts COVER_MOTIFS). Defaults to 'book'. */
+  coverMotif?: string;
   translator: string;
   translatorContact?: string;
   status: 'available' | 'in-progress' | 'coming-soon' | 'preview';
@@ -45,7 +46,7 @@ export const books: BookConfig[] = [
     subtitle: 'Þýðing á OpenStax Chemistry 2e',
     description: 'Gagnvirkur veflesari fyrir efnafræðinám á framhaldsskólastigi.',
     subject: 'raunvisindi',
-    coverImage: '/covers/efnafraedi-2e.svg',
+    coverMotif: 'atom',
     translator: 'Sigurður E. Vilhelmsson',
     status: 'available',
     source: {
@@ -76,7 +77,7 @@ export const books: BookConfig[] = [
     subtitle: 'Þýðing á OpenStax Biology 2e',
     description: 'Gagnvirkur veflesari fyrir líffræðinám á framhaldsskólastigi.',
     subject: 'raunvisindi',
-    coverImage: '/covers/liffraedi-2e.svg',
+    coverMotif: 'leaf',
     translator: 'Þórhallur Halldórsson',
     status: 'in-progress',
     source: {
@@ -104,7 +105,7 @@ export const books: BookConfig[] = [
     subtitle: 'Sýnishorn úr OpenStax Microbiology',
     description: 'Vélþýddur sýniskafli úr Microbiology.',
     subject: 'raunvisindi',
-    coverImage: '/covers/orverufraedi.svg',
+    coverMotif: 'microbe',
     translator: 'Sigurður E. Vilhelmsson',
     status: 'preview',
     source: {
@@ -132,7 +133,7 @@ export const books: BookConfig[] = [
     subtitle: 'Sýnishorn úr OpenStax Organic Chemistry',
     description: 'Vélþýddur sýniskafli úr Organic Chemistry.',
     subject: 'raunvisindi',
-    coverImage: '/covers/lifraen-efnafraedi.svg',
+    coverMotif: 'benzene',
     translator: 'Sigurður E. Vilhelmsson',
     status: 'preview',
     source: {
@@ -160,7 +161,7 @@ export const books: BookConfig[] = [
     subtitle: 'Sýnishorn úr OpenStax College Physics 2e',
     description: 'Vélþýddur sýniskafli úr College Physics 2e.',
     subject: 'raunvisindi',
-    coverImage: '/covers/edlisfraedi-2e.svg',
+    coverMotif: 'orbit',
     translator: 'Sigurður E. Vilhelmsson',
     status: 'preview',
     source: {
