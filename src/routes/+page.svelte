@@ -7,6 +7,7 @@
   import { onMount, onDestroy } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
   import BookCover from '$lib/components/BookCover.svelte';
+  import LicenceBadge from '$lib/components/LicenceBadge.svelte';
   import type { PageData } from './$types';
   import type { CatalogueEntry, SubjectGroup } from '$lib/data/openstax-catalogue';
   import { faqItems } from '$lib/data/faq';
@@ -222,6 +223,9 @@
                   {book.status === 'available' ? 'Í boði' : 'Í vinnslu'}
                 </span>
               </div>
+              <div class="caption-row caption-licence">
+                <LicenceBadge code={book.attribution.derivativeLicence} />
+              </div>
             </div>
           </a>
         </article>
@@ -250,6 +254,9 @@
                   <span class="caption-meta">{book.stats?.translatedChapters ?? 1} kafli í forskoðun</span>
                   <span class="book-status status-preview">Forskoðun</span>
                 </div>
+                <div class="caption-row caption-licence">
+                  <LicenceBadge code={book.attribution.derivativeLicence} />
+                </div>
               </div>
             </a>
           </article>
@@ -262,9 +269,9 @@
       <p>
         Þýðingarnar okkar byggjast á opnum kennslubókum frá
         <a href="https://openstax.org" target="_blank" rel="noopener noreferrer">OpenStax</a>,
-        gefnar út af Rice University undir
-        <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>
-        leyfi. Hér fyrir neðan eru allar námsbækur OpenStax.
+        gefnar út af Rice University undir Creative Commons leyfum. Leyfið er mismunandi eftir
+        bók — sjá leyfismerki hverrar bókar hér að ofan og leyfissíðu hennar. Hér fyrir neðan eru
+        allar námsbækur OpenStax.
         Hafðu samband á
         <a href="mailto:sigurdur@namsbokasafn.is">sigurdur@namsbokasafn.is</a>
         ef þú vilt leggja verkefninu lið.
@@ -374,9 +381,9 @@
         <h3>OpenStax og Rice University</h3>
         <p>
           Þýðingarnar byggjast á opnum kennslubókum frá OpenStax,
-          gefnar út af Rice University undir
-          <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>
-          leyfi. Námsbókasafn er sjálfstætt verkefni og ekki tengt OpenStax.
+          gefnar út af Rice University undir Creative Commons leyfum. Leyfið er mismunandi eftir
+          bók (CC BY 4.0 eða CC BY-NC-SA 4.0) — sjá leyfissíðu hverrar bókar. Námsbókasafn er
+          sjálfstætt verkefni og ekki tengt OpenStax.
         </p>
         <a href="https://openstax.org" target="_blank" rel="noopener noreferrer" class="about-link">
           Heimsækja OpenStax
@@ -806,6 +813,11 @@
     align-items: center;
     justify-content: space-between;
     gap: 0.5rem;
+  }
+
+  .caption-licence {
+    margin-top: 0.4rem;
+    justify-content: flex-start;
   }
 
   .caption-meta {
