@@ -72,7 +72,15 @@ describe('icon registry', () => {
 			'highlighter',
 			'message-square-text',
 			'bookmark',
-			'calendar'
+			'calendar',
+			// Final route-page sweep (catalog / section reader / for-teachers / feedback)
+			'languages',
+			'message-square',
+			'send',
+			'book',
+			'mail',
+			'printer',
+			'share-2'
 		];
 		expect([...ICON_NAMES].sort()).toEqual([...expected].sort());
 	});

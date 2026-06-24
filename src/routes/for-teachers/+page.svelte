@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
   import { settings } from '$lib/stores/settings';
+  import Icon from '$lib/components/Icon.svelte';
 </script>
 
 <svelte:head>
@@ -21,9 +22,7 @@
   <header class="guide-header">
     <div class="container">
       <a href="/" class="back-link">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
+        <Icon name="arrow-left" size="sm" />
         Til baka
       </a>
       <h1>Leiðbeiningar fyrir kennara</h1>
@@ -49,28 +48,21 @@
       <!-- Section: Access -->
       <section class="section" id="access">
         <h2>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-          </svg>
+          <Icon name="book" size="md" class="text-[var(--accent-color)]" />
           Aðgangur að efni
         </h2>
 
         <p>Námsbókasafn býður upp á opnar kennslubækur á íslensku. Efnið er aðgengilegt öllum án innskráningar.</p>
 
-        <a href="/efnafraedi-2e" class="book-link">
+        <a href="/efnafraedi-2e" class="book-link group">
           <div class="book-icon chemistry">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M9 3h6v6l3 9H6l3-9V3z" />
-              <path d="M9 3h6" />
-            </svg>
+            <Icon name="flask-conical" size="lg" class="text-white" />
           </div>
           <div class="book-info">
             <strong>Efnafræði</strong>
             <span>Kaflar 1-4 tiltækir</span>
           </div>
-          <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
+          <Icon name="chevron-right" size="md" class="text-[var(--text-secondary)] group-hover:text-[var(--accent-color)]" />
         </a>
 
         <div class="highlight-box">
@@ -91,9 +83,7 @@
       <!-- Section: Content Status -->
       <section class="section" id="content-status">
         <h2>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-          </svg>
+          <Icon name="clipboard-check" size="md" class="text-[var(--accent-color)]" />
           Staða efnis
         </h2>
 
@@ -139,11 +129,7 @@
       <!-- Section: Known Issues -->
       <section class="section" id="known-issues">
         <h2>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-            <line x1="12" y1="9" x2="12" y2="13" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
+          <Icon name="triangle-alert" size="md" class="text-[var(--accent-color)]" />
           Þekkt vandamál
         </h2>
 
@@ -182,9 +168,7 @@
       <!-- Section: Quality -->
       <section class="section" id="quality">
         <h2>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
+          <Icon name="star" size="md" class="text-[var(--accent-color)]" />
           Gæði þýðinga
         </h2>
 
@@ -213,19 +197,14 @@
       <!-- Section: Feedback -->
       <section class="section" id="feedback">
         <h2>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-          </svg>
+          <Icon name="message-square" size="md" class="text-[var(--accent-color)]" />
           Tilkynna villur
         </h2>
 
         <p>Ef þú finnur villu í þýðingu eða tæknilegt vandamál, vinsamlegast láttu okkur vita:</p>
 
         <a href="/feedback" class="feedback-link">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
+          <Icon name="square-pen" size="md" />
           Senda endurgjöf
         </a>
 
@@ -247,11 +226,7 @@
       <!-- Section: Support -->
       <section class="section" id="support">
         <h2>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-          </svg>
+          <Icon name="circle-help" size="md" class="text-[var(--accent-color)]" />
           Stuðningur
         </h2>
 
@@ -259,18 +234,12 @@
 
         <div class="contact-grid">
           <div class="contact-card">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-              <polyline points="22,6 12,13 2,6" />
-            </svg>
+            <Icon name="mail" size="lg" class="text-[var(--accent-color)] mb-2" />
             <h4>Tölvupóstur</h4>
             <a href="mailto:namsbokasafn@gmail.com">namsbokasafn@gmail.com</a>
           </div>
           <div class="contact-card">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-            </svg>
+            <Icon name="square-pen" size="lg" class="text-[var(--accent-color)] mb-2" />
             <h4>Endurgjöf</h4>
             <a href="/feedback">Opna eyðublað</a>
           </div>
@@ -332,11 +301,6 @@
 
   .back-link:hover {
     color: white;
-  }
-
-  .back-link svg {
-    width: 1rem;
-    height: 1rem;
   }
 
   .guide-header h1 {
@@ -413,12 +377,6 @@
     margin: 0 0 1rem;
   }
 
-  .section h2 svg {
-    width: 1.25rem;
-    height: 1.25rem;
-    color: var(--accent-color);
-  }
-
   .section h3 {
     font-size: 1rem;
     font-weight: 600;
@@ -489,12 +447,6 @@
     background: linear-gradient(135deg, var(--accent-light, #f5e6b8), var(--accent-color, #c78c20));
   }
 
-  .book-icon svg {
-    width: 1.5rem;
-    height: 1.5rem;
-    color: white;
-  }
-
   .book-info {
     flex: 1;
   }
@@ -507,16 +459,6 @@
   .book-info span {
     font-size: 0.875rem;
     color: var(--text-secondary);
-  }
-
-  .book-link .arrow {
-    width: 1.25rem;
-    height: 1.25rem;
-    color: var(--text-secondary);
-  }
-
-  .book-link:hover .arrow {
-    color: var(--accent-color);
   }
 
   /* Highlight boxes */
@@ -644,11 +586,6 @@
     background: var(--accent-hover, #b37a1c);
   }
 
-  .feedback-link svg {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
   /* Contact grid */
   .contact-grid {
     display: grid;
@@ -663,13 +600,6 @@
     padding: 1rem;
     border-radius: 0.5rem;
     text-align: center;
-  }
-
-  .contact-card svg {
-    width: 1.5rem;
-    height: 1.5rem;
-    color: var(--accent-color);
-    margin-bottom: 0.5rem;
   }
 
   .contact-card h4 {

@@ -72,6 +72,13 @@ import {
 	MessageSquareText,
 	Bookmark,
 	Calendar,
+	Languages,
+	MessageSquare,
+	Send,
+	Book,
+	Mail,
+	Printer,
+	Share2,
 	type IconNode
 } from 'lucide';
 
@@ -150,7 +157,15 @@ export const ICON_NODES = {
 	highlighter: Highlighter,
 	'message-square-text': MessageSquareText,
 	bookmark: Bookmark,
-	calendar: Calendar
+	calendar: Calendar,
+	// Final route-page sweep (catalog / section reader / for-teachers / feedback)
+	languages: Languages,
+	'message-square': MessageSquare,
+	send: Send,
+	book: Book,
+	mail: Mail,
+	printer: Printer,
+	'share-2': Share2
 } satisfies Record<string, IconNode>;
 
 export type IconName = keyof typeof ICON_NODES;

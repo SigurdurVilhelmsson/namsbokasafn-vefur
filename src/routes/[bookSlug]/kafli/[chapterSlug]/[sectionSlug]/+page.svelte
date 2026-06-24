@@ -9,6 +9,7 @@
 	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
 	import { isSectionRead, isSectionBookmarked, getSavedScrollPosition, type ScrollPositions } from '$lib/stores/reader';
 	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
 	import TextHighlighter from '$lib/components/TextHighlighter.svelte';
 	import AnnotationSidebar from '$lib/components/AnnotationSidebar.svelte';
@@ -227,9 +228,7 @@
 		>
 			<div class="flex items-center gap-3">
 				<div class="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center">
-					<svg class="w-5 h-5 text-[var(--accent-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-					</svg>
+					<Icon name="book-open" size="md" class="text-[var(--accent-color)]" />
 				</div>
 				<div>
 					<p class="font-medium text-[var(--text-primary)]">Haltu áfram að lesa</p>
@@ -251,9 +250,7 @@
 					aria-label="Hunsa"
 					title="Byrja frá byrjun"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-					</svg>
+					<Icon name="x" size="md" />
 				</button>
 			</div>
 		</div>
@@ -270,9 +267,7 @@
 		<div class="flex items-center gap-2 sm:gap-3">
 			{#if data.section.readingTime}
 				<span class="inline-flex items-center gap-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-					<svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-					</svg>
+					<Icon name="clock" size="sm" />
 					<span>~{data.section.readingTime} mín lestími</span>
 				</span>
 			{/if}
@@ -300,9 +295,7 @@
 				aria-label="Prenta kafla"
 				title="Prenta"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-				</svg>
+				<Icon name="printer" size="md" />
 			</button>
 			<!-- Download chapter PDF -->
 			<PdfDownloadButton
@@ -322,13 +315,9 @@
 				title={shareSuccess ? 'Hlekkur afritaður!' : 'Deila'}
 			>
 				{#if shareSuccess}
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-					</svg>
+					<Icon name="check" size="md" />
 				{:else}
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-					</svg>
+					<Icon name="share-2" size="md" />
 				{/if}
 			</button>
 			<!-- Annotations button -->
@@ -338,9 +327,7 @@
 				aria-label="Opna athugasemdir"
 				title="Athugasemdir"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-				</svg>
+				<Icon name="square-pen" size="md" />
 			</button>
 			<button
 				onclick={toggleBookmark}
@@ -359,16 +346,12 @@
 					class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
 					aria-label="Merkja sem lesið"
 				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-					</svg>
+					<Icon name="check" size="sm" />
 					<span class="hidden sm:inline">Merkja sem lesið</span>
 				</button>
 			{:else}
 				<span class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-					</svg>
+					<Icon name="check" size="sm" />
 					<span class="hidden sm:inline">Lesið</span>
 				</span>
 			{/if}
@@ -381,9 +364,7 @@
 		<div class="mb-8 p-6 rounded-xl bg-[var(--accent-light)] border border-[var(--accent-subtle)]">
 			<div class="flex items-center justify-between mb-3">
 				<h3 class="text-lg font-semibold text-[var(--text-primary)] flex items-center gap-2">
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-					</svg>
+					<Icon name="clipboard-check" size="md" />
 					Námsmarkmið
 				</h3>
 				{#if completedCount > 0}
@@ -407,9 +388,7 @@
 							aria-label={completed ? 'Afmerkja markmið' : 'Merkja markmið sem kláruð'}
 						>
 							{#if completed}
-								<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
+								<Icon name="check" size="sm" />
 							{:else}
 								<span class="text-xs font-medium text-[var(--accent-color)]">{i + 1}</span>
 							{/if}
@@ -461,9 +440,7 @@
 				onclick={markAsRead}
 				class="inline-flex items-center gap-2 px-6 py-3 text-lg font-medium rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-				</svg>
+				<Icon name="check" size="md" />
 				Merkja kafla sem lesinn
 			</button>
 		</div>
@@ -513,9 +490,7 @@
 
 		<!-- Central message -->
 		<div class="completion-message bg-emerald-500 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2">
-			<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-			</svg>
+			<Icon name="check" size="lg" />
 			<span class="font-semibold">Vel gert!</span>
 		</div>
 	</div>
