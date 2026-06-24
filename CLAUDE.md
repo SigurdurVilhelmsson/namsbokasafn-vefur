@@ -149,6 +149,17 @@ All fonts are **self-hosted** in `static/fonts/` — no external CDN dependencie
 
 `src/lib/actions/glossaryTerms.ts` uses **semantic-only** term detection — it only processes `<dfn class="term">` elements from the CNXML pipeline. A previous text-matching pass was removed to avoid false positives on common Icelandic words like "efni".
 
+## Attribution & Licensing
+
+The catalogue carries **two licences**: most titles are CC BY 4.0, but Organic Chemistry (`lifraen-efnafraedi`) and College Physics (`edlisfraedi-2e`) are **CC BY-NC-SA 4.0**. Attribution is **data-driven** and rendered on every page.
+
+- **Source of truth for verdicts:** the provenance audit in the sister repo, `namsbokasafn-efni/docs/provenance/openstax-cnxml-licence-provenance.md`. Licence decisions derive from there — do not re-determine them here. A trimmed public-facing summary (`docs/provenance/provenance.md` in efni) is synced to `static/provenance/` (gitignored) by `sync-content.js` and linked from each colophon.
+- **Per-book metadata** lives in `src/lib/types/book.ts` as `attribution: BookAttribution` (multi-source schema — see `src/lib/data/licences.ts`). `toc.json` does **not** carry attribution. Each book lists every obtained `source` (format + obtained date + licence); `derivativeLicence` is the **most-restrictive** licence across those sources (NC-SA beats BY).
+- **No per-book conditionals in components.** The NC/SA notices come from the licence descriptor flags (`nonCommercial`, `shareAlike`) in `LICENCES`, not from `book.slug`. Branch on data, never on identity.
+- **No commingling.** No aggregate view (landing, About, FAQ, meta tags) may make a blanket "CC BY 4.0" claim. The catalogue shows a per-book `LicenceBadge`; replace any global licence statement with per-book licences.
+- **Fail loud.** Missing/inconsistent attribution fails the build via `scripts/validate-content.js` (loads `book.ts` through esbuild and runs `validateAllBookAttributions`) **and** renders a visible placeholder + `console.error` at runtime (`BookAttribution.svelte`, colophon). Never render attribution silently-empty or guess data.
+- **Render sites:** `BookAttribution.svelte` (section/chapter footers + print routes — unlike the MT `PreviewBanner`, attribution is **not** hidden in print), `/[bookSlug]/leyfi` colophon (full multi-source provenance), and `LicenceBadge.svelte` (catalogue + book-home). The print full-book/chapter routes also carry the correct derivative licence.
+
 ## Key Actions & Components
 
 - `src/lib/actions/equations.ts`: Equation rendering
@@ -220,10 +231,10 @@ never the sister's. So when work crosses over:
 3. **Recommend relaunching in the sister repo** (then pause for the user's choice) when
    the work's center of gravity is there — ANY of: more than ~2 files to change in the
    sister repo; the task needs the sister's skills/permissions/auto-recalled memory;
-   it's an iterative edit→test/build loop there; or you're about to *design/architect*
-   there rather than apply a known edit. Phrase it: *"This is now mostly efni work —
+   it's an iterative edit→test/build loop there; or you're about to _design/architect_
+   there rather than apply a known edit. Phrase it: _"This is now mostly efni work —
    consider relaunching Claude in namsbokasafn-efni for full context. Continue here, or
-   relaunch?"* Do **not** nag for a one- or two-file cross-repo touch.
+   relaunch?"_ Do **not** nag for a one- or two-file cross-repo touch.
 
 These are heuristics you apply with judgment, not hard gates.
 

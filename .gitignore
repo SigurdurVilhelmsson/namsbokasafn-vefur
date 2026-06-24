@@ -34,6 +34,7 @@ coverage
 build
 static/content
 static/downloads
+static/provenance
 dev-dist/
 
 # Test artifacts

@@ -31,7 +31,7 @@
  */
 
 import { execFileSync, execSync, spawnSync } from 'child_process';
-import { existsSync, readdirSync, statSync, rmSync, cpSync } from 'fs';
+import { existsSync, readdirSync, statSync, rmSync, cpSync, mkdirSync } from 'fs';
 import { resolve, dirname, relative, sep } from 'path';
 import { fileURLToPath } from 'url';
 import { chapterFullyFaithful, faithfulFileWins, faithfulRollupsComplete, ROLLUPS_COMPLETE_MARKER } from './lib/overlay.js';
@@ -392,6 +392,33 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 	}
 }
 
+/**
+ * Sync the public-facing licence/provenance summary from efni so the colophon
+ * page (/[book]/leyfi) and BookAttribution can link to a served copy. Single
+ * source of truth lives in efni docs/provenance/provenance.md; the destination
+ * (static/provenance/) is gitignored, like static/content.
+ */
+function syncProvenance(sourceDir, dryRun) {
+	const src = resolve(sourceDir, 'docs', 'provenance', 'provenance.md');
+	const destProvenanceDir = resolve(projectRoot, 'static', 'provenance');
+	const dest = resolve(destProvenanceDir, 'provenance.md');
+
+	if (!existsSync(src)) {
+		console.warn(`\nWarning: provenance summary not found at ${src} — colophon link will 404.`);
+		return;
+	}
+
+	if (dryRun) {
+		console.log(`\n[DRY-RUN] Would sync provenance summary:\n    ${src}\n    To: ${dest}`);
+		return;
+	}
+
+	console.log('\nSyncing provenance summary...');
+	mkdirSync(destProvenanceDir, { recursive: true });
+	cpSync(src, dest);
+	console.log(`  Done: ${dest}`);
+}
+
 function main() {
 	if (process.getuid?.() === 0) {
 		console.error('Error: Do not run this script as root (sudo).');
@@ -501,6 +528,9 @@ function main() {
 	}
 
 	console.log(`\nSync complete: ${success} succeeded, ${failed} failed`);
+
+	// Sync the public-facing provenance summary (independent of per-book results).
+	syncProvenance(options.source, options.dryRun);
 
 	// Run validation if requested
 	if (options.validate && !options.dryRun && failed === 0) {
