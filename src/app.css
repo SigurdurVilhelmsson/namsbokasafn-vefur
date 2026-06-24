@@ -135,6 +135,15 @@
     color: var(--text-primary);
     font-family: "Literata", Georgia, serif;
   }
+
+  /* Offset in-page anchor jumps so the target clears the sticky 56px header
+     (search/settings banner) instead of landing flush against the viewport
+     top, hidden beneath it. Applies site-wide to every #anchor scroll —
+     footnote back-refs, cross-references, section jumps, headings. The window
+     is the scroll container (no overflow wrapper), so this lives on <html>. */
+  html {
+    scroll-padding-top: 5rem;
+  }
 }
 
 /* Self-hosted Google Fonts (Bricolage Grotesque, Literata, JetBrains Mono)
@@ -1218,10 +1227,9 @@
   outline: none;
 }
 
-/* Figure caption ID (for cross-reference anchors) */
-.figure-caption-id {
-  scroll-margin-top: 5rem;
-}
+/* Figure caption anchor offset is now handled globally by
+   `html { scroll-padding-top }` (see @layer base). A per-target
+   scroll-margin-top here would stack with that padding and double the offset. */
 
 /* ========================================== */
 /* FIGURE CAPTIONS                           */

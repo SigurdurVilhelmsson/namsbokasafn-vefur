@@ -27,6 +27,14 @@ export interface BookConfig {
     exercises: boolean;
     periodicTable?: boolean;
   };
+  /**
+   * Appendices that should resolve to a bespoke interactive component instead of
+   * their prose landing page. efni emits the semantic `/vidauki/{letter}` route and
+   * (by separation of concerns) does NOT hardcode the reader's component routes, so
+   * this letter→route mapping is a vefur-side decision. The appendix route redirects
+   * to `componentPath`, making the interactive view reachable in one click.
+   */
+  interactiveAppendices?: { letter: string; componentPath: string }[];
 }
 
 export const books: BookConfig[] = [
@@ -57,7 +65,9 @@ export const books: BookConfig[] = [
       flashcards: true,
       exercises: true,
       periodicTable: true
-    }
+    },
+    // Appendix A (Lotukerfið) is the interactive periodic table at /lotukerfi
+    interactiveAppendices: [{ letter: 'A', componentPath: '/lotukerfi' }]
   },
   {
     id: 'liffraedi-2e',

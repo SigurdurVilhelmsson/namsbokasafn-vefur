@@ -19,9 +19,17 @@
 		sectionSlug?: string;
 		chapterNumber?: number;
 		sectionType?: string;
+		/**
+		 * Hide the static `.learning-objectives` block embedded in the content HTML.
+		 * Set true when the host page renders its own interactive objectives UI from
+		 * page-data, so the two don't appear as duplicates. efni dual-emits objectives
+		 * (static block + page-data) by design for graceful degradation — see
+		 * docs/plans/2026-06-23-live-qa-followup-vefur.md item I.
+		 */
+		hideStaticObjectives?: boolean;
 	}
 
-	let { content, bookSlug = '', chapterSlug = '', sectionSlug = '', chapterNumber = 1, sectionType = '' }: Props = $props();
+	let { content, bookSlug = '', chapterSlug = '', sectionSlug = '', chapterNumber = 1, sectionType = '', hideStaticObjectives = false }: Props = $props();
 
 	let html = $state('');
 	let error: string | null = $state(null);
@@ -47,6 +55,7 @@
 		 and the action order carries no constraints. -->
 	<div
 		class="reading-content"
+		class:hide-static-objectives={hideStaticObjectives}
 		use:equations
 		use:figureViewer
 		use:crossReferences={{ bookSlug, chapterSlug, sectionSlug, chapterNumber, content }}
@@ -65,3 +74,13 @@
 {:else}
 	<Skeleton variant="content" />
 {/if}
+
+<style>
+	/* When the host page renders its own interactive objectives UI (from page-data),
+	   suppress the static `.learning-objectives` block embedded in the content HTML so
+	   the two don't appear duplicated. The static block remains the graceful-degradation
+	   fallback everywhere the prop is not set (chapter view, print/PDF). */
+	.reading-content.hide-static-objectives :global(.learning-objectives) {
+		display: none;
+	}
+</style>
