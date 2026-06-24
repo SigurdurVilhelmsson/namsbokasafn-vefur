@@ -5,6 +5,7 @@
 <script lang="ts">
   import { settings } from '$lib/stores/settings';
   import { onMount, onDestroy } from 'svelte';
+  import Icon from '$lib/components/Icon.svelte';
   import type { PageData } from './$types';
   import type { CatalogueEntry, SubjectGroup } from '$lib/data/openstax-catalogue';
   import { faqItems } from '$lib/data/faq';
@@ -155,13 +156,8 @@
         onclick={() => settings.toggleTheme()}
         aria-label="Skipta um þema"
       >
-        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="5" />
-          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-        </svg>
-        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-        </svg>
+        <span class="sun-icon"><Icon name="sun" size="sm" /></span>
+        <span class="moon-icon"><Icon name="moon" size="sm" /></span>
       </button>
     </div>
   </header>
@@ -217,11 +213,7 @@
             <h3 class="book-title">{book.title}</h3>
             <p class="book-source">
               Byggt á {book.source.title}
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="external-icon">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
+              <Icon name="external-link" size="sm" class="external-icon" />
             </p>
 
             {#if book.stats}
@@ -239,36 +231,22 @@
               <div class="book-tools">
                 {#if book.features.flashcards}
                   <span class="tool-icon" title="Minniskort">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="2" y="4" width="20" height="16" rx="2" />
-                      <path d="M12 8v8M8 12h8" />
-                    </svg>
+                    <Icon name="credit-card" size="lg" />
                   </span>
                 {/if}
                 {#if book.features.glossary}
                   <span class="tool-icon" title="Orðasafn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-                      <path d="M8 7h8M8 11h6" />
-                    </svg>
+                    <Icon name="book-open" size="lg" />
                   </span>
                 {/if}
                 {#if book.features.exercises}
                   <span class="tool-icon" title="Æfingarverkefni">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M9 11l3 3L22 4" />
-                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                    </svg>
+                    <Icon name="clipboard-check" size="lg" />
                   </span>
                 {/if}
                 {#if book.features.periodicTable}
                   <span class="tool-icon" title="Lotukerfið">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="7" height="7" rx="1" />
-                      <rect x="14" y="3" width="7" height="7" rx="1" />
-                      <rect x="3" y="14" width="7" height="7" rx="1" />
-                      <rect x="14" y="14" width="7" height="7" rx="1" />
-                    </svg>
+                    <Icon name="grid-2x2" size="lg" />
                   </span>
                 {/if}
               </div>
@@ -303,11 +281,7 @@
               <h3 class="book-title">{book.title}</h3>
               <p class="book-source">
                 Byggt á {book.source.title}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="external-icon">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
+                <Icon name="external-link" size="sm" class="external-icon" />
               </p>
 
               <div class="book-preview-info">
@@ -352,9 +326,7 @@
           <summary class="subject-accordion-header">
             <span class="subject-accordion-title">{group.label}</span>
             <span class="subject-accordion-count">{entries.length} {entries.length === 1 ? 'bók' : 'bækur'}</span>
-            <svg class="subject-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 9l-7 7-7-7" />
-            </svg>
+            <span class="subject-accordion-chevron"><Icon name="chevron-down" size="md" /></span>
           </summary>
 
           <div class="compact-grid">
@@ -371,11 +343,7 @@
                     class="compact-link"
                   >
                     OpenStax
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="compact-external-icon">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                      <polyline points="15 3 21 3 21 9" />
-                      <line x1="10" y1="14" x2="21" y2="3" />
-                    </svg>
+                    <Icon name="external-link" size="sm" class="compact-external-icon" />
                   </a>
                 </div>
               </article>
@@ -397,11 +365,7 @@
       <!-- Minniskort -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
-            <rect x="2" y="4" width="20" height="16" rx="2" />
-            <rect x="5" y="7" width="14" height="10" rx="1" opacity="0.4" />
-            <path d="M12 8v8M8 12h8" />
-          </svg>
+          <Icon name="credit-card" size="md" style="color: var(--accent-color)" />
         </div>
         <h3>Minniskort</h3>
         <p>Endurtekningarkerfi sem aðlagar sig að þér</p>
@@ -410,10 +374,7 @@
       <!-- Orðasafn -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-            <path d="M8 7h8M8 11h6" />
-          </svg>
+          <Icon name="book-open" size="md" style="color: var(--accent-color)" />
         </div>
         <h3>Orðasafn</h3>
         <p>Smelltu á hugtök til að sjá skilgreiningar</p>
@@ -422,10 +383,7 @@
       <!-- Próf -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--subject-math) 12%, transparent)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--subject-math)" stroke-width="2">
-            <path d="M9 11l3 3L22 4" />
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-          </svg>
+          <Icon name="clipboard-check" size="md" style="color: var(--subject-math)" />
         </div>
         <h3>Próf</h3>
         <p>Aðlöguð verkefni til að prófa þekkingu</p>
@@ -434,11 +392,7 @@
       <!-- Framvinda -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--subject-biology) 12%, transparent)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--subject-biology)" stroke-width="2">
-            <rect x="3" y="12" width="4" height="9" rx="1" />
-            <rect x="10" y="8" width="4" height="13" rx="1" />
-            <rect x="17" y="4" width="4" height="17" rx="1" />
-          </svg>
+          <Icon name="chart-column" size="md" style="color: var(--subject-biology)" />
         </div>
         <h3>Framvinda</h3>
         <p>Fylgstu með hvar þú ert í bókinni</p>
@@ -467,11 +421,7 @@
         </p>
         <a href="https://openstax.org" target="_blank" rel="noopener noreferrer" class="about-link">
           Heimsækja OpenStax
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-            <polyline points="15 3 21 3 21 9" />
-            <line x1="10" y1="14" x2="21" y2="3" />
-          </svg>
+          <Icon name="external-link" size="sm" />
         </a>
       </div>
     </div>
@@ -488,9 +438,7 @@
         <details class="faq-item">
           <summary class="faq-question">
             <span>{item.question}</span>
-            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 9l-7 7-7-7" />
-            </svg>
+            <span class="faq-chevron"><Icon name="chevron-down" size="md" /></span>
           </summary>
           <div class="faq-answer">
             {@html item.answer}
@@ -687,11 +635,11 @@
     transform: rotate(15deg);
   }
 
-  .theme-toggle svg {
-    width: 1.125rem;
-    height: 1.125rem;
-    color: var(--text-secondary);
+  .theme-toggle .sun-icon,
+  .theme-toggle .moon-icon {
     position: absolute;
+    display: inline-flex;
+    color: var(--text-secondary);
     transition: opacity 0.2s, transform 0.3s;
   }
 
@@ -942,12 +890,6 @@
     margin: 0;
   }
 
-  .external-icon {
-    width: 0.75rem;
-    height: 0.75rem;
-    flex-shrink: 0;
-  }
-
   .book-progress {
     margin-top: 0.25rem;
   }
@@ -986,11 +928,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .tool-icon svg {
-    width: 100%;
-    height: 100%;
   }
 
   .book-cta {
@@ -1114,8 +1051,7 @@
   }
 
   .subject-accordion-chevron {
-    width: 1.25rem;
-    height: 1.25rem;
+    display: inline-flex;
     flex-shrink: 0;
     color: var(--text-tertiary);
     transition: transform 0.2s, color 0.2s;
@@ -1199,12 +1135,6 @@
     color: var(--accent-color);
   }
 
-  .compact-external-icon {
-    width: 0.6875rem;
-    height: 0.6875rem;
-    flex-shrink: 0;
-  }
-
   /* ====================================
      STUDY TOOLS SECTION
      ==================================== */
@@ -1246,11 +1176,6 @@
     justify-content: center;
     margin: 0 auto 1rem;
     transition: transform 0.2s;
-  }
-
-  .tool-card-icon svg {
-    width: 1.25rem;
-    height: 1.25rem;
   }
 
   @media (min-width: 1024px) {
@@ -1346,11 +1271,6 @@
     gap: 0.625rem;
   }
 
-  .about-link svg {
-    width: 1rem;
-    height: 1rem;
-  }
-
   /* ====================================
      FAQ SECTION
      ==================================== */
@@ -1407,8 +1327,7 @@
   }
 
   .faq-chevron {
-    width: 1.25rem;
-    height: 1.25rem;
+    display: inline-flex;
     flex-shrink: 0;
     color: var(--text-tertiary);
     transition: transform 0.2s, color 0.2s;
