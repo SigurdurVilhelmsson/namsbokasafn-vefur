@@ -5,8 +5,11 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { getLicence } from '$lib/data/licences';
 
 	let { data }: { data: PageData } = $props();
+
+	let licence = $derived(getLicence(data.attribution.derivativeLicence));
 </script>
 
 <svelte:head>
@@ -33,3 +36,17 @@
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html block.content}
 {/each}
+
+<!-- Attribution colophon — a standalone chapter PDF carries the same licence
+     obligations as the book, so it must not ship without attribution. -->
+<section class="print-attribution">
+	<p>
+		Byggt á {data.attribution.originalTitle} eftir {data.attribution.originalAuthors.join(', ')}
+		({data.attribution.publisher}). Íslensk þýðing — breytingar gerðar.
+	</p>
+	<p>Leyfi: {licence.name} ({licence.fullName}).</p>
+	{#if licence.notices.length > 0}
+		<p>{licence.notices.join(' ')}</p>
+	{/if}
+	<p>Aðgangur að frumefninu er ókeypis á openstax.org — {data.attribution.sourceUrl}</p>
+</section>

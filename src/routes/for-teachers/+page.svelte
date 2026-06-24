@@ -263,7 +263,7 @@
   <footer class="guide-footer">
     <div class="container">
       <p>Námsbókasafn - Opnar kennslubækur á íslensku</p>
-      <p>Upprunalegt efni frá <a href="https://openstax.org" target="_blank" rel="noopener noreferrer">OpenStax</a> - CC BY 4.0</p>
+      <p>Upprunalegt efni frá <a href="https://openstax.org" target="_blank" rel="noopener noreferrer">OpenStax</a> — undir Creative Commons leyfum (mismunandi eftir bók)</p>
     </div>
   </footer>
 </div>

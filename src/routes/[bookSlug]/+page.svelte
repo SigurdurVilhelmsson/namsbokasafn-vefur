@@ -10,6 +10,8 @@
 	import { calcChapterProgress, isSectionRead } from '$lib/stores/reader';
 	import DownloadBookButton from '$lib/components/DownloadBookButton.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
+	import LicenceBadge from '$lib/components/LicenceBadge.svelte';
+	import { getLicence } from '$lib/data/licences';
 	import ErrorMessage from '$lib/components/ErrorMessage.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
@@ -44,23 +46,27 @@
 		return calcChapterProgress(progress, data.bookSlug, getChapterPath(chapter), chapter.sections.length);
 	}
 
-	// Get attribution data (supports both 'source' and 'attribution' fields with v1/v2 field names)
-	let attribution = $derived.by(() => {
-		if (!toc) return undefined;
-		return toc.source || toc.attribution;
-	});
-	// Handle both v1 field names (original, authors) and v2 field names (originalTitle, originalAuthors)
-	let originalTitle = $derived(attribution?.original || (attribution as any)?.originalTitle);
-	let authors = $derived(attribution?.authors || (attribution as any)?.originalAuthors);
+	// Attribution comes from the per-book metadata in book.ts (the populated source of
+	// truth), not from toc.json. The legacy toc.source/attribution path was always
+	// undefined (the book-home block never rendered).
+	let attribution = $derived(data.book?.attribution);
+	let licence = $derived(attribution ? getLicence(attribution.derivativeLicence) : null);
+
+	// Book-specific, licence-correct meta description (no blanket CC BY claim).
+	let metaDescription = $derived(
+		attribution && licence
+			? `Opið námsefni: íslensk þýðing á OpenStax ${attribution.originalTitle}, gefin út með ${licence.name} leyfi.`
+			: 'Opið námsefni — íslenskar þýðingar á OpenStax kennslubókum.'
+	);
 </script>
 
 <svelte:head>
 	<title>{data.book?.title ?? 'Bók'} | Námsbókasafn</title>
-	<meta name="description" content="Opið námsefni í efnafræði fyrir framhaldsskóla. Íslensk þýðing á OpenStax Chemistry 2e, gefið út með CC BY 4.0 leyfi." />
+	<meta name="description" content={metaDescription} />
 	<meta name="robots" content="index, follow" />
 	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}" />
 	<meta property="og:title" content="{data.book?.title ?? 'Bók'} | Námsbókasafn" />
-	<meta property="og:description" content="Opið námsefni í efnafræði fyrir framhaldsskóla. Íslensk þýðing á OpenStax Chemistry 2e." />
+	<meta property="og:description" content={metaDescription} />
 	<meta property="og:type" content="website" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}" />
 </svelte:head>
@@ -156,35 +162,26 @@
 			{/each}
 		</div>
 
-		<!-- Attribution -->
-		{#if attribution}
+		<!-- Attribution (from per-book metadata; full provenance on the colophon page) -->
+		{#if attribution && licence}
 			<div class="book-attribution">
-				<h3 class="book-attribution-heading">
-					Um bókina
-				</h3>
+				<h3 class="book-attribution-heading">Um bókina</h3>
 				<div class="book-attribution-content">
-					{#if originalTitle}
-						<p><strong>Upprunalegt efni:</strong> {originalTitle}</p>
-					{/if}
-					{#if authors}
-						<p><strong>Höfundar:</strong> {authors}</p>
-					{/if}
-					{#if attribution.translator}
-						<p><strong>Þýðandi:</strong> {attribution.translator}</p>
-					{/if}
-					{#if attribution.license}
-						<p>
-							<strong>Leyfi:</strong>
-							{#if attribution.licenseUrl}
-								<a href={attribution.licenseUrl} target="_blank" rel="noopener noreferrer" class="attribution-link">
-									{attribution.license}
-								</a>
-							{:else}
-								{attribution.license}
-							{/if}
-						</p>
-					{/if}
+					<p><strong>Upprunalegt efni:</strong> {attribution.originalTitle}</p>
+					<p><strong>Höfundar:</strong> {attribution.originalAuthors.join(', ')}</p>
+					<p><strong>Útgefandi:</strong> {attribution.publisher}</p>
+					<p><strong>Þýðandi:</strong> {attribution.translators}</p>
+					<p class="book-attribution-licence">
+						<strong>Leyfi:</strong>
+						<LicenceBadge code={attribution.derivativeLicence} size="md" />
+					</p>
+					{#each licence.notices as notice (notice)}
+						<p class="book-attribution-notice">{notice}</p>
+					{/each}
 				</div>
+				<a class="book-attribution-colophon" href={`/${data.bookSlug}/leyfi`}>
+					Leyfi og heimildir
+				</a>
 			</div>
 		{/if}
 	{/if}
@@ -362,13 +359,30 @@
 		margin-bottom: 0;
 	}
 
-	.attribution-link {
-		color: var(--accent-color);
-		text-decoration: none;
+	.book-attribution-licence {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 0.5rem;
 	}
 
-	.attribution-link:hover {
+	.book-attribution-notice {
+		margin-top: 0.25rem;
+		font-size: 0.8125rem;
+		font-style: italic;
+	}
+
+	.book-attribution-colophon {
+		display: inline-block;
+		margin-top: 0.75rem;
+		font-size: 0.875rem;
+		font-weight: 500;
 		color: var(--accent-hover);
 		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	.book-attribution-colophon:hover {
+		color: var(--accent-color);
 	}
 </style>

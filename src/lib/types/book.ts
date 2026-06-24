@@ -1,3 +1,6 @@
+import type { BookAttribution } from '$lib/data/licences';
+import { validateAttribution } from '$lib/data/licences';
+
 export interface BookConfig {
   id: string;
   slug: string;
@@ -18,6 +21,14 @@ export interface BookConfig {
     license: string;
     licenseUrl: string;
   };
+  /**
+   * Multi-source attribution metadata. Drives every per-page licence/credit render
+   * (footers, colophon, catalogue badge). Licence verdicts derive from the provenance
+   * audit in namsbokasafn-efni `docs/provenance/`. Required on every book — missing or
+   * inconsistent attribution fails the build (see scripts/validate-content.js) and
+   * renders a visible placeholder at runtime.
+   */
+  attribution: BookAttribution;
   stats?: {
     totalChapters: number;
     translatedChapters: number;
@@ -57,6 +68,38 @@ export const books: BookConfig[] = [
       license: 'CC BY 4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
     },
+    attribution: {
+      bookKey: 'efnafraedi-2e',
+      originalTitle: 'Chemistry 2e',
+      originalAuthors: ['Paul Flowers', 'Klaus Theopold', 'Richard Langley', 'William R. Robinson'],
+      publisher: 'OpenStax, Rice University',
+      sourceUrl: 'https://openstax.org/details/books/chemistry-2e',
+      translators: 'Sigurður E. Vilhelmsson',
+      modifications:
+        'Þýtt á íslensku og staðfært úr Chemistry 2e. Breytingarnar fela í sér þýðingu á texta, hugtökum, dæmum og myndatextum yfir á íslensku.',
+      derivativeLicence: 'CC-BY-4.0',
+      derivativeLicenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      provenanceRef: '/provenance/provenance.md',
+      sources: [
+        {
+          format: 'docx',
+          obtained: '2025-09-01',
+          licenceAtObtaining: 'CC-BY-4.0',
+          licenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+          chaptersCovered: 'Frumþýðingargrunnur (Word-útgáfa)'
+        },
+        {
+          format: 'cnxml',
+          obtained: '2026-01-19',
+          licenceAtObtaining: 'CC-BY-4.0',
+          licenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+          upstreamRepo: 'osbooks-chemistry-bundle',
+          collection: 'chemistry-2e',
+          upstreamChangeCommit: 'd91a52cb (2026-04-23, eftir sókn — afritið helst CC BY)',
+          chaptersCovered: 'Yfirlesnir kaflar'
+        }
+      ]
+    },
     stats: {
       totalChapters: 21,
       translatedChapters: 21
@@ -88,6 +131,30 @@ export const books: BookConfig[] = [
       license: 'CC BY 4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
     },
+    attribution: {
+      bookKey: 'liffraedi-2e',
+      originalTitle: 'Biology 2e',
+      originalAuthors: ['Mary Ann Clark', 'Matthew Douglas', 'Jung Choi'],
+      publisher: 'OpenStax, Rice University',
+      sourceUrl: 'https://openstax.org/details/books/biology-2e',
+      translators: 'Þórhallur Halldórsson',
+      modifications:
+        'Þýtt á íslensku og staðfært úr Biology 2e. Breytingarnar fela í sér þýðingu á texta, hugtökum, dæmum og myndatextum yfir á íslensku.',
+      derivativeLicence: 'CC-BY-4.0',
+      derivativeLicenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      provenanceRef: '/provenance/provenance.md',
+      sources: [
+        {
+          format: 'cnxml',
+          obtained: '2026-03-11',
+          licenceAtObtaining: 'CC-BY-4.0',
+          licenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+          upstreamRepo: 'osbooks-biology-bundle',
+          collection: 'biology-2e',
+          upstreamChangeCommit: 'db5f4a56 (2026-04-23, eftir sókn — afritið helst CC BY)'
+        }
+      ]
+    },
     stats: {
       totalChapters: 47,
       translatedChapters: 2
@@ -116,6 +183,30 @@ export const books: BookConfig[] = [
       license: 'CC BY 4.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
     },
+    attribution: {
+      bookKey: 'orverufraedi',
+      originalTitle: 'Microbiology',
+      originalAuthors: ['Nina Parker', 'Mark Schneegurt', 'Anh-Hue Thi Tu', 'Philip Lister', 'Brian M. Forster'],
+      publisher: 'OpenStax, Rice University',
+      sourceUrl: 'https://openstax.org/details/books/microbiology',
+      translators: 'Sigurður E. Vilhelmsson',
+      modifications:
+        'Vélþýddur sýniskafli úr Microbiology, þýtt á íslensku. Breytingarnar fela í sér þýðingu á texta, hugtökum og myndatextum yfir á íslensku.',
+      derivativeLicence: 'CC-BY-4.0',
+      derivativeLicenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+      provenanceRef: '/provenance/provenance.md',
+      sources: [
+        {
+          format: 'cnxml',
+          obtained: '2026-03-09',
+          licenceAtObtaining: 'CC-BY-4.0',
+          licenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+          upstreamRepo: 'osbooks-microbiology',
+          collection: 'microbiology',
+          upstreamChangeCommit: '4eeff16d (2026-04-23, eftir sókn — afritið helst CC BY)'
+        }
+      ]
+    },
     stats: {
       totalChapters: 26,
       translatedChapters: 1
@@ -141,8 +232,32 @@ export const books: BookConfig[] = [
       publisher: 'OpenStax',
       url: 'https://openstax.org/details/books/organic-chemistry',
       authors: ['David Klein'],
-      license: 'CC BY 4.0',
-      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
+      license: 'CC BY-NC-SA 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+    },
+    attribution: {
+      bookKey: 'lifraen-efnafraedi',
+      originalTitle: 'Organic Chemistry',
+      originalAuthors: ['David Klein'],
+      publisher: 'OpenStax, Rice University',
+      sourceUrl: 'https://openstax.org/details/books/organic-chemistry',
+      translators: 'Sigurður E. Vilhelmsson',
+      modifications:
+        'Vélþýddur sýniskafli úr Organic Chemistry, þýtt á íslensku. Breytingarnar fela í sér þýðingu á texta, hugtökum og dæmum yfir á íslensku.',
+      derivativeLicence: 'CC-BY-NC-SA-4.0',
+      derivativeLicenceUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+      provenanceRef: '/provenance/provenance.md',
+      sources: [
+        {
+          format: 'cnxml',
+          obtained: '2026-03-23',
+          licenceAtObtaining: 'CC-BY-NC-SA-4.0',
+          licenceUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+          upstreamRepo: 'osbooks-organic-chemistry',
+          collection: 'organic-chemistry',
+          upstreamChangeCommit: '51e417ff (frá fyrsta riti 2022-06-09 — ávallt CC BY-NC-SA)'
+        }
+      ]
     },
     stats: {
       totalChapters: 30,
@@ -169,8 +284,32 @@ export const books: BookConfig[] = [
       publisher: 'OpenStax',
       url: 'https://openstax.org/details/books/college-physics-2e',
       authors: ['Paul Peter Urone', 'Roger Hinrichs'],
-      license: 'CC BY 4.0',
-      licenseUrl: 'https://creativecommons.org/licenses/by/4.0/'
+      license: 'CC BY-NC-SA 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+    },
+    attribution: {
+      bookKey: 'edlisfraedi-2e',
+      originalTitle: 'College Physics 2e',
+      originalAuthors: ['Paul Peter Urone', 'Roger Hinrichs'],
+      publisher: 'OpenStax, Rice University',
+      sourceUrl: 'https://openstax.org/details/books/college-physics-2e',
+      translators: 'Sigurður E. Vilhelmsson',
+      modifications:
+        'Vélþýddur sýniskafli úr College Physics 2e, þýtt á íslensku. Breytingarnar fela í sér þýðingu á texta, hugtökum og dæmum yfir á íslensku.',
+      derivativeLicence: 'CC-BY-NC-SA-4.0',
+      derivativeLicenceUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+      provenanceRef: '/provenance/provenance.md',
+      sources: [
+        {
+          format: 'cnxml',
+          obtained: '2026-03-23',
+          licenceAtObtaining: 'CC-BY-NC-SA-4.0',
+          licenceUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+          upstreamRepo: 'osbooks-college-physics-bundle',
+          collection: 'college-physics-2e',
+          upstreamChangeCommit: '5182c46e (LICENSE 2026-03-19, fyrir sókn — meðhöndlað sem CC BY-NC-SA)'
+        }
+      ]
     },
     stats: {
       totalChapters: 34,
@@ -194,4 +333,25 @@ export function getAvailableBooks(): BookConfig[] {
 
 export function getAllBooks(): BookConfig[] {
   return books;
+}
+
+/** Attribution metadata for a book, or undefined if the slug is unknown. */
+export function getBookAttribution(slug: string): BookAttribution | undefined {
+  return getBook(slug)?.attribution;
+}
+
+/**
+ * Validate every book's attribution. Returns a map of bookSlug → error list,
+ * including only books that have problems. Consumed by the build gate
+ * (scripts/validate-content.js) to fail loudly on missing/inconsistent metadata.
+ */
+export function validateAllBookAttributions(): Record<string, string[]> {
+  const problems: Record<string, string[]> = {};
+  for (const book of books) {
+    const errors = validateAttribution(book.attribution);
+    if (errors.length > 0) {
+      problems[book.slug] = errors;
+    }
+  }
+  return problems;
 }
