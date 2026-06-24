@@ -438,6 +438,7 @@
 				sectionSlug={data.sectionSlug}
 				chapterNumber={data.chapterNumber}
 				sectionType={data.section.type || ''}
+				hideStaticObjectives={!!(data.section.objectives && data.section.objectives.length > 0)}
 			/>
 		</TextHighlighter>
 

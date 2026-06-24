@@ -423,6 +423,11 @@
 						<span>Próf</span>
 					</a>
 
+					<a href="/{bookSlug}/markmid" class="study-tool-link">
+						<Icon name="badge-check" />
+						<span>Námsmarkmið</span>
+					</a>
+
 					{#if hasPeriodicTable}
 						<a href="/{bookSlug}/lotukerfi" class="study-tool-link">
 							<Icon name="atom" />
