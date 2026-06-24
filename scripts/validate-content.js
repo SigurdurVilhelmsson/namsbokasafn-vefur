@@ -15,6 +15,7 @@
 import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { build } from 'esbuild';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -225,9 +226,44 @@ function printResults() {
 }
 
 /**
+ * Build gate for per-book attribution metadata. Loads the TypeScript book config
+ * via esbuild (resolving the $lib alias) and runs the same validation the runtime
+ * uses, so missing/inconsistent licence data fails the build loudly — including a
+ * derivativeLicence that disagrees with the most-restrictive source licence.
+ */
+async function validateAttributions() {
+	const libDir = resolve(projectRoot, 'src', 'lib');
+	let mod;
+	try {
+		const result = await build({
+			entryPoints: [resolve(libDir, 'types', 'book.ts')],
+			bundle: true,
+			format: 'esm',
+			platform: 'node',
+			write: false,
+			logLevel: 'silent',
+			alias: { $lib: libDir }
+		});
+		const code = result.outputFiles[0].text;
+		const dataUrl = 'data:text/javascript;base64,' + Buffer.from(code).toString('base64');
+		mod = await import(dataUrl);
+	} catch (e) {
+		error('src/lib/types/book.ts', 0, `Could not load attribution data: ${e.message}`);
+		return;
+	}
+
+	const problems = mod.validateAllBookAttributions();
+	for (const [slug, errs] of Object.entries(problems)) {
+		for (const msg of errs) {
+			error(`book.ts (${slug})`, 0, `Attribution — ${msg}`);
+		}
+	}
+}
+
+/**
  * Main function
  */
-function main() {
+async function main() {
 	const args = process.argv.slice(2);
 	let targetBook = null;
 
@@ -256,6 +292,9 @@ function main() {
 	for (const bookSlug of books) {
 		validateBook(bookSlug);
 	}
+
+	// Attribution/licence metadata gate (book.ts is the source of truth).
+	await validateAttributions();
 
 	const success = printResults();
 	process.exit(success ? 0 : 1);
