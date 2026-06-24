@@ -14,6 +14,7 @@
 	import TextHighlighter from '$lib/components/TextHighlighter.svelte';
 	import AnnotationSidebar from '$lib/components/AnnotationSidebar.svelte';
 	import PreviewBanner from '$lib/components/PreviewBanner.svelte';
+	import BookAttribution from '$lib/components/BookAttribution.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
 	import { createObjectiveKey } from '$lib/utils/storeHelpers';
@@ -445,6 +446,9 @@
 			</button>
 		</div>
 	{/if}
+
+	<!-- Per-page attribution: required on every section view (CC/OpenStax). -->
+	<BookAttribution attribution={data.book?.attribution} bookSlug={data.bookSlug} />
 </article>
 
 <!-- Navigation buttons -->
