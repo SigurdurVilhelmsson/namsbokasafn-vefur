@@ -9,6 +9,7 @@
 	import { isSectionRead, calcChapterProgress } from '$lib/stores/reader';
 	import { getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
+	import BookAttribution from '$lib/components/BookAttribution.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -189,5 +190,8 @@
 				</a>
 			{/if}
 		</div>
+
+		<!-- Per-page attribution: required on every chapter view (CC/OpenStax). -->
+		<BookAttribution attribution={data.book?.attribution} bookSlug={data.bookSlug} />
 	</div>
 </div>

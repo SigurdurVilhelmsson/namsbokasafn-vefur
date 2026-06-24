@@ -4,8 +4,12 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { getLicence } from '$lib/data/licences';
 
 	let { data }: { data: PageData } = $props();
+
+	let attribution = $derived(data.book.attribution);
+	let licence = $derived(getLicence(attribution.derivativeLicence));
 
 	const today = new Date().toLocaleDateString('is-IS', {
 		year: 'numeric',
@@ -27,11 +31,18 @@
 	<h1 class="cover-title">{data.book.title}</h1>
 	<p class="cover-book-title">{data.book.subtitle}</p>
 	<p class="cover-meta">
-		Þýðing: {data.book.translator}<br />
-		Heimild: {data.book.source.title}, {data.book.source.publisher}<br />
-		Leyfi: {data.book.source.license}<br />
+		Þýðing: {attribution.translators}<br />
+		Byggt á {attribution.originalTitle} eftir {attribution.originalAuthors.join(', ')}<br />
+		Útgefandi frumefnis: {attribution.publisher} — {attribution.sourceUrl}<br />
+		Leyfi: {licence.name} ({licence.fullName})<br />
 		Sótt {today} af namsbokasafn.is
 	</p>
+	{#if licence.notices.length > 0}
+		<p class="cover-notice">
+			{licence.notices.join(' ')}
+		</p>
+	{/if}
+	<p class="cover-notice">Aðgangur að frumefninu er ókeypis á openstax.org.</p>
 </section>
 
 <!-- Table of contents -->

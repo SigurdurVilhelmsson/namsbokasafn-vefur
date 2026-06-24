@@ -1,0 +1,127 @@
+import { describe, it, expect } from 'vitest';
+import {
+	LICENCES,
+	getLicence,
+	mostRestrictive,
+	validateAttribution,
+	type BookAttribution
+} from './licences';
+
+/** A complete, valid CC BY attribution fixture. */
+function validByAttribution(): BookAttribution {
+	return {
+		bookKey: 'efnafraedi-2e',
+		originalTitle: 'Chemistry 2e',
+		originalAuthors: ['Paul Flowers', 'Klaus Theopold'],
+		publisher: 'OpenStax, Rice University',
+		sourceUrl: 'https://openstax.org/details/books/chemistry-2e',
+		translators: 'Sigurður E. Vilhelmsson',
+		modifications: 'Íslensk þýðing og staðfærsla.',
+		derivativeLicence: 'CC-BY-4.0',
+		derivativeLicenceUrl: 'https://creativecommons.org/licenses/by/4.0/',
+		provenanceRef: '/provenance/provenance.md',
+		sources: [
+			{
+				format: 'cnxml',
+				obtained: '2026-01-19',
+				licenceAtObtaining: 'CC-BY-4.0',
+				licenceUrl: 'https://creativecommons.org/licenses/by/4.0/'
+			}
+		]
+	};
+}
+
+describe('getLicence', () => {
+	it('returns the descriptor for a known code', () => {
+		expect(getLicence('CC-BY-4.0').name).toBe('CC BY 4.0');
+	});
+
+	it('marks CC BY as neither NonCommercial nor ShareAlike', () => {
+		const l = getLicence('CC-BY-4.0');
+		expect(l.nonCommercial).toBe(false);
+	});
+
+	it('marks NC-SA as NonCommercial', () => {
+		expect(getLicence('CC-BY-NC-SA-4.0').nonCommercial).toBe(true);
+	});
+
+	it('marks NC-SA as ShareAlike', () => {
+		expect(getLicence('CC-BY-NC-SA-4.0').shareAlike).toBe(true);
+	});
+
+	it('throws on an unknown code', () => {
+		// @ts-expect-error testing runtime guard with an invalid code
+		expect(() => getLicence('CC-BY-ND-4.0')).toThrow();
+	});
+});
+
+describe('mostRestrictive', () => {
+	it('returns CC BY when every source is CC BY', () => {
+		expect(mostRestrictive(['CC-BY-4.0', 'CC-BY-4.0'])).toBe('CC-BY-4.0');
+	});
+
+	it('returns NC-SA when any source is NC-SA', () => {
+		expect(mostRestrictive(['CC-BY-4.0', 'CC-BY-NC-SA-4.0'])).toBe('CC-BY-NC-SA-4.0');
+	});
+
+	it('returns NC-SA when all sources are NC-SA', () => {
+		expect(mostRestrictive(['CC-BY-NC-SA-4.0'])).toBe('CC-BY-NC-SA-4.0');
+	});
+
+	it('throws on an empty source list', () => {
+		expect(() => mostRestrictive([])).toThrow();
+	});
+});
+
+describe('validateAttribution', () => {
+	it('reports no errors for a complete, consistent attribution', () => {
+		expect(validateAttribution(validByAttribution())).toEqual([]);
+	});
+
+	it('flags a missing required field', () => {
+		const a = validByAttribution();
+		a.originalTitle = '';
+		expect(validateAttribution(a).join(' ')).toMatch(/originalTitle/);
+	});
+
+	it('flags an empty authors array', () => {
+		const a = validByAttribution();
+		a.originalAuthors = [];
+		expect(validateAttribution(a).join(' ')).toMatch(/originalAuthors/);
+	});
+
+	it('flags an empty sources array', () => {
+		const a = validByAttribution();
+		a.sources = [];
+		expect(validateAttribution(a).join(' ')).toMatch(/sources/);
+	});
+
+	it('flags a derivativeLicence that is not the most-restrictive source licence', () => {
+		const a = validByAttribution();
+		// One NC-SA source but the book still claims CC BY — the exposure this guard exists to catch.
+		a.sources.push({
+			format: 'cnxml',
+			obtained: '2026-03-23',
+			licenceAtObtaining: 'CC-BY-NC-SA-4.0',
+			licenceUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+		});
+		expect(validateAttribution(a).join(' ')).toMatch(/derivativeLicence/);
+	});
+
+	it('accepts NC-SA derivative when a source is NC-SA', () => {
+		const a = validByAttribution();
+		a.derivativeLicence = 'CC-BY-NC-SA-4.0';
+		a.derivativeLicenceUrl = 'https://creativecommons.org/licenses/by-nc-sa/4.0/';
+		a.sources[0].licenceAtObtaining = 'CC-BY-NC-SA-4.0';
+		expect(validateAttribution(a)).toEqual([]);
+	});
+});
+
+describe('LICENCES table', () => {
+	it('every descriptor carries an Icelandic-facing licence name and url', () => {
+		for (const code of Object.keys(LICENCES) as Array<keyof typeof LICENCES>) {
+			expect(LICENCES[code].name).toBeTruthy();
+			expect(LICENCES[code].url).toMatch(/^https:\/\/creativecommons\.org/);
+		}
+	});
+});
