@@ -6,7 +6,7 @@ import {
 	ContentLoadError
 } from '$lib/utils/contentLoader';
 import { error, isHttpError, isRedirect, redirect } from '@sveltejs/kit';
-import { books } from '$lib/types/book';
+import { books, getBook } from '$lib/types/book';
 
 export const prerender = true;
 
@@ -37,6 +37,16 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
 		if (!appendix) {
 			throw error(404, { message: 'Viðauki fannst ekki' });
+		}
+
+		// Vefur-side interactive-appendix mapping (book config): efni emits the semantic
+		// /vidauki/{letter} and doesn't hardcode component routes, so the reader decides
+		// which appendices resolve to a bespoke component. Redirect there in one click.
+		const configInteractive = getBook(bookSlug)?.interactiveAppendices?.find(
+			(a) => a.letter === appendixLetter
+		);
+		if (configInteractive) {
+			throw redirect(307, `/${bookSlug}${configInteractive.componentPath}`);
 		}
 
 		// If appendix is interactive (like periodic table), redirect to component
