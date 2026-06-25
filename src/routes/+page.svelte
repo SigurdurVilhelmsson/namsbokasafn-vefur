@@ -11,6 +11,7 @@
   import type { PageData } from './$types';
   import type { CatalogueEntry, SubjectGroup } from '$lib/data/openstax-catalogue';
   import { faqItems } from '$lib/data/faq';
+  import { roster, rosterNote } from '$lib/data/about';
 
   let { data }: { data: PageData } = $props();
   let translationBooks = $derived(data.translationBooks);
@@ -173,6 +174,11 @@
       </h1>
       <p class="hero-sub anim-item" style="--anim-delay: 200ms">
         Þýddar OpenStax námsbækur með innbyggðum námsverkfærum — gjaldfrjálst og opið öllum.
+      </p>
+      <!-- Alternative tagline the editor may swap in later:
+           "Þýtt með íslenskri vélþýðingu (Erlendur) og ritstýrt af kennurum með fagþekkingu." -->
+      <p class="hero-credit anim-item" style="--anim-delay: 250ms">
+        Vélþýtt og yfirlesið af starfandi raungreinakennurum.
       </p>
       <div class="hero-actions anim-item" style="--anim-delay: 300ms">
         <a href="#kennslubaekur" class="btn-primary" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('kennslubaekur'); }}>
@@ -370,11 +376,16 @@
   <section id="um" class="about-section">
     <div class="about-grid">
       <div class="about-card">
-        <h3>Um Námsbókasafn</h3>
+        <h3>Um verkefnið</h3>
         <p>
-          Námsbókasafn er safn íslenskra þýðinga á opnum námsbókum.
-          Verkefnið miðar að því að gera hágæða námsefni aðgengilegt
-          öllum íslenskum nemendum og kennurum, gjaldfrjálst og á móðurmálinu.
+          Námsbókasafn er sjálfstætt verkefni unnið af starfandi
+          framhaldsskólakennurum. Markmiðið er að gera hágæða raungreinaefni
+          aðgengilegt öllum íslenskum nemendum, gjaldfrjálst og á móðurmálinu.
+        </p>
+        <p>
+          Efnið er þýtt með aðstoð gervigreindar og yfirlesið af kennurum með
+          sérþekkingu á viðkomandi grein. Verkefnið hófst í efnafræði og nær nú
+          einnig til líffræði og fleiri raungreina.
         </p>
       </div>
       <div class="about-card">
@@ -390,6 +401,21 @@
           <Icon name="external-link" size="sm" />
         </a>
       </div>
+    </div>
+
+    <!-- Project roster -->
+    <div class="roster-card">
+      <h3>Aðstandendur</h3>
+      <ul class="roster-list">
+        {#each roster as member (member.name)}
+          <li class="roster-item">
+            <span class="roster-name">{member.name}</span>
+            <span class="roster-detail">{member.detail}</span>
+            <a class="roster-email" href="mailto:{member.email}">{member.email}</a>
+          </li>
+        {/each}
+      </ul>
+      <p class="roster-note">{rosterNote}</p>
     </div>
   </section>
 
@@ -675,6 +701,18 @@
 
   @media (max-width: 1023px) {
     .hero-sub { margin-left: auto; margin-right: auto; }
+  }
+
+  .hero-credit {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin: -1.25rem 0 2rem;
+    max-width: 36rem;
+  }
+
+  @media (max-width: 1023px) {
+    .hero-credit { margin-left: auto; margin-right: auto; }
   }
 
   .hero-actions {
@@ -1152,6 +1190,10 @@
     margin: 0;
   }
 
+  .about-card p + p {
+    margin-top: 0.75rem;
+  }
+
   .about-card a {
     color: var(--accent-color);
     text-decoration: none;
@@ -1175,6 +1217,71 @@
 
   .about-link:hover {
     gap: 0.625rem;
+  }
+
+  /* ====================================
+     PROJECT ROSTER
+     ==================================== */
+  .roster-card {
+    max-width: 56rem;
+    margin: 1.5rem auto 0;
+    padding: 2rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+  }
+
+  .roster-card h3 {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 1rem;
+  }
+
+  .roster-list {
+    list-style: none;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .roster-item {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  .roster-name {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .roster-name::after {
+    content: " — ";
+    color: var(--text-tertiary);
+  }
+
+  .roster-email {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.875rem;
+    color: var(--accent-color);
+    text-decoration: none;
+  }
+
+  .roster-email:hover {
+    text-decoration: underline;
+  }
+
+  .roster-note {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
   }
 
   /* ====================================

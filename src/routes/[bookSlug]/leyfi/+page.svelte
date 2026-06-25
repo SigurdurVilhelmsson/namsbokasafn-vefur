@@ -12,6 +12,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { getLicence, validateAttribution } from '$lib/data/licences';
+	import { getBookCredit, compactCreditPair } from '$lib/data/bookCredits';
 	import LicenceBadge from '$lib/components/LicenceBadge.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -20,6 +21,11 @@
 	let errors = $derived(validateAttribution(attribution));
 	let valid = $derived(errors.length === 0);
 	let licence = $derived(valid ? getLicence(attribution!.derivativeLicence) : null);
+	// Rich, role-separated credit where it exists (chemistry); else a method-accurate pair.
+	let bookCredit = $derived(getBookCredit(data.bookSlug));
+	let compactPair = $derived(
+		valid ? compactCreditPair(data.book?.status ?? '', attribution!.translators) : null
+	);
 
 	$effect(() => {
 		if (!valid) {
@@ -71,18 +77,39 @@
 		</section>
 
 		<section class="colophon__section">
-			<h2>Þessi útgáfa</h2>
-			<dl>
-				<dt>Þýðing</dt>
-				<dd>{attribution.translators}</dd>
-				<dt>Breytingar</dt>
-				<dd>{attribution.modifications}</dd>
-				<dt>Leyfi þessarar útgáfu</dt>
-				<dd class="colophon__licence">
-					<LicenceBadge code={attribution.derivativeLicence} size="md" />
-					<span>{licence.fullName}</span>
-				</dd>
-			</dl>
+			<h2>Um þessa þýðingu</h2>
+			{#if bookCredit}
+				{#each bookCredit.prefaceParagraphs as para (para)}
+					<p class="colophon__preface">{para}</p>
+				{/each}
+				<h3 class="colophon__credits-heading">Aðstandendur þessarar bókar</h3>
+				<dl>
+					{#each bookCredit.creditList as line (line.label)}
+						<dt>{line.label}</dt>
+						<dd>{line.value}</dd>
+					{/each}
+				</dl>
+				<p class="colophon__forskodun">{bookCredit.note}</p>
+				<dl>
+					<dt>Leyfi þessarar útgáfu</dt>
+					<dd class="colophon__licence">
+						<LicenceBadge code={attribution.derivativeLicence} size="md" />
+						<span>{licence.fullName}</span>
+					</dd>
+				</dl>
+			{:else}
+				<dl>
+					<dt>{compactPair?.label}</dt>
+					<dd>{compactPair?.value}</dd>
+					<dt>Breytingar</dt>
+					<dd>{attribution.modifications}</dd>
+					<dt>Leyfi þessarar útgáfu</dt>
+					<dd class="colophon__licence">
+						<LicenceBadge code={attribution.derivativeLicence} size="md" />
+						<span>{licence.fullName}</span>
+					</dd>
+				</dl>
+			{/if}
 			{#if licence.notices.length > 0}
 				<ul class="colophon__notices">
 					{#each licence.notices as notice (notice)}
@@ -130,7 +157,7 @@
 				Upprunalega efnið er gefið út af OpenStax, Rice University, sem býður opnar kennslubækur
 				gjaldfrjálst. Aðgangur að frumefninu er ókeypis á
 				<a href={attribution.sourceUrl} target="_blank" rel="noopener noreferrer">openstax.org</a>.
-				Námsbókasafn er sjálfstætt verkefni og ekki tengt OpenStax.
+				{#if !bookCredit}Námsbókasafn er sjálfstætt verkefni og ekki tengt OpenStax.{/if}
 			</p>
 			<p>
 				<a href={attribution.provenanceRef} target="_blank" rel="noopener noreferrer">
@@ -181,6 +208,25 @@
 
 	.colophon__section {
 		margin-bottom: 2.5rem;
+	}
+
+	.colophon__preface {
+		color: var(--text-primary);
+		line-height: 1.65;
+		margin: 0 0 1rem;
+	}
+
+	.colophon__credits-heading {
+		font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+		font-size: 1rem;
+		margin: 1.5rem 0 0.75rem;
+		color: var(--text-primary);
+	}
+
+	.colophon__forskodun {
+		margin: 1rem 0 1.5rem;
+		color: var(--text-secondary);
+		font-size: 0.9375rem;
 	}
 
 	.colophon__section h2 {
