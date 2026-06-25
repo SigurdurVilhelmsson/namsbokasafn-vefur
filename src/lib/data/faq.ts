@@ -33,7 +33,7 @@ export const faqItems: FaqItem[] = [
 		id: 'thyding',
 		question: 'Hvernig er efnið þýtt?',
 		answer:
-			'Við notum blöndu af gervigreindarþýðingu (Miðeind/Erlendur) og yfirlestri sérfræðinga. Vélþýðing gefur góðan grunn sem yfirlesari með sérþekkingu á efninu fer yfir og lagar. Þetta tryggir bæði hröð afköst og gæði, sérstaklega hvað varðar faghugtök í raungreinum.'
+			'Flestar þýðingar eru blanda af gervigreindarþýðingu (Miðeind/Erlendur) og yfirlestri sérfræðinga. Vélþýðing gefur góðan grunn sem yfirlesari með sérþekkingu á efninu fer yfir og lagar. Þetta tryggir bæði hröð afköst og gæði, sérstaklega hvað varðar faghugtök í raungreinum. Í einhverjum tilfellum hafa kennarar þó lagt til eigin frumþýðingar á efni frá OpenStax — þá er textinn handþýddur frá grunni fremur en vélþýddur.'
 	},
 	{
 		id: 'forskodun',

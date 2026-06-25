@@ -12,6 +12,7 @@
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import LicenceBadge from '$lib/components/LicenceBadge.svelte';
 	import { getLicence } from '$lib/data/licences';
+	import { creditLine } from '$lib/data/bookCredits';
 	import ErrorMessage from '$lib/components/ErrorMessage.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
@@ -51,6 +52,10 @@
 	// undefined (the book-home block never rendered).
 	let attribution = $derived(data.book?.attribution);
 	let licence = $derived(attribution ? getLicence(attribution.derivativeLicence) : null);
+	// Method-accurate translation credit (machine vs human), not a blanket "Þýðandi".
+	let credit = $derived(
+		attribution ? creditLine(data.bookSlug, data.book?.status ?? '', attribution.translators) : null
+	);
 
 	// Book-specific, licence-correct meta description (no blanket CC BY claim).
 	let metaDescription = $derived(
@@ -170,7 +175,7 @@
 					<p><strong>Upprunalegt efni:</strong> {attribution.originalTitle}</p>
 					<p><strong>Höfundar:</strong> {attribution.originalAuthors.join(', ')}</p>
 					<p><strong>Útgefandi:</strong> {attribution.publisher}</p>
-					<p><strong>Þýðandi:</strong> {attribution.translators}</p>
+					<p class="book-attribution-credit">{credit}</p>
 					<p class="book-attribution-licence">
 						<strong>Leyfi:</strong>
 						<LicenceBadge code={attribution.derivativeLicence} size="md" />

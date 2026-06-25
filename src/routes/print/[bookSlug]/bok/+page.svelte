@@ -5,11 +5,14 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { getLicence } from '$lib/data/licences';
+	import { creditLine } from '$lib/data/bookCredits';
 
 	let { data }: { data: PageData } = $props();
 
 	let attribution = $derived(data.book.attribution);
 	let licence = $derived(getLicence(attribution.derivativeLicence));
+	// Method-accurate translation credit (machine vs human), not a blanket "Þýðing".
+	let credit = $derived(creditLine(data.book.slug, data.book.status, attribution.translators));
 
 	const today = new Date().toLocaleDateString('is-IS', {
 		year: 'numeric',
@@ -31,7 +34,7 @@
 	<h1 class="cover-title">{data.book.title}</h1>
 	<p class="cover-book-title">{data.book.subtitle}</p>
 	<p class="cover-meta">
-		Þýðing: {attribution.translators}<br />
+		{credit}<br />
 		Byggt á {attribution.originalTitle} eftir {attribution.originalAuthors.join(', ')}<br />
 		Útgefandi frumefnis: {attribution.publisher} — {attribution.sourceUrl}<br />
 		Leyfi: {licence.name} ({licence.fullName})<br />
