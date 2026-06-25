@@ -49,6 +49,10 @@
 		background: linear-gradient(150deg, var(--cover-c), color-mix(in srgb, var(--cover-c) 52%, #0b1f2a));
 		box-shadow: var(--shadow-lg);
 		font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+		/* Make the cover a query container so cover text scales with its OWN width.
+		   The landing grid lets covers stretch to full width (1 column) on phones, where
+		   a fixed-rem title looked tiny (~6% of cover width vs ~12% on desktop). */
+		container-type: inline-size;
 	}
 	/* left-edge spine highlight */
 	.book-cover::before {
@@ -98,11 +102,13 @@
 		font-weight: 800;
 		letter-spacing: -0.02em;
 		line-height: 1.05;
-		font-size: 1.25rem;
+		/* Scales with cover width (cqi); clamped so desktop stays ~as before and
+		   full-width phone covers don't blow up. */
+		font-size: clamp(1.25rem, 12cqi, 2rem);
 		overflow-wrap: break-word;
 	}
 	.cover-title.long {
-		font-size: 1.05rem;
+		font-size: clamp(1.05rem, 10cqi, 1.7rem);
 	}
 	.cover-attr {
 		position: absolute;
@@ -110,7 +116,7 @@
 		right: 13px;
 		bottom: 14px;
 		z-index: 2;
-		font-size: 0.57rem;
+		font-size: clamp(0.57rem, 5.5cqi, 0.72rem);
 		letter-spacing: 0.07em;
 		text-transform: uppercase;
 		font-weight: 600;
