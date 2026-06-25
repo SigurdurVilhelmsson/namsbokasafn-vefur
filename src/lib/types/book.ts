@@ -1,5 +1,6 @@
 import type { BookAttribution } from '$lib/data/licences';
 import { validateAttribution } from '$lib/data/licences';
+import { MACHINE_TRANSLATION_CREDIT } from '$lib/data/bookCredits';
 
 export interface BookConfig {
   id: string;
@@ -58,7 +59,7 @@ export const books: BookConfig[] = [
     description: 'Gagnvirkur veflesari fyrir efnafræðinám á framhaldsskólastigi.',
     subject: 'raunvisindi',
     coverMotif: 'atom',
-    translator: 'Sigurður E. Vilhelmsson',
+    translator: 'Erlendur (Miðeind)',
     status: 'available',
     source: {
       title: 'Chemistry 2e',
@@ -74,7 +75,7 @@ export const books: BookConfig[] = [
       originalAuthors: ['Paul Flowers', 'Klaus Theopold', 'Richard Langley', 'William R. Robinson'],
       publisher: 'OpenStax, Rice University',
       sourceUrl: 'https://openstax.org/details/books/chemistry-2e',
-      translators: 'Sigurður E. Vilhelmsson',
+      translators: MACHINE_TRANSLATION_CREDIT,
       modifications:
         'Þýtt á íslensku og staðfært úr Chemistry 2e. Breytingarnar fela í sér þýðingu á texta, hugtökum, dæmum og myndatextum yfir á íslensku.',
       derivativeLicence: 'CC-BY-4.0',
@@ -173,7 +174,7 @@ export const books: BookConfig[] = [
     description: 'Vélþýddur sýniskafli úr Microbiology.',
     subject: 'raunvisindi',
     coverMotif: 'microbe',
-    translator: 'Sigurður E. Vilhelmsson',
+    translator: 'Erlendur (Miðeind)',
     status: 'preview',
     source: {
       title: 'Microbiology',
@@ -189,7 +190,7 @@ export const books: BookConfig[] = [
       originalAuthors: ['Nina Parker', 'Mark Schneegurt', 'Anh-Hue Thi Tu', 'Philip Lister', 'Brian M. Forster'],
       publisher: 'OpenStax, Rice University',
       sourceUrl: 'https://openstax.org/details/books/microbiology',
-      translators: 'Sigurður E. Vilhelmsson',
+      translators: MACHINE_TRANSLATION_CREDIT,
       modifications:
         'Vélþýddur sýniskafli úr Microbiology, þýtt á íslensku. Breytingarnar fela í sér þýðingu á texta, hugtökum og myndatextum yfir á íslensku.',
       derivativeLicence: 'CC-BY-4.0',
@@ -225,7 +226,7 @@ export const books: BookConfig[] = [
     description: 'Vélþýddur sýniskafli úr Organic Chemistry.',
     subject: 'raunvisindi',
     coverMotif: 'benzene',
-    translator: 'Sigurður E. Vilhelmsson',
+    translator: 'Erlendur (Miðeind)',
     status: 'preview',
     source: {
       title: 'Organic Chemistry',
@@ -241,7 +242,7 @@ export const books: BookConfig[] = [
       originalAuthors: ['David Klein'],
       publisher: 'OpenStax, Rice University',
       sourceUrl: 'https://openstax.org/details/books/organic-chemistry',
-      translators: 'Sigurður E. Vilhelmsson',
+      translators: MACHINE_TRANSLATION_CREDIT,
       modifications:
         'Vélþýddur sýniskafli úr Organic Chemistry, þýtt á íslensku. Breytingarnar fela í sér þýðingu á texta, hugtökum og dæmum yfir á íslensku.',
       derivativeLicence: 'CC-BY-NC-SA-4.0',
@@ -277,7 +278,7 @@ export const books: BookConfig[] = [
     description: 'Vélþýddur sýniskafli úr College Physics 2e.',
     subject: 'raunvisindi',
     coverMotif: 'orbit',
-    translator: 'Sigurður E. Vilhelmsson',
+    translator: 'Erlendur (Miðeind)',
     status: 'preview',
     source: {
       title: 'College Physics 2e',
@@ -293,7 +294,7 @@ export const books: BookConfig[] = [
       originalAuthors: ['Paul Peter Urone', 'Roger Hinrichs'],
       publisher: 'OpenStax, Rice University',
       sourceUrl: 'https://openstax.org/details/books/college-physics-2e',
-      translators: 'Sigurður E. Vilhelmsson',
+      translators: MACHINE_TRANSLATION_CREDIT,
       modifications:
         'Vélþýddur sýniskafli úr College Physics 2e, þýtt á íslensku. Breytingarnar fela í sér þýðingu á texta, hugtökum og dæmum yfir á íslensku.',
       derivativeLicence: 'CC-BY-NC-SA-4.0',
