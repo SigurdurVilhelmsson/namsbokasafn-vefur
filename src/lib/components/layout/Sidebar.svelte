@@ -133,6 +133,33 @@
 				<Skeleton variant="sidebar" />
 			{:else}
 				<ul class="sidebar-list">
+					<!-- Front matter (e.g. Formáli) — rendered before Chapter 1, unnumbered -->
+					{#if toc.frontMatter && toc.frontMatter.length > 0}
+						{#each toc.frontMatter as section (section.file)}
+							{@const sectionPath = getSectionPath(section)}
+							{@const isCurrent = chapterParam === '00' && (sectionParam === sectionPath || sectionParam === section.slug)}
+							{@const isReadSection = isRead('00', sectionPath)}
+							<li>
+								<a
+									href="/{bookSlug}/kafli/00/{sectionPath}"
+									class="section-link front-matter-link {isCurrent ? 'section-link--current' : ''}"
+								>
+									<span class="section-dot-wrap">
+										{#if isReadSection}
+											<span class="section-dot section-dot--read"></span>
+										{:else if isCurrent}
+											<span class="section-dot section-dot--current"></span>
+										{:else}
+											<span class="section-dot section-dot--unread"></span>
+										{/if}
+									</span>
+									<div class="flex-1 min-w-0">
+										<span class="section-title">{section.title}</span>
+									</div>
+								</a>
+							</li>
+						{/each}
+					{/if}
 					{#each toc.chapters as chapter (chapter.number)}
 						{@const chapterPath = getChapterPath(chapter)}
 						{@const progressPercent = getChapterProgressPercent(chapter)}
@@ -680,6 +707,11 @@
 		color: var(--accent-color);
 		border-left-color: var(--accent-color);
 		font-weight: 500;
+	}
+
+	/* Front matter (Formáli) sits at the top level — give it slightly more weight */
+	.front-matter-link .section-title {
+		font-weight: 600;
 	}
 
 	.section-link--current:hover {

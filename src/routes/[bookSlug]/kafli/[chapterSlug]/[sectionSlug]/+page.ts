@@ -20,6 +20,14 @@ export async function entries() {
 		const tocPath = `static/content/${book.slug}/toc.json`;
 		if (!existsSync(tocPath)) continue;
 		const toc = JSON.parse(readFileSync(tocPath, 'utf-8'));
+		// Front matter (preface etc.) lives in chapter dir "00", outside toc.chapters.
+		for (const sec of toc.frontMatter ?? []) {
+			entries.push({
+				bookSlug: book.slug,
+				chapterSlug: '00',
+				sectionSlug: getSectionPath(sec)
+			});
+		}
 		for (const ch of toc.chapters) {
 			const chapterSlug = String(ch.number).padStart(2, '0');
 			for (const sec of ch.sections) {
