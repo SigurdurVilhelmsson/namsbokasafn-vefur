@@ -293,6 +293,58 @@ function loadExistingToc(bookPath) {
 	}
 }
 
+// Scan front-matter directory (chapters/00/) and generate front-matter entries.
+// Front matter (e.g. the preface / formáli) is rendered before Chapter 1 and is
+// NOT a numbered chapter — it lives in toc.frontMatter, not toc.chapters.
+// Book-agnostic: any book with a chapters/00/ directory gets front matter.
+function scanFrontMatter(bookPath, bookSlug, options) {
+	const dir = resolve(bookPath, 'chapters', '00');
+	if (!existsSync(dir)) {
+		return [];
+	}
+
+	const files = readdirSync(dir)
+		.filter((f) => f.endsWith('.html'))
+		.sort();
+
+	const entries = [];
+
+	for (const file of files) {
+		const content = readFileSync(resolve(dir, file), 'utf-8');
+		const frontmatter = parseHtmlMetadata(content);
+		const sectionType = getSectionType(file);
+
+		let title = frontmatter.title;
+		if (!title) {
+			// Fallback: derive from filename (e.g. "0-1-formali" -> "Formali")
+			title = getBasenameWithoutExt(file)
+				.replace(/^\d+-\d+-/, '')
+				.replace(/^\d+-/, '')
+				.replace(/-/g, ' ');
+			title = title.charAt(0).toUpperCase() + title.slice(1);
+		}
+
+		// Number is intentionally blank: front matter is unnumbered, like OpenStax
+		// front matter. The sidebar shows only the title ("Formáli").
+		const entry = {
+			number: '',
+			title,
+			file
+		};
+		if (sectionType) {
+			entry.type = sectionType;
+		}
+		// Only stamp reviewed modules; absence means machine-translated preview.
+		if (isReviewedModule(options.efniPath, bookSlug, '00', file)) {
+			entry.reviewed = true;
+		}
+
+		entries.push(entry);
+	}
+
+	return entries;
+}
+
 // Scan appendix directory and generate appendix entries
 function scanAppendices(bookPath) {
 	// Check for appendices in multiple possible locations
@@ -426,11 +478,11 @@ function generateToc(bookSlug, options) {
 	}
 
 	// Find chapter directories (01, 02, etc.)
-	// Exclude 99 as it's used for appendices
+	// Exclude 99 (appendices) and 00 (front matter — handled by scanFrontMatter)
 	const chapterDirs = readdirSync(chaptersDir)
 		.filter((name) => {
 			const fullPath = resolve(chaptersDir, name);
-			return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name) && name !== '99';
+			return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name) && name !== '99' && name !== '00';
 		})
 		.sort();
 
@@ -551,6 +603,13 @@ function generateToc(bookSlug, options) {
 		});
 
 		console.log(`    Chapter ${chapterNum}: ${chapterTitle} (${finalSections.length} sections)`);
+	}
+
+	// Scan for front matter (chapters/00/ — preface etc., rendered before Chapter 1)
+	const frontMatter = scanFrontMatter(bookPath, bookSlug, options);
+	if (frontMatter.length > 0) {
+		toc.frontMatter = frontMatter;
+		console.log(`  Found ${frontMatter.length} front-matter section(s)`);
 	}
 
 	// Scan for appendices
