@@ -80,6 +80,9 @@ export interface TableOfContents {
   title: string;
   attribution?: SourceAttribution;
   source?: SourceAttribution;
+  // Front matter (e.g. the preface / formáli), rendered before Chapter 1.
+  // Lives in the chapters/00/ directory; unnumbered, not part of `chapters`.
+  frontMatter?: Section[];
   chapters: Chapter[];
   // Appendices (A-M for Chemistry 2e)
   appendices?: Appendix[];

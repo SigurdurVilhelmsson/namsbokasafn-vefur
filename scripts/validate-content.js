@@ -182,6 +182,14 @@ function validateBook(bookSlug) {
 		}
 	}
 
+	// Validate front-matter files (chapters/00/ — preface etc.) exist on disk
+	for (const section of toc.frontMatter || []) {
+		const sectionPath = join(contentDir, bookSlug, 'chapters', '00', section.file);
+		if (!existsSync(sectionPath)) {
+			error(sectionPath, 0, `Front-matter file not found: ${section.file}`);
+		}
+	}
+
 	// Validate glossary
 	validateGlossary(bookSlug, toc);
 }

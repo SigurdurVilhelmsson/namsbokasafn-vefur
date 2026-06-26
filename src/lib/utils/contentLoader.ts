@@ -6,7 +6,7 @@
  * falling back to cache when offline.
  */
 
-import type { TableOfContents, SectionContent, SectionMetadata, Appendix } from '$lib/types/content';
+import type { TableOfContents, SectionContent, SectionMetadata, Appendix, Chapter } from '$lib/types/content';
 import { browser } from '$app/environment';
 
 /**
@@ -265,6 +265,23 @@ export function findChapterBySlug(toc: TableOfContents, path: string) {
  * @param sectionPath - Section path (e.g., "2-1" or "2-1-fyrstu-hugmyndir")
  */
 export function findSectionBySlug(toc: TableOfContents, chapterPath: string, sectionPath: string) {
+  // Front matter (e.g. preface / formáli): lives in chapter dir "00" and is not
+  // part of toc.chapters. Resolve it to a synthetic chapter {number: 0} so the
+  // section page's navigation logic flows naturally (no previous; next = Chapter 1).
+  if (toc.frontMatter?.length && parseInt(chapterPath, 10) === 0) {
+    const section =
+      toc.frontMatter.find((s) => s.file && s.file.replace(/\.html$/, '') === sectionPath) ??
+      toc.frontMatter.find((s) => s.slug === sectionPath);
+    if (section) {
+      const chapter: Chapter = {
+        number: 0,
+        title: toc.frontMatter[0]?.title ?? 'Formáli',
+        sections: toc.frontMatter
+      };
+      return { chapter, section };
+    }
+  }
+
   const chapter = findChapterBySlug(toc, chapterPath);
   if (!chapter) return null;
 
