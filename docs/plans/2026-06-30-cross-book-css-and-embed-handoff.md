@@ -152,6 +152,8 @@ Until then, test against a hand-authored fixture (drop the snippet above into a 
 
 ### 3a — Search-index strip (🟡 the one real fix — GATES the content sync)
 
+> **▶ Execution-ready brief:** `docs/plans/2026-06-30-vefur-task3a-search-index-strip-brief.md` (TDD steps, testability decision, exact regex, acceptance). Use it to implement 3a.
+
 `src/lib/workers/search.worker.ts` strips MathJax before indexing: `:39` removes `<mjx-container>…</mjx-container>`,
 `:40` removes block `<span class="mathjax…">…</span>`. **Neither covers the new `<math class="assistive-mathml">`
 sibling** — and for **inline** math (wrapped in `<span class="math-inline">`, which `:40` does not match), the
