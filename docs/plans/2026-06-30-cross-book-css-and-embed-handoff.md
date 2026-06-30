@@ -142,7 +142,15 @@ The hiding is **inline** by design (self-contained — so the rendered HTML need
 **These elements appear in synced content only after efni re-renders the math-bearing books and syncs.**
 Until then, test against a hand-authored fixture (drop the snippet above into a section's content).
 
-### 3a — Search-index strip (🟡 the one real fix)
+> **⏱ NOW TIME-SENSITIVE (updated 2026-06-30):** efni has **re-rendered efnafraedi-2e** — every equation in
+> `05-publication` now carries the assistive `<math>` sibling (efni PR **#205**, the combined a11y-2 + A3
+> re-render; gate: 5496 assistive-`<math>` == 5496 `<mjx-container>`). Per the efni delivery runbook
+> (`namsbokasafn-efni docs/plans/2026-06-30-efnafraedi-rerender-sync-runbook.md`, Phase 2), **Task 3a below
+> must land in this repo BEFORE that content is synced here** (`scripts/sync-content.js`) — otherwise the
+> full-text search index ingests MathML tokens from every equation. So 3a is no longer "nice to have soon";
+> it is the **gate on the sync** that delivers a11y-2 + A3 to namsbokasafn.is. 3b/3c remain verify-only.
+
+### 3a — Search-index strip (🟡 the one real fix — GATES the content sync)
 
 `src/lib/workers/search.worker.ts` strips MathJax before indexing: `:39` removes `<mjx-container>…</mjx-container>`,
 `:40` removes block `<span class="mathjax…">…</span>`. **Neither covers the new `<math class="assistive-mathml">`
