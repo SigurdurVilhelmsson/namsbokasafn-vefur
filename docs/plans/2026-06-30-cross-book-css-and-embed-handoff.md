@@ -1,14 +1,15 @@
-# Cross-book CSS + D4 embed styling — implementation handoff
+# Cross-book CSS + D4 embed styling + a11y MathML — implementation handoff
 
-**Created:** 2026-06-30 (handed off from a namsbokasafn-efni session). **Repo:** namsbokasafn-vefur.
+**Created:** 2026-06-30 (handed off from a namsbokasafn-efni session). **Updated:** 2026-06-30 (added Task 3, a11y-2 assistive MathML). **Repo:** namsbokasafn-vefur.
 **Status:** ready to implement in a fresh vefur session. **Owner:** vefur.
 
 ## Why this exists
 
 The sister repo (namsbokasafn-efni) finished its pipeline-architecture arc (Track D cross-book onboarding,
-D4 iframe embeds, B2 provenance routing — all merged). That work surfaced **two vefur-side styling tasks**
-that efni cannot do (render HTML class names are a contract; the CSS lives here). Biology is the next book
-to onboard, so its styling is the priority.
+D4 iframe embeds, B2 provenance routing — all merged) and, separately, shipped **a11y-2 assistive MathML**
+(PR #203, merged 2026-06-30). That work surfaced **three vefur-side tasks** that efni cannot do (render HTML
+class names/structure are a contract; the CSS and content-processing live here): two styling tasks (biology
+is the next book to onboard, so its styling is the priority) and one accessibility follow-up.
 
 All technical detail is also in vefur memory `css-cross-book-gaps` (auto-loaded); this doc is the
 single actionable plan.
@@ -20,7 +21,7 @@ single actionable plan.
 - "Suppress empty-glossary TOC entries" (fixlist item **E**) is an **efni-side** issue (stale efni-built
   `glossary.json`/`index.json` aggregates), handed back to efni — see memory `glossary-aggregates-stale`.
   **Not a vefur task.**
-- This handoff is **only** the two CSS tasks below.
+- This handoff is the two CSS tasks **plus** the a11y MathML follow-up (Task 3) below.
 
 **File for both tasks:** `static/styles/content.css`. Existing note rules to mirror live at
 `static/styles/content.css:227` (`article.cnx-module aside.note` base), `:264`
@@ -120,16 +121,80 @@ existing `.note-link-to-learning` rule at `content.css:264`):
 
 ---
 
+---
+
+## Task 3 — a11y-2 assistive MathML follow-ups · 🟡 Medium (one real fix) + verify items
+
+efni's **a11y-2** (PR #203, merged 2026-06-30) makes server-rendered math accessible to screen readers.
+`cnxml-render.js` (`tools/lib/mathjax-render.js`) now, **for every block and inline expression**, marks the
+visual `<mjx-container>` `aria-hidden="true"` and appends a **visually-hidden, inline-styled** sibling:
+
+```html
+<mjx-container … aria-hidden="true"><svg …></svg></mjx-container
+><math
+  class="assistive-mathml"
+  xmlns="http://www.w3.org/1998/Math/MathML"
+  display="block"
+  style="position:absolute;width:1px;height:1px;…clip:rect(0,0,0,0);…"
+  >…source MathML…</math
+>
+```
+
+The hiding is **inline** by design (self-contained — so the rendered HTML needs no CSS from this repo).
+**These elements appear in synced content only after efni re-renders the math-bearing books and syncs.**
+Until then, test against a hand-authored fixture (drop the snippet above into a section's content).
+
+### 3a — Search-index strip (🟡 the one real fix)
+
+`src/lib/workers/search.worker.ts` strips MathJax before indexing: `:39` removes `<mjx-container>…</mjx-container>`,
+`:40` removes block `<span class="mathjax…">…</span>`. **Neither covers the new `<math class="assistive-mathml">`
+sibling** — and for **inline** math (wrapped in `<span class="math-inline">`, which `:40` does not match), the
+generic tag-strip at `:42` then leaves the MathML's **text** (variable letters from `<mi>`, numbers from `<mn>`,
+operators) in the full-text index → search noise that didn't exist before (content was SVG-only).
+
+- **Fix:** add a strip for the assistive sibling **before** the generic `<[^>]*>` strip at `:42`, e.g.
+  `.replace(/<math\b[^>]*class="assistive-mathml"[\s\S]*?<\/math>/gi, '')` (lazy — MathML can't nest `<math>`).
+- **Acceptance:** after the strip, indexing a section with inline + block math yields no stray single-letter /
+  bare-number tokens from equations; a search for a real word in the surrounding prose still hits.
+
+### 3b — Verify items (🟢 likely no change, confirm)
+
+- **Print / PDF** (`static/styles/print.css` styles `.mathjax-display` / `mjx-container` at `:108`,`:151`): the
+  assistive `<math>`'s **inline** `position:absolute;clip` should keep it hidden in print too, but print.css has
+  no `<math>` rule — **verify the per-chapter/full-book PDFs (`scripts/generate-pdfs.js`) don't show duplicated
+  or stray MathML.** If they do, add a `print.css` rule hiding `.assistive-mathml`.
+- **Bionic reading** (`src/lib/actions/bionicReading.ts:15` keeps a skip-list incl. `mjx-container`): consider
+  adding `math` / `.assistive-mathml` so the transform skips it. Cosmetic only (it's visually hidden), low
+  priority.
+- **Post-deploy screen-reader validation:** once efni re-renders+syncs, confirm with a real screen reader
+  (VoiceOver/NVDA/Orca) that equations are now announced and navigable — this is the validation leg of
+  reader-plan **§ P2.5**.
+
+### 3c — Do NOT add MathML-hiding CSS to `content.css`
+
+The sibling is hidden by its **inline** style on purpose (fail-safe, self-contained). Do **not** add a
+`content.css`/`app.css` rule that hides or restyles `math` / `.assistive-mathml` in a way that could fight the
+inline style — that would re-introduce the cross-repo coupling a11y-2 deliberately avoided. (Confirmed: vefur
+`content.css` has no `math {` selector today.) `app.css` already styles `mjx-container` (the visible SVG) — leave that.
+
+- **No-action note:** `src/lib/actions/equations.ts` selects by class (`.equation`, `.mathjax-display`,
+  `.equation-content`), **not** the `<math>` tag, so it will not double-process the new sibling.
+
+---
+
 ## Suggested order
 
 1. **Task 1 (embed CSS)** — small, self-contained, unblocks biology embeds. Do first.
 2. **Task 2 biology subset** — `.note-evolution`/`.note-career`/`.note-visual-connection` + `.span-all` +
    the `.note-interactive` quick win — before biology launch.
-3. Remaining Task 2 classes (organic/physics/microbiology) as each book is onboarded.
+3. **Task 3a (search-index strip)** — small, real, and independent of the re-render (testable against a
+   fixture now); do alongside Task 1. Task 3b/3c are verify-only.
+4. Remaining Task 2 classes (organic/physics/microbiology) as each book is onboarded.
 
 ## References
 
-- vefur memory: `css-cross-book-gaps` (the source detail), `project_multibook`.
-- efni memory: `d4-iframe-embeds`, `pipeline-architecture-audit-2026-06`.
+- vefur memory: `css-cross-book-gaps` (the source detail), `project_multibook`, `a11y-assistive-math-from-efni` (Task 3).
+- efni memory: `d4-iframe-embeds`, `pipeline-architecture-audit-2026-06`, `a11y-2-assistive-mathml` (Task 3 origin).
 - efni consolidated backlog: `docs/plans/2026-06-28-pipeline-architecture-implementation-plan.md`
   § ★ Consolidated Backlog (the 🔗 vefur row).
+- a11y origin: `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md` § P2.5.
