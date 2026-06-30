@@ -121,8 +121,6 @@ existing `.note-link-to-learning` rule at `content.css:264`):
 
 ---
 
----
-
 ## Task 3 — a11y-2 assistive MathML follow-ups · 🟡 Medium (one real fix) + verify items
 
 efni's **a11y-2** (PR #203, merged 2026-06-30) makes server-rendered math accessible to screen readers.
