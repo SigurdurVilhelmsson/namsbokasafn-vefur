@@ -150,9 +150,11 @@ Until then, test against a hand-authored fixture (drop the snippet above into a 
 > full-text search index ingests MathML tokens from every equation. So 3a is no longer "nice to have soon";
 > it is the **gate on the sync** that delivers a11y-2 + A3 to namsbokasafn.is. 3b/3c remain verify-only.
 
-### 3a — Search-index strip (🟡 the one real fix — GATES the content sync)
+### 3a — Search-index strip (✅ SHIPPED — gate satisfied)
 
-> **▶ Execution-ready brief:** `docs/plans/2026-06-30-vefur-task3a-search-index-strip-brief.md` (TDD steps, testability decision, exact regex, acceptance). Use it to implement 3a.
+> **✅ DONE 2026-06-30 — vefur PR #176 MERGED to `main` (`0c219e1`).** `htmlToPlainText` extracted out of the worker into `src/lib/utils/html.ts` (exported, worker-safe; `search.worker.ts` imports it). The leak was **inline math only** (block `.mathjax-display` was already stripped); regex hardened to `\bassistive-mathml\b` after grepping the real efni `05-publication` (~5,496 hits, no namespace prefix). Tests in `src/lib/utils/html.test.ts` (RED-verified). Phase 2 gate satisfied → **Phase 3 (sync+deploy) is lead-side on the deployment server.** efni runbook updated via efni PR #206.
+
+> **▶ Execution-ready brief:** `docs/plans/2026-06-30-vefur-task3a-search-index-strip-brief.md` (TDD steps, testability decision, exact regex, acceptance).
 
 `src/lib/workers/search.worker.ts` strips MathJax before indexing: `:39` removes `<mjx-container>…</mjx-container>`,
 `:40` removes block `<span class="mathjax…">…</span>`. **Neither covers the new `<math class="assistive-mathml">`

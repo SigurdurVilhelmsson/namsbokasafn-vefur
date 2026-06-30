@@ -1,5 +1,7 @@
 # Brief — Task 3a: strip assistive MathML from the search index (GATES the efni content sync)
 
+> **✅ SHIPPED 2026-06-30 — vefur PR #176 MERGED to `main` (`0c219e1`).** Implemented per this brief, with two deltas the brief invited: (1) `htmlToPlainText` extracted into `$lib/utils/html.ts` (not a new `htmlToPlainText.ts` and not `searchIndex.ts` — the latter is browser-coupled), and (2) regex hardened to `\bassistive-mathml\b` after grepping the real efni `05-publication` (~5,496 hits, no namespace prefix, class is first attr). Leak confirmed inline-only. Tests in `src/lib/utils/html.test.ts`. **Phase 3 sync+deploy is lead-side on the deploy server.**
+
 **Repo:** namsbokasafn-vefur. **Date:** 2026-06-30. **Size:** S (one real fix + one test, possibly a tiny extract-for-test refactor). **Type:** bug fix, TDD.
 **Parent handoff:** `docs/plans/2026-06-30-cross-book-css-and-embed-handoff.md` § Task 3 (this is the execution-ready version of 3a).
 
