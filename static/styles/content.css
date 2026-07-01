@@ -206,7 +206,7 @@ article.cnx-module figure figcaption {
   font-style: italic;
   color: var(--os-text-body);
   margin-top: 10px;
-  text-align: center;
+  text-align: left;
   line-height: 1.4;
 }
 
