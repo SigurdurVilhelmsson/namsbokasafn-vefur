@@ -249,13 +249,42 @@ figure img {
   object-fit: contain;
 }
 
-figcaption {
-  font-size: 0.9em;
+/* Descriptive caption body: serif italic, left-aligned. Selector matches
+   content.css's `article.cnx-module figure figcaption` specificity so print
+   wins by load order (print.css is linked after content.css). The image stays
+   centered via the parent `figure`'s text-align: center. */
+article.cnx-module figure figcaption {
+  font-family: "Literata", Georgia, serif;
+  font-style: italic;
+  font-size: 9.5pt;
+  line-height: 1.4;
   color: #444;
   margin-top: 0.4em;
-  /* Override the centered `figure` text-align; captions read left-aligned.
-     The figure image stays centered via the parent's text-align: center. */
   text-align: left;
+}
+
+/* Bold amber label ("Mynd 15.3" / "Tafla 1.2") — sans, upright, not italic.
+   Overrides content.css's blue --os-link-color label (same specificity → wins
+   by order). */
+article.cnx-module figure figcaption .figure-label,
+article.cnx-module table caption .table-label {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 9.5pt;
+  color: #c78c20;
+}
+
+/* Table caption matches the figure caption (serif italic, left, below table). */
+article.cnx-module table caption {
+  caption-side: bottom;
+  font-family: "Literata", Georgia, serif;
+  font-style: italic;
+  font-size: 9.5pt;
+  line-height: 1.4;
+  color: #444;
+  text-align: left;
+  margin-top: 6pt;
 }
 
 /* =====================================================================
