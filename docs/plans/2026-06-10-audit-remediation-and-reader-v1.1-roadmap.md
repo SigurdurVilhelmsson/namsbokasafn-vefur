@@ -111,3 +111,13 @@ the practice-pipeline data wired up in Phase 1.
 - The completion celebration gets no cleanup investment — P0.2 replaces it.
 - Section-page lifecycle fixes (PR #110) are the foundation P0.4's
   read-detection rewire builds on.
+
+## Related plans (parked, pick up when convenient)
+
+- **PDF output redesign** — `docs/plans/2026-07-01-pdf-redesign-plan.md`. Full
+  design spec (typography, margins, colour, binding) + phased implementation for
+  a _designed_, interactive (bookmarks / clickable TOC / cross-refs / glossary /
+  exercise↔answer links) and print/bind-friendly (spiral, 4-hole) PDF, with
+  complete CC-BY / CC-BY-NC-SA attribution on both full-book and per-chapter
+  artifacts. Benchmarked against the OpenStax `Chemistry2e-WEB.pdf` reference
+  (gitignored in repo root). Not started; Phase 0 spikes gate the rest.
