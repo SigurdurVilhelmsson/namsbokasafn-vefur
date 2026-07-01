@@ -299,13 +299,20 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 ## Phase 4 — CC-BY hardening
 
-### Task 4.1: Colophon on standalone chapter PDFs
+### Task 4.1: Colophon on standalone chapters — and keep it OUT of the book
 
-**Files:** `src/routes/print/[bookSlug]/kafli/[chapterSlug]/+page.svelte`, `static/styles/print.css`.
+**Reviewer question (2026-07-01):** should the per-chapter colophon be stripped from the whole-book version, and are two render tracks more logical? **Findings:**
 
-- [ ] Add a compact colophon (title/authors/publisher/source/licence+URL/translators/modification note) as the last page (or a footer band) of each standalone chapter, since a chapter distributed alone still needs full attribution. Data from `book.attribution` + `getLicence(...)`; **fail loud** if missing.
-- [ ] **Acceptance:** every `*-kafli-NN.pdf` carries complete attribution; NC-SA books show NonCommercial + ShareAlike from descriptor flags.
-- [ ] Commit: `feat(pdf): CC-BY colophon on standalone chapters`.
+- The chapter print route (`kafli/[chapterSlug]/+page.svelte`) **already** renders a `.print-attribution` colophon at the end (lines 42–52), and `generate-pdfs.js` reuses that one raw render for **both** the standalone chapter PDF **and** the book merge — so the book currently carries the chapter colophon **22 times** (verified: `breytingar gerðar` × 22 in `-bok.pdf`), redundant with the front-matter colophon. This must be fixed.
+- **Do NOT split into two full render tracks.** Rendering each chapter twice (bare-for-book + with-extras-for-standalone) doubles a ~3-min build for no real gain. Chapter-first rendering is deliberate and correct: a single whole-book `page.pdf()` of ~1400 pages is memory-risky; per-chapter renders are bounded and the pdf-lib merge is cheap. **The right pattern is: render chapter _content_ once, then diverge standalone vs book at the pdf-lib assembly stage** (they already load the raw separately — `standalone` vs `src`).
+
+**Files:** `kafli/[chapterSlug]/+page.svelte` (remove inline colophon), a small colophon render (new tiny route or reuse `/bok` colophon), `scripts/generate-pdfs.js`.
+
+- [ ] Move the colophon **out** of the shared chapter content render. Render the colophon once (it's identical for every chapter — same `book.attribution`) and **append it via pdf-lib only to the standalone** `*-kafli-NN.pdf`; the book merge copies colophon-free chapters. (Alternative if kept inline: drop the trailing colophon page(s) in the book's `copyPages` — but a known-size appended page is more robust than page-boundary detection.)
+- [ ] Upgrade the standalone colophon to the full set (title/authors/publisher/source/**licence+URL**/translators/**modification statement**) matching the `/bok` cover colophon (Task 1.5); **fail loud** if missing. NC-SA books show NonCommercial + ShareAlike from descriptor flags.
+- **Keep in the book:** the chapter **cover pages** (chapter number + title) stay — they are desirable chapter dividers (cf. OpenStax chapter openers). Only the end-of-chapter attribution colophon is stripped from the book.
+- [ ] **Acceptance:** every `*-kafli-NN.pdf` carries the full colophon once; the book has the colophon **only** in front matter (0 per-chapter colophons — `breytingar gerðar` count drops to 0 in `-bok.pdf`); chapter dividers still present.
+- [ ] Commit: `feat(pdf): standalone-only CC-BY colophon (stripped from book)`.
 
 ### Task 4.2: PDF metadata + optional XMP
 
