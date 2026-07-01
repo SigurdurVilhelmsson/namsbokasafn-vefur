@@ -395,8 +395,20 @@ article.cnx-module div.equation mjx-container {
    ===================================================================== */
 
 a {
-  color: #0a4f88;
+  color: #8a5e14;
   text-decoration: none;
+}
+
+/* Interactive content links (cross-references, exercise↔answer, chapter-outline)
+   now resolve in the assembled book (see generate-pdfs.js dest rebuild). Style
+   them dark-amber + underline so they read as links — the underline (not colour
+   alone) keeps them legible in a greyscale/B&W copy. Overrides content.css's
+   blue `--os-link-color` (same specificity → wins by load order). */
+article.cnx-module a[href] {
+  color: #8a5e14;
+  text-decoration: underline;
+  text-underline-offset: 1.5px;
+  text-decoration-thickness: 0.5pt;
 }
 
 a[href]:not([href^="#"]):not([href^="/"])::after {
