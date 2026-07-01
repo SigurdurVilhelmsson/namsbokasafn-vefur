@@ -16,6 +16,8 @@ const SKIP_SELECTORS = [
 	'.mathjax-display',
 	'.math-inline',
 	'.equation-wrapper',
+	'math',
+	'.assistive-mathml',
 	'svg',
 	'script',
 	'style',
