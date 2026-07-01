@@ -553,9 +553,35 @@ article.cnx-module p {
 /* Learning objectives: keep visually distinct but compact. */
 article.cnx-module .learning-objectives {
   background: #fdf6e7;
-  border-left: 4px solid #c78c20;
+  border-left: 5px solid #c78c20;
   padding: 0.6cm 0.8cm;
   margin: 0.6cm 0;
+}
+
+/* =====================================================================
+   Callouts — greyscale-safe + "designed".
+
+   Every note/example already carries a full border + bold label (.note-type /
+   .example-label), which survives a B&W (spiral/punch) copy. We thicken the
+   LEFT edge into an accent bar in the block's own semantic colour so the type
+   reads at a glance and the block looks intentional; the light tint fills stay
+   as-is (semantic, allowed — but never the sole signal). Brand-navigation boxes
+   (chapter outline) get an amber accent to match the section palette.
+   ===================================================================== */
+article.cnx-module aside.note,
+article.cnx-module aside.example {
+  border-left-width: 5px;
+}
+
+article.cnx-module .chapter-outline {
+  border-left: 5px solid #c78c20;
+}
+
+/* Horizontal rules in brand amber, not default grey. */
+article.cnx-module hr {
+  border: 0;
+  border-top: 1px solid #c78c20;
+  margin: 1.4em 0;
 }
 
 article.cnx-module .learning-objectives h2 {
