@@ -1,6 +1,6 @@
 # PDF Output Redesign — Design Spec & Implementation Plan
 
-> **Status:** Planned / not started. Parked for pickup when convenient. Created 2026-07-01.
+> **Status:** **Phase 0 spikes COMPLETE (2026-07-01)** on branch `feature/pdf-redesign` — both spikes pass; the link-reconstruction risk is retired (decision recorded below → Phase 3 unblocked). Next: Phase 1 (CSS-only visual redesign). Created 2026-07-01.
 > **For agentic workers:** use `superpowers:subagent-driven-development` or `superpowers:executing-plans` to implement task-by-task. Steps use `- [ ]` checkboxes.
 > **Attached to:** `docs/plans/2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md` (§ Planned) and the open-work triage `docs/plans/2026-06-30-open-work-triage-vs-efni.md` (backlog).
 
@@ -130,21 +130,23 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 **Files:** `static/styles/print.css` (temp branch).
 
-- [ ] Add `.reading-content, article.cnx-module { font-family: "Literata", Georgia, serif; font-size: 10.5pt; line-height: 1.45; }` (Literata `@font-face` is already loaded globally; confirm it is available on `/print/*` — if not, add `@font-face` to `print.css` pointing at `/fonts/Literata-*.woff2`).
-- [ ] Regenerate one chapter: `node scripts/generate-pdfs.js --book efnafraedi-2e` then inspect `static/downloads/efnafraedi-2e/efnafraedi-2e-kafli-15.pdf`.
-- [ ] `pdffonts static/downloads/efnafraedi-2e/efnafraedi-2e-kafli-15.pdf` → **Expected:** Literata embedded/subset, not Helvetica, for body runs.
-- [ ] Rasterize a content page (`pdftoppm -png -r 110 -f 4 -l 4 …`) and visually confirm serif body + unchanged math.
-- **Acceptance:** body renders in Literata serif; math/figures unaffected; no font-fallback boxes on Icelandic glyphs (á ð é í ó ú ý þ æ ö).
+- [x] Add serif body to `print.css` document defaults: `font-family: "Literata", Georgia, serif; font-size: 10.5pt; line-height: 1.45;`. Literata `@font-face` comes from `app.css` (loaded globally by the root layout, so present on `/print/*`); Task 1.1 will add a belt-and-braces `@font-face` to `print.css` so print never depends on `app.css`.
+- [x] Rendered one chapter (`/print/efnafraedi-2e/kafli/15`) via a minimal Playwright driver (confirms **Chromium runs in this environment** — `~/.cache/ms-playwright/chromium-1228`).
+- [x] `pdffonts` → **Literata embedded/subset** for all body runs (Type3 custom-encoded, `emb/sub/uni = yes`); **no Helvetica/Arial** for body text.
+- [x] Rasterized a content page — serif body confirmed, math/figures unaffected.
+- **Acceptance MET:** body renders in Literata serif; math/figures unaffected; Icelandic glyphs (á ð é í ó ú ý þ æ ö) all intact, no fallback boxes.
 
 ### Task 0.2: pdf-lib link-reconstruction spike (the risk)
 
 **Files:** `scripts/lib/pdf-links.js` (new, spike), a throwaway driver.
 
-- [ ] Build a 2-chapter fixture: render `/print/efnafraedi-2e/kafli/03` and `/kafli/15` to PDFs, merge with `copyPages` (mirror `generate-pdfs.js`).
-- [ ] Write `defineNamedDest(doc, name, pageRef, top)` that inserts into the catalog `/Names /Dests` name tree, and `addGoToLink(page, rect, name)` that adds a `/Annots` `/Link` with `/A << /S /GoTo /D (name) >>`.
-- [ ] Prove: a link annotation on chapter-03's page jumps to a named dest on chapter-15's page **in the merged book**. Open in a viewer (or assert the `/Dests` entry resolves to the correct merged page ref via pdf-lib).
-- [ ] Also test the **fix-up path**: read the link annotations Chromium already emitted for `<a href="#id">` on a single-chapter PDF (`page.node.Annots`), read their rects, and re-target them to registry dests after merge.
-- **Acceptance:** a decision recorded in the plan — **(A)** rebuild all links from scratch in pdf-lib using rects we compute, or **(B)** harvest Chromium's annotation rects and re-target their destinations. Whichever proves reliable becomes the Phase 3 approach. If neither is reliable, fall back to _outline-only_ navigation (Phase 2) and mark Phase 3 blocked.
+- [x] Built the 2-chapter fixture by `copyPages`-merging the existing kafli-03 + kafli-15 PDFs (mirrors `generate-pdfs.js`), in `.pdf-spike-driver.mjs`.
+- [x] Implemented `defineNamedDest` + `addGoToLink` **and** the harvest/rebase utilities in `scripts/lib/pdf-links.js` (real module, not throwaway). Note: Chromium uses the catalog **`/Dests` name-dictionary**, not the `/Names /Dests` string tree — so the utilities target `/Dests`.
+- [x] **Proved cross-chapter jump:** after harvest/rebase, a name owned by kafli-15 resolves to the correct merged page (39, in kafli-15's range) — verified through a **save→reload round-trip**, and the target page rasterized to genuine kafli-15 content (Mynd 15.1 flúorít).
+- [x] **Proved synthetic inject:** `defineNamedDest` + `addGoToLink` on a kafli-03 page → a kafli-15 dest resolves correctly after reload; both injected annotations persist. This is the mechanism for TOC/glossary/answer links (which have **no** Chromium source anchor).
+- [x] Characterised the corpus (all 21 chapters): **792** internal name-dest links + **146** external URI links (URIs are all `http(s)`, self-contained, already survive the merge — no work needed); **0** array-dests, **0** `/GoTo`-action, **0** `/GoToR`. Collisions across chapters: **only `fnref-N`** (footnote-return anchors, intra-chapter, cosmetic); `CNX_Chem_NN_*` content ids are globally unique. **No genuine cross-chapter content cross-references exist in efnafraedi-2e** (OpenStax chem refs stay within-module) — so cross-chapter had to be proven by synthetic injection, per above.
+
+**DECISION (recorded 2026-07-01): approach (B), refined — harvest + rebase, do _not_ rebuild from rects.** Chromium already emits every internal `<a href="#id">` as a **name-object `/Dest` Link annotation**, and those annotations **survive `copyPages`** onto the merged pages (938/938 present in the current `-bok.pdf`); what `copyPages` drops is the catalog `/Dests` dict, so the names dangle. Phase 3 therefore does **not** touch the surviving annotations or compute any rects for content links: it harvests each chapter's `/Dests`, rebases page refs to merged indices, and writes one combined `/Dests` (`harvestDests` → `findCollidingNames` → `mergeChapterDests` → `writeMergedDests`). Colliding names (`fnref-*` only) are namespaced per chapter; everything else stays global so cross-chapter resolution works. Constructs with no source anchor (TOC rows Task 2.3, back-of-book glossary Task 3.4, exercise↔answer Task 3.3 if those aren't `<a href>` in print HTML) are built with `defineNamedDest` + `addGoToLink`. **Phase 3 is UNBLOCKED.** Fallback (outline-only) is not needed.
 
 ---
 
