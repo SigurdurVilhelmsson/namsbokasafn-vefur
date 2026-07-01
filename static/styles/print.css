@@ -32,8 +32,13 @@ html,
 body {
   background: #ffffff !important;
   color: #1a1a1a !important;
-  font-size: 11pt;
-  line-height: 1.55;
+  /* PDF redesign Phase 0.1/1.1: serif body (Literata) — the single
+     highest-impact change vs the OpenStax benchmark. @font-face is provided by
+     app.css, which the root layout loads globally on /print/* too; Task 1.1
+     adds a belt-and-braces @font-face here so print never depends on app.css. */
+  font-family: "Literata", Georgia, serif;
+  font-size: 10.5pt;
+  line-height: 1.45;
 }
 
 body {
