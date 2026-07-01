@@ -1,3 +1,11 @@
+> ⛔ **SUPERSEDED (2026-07-01).** efni investigated and this doc's **root-cause theory is wrong** — the
+> `fs-idp→fs-idm` "divergence" is just a source **module boundary**, and efni's id pairing is 100% correct
+> (0 orphan answers, consistent ids+numbers). The real cause: `cnxml-render` numbers EOC exercises
+> **continuously across subsections** while the reader assumes **odd number ⇒ has answer** (`answerLinks.ts`
+> parity skip), so in ch12–17 answered exercises drift onto even numbers → dead links **and** unreachable
+> answers. Corrected diagnosis + the fix: `namsbokasafn-efni/docs/handoffs/2026-07-01-exercise-answer-has-answer-signal.md`.
+> The symptom (ch12–17 broken) and the affected-chapter list below remain accurate; only the _cause_ was wrong.
+
 # Handoff → namsbokasafn-efni: exercise↔answer id/number mismatch
 
 > **From:** vefur PDF-redesign session, 2026-07-01. **For:** efni (content/pipeline debugging).
