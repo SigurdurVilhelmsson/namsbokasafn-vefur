@@ -203,6 +203,30 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 - [ ] Commit: `feat(pdf): binding-edge margin for spiral/4-hole`.
 - [ ] **Re-benchmark checkpoint:** rasterize p4 + cover + a figure page; compare to OpenStax; note residual gaps.
 
+### Task 1.7: Pagination cohesion + equation density (keep examples whole)
+
+**Files:** `static/styles/print.css`. **Added after review feedback (2026-07-01):** examples/notes/figures/tables must not split across pages where avoidable, and a worked example must stay with its "Kannaðu þekkingu þína" (test-your-knowledge). Two levers, in priority order: **(a) density** — reclaim wasted vertical space so more examples fit a page; **(b) cohesion** — control where the residual breaks land.
+
+- **Structure finding:** "Kannaðu þekkingu þína" is authored _inside_ `<aside class="example">` (nested, last child), so an example and its test-your-knowledge are one HTML block and stay together whenever the block fits a page.
+
+- **(a) Equation density — the dominant lever (done).** `content.css` gives every `div.equation` 20px margins + 0.25rem padding and an inner 10px `mjx-container` padding — fine on screen, wasteful in print where worked examples stack many calculation steps. Tightened in print to `div.equation { margin: 0.35em; padding: 0 }` + inner `padding: 1px` + display-math `margin: 0.35em`. **Measured on kafli-15 (16 examples, A4 content box ≈ 956px, via a browser `getBoundingClientRect` pass):**
+  | metric | before | after tightening |
+  | --- | --- | --- |
+  | examples whose **core** (problem+solution) alone > 1 page | 8 | **2** (15.12, 15.16) |
+  | examples whose **full** block > 1 page | 14 | 6 |
+  | kafli-15 total pages | 63 | **53** (−16%) |
+  Equations remain visually well-spaced (not cramped); Dæmi 15.6 went from spanning 2 pages to fitting whole (incl. test-your-knowledge).
+
+- **(b) Cohesion — seam-break (done; policy confirmed by reviewer).** Removed `aside.example` from the global `break-inside: avoid` list; instead fence the core so the problem+solution can't split (each direct child `break-inside: avoid`, `break-before: avoid` between consecutive core children) while leaving the nested check-knowledge as the single permitted break point. So: example stays whole when it fits; for the ~4 borderline cases (core fits, full block doesn't) the test-your-knowledge drops to the next page instead of leaving a ~40% gap; **never splits mid-solution.** Seam protection: `break-after: avoid` on `.note-type`/note `h4`/`.para-title`/example label so no heading is stranded.
+
+- **Unavoidable residual:** 2 of 16 examples (15.12, 15.16) have a core taller than one A4 page even when tight — physically impossible to keep whole. Verified they break **gracefully** (between calculation steps, no mid-equation split, no stranded heading; 15.16 breaks before the final mass calc, check-knowledge concludes on the next page).
+
+- [x] Equation density tightening (measured 8→2 oversized cores, 63→53 pages).
+- [x] Example core-fencing + test-your-knowledge seam-break; heading seam protection.
+- [ ] **Phase 5 QA must include:** a scan for (a) any example split mid-solution, (b) any mid-equation/stranded-heading break, (c) excessive (> ~⅓ page) whitespace at page feet. Re-measure oversized-core counts if content changes materially.
+- **Not doing (documented):** height-based conditional cohesion isn't expressible in CSS; a measurement-based JS repagination pass is possible but out of scope — revisit only if QA finds systematically bad whitespace. Could tighten paragraph spacing further (already 0.5em) but equation spacing was the dominant lever; leave paragraphs for readability.
+- [ ] Commit: `style(pdf): tighten equation spacing` + `style(pdf): example pagination cohesion`.
+
 ---
 
 ## Phase 2 — Navigation (outline + TOC links + real fonts)
