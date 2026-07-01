@@ -267,6 +267,14 @@ article.cnx-module aside.note.link-to-learning {
   border-color: var(--note-link-learning-border);
 }
 
+/* Interactive (simulations / "Link to Learning" variant, biology + physics) - Blue tint.
+   Cross-book shared class (rendered as `note note-interactive`); mirrors
+   .note-link-to-learning. Removed from efni KNOWN_GAPS 2026-06-30. */
+article.cnx-module aside.note-interactive {
+  background-color: var(--note-link-learning-bg);
+  border-color: var(--note-link-learning-border);
+}
+
 /* Chemistry in Everyday Life - Yellow/Orange tint */
 article.cnx-module aside.note-chemistry.note-everyday-life,
 article.cnx-module aside.note.note-chemistry.everyday-life {
