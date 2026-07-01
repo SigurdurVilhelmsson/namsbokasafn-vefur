@@ -275,34 +275,26 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 **Files:** `scripts/lib/pdf-links.js`, `scripts/lib/pdf-links.test.js`.
 
 - **Phase 0 already built the utilities** in `scripts/lib/pdf-links.js`: `harvestDests`, `findCollidingNames`, `mergeChapterDests`, `writeMergedDests` (the harvest+rebase path — the recorded 0.2 decision), plus `defineNamedDest` + `addGoToLink` for synthetic links. The registry approach is settled; **no rect-harvest/rect-compute choice remains**.
-- [ ] Remaining 3.1 work: wire the harvest/rebase utilities into `generate-pdfs.js`'s merge loop (call `harvestDests` per chapter with its page offset, accumulate, `writeMergedDests` on the merged doc). Section/figure page offsets come from Task 2.2's per-section page measurement.
-- [ ] **CARRY-OVER (owed from Phase 0):** `scripts/lib/pdf-links.js` shipped in commit `f9f048f` **without its Vitest** — the mechanism was proven by a throwaway spike driver, not a committed test. Add `scripts/lib/pdf-links.test.js` on a **synthetic fixture PDF** (build a 2-page doc in-memory, register a dest, assert it resolves after save→reload; assert `addGoToLink` annotation present; assert `findCollidingNames`/`mergeChapterDests` namespacing). Must not depend on the gitignored `static/downloads/` artifacts.
-- [ ] Commit: `feat(pdf): anchor registry wiring + link-utility tests`.
+- [x] Wired the harvest/rebase utilities into `generate-pdfs.js`'s merge loop (Phase 2 commit `7a3ffe8`): `harvestDests` per chapter/appendix/glossary with its merged offset, accumulate, `writeMergedDests`. Book `/Dests` 0→805.
+- [x] **CARRY-OVER done:** `scripts/lib/pdf-links.test.js` — 9 hermetic Vitest cases on synthetic in-memory PDFs (round-trip resolve, annotation shape, collider namespacing). Commit `test(pdf): Vitest for pdf-links utilities`.
 
-### Task 3.2: Cross-reference links
+### Task 3.2: Cross-reference links — DONE
 
-**Files:** `scripts/generate-pdfs.js`.
+- **Key realisation:** these did **not** need per-`<a>` GoTo injection. The content `<a href="#id">` links are already Chromium name-dest annotations; the Phase 2 harvest/rebase makes them resolve. So 3.2 was just **styling** (Task 3.2 commit): `article.cnx-module a[href]` → dark-amber `#8a5e14` + underline (greyscale-legible), overriding content.css blue. Verified: "Mynd 15.x" + chapter-outline refs jump and read as links.
+- [x] Commit: `style(pdf): dark-amber underlined content links`.
 
-- [ ] For every content `<a href="#id">`, add a GoTo link to the registry dest. Style handled in CSS (dark-amber underline).
-- [ ] **Acceptance:** "Mynd 15.2", section/equation refs jump correctly across chapters.
-- [ ] Commit: `feat(pdf): working cross-reference links`.
+### Task 3.3: Exercise ↔ answer links — DEFERRED (needs render-time injection)
 
-### Task 3.3: Exercise ↔ answer links
+- **Verified:** exercise↔answer links are **reader-only** — the answer-key HTML has **0** `<a href>` and exercises only 4 (incidental). `answerLinks.ts` builds the pairing at runtime in the reader, so the print HTML has no anchors to harvest.
+- **Approach when picked up (deferred):** don't compute rects in pdf-lib — instead **replicate `answerLinks.ts` at render time in the print loader** (transform the EOC/answer-key HTML to wrap exercise numbers + answer entries in `<a href="#…">` with a shared id scheme). Then Chromium emits the annotations and the existing harvest/rebase resolves both directions — same pattern as the clickable TOC. Same mechanism unlocks glossary term-links (3.4 below).
 
-**Files:** `scripts/generate-pdfs.js`, possibly `src/routes/print/.../+page.svelte` to ensure ids exist.
+### Task 3.4: Back-of-book glossary — PAGE DONE, term-links deferred
 
-- [ ] **CARRY-OVER (verify first, from Phase 0):** check whether the exercise↔answer targets are already emitted as `<a href="#id">` in the **print-route HTML** (in which case Chromium emits harvestable name-dest annotations and this is free via the harvest path — like the 792 content links) **or** whether `answerLinks.ts` builds them at runtime in the reader only (in which case the print HTML has no anchors and these links must be **synthetically injected** with `defineNamedDest`/`addGoToLink`, mirroring the `answerLinks.ts` id scheme). Inspect a rendered EOC/answer-key chapter's `/Dests` + annotations to decide before writing code.
-- [ ] Bidirectional GoTo links: exercise number → answer-key entry; answer → exercise.
-- [ ] **Acceptance:** both directions jump; verify on a chapter with EOC + answer key.
-- [ ] Commit: `feat(pdf): exercise↔answer navigation`.
+**Files:** new `src/routes/print/[bookSlug]/ordabok/{+page.ts,+page.svelte}`, `scripts/generate-pdfs.js`, `bok/+page.svelte` (TOC row), `print.css`.
 
-### Task 3.4: Back-of-book glossary + term links
-
-**Files:** new `src/routes/print/[bookSlug]/ordabok/+page.svelte` (or glossary block in `/bok`), `scripts/generate-pdfs.js`.
-
-- [ ] Render glossary from `glossary.json` with per-term `id`s; assemble it after appendices. Link the **first occurrence per section** of each `<dfn class="term">` → its glossary entry; entry back-links to first use. Optionally set the link annotation `/Contents` to the (short) definition for hover-tooltip viewers.
-- [ ] **Acceptance:** clicking a term jumps to its definition; glossary entries back-link; no over-linking (one link per term per section).
-- [ ] Commit: `feat(pdf): back-of-book glossary + term links`.
+- [x] **Glossary page:** renders all 753 terms from `glossary.json`, Icelandic-collated, two-column, each with a stable `gloss-N` id. `generate-pdfs` renders it once, measures it (pass 1), merges it after the appendices with continuous folios + a running header, an **outline bookmark ("Orðaskrá")**, and a **clickable TOC row** (`#ordaskra`, via the invisible-target trick + `toc-pages.json` `glossaryPage`).
+- [ ] **Term-links (deferred, needs render-time injection like 3.3):** link the **first `<dfn class="term">` per section** → its `gloss-N` entry; entry back-links to first use. The `gloss-N` ids are already in place; the remaining work is the render-time `<dfn>`→`<a href="#gloss-…">` transform in the print loader + a term→id map.
+- [x] Commit (page): `feat(pdf): back-of-book glossary page`.
 
 ---
 

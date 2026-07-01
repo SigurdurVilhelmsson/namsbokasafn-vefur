@@ -708,6 +708,47 @@ button,
 }
 
 /* =====================================================================
+   Back-of-book glossary (print ordabok route). Two columns for density.
+   ===================================================================== */
+
+.print-glossary {
+  break-before: page;
+  page-break-before: always;
+  column-count: 2;
+  column-gap: 1cm;
+  font-size: 9.5pt;
+  line-height: 1.35;
+}
+
+.print-glossary dl {
+  margin: 0;
+}
+
+.print-glossary .gloss-entry {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin: 0 0 0.4em;
+}
+
+.print-glossary dt {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.print-glossary dt .gloss-en {
+  font-family: "Literata", Georgia, serif;
+  font-weight: 400;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.print-glossary dd {
+  margin: 0;
+  color: #333;
+}
+
+/* =====================================================================
    Tighten oversized content.css spacing for print density.
    ===================================================================== */
 
