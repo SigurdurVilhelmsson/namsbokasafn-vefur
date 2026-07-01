@@ -722,6 +722,23 @@ article.cnx-module hr {
   margin: 1.4em 0;
 }
 
+/* =====================================================================
+   Machine-translation watermark.
+
+   Unreviewed (machine-translated) sections carry a faint repeating "VÉLÞÝTT
+   EFNI" watermark so a PDF built before proofreading is unmistakably marked —
+   essential while most content is still MT preview. Driven by section.reviewed
+   (toc.json): the print loader adds .mt-content to the <article>, so the mark is
+   PER SECTION (a partly-reviewed chapter watermarks only its MT sections). The
+   tiled SVG background repeats across every page the section spans; the
+   generator prints backgrounds (printBackground: true). Kept very light (6%) so
+   it never impairs reading, and grey so it survives a B&W copy.
+   ===================================================================== */
+article.cnx-module.mt-content {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%22330%22 height%3D%22230%22%3E%3Ctext x%3D%22165%22 y%3D%22115%22 fill%3D%22%234a4a4a%22 fill-opacity%3D%220.06%22 font-family%3D%22sans-serif%22 font-size%3D%2225%22 font-weight%3D%22700%22 letter-spacing%3D%222%22 text-anchor%3D%22middle%22 transform%3D%22rotate(-32 165 115)%22%3EV%C3%89L%C3%9E%C3%9DTT EFNI%3C%2Ftext%3E%3C%2Fsvg%3E");
+  background-repeat: repeat;
+}
+
 article.cnx-module .learning-objectives h2 {
   margin-top: 0;
   font-size: 1.05rem;

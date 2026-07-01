@@ -229,6 +229,15 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 - **Not doing (documented):** height-based conditional cohesion isn't expressible in CSS; a measurement-based JS repagination pass is possible but out of scope — revisit only if QA finds systematically bad whitespace. Could tighten paragraph spacing further (already 0.5em) but equation spacing was the dominant lever; leave paragraphs for readability.
 - [ ] Commit: `style(pdf): tighten equation spacing` + `style(pdf): example pagination cohesion`.
 
+### Task 1.8: Transparency — PDF build date + MT watermark
+
+**Reviewer requests (2026-07-01):** (a) show the PDF creation date so readers can tell which version they hold (PDFs are regenerated as proofread content lands); (b) mark machine-translated (unreviewed) content — essential while most content is still MT preview (efnafraedi-2e is **212/216 sections unreviewed**; the other four books are 100% MT).
+
+- [x] **Build date on every cover.** `Útgáfudagur PDF-skjals: {date}` on the book cover colophon and each chapter cover. Formatted with **date-fns + `is` locale** (`d. MMMM yyyy` → "1. júlí 2026") — `Intl.toLocaleDateString('is-IS')` renders English under Node small-ICU, so it's not used. Verified. _(Refinement, not done: the date is `new Date()` per route — same day within a build; a single generator-passed timestamp would be exact.)_
+- [x] **Per-section MT watermark.** The print loader now propagates `section.reviewed` and adds an `mt-content` class to the `<article>` of every unreviewed section (`markMachineTranslated`); `print.css` renders a faint (6%) tiled diagonal **"VÉLÞÝTT EFNI"** SVG-background watermark on `.mt-content`, repeating across every page the section spans. **Per-section**, so a partly-reviewed chapter marks only its MT sections (verified on kafli-01: reviewed 1.0/1.1 clean, MT sections watermarked). Wording matches the reader's "Vélþýtt efni" banner. Answer-key/aggregation blocks default to watermarked (conservative). Class injected into the article (not a wrapper) so `:first-of-type` page-break logic is preserved. Greyscale-safe.
+- **Go-live gate:** the MT watermark must be in place before any PDF is published while content is still MT.
+- [x] Commit: `feat(pdf): build date on covers + MT watermark on unreviewed content`.
+
 ---
 
 ## Phase 2 — Navigation (outline + TOC links + real fonts)
