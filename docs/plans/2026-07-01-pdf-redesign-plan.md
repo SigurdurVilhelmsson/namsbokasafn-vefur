@@ -1,6 +1,6 @@
 # PDF Output Redesign — Design Spec & Implementation Plan
 
-> **Status:** **Phase 0 spikes COMPLETE (2026-07-01)** on branch `feature/pdf-redesign` — both spikes pass; the link-reconstruction risk is retired (decision recorded below → Phase 3 unblocked). Next: Phase 1 (CSS-only visual redesign). Created 2026-07-01.
+> **Status (2026-07-01, branch `feature/pdf-redesign`):** **Phase 0** (spikes) ✓ · **Phase 1** (visual redesign, incl. duplex margins + pagination) ✓ · **Task 1.8** (build date + MT watermark) ✓ · **Task 4.1** (standalone-only colophon) ✓ · **Phase 2 core** — content-link resurrection + clickable TOC ✓ (2.1 fonts deferred, 2.2 section outline blocked-noted). **Next:** Phase 3 link _styling_ (dark-amber cross-refs) + exercise↔answer + back-of-book glossary; Phase 4.2/4.3 metadata/footer; Phase 5 profiles. Created 2026-07-01.
 > **For agentic workers:** use `superpowers:subagent-driven-development` or `superpowers:executing-plans` to implement task-by-task. Steps use `- [ ]` checkboxes.
 > **Attached to:** `docs/plans/2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md` (§ Planned) and the open-work triage `docs/plans/2026-06-30-open-work-triage-vs-efni.md` (backlog).
 
