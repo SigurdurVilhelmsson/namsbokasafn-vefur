@@ -208,11 +208,11 @@ h4 {
   break-inside: avoid;
 }
 
-/* Blocks that shouldn't split mid-element. */
+/* Blocks that shouldn't split mid-element. (aside.example is handled
+   separately below — it is allowed to break at one controlled seam.) */
 figure,
 table,
 aside.note,
-aside.example,
 div.exercise,
 div.equation,
 .learning-objectives,
@@ -226,6 +226,67 @@ mjx-container {
 p {
   orphans: 3;
   widows: 3;
+}
+
+/* =====================================================================
+   Pagination cohesion — keep units "read as a whole" together.
+
+   break-inside: avoid (above) keeps figures, tables, notes, examples,
+   exercises and equations from splitting when they fit on a page; Chromium
+   splits a block only when it is taller than a page, so there is never an
+   infinite blank. The cost is occasional whitespace at a page foot when a tall
+   block is pushed whole to the next page — the deliberate tradeoff for not
+   splitting an example (a block can be kept whole OR every page filled, not
+   both). "Kannaðu þekkingu þína" is authored *inside* <aside class="example">,
+   so an example and its check-your-knowledge are already one unit and land on
+   the same page whenever they fit (verified: Dæmi 15.1).
+
+   The rules below keep the unavoidable splits (blocks taller than a page)
+   graceful — a label/heading is never stranded at a page foot — and defend the
+   example↔check-knowledge bond if a book ever authors it as a sibling.
+   ===================================================================== */
+article.cnx-module aside.note .note-type,
+article.cnx-module aside.note h4,
+article.cnx-module .para-title {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* Examples: keep the worked problem+solution together as one unit, but allow a
+   page break at the single seam before the nested "Kannaðu þekkingu þína"
+   (test-your-knowledge). So an example stays whole when it fits; when it does
+   not, the check-your-knowledge drops to the next page to reduce a large gap —
+   rather than pushing the whole (often full-page) example down and leaving ~40%
+   whitespace, and never splitting mid-solution.
+
+   Mechanism: the example itself may break (auto); every core child is kept
+   whole and clings to the previous core child (break-before: avoid), so the
+   problem+solution can't split internally; the nested check-knowledge note
+   (last child, an aside.note → already break-inside: avoid) is the ONLY child
+   left with an auto break-before, i.e. the only permitted break point. */
+article.cnx-module aside.example {
+  break-inside: auto;
+  page-break-inside: auto;
+}
+article.cnx-module aside.example > *:not(.check-knowledge-answer) {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+article.cnx-module
+  aside.example
+  > *:not(.check-knowledge-answer)
+  + *:not(.check-knowledge-answer) {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+/* Defensive: if a check-your-knowledge note is authored as an example sibling
+   (rather than nested), still let it break away under pressure but prefer to
+   stay — the nested case above is the one that actually ships today. */
+article.cnx-module aside.example .example-label,
+article.cnx-module aside.example > h4 {
+  break-after: avoid;
+  page-break-after: avoid;
 }
 
 /* =====================================================================
@@ -298,13 +359,27 @@ mjx-container[jax="SVG"] {
 mjx-container[jax="SVG"][display="true"] {
   display: block;
   text-align: center;
-  margin: 0.6em 0;
+  margin: 0.35em 0;
 }
 
 /* Inline equations are inline. */
 mjx-container[jax="SVG"]:not([display="true"]) {
   display: inline-block;
   vertical-align: middle;
+}
+
+/* Tighten display-equation spacing for print density. content.css gives each
+   div.equation 20px margins + 0.25rem padding plus an inner 10px mjx padding —
+   generous on screen but wasteful in print, where worked examples stack many
+   calculation steps and the accumulated gaps push a fittable example past a
+   page. Selectors match content.css so print wins by load order. */
+article.cnx-module div.equation {
+  margin: 0.35em 0;
+  padding: 0;
+}
+article.cnx-module div.equation .mathjax-display,
+article.cnx-module div.equation mjx-container {
+  padding: 1px 0;
 }
 
 /* =====================================================================
