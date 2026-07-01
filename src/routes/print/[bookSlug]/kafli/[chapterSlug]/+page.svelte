@@ -6,10 +6,15 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { getLicence } from '$lib/data/licences';
+	import { format } from 'date-fns';
+	import { is } from 'date-fns/locale';
 
 	let { data }: { data: PageData } = $props();
 
 	let licence = $derived(getLicence(data.attribution.derivativeLicence));
+
+	// PDF build date (Icelandic via date-fns; Intl fails under Node small-ICU).
+	const buildDate = format(new Date(), 'd. MMMM yyyy', { locale: is });
 </script>
 
 <svelte:head>
@@ -22,7 +27,10 @@
 	<p class="cover-chapter-number">{data.chapter.number}</p>
 	<h1 class="cover-title">{data.chapter.title}</h1>
 	<p class="cover-book-title">{data.bookSubtitle}</p>
-	<p class="cover-meta">namsbokasafn.is</p>
+	<p class="cover-meta">
+		Útgáfudagur PDF-skjals: {buildDate}<br />
+		namsbokasafn.is
+	</p>
 </section>
 
 <!--

@@ -6,6 +6,8 @@
 	import type { PageData } from './$types';
 	import { getLicence } from '$lib/data/licences';
 	import { creditLine } from '$lib/data/bookCredits';
+	import { format } from 'date-fns';
+	import { is } from 'date-fns/locale';
 
 	let { data }: { data: PageData } = $props();
 
@@ -14,10 +16,11 @@
 	// Method-accurate translation credit (machine vs human), not a blanket "Þýðing".
 	let credit = $derived(creditLine(data.book.slug, data.book.status, attribution.translators));
 
-	const today = new Date().toLocaleDateString('is-IS', {
-		year: 'numeric',
-		month: 'long'
-	});
+	// PDF build date. date-fns + `is` locale gives Icelandic month names reliably;
+	// Intl `toLocaleDateString('is-IS')` fails under Node small-ICU (renders English).
+	// PDFs are regenerated as proofread content lands, so the reader must be able to
+	// tell which version they hold.
+	const buildDate = format(new Date(), 'd. MMMM yyyy', { locale: is });
 
 	function chapterPage(chapterNum: number): number | null {
 		return data.tocPages?.chapters.find((c) => c.number === chapterNum)?.page ?? null;
@@ -52,7 +55,9 @@
 			<p>{licence.notices.join(' ')}</p>
 		{/if}
 		<p>Aðgangur að frumefninu er ókeypis á openstax.org.</p>
-		<p class="colophon-fetched">Sótt {today} af namsbokasafn.is</p>
+		<p class="colophon-fetched">
+			Útgáfudagur PDF-skjals: {buildDate} · namsbokasafn.is
+		</p>
 	</div>
 </section>
 
