@@ -336,7 +336,14 @@ button,
 .storage-warning,
 .offline-indicator,
 [data-pwa-updater],
-[role='dialog'][aria-live] {
+[role='dialog'][aria-live],
+/* Transient notification toasts render on any route (incl. /print) when the
+   service worker registers during dev-server PDF generation — e.g. PWAUpdater's
+   green "Forritið er tilbúið til notkunar án nettengingar" (role=status) and
+   ErrorMessage (role=alert). Nondeterministic (didn't fire in the May build),
+   so suppress defensively; no textbook content uses these roles. */
+[role='status'],
+[role='alert'] {
   display: none !important;
 }
 
