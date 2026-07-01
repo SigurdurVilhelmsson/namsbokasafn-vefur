@@ -546,6 +546,63 @@ button,
   color: #6b7280;
 }
 
+/* --- Standalone-chapter colophon page (/print/<slug>/colophon, appended to
+   each kafli PDF by generate-pdfs.js). Its own page, full attribution. --- */
+.print-colophon-page {
+  break-before: page;
+  page-break-before: always;
+  padding-top: 4cm;
+  text-align: center;
+}
+
+.print-colophon-page .colophon-eyebrow {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c78c20;
+  margin-bottom: 0.8cm;
+}
+
+.print-colophon-page .colophon-heading {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.2cm;
+}
+
+.print-colophon-page .colophon-sub {
+  font-style: italic;
+  color: #4b5563;
+  margin: 0 0 1.4cm;
+}
+
+.print-colophon-page .print-colophon {
+  max-width: 15cm;
+  margin: 0 auto;
+  padding-top: 0.5cm;
+  border-top: 1px solid #d1d5db;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #4b5563;
+  text-align: left;
+}
+
+.print-colophon-page .print-colophon p {
+  margin: 0 0 0.2cm;
+}
+
+.print-colophon-page .print-colophon .colophon-credit {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.print-colophon-page .print-colophon .colophon-work {
+  font-style: italic;
+}
+
 .print-attribution {
   margin-top: 1cm;
   padding-top: 0.5cm;

@@ -5,13 +5,10 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { getLicence } from '$lib/data/licences';
 	import { format } from 'date-fns';
 	import { is } from 'date-fns/locale';
 
 	let { data }: { data: PageData } = $props();
-
-	let licence = $derived(getLicence(data.attribution.derivativeLicence));
 
 	// PDF build date (Icelandic via date-fns; Intl fails under Node small-ICU).
 	const buildDate = format(new Date(), 'd. MMMM yyyy', { locale: is });
@@ -45,16 +42,6 @@
 	{@html block.content}
 {/each}
 
-<!-- Attribution colophon — a standalone chapter PDF carries the same licence
-     obligations as the book, so it must not ship without attribution. -->
-<section class="print-attribution">
-	<p>
-		Byggt á {data.attribution.originalTitle} eftir {data.attribution.originalAuthors.join(', ')}
-		({data.attribution.publisher}). Íslensk þýðing — breytingar gerðar.
-	</p>
-	<p>Leyfi: {licence.name} ({licence.fullName}).</p>
-	{#if licence.notices.length > 0}
-		<p>{licence.notices.join(' ')}</p>
-	{/if}
-	<p>Aðgangur að frumefninu er ókeypis á openstax.org — {data.attribution.sourceUrl}</p>
-</section>
+<!-- The attribution colophon is NOT rendered inline here: generate-pdfs.js
+     appends a dedicated colophon page (/print/<slug>/colophon) to the standalone
+     chapter PDF only, so it never repeats through the merged full book. -->
