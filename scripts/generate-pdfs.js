@@ -66,9 +66,10 @@ const CONTENT_DIR = join(ROOT, 'static', 'content');
 const OUTPUT_DIR = join(ROOT, 'static', 'downloads');
 const TMP_DIR = join(ROOT, '.svelte-kit', 'pdf-tmp');
 
-// Stamp geometry (PDF points; A4 = 595.28 × 841.89). Must stay inside the
-// 22mm top/bottom + 18mm side margins set in printToPdf().
-const MARGIN_X = 51; // 18mm
+// Stamp geometry (PDF points; A4 = 595.28 × 841.89). Folios/headers sit on the
+// outer edge, ~18mm in — inside the 22mm side margins (see print.css @page), so
+// they never collide with body text or the binding gutter.
+const MARGIN_X = 51; // 18mm from the outer paper edge
 const FOOTER_BASELINE = 34;
 const HEADER_BASELINE = 806;
 const STAMP_FONT_SIZE = 9;
@@ -126,7 +127,10 @@ async function printToPdf(page, url, outFile) {
 		printBackground: true,
 		preferCSSPageSize: true, // honor @page rules in print.css
 		displayHeaderFooter: false,
-		margin: { top: '22mm', bottom: '22mm', left: '18mm', right: '18mm' }
+		// preferCSSPageSize honours print.css's @page margins (20/22/22/22mm —
+		// symmetric binding-safe sides for double-sided binding); these mirror
+		// that for clarity and any non-CSS-page-size fallback.
+		margin: { top: '20mm', bottom: '22mm', left: '22mm', right: '22mm' }
 	});
 }
 
