@@ -313,6 +313,13 @@ async function generateForBook(page, baseUrl, bookSlug) {
 	await printToPdf(page, `${baseUrl}/print/${bookSlug}/bok`, frontMatterFile);
 	const frontPageCount = await getPdfPageCount(frontMatterFile);
 
+	// Colophon page — identical for every chapter, so render once and append it
+	// (below) only to the standalone chapter PDFs. The full book is NOT given a
+	// per-chapter colophon; it carries the single front-matter colophon instead.
+	const colophonFile = join(bookTmpDir, `${bookSlug}-colophon.pdf`);
+	console.log(`  ${bookSlug}: colophon (standalone chapters)`);
+	await printToPdf(page, `${baseUrl}/print/${bookSlug}/colophon`, colophonFile);
+
 	// --- Stamp + write standalone chapter PDFs, assemble the full book -------
 
 	const bookTitle = toc.title ?? bookSlug;
@@ -347,6 +354,13 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		});
 		standalone.setLanguage('is');
 		await stampPages(standalone, headerForPage);
+		// Append the standalone-only colophon as an unstamped addendum page (so a
+		// chapter shared on its own still carries full CC-BY attribution). It is
+		// deliberately absent from the merged book below.
+		const colDoc = await PDFDocument.load(readFileSync(colophonFile));
+		for (const p of await standalone.copyPages(colDoc, colDoc.getPageIndices())) {
+			standalone.addPage(p);
+		}
 		const standaloneFile = join(bookOutDir, part.outFile);
 		writeFileSync(standaloneFile, await standalone.save());
 

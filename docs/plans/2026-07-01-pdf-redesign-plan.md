@@ -317,11 +317,12 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 **Files:** `kafli/[chapterSlug]/+page.svelte` (remove inline colophon), a small colophon render (new tiny route or reuse `/bok` colophon), `scripts/generate-pdfs.js`.
 
-- [ ] Move the colophon **out** of the shared chapter content render. Render the colophon once (it's identical for every chapter — same `book.attribution`) and **append it via pdf-lib only to the standalone** `*-kafli-NN.pdf`; the book merge copies colophon-free chapters. (Alternative if kept inline: drop the trailing colophon page(s) in the book's `copyPages` — but a known-size appended page is more robust than page-boundary detection.)
-- [ ] Upgrade the standalone colophon to the full set (title/authors/publisher/source/**licence+URL**/translators/**modification statement**) matching the `/bok` cover colophon (Task 1.5); **fail loud** if missing. NC-SA books show NonCommercial + ShareAlike from descriptor flags.
-- **Keep in the book:** the chapter **cover pages** (chapter number + title) stay — they are desirable chapter dividers (cf. OpenStax chapter openers). Only the end-of-chapter attribution colophon is stripped from the book.
-- [ ] **Acceptance:** every `*-kafli-NN.pdf` carries the full colophon once; the book has the colophon **only** in front matter (0 per-chapter colophons — `breytingar gerðar` count drops to 0 in `-bok.pdf`); chapter dividers still present.
-- [ ] Commit: `feat(pdf): standalone-only CC-BY colophon (stripped from book)`.
+- [x] Moved the colophon **out** of the shared chapter render (removed the inline `.print-attribution` from `kafli/+page.svelte`). New `/print/[bookSlug]/colophon` route renders a full colophon **page**; `generate-pdfs.js` renders it **once per book** and appends it (pdf-lib `copyPages`, unstamped addendum) **only to each standalone** `*-kafli-NN.pdf`. The book merges colophon-free chapters (no code change there — the raw chapters no longer contain a colophon).
+- [x] Standalone colophon upgraded to the full set (credit / authors / publisher / source / **licence+URL** / **modification statement** / NC-SA notices) matching the `/bok` cover colophon — verified on the appended kafli page.
+- [x] Also removed the **appendix** (`vidauki`) inline colophon — appendices only appear inside the book (no standalone appendix PDF), so the front-matter colophon covers them; this was the source of the book's 2nd colophon.
+- **Kept in the book:** chapter **cover pages** (dividers). Also added the build date to the appendix cover for consistency.
+- [x] **Acceptance MET:** `-bok.pdf` colophon count **23 → 1** (front matter only); every standalone `*-kafli-NN.pdf` carries **1** full colophon page; chapter dividers intact. (Marker: `Aðgangur að frumefninu` — book 1, kafli-03 1.)
+- [x] Commit: `feat(pdf): standalone-only CC-BY colophon (stripped from book)`.
 
 ### Task 4.2: PDF metadata + optional XMP
 
