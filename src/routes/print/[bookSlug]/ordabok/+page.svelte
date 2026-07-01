@@ -19,7 +19,11 @@
 	<p class="cover-book-title">{data.bookSubtitle}</p>
 </section>
 
-<div class="print-glossary">
+<!-- mt-content: the definitions are aggregated from machine-translated content,
+     so the glossary carries the same "Vélþýtt efni" watermark as MT sections.
+     (Unconditional for now — all books are MT; gate on review status once a book
+     is fully proofread.) -->
+<div class="print-glossary mt-content">
 	<dl>
 		{#each data.terms as t, i (i)}
 			<div class="gloss-entry">

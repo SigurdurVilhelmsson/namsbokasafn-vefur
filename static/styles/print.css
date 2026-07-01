@@ -437,7 +437,11 @@ button,
    ErrorMessage (role=alert). Nondeterministic (didn't fire in the May build),
    so suppress defensively; no textbook content uses these roles. */
 [role='status'],
-[role='alert'] {
+[role='alert'],
+/* Interactive launch button (e.g. the appendix "Opna gagnvirka lotukerfið"
+   periodic-table link) — a live web tool + branding blue, useless in a static
+   PDF; the plain-text URL fallback beside it remains. */
+.periodic-table-link {
   display: none !important;
 }
 
@@ -863,8 +867,13 @@ article.cnx-module hr {
    tiled SVG background repeats across every page the section spans; the
    generator prints backgrounds (printBackground: true). Kept very light (6%) so
    it never impairs reading, and grey so it survives a B&W copy.
+
+   Applies to any `.mt-content`: section AND appendix `<article>`s (both loaders
+   tag unreviewed content), plus the back-of-book glossary (`.print-glossary` —
+   MT-derived definitions, tagged unconditionally for now; see the ordabok
+   route). All are go-live-gated: no MT content ships unmarked.
    ===================================================================== */
-article.cnx-module.mt-content {
+.mt-content {
   background-image: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%22330%22 height%3D%22230%22%3E%3Ctext x%3D%22165%22 y%3D%22115%22 fill%3D%22%234a4a4a%22 fill-opacity%3D%220.06%22 font-family%3D%22sans-serif%22 font-size%3D%2225%22 font-weight%3D%22700%22 letter-spacing%3D%222%22 text-anchor%3D%22middle%22 transform%3D%22rotate(-32 165 115)%22%3EV%C3%89L%C3%9E%C3%9DTT EFNI%3C%2Ftext%3E%3C%2Fsvg%3E");
   background-repeat: repeat;
 }
