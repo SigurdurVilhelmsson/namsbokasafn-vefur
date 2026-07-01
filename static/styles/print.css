@@ -441,14 +441,17 @@ button,
 }
 
 .print-cover .cover-eyebrow {
-  font-size: 1rem;
-  letter-spacing: 0.18em;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #6b7280;
+  color: #c78c20;
   margin-bottom: 1.2cm;
 }
 
 .print-cover .cover-chapter-number {
+  font-family: "Bricolage Grotesque", sans-serif;
   font-size: 4.5rem;
   font-weight: 700;
   line-height: 1;
@@ -457,15 +460,18 @@ button,
 }
 
 .print-cover .cover-title {
+  font-family: "Bricolage Grotesque", sans-serif;
   font-size: 2.4rem;
   font-weight: 700;
   margin: 0.4cm auto 1.6cm;
   max-width: 14cm;
-  line-height: 1.2;
+  line-height: 1.15;
+  color: #1a1a1a;
 }
 
 .print-cover .cover-book-title {
   font-size: 1.1rem;
+  font-style: italic;
   color: #4b5563;
   margin-bottom: 0.4cm;
 }
@@ -476,10 +482,60 @@ button,
   color: #6b7280;
 }
 
-.print-cover .cover-notice {
-  margin-top: 0.6cm;
+/* --- Book cover (full-book /bok route): hero pinned to upper third, colophon
+   pinned to the page foot; scoped so chapter/appendix covers are unaffected. --- */
+.print-book-cover {
+  display: flex;
+  flex-direction: column;
+  min-height: 245mm;
+  padding-top: 0;
+}
+
+.print-book-cover .cover-hero {
+  margin-top: 5.5cm;
+}
+
+.print-book-cover .cover-title {
+  margin-bottom: 0.5cm;
+}
+
+/* Short amber rule under the title — brand accent. */
+.print-book-cover .cover-rule {
+  width: 3cm;
+  height: 3px;
+  background: #c78c20;
+  margin: 0.5cm auto 0.7cm;
+}
+
+/* Colophon: structured, compact, pinned to the bottom of the cover page. */
+.print-book-cover .print-colophon {
+  margin-top: auto;
+  padding-top: 0.5cm;
+  border-top: 1px solid #d1d5db;
+  max-width: 15cm;
+  margin-left: auto;
+  margin-right: auto;
   font-size: 0.8rem;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.print-book-cover .print-colophon p {
+  margin: 0 0 0.18cm;
+}
+
+.print-book-cover .print-colophon .colophon-credit {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.print-book-cover .print-colophon .colophon-work {
   font-style: italic;
+}
+
+.print-book-cover .print-colophon .colophon-fetched {
+  margin-top: 0.35cm;
+  font-size: 0.72rem;
   color: #6b7280;
 }
 

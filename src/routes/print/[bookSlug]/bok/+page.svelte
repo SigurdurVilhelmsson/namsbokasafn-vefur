@@ -29,23 +29,31 @@
 </svelte:head>
 
 <!-- Title page -->
-<section class="print-cover">
-	<p class="cover-eyebrow">Námsbókasafn</p>
-	<h1 class="cover-title">{data.book.title}</h1>
-	<p class="cover-book-title">{data.book.subtitle}</p>
-	<p class="cover-meta">
-		{credit}<br />
-		Byggt á {attribution.originalTitle} eftir {attribution.originalAuthors.join(', ')}<br />
-		Útgefandi frumefnis: {attribution.publisher} — {attribution.sourceUrl}<br />
-		Leyfi: {licence.name} ({licence.fullName})<br />
-		Sótt {today} af namsbokasafn.is
-	</p>
-	{#if licence.notices.length > 0}
-		<p class="cover-notice">
-			{licence.notices.join(' ')}
+<section class="print-cover print-book-cover">
+	<div class="cover-hero">
+		<p class="cover-eyebrow">Námsbókasafn</p>
+		<h1 class="cover-title">{data.book.title}</h1>
+		<div class="cover-rule" aria-hidden="true"></div>
+		<p class="cover-book-title">{data.book.subtitle}</p>
+	</div>
+
+	<!-- Colophon: full CC-BY / CC-BY-NC-SA attribution incl. licence URL and the
+	     required modification statement (this is an Icelandic derivative). -->
+	<div class="print-colophon">
+		<p class="colophon-credit">{credit}</p>
+		<p>
+			Byggt á <span class="colophon-work">{attribution.originalTitle}</span> eftir
+			{attribution.originalAuthors.join(', ')}.
 		</p>
-	{/if}
-	<p class="cover-notice">Aðgangur að frumefninu er ókeypis á openstax.org.</p>
+		<p>Útgefandi frumefnis: {attribution.publisher} — {attribution.sourceUrl}</p>
+		<p>Leyfi: {licence.name} ({licence.fullName}) — {licence.url}</p>
+		<p>{attribution.modifications}</p>
+		{#if licence.notices.length > 0}
+			<p>{licence.notices.join(' ')}</p>
+		{/if}
+		<p>Aðgangur að frumefninu er ókeypis á openstax.org.</p>
+		<p class="colophon-fetched">Sótt {today} af namsbokasafn.is</p>
+	</div>
 </section>
 
 <!-- Table of contents -->
