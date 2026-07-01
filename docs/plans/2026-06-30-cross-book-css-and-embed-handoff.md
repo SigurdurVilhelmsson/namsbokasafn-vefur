@@ -84,12 +84,18 @@ efni D4 makes PhET/YouTube `<iframe>` embeds render. Each embed now emits:
 
 ---
 
-## Task 2 — 14 cross-book note/section CSS gap classes · 🟡 Medium · per-book launch polish
+## Task 2 — 14 cross-book note/section CSS gap classes · 🟡 Medium · per-book launch polish · (1/14 done)
 
 efni's css-contract test (parametrized over all 5 books) found **14 classes** that non-chemistry books emit
 but `content.css` doesn't style. None break rendering (they fall back to base `.note` / plain divs) — they
 lack per-type accent/section polish. They are tracked in **efni's `KNOWN_GAPS`** (the contract stays green,
 logging each). **Biology is next → its note variants + `span-all` are the priority.**
+
+> **✅ `.note-interactive` DONE 2026-06-30** — styled blue (mirrors `.note-link-to-learning`) in `content.css`;
+> removed from efni `KNOWN_GAPS` (efni css-contract green with `VEFUR_CONTRACT=1`). Live on edlisfraedi-2e (16)
+>
+> - liffraedi-2e (32) = 48 files. **13 classes remain.** (Same efni change added `assistive-mathml` to the
+>   contract's `STRUCTURAL_CLASSES` — a11y-2 sibling, intentionally unstyled, see Task 3c.)
 
 **Note-type variants** (add per-type accent/color/icon; base box already comes from `.note` — mirror the
 existing `.note-link-to-learning` rule at `content.css:264`):
