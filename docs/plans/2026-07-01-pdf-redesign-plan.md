@@ -284,10 +284,10 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 - **Key realisation:** these did **not** need per-`<a>` GoTo injection. The content `<a href="#id">` links are already Chromium name-dest annotations; the Phase 2 harvest/rebase makes them resolve. So 3.2 was just **styling** (Task 3.2 commit): `article.cnx-module a[href]` → dark-amber `#8a5e14` + underline (greyscale-legible), overriding content.css blue. Verified: "Mynd 15.x" + chapter-outline refs jump and read as links.
 - [x] Commit: `style(pdf): dark-amber underlined content links`.
 
-### Task 3.3: Exercise ↔ answer links — DEFERRED (needs render-time injection)
+### Task 3.3: Exercise ↔ answer links — BLOCKED on an efni content/pipeline fix
 
-- **Verified:** exercise↔answer links are **reader-only** — the answer-key HTML has **0** `<a href>` and exercises only 4 (incidental). `answerLinks.ts` builds the pairing at runtime in the reader, so the print HTML has no anchors to harvest.
-- **Approach when picked up (deferred):** don't compute rects in pdf-lib — instead **replicate `answerLinks.ts` at render time in the print loader** (transform the EOC/answer-key HTML to wrap exercise numbers + answer entries in `<a href="#…">` with a shared id scheme). Then Chromium emits the annotations and the existing harvest/rebase resolves both directions — same pattern as the clickable TOC. Same mechanism unlocks glossary term-links (3.4 below).
+- **Verified:** exercise↔answer links are **reader-only** (`answerLinks.ts` builds them at runtime); the print HTML has no anchors. The render-time approach is settled (add `ex-`/`ans-` target spans keyed on the shared `data-exercise-id`, inject "Sjá svar"/"Sjá æfingu" links; both live in the same chapter so they resolve via the existing harvest — no cross-doc trick even needed). The mechanism is ready.
+- **BLOCKER (found 2026-07-01):** the pairing key is broken in **6 chapters (12–17)** — only ~⅓–¾ of odd exercises pair; the tail exercises switch id namespace `fs-idp*`→`fs-idm*` with no matching answers. This is a **content/pipeline bug that also breaks the website reader's crosslinking** (same shared-`fs-id` key → silent scroll failure). **Handed to efni:** `docs/handoffs/2026-07-01-exercise-answer-id-mismatch-for-efni.md` (source-CNXML vs split/id-gen question). Build the PDF links once efni re-aligns the ids — it's low-value at ~70% coverage until then.
 
 ### Task 3.4: Back-of-book glossary — PAGE DONE, term-links deferred
 
