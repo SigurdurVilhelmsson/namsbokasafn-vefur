@@ -288,13 +288,29 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		appendixPart = { rawFile, pageCount: await getPdfPageCount(rawFile) };
 	}
 
-	// Body page numbering starts at 1 on the first page of chapter 1.
+	// Back-of-book glossary (rendered from glossary.json), merged after appendices.
+	let glossaryPart = null;
+	if (existsSync(join(CONTENT_DIR, bookSlug, 'glossary.json'))) {
+		const rawFile = join(bookTmpDir, `${bookSlug}-ordabok-raw.pdf`);
+		console.log(`  ${bookSlug}: glossary (orðaskrá)`);
+		await printToPdf(page, `${baseUrl}/print/${bookSlug}/ordabok/`, rawFile);
+		glossaryPart = { rawFile, pageCount: await getPdfPageCount(rawFile) };
+	}
+
+	// Body page numbering starts at 1 on the first page of chapter 1; appendices
+	// then the glossary continue the count.
 	let nextStart = 1;
 	for (const part of chapterParts) {
 		part.startPage = nextStart;
 		nextStart += part.pageCount;
 	}
-	if (appendixPart) appendixPart.startPage = nextStart;
+	if (appendixPart) {
+		appendixPart.startPage = nextStart;
+		nextStart += appendixPart.pageCount;
+	}
+	// Glossary is the last body part, so its start is the running total (no need
+	// to advance nextStart further).
+	if (glossaryPart) glossaryPart.startPage = nextStart;
 
 	// --- Pass 2: front matter with TOC page numbers --------------------------
 
@@ -307,7 +323,8 @@ async function generateForBook(page, baseUrl, bookSlug) {
 					number: p.chapterNum,
 					page: p.startPage
 				})),
-				appendicesPage: appendixPart?.startPage ?? null
+				appendicesPage: appendixPart?.startPage ?? null,
+				glossaryPage: glossaryPart?.startPage ?? null
 			},
 			null,
 			2
@@ -407,6 +424,16 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		for (const p of copied) merged.addPage(p);
 	}
 
+	if (glossaryPart) {
+		const mergedOffset = merged.getPageCount();
+		outlineItems.push({ title: 'Orðaskrá', pageIndex: mergedOffset });
+		tocDests['ordaskra'] = mergedOffset;
+		const src = await PDFDocument.load(readFileSync(glossaryPart.rawFile));
+		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 91 });
+		const copied = await merged.copyPages(src, src.getPageIndices());
+		for (const p of copied) merged.addPage(p);
+	}
+
 	// Rebuild the merged catalog /Dests: harvested content dests (rebased to the
 	// merged page tree) so every in-content link resolves again, plus chapter /
 	// appendix start pages for the clickable TOC. Colliding auto-ids (footnote
@@ -430,6 +457,12 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		partStarts.push({
 			header: (n) => (n % 2 === 1 ? 'Viðaukar' : bookTitle),
 			startPage: appendixPart.startPage
+		});
+	}
+	if (glossaryPart) {
+		partStarts.push({
+			header: (n) => (n % 2 === 1 ? 'Orðaskrá' : bookTitle),
+			startPage: glossaryPart.startPage
 		});
 	}
 	await stampPages(merged, (i) => {

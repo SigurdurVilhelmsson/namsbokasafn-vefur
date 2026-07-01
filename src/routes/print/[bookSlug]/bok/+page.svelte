@@ -95,6 +95,17 @@
 				</a>
 			</li>
 		{/if}
+		{#if data.tocPages?.glossaryPage != null}
+			<li>
+				<a class="toc-link" href="#ordaskra">
+					<span>
+						<span class="toc-chapter-num" aria-hidden="true"></span>
+						Orðaskrá
+					</span>
+					<span class="toc-page">{data.tocPages.glossaryPage}</span>
+				</a>
+			</li>
+		{/if}
 	</ol>
 
 	<!-- Invisible in-document anchor targets: Chromium only emits a Link
@@ -108,6 +119,9 @@
 		{/each}
 		{#if data.appendices.length > 0}
 			<span id="vidaukar"></span>
+		{/if}
+		{#if data.tocPages?.glossaryPage != null}
+			<span id="ordaskra"></span>
 		{/if}
 	</div>
 </section>
