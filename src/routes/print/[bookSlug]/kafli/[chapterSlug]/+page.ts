@@ -8,6 +8,7 @@ import {
 	linkGlossaryTerms,
 	type TermIndex
 } from '$lib/utils/printGlossary';
+import { extractArticle, markMachineTranslated } from '$lib/utils/printContent';
 
 export const prerender = true;
 
@@ -34,24 +35,6 @@ interface PrintBlock {
 	content: string;
 	/** Human-reviewed (faithful)? false = machine-translated → gets an MT watermark. */
 	reviewed: boolean;
-}
-
-function extractArticle(html: string): string {
-	const article = html.match(/<article[^>]*>[\s\S]*?<\/article>/);
-	if (article) return article[0];
-	const body = html.match(/<body[^>]*>([\s\S]*?)<\/body>/);
-	return body ? body[1] : html;
-}
-
-/**
- * Tag machine-translated (unreviewed) content so print.css can render a
- * "Vélþýtt efni" watermark behind it. Adds the `mt-content` class to the first
- * <article> (keeping it the direct child, so the section page-break rule still
- * applies — a wrapper div would defeat `article.cnx-module:first-of-type`).
- */
-function markMachineTranslated(articleHtml: string, reviewed: boolean): string {
-	if (reviewed) return articleHtml;
-	return articleHtml.replace(/(<article\b[^>]*\bclass=")/i, '$1mt-content ');
 }
 
 export const load: PageLoad = async ({ params, fetch }) => {
