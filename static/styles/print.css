@@ -628,11 +628,31 @@ button,
 }
 
 .print-toc li {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.25cm 0;
   border-bottom: 1px dotted #d1d5db;
   font-size: 1rem;
+}
+
+/* Invisible in-document targets that make Chromium emit the TOC link
+   annotations (see bok/+page.svelte). Visually hidden but kept in layout so
+   they receive a destination. */
+.toc-anchor-targets {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+/* The row is an anchor-link (clickable TOC); keep it looking like the TOC, not
+   a blue body link. */
+.print-toc .toc-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  padding: 0.25cm 0;
+  color: inherit;
+  text-decoration: none;
 }
 
 .print-toc .toc-chapter-num {

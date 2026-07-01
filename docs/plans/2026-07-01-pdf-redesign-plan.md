@@ -242,29 +242,29 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 ## Phase 2 — Navigation (outline + TOC links + real fonts)
 
-### Task 2.1: Embed brand fonts in stamps
+### Task 2.1: Embed brand fonts in stamps — DEFERRED
 
-**Files:** `scripts/generate-pdfs.js` (`stampPages` ~166; `encodableText` ~143).
+**Files:** `scripts/generate-pdfs.js` (`stampPages`, `encodableText`).
 
-- [ ] Replace `StandardFonts.Helvetica/Oblique` with embedded Literata/Bricolage (read woff2→ttf; note pdf-lib needs TTF/OTF, not woff2 — add a `.ttf` of the stamp face under `scripts/assets/` or convert at build). Keep `encodableText` guard.
-- [ ] **Acceptance:** running headers/folios render in the brand face; Icelandic glyphs intact.
-- [ ] Commit: `feat(pdf): embed brand font in headers/folios`.
+- **Deferred (2026-07-01):** blocked on tooling for low visual payoff. pdf-lib's `embedFont` for a custom face needs **`@pdf-lib/fontkit` (not installed)** + a **TTF/OTF** stamp face, but `static/fonts/` has only **woff2** and there's **no converter available** (no fonttools/brotli/wawoff2). The stamps are 8.5–9pt folios/headers in the margin — Helvetica there is barely distinguishable from Bricolage. Revisit if we add `@pdf-lib/fontkit` + a committed `.ttf` under `scripts/assets/` (or a build-time woff2→ttf step).
+- [ ] Acceptance (when picked up): running headers/folios render in the brand face; Icelandic glyphs intact.
 
-### Task 2.2: Hierarchical outline (sections)
+### Task 2.2: Hierarchical outline (sections) — PARTIALLY BLOCKED
 
-**Files:** `scripts/generate-pdfs.js` (`addOutline` ~207; `generateForBook` ~238 to gather section page offsets).
+**Files:** `scripts/generate-pdfs.js` (`addOutline`, `generateForBook`).
 
-- [ ] Extend outline items to nested `{title, pageIndex, children[]}`; measure section start pages (each section is an `article.cnx-module` with an `id` — count pages up to each within the per-chapter raw PDF, or split page offsets from the render). Rewrite `addOutline` to build `First/Last/Parent/Next/Prev/Count` for nesting.
-- [ ] **Acceptance:** `pdfinfo -struct-text` / a viewer shows chapters expandable into sections; every entry lands on the right page.
-- [ ] Commit: `feat(pdf): hierarchical (section-level) outline`.
+- **Blocker found (2026-07-01):** the plan assumed each section `<article>` has a linkable `id` to get its start page — it does **not** (sections carry `data-module-id="m…"`, not `id`, so Chromium emits no dest for the section start). Harvested dests are figure/content anchors (`CNX_Chem_15_00_*`), not section openers. So section start pages aren't directly available.
+- **Options when picked up:** (a) inject an `id` + an invisible in-`/bok`-style target per section so Chromium emits a section-start dest (same trick as the clickable TOC), then read its page from the harvested dests; or (b) inject a section-start `id` into each block's `<article>` in the print loader (like `markMachineTranslated` does for `mt-content`) and register a synthetic dest at render/measure time. Then nest the outline (`First/Last/Parent/Next/Prev/Count`).
+- [ ] **Acceptance:** a viewer shows chapters expandable into sections; every entry lands on the right page. Lower priority than the content-link win below.
 
-### Task 2.3: Clickable TOC
+### Task 2.3: Clickable TOC + content-link resurrection — DONE (core)
 
-**Files:** `src/routes/print/[bookSlug]/bok/+page.svelte` (add section rows + `href="#…"`), `scripts/generate-pdfs.js` (register TOC dests), `scripts/lib/pdf-links.js`.
+**Files:** `bok/+page.svelte` (anchor-link TOC rows + invisible targets), `scripts/generate-pdfs.js` (harvest/rebase `/Dests` + register TOC dests), `static/styles/print.css`, `scripts/lib/pdf-links.js` (Phase 0 utilities).
 
-- [ ] Render TOC rows with the anchor names the registry uses; after assembly, add GoTo link annotations over TOC row rects → chapter/section start-page dests (approach from Task 0.2).
-- [ ] **Acceptance:** clicking a TOC entry in a reader jumps to that chapter/section; page numbers already present.
-- [ ] Commit: `feat(pdf): clickable table of contents`.
+- [x] **Content-link resurrection (the big win, also Phase 3.1/3.2 core):** generate-pdfs now harvests each chapter/appendix `/Dests` and rebases them onto the merged page tree (`harvestDests`→`findCollidingNames`→`mergeChapterDests`→`writeMergedDests`), rebuilding the catalog `/Dests` that `copyPages` drops. Verified on the book: `/Dests` **0 → 805 keys**; **1026** in-content name-dest link annotations now resolve (e.g. `CNX_Chem_15_00_Fluorite` → the correct merged page). All "Mynd/Tafla/jafna" cross-references are clickable in the book again.
+- [x] **Clickable TOC:** `/bok` TOC rows are anchor-links (`#kafli-N` / `#vidaukar`); Chromium only emits a Link annotation when the target id exists in `/bok`, so invisible `.toc-anchor-targets` spans give them local targets (verified: 22 annotations emitted). generate-pdfs registers `kafli-N` / `vidaukar` as merged dests (`[pageRef, /Fit]`) at the chapter/appendix start pages, so the surviving annotations re-point to the real pages. TOC rows styled to inherit (not blue).
+- [x] Commit: `feat(pdf): resurrect content links + clickable TOC`.
+- **Note:** external URI links (146) already survived the merge untouched. Cross-ref link _styling_ (dark-amber underline) is Phase 3.2; exercise↔answer + glossary links are Phase 3.3/3.4.
 
 ---
 
