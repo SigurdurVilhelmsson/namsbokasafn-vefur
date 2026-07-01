@@ -65,28 +65,49 @@
 <section class="print-toc">
 	<h1>Efnisyfirlit</h1>
 	<ol>
+		<!-- Rows are anchor-links (#kafli-N / #vidaukar). Chromium emits a Link
+		     annotation per row; generate-pdfs.js registers those names as merged
+		     dests so the TOC is clickable in the assembled book. -->
 		{#each data.chapters as chapter (chapter.number)}
 			<li>
-				<span>
-					<span class="toc-chapter-num">{chapter.number}.</span>
-					{chapter.title}
-				</span>
-				{#if chapterPage(chapter.number) !== null}
-					<span class="toc-page">{chapterPage(chapter.number)}</span>
-				{/if}
+				<a class="toc-link" href="#kafli-{chapter.number}">
+					<span>
+						<span class="toc-chapter-num">{chapter.number}.</span>
+						{chapter.title}
+					</span>
+					{#if chapterPage(chapter.number) !== null}
+						<span class="toc-page">{chapterPage(chapter.number)}</span>
+					{/if}
+				</a>
 			</li>
 		{/each}
 		{#if data.appendices.length > 0}
 			<li>
-				<span>
-					<span class="toc-chapter-num" aria-hidden="true"></span>
-					Viðaukar
-					({data.appendices.map((a) => a.letter).join(', ')})
-				</span>
-				{#if data.tocPages?.appendicesPage != null}
-					<span class="toc-page">{data.tocPages.appendicesPage}</span>
-				{/if}
+				<a class="toc-link" href="#vidaukar">
+					<span>
+						<span class="toc-chapter-num" aria-hidden="true"></span>
+						Viðaukar
+						({data.appendices.map((a) => a.letter).join(', ')})
+					</span>
+					{#if data.tocPages?.appendicesPage != null}
+						<span class="toc-page">{data.tocPages.appendicesPage}</span>
+					{/if}
+				</a>
 			</li>
 		{/if}
 	</ol>
+
+	<!-- Invisible in-document anchor targets: Chromium only emits a Link
+	     annotation for an `<a href="#id">` whose target id exists in THIS
+	     document. These give the TOC rows a local target so the annotations are
+	     created; generate-pdfs.js then re-points the names to the real chapter /
+	     appendix pages in the merged book. -->
+	<div class="toc-anchor-targets" aria-hidden="true">
+		{#each data.chapters as chapter (chapter.number)}
+			<span id="kafli-{chapter.number}"></span>
+		{/each}
+		{#if data.appendices.length > 0}
+			<span id="vidaukar"></span>
+		{/if}
+	</div>
 </section>
