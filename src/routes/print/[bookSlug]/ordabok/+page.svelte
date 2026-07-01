@@ -31,3 +31,13 @@
 		{/each}
 	</dl>
 </div>
+
+<!-- Invisible self-target links: Chromium only creates a named destination for
+     an element that is the target of an in-document link. These give every
+     gloss-N entry a destination so the chapter `<dfn>` term-links resolve to it
+     after the merge (harvested by generate-pdfs.js). -->
+<div class="toc-anchor-targets" aria-hidden="true">
+	{#each data.terms as _t, i (i)}
+		<a href="#gloss-{i}">·</a>
+	{/each}
+</div>

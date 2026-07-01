@@ -439,6 +439,13 @@ async function generateForBook(page, baseUrl, bookSlug) {
 	// appendix start pages for the clickable TOC. Colliding auto-ids (footnote
 	// anchors) are namespaced per chapter so they don't clobber.
 	const collidingNames = findCollidingNames(destHarvest.map((h) => h.dests));
+	// `gloss-N` are intentionally shared: many chapters link the same glossary
+	// entry, and each chapter carries a hidden placeholder target for it (so
+	// Chromium emits the dfn link annotation). They must NOT be namespaced — the
+	// glossary part is harvested last, so its real gloss-N entry page wins.
+	for (const name of [...collidingNames]) {
+		if (name.startsWith('gloss-')) collidingNames.delete(name);
+	}
 	const registry = new Map();
 	for (const { dests, mergedOffset, chapterNum } of destHarvest) {
 		mergeChapterDests(registry, dests, mergedOffset, chapterNum, collidingNames);
