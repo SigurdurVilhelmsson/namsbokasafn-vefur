@@ -2,6 +2,12 @@ import { error, isHttpError } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { loadTableOfContents, findChapterBySlug, getChapterPath } from '$lib/utils/contentLoader';
 import { books, getBook } from '$lib/types/book';
+import {
+	sortGlossaryTerms,
+	buildTermIndex,
+	linkGlossaryTerms,
+	type TermIndex
+} from '$lib/utils/printGlossary';
 
 export const prerender = true;
 
@@ -60,16 +66,27 @@ export const load: PageLoad = async ({ params, fetch }) => {
 
 		const folder = getChapterPath(chapter);
 
+		// Glossary term-index for linking `<dfn class="term">` → back-of-book entry
+		// (`#gloss-N`), matching the /ordabok route's sort. Tolerate absence.
+		let termIndex: TermIndex = { byTerm: new Map(), byEnglish: new Map() };
+		try {
+			const gRes = await fetch(`/content/${bookSlug}/glossary.json`);
+			if (gRes.ok) termIndex = buildTermIndex(sortGlossaryTerms((await gRes.json()).terms ?? []));
+		} catch {
+			// no glossary — leave dfns unlinked
+		}
+
 		const blocks: PrintBlock[] = [];
 		for (const section of chapter.sections) {
 			const url = `/content/${bookSlug}/chapters/${folder}/${section.file}`;
 			const res = await fetch(url);
 			if (!res.ok) continue; // tolerate missing files (e.g., partial books) — don't break the build
 			const html = await res.text();
+			const article = linkGlossaryTerms(extractArticle(html), termIndex);
 			blocks.push({
 				title: section.title,
 				type: section.type ?? 'section',
-				content: markMachineTranslated(extractArticle(html), section.reviewed ?? false),
+				content: markMachineTranslated(article, section.reviewed ?? false),
 				reviewed: section.reviewed ?? false
 			});
 		}

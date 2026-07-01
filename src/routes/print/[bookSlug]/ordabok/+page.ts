@@ -1,6 +1,7 @@
 import { error, isHttpError } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { books, getBook } from '$lib/types/book';
+import { sortGlossaryTerms, type GlossaryTerm } from '$lib/utils/printGlossary';
 
 export const prerender = true;
 
@@ -13,18 +14,11 @@ export async function entries() {
 	return list;
 }
 
-interface GlossaryTerm {
-	term: string;
-	definition: string;
-	english?: string;
-	chapter?: number;
-}
-
 /**
  * Back-of-book glossary page for the full-book PDF. generate-pdfs.js renders
  * this once and merges it after the appendices. Terms are collated in Icelandic
- * order and given stable `gloss-N` ids so content `<dfn>` terms can later link
- * to their definition (Task 3.4 term-linking).
+ * order and given stable `gloss-N` ids that content `<dfn>` terms link to
+ * (Task 3.4 term-linking, via `linkGlossaryTerms` in the chapter loader).
  */
 export const load: PageLoad = async ({ params, fetch }) => {
 	const { bookSlug } = params;
@@ -33,9 +27,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 	try {
 		const res = await fetch(`/content/${bookSlug}/glossary.json`);
 		const glossary = res.ok ? await res.json() : { terms: [] };
-		const terms: GlossaryTerm[] = [...(glossary.terms ?? [])].sort((a, b) =>
-			a.term.localeCompare(b.term, 'is')
-		);
+		const terms: GlossaryTerm[] = sortGlossaryTerms(glossary.terms ?? []);
 		return { bookTitle: book.title, bookSubtitle: book.subtitle, terms };
 	} catch (e) {
 		if (isHttpError(e)) throw e;
