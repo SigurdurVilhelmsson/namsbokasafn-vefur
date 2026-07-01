@@ -3,6 +3,14 @@
 **Date:** 2026-06-30. **Author:** Claude (Opus 4.8) session after Task 3a shipped.
 **Method:** full inventory of `docs/plans/*`, `docs/code-review-2026-06.md`, `docs/manual-qa-2026-06.md`, the memory index, and the active handoff — each item re-prioritised against what efni's `main` (`c6cc7b0d`) actually emits into rendered content **today**.
 
+> **Progress since this triage (actioned same session):**
+>
+> 1. **C1 nginx orphan → merged** (vefur PR #177): dead `ssl_stapling` directives dropped from `nginx-config-example.conf`.
+> 2. **Branch cleanup → done**: 17 superseded local branches deleted; 49 stale remote branches pruned (47 `claude/*` + `sveltekit-poc` + merged `mobile-cover-title`); SHAs recorded. Repo now: local `main`+`archive/react-v1`; remote adds `feature/reader-v1.1`/`v1.2`.
+> 3. **A5 `.note-interactive` → done** (vefur PR #178 + efni PR #207): styled blue, removed from efni `KNOWN_GAPS`; efni contract also now excludes `assistive-mathml` (a11y-2, Task 3c). **13 cross-book classes remain.**
+>
+> Still open per below: A1 efnafraedi Phase-3 sync (lead), A2 3b a11y verify, A4 embed CSS (no trigger), the reader v1.1/v1.2 releases (B1/B2), and the code-review M-item backlog (B8, verify-first).
+
 ## The facts that re-order everything
 
 **`efnafraedi-2e` is the only fully-reviewed book, but it is NOT the only live one.** Five books are synced into `static/content/` and catalog-visible (each has a `toc.json`): `efnafraedi-2e` (252 sections), `edlisfraedi-2e` (15), `liffraedi-2e` (18), `lifraen-efnafraedi` (13), `orverufraedi` (22). The four non-chemistry books serve as **MT previews** (the MT-banner system exists precisely for this). `stjornufraedi` has no content. So the cross-book books **are** live — just machine-translated and largely unreviewed.
