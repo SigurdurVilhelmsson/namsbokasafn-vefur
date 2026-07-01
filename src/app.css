@@ -1101,6 +1101,22 @@
   opacity: 1;
 }
 
+/* Wide display equations shouldn't scroll inside the narrow prose measure while
+   there's empty page beside it. On desktop, let the equation grow beyond the
+   reading column (centered on it) into the side whitespace, up to a bounded
+   width; only equations wider than that still scroll (via .equation-content).
+   Gated at 1280px: below that the sidebar leaves too little room, so a wide
+   equation would clip past the viewport — fall back to in-column scroll there. */
+@media (min-width: 1280px) {
+  .reading-content .equation-wrapper {
+    width: fit-content;
+    max-width: min(58rem, calc(100vw - 6rem));
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
 .equation-copy-btn,
 .equation-zoom-btn {
   padding: 0.25rem 0.5rem;
@@ -1253,7 +1269,7 @@ mjx-container[jax="SVG"][display="true"] {
 }
 
 mjx-container[jax="SVG"] {
-  font-size: 1.15em;
+  font-size: 1.05em;
 }
 
 /* Override Tailwind Preflight which sets all SVGs to display:block —
@@ -1483,7 +1499,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   font-style: italic;
   line-height: 1.5;
   color: var(--text-secondary);
-  text-align: center;
+  text-align: left;
 }
 
 .dark .reading-content figcaption {
@@ -1502,7 +1518,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   display: block;
   font-size: 0.875rem;
   color: var(--text-secondary);
-  text-align: center;
+  text-align: left;
   margin-top: 0.75rem;
 }
 
@@ -1586,9 +1602,13 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
     white-space: nowrap;
   }
 
-  /* Equation actions always visible on touch */
+  /* Touch has no hover: show controls as a bar below the equation instead of
+     the desktop corner overlay, so they never occlude the math itself. */
   .equation-wrapper .equation-actions {
+    position: static;
     opacity: 1;
+    justify-content: center;
+    margin-top: 0.25rem;
   }
 
   /* Figure lightbox toolbar */
@@ -2114,14 +2134,14 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   figcaption {
     font-size: 10pt;
     font-style: italic;
-    text-align: center;
+    text-align: left;
     margin-top: 6pt;
   }
 
   .figure-caption {
     font-size: 10pt;
     font-style: italic;
-    text-align: center;
+    text-align: left;
   }
 
   /* ----------------------------------------
