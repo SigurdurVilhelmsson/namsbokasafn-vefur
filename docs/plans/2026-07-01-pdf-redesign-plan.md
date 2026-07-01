@@ -194,14 +194,16 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 - [ ] **Acceptance:** cover looks intentional; colophon lists title/authors/publisher/source/licence+URL/translators/modification statement.
 - [ ] Commit: `style(pdf): cover + colophon layout`.
 
-### Task 1.6: Binding margin (interim, `bound` default)
+### Task 1.6: Binding margin — DUPLEX (double-sided) default
 
-**Files:** `scripts/generate-pdfs.js` (`printToPdf` margins ~129; `MARGIN_X`, stamp geometry ~71–76).
+**Reviewer decision (2026-07-01): double-sided is the target** (school/professional printers duplex by default, and that's where binding is applied). This supersedes the plan's original `bound` single-sided default. **Files:** `static/styles/print.css` (`@page`), `scripts/generate-pdfs.js` (`printToPdf` margin option, `MARGIN_X` comment).
 
-- [ ] Set left margin 26 mm, right 18 mm; update `MARGIN_X` and folio/header x-positions so stamps stay in the (new) margins on the correct edge for single-sided.
-- [ ] **Acceptance:** no content within 26 mm of the left edge; folio/header positioned correctly; regenerate confirms.
-- [ ] Commit: `feat(pdf): binding-edge margin for spiral/4-hole`.
-- [ ] **Re-benchmark checkpoint:** rasterize p4 + cover + a figure page; compare to OpenStax; note residual gaps.
+- **Why symmetric, not mirrored:** true mirrored margins (wide inner gutter / narrow outer) can't be done reliably here — chapters are rendered separately then merged, so a chapter's internal `@page :left`/`:right` parity doesn't match its position in the merged book (a chapter that renders recto-first may land on a verso page → gutter on the wrong side for half the pages). Real books fix this by forcing every chapter to start on a recto with blank filler pages; that needs folio/TOC re-accounting → **deferred to Task 5.1**.
+- [x] `@page` margins **20 / 22 / 22 / 22 mm** (top/right/bottom/left) — symmetric, binding-safe on both sides (22mm ≥ 4-hole punch ~12mm + clearance, comb/spiral bite) so the alternating gutter always clears. `preferCSSPageSize` makes `@page` authoritative (verified: content sits at 22mm); generator margin option mirrored for clarity.
+- [x] Folios/headers already correct for duplex (original recto/verso logic kept): odd/recto → folio + chapter-title header on the **right**; even/verso → folio + book-title header on the **left**; on the outer edge (`MARGIN_X` 18mm), inside the 22mm margin, never in the gutter. Verified on the assembled book (p27 recto right, p28 verso left).
+- **Effect on page count & pagination (measured, kafli-15):** total pages **53 — unchanged** vs the 18mm tightened version (the equation density work already freed the room, so the wider gutter costs 0 pages). Oversized-core examples: 18mm → **3**, 22mm → **4** (only Dæmi 15.11 tips ~1px over) — negligible, and covered by the seam-break + graceful-break handling from Task 1.7.
+- [x] Commit: `feat(pdf): double-sided binding margins`.
+- [ ] **Re-benchmark checkpoint:** rasterize cover + a content page + a figure page; compare to OpenStax; note residual gaps.
 
 ### Task 1.7: Pagination cohesion + equation density (keep examples whole)
 
@@ -325,13 +327,14 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 ## Phase 5 — Print/binding profiles
 
-### Task 5.1: `--profile bound|duplex`
+### Task 5.1: margin profiles + true-mirrored duplex
 
-**Files:** `scripts/generate-pdfs.js` (`parseArgs`, `printToPdf` margins, `stampPages` edge logic).
+**Default is already DUPLEX** (Task 1.6, symmetric binding-safe margins). Task 5.1 adds the two harder options on top. **Files:** `scripts/generate-pdfs.js` (`parseArgs`, filler-page insertion, `stampPages` edge logic), `static/styles/print.css` (`@page :left`/`:right`).
 
-- [ ] Add `--profile` (default `bound`). `bound` = uniform left 26 mm gutter, folios/headers on right every page (single-sided). `duplex` = mirrored inner/outer + recto/verso folios (current behaviour).
-- [ ] **Acceptance:** `bound` output has consistent left gutter on all pages; `duplex` mirrors. Document in `docs/guides/deployment.md` / script header.
-- [ ] Commit: `feat(pdf): bound vs duplex margin profiles`.
+- [ ] **True-mirrored duplex** (efficient: wide inner gutter, narrow outer) — requires forcing every chapter to start on a **recto** by inserting a blank verso filler page when a chapter would otherwise start on a verso, so per-chapter `@page :left`/`:right` parity matches the merged book. Then re-account folio numbers + TOC page numbers for the fillers. Only worth it if the symmetric outer margin (22mm) feels too wide in review.
+- [ ] **`--profile bound`** (single-sided, spiral/4-hole): uniform left 26mm gutter, folios/headers on the right every page. (Original stampPages had this shape; re-add behind the flag.)
+- [ ] **Acceptance:** duplex (default) mirrors correctly with no wrong-side gutters; `bound` has a consistent left gutter. Document in `docs/guides/deployment.md` / script header.
+- [ ] Commit: `feat(pdf): mirrored duplex + bound profile`.
 
 ### Task 5.2: Greyscale + binding verification
 

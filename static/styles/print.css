@@ -122,7 +122,14 @@
 
 @page {
   size: A4;
-  margin: 22mm 18mm 22mm 18mm;
+  /* Double-sided (duplex) binding. The gutter alternates sides page-to-page, so
+     both side margins are binding-safe (22mm ≥ 4-hole-punch ~12mm + clearance,
+     and comb/spiral bite). Symmetric (not mirrored inner/outer) because chapters
+     are rendered separately then merged — per-chapter @page:left/:right parity
+     would not match the merged book. True mirrored margins need chapters forced
+     to start on a recto with blank fillers (deferred to the print-profile task).
+     top / right / bottom / left. */
+  margin: 20mm 22mm 22mm 22mm;
 }
 
 @page :first {
