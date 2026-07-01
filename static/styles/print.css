@@ -142,6 +142,9 @@ figcaption {
   font-size: 0.9em;
   color: #444;
   margin-top: 0.4em;
+  /* Override the centered `figure` text-align; captions read left-aligned.
+     The figure image stays centered via the parent's text-align: center. */
+  text-align: left;
 }
 
 /* =====================================================================
