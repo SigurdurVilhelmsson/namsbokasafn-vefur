@@ -239,9 +239,10 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 **Files:** `scripts/lib/pdf-links.js`, `scripts/lib/pdf-links.test.js`.
 
-- [ ] Implement `buildRegistry()` mapping every target `id` (section, figure, table, equation, exercise, answer, glossary term) → merged page index (derive ids by scanning the rendered HTML per chapter and tracking page offsets from Task 2.2). Implement `defineNamedDest`, `addGoToLink`, and (per Task 0.2 decision) either rect-harvest or rect-compute.
-- [ ] Vitest on a fixture PDF: dest resolves to correct page; annotation rect present.
-- [ ] Commit: `feat(pdf): anchor registry + link utilities (tested)`.
+- **Phase 0 already built the utilities** in `scripts/lib/pdf-links.js`: `harvestDests`, `findCollidingNames`, `mergeChapterDests`, `writeMergedDests` (the harvest+rebase path — the recorded 0.2 decision), plus `defineNamedDest` + `addGoToLink` for synthetic links. The registry approach is settled; **no rect-harvest/rect-compute choice remains**.
+- [ ] Remaining 3.1 work: wire the harvest/rebase utilities into `generate-pdfs.js`'s merge loop (call `harvestDests` per chapter with its page offset, accumulate, `writeMergedDests` on the merged doc). Section/figure page offsets come from Task 2.2's per-section page measurement.
+- [ ] **CARRY-OVER (owed from Phase 0):** `scripts/lib/pdf-links.js` shipped in commit `f9f048f` **without its Vitest** — the mechanism was proven by a throwaway spike driver, not a committed test. Add `scripts/lib/pdf-links.test.js` on a **synthetic fixture PDF** (build a 2-page doc in-memory, register a dest, assert it resolves after save→reload; assert `addGoToLink` annotation present; assert `findCollidingNames`/`mergeChapterDests` namespacing). Must not depend on the gitignored `static/downloads/` artifacts.
+- [ ] Commit: `feat(pdf): anchor registry wiring + link-utility tests`.
 
 ### Task 3.2: Cross-reference links
 
@@ -255,7 +256,8 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 **Files:** `scripts/generate-pdfs.js`, possibly `src/routes/print/.../+page.svelte` to ensure ids exist.
 
-- [ ] Bidirectional GoTo links: exercise number → answer-key entry; answer → exercise. Mirror the reader's `answerLinks.ts` id scheme.
+- [ ] **CARRY-OVER (verify first, from Phase 0):** check whether the exercise↔answer targets are already emitted as `<a href="#id">` in the **print-route HTML** (in which case Chromium emits harvestable name-dest annotations and this is free via the harvest path — like the 792 content links) **or** whether `answerLinks.ts` builds them at runtime in the reader only (in which case the print HTML has no anchors and these links must be **synthetically injected** with `defineNamedDest`/`addGoToLink`, mirroring the `answerLinks.ts` id scheme). Inspect a rendered EOC/answer-key chapter's `/Dests` + annotations to decide before writing code.
+- [ ] Bidirectional GoTo links: exercise number → answer-key entry; answer → exercise.
 - [ ] **Acceptance:** both directions jump; verify on a chapter with EOC + answer key.
 - [ ] Commit: `feat(pdf): exercise↔answer navigation`.
 
