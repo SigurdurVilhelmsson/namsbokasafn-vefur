@@ -11,12 +11,125 @@
  */
 
 /* =====================================================================
+   Self-hosted brand fonts (belt-and-braces).
+
+   app.css already declares these and the root layout loads it on /print/*,
+   so in practice the fonts resolve. We re-declare them here so this stylesheet
+   is self-contained: the PDF pipeline never silently falls back to Georgia/
+   sans if app.css is refactored. Same woff2 subsets as app.css; the
+   unicode-range split composites latin + latin-ext (needed for Icelandic).
+   ===================================================================== */
+
+/* Literata — serif body + italic captions */
+@font-face {
+  font-family: "Literata";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/Literata-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Literata";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/Literata-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Literata";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Literata-Italic-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Literata";
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/Literata-Italic-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+/* Bricolage Grotesque — headings & labels */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 400 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("/fonts/BricolageGrotesque-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 400 800;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url("/fonts/BricolageGrotesque-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+/* JetBrains Mono — code */
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304,
+    U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB,
+    U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/JetBrainsMono-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+/* =====================================================================
    Page setup — A4 with comfortable textbook margins.
    ===================================================================== */
 
 @page {
   size: A4;
-  margin: 22mm 18mm 22mm 18mm;
+  /* Double-sided (duplex) binding. The gutter alternates sides page-to-page, so
+     both side margins are binding-safe (22mm ≥ 4-hole-punch ~12mm + clearance,
+     and comb/spiral bite). Symmetric (not mirrored inner/outer) because chapters
+     are rendered separately then merged — per-chapter @page:left/:right parity
+     would not match the merged book. True mirrored margins need chapters forced
+     to start on a recto with blank fillers (deferred to the print-profile task).
+     top / right / bottom / left. */
+  margin: 20mm 22mm 22mm 22mm;
 }
 
 @page :first {
@@ -32,8 +145,13 @@ html,
 body {
   background: #ffffff !important;
   color: #1a1a1a !important;
-  font-size: 11pt;
-  line-height: 1.55;
+  /* PDF redesign Phase 0.1/1.1: serif body (Literata) — the single
+     highest-impact change vs the OpenStax benchmark. @font-face is provided by
+     app.css, which the root layout loads globally on /print/* too; Task 1.1
+     adds a belt-and-braces @font-face here so print never depends on app.css. */
+  font-family: "Literata", Georgia, serif;
+  font-size: 10.5pt;
+  line-height: 1.45;
 }
 
 body {
@@ -97,11 +215,11 @@ h4 {
   break-inside: avoid;
 }
 
-/* Blocks that shouldn't split mid-element. */
+/* Blocks that shouldn't split mid-element. (aside.example is handled
+   separately below — it is allowed to break at one controlled seam.) */
 figure,
 table,
 aside.note,
-aside.example,
 div.exercise,
 div.equation,
 .learning-objectives,
@@ -115,6 +233,67 @@ mjx-container {
 p {
   orphans: 3;
   widows: 3;
+}
+
+/* =====================================================================
+   Pagination cohesion — keep units "read as a whole" together.
+
+   break-inside: avoid (above) keeps figures, tables, notes, examples,
+   exercises and equations from splitting when they fit on a page; Chromium
+   splits a block only when it is taller than a page, so there is never an
+   infinite blank. The cost is occasional whitespace at a page foot when a tall
+   block is pushed whole to the next page — the deliberate tradeoff for not
+   splitting an example (a block can be kept whole OR every page filled, not
+   both). "Kannaðu þekkingu þína" is authored *inside* <aside class="example">,
+   so an example and its check-your-knowledge are already one unit and land on
+   the same page whenever they fit (verified: Dæmi 15.1).
+
+   The rules below keep the unavoidable splits (blocks taller than a page)
+   graceful — a label/heading is never stranded at a page foot — and defend the
+   example↔check-knowledge bond if a book ever authors it as a sibling.
+   ===================================================================== */
+article.cnx-module aside.note .note-type,
+article.cnx-module aside.note h4,
+article.cnx-module .para-title {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+
+/* Examples: keep the worked problem+solution together as one unit, but allow a
+   page break at the single seam before the nested "Kannaðu þekkingu þína"
+   (test-your-knowledge). So an example stays whole when it fits; when it does
+   not, the check-your-knowledge drops to the next page to reduce a large gap —
+   rather than pushing the whole (often full-page) example down and leaving ~40%
+   whitespace, and never splitting mid-solution.
+
+   Mechanism: the example itself may break (auto); every core child is kept
+   whole and clings to the previous core child (break-before: avoid), so the
+   problem+solution can't split internally; the nested check-knowledge note
+   (last child, an aside.note → already break-inside: avoid) is the ONLY child
+   left with an auto break-before, i.e. the only permitted break point. */
+article.cnx-module aside.example {
+  break-inside: auto;
+  page-break-inside: auto;
+}
+article.cnx-module aside.example > *:not(.check-knowledge-answer) {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+article.cnx-module
+  aside.example
+  > *:not(.check-knowledge-answer)
+  + *:not(.check-knowledge-answer) {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+/* Defensive: if a check-your-knowledge note is authored as an example sibling
+   (rather than nested), still let it break away under pressure but prefer to
+   stay — the nested case above is the one that actually ships today. */
+article.cnx-module aside.example .example-label,
+article.cnx-module aside.example > h4 {
+  break-after: avoid;
+  page-break-after: avoid;
 }
 
 /* =====================================================================
@@ -138,13 +317,42 @@ figure img {
   object-fit: contain;
 }
 
-figcaption {
-  font-size: 0.9em;
+/* Descriptive caption body: serif italic, left-aligned. Selector matches
+   content.css's `article.cnx-module figure figcaption` specificity so print
+   wins by load order (print.css is linked after content.css). The image stays
+   centered via the parent `figure`'s text-align: center. */
+article.cnx-module figure figcaption {
+  font-family: "Literata", Georgia, serif;
+  font-style: italic;
+  font-size: 9.5pt;
+  line-height: 1.4;
   color: #444;
   margin-top: 0.4em;
-  /* Override the centered `figure` text-align; captions read left-aligned.
-     The figure image stays centered via the parent's text-align: center. */
   text-align: left;
+}
+
+/* Bold amber label ("Mynd 15.3" / "Tafla 1.2") — sans, upright, not italic.
+   Overrides content.css's blue --os-link-color label (same specificity → wins
+   by order). */
+article.cnx-module figure figcaption .figure-label,
+article.cnx-module table caption .table-label {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+  font-size: 9.5pt;
+  color: #c78c20;
+}
+
+/* Table caption matches the figure caption (serif italic, left, below table). */
+article.cnx-module table caption {
+  caption-side: bottom;
+  font-family: "Literata", Georgia, serif;
+  font-style: italic;
+  font-size: 9.5pt;
+  line-height: 1.4;
+  color: #444;
+  text-align: left;
+  margin-top: 6pt;
 }
 
 /* =====================================================================
@@ -158,7 +366,7 @@ mjx-container[jax="SVG"] {
 mjx-container[jax="SVG"][display="true"] {
   display: block;
   text-align: center;
-  margin: 0.6em 0;
+  margin: 0.35em 0;
 }
 
 /* Inline equations are inline. */
@@ -167,14 +375,40 @@ mjx-container[jax="SVG"]:not([display="true"]) {
   vertical-align: middle;
 }
 
+/* Tighten display-equation spacing for print density. content.css gives each
+   div.equation 20px margins + 0.25rem padding plus an inner 10px mjx padding —
+   generous on screen but wasteful in print, where worked examples stack many
+   calculation steps and the accumulated gaps push a fittable example past a
+   page. Selectors match content.css so print wins by load order. */
+article.cnx-module div.equation {
+  margin: 0.35em 0;
+  padding: 0;
+}
+article.cnx-module div.equation .mathjax-display,
+article.cnx-module div.equation mjx-container {
+  padding: 1px 0;
+}
+
 /* =====================================================================
    Links — show URLs only for cross-document references, keep
    in-page anchors quiet (anchor links are common in textbooks).
    ===================================================================== */
 
 a {
-  color: #0a4f88;
+  color: #8a5e14;
   text-decoration: none;
+}
+
+/* Interactive content links (cross-references, exercise↔answer, chapter-outline)
+   now resolve in the assembled book (see generate-pdfs.js dest rebuild). Style
+   them dark-amber + underline so they read as links — the underline (not colour
+   alone) keeps them legible in a greyscale/B&W copy. Overrides content.css's
+   blue `--os-link-color` (same specificity → wins by load order). */
+article.cnx-module a[href] {
+  color: #8a5e14;
+  text-decoration: underline;
+  text-underline-offset: 1.5px;
+  text-decoration-thickness: 0.5pt;
 }
 
 a[href]:not([href^="#"]):not([href^="/"])::after {
@@ -196,7 +430,18 @@ button,
 .storage-warning,
 .offline-indicator,
 [data-pwa-updater],
-[role='dialog'][aria-live] {
+[role='dialog'][aria-live],
+/* Transient notification toasts render on any route (incl. /print) when the
+   service worker registers during dev-server PDF generation — e.g. PWAUpdater's
+   green "Forritið er tilbúið til notkunar án nettengingar" (role=status) and
+   ErrorMessage (role=alert). Nondeterministic (didn't fire in the May build),
+   so suppress defensively; no textbook content uses these roles. */
+[role='status'],
+[role='alert'],
+/* Interactive launch button (e.g. the appendix "Opna gagnvirka lotukerfið"
+   periodic-table link) — a live web tool + branding blue, useless in a static
+   PDF; the plain-text URL fallback beside it remains. */
+.periodic-table-link {
   display: none !important;
 }
 
@@ -219,14 +464,17 @@ button,
 }
 
 .print-cover .cover-eyebrow {
-  font-size: 1rem;
-  letter-spacing: 0.18em;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #6b7280;
+  color: #c78c20;
   margin-bottom: 1.2cm;
 }
 
 .print-cover .cover-chapter-number {
+  font-family: "Bricolage Grotesque", sans-serif;
   font-size: 4.5rem;
   font-weight: 700;
   line-height: 1;
@@ -235,15 +483,18 @@ button,
 }
 
 .print-cover .cover-title {
+  font-family: "Bricolage Grotesque", sans-serif;
   font-size: 2.4rem;
   font-weight: 700;
   margin: 0.4cm auto 1.6cm;
   max-width: 14cm;
-  line-height: 1.2;
+  line-height: 1.15;
+  color: #1a1a1a;
 }
 
 .print-cover .cover-book-title {
   font-size: 1.1rem;
+  font-style: italic;
   color: #4b5563;
   margin-bottom: 0.4cm;
 }
@@ -254,11 +505,118 @@ button,
   color: #6b7280;
 }
 
-.print-cover .cover-notice {
-  margin-top: 0.6cm;
+/* --- Book cover (full-book /bok route): hero pinned to upper third, colophon
+   pinned to the page foot; scoped so chapter/appendix covers are unaffected. --- */
+.print-book-cover {
+  display: flex;
+  flex-direction: column;
+  min-height: 245mm;
+  padding-top: 0;
+}
+
+.print-book-cover .cover-hero {
+  margin-top: 5.5cm;
+}
+
+.print-book-cover .cover-title {
+  margin-bottom: 0.5cm;
+}
+
+/* Short amber rule under the title — brand accent. */
+.print-book-cover .cover-rule {
+  width: 3cm;
+  height: 3px;
+  background: #c78c20;
+  margin: 0.5cm auto 0.7cm;
+}
+
+/* Colophon: structured, compact, pinned to the bottom of the cover page. */
+.print-book-cover .print-colophon {
+  margin-top: auto;
+  padding-top: 0.5cm;
+  border-top: 1px solid #d1d5db;
+  max-width: 15cm;
+  margin-left: auto;
+  margin-right: auto;
   font-size: 0.8rem;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+.print-book-cover .print-colophon p {
+  margin: 0 0 0.18cm;
+}
+
+.print-book-cover .print-colophon .colophon-credit {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.print-book-cover .print-colophon .colophon-work {
   font-style: italic;
+}
+
+.print-book-cover .print-colophon .colophon-fetched {
+  margin-top: 0.35cm;
+  font-size: 0.72rem;
   color: #6b7280;
+}
+
+/* --- Standalone-chapter colophon page (/print/<slug>/colophon, appended to
+   each kafli PDF by generate-pdfs.js). Its own page, full attribution. --- */
+.print-colophon-page {
+  break-before: page;
+  page-break-before: always;
+  padding-top: 4cm;
+  text-align: center;
+}
+
+.print-colophon-page .colophon-eyebrow {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c78c20;
+  margin-bottom: 0.8cm;
+}
+
+.print-colophon-page .colophon-heading {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 0.2cm;
+}
+
+.print-colophon-page .colophon-sub {
+  font-style: italic;
+  color: #4b5563;
+  margin: 0 0 1.4cm;
+}
+
+.print-colophon-page .print-colophon {
+  max-width: 15cm;
+  margin: 0 auto;
+  padding-top: 0.5cm;
+  border-top: 1px solid #d1d5db;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: #4b5563;
+  text-align: left;
+}
+
+.print-colophon-page .print-colophon p {
+  margin: 0 0 0.2cm;
+}
+
+.print-colophon-page .print-colophon .colophon-credit {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.print-colophon-page .print-colophon .colophon-work {
+  font-style: italic;
 }
 
 .print-attribution {
@@ -286,11 +644,31 @@ button,
 }
 
 .print-toc li {
-  display: flex;
-  justify-content: space-between;
-  padding: 0.25cm 0;
   border-bottom: 1px dotted #d1d5db;
   font-size: 1rem;
+}
+
+/* Invisible in-document targets that make Chromium emit the TOC link
+   annotations (see bok/+page.svelte). Visually hidden but kept in layout so
+   they receive a destination. */
+.toc-anchor-targets {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+/* The row is an anchor-link (clickable TOC); keep it looking like the TOC, not
+   a blue body link. */
+.print-toc .toc-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  width: 100%;
+  padding: 0.25cm 0;
+  color: inherit;
+  text-decoration: none;
 }
 
 .print-toc .toc-chapter-num {
@@ -334,25 +712,110 @@ button,
 }
 
 /* =====================================================================
+   Back-of-book glossary (print ordabok route). Two columns for density.
+   ===================================================================== */
+
+.print-glossary {
+  break-before: page;
+  page-break-before: always;
+  column-count: 2;
+  column-gap: 1cm;
+  font-size: 9.5pt;
+  line-height: 1.35;
+}
+
+.print-glossary dl {
+  margin: 0;
+}
+
+.print-glossary .gloss-entry {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin: 0 0 0.4em;
+}
+
+.print-glossary dt {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.print-glossary dt .gloss-en {
+  font-family: "Literata", Georgia, serif;
+  font-weight: 400;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.print-glossary dd {
+  margin: 0;
+  color: #333;
+}
+
+/* =====================================================================
    Tighten oversized content.css spacing for print density.
    ===================================================================== */
 
 article.cnx-module {
-  font-size: 11pt;
+  /* Inherit the 10.5pt serif body set on <body>; this block used to re-assert
+     11pt sans, which fought the Phase 1 body change. */
+  font-size: inherit;
 }
 
-article.cnx-module header h1 {
-  font-size: 1.7rem;
+/* Code / monospace runs use the brand mono at a slightly smaller size. */
+article.cnx-module code,
+article.cnx-module pre,
+article.cnx-module kbd,
+article.cnx-module samp {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-size: 9.5pt;
+}
+
+/* Heading system: sans (Bricolage) headings over the serif body — classic
+   textbook contrast. Amber for the module title and its subsection headings
+   (differentiated by size, à la OpenStax); dark for deeper levels. Content
+   uses h1 (module title) → h2 (subsection) → h4 (worked-example bits); h3 is
+   rare. Semantic boxes (objectives/notes) keep dark titles (overridden below
+   and in the callout section). */
+article.cnx-module :is(h1, h2, h3, h4) {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-weight: 700;
+}
+
+article.cnx-module header h1,
+article.cnx-module > h1 {
+  font-size: 20pt;
+  line-height: 1.15;
+  color: #c78c20;
   margin-top: 0;
 }
 
 article.cnx-module section h2 {
-  font-size: 1.25rem;
-  margin-top: 1.2em;
+  font-size: 15pt;
+  line-height: 1.2;
+  color: #c78c20;
+  margin-top: 1.1em;
 }
 
 article.cnx-module section h3 {
-  font-size: 1.1rem;
+  font-size: 12.5pt;
+  line-height: 1.2;
+  color: #1a1a1a;
+}
+
+article.cnx-module h4 {
+  font-size: 11.5pt;
+  line-height: 1.2;
+  color: #1a1a1a;
+  margin-bottom: 0.2em;
+}
+
+/* Semantic boxes: dark, compact titles — not amber section headings. */
+article.cnx-module .learning-objectives h2,
+article.cnx-module aside.note h2,
+article.cnx-module aside.note h3 {
+  font-size: 12pt;
+  color: #1a1a1a;
 }
 
 article.cnx-module p {
@@ -362,9 +825,57 @@ article.cnx-module p {
 /* Learning objectives: keep visually distinct but compact. */
 article.cnx-module .learning-objectives {
   background: #fdf6e7;
-  border-left: 4px solid #c78c20;
+  border-left: 5px solid #c78c20;
   padding: 0.6cm 0.8cm;
   margin: 0.6cm 0;
+}
+
+/* =====================================================================
+   Callouts — greyscale-safe + "designed".
+
+   Every note/example already carries a full border + bold label (.note-type /
+   .example-label), which survives a B&W (spiral/punch) copy. We thicken the
+   LEFT edge into an accent bar in the block's own semantic colour so the type
+   reads at a glance and the block looks intentional; the light tint fills stay
+   as-is (semantic, allowed — but never the sole signal). Brand-navigation boxes
+   (chapter outline) get an amber accent to match the section palette.
+   ===================================================================== */
+article.cnx-module aside.note,
+article.cnx-module aside.example {
+  border-left-width: 5px;
+}
+
+article.cnx-module .chapter-outline {
+  border-left: 5px solid #c78c20;
+}
+
+/* Horizontal rules in brand amber, not default grey. */
+article.cnx-module hr {
+  border: 0;
+  border-top: 1px solid #c78c20;
+  margin: 1.4em 0;
+}
+
+/* =====================================================================
+   Machine-translation watermark.
+
+   Unreviewed (machine-translated) sections carry a faint repeating "VÉLÞÝTT
+   EFNI" watermark so a PDF built before proofreading is unmistakably marked —
+   essential while most content is still MT preview. Driven by section.reviewed
+   (toc.json): the print loader adds .mt-content to the <article>, so the mark is
+   PER SECTION (a partly-reviewed chapter watermarks only its MT sections). The
+   tiled SVG background repeats across every page the section spans; the
+   generator prints backgrounds (printBackground: true). Kept very light (6%) so
+   it never impairs reading, and grey so it survives a B&W copy.
+
+   Applies to any `.mt-content`: section AND appendix `<article>`s (both loaders
+   tag unreviewed content), plus the back-of-book glossary (`.print-glossary` —
+   MT-derived definitions, tagged unconditionally for now; see the ordabok
+   route). All are go-live-gated: no MT content ships unmarked.
+   ===================================================================== */
+.mt-content {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 width%3D%22330%22 height%3D%22230%22%3E%3Ctext x%3D%22165%22 y%3D%22115%22 fill%3D%22%234a4a4a%22 fill-opacity%3D%220.06%22 font-family%3D%22sans-serif%22 font-size%3D%2225%22 font-weight%3D%22700%22 letter-spacing%3D%222%22 text-anchor%3D%22middle%22 transform%3D%22rotate(-32 165 115)%22%3EV%C3%89L%C3%9E%C3%9DTT EFNI%3C%2Ftext%3E%3C%2Fsvg%3E");
+  background-repeat: repeat;
 }
 
 article.cnx-module .learning-objectives h2 {

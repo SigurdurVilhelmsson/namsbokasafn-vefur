@@ -2,6 +2,7 @@ import { error, isHttpError } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
 import { loadTableOfContents } from '$lib/utils/contentLoader';
 import { books, getBook } from '$lib/types/book';
+import { extractArticle, markMachineTranslated } from '$lib/utils/printContent';
 
 export const prerender = true;
 
@@ -23,13 +24,6 @@ interface PrintBlock {
 	content: string;
 }
 
-function extractArticle(html: string): string {
-	const article = html.match(/<article[^>]*>[\s\S]*?<\/article>/);
-	if (article) return article[0];
-	const body = html.match(/<body[^>]*>([\s\S]*?)<\/body>/);
-	return body ? body[1] : html;
-}
-
 export const load: PageLoad = async ({ params, fetch }) => {
 	const { bookSlug } = params;
 	const book = getBook(bookSlug);
@@ -49,7 +43,9 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			blocks.push({
 				letter: appendix.letter,
 				title: appendix.title,
-				content: extractArticle(html)
+				// Appendices carry no per-item review flag and are MT like the rest,
+				// so always mark them (reviewed=false) → "Vélþýtt efni" watermark.
+				content: markMachineTranslated(extractArticle(html), false)
 			});
 		}
 

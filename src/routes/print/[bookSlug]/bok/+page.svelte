@@ -6,6 +6,8 @@
 	import type { PageData } from './$types';
 	import { getLicence } from '$lib/data/licences';
 	import { creditLine } from '$lib/data/bookCredits';
+	import { format } from 'date-fns';
+	import { is } from 'date-fns/locale';
 
 	let { data }: { data: PageData } = $props();
 
@@ -14,10 +16,11 @@
 	// Method-accurate translation credit (machine vs human), not a blanket "Þýðing".
 	let credit = $derived(creditLine(data.book.slug, data.book.status, attribution.translators));
 
-	const today = new Date().toLocaleDateString('is-IS', {
-		year: 'numeric',
-		month: 'long'
-	});
+	// PDF build date. date-fns + `is` locale gives Icelandic month names reliably;
+	// Intl `toLocaleDateString('is-IS')` fails under Node small-ICU (renders English).
+	// PDFs are regenerated as proofread content lands, so the reader must be able to
+	// tell which version they hold.
+	const buildDate = format(new Date(), 'd. MMMM yyyy', { locale: is });
 
 	function chapterPage(chapterNum: number): number | null {
 		return data.tocPages?.chapters.find((c) => c.number === chapterNum)?.page ?? null;
@@ -29,51 +32,96 @@
 </svelte:head>
 
 <!-- Title page -->
-<section class="print-cover">
-	<p class="cover-eyebrow">Námsbókasafn</p>
-	<h1 class="cover-title">{data.book.title}</h1>
-	<p class="cover-book-title">{data.book.subtitle}</p>
-	<p class="cover-meta">
-		{credit}<br />
-		Byggt á {attribution.originalTitle} eftir {attribution.originalAuthors.join(', ')}<br />
-		Útgefandi frumefnis: {attribution.publisher} — {attribution.sourceUrl}<br />
-		Leyfi: {licence.name} ({licence.fullName})<br />
-		Sótt {today} af namsbokasafn.is
-	</p>
-	{#if licence.notices.length > 0}
-		<p class="cover-notice">
-			{licence.notices.join(' ')}
+<section class="print-cover print-book-cover">
+	<div class="cover-hero">
+		<p class="cover-eyebrow">Námsbókasafn</p>
+		<h1 class="cover-title">{data.book.title}</h1>
+		<div class="cover-rule" aria-hidden="true"></div>
+		<p class="cover-book-title">{data.book.subtitle}</p>
+	</div>
+
+	<!-- Colophon: full CC-BY / CC-BY-NC-SA attribution incl. licence URL and the
+	     required modification statement (this is an Icelandic derivative). -->
+	<div class="print-colophon">
+		<p class="colophon-credit">{credit}</p>
+		<p>
+			Byggt á <span class="colophon-work">{attribution.originalTitle}</span> eftir
+			{attribution.originalAuthors.join(', ')}.
 		</p>
-	{/if}
-	<p class="cover-notice">Aðgangur að frumefninu er ókeypis á openstax.org.</p>
+		<p>Útgefandi frumefnis: {attribution.publisher} — {attribution.sourceUrl}</p>
+		<p>Leyfi: {licence.name} ({licence.fullName}) — {licence.url}</p>
+		<p>{attribution.modifications}</p>
+		{#if licence.notices.length > 0}
+			<p>{licence.notices.join(' ')}</p>
+		{/if}
+		<p>Aðgangur að frumefninu er ókeypis á openstax.org.</p>
+		<p class="colophon-fetched">
+			Útgáfudagur PDF-skjals: {buildDate} · namsbokasafn.is
+		</p>
+	</div>
 </section>
 
 <!-- Table of contents -->
 <section class="print-toc">
 	<h1>Efnisyfirlit</h1>
 	<ol>
+		<!-- Rows are anchor-links (#kafli-N / #vidaukar). Chromium emits a Link
+		     annotation per row; generate-pdfs.js registers those names as merged
+		     dests so the TOC is clickable in the assembled book. -->
 		{#each data.chapters as chapter (chapter.number)}
 			<li>
-				<span>
-					<span class="toc-chapter-num">{chapter.number}.</span>
-					{chapter.title}
-				</span>
-				{#if chapterPage(chapter.number) !== null}
-					<span class="toc-page">{chapterPage(chapter.number)}</span>
-				{/if}
+				<a class="toc-link" href="#kafli-{chapter.number}">
+					<span>
+						<span class="toc-chapter-num">{chapter.number}.</span>
+						{chapter.title}
+					</span>
+					{#if chapterPage(chapter.number) !== null}
+						<span class="toc-page">{chapterPage(chapter.number)}</span>
+					{/if}
+				</a>
 			</li>
 		{/each}
 		{#if data.appendices.length > 0}
 			<li>
-				<span>
-					<span class="toc-chapter-num" aria-hidden="true"></span>
-					Viðaukar
-					({data.appendices.map((a) => a.letter).join(', ')})
-				</span>
-				{#if data.tocPages?.appendicesPage != null}
-					<span class="toc-page">{data.tocPages.appendicesPage}</span>
-				{/if}
+				<a class="toc-link" href="#vidaukar">
+					<span>
+						<span class="toc-chapter-num" aria-hidden="true"></span>
+						Viðaukar
+						({data.appendices.map((a) => a.letter).join(', ')})
+					</span>
+					{#if data.tocPages?.appendicesPage != null}
+						<span class="toc-page">{data.tocPages.appendicesPage}</span>
+					{/if}
+				</a>
+			</li>
+		{/if}
+		{#if data.tocPages?.glossaryPage != null}
+			<li>
+				<a class="toc-link" href="#ordaskra">
+					<span>
+						<span class="toc-chapter-num" aria-hidden="true"></span>
+						Orðaskrá
+					</span>
+					<span class="toc-page">{data.tocPages.glossaryPage}</span>
+				</a>
 			</li>
 		{/if}
 	</ol>
+
+	<!-- Invisible in-document anchor targets: Chromium only emits a Link
+	     annotation for an `<a href="#id">` whose target id exists in THIS
+	     document. These give the TOC rows a local target so the annotations are
+	     created; generate-pdfs.js then re-points the names to the real chapter /
+	     appendix pages in the merged book. -->
+	<div class="toc-anchor-targets" aria-hidden="true">
+		{#each data.chapters as chapter (chapter.number)}
+			<span id="kafli-{chapter.number}"></span>
+		{/each}
+		{#if data.appendices.length > 0}
+			<span id="vidaukar"></span>
+		{/if}
+		{#if data.tocPages?.glossaryPage != null}
+			<span id="ordaskra"></span>
+		{/if}
+	</div>
 </section>
