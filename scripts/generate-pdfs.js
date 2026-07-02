@@ -59,6 +59,12 @@ import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
 import { chromium } from '@playwright/test';
 import { PDFDocument, PDFName, PDFHexString, StandardFonts, rgb } from 'pdf-lib';
+import {
+	harvestDests,
+	findCollidingNames,
+	mergeChapterDests,
+	writeMergedDests
+} from './lib/pdf-links.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -66,9 +72,10 @@ const CONTENT_DIR = join(ROOT, 'static', 'content');
 const OUTPUT_DIR = join(ROOT, 'static', 'downloads');
 const TMP_DIR = join(ROOT, '.svelte-kit', 'pdf-tmp');
 
-// Stamp geometry (PDF points; A4 = 595.28 × 841.89). Must stay inside the
-// 22mm top/bottom + 18mm side margins set in printToPdf().
-const MARGIN_X = 51; // 18mm
+// Stamp geometry (PDF points; A4 = 595.28 × 841.89). Folios/headers sit on the
+// outer edge, ~18mm in — inside the 22mm side margins (see print.css @page), so
+// they never collide with body text or the binding gutter.
+const MARGIN_X = 51; // 18mm from the outer paper edge
 const FOOTER_BASELINE = 34;
 const HEADER_BASELINE = 806;
 const STAMP_FONT_SIZE = 9;
@@ -126,7 +133,10 @@ async function printToPdf(page, url, outFile) {
 		printBackground: true,
 		preferCSSPageSize: true, // honor @page rules in print.css
 		displayHeaderFooter: false,
-		margin: { top: '22mm', bottom: '22mm', left: '18mm', right: '18mm' }
+		// preferCSSPageSize honours print.css's @page margins (20/22/22/22mm —
+		// symmetric binding-safe sides for double-sided binding); these mirror
+		// that for clarity and any non-CSS-page-size fallback.
+		margin: { top: '20mm', bottom: '22mm', left: '22mm', right: '22mm' }
 	});
 }
 
@@ -257,7 +267,7 @@ async function generateForBook(page, baseUrl, bookSlug) {
 	const chapterParts = [];
 	for (const chapter of chapters) {
 		const chSlug = pad2(chapter.number);
-		const url = `${baseUrl}/print/${bookSlug}/kafli/${chSlug}`;
+		const url = `${baseUrl}/print/${bookSlug}/kafli/${chSlug}/`;
 		const rawFile = join(bookTmpDir, `${bookSlug}-kafli-${chSlug}-raw.pdf`);
 		console.log(`  ${bookSlug} kafli ${chSlug}: ${chapter.title}`);
 		await printToPdf(page, url, rawFile);
@@ -274,17 +284,33 @@ async function generateForBook(page, baseUrl, bookSlug) {
 	if ((toc.appendices ?? []).length > 0) {
 		const rawFile = join(bookTmpDir, `${bookSlug}-vidauki-raw.pdf`);
 		console.log(`  ${bookSlug}: appendices (${toc.appendices.length})`);
-		await printToPdf(page, `${baseUrl}/print/${bookSlug}/vidauki`, rawFile);
+		await printToPdf(page, `${baseUrl}/print/${bookSlug}/vidauki/`, rawFile);
 		appendixPart = { rawFile, pageCount: await getPdfPageCount(rawFile) };
 	}
 
-	// Body page numbering starts at 1 on the first page of chapter 1.
+	// Back-of-book glossary (rendered from glossary.json), merged after appendices.
+	let glossaryPart = null;
+	if (existsSync(join(CONTENT_DIR, bookSlug, 'glossary.json'))) {
+		const rawFile = join(bookTmpDir, `${bookSlug}-ordabok-raw.pdf`);
+		console.log(`  ${bookSlug}: glossary (orðaskrá)`);
+		await printToPdf(page, `${baseUrl}/print/${bookSlug}/ordabok/`, rawFile);
+		glossaryPart = { rawFile, pageCount: await getPdfPageCount(rawFile) };
+	}
+
+	// Body page numbering starts at 1 on the first page of chapter 1; appendices
+	// then the glossary continue the count.
 	let nextStart = 1;
 	for (const part of chapterParts) {
 		part.startPage = nextStart;
 		nextStart += part.pageCount;
 	}
-	if (appendixPart) appendixPart.startPage = nextStart;
+	if (appendixPart) {
+		appendixPart.startPage = nextStart;
+		nextStart += appendixPart.pageCount;
+	}
+	// Glossary is the last body part, so its start is the running total (no need
+	// to advance nextStart further).
+	if (glossaryPart) glossaryPart.startPage = nextStart;
 
 	// --- Pass 2: front matter with TOC page numbers --------------------------
 
@@ -297,7 +323,8 @@ async function generateForBook(page, baseUrl, bookSlug) {
 					number: p.chapterNum,
 					page: p.startPage
 				})),
-				appendicesPage: appendixPart?.startPage ?? null
+				appendicesPage: appendixPart?.startPage ?? null,
+				glossaryPage: glossaryPart?.startPage ?? null
 			},
 			null,
 			2
@@ -306,8 +333,15 @@ async function generateForBook(page, baseUrl, bookSlug) {
 
 	const frontMatterFile = join(bookTmpDir, `${bookSlug}-front.pdf`);
 	console.log(`  ${bookSlug}: front matter (title + TOC)`);
-	await printToPdf(page, `${baseUrl}/print/${bookSlug}/bok`, frontMatterFile);
+	await printToPdf(page, `${baseUrl}/print/${bookSlug}/bok/`, frontMatterFile);
 	const frontPageCount = await getPdfPageCount(frontMatterFile);
+
+	// Colophon page — identical for every chapter, so render once and append it
+	// (below) only to the standalone chapter PDFs. The full book is NOT given a
+	// per-chapter colophon; it carries the single front-matter colophon instead.
+	const colophonFile = join(bookTmpDir, `${bookSlug}-colophon.pdf`);
+	console.log(`  ${bookSlug}: colophon (standalone chapters)`);
+	await printToPdf(page, `${baseUrl}/print/${bookSlug}/colophon/`, colophonFile);
 
 	// --- Stamp + write standalone chapter PDFs, assemble the full book -------
 
@@ -321,6 +355,14 @@ async function generateForBook(page, baseUrl, bookSlug) {
 
 	const outlineItems = [];
 	if (frontPageCount > 1) outlineItems.push({ title: 'Efnisyfirlit', pageIndex: 1 });
+
+	// Collected so we can rebuild internal-link destinations after the merge:
+	// copyPages drops the catalog /Dests dict, so every `<a href="#id">` in the
+	// content dangles until we harvest each chapter's dests and rewrite them
+	// against the merged page tree. Also lets us register chapter start pages as
+	// named dests for the clickable table of contents. See scripts/lib/pdf-links.js.
+	const destHarvest = []; // { dests, mergedOffset, chapterNum }
+	const tocDests = {}; // anchor name → merged page index (chapter/appendix starts)
 
 	const chapterEntries = [];
 	for (const part of chapterParts) {
@@ -343,15 +385,22 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		});
 		standalone.setLanguage('is');
 		await stampPages(standalone, headerForPage);
+		// Append the standalone-only colophon as an unstamped addendum page (so a
+		// chapter shared on its own still carries full CC-BY attribution). It is
+		// deliberately absent from the merged book below.
+		const colDoc = await PDFDocument.load(readFileSync(colophonFile));
+		for (const p of await standalone.copyPages(colDoc, colDoc.getPageIndices())) {
+			standalone.addPage(p);
+		}
 		const standaloneFile = join(bookOutDir, part.outFile);
 		writeFileSync(standaloneFile, await standalone.save());
 
 		// Same pages into the full book.
-		outlineItems.push({
-			title: `${part.chapterNum}. ${part.title}`,
-			pageIndex: merged.getPageCount()
-		});
+		const mergedOffset = merged.getPageCount();
+		outlineItems.push({ title: `${part.chapterNum}. ${part.title}`, pageIndex: mergedOffset });
+		tocDests[`kafli-${part.chapterNum}`] = mergedOffset;
 		const src = await PDFDocument.load(readFileSync(part.rawFile));
+		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: part.chapterNum });
 		const copied = await merged.copyPages(src, src.getPageIndices());
 		for (const p of copied) merged.addPage(p);
 
@@ -366,11 +415,45 @@ async function generateForBook(page, baseUrl, bookSlug) {
 	}
 
 	if (appendixPart) {
-		outlineItems.push({ title: 'Viðaukar', pageIndex: merged.getPageCount() });
+		const mergedOffset = merged.getPageCount();
+		outlineItems.push({ title: 'Viðaukar', pageIndex: mergedOffset });
+		tocDests['vidaukar'] = mergedOffset;
 		const src = await PDFDocument.load(readFileSync(appendixPart.rawFile));
+		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 90 });
 		const copied = await merged.copyPages(src, src.getPageIndices());
 		for (const p of copied) merged.addPage(p);
 	}
+
+	if (glossaryPart) {
+		const mergedOffset = merged.getPageCount();
+		outlineItems.push({ title: 'Orðaskrá', pageIndex: mergedOffset });
+		tocDests['ordaskra'] = mergedOffset;
+		const src = await PDFDocument.load(readFileSync(glossaryPart.rawFile));
+		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 91 });
+		const copied = await merged.copyPages(src, src.getPageIndices());
+		for (const p of copied) merged.addPage(p);
+	}
+
+	// Rebuild the merged catalog /Dests: harvested content dests (rebased to the
+	// merged page tree) so every in-content link resolves again, plus chapter /
+	// appendix start pages for the clickable TOC. Colliding auto-ids (footnote
+	// anchors) are namespaced per chapter so they don't clobber.
+	const collidingNames = findCollidingNames(destHarvest.map((h) => h.dests));
+	// `gloss-N` are intentionally shared: many chapters link the same glossary
+	// entry, and each chapter carries a hidden placeholder target for it (so
+	// Chromium emits the dfn link annotation). They must NOT be namespaced — the
+	// glossary part is harvested last, so its real gloss-N entry page wins.
+	for (const name of [...collidingNames]) {
+		if (name.startsWith('gloss-')) collidingNames.delete(name);
+	}
+	const registry = new Map();
+	for (const { dests, mergedOffset, chapterNum } of destHarvest) {
+		mergeChapterDests(registry, dests, mergedOffset, chapterNum, collidingNames);
+	}
+	for (const [name, mergedPageIndex] of Object.entries(tocDests)) {
+		registry.set(name, { mergedPageIndex, params: [PDFName.of('Fit')] });
+	}
+	writeMergedDests(merged, registry);
 
 	// Continuous folios + running headers across the whole assembled book.
 	const partStarts = chapterParts.map((p) => ({
@@ -381,6 +464,12 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		partStarts.push({
 			header: (n) => (n % 2 === 1 ? 'Viðaukar' : bookTitle),
 			startPage: appendixPart.startPage
+		});
+	}
+	if (glossaryPart) {
+		partStarts.push({
+			header: (n) => (n % 2 === 1 ? 'Orðaskrá' : bookTitle),
+			startPage: glossaryPart.startPage
 		});
 	}
 	await stampPages(merged, (i) => {

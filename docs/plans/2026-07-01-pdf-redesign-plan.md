@@ -1,6 +1,6 @@
 # PDF Output Redesign — Design Spec & Implementation Plan
 
-> **Status:** Planned / not started. Parked for pickup when convenient. Created 2026-07-01.
+> **Status (branch `feature/pdf-redesign`, PR #182 opened 2026-07-02):** **Phase 0** (spikes) ✓ · **Phase 1** (visual redesign, incl. duplex margins + pagination) ✓ · **Task 1.8** (build date + MT watermark) ✓ · **Task 4.1** (standalone-only colophon) ✓ · **Phase 2 core** — content-link resurrection + clickable TOC ✓ (2.1 fonts deferred, 2.2 section outline blocked-noted). **Next:** Phase 3 link _styling_ (dark-amber cross-refs) + exercise↔answer + back-of-book glossary; Phase 4.2/4.3 metadata/footer; Phase 5 profiles. Created 2026-07-01.
 > **For agentic workers:** use `superpowers:subagent-driven-development` or `superpowers:executing-plans` to implement task-by-task. Steps use `- [ ]` checkboxes.
 > **Attached to:** `docs/plans/2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md` (§ Planned) and the open-work triage `docs/plans/2026-06-30-open-work-triage-vs-efni.md` (backlog).
 
@@ -130,21 +130,23 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 **Files:** `static/styles/print.css` (temp branch).
 
-- [ ] Add `.reading-content, article.cnx-module { font-family: "Literata", Georgia, serif; font-size: 10.5pt; line-height: 1.45; }` (Literata `@font-face` is already loaded globally; confirm it is available on `/print/*` — if not, add `@font-face` to `print.css` pointing at `/fonts/Literata-*.woff2`).
-- [ ] Regenerate one chapter: `node scripts/generate-pdfs.js --book efnafraedi-2e` then inspect `static/downloads/efnafraedi-2e/efnafraedi-2e-kafli-15.pdf`.
-- [ ] `pdffonts static/downloads/efnafraedi-2e/efnafraedi-2e-kafli-15.pdf` → **Expected:** Literata embedded/subset, not Helvetica, for body runs.
-- [ ] Rasterize a content page (`pdftoppm -png -r 110 -f 4 -l 4 …`) and visually confirm serif body + unchanged math.
-- **Acceptance:** body renders in Literata serif; math/figures unaffected; no font-fallback boxes on Icelandic glyphs (á ð é í ó ú ý þ æ ö).
+- [x] Add serif body to `print.css` document defaults: `font-family: "Literata", Georgia, serif; font-size: 10.5pt; line-height: 1.45;`. Literata `@font-face` comes from `app.css` (loaded globally by the root layout, so present on `/print/*`); Task 1.1 will add a belt-and-braces `@font-face` to `print.css` so print never depends on `app.css`.
+- [x] Rendered one chapter (`/print/efnafraedi-2e/kafli/15`) via a minimal Playwright driver (confirms **Chromium runs in this environment** — `~/.cache/ms-playwright/chromium-1228`).
+- [x] `pdffonts` → **Literata embedded/subset** for all body runs (Type3 custom-encoded, `emb/sub/uni = yes`); **no Helvetica/Arial** for body text.
+- [x] Rasterized a content page — serif body confirmed, math/figures unaffected.
+- **Acceptance MET:** body renders in Literata serif; math/figures unaffected; Icelandic glyphs (á ð é í ó ú ý þ æ ö) all intact, no fallback boxes.
 
 ### Task 0.2: pdf-lib link-reconstruction spike (the risk)
 
 **Files:** `scripts/lib/pdf-links.js` (new, spike), a throwaway driver.
 
-- [ ] Build a 2-chapter fixture: render `/print/efnafraedi-2e/kafli/03` and `/kafli/15` to PDFs, merge with `copyPages` (mirror `generate-pdfs.js`).
-- [ ] Write `defineNamedDest(doc, name, pageRef, top)` that inserts into the catalog `/Names /Dests` name tree, and `addGoToLink(page, rect, name)` that adds a `/Annots` `/Link` with `/A << /S /GoTo /D (name) >>`.
-- [ ] Prove: a link annotation on chapter-03's page jumps to a named dest on chapter-15's page **in the merged book**. Open in a viewer (or assert the `/Dests` entry resolves to the correct merged page ref via pdf-lib).
-- [ ] Also test the **fix-up path**: read the link annotations Chromium already emitted for `<a href="#id">` on a single-chapter PDF (`page.node.Annots`), read their rects, and re-target them to registry dests after merge.
-- **Acceptance:** a decision recorded in the plan — **(A)** rebuild all links from scratch in pdf-lib using rects we compute, or **(B)** harvest Chromium's annotation rects and re-target their destinations. Whichever proves reliable becomes the Phase 3 approach. If neither is reliable, fall back to _outline-only_ navigation (Phase 2) and mark Phase 3 blocked.
+- [x] Built the 2-chapter fixture by `copyPages`-merging the existing kafli-03 + kafli-15 PDFs (mirrors `generate-pdfs.js`), in `.pdf-spike-driver.mjs`.
+- [x] Implemented `defineNamedDest` + `addGoToLink` **and** the harvest/rebase utilities in `scripts/lib/pdf-links.js` (real module, not throwaway). Note: Chromium uses the catalog **`/Dests` name-dictionary**, not the `/Names /Dests` string tree — so the utilities target `/Dests`.
+- [x] **Proved cross-chapter jump:** after harvest/rebase, a name owned by kafli-15 resolves to the correct merged page (39, in kafli-15's range) — verified through a **save→reload round-trip**, and the target page rasterized to genuine kafli-15 content (Mynd 15.1 flúorít).
+- [x] **Proved synthetic inject:** `defineNamedDest` + `addGoToLink` on a kafli-03 page → a kafli-15 dest resolves correctly after reload; both injected annotations persist. This is the mechanism for TOC/glossary/answer links (which have **no** Chromium source anchor).
+- [x] Characterised the corpus (all 21 chapters): **792** internal name-dest links + **146** external URI links (URIs are all `http(s)`, self-contained, already survive the merge — no work needed); **0** array-dests, **0** `/GoTo`-action, **0** `/GoToR`. Collisions across chapters: **only `fnref-N`** (footnote-return anchors, intra-chapter, cosmetic); `CNX_Chem_NN_*` content ids are globally unique. **No genuine cross-chapter content cross-references exist in efnafraedi-2e** (OpenStax chem refs stay within-module) — so cross-chapter had to be proven by synthetic injection, per above.
+
+**DECISION (recorded 2026-07-01): approach (B), refined — harvest + rebase, do _not_ rebuild from rects.** Chromium already emits every internal `<a href="#id">` as a **name-object `/Dest` Link annotation**, and those annotations **survive `copyPages`** onto the merged pages (938/938 present in the current `-bok.pdf`); what `copyPages` drops is the catalog `/Dests` dict, so the names dangle. Phase 3 therefore does **not** touch the surviving annotations or compute any rects for content links: it harvests each chapter's `/Dests`, rebases page refs to merged indices, and writes one combined `/Dests` (`harvestDests` → `findCollidingNames` → `mergeChapterDests` → `writeMergedDests`). Colliding names (`fnref-*` only) are namespaced per chapter; everything else stays global so cross-chapter resolution works. Constructs with no source anchor (TOC rows Task 2.3, back-of-book glossary Task 3.4, exercise↔answer Task 3.3 if those aren't `<a href>` in print HTML) are built with `defineNamedDest` + `addGoToLink`. **Phase 3 is UNBLOCKED.** Fallback (outline-only) is not needed.
 
 ---
 
@@ -192,42 +194,78 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 - [ ] **Acceptance:** cover looks intentional; colophon lists title/authors/publisher/source/licence+URL/translators/modification statement.
 - [ ] Commit: `style(pdf): cover + colophon layout`.
 
-### Task 1.6: Binding margin (interim, `bound` default)
+### Task 1.6: Binding margin — DUPLEX (double-sided) default
 
-**Files:** `scripts/generate-pdfs.js` (`printToPdf` margins ~129; `MARGIN_X`, stamp geometry ~71–76).
+**Reviewer decision (2026-07-01): double-sided is the target** (school/professional printers duplex by default, and that's where binding is applied). This supersedes the plan's original `bound` single-sided default. **Files:** `static/styles/print.css` (`@page`), `scripts/generate-pdfs.js` (`printToPdf` margin option, `MARGIN_X` comment).
 
-- [ ] Set left margin 26 mm, right 18 mm; update `MARGIN_X` and folio/header x-positions so stamps stay in the (new) margins on the correct edge for single-sided.
-- [ ] **Acceptance:** no content within 26 mm of the left edge; folio/header positioned correctly; regenerate confirms.
-- [ ] Commit: `feat(pdf): binding-edge margin for spiral/4-hole`.
-- [ ] **Re-benchmark checkpoint:** rasterize p4 + cover + a figure page; compare to OpenStax; note residual gaps.
+- **Why symmetric, not mirrored:** true mirrored margins (wide inner gutter / narrow outer) can't be done reliably here — chapters are rendered separately then merged, so a chapter's internal `@page :left`/`:right` parity doesn't match its position in the merged book (a chapter that renders recto-first may land on a verso page → gutter on the wrong side for half the pages). Real books fix this by forcing every chapter to start on a recto with blank filler pages; that needs folio/TOC re-accounting → **deferred to Task 5.1**.
+- [x] `@page` margins **20 / 22 / 22 / 22 mm** (top/right/bottom/left) — symmetric, binding-safe on both sides (22mm ≥ 4-hole punch ~12mm + clearance, comb/spiral bite) so the alternating gutter always clears. `preferCSSPageSize` makes `@page` authoritative (verified: content sits at 22mm); generator margin option mirrored for clarity.
+- [x] Folios/headers already correct for duplex (original recto/verso logic kept): odd/recto → folio + chapter-title header on the **right**; even/verso → folio + book-title header on the **left**; on the outer edge (`MARGIN_X` 18mm), inside the 22mm margin, never in the gutter. Verified on the assembled book (p27 recto right, p28 verso left).
+- **Effect on page count & pagination (measured, kafli-15):** total pages **53 — unchanged** vs the 18mm tightened version (the equation density work already freed the room, so the wider gutter costs 0 pages). Oversized-core examples: 18mm → **3**, 22mm → **4** (only Dæmi 15.11 tips ~1px over) — negligible, and covered by the seam-break + graceful-break handling from Task 1.7.
+- [x] Commit: `feat(pdf): double-sided binding margins`.
+- [x] **Re-benchmark checkpoint (done 2026-07-01):** compared our kafli-15 (opener + Dæmi 15.1 equation page) against OpenStax `Chemistry2e-WEB.pdf` p763/p765 (same fluorite/Ksp content). **Closed gaps:** serif body (the biggest one), running header + folio on every page, figure label+caption treatment, compact two-column reaction/Ksp equation layout (matches OpenStax), colored section headings (amber vs their teal). **Intentional differences:** amber brand vs teal; boxed examples vs icon-marked; dedicated chapter cover page vs combined opener. **Residual gaps → later phases:** cross-ref links still blue (Phase 3 → dark-amber); no clickable TOC / PDF outline yet (Phase 2). Verdict: Phase 1 output reads as a professional textbook comparable to the OpenStax reference.
+
+### Task 1.7: Pagination cohesion + equation density (keep examples whole)
+
+**Files:** `static/styles/print.css`. **Added after review feedback (2026-07-01):** examples/notes/figures/tables must not split across pages where avoidable, and a worked example must stay with its "Kannaðu þekkingu þína" (test-your-knowledge). Two levers, in priority order: **(a) density** — reclaim wasted vertical space so more examples fit a page; **(b) cohesion** — control where the residual breaks land.
+
+- **Structure finding:** "Kannaðu þekkingu þína" is authored _inside_ `<aside class="example">` (nested, last child), so an example and its test-your-knowledge are one HTML block and stay together whenever the block fits a page.
+
+- **(a) Equation density — the dominant lever (done).** `content.css` gives every `div.equation` 20px margins + 0.25rem padding and an inner 10px `mjx-container` padding — fine on screen, wasteful in print where worked examples stack many calculation steps. Tightened in print to `div.equation { margin: 0.35em; padding: 0 }` + inner `padding: 1px` + display-math `margin: 0.35em`. **Measured on kafli-15 (16 examples, A4 content box ≈ 956px, via a browser `getBoundingClientRect` pass):**
+  | metric | before | after tightening |
+  | --- | --- | --- |
+  | examples whose **core** (problem+solution) alone > 1 page | 8 | **2** (15.12, 15.16) |
+  | examples whose **full** block > 1 page | 14 | 6 |
+  | kafli-15 total pages | 63 | **53** (−16%) |
+  Equations remain visually well-spaced (not cramped); Dæmi 15.6 went from spanning 2 pages to fitting whole (incl. test-your-knowledge).
+
+- **(b) Cohesion — seam-break (done; policy confirmed by reviewer).** Removed `aside.example` from the global `break-inside: avoid` list; instead fence the core so the problem+solution can't split (each direct child `break-inside: avoid`, `break-before: avoid` between consecutive core children) while leaving the nested check-knowledge as the single permitted break point. So: example stays whole when it fits; for the ~4 borderline cases (core fits, full block doesn't) the test-your-knowledge drops to the next page instead of leaving a ~40% gap; **never splits mid-solution.** Seam protection: `break-after: avoid` on `.note-type`/note `h4`/`.para-title`/example label so no heading is stranded.
+
+- **Unavoidable residual:** 2 of 16 examples (15.12, 15.16) have a core taller than one A4 page even when tight — physically impossible to keep whole. Verified they break **gracefully** (between calculation steps, no mid-equation split, no stranded heading; 15.16 breaks before the final mass calc, check-knowledge concludes on the next page).
+
+- [x] Equation density tightening (measured 8→2 oversized cores, 63→53 pages).
+- [x] Example core-fencing + test-your-knowledge seam-break; heading seam protection.
+- [ ] **Phase 5 QA must include:** a scan for (a) any example split mid-solution, (b) any mid-equation/stranded-heading break, (c) excessive (> ~⅓ page) whitespace at page feet. Re-measure oversized-core counts if content changes materially.
+- **Not doing (documented):** height-based conditional cohesion isn't expressible in CSS; a measurement-based JS repagination pass is possible but out of scope — revisit only if QA finds systematically bad whitespace. Could tighten paragraph spacing further (already 0.5em) but equation spacing was the dominant lever; leave paragraphs for readability.
+- [ ] Commit: `style(pdf): tighten equation spacing` + `style(pdf): example pagination cohesion`.
+
+### Task 1.8: Transparency — PDF build date + MT watermark
+
+**Reviewer requests (2026-07-01):** (a) show the PDF creation date so readers can tell which version they hold (PDFs are regenerated as proofread content lands); (b) mark machine-translated (unreviewed) content — essential while most content is still MT preview (efnafraedi-2e is **212/216 sections unreviewed**; the other four books are 100% MT).
+
+- [x] **Build date on every cover.** `Útgáfudagur PDF-skjals: {date}` on the book cover colophon and each chapter cover. Formatted with **date-fns + `is` locale** (`d. MMMM yyyy` → "1. júlí 2026") — `Intl.toLocaleDateString('is-IS')` renders English under Node small-ICU, so it's not used. Verified. _(Refinement, not done: the date is `new Date()` per route — same day within a build; a single generator-passed timestamp would be exact.)_
+- [x] **Per-section MT watermark.** The print loader now propagates `section.reviewed` and adds an `mt-content` class to the `<article>` of every unreviewed section (`markMachineTranslated`); `print.css` renders a faint (6%) tiled diagonal **"VÉLÞÝTT EFNI"** SVG-background watermark on `.mt-content`, repeating across every page the section spans. **Per-section**, so a partly-reviewed chapter marks only its MT sections (verified on kafli-01: reviewed 1.0/1.1 clean, MT sections watermarked). Wording matches the reader's "Vélþýtt efni" banner. Answer-key/aggregation blocks default to watermarked (conservative). Class injected into the article (not a wrapper) so `:first-of-type` page-break logic is preserved. Greyscale-safe.
+- **Go-live gate:** the MT watermark must be in place before any PDF is published while content is still MT.
+- [x] **COVERAGE GAP CLOSED (2026-07-01):** extended the watermark beyond section content. `markMachineTranslated`/`extractArticle` extracted to `src/lib/utils/printContent.ts`; the **vidauki** loader now tags appendix articles `mt-content` (reviewed=false), the **ordabok** glossary container is tagged `mt-content` (MT-derived), and the CSS rule was generalised `article.cnx-module.mt-content` → `.mt-content`. Verified: glossary + all 13 appendix articles watermarked. Also hid the appendix's blue interactive `.periodic-table-link` (web-tool launcher, useless in print). _TODO: gate the appendix/glossary marking on review status once a book is fully proofread (unconditional for now — all content is MT)._
+- [x] Commit: `feat(pdf): build date on covers + MT watermark on unreviewed content`.
 
 ---
 
 ## Phase 2 — Navigation (outline + TOC links + real fonts)
 
-### Task 2.1: Embed brand fonts in stamps
+### Task 2.1: Embed brand fonts in stamps — DEFERRED
 
-**Files:** `scripts/generate-pdfs.js` (`stampPages` ~166; `encodableText` ~143).
+**Files:** `scripts/generate-pdfs.js` (`stampPages`, `encodableText`).
 
-- [ ] Replace `StandardFonts.Helvetica/Oblique` with embedded Literata/Bricolage (read woff2→ttf; note pdf-lib needs TTF/OTF, not woff2 — add a `.ttf` of the stamp face under `scripts/assets/` or convert at build). Keep `encodableText` guard.
-- [ ] **Acceptance:** running headers/folios render in the brand face; Icelandic glyphs intact.
-- [ ] Commit: `feat(pdf): embed brand font in headers/folios`.
+- **Deferred (2026-07-01):** blocked on tooling for low visual payoff. pdf-lib's `embedFont` for a custom face needs **`@pdf-lib/fontkit` (not installed)** + a **TTF/OTF** stamp face, but `static/fonts/` has only **woff2** and there's **no converter available** (no fonttools/brotli/wawoff2). The stamps are 8.5–9pt folios/headers in the margin — Helvetica there is barely distinguishable from Bricolage. Revisit if we add `@pdf-lib/fontkit` + a committed `.ttf` under `scripts/assets/` (or a build-time woff2→ttf step).
+- [ ] Acceptance (when picked up): running headers/folios render in the brand face; Icelandic glyphs intact.
 
-### Task 2.2: Hierarchical outline (sections)
+### Task 2.2: Hierarchical outline (sections) — PARTIALLY BLOCKED
 
-**Files:** `scripts/generate-pdfs.js` (`addOutline` ~207; `generateForBook` ~238 to gather section page offsets).
+**Files:** `scripts/generate-pdfs.js` (`addOutline`, `generateForBook`).
 
-- [ ] Extend outline items to nested `{title, pageIndex, children[]}`; measure section start pages (each section is an `article.cnx-module` with an `id` — count pages up to each within the per-chapter raw PDF, or split page offsets from the render). Rewrite `addOutline` to build `First/Last/Parent/Next/Prev/Count` for nesting.
-- [ ] **Acceptance:** `pdfinfo -struct-text` / a viewer shows chapters expandable into sections; every entry lands on the right page.
-- [ ] Commit: `feat(pdf): hierarchical (section-level) outline`.
+- **Blocker found (2026-07-01):** the plan assumed each section `<article>` has a linkable `id` to get its start page — it does **not** (sections carry `data-module-id="m…"`, not `id`, so Chromium emits no dest for the section start). Harvested dests are figure/content anchors (`CNX_Chem_15_00_*`), not section openers. So section start pages aren't directly available.
+- **Options when picked up:** (a) inject an `id` + an invisible in-`/bok`-style target per section so Chromium emits a section-start dest (same trick as the clickable TOC), then read its page from the harvested dests; or (b) inject a section-start `id` into each block's `<article>` in the print loader (like `markMachineTranslated` does for `mt-content`) and register a synthetic dest at render/measure time. Then nest the outline (`First/Last/Parent/Next/Prev/Count`).
+- [ ] **Acceptance:** a viewer shows chapters expandable into sections; every entry lands on the right page. Lower priority than the content-link win below.
 
-### Task 2.3: Clickable TOC
+### Task 2.3: Clickable TOC + content-link resurrection — DONE (core)
 
-**Files:** `src/routes/print/[bookSlug]/bok/+page.svelte` (add section rows + `href="#…"`), `scripts/generate-pdfs.js` (register TOC dests), `scripts/lib/pdf-links.js`.
+**Files:** `bok/+page.svelte` (anchor-link TOC rows + invisible targets), `scripts/generate-pdfs.js` (harvest/rebase `/Dests` + register TOC dests), `static/styles/print.css`, `scripts/lib/pdf-links.js` (Phase 0 utilities).
 
-- [ ] Render TOC rows with the anchor names the registry uses; after assembly, add GoTo link annotations over TOC row rects → chapter/section start-page dests (approach from Task 0.2).
-- [ ] **Acceptance:** clicking a TOC entry in a reader jumps to that chapter/section; page numbers already present.
-- [ ] Commit: `feat(pdf): clickable table of contents`.
+- [x] **Content-link resurrection (the big win, also Phase 3.1/3.2 core):** generate-pdfs now harvests each chapter/appendix `/Dests` and rebases them onto the merged page tree (`harvestDests`→`findCollidingNames`→`mergeChapterDests`→`writeMergedDests`), rebuilding the catalog `/Dests` that `copyPages` drops. Verified on the book: `/Dests` **0 → 805 keys**; **1026** in-content name-dest link annotations now resolve (e.g. `CNX_Chem_15_00_Fluorite` → the correct merged page). All "Mynd/Tafla/jafna" cross-references are clickable in the book again.
+- [x] **Clickable TOC:** `/bok` TOC rows are anchor-links (`#kafli-N` / `#vidaukar`); Chromium only emits a Link annotation when the target id exists in `/bok`, so invisible `.toc-anchor-targets` spans give them local targets (verified: 22 annotations emitted). generate-pdfs registers `kafli-N` / `vidaukar` as merged dests (`[pageRef, /Fit]`) at the chapter/appendix start pages, so the surviving annotations re-point to the real pages. TOC rows styled to inherit (not blue).
+- [x] Commit: `feat(pdf): resurrect content links + clickable TOC`.
+- **Note:** external URI links (146) already survived the merge untouched. Cross-ref link _styling_ (dark-amber underline) is Phase 3.2; exercise↔answer + glossary links are Phase 3.3/3.4.
 
 ---
 
@@ -237,45 +275,47 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 **Files:** `scripts/lib/pdf-links.js`, `scripts/lib/pdf-links.test.js`.
 
-- [ ] Implement `buildRegistry()` mapping every target `id` (section, figure, table, equation, exercise, answer, glossary term) → merged page index (derive ids by scanning the rendered HTML per chapter and tracking page offsets from Task 2.2). Implement `defineNamedDest`, `addGoToLink`, and (per Task 0.2 decision) either rect-harvest or rect-compute.
-- [ ] Vitest on a fixture PDF: dest resolves to correct page; annotation rect present.
-- [ ] Commit: `feat(pdf): anchor registry + link utilities (tested)`.
+- **Phase 0 already built the utilities** in `scripts/lib/pdf-links.js`: `harvestDests`, `findCollidingNames`, `mergeChapterDests`, `writeMergedDests` (the harvest+rebase path — the recorded 0.2 decision), plus `defineNamedDest` + `addGoToLink` for synthetic links. The registry approach is settled; **no rect-harvest/rect-compute choice remains**.
+- [x] Wired the harvest/rebase utilities into `generate-pdfs.js`'s merge loop (Phase 2 commit `7a3ffe8`): `harvestDests` per chapter/appendix/glossary with its merged offset, accumulate, `writeMergedDests`. Book `/Dests` 0→805.
+- [x] **CARRY-OVER done:** `scripts/lib/pdf-links.test.js` — 9 hermetic Vitest cases on synthetic in-memory PDFs (round-trip resolve, annotation shape, collider namespacing). Commit `test(pdf): Vitest for pdf-links utilities`.
 
-### Task 3.2: Cross-reference links
+### Task 3.2: Cross-reference links — DONE
 
-**Files:** `scripts/generate-pdfs.js`.
+- **Key realisation:** these did **not** need per-`<a>` GoTo injection. The content `<a href="#id">` links are already Chromium name-dest annotations; the Phase 2 harvest/rebase makes them resolve. So 3.2 was just **styling** (Task 3.2 commit): `article.cnx-module a[href]` → dark-amber `#8a5e14` + underline (greyscale-legible), overriding content.css blue. Verified: "Mynd 15.x" + chapter-outline refs jump and read as links.
+- [x] Commit: `style(pdf): dark-amber underlined content links`.
 
-- [ ] For every content `<a href="#id">`, add a GoTo link to the registry dest. Style handled in CSS (dark-amber underline).
-- [ ] **Acceptance:** "Mynd 15.2", section/equation refs jump correctly across chapters.
-- [ ] Commit: `feat(pdf): working cross-reference links`.
+### Task 3.3: Exercise ↔ answer links — BLOCKED on an efni content/pipeline fix
 
-### Task 3.3: Exercise ↔ answer links
+- **Verified:** exercise↔answer links are **reader-only** (`answerLinks.ts` builds them at runtime); the print HTML has no anchors. The render-time approach is settled (add `ex-`/`ans-` target spans keyed on the shared `data-exercise-id`, inject "Sjá svar"/"Sjá æfingu" links; both live in the same chapter so they resolve via the existing harvest — no cross-doc trick even needed). The mechanism is ready.
+- **BLOCKER (found 2026-07-01; my diagnosis corrected by efni):** the "Sjá svar" navigation is broken in **6 chapters (12–17)**. My first theory (`fs-idp→fs-idm` id mismatch) was **wrong** — efni proved the id pairing is 100% correct. **Real cause:** `cnxml-render` numbers EOC exercises **continuously across subsections**, but the reader (`answerLinks.ts:252`) emits a link on **odd `data-exercise-number`** and skips even — so where answered exercises drift onto even numbers (ch12–17), odd-no-answer → dead link and even-with-answer → unreachable (verified ch15: 16 + 15). **Fix (split, both halves done):** efni **shipped** `data-has-answer="true|false"` on `.eoc-exercise` (ground truth; PR #216). vefur **applied** (`fix(reader): answer-links use data-has-answer` + `answerLinks.test.ts`, 3 tests): `answerLinks.ts` exercises branch now emits a link iff `dataset.hasAnswer==='true'`, with the legacy parity heuristic as a fallback for un-re-rendered pages. **Takes full effect only after an efnafraedi re-render+sync** (batches with clean-slate WS5). Once the content lands, the PDF exercise↔answer injection unblocks and can key off `data-has-answer` too. _(My superseded id-mismatch handoff doc is banner-marked.)_
 
-**Files:** `scripts/generate-pdfs.js`, possibly `src/routes/print/.../+page.svelte` to ensure ids exist.
+### Task 3.4: Back-of-book glossary — PAGE DONE, term-links deferred
 
-- [ ] Bidirectional GoTo links: exercise number → answer-key entry; answer → exercise. Mirror the reader's `answerLinks.ts` id scheme.
-- [ ] **Acceptance:** both directions jump; verify on a chapter with EOC + answer key.
-- [ ] Commit: `feat(pdf): exercise↔answer navigation`.
+**Files:** new `src/routes/print/[bookSlug]/ordabok/{+page.ts,+page.svelte}`, `scripts/generate-pdfs.js`, `bok/+page.svelte` (TOC row), `print.css`.
 
-### Task 3.4: Back-of-book glossary + term links
-
-**Files:** new `src/routes/print/[bookSlug]/ordabok/+page.svelte` (or glossary block in `/bok`), `scripts/generate-pdfs.js`.
-
-- [ ] Render glossary from `glossary.json` with per-term `id`s; assemble it after appendices. Link the **first occurrence per section** of each `<dfn class="term">` → its glossary entry; entry back-links to first use. Optionally set the link annotation `/Contents` to the (short) definition for hover-tooltip viewers.
-- [ ] **Acceptance:** clicking a term jumps to its definition; glossary entries back-link; no over-linking (one link per term per section).
-- [ ] Commit: `feat(pdf): back-of-book glossary + term links`.
+- [x] **Glossary page:** renders all 753 terms from `glossary.json`, Icelandic-collated, two-column, each with a stable `gloss-N` id. `generate-pdfs` renders it once, measures it (pass 1), merges it after the appendices with continuous folios + a running header, an **outline bookmark ("Orðaskrá")**, and a **clickable TOC row** (`#ordaskra`, via the invisible-target trick + `toc-pages.json` `glossaryPage`).
+- [x] **Term-links DONE:** the print chapter loader wraps the first `<dfn class="term">` per section in `<a href="#gloss-N">` (`linkGlossaryTerms` in `src/lib/utils/printGlossary.ts`), matched by Icelandic headword then **English fallback** (dfn text and glossary headword are sometimes translated differently). Mechanism (same cross-document dest problem as the TOC): the loader also appends a hidden `<span id="gloss-N">` per linked term so Chromium emits the annotation; the glossary route emits hidden self-target links so its 753 entries get real dests; generate-pdfs **exempts `gloss-*` from collision-namespacing** so the glossary's authoritative entry-page dest wins over the chapter placeholders. Verified: **718 dfn→gloss annotations, all 718 resolve into the glossary** (e.g. a term on p9 → its entry on p1431); rendered bold + dark-amber underline. Partial coverage expected (unmatched dfns stay unlinked). _Back-link (glossary entry → first use) not done — the glossary route lacks the dfn ids; a term→dfn-id map would be needed._
+- [x] Commit: `feat(pdf): back-of-book glossary page` + `feat(pdf): glossary term-links`.
 
 ---
 
 ## Phase 4 — CC-BY hardening
 
-### Task 4.1: Colophon on standalone chapter PDFs
+### Task 4.1: Colophon on standalone chapters — and keep it OUT of the book
 
-**Files:** `src/routes/print/[bookSlug]/kafli/[chapterSlug]/+page.svelte`, `static/styles/print.css`.
+**Reviewer question (2026-07-01):** should the per-chapter colophon be stripped from the whole-book version, and are two render tracks more logical? **Findings:**
 
-- [ ] Add a compact colophon (title/authors/publisher/source/licence+URL/translators/modification note) as the last page (or a footer band) of each standalone chapter, since a chapter distributed alone still needs full attribution. Data from `book.attribution` + `getLicence(...)`; **fail loud** if missing.
-- [ ] **Acceptance:** every `*-kafli-NN.pdf` carries complete attribution; NC-SA books show NonCommercial + ShareAlike from descriptor flags.
-- [ ] Commit: `feat(pdf): CC-BY colophon on standalone chapters`.
+- The chapter print route (`kafli/[chapterSlug]/+page.svelte`) **already** renders a `.print-attribution` colophon at the end (lines 42–52), and `generate-pdfs.js` reuses that one raw render for **both** the standalone chapter PDF **and** the book merge — so the book currently carries the chapter colophon **22 times** (verified: `breytingar gerðar` × 22 in `-bok.pdf`), redundant with the front-matter colophon. This must be fixed.
+- **Do NOT split into two full render tracks.** Rendering each chapter twice (bare-for-book + with-extras-for-standalone) doubles a ~3-min build for no real gain. Chapter-first rendering is deliberate and correct: a single whole-book `page.pdf()` of ~1400 pages is memory-risky; per-chapter renders are bounded and the pdf-lib merge is cheap. **The right pattern is: render chapter _content_ once, then diverge standalone vs book at the pdf-lib assembly stage** (they already load the raw separately — `standalone` vs `src`).
+
+**Files:** `kafli/[chapterSlug]/+page.svelte` (remove inline colophon), a small colophon render (new tiny route or reuse `/bok` colophon), `scripts/generate-pdfs.js`.
+
+- [x] Moved the colophon **out** of the shared chapter render (removed the inline `.print-attribution` from `kafli/+page.svelte`). New `/print/[bookSlug]/colophon` route renders a full colophon **page**; `generate-pdfs.js` renders it **once per book** and appends it (pdf-lib `copyPages`, unstamped addendum) **only to each standalone** `*-kafli-NN.pdf`. The book merges colophon-free chapters (no code change there — the raw chapters no longer contain a colophon).
+- [x] Standalone colophon upgraded to the full set (credit / authors / publisher / source / **licence+URL** / **modification statement** / NC-SA notices) matching the `/bok` cover colophon — verified on the appended kafli page.
+- [x] Also removed the **appendix** (`vidauki`) inline colophon — appendices only appear inside the book (no standalone appendix PDF), so the front-matter colophon covers them; this was the source of the book's 2nd colophon.
+- **Kept in the book:** chapter **cover pages** (dividers). Also added the build date to the appendix cover for consistency.
+- [x] **Acceptance MET:** `-bok.pdf` colophon count **23 → 1** (front matter only); every standalone `*-kafli-NN.pdf` carries **1** full colophon page; chapter dividers intact. (Marker: `Aðgangur að frumefninu` — book 1, kafli-03 1.)
+- [x] Commit: `feat(pdf): standalone-only CC-BY colophon (stripped from book)`.
 
 ### Task 4.2: PDF metadata + optional XMP
 
@@ -297,13 +337,14 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 ## Phase 5 — Print/binding profiles
 
-### Task 5.1: `--profile bound|duplex`
+### Task 5.1: margin profiles + true-mirrored duplex
 
-**Files:** `scripts/generate-pdfs.js` (`parseArgs`, `printToPdf` margins, `stampPages` edge logic).
+**Default is already DUPLEX** (Task 1.6, symmetric binding-safe margins). Task 5.1 adds the two harder options on top. **Files:** `scripts/generate-pdfs.js` (`parseArgs`, filler-page insertion, `stampPages` edge logic), `static/styles/print.css` (`@page :left`/`:right`).
 
-- [ ] Add `--profile` (default `bound`). `bound` = uniform left 26 mm gutter, folios/headers on right every page (single-sided). `duplex` = mirrored inner/outer + recto/verso folios (current behaviour).
-- [ ] **Acceptance:** `bound` output has consistent left gutter on all pages; `duplex` mirrors. Document in `docs/guides/deployment.md` / script header.
-- [ ] Commit: `feat(pdf): bound vs duplex margin profiles`.
+- [ ] **True-mirrored duplex** (efficient: wide inner gutter, narrow outer) — requires forcing every chapter to start on a **recto** by inserting a blank verso filler page when a chapter would otherwise start on a verso, so per-chapter `@page :left`/`:right` parity matches the merged book. Then re-account folio numbers + TOC page numbers for the fillers. Only worth it if the symmetric outer margin (22mm) feels too wide in review.
+- [ ] **`--profile bound`** (single-sided, spiral/4-hole): uniform left 26mm gutter, folios/headers on the right every page. (Original stampPages had this shape; re-add behind the flag.)
+- [ ] **Acceptance:** duplex (default) mirrors correctly with no wrong-side gutters; `bound` has a consistent left gutter. Document in `docs/guides/deployment.md` / script header.
+- [ ] Commit: `feat(pdf): mirrored duplex + bound profile`.
 
 ### Task 5.2: Greyscale + binding verification
 
