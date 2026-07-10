@@ -123,7 +123,12 @@ export const books: BookConfig[] = [
     subject: 'raunvisindi',
     coverMotif: 'leaf',
     translator: 'Þórhallur Halldórsson',
-    status: 'in-progress',
+    // Only 2/47 chapters are human-translated; the rest ship as MT previews with the
+    // MT banner, so the book is a preview until faithful biology exists — this keeps the
+    // credit machine-accurate (compactCreditPair keys on status) and stops crediting a
+    // named human on raw MT pages (R6-2). Flip back to 'in-progress' when faithful
+    // biology lands (and restore the human credit then).
+    status: 'preview',
     source: {
       title: 'Biology 2e',
       publisher: 'OpenStax',
