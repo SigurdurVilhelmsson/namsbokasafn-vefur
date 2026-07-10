@@ -304,6 +304,17 @@ export function findSectionBySlug(toc: TableOfContents, chapterPath: string, sec
   section = chapter.sections.find((s) => s.number === sectionNumber);
   if (section) return { chapter, section };
 
+  // Split-slug books (physics/organic/microbiology) never emit a combined
+  // `{n}-exercises.html`; they compile per-type exercises pages instead
+  // (e.g. `4-conceptual-questions.html`). Consumers that build `{n}-exercises`
+  // (svarlykill back-button, answer-number links) would otherwise 404. Resolve
+  // it to the chapter's first exercises-type section. Books with a real
+  // `{n}-exercises.html` matched above, so this only fires for split-slug books.
+  if (/^\d+-exercises$/.test(sectionPath)) {
+    section = chapter.sections.find((s) => s.type === 'exercises');
+    if (section) return { chapter, section };
+  }
+
   return null;
 }
 

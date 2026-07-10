@@ -152,6 +152,62 @@ describe('contentLoader utilities', () => {
 		});
 	});
 
+	// Split-slug books (physics/organic/microbiology) emit per-type compiled
+	// exercises pages (e.g. `4-conceptual-questions.html`) and NEVER a combined
+	// `4-exercises.html`, but the svarlykill back-button and answer-number links
+	// hardcode `{n}-exercises`. Resolve that slug to the chapter's first
+	// exercises-type section so those links don't 404 (R6-3).
+	describe('findSectionBySlug — {n}-exercises resolution on split-slug books', () => {
+		const splitSlugToc: TableOfContents = {
+			title: 'Eðlisfræði',
+			chapters: [
+				{
+					number: 4,
+					title: 'Hreyfifræði',
+					sections: [
+						{ number: '4.1', title: 'Kraftur', file: '4-1-kraftur.html' },
+						{ number: '', title: 'Lykilhugtök', file: '4-key-terms.html', type: 'glossary' },
+						{
+							number: '',
+							title: 'Hugtaksspurningar',
+							file: '4-conceptual-questions.html',
+							type: 'exercises'
+						},
+						{
+							number: '',
+							title: 'Dæmi og æfingar',
+							file: '4-problems-exercises.html',
+							type: 'exercises'
+						}
+					]
+				}
+			]
+		};
+
+		it('resolves {n}-exercises to the first exercises-type section when no combined page exists', () => {
+			const result = findSectionBySlug(splitSlugToc, '04', '4-exercises');
+			expect(result?.section.file).toBe('4-conceptual-questions.html');
+		});
+
+		it('does not shadow a real combined {n}-exercises.html when one exists', () => {
+			const combinedToc: TableOfContents = {
+				title: 'Efnafræði',
+				chapters: [
+					{
+						number: 4,
+						title: 'Kafli',
+						sections: [
+							{ number: '', title: 'Æfingar', file: '4-exercises.html', type: 'exercises' },
+							{ number: '', title: 'Fleiri æfingar', file: '4-extra-exercises.html', type: 'exercises' }
+						]
+					}
+				]
+			};
+			const result = findSectionBySlug(combinedToc, '04', '4-exercises');
+			expect(result?.section.file).toBe('4-exercises.html');
+		});
+	});
+
 	// ============================================
 	// Appendix helpers
 	// ============================================
