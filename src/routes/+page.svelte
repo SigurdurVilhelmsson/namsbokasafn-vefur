@@ -446,8 +446,10 @@
       © {new Date().getFullYear()} Námsbókasafn ·
       Efni byggt á
       <a href="https://openstax.org" target="_blank" rel="noopener noreferrer">OpenStax</a>
-      ·
-      <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>
+      · Leyfi er mismunandi eftir bók
+      (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>
+      eða
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>) — sjá leyfissíðu hverrar bókar
     </p>
   </footer>
 </div>
