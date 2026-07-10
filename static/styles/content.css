@@ -19,6 +19,8 @@
   --os-text-body: #424242;
   --os-link-color: #027eb5;
   --os-green: #4caf50;
+  /* Ionizable/acidic hydrogen marker (<em class="emphasis-one">), OpenStax red */
+  --emphasis-one-color: #c0392b;
 
   /* Note type color categories (6 categories, shared across all books) */
   --note-blue-bg: #e8f4f8;
@@ -577,6 +579,13 @@ article.cnx-module ul {
 article.cnx-module ol {
   margin: 10px 0;
   padding-left: 30px;
+}
+
+/* Enumerated lists carry their marker from the CNXML pipeline as an inline
+   `list-style-type` (e.g. lower-alpha / upper-alpha for a,b,c,d option lists that
+   match a letter answer key). Apply the decimal default only when the pipeline has
+   NOT supplied a marker, so the inline alpha value is honoured, not overridden. */
+article.cnx-module ol:not([style*="list-style-type"]) {
   list-style-type: decimal;
 }
 
@@ -827,6 +836,15 @@ article.cnx-module em {
   font-style: italic;
 }
 
+/* Acidic / ionizable hydrogen marker from the CNXML pipeline (OpenStax appendix-H
+   ionization-constant tables emphasise the dissociable H, e.g. CH₃CO₂H). Render bold
+   and coloured — not italic — so the reactive proton stands out, matching OpenStax. */
+article.cnx-module em.emphasis-one {
+  font-style: normal;
+  font-weight: 700;
+  color: var(--emphasis-one-color);
+}
+
 article.cnx-module strong {
   font-weight: 700;
 }
@@ -871,6 +889,8 @@ article.cnx-module strong {
   --os-text-body: #c8c4be;
   --os-link-color: #5bb8d8;
   --os-green: #66bb6a;
+  /* Lighter red for dark backgrounds (acidic-H marker) */
+  --emphasis-one-color: #ff8a80;
 
   /* Note type color categories — muted for dark backgrounds */
   --note-blue-bg: rgba(91, 184, 216, 0.12);
