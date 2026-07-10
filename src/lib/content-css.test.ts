@@ -26,3 +26,38 @@ describe('content.css biology note selectors (R6-5)', () => {
 		});
 	}
 });
+
+/**
+ * Alpha list marker contract (R5-1). The CNXML pipeline (efni Task E5) emits enumerated
+ * lists with an inline `style="list-style-type: lower-alpha|upper-alpha"`. The decimal
+ * default must be scoped so it never overrides that inline marker (a,b,c,d option lists
+ * must match their letter answer key).
+ */
+describe('content.css enumerated-list marker (R5-1)', () => {
+	it('scopes the decimal default so an inline list-style-type wins', () => {
+		// Quote style is normalised by Prettier — accept either.
+		expect(CONTENT_CSS).toMatch(/ol:not\(\[style\*=["']list-style-type["']\]\)/);
+	});
+
+	it('does not force decimal unconditionally on every ol', () => {
+		// The bare `article.cnx-module ol { … }` block must not set list-style-type.
+		const bareOl = CONTENT_CSS.match(/article\.cnx-module ol \{[^}]*\}/);
+		expect(bareOl?.[0]).not.toMatch(/list-style-type/);
+	});
+});
+
+/**
+ * Acidic/ionizable-H marker (P0-9, pairs with efni Task E8). `<em class="emphasis-one">`
+ * marks the dissociable H in ionization-constant tables; it must render bold and coloured
+ * rather than the plain italic of a bare <em>.
+ */
+describe('content.css emphasis-one marker (P0-9)', () => {
+	it('defines a rule for em.emphasis-one', () => {
+		expect(CONTENT_CSS).toContain('em.emphasis-one');
+	});
+
+	it('defines the emphasis-one colour variable (light + dark)', () => {
+		const defs = CONTENT_CSS.match(/--emphasis-one-color:/g) ?? [];
+		expect(defs.length).toBeGreaterThanOrEqual(2);
+	});
+});
