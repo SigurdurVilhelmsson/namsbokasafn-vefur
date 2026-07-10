@@ -324,20 +324,22 @@ article.cnx-module aside.note.chem-connections {
    NOTES — BIOLOGY
    ============================================== */
 
-/* Biology: Visual Connection - Blue tint */
-article.cnx-module aside.note.visual-connection {
+/* Biology: Visual Connection - Blue tint.
+   Emitted as `note note-visual-connection` (single hyphenated class) by the CNXML
+   pipeline, mirroring .note-interactive — NOT a compound `.note.visual-connection`. */
+article.cnx-module aside.note-visual-connection {
   background-color: var(--note-blue-bg);
   border-color: var(--note-blue-border);
 }
 
 /* Biology: Evolution - Green tint */
-article.cnx-module aside.note.evolution {
+article.cnx-module aside.note-evolution {
   background-color: var(--note-green-bg);
   border-color: var(--note-green-border);
 }
 
 /* Biology: Career - Pink tint */
-article.cnx-module aside.note.career {
+article.cnx-module aside.note-career {
   background-color: var(--note-pink-bg);
   border-color: var(--note-pink-border);
 }
