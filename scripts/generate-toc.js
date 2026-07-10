@@ -650,6 +650,18 @@ function generateToc(bookSlug, options) {
 		console.log('  Found index');
 	}
 
+	// Check if glossary.json exists and add glossary entry. Books without one
+	// (0 <glossary> in source until efni's D5 lands) get no glossary entry, so
+	// the reader gates the Orðasafn link + route on its absence.
+	const glossaryPath = resolve(bookPath, 'glossary.json');
+	if (existsSync(glossaryPath)) {
+		toc.glossary = {
+			title: 'Orðasafn',
+			file: 'glossary.json'
+		};
+		console.log('  Found glossary');
+	}
+
 	return toc;
 }
 
