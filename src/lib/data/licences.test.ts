@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
 	LICENCES,
@@ -139,11 +139,19 @@ describe('LICENCES table', () => {
  * (bookCredits, book.ts, LicenceBadge) are data-driven and out of scope here.
  */
 describe('no blanket "CC BY 4.0" claim in aggregate views (R6-1)', () => {
-	// Shared/aggregate surfaces that speak for the whole catalogue.
+	// Print routes render licence text (colophon, full-book, chapter); scan them all so
+	// a future blanket claim in any print template is caught, not just today's files.
+	const printFiles = readdirSync(join(REPO_ROOT, 'src/routes/print'), { recursive: true })
+		.map((p) => String(p))
+		.filter((p) => p.endsWith('.svelte'))
+		.map((p) => `src/routes/print/${p}`);
+
+	// Shared/aggregate surfaces that speak for the whole catalogue (plan: landing/FAQ/meta/print).
 	const AGGREGATE_VIEW_FILES = [
 		'src/routes/+page.svelte', // landing: about-card + footer
 		'src/lib/data/faq.ts', // FAQ (rendered on the landing page)
-		'src/app.html' // document shell / meta
+		'src/app.html', // document shell / meta
+		...printFiles
 	];
 	const BLANKET = 'CC BY 4.0';
 	// The NC-SA counterpart (label "CC BY-NC-SA 4.0" or the by-nc-sa/ url) must
