@@ -423,13 +423,15 @@
 					</div>
 				{/if}
 
-				<!-- Index (Atriðisorðaskrá) -->
-				<div class="sidebar-section index-link-section">
-					<a href="/{bookSlug}/atridiordasskra" class="study-tool-link">
-						<Icon name="list" />
-						<span>Atriðisorðaskrá</span>
-					</a>
-				</div>
+				<!-- Index (Atriðisorðaskrá) — only when the book ships an index.json (toc.index) -->
+				{#if toc.index}
+					<div class="sidebar-section index-link-section">
+						<a href="/{bookSlug}/atridiordasskra" class="study-tool-link">
+							<Icon name="list" />
+							<span>Atriðisorðaskrá</span>
+						</a>
+					</div>
+				{/if}
 
 				<!-- Study tools section -->
 				<div class="study-tools">
