@@ -88,6 +88,9 @@ export interface TableOfContents {
   appendices?: Appendix[];
   // Answer key entries (per-chapter, OpenStax style)
   answerKey?: AnswerKeyEntry[];
+  // Book-wide alphabetical subject index (Atriðisorðaskrá) — present only when the
+  // book ships an index.json (set by generate-toc.js). Gates the sidebar link + route.
+  index?: { title: string; file: string };
   // Precomputed cross-reference index (from build-time processing)
   references?: { [key: string]: PrecomputedReference };
 }
