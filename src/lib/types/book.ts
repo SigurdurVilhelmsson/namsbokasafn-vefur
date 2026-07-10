@@ -35,7 +35,6 @@ export interface BookConfig {
     translatedChapters: number;
   };
   features?: {
-    glossary: boolean;
     flashcards: boolean;
     exercises: boolean;
     periodicTable?: boolean;
@@ -106,7 +105,6 @@ export const books: BookConfig[] = [
       translatedChapters: 21
     },
     features: {
-      glossary: true,
       flashcards: true,
       exercises: true,
       periodicTable: true
@@ -166,7 +164,6 @@ export const books: BookConfig[] = [
       translatedChapters: 2
     },
     features: {
-      glossary: true,
       flashcards: false,
       exercises: true
     }
@@ -218,7 +215,6 @@ export const books: BookConfig[] = [
       translatedChapters: 1
     },
     features: {
-      glossary: true,
       flashcards: false,
       exercises: false
     }
@@ -270,7 +266,6 @@ export const books: BookConfig[] = [
       translatedChapters: 1
     },
     features: {
-      glossary: true,
       flashcards: false,
       exercises: true
     }
@@ -322,7 +317,6 @@ export const books: BookConfig[] = [
       translatedChapters: 1
     },
     features: {
-      glossary: true,
       flashcards: false,
       exercises: true
     }

@@ -442,10 +442,12 @@
 						<span>Minniskort</span>
 					</a>
 
-					<a href="/{bookSlug}/ordabok" class="study-tool-link">
-						<Icon name="book-open" />
-						<span>Orðasafn</span>
-					</a>
+					{#if toc.glossary}
+						<a href="/{bookSlug}/ordabok" class="study-tool-link">
+							<Icon name="book-open" />
+							<span>Orðasafn</span>
+						</a>
+					{/if}
 
 					<a href="/{bookSlug}/prof" class="study-tool-link">
 						<Icon name="clipboard-check" />

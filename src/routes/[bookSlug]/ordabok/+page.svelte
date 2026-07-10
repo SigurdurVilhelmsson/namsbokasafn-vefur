@@ -13,13 +13,19 @@
 	let glossary: Glossary | null = $state(null);
 	let loading = $state(true);
 	let error: string | null = $state(null);
+	let notAvailable = $state(false);
 	let searchQuery = $state('');
 	let selectedLetter: string | null = $state(null);
 
 	onMount(async () => {
 		try {
 			const response = await fetch(`/content/${data.bookSlug}/glossary.json`);
-			if (!response.ok) throw new Error('Failed to load glossary');
+			if (!response.ok) {
+				// A missing glossary.json means this book simply has no glossary yet
+				// (e.g. orverufraedi/lifraen before efni's D5 key-terms land) — not an error.
+				notAvailable = true;
+				return;
+			}
 			glossary = await response.json();
 		} catch (e) {
 			error = 'Gat ekki hlaðið orðasafni';
@@ -82,6 +88,13 @@
 	{:else if error}
 		<div class="glossary-error">
 			<p>{error}</p>
+		</div>
+	{:else if notAvailable}
+		<div class="text-center py-12">
+			<svg class="glossary-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+			</svg>
+			<p class="glossary-empty-text">Orðasafn er ekki tiltækt fyrir þessa bók ennþá.</p>
 		</div>
 	{:else if glossary}
 		<!-- Search and filters -->
