@@ -190,7 +190,7 @@ Static site on a Linode server (nginx). Output goes to the `build/` directory. N
 
 - HSTS (`max-age=63072000; includeSubDomains; preload`)
 - Permissions-Policy (camera, microphone, geolocation, payment all denied)
-- CSP (`default-src 'self'`; fonts, styles, scripts all self-hosted)
+- CSP (`default-src 'self'`; fonts, styles, scripts all self-hosted; `frame-src` allows only PhET/YouTube for content embeds)
 
 ## Two-Repository Workflow
 
