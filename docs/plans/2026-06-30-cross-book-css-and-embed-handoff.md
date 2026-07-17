@@ -1,7 +1,31 @@
 # Cross-book CSS + D4 embed styling + a11y MathML — implementation handoff
 
-**Created:** 2026-06-30 (handed off from a namsbokasafn-efni session). **Updated:** 2026-06-30 (added Task 3, a11y-2 assistive MathML). **Repo:** namsbokasafn-vefur.
-**Status:** ready to implement in a fresh vefur session. **Owner:** vefur.
+**Created:** 2026-06-30 (handed off from a namsbokasafn-efni session). **Updated:** 2026-07-17. **Repo:** namsbokasafn-vefur.
+**Status:** **Task 1 DONE** (vefur PR #191 + efni PR #295, 2026-07-17) · **Task 2 effectively closed for biology; 8 organic/physics classes remain** · **Task 3a DONE** (PR #176), 3b/3c verify-only. **Owner:** vefur.
+
+> ## ✅ 2026-07-17 — Task 1 shipped (campaign item 11)
+>
+> **vefur PR #191** (`content.css` wrapper + note inset, `print.css` + `app.css` print hides,
+> nginx `frame-src`) · **efni PR #295** (css-contract re-arm + 3 structural reclassifications).
+> Full write-up incl. findings for efni: **`docs/handoffs/2026-07-17-embed-css-and-css-contract-for-efni.md`**.
+>
+> **What this plan got wrong (read before trusting the sections below):**
+>
+> - **Task 1 missed the note case.** **91 of 108 embeds sit inside `<aside class="note note-interactive">`**,
+>   not in top-level flow. Note children are inset **30px (10px under the 768px breakpoint)**, so the
+>   wrapper needs a matching inset or it bleeds past the note's own prose. The CSS block quoted in
+>   Task 1 below is therefore **incomplete** — see the shipped rules in `content.css`.
+> - **Task 1 missed the second print surface.** `print.css` covers only `/print/*`; a reader pressing
+>   Ctrl+P on a section page gets `app.css`'s own `@media print`. Both need the hide.
+> - **Task 2's biology subset was already done or unnecessary.** `.note-evolution` / `.note-career` /
+>   `.note-visual-connection` were **already styled** (Phase-0 era) but still sitting in efni's
+>   `KNOWN_GAPS` — now re-armed. **`.span-all` needs no rule at all**: it's a _two-column_ modifier and
+>   this reader is single-column (and it's 11 figures + 1 table, not "a table row"). `.note-microbiology`
+>   and the newly-found `.interactive-long` are likewise structural.
+>
+> **Remaining from Task 2 — 8 classes, all organic/physics, none biology:**
+> `.section-exercises`, `.chemistry-matters`, `.exercise-part`, `.key-terms-section`, `.centered-text`
+> (organic) · `.section-summary`, `.conceptual-questions`, `.problems-exercises` (physics).
 
 ## Why this exists
 
@@ -29,7 +53,12 @@ single actionable plan.
 
 ---
 
-## Task 1 — D4 embed wrapper CSS · 🟠 High · gates biology embeds going live
+## Task 1 — D4 embed wrapper CSS · ✅ DONE 2026-07-17 (PR #191) · was: 🟠 High
+
+> **⚠️ The CSS quoted in this section is the ORIGINAL proposal and is incomplete** — it lacks the
+> in-note inset that 91 of 108 embeds need, and the `app.css` print hide. The shipped rules live in
+> `static/styles/content.css` (§ EMBEDS + the RESPONSIVE block) and `static/styles/print.css` /
+> `src/app.css`. Kept below for provenance.
 
 efni D4 makes PhET/YouTube `<iframe>` embeds render. Each embed now emits:
 
@@ -84,7 +113,11 @@ efni D4 makes PhET/YouTube `<iframe>` embeds render. Each embed now emits:
 
 ---
 
-## Task 2 — 14 cross-book note/section CSS gap classes · 🟡 Medium · per-book launch polish · (1/14 done)
+## Task 2 — cross-book note/section CSS gap classes · 🟡 biology subset CLOSED 2026-07-17; **8 organic/physics remain**
+
+> **⚠️ The 14-class list below is superseded** — see the 2026-07-17 box at the top of this file.
+> Biology needs nothing further: its note variants were already styled (and are now re-armed in
+> efni's `KNOWN_GAPS`), and `.span-all` correctly gets no rule. Kept below for provenance.
 
 efni's css-contract test (parametrized over all 5 books) found **14 classes** that non-chemistry books emit
 but `content.css` doesn't style. None break rendering (they fall back to base `.note` / plain divs) — they
