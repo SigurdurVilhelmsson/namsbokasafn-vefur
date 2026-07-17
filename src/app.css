@@ -1785,6 +1785,10 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   .tts-controls,
   .focus-mode-nav,
   .offline-indicator,
+  /* Live PhET/YouTube iframe — a dead box on paper. print.css does the same for
+     the PDF routes; this covers a reader pressing Ctrl+P on a section page.
+     The .embed-fallback link stays and prints its URL via the rule below. */
+  .embed-responsive,
   .poc-banner {
     display: none !important;
   }

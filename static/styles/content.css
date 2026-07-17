@@ -223,6 +223,46 @@ article.cnx-module figure.splash {
 }
 
 /* ==============================================
+   EMBEDS (iframes — PhET simulations, YouTube)
+   ============================================== */
+
+/* Responsive wrapper emitted by the CNXML pipeline (efni D4) around each
+   <iframe>. The iframe's raw width/height attributes would overflow narrow
+   viewports; the wrapper scales the frame to the content column instead. */
+article.cnx-module .embed-responsive {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  margin: 20px 0 0;
+}
+
+article.cnx-module .embed-responsive iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* "Opna í nýjum glugga" link under every embed — intentional resilience
+   (a video can refuse embedding with no header signal); keep it visible. */
+article.cnx-module .embed-fallback {
+  margin: 4px 0 20px;
+  font-size: 0.9em;
+}
+
+/* Most embeds (91 of 108 across biology + physics) sit inside an
+   `<aside class="note note-interactive">`, where the pipeline hoists them out
+   of the paragraph so the wrapper is a direct child of the note. Note children
+   are inset 30px (10px on mobile — see RESPONSIVE ADJUSTMENTS); match it so the
+   frame lines up with the note's prose instead of bleeding to its border.
+   The sibling <p class="embed-fallback"> is inset by `aside.note p` already. */
+article.cnx-module aside.note .embed-responsive {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+/* ==============================================
    NOTES (Feature Boxes)
    ============================================== */
 
@@ -874,6 +914,13 @@ article.cnx-module strong {
   article.cnx-module aside.note .note-type,
   article.cnx-module aside.example .example-label {
     padding: 8px 10px;
+  }
+
+  /* Track the reduced note inset above, so an embed stays aligned with the
+     note's prose at mobile width. */
+  article.cnx-module aside.note .embed-responsive {
+    margin-left: 10px;
+    margin-right: 10px;
   }
 }
 

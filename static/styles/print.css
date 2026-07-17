@@ -441,7 +441,11 @@ button,
 /* Interactive launch button (e.g. the appendix "Opna gagnvirka lotukerfið"
    periodic-table link) — a live web tool + branding blue, useless in a static
    PDF; the plain-text URL fallback beside it remains. */
-.periodic-table-link {
+.periodic-table-link,
+/* Live iframe embeds (PhET sims / YouTube, efni D4) — useless in a static
+   PDF; the .embed-fallback link beside them remains and, being an external
+   absolute URL, prints its target via the a[href]::after rule above. */
+.embed-responsive {
   display: none !important;
 }
 
