@@ -55,3 +55,11 @@ static/sitemap.xml
 # Reference material — official OpenStax source PDF, used as a PDF-quality
 # benchmark. Large binary; never commit.
 Chemistry2e-WEB.pdf
+
+# Personal Claude Code permissions — machine-local, may contain allowlisted
+# commands. These files have carried live API tokens inside permission strings
+# (see the 2025-12-30 Cloudflare leak), so they must never be tracked.
+# Repo-level rule on purpose: a global ~/.config/git/ignore does not travel
+# with a clone, so it protects neither collaborators nor CI.
+.claude/settings.local.json
+.claude/*.local.json
