@@ -489,6 +489,15 @@ function main() {
 		console.log('Note: rsync not found, using cp fallback (less efficient)\n');
 	}
 
+	// Ensure the destination root exists. static/content/ is gitignored, so on a
+	// fresh clone it does not exist — and rsync cannot create
+	// static/content/<book> when its parent is missing. Without this, every book
+	// fails with "mkdir ... No such file or directory" and the documented setup
+	// path (clone → npm install → sync-content) does not work at all.
+	if (!options.dryRun) {
+		mkdirSync(destDir, { recursive: true });
+	}
+
 	// Sync each book
 	let success = 0;
 	let failed = 0;
