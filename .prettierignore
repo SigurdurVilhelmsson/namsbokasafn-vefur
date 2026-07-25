@@ -1,0 +1,17 @@
+# npm owns this file's formatting. Prettier rewrites it, then the next
+# `npm install` rewrites it back — a permanent diff-churn loop, and lint-staged
+# runs `prettier --write` on every *.json.
+package-lock.json
+
+# Generated / synced — not ours to format
+build/
+.svelte-kit/
+dev-dist/
+static/content/
+static/provenance/
+static/sitemap.xml
+playwright-report/
+test-results/
+coverage/
+docs/_generated/
+node_modules/
