@@ -234,8 +234,23 @@ Contributions are welcome — whether you're fixing a bug, improving the reader,
 
 The textbook content is an Icelandic translation of open textbooks from [OpenStax](https://openstax.org/).
 
-**Chemistry 2e** — Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson
-Translated by Sigurdur E. Vilhelmsson. Licensed under CC BY 4.0.
+**Credit follows the method, not the job title** — the same rule the reader
+already enforces in code (`src/lib/data/bookCredits.ts`). For most books the
+first draft is machine translation (Erlendur, Miðeind) which people then edit,
+so the machine is credited as the translator and the people are credited for
+**ritstjórn** and **yfirlestur**. Chapters marked _forskoðun_ are raw machine
+translation with no reviewer claim. Biology is the exception — it is
+human-translated.
+
+| Hlutverk                         |                                           |
+| -------------------------------- | ----------------------------------------- |
+| Verkefnastjóri og ritstjórn      | Sigurður Einar Vilhelmsson                |
+| Yfirlestur og málfar í efnafræði | Guðrún Ingibjörg Stefánsdóttir            |
+| Þýðing og yfirlestur í líffræði  | Þórhallur Halldórsson                     |
+| Vélþýðing                        | Erlendur ([Miðeind](https://mideind.is/)) |
+
+**Chemistry 2e** — Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson.
+Icelandic edition: machine translation with human editorial review. CC BY 4.0.
 
 ## Status
 

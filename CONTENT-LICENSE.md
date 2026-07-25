@@ -23,15 +23,21 @@ This content is an Icelandic translation and adaptation of:
 
 **Adaptation Information:**
 
-- **Translator**: Sigurður E. Vilhelmsson
+- **Translation method**: machine translation (Erlendur, Miðeind) with human
+  editorial review. Credit follows the method — the machine is the translator;
+  the people below are credited for ritstjórn and yfirlestur. Biology is
+  human-translated.
+- **Verkefnastjóri og ritstjórn**: Sigurður Einar Vilhelmsson
+- **Yfirlestur og málfar í efnafræði**: Guðrún Ingibjörg Stefánsdóttir
+- **Þýðing og yfirlestur í líffræði**: Þórhallur Halldórsson
 - **Translation Language**: Icelandic (Íslenska)
 - **Target Audience**: Icelandic high school students
-- **Year**: 2025
+- **Year**: 2025–2026
 - **License**: Creative Commons Attribution 4.0 International (CC BY 4.0)
 
 **Modifications Made:**
 
-- Translation from English to Icelandic
+- Translation from English to Icelandic (machine translation with human review)
 - Adaptation of terminology for Icelandic educational context
 - Formatting adjustments for digital reader interface
 - Organization optimized for web-based learning
@@ -68,7 +74,8 @@ Available at: https://openstax.org/details/books/chemistry-2e
 **For This Translation:**
 
 ```
-Icelandic translation by Sigurður E. Vilhelmsson (2025), licensed under CC BY 4.0.
+Icelandic edition by Námsbókasafn (2025–2026): machine translation
+(Erlendur, Miðeind) with human editorial review. Licensed under CC BY 4.0.
 Available at: https://github.com/SigurdurVilhelmsson/namsbokasafn-vefur
 ```
 
@@ -76,9 +83,13 @@ Available at: https://github.com/SigurdurVilhelmsson/namsbokasafn-vefur
 
 ```
 This content is based on "Chemistry 2e" by Paul Flowers, Klaus Theopold,
-Richard Langley, and William R. Robinson (OpenStax, CC BY 4.0), translated
-to Icelandic by Sigurður E. Vilhelmsson (2025, CC BY 4.0).
+Richard Langley, and William R. Robinson (OpenStax, CC BY 4.0). Icelandic
+edition by Námsbókasafn (2025–2026): machine translation (Erlendur, Miðeind)
+with human editorial review. CC BY 4.0.
 ```
+
+> Use the licence of the **specific book** you are reusing. Lífræn efnafræði and
+> Eðlisfræði are CC BY-NC-SA 4.0, not CC BY 4.0.
 
 ## Indicating Changes
 
@@ -114,7 +125,7 @@ If you have questions about the license or how to properly attribute this work, 
 For questions specific to this translation project, please contact:
 
 - Repository: https://github.com/SigurdurVilhelmsson/namsbokasafn-vefur
-- Translator: Sigurður E. Vilhelmsson
+- Verkefnastjóri og ritstjórn: Sigurður Einar Vilhelmsson
 
 ---
 
