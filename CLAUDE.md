@@ -151,7 +151,32 @@ All fonts are **self-hosted** in `static/fonts/` — no external CDN dependencie
 
 ## Attribution & Licensing
 
-The catalogue carries **two licences**: most titles are CC BY 4.0, but Organic Chemistry (`lifraen-efnafraedi`) and College Physics (`edlisfraedi-2e`) are **CC BY-NC-SA 4.0**. Attribution is **data-driven** and rendered on every page.
+> **⚠️ This repository is PUBLIC (since 2026-07-25).** Assume anything committed is
+> world-readable immediately. Both repos were audited and remediated before the flip
+> — see efni memory `pre-publication-2026-07-25`.
+
+**Repository licensing — three separate things, do not conflate them:**
+
+| What                                                    | Licence                                 | Where                              |
+| ------------------------------------------------------- | --------------------------------------- | ---------------------------------- |
+| Application code (TS/JS/CSS/config)                     | **MIT**                                 | root `LICENSE` §1                  |
+| Educational content (`static/content/`)                 | **per-book CC** — see below             | `LICENSE` §2, `CONTENT-LICENSE.md` |
+| Bundled fonts (`static/fonts/`, `static/assets/fonts/`) | **third-party**: OFL-1.1 ×4 + KaTeX MIT | `static/fonts/LICENSES.md`         |
+
+- Fonts are **not** covered by the MIT grant. OFL-1.1 requires its text travel with
+  the fonts, which is why `static/fonts/OFL.txt` sits beside them and ships to
+  `/fonts/OFL.txt`. **Adding a font means adding its copyright line there** plus a
+  row in `LICENSES.md`. OpenDyslexic carries a Reserved Font Name — read the note in
+  `OFL.txt` before re-subsetting it.
+- Sister repo `namsbokasafn-efni` splits **MIT** (`tools/`, `scripts/`) from
+  **AGPL-3.0** (`server/` — Ritstjóri). Respect that boundary if you work there.
+- **Credit follows the METHOD, not the job title** — the machine is the translator;
+  people are credited for _ritstjórn_ / _yfirlestur_. Biology alone is
+  human-translated ("Þýðing", Þórhallur Halldórsson). `src/lib/data/bookCredits.ts`
+  encodes this and its test asserts the credit must never read `Þýðandi: <human>`
+  for MT content. Keep prose docs in step with it.
+
+The catalogue carries **two content licences**: most titles are CC BY 4.0, but Organic Chemistry (`lifraen-efnafraedi`) and College Physics (`edlisfraedi-2e`) are **CC BY-NC-SA 4.0**. Attribution is **data-driven** and rendered on every page.
 
 - **Source of truth for verdicts:** the provenance audit in the sister repo, `namsbokasafn-efni/docs/provenance/openstax-cnxml-licence-provenance.md`. Licence decisions derive from there — do not re-determine them here. A trimmed public-facing summary (`docs/provenance/provenance.md` in efni) is synced to `static/provenance/` (gitignored) by `sync-content.js` and linked from each colophon.
 - **Per-book metadata** lives in `src/lib/types/book.ts` as `attribution: BookAttribution` (multi-source schema — see `src/lib/data/licences.ts`). `toc.json` does **not** carry attribution. Each book lists every obtained `source` (format + obtained date + licence); `derivativeLicence` is the **most-restrictive** licence across those sources (NC-SA beats BY).
@@ -183,6 +208,52 @@ The catalogue carries **two licences**: most titles are CC BY 4.0, but Organic C
 Static site on a Linode server (nginx). Output goes to the `build/` directory. No backend — all state is client-side in localStorage.
 
 **CI does not deploy.** GitHub Actions (`ci.yml`) runs lint/type-check/tests/build/E2E on pushes and PRs for `main` and the `feature/**` integration branches. Deployment is the separate `deploy.yml` workflow — manual trigger or release tag (`v*.*.*`), rsync over a directory-restricted SSH key (setup in `docs/guides/deployment.md`) — with manual rsync as fallback. nginx changes must be applied on the server to match `nginx-config-example.conf`; the workflow never touches nginx.
+
+### CI — read this before trusting or blaming a red check
+
+CI was **billing-blocked 2026-07-17 → 2026-07-25** (every job died in ~3s on every
+branch). It is **working again**, and `main` is fully green.
+
+- **Duration is the diagnostic.** A billing/infra failure dies _before_ a runner is
+  provisioned — no `Current runner version:` line in the log. Anything that runs for
+  minutes is a real result. Check duration before diagnosing content.
+- **`workflow_dispatch` is enabled** on `ci.yml` (and on all five efni gating
+  workflows). Re-verify CI health from the Actions tab — never invent a commit.
+- **What the jobs actually run** — verify against _this_, not a similarly-named local
+  script. `lint-and-test`, `security`, `e2e`. In efni the trap is worse:
+  `npm run lint` is eslint only while CI _also_ runs `npm run format:check`, and
+  `npm test` is the unit suite while CI _also_ runs Playwright.
+- **The `security` job is split on purpose.** Blocking = `npm audit --audit-level=high
+--omit=dev` (production tree, currently **0**). Informational =
+  the full tree with `continue-on-error`, because one advisory is genuinely
+  _unfixable_: brace-expansion's OOM (`GHSA-mh99-v99m-4gvg`) has range `<=5.0.7`,
+  which npm applies across all majors, so the 2.x copy stays flagged forever. Do not
+  "fix" this by making the full-tree audit blocking again.
+- **No repo secrets.** `EFNI_TOKEN` was deleted once efni went public —
+  `github.token` reads a public repo fine. Keep `persist-credentials: false`; it is
+  about _any_ credential, not just that PAT.
+
+### Two dependency rules that will bite you
+
+1. **`typescript` is pinned `~6.0.3` — tilde, not caret, and not 7.x.** TypeScript 7
+   makes `npm ci` fail on a fresh clone (ERESOLVE). `@sveltejs/kit` peers
+   `^5.3.3 || ^6.0.0` and `typescript-eslint` peers `>=4.8.4 <6.1.0`; the
+   intersection is 6.0.x. `.github/dependabot.yml` **ignores major typescript
+   bumps** — Dependabot has proposed 7.x twice (#190 merged and broke fresh clones,
+   #195 closed). Lift the ignore only when _both_ peers admit 7.
+2. **`package-lock.json` is in `.prettierignore`.** npm owns its formatting; prettier
+   rewrites it and the next `npm install` rewrites it back, forever.
+
+### E2E gating fixtures must be derived, never hardcoded
+
+`e2e/helpers/content-fixtures.ts` (`bookWith` / `bookWithout`) picks fixture books
+from `static/content/*/toc.json` at run time. Hardcoding "book X has no index" bakes
+in a fact about efni's content that expires: `index-gating.spec.ts` pinned
+`edlisfraedi-2e`, efni shipped a physics index, and both tests went red **while the
+app was correct**. It passed locally and failed only in CI, because `static/content/`
+is gitignored and a dev machine runs against a stale sync. Use `test.skip` when a
+case has no fixture; the helper _throws_ when content is missing entirely, so a
+skipped sync fails loudly instead of turning every gating test green.
 
 ### Security Headers
 
@@ -252,7 +323,32 @@ These are heuristics you apply with judgment, not hard gates.
 
 **Pre-commit hooks:** Husky runs lint-staged on commit, which auto-fixes ESLint and Prettier issues on staged files. If a commit is blocked, check the lint-staged output for the specific error.
 
-## Current Development Status (June 2026)
+## Current Development Status
+
+### 2026-07-25 — repo went public; CI restored; main green
+
+- **Repository is PUBLIC.** Pre-publication audit + remediation done in both repos.
+  History was **rewritten** on 2026-07-25 (`git-filter-repo`) to strip
+  `.claude/settings.local.json`, which had carried two live Cloudflare API tokens at
+  `origin/main` HEAD for ~5 months. Tokens revoked. **Any clone predating
+  `20e8690` must re-clone or hard-reset** — old refs are gone:
+  `git fetch origin && git reset --hard origin/main && git reflog expire --expire=now --all && git gc --prune=now`.
+  Residual, accepted: ~146 GitHub `refs/pull/*` refs still carry the dead tokens —
+  GitHub-owned, unremovable by us, harmless post-revocation.
+- **`.claude/*.local.json` is gitignored at repo level.** Claude Code writes
+  credentials into permission-allowlist strings where they don't look like secrets.
+  Never rely on a global `~/.config/git/ignore` — it doesn't travel with a clone.
+- **CI is green on `main`** (`security`, `lint-and-test`, `e2e`) after the billing
+  outage was resolved. See the CI section above for the duration-is-the-diagnostic
+  rule and the audit split.
+- **Licensing corrected**: `LICENSE` / `CONTENT-LICENSE.md` no longer make a blanket
+  CC BY 4.0 claim (they now carry the per-book table), credits are method-based, and
+  bundled fonts have their licences shipped. See Attribution & Licensing above.
+- Sister-repo state: efni is public too, `main` green except **C2** — two Playwright
+  specs red since 2026-07-12 (synthetic segment IDs 404'd by the SR-OOS-2 backstop).
+  Tracked in efni's follow-up campaign register; no vefur action.
+
+### Earlier (June 2026)
 
 - **`main`**: fully remediated per the June 2026 audit (`docs/code-review-2026-06.md`) — all high-severity findings closed; practice-problem tracking wired to the quiz store; CI gates `feature/**` branches. Content-pipeline overlay work also landed on main June 15–17 (faithful-on-mt-preview overlay + MT banner, rollup gating by chapter completeness / `rollups-complete` marker, long-form section-slug routing); mechanics are documented in the Build Scripts and Routing sections above.
 - **`feature/reader-v1.1`** (→ v1.1.0): reader plan P0 — narrow measure default, predict-first ratings, free-recall prompt (`recall` store, `RecallPrompt`), hybrid pagination (`utils/paginate.ts`, `PagedReaderControls`, `readingMode` setting). Gated on manual QA batches D–E (`docs/manual-qa-2026-06.md`).
