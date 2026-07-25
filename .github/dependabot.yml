@@ -13,6 +13,23 @@ updates:
         dependency-type: "production"
         patterns:
           - "*"
+    ignore:
+      # TypeScript 7 breaks `npm ci` on a fresh clone. Two consumers still cap
+      # below it, and Dependabot does not honour peerOptional conflicts:
+      #   @sveltejs/kit@2.70.1  peer typescript ^5.3.3 || ^6.0.0
+      #   typescript-eslint@8.65.0  peer typescript >=4.8.4 <6.1.0
+      # The intersection is 6.0.x, which is why package.json pins ~6.0.3 rather
+      # than ^6 (^6 would admit 6.1 and re-break typescript-eslint).
+      #
+      # Dependabot proposed the 7.x bump twice: PR #190 (merged 2026-07-14,
+      # which made a fresh clone uninstallable and went unnoticed because CI is
+      # billing-blocked) and PR #195 (closed 2026-07-25).
+      #
+      # REMOVE THIS IGNORE once both peers admit 7.x — check with:
+      #   npm view @sveltejs/kit peerDependencies.typescript
+      #   npm view typescript-eslint peerDependencies.typescript
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
     open-pull-requests-limit: 10
