@@ -474,7 +474,8 @@ interface SourceAttribution {
   license: string; // License name (e.g., "CC BY 4.0")
   licenseUrl: string; // URL to license
   originalUrl: string; // URL to original work
-  translator: string; // Translator name
+  translator: string; // Credit by METHOD: MT engine for MT books, a person
+  // only for human-translated content (never a person for MT)
   translationYear: number;
   modifications: string; // Description of changes
 }
@@ -572,7 +573,7 @@ interface BookConfig {
   description: string;
   subject: "raunvisindi" | "staerdfraedi" | "felagsvisindi" | "annað";
   coverImage: string; // Path to cover image
-  translator: string;
+  translator: string; // Credit by METHOD — see SourceAttribution above
   translatorContact?: string;
   status: "available" | "in-progress" | "coming-soon";
   source: {

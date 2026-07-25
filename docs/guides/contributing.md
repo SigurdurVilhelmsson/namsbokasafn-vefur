@@ -294,7 +294,7 @@ describe('Button', () => {
   description: 'Description...',
   subject: 'raunvisindi',
   coverImage: '/covers/new-book.svg',
-  translator: 'Translator Name',
+  translator: 'Erlendur (Miðeind)',
   status: 'available',
   source: {
     title: 'Original Title',
@@ -341,7 +341,7 @@ static/content/new-book/
     "license": "CC BY 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
     "originalUrl": "https://openstax.org/...",
-    "translator": "Translator Name",
+    "translator": "Erlendur (Miðeind)",
     "translationYear": 2024,
     "modifications": "Translated to Icelandic with adaptations."
   },

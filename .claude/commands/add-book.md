@@ -17,6 +17,7 @@ Scaffold directory structure and template files for a new translated book.
 ## Steps
 
 1. **Create content directory**
+
    ```
    static/content/$ARGUMENTS.slug/
    ├── toc.json
@@ -27,6 +28,7 @@ Scaffold directory structure and template files for a new translated book.
    ```
 
 2. **Create toc.json template**
+
    ```json
    {
      "title": "$ARGUMENTS.title",
@@ -37,7 +39,7 @@ Scaffold directory structure and template files for a new translated book.
        "originalUrl": "https://openstax.org/details/books/...",
        "license": "CC BY 4.0",
        "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
-       "translator": "Translator Name",
+       "translator": "Erlendur (Miðeind)",
        "translationYear": 2025,
        "modifications": "Translated to Icelandic"
      },
@@ -46,7 +48,11 @@ Scaffold directory structure and template files for a new translated book.
          "number": 1,
          "title": "Inngangur",
          "sections": [
-           {"number": "1.1", "title": "First Section", "file": "1-1-introduction.md"}
+           {
+             "number": "1.1",
+             "title": "First Section",
+             "file": "1-1-introduction.md"
+           }
          ]
        }
      ]
@@ -54,6 +60,7 @@ Scaffold directory structure and template files for a new translated book.
    ```
 
 3. **Create glossary.json template**
+
    ```json
    {
      "terms": []
@@ -61,6 +68,7 @@ Scaffold directory structure and template files for a new translated book.
    ```
 
 4. **Create sample section file** at `chapters/01/1-1-introduction.md`
+
    ```markdown
    ---
    title: First Section Title
