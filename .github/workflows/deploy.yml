@@ -40,8 +40,10 @@ jobs:
         with:
           repository: SigurdurVilhelmsson/namsbokasafn-efni
           path: namsbokasafn-efni
-          token: ${{ secrets.EFNI_TOKEN || github.token }}
-          # Don't write the PAT into the workspace git config
+          # namsbokasafn-efni went public 2026-07-25 — the default workflow
+          # token can read it; no PAT needed.
+          token: ${{ github.token }}
+          # Keep credentials out of the workspace git config
           persist-credentials: false
 
       - name: Install dependencies

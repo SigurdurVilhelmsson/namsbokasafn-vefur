@@ -30,12 +30,12 @@ jobs:
         with:
           repository: SigurdurVilhelmsson/namsbokasafn-efni
           path: namsbokasafn-efni
-          # namsbokasafn-efni is private; the default CI token only sees this
-          # repo. EFNI_TOKEN is a fine-grained PAT with read access to the
-          # content repo (falls back to the default token if unset).
-          token: ${{ secrets.EFNI_TOKEN || github.token }}
-          # Don't write the PAT into the workspace git config where later
-          # PR-controlled steps (npm scripts, tests) could read it
+          # namsbokasafn-efni went public 2026-07-25, so the default workflow
+          # token can read it — public repos need no permission grant. The
+          # EFNI_TOKEN PAT this used to prefer is gone.
+          token: ${{ github.token }}
+          # Keep credentials out of the workspace git config, where later
+          # PR-controlled steps (npm scripts, tests) could read them
           persist-credentials: false
 
       - name: Install dependencies
@@ -76,12 +76,12 @@ jobs:
         with:
           repository: SigurdurVilhelmsson/namsbokasafn-efni
           path: namsbokasafn-efni
-          # namsbokasafn-efni is private; the default CI token only sees this
-          # repo. EFNI_TOKEN is a fine-grained PAT with read access to the
-          # content repo (falls back to the default token if unset).
-          token: ${{ secrets.EFNI_TOKEN || github.token }}
-          # Don't write the PAT into the workspace git config where later
-          # PR-controlled steps (npm scripts, tests) could read it
+          # namsbokasafn-efni went public 2026-07-25, so the default workflow
+          # token can read it — public repos need no permission grant. The
+          # EFNI_TOKEN PAT this used to prefer is gone.
+          token: ${{ github.token }}
+          # Keep credentials out of the workspace git config, where later
+          # PR-controlled steps (npm scripts, tests) could read them
           persist-credentials: false
 
       - name: Install dependencies
