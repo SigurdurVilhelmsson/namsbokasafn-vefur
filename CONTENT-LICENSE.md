@@ -1,10 +1,24 @@
-# Content License - Creative Commons Attribution 4.0 International
+# Content License - a per-book Creative Commons licence
 
-This document provides detailed information about the licensing of educational content in this repository.
+This document provides detailed information about the licensing of educational content served by this reader.
 
 ## Overview
 
-The educational content located in the `static/content/` directory is licensed under the **Creative Commons Attribution 4.0 International License (CC BY 4.0)**.
+**The educational content served from `static/content/` is not under a single licence.** Each book inherits the Creative Commons licence in force on its OpenStax source on the date that source was obtained. OpenStax relicensed several titles from CC BY 4.0 to CC BY-NC-SA 4.0 during 2026, and a CC licence is irrevocable for the copy obtained under it — so the books differ.
+
+| Book             | OpenStax source    | Licence             |
+| ---------------- | ------------------ | ------------------- |
+| Efnafræði        | Chemistry 2e       | CC BY 4.0           |
+| Líffræði         | Biology 2e         | CC BY 4.0           |
+| Örverufræði      | Microbiology       | CC BY 4.0           |
+| Lífræn efnafræði | Organic Chemistry  | **CC BY-NC-SA 4.0** |
+| Eðlisfræði       | College Physics 2e | **CC BY-NC-SA 4.0** |
+
+> **Lífræn efnafræði and Eðlisfræði grant no commercial rights and no non-ShareAlike rights.** You may not use them commercially, and any adaptation you distribute must itself be CC BY-NC-SA 4.0. The CC BY 4.0 terms described in the rest of this document apply **only** to the three books marked CC BY 4.0 above.
+
+The authoritative, machine-readable licence for each book is the `licence` block in `books/<slug>/book-config.json` in the content repository, [namsbokasafn-efni](https://github.com/SigurdurVilhelmsson/namsbokasafn-efni); the evidence behind each determination is in that repo's `docs/provenance/openstax-cnxml-licence-provenance.md`. Content is synced in at build time and is not tracked in this repository.
+
+The rest of this document describes the CC BY 4.0 case in detail, using Chemistry 2e as the representative work.
 
 ## Original Work Attribution
 

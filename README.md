@@ -228,7 +228,7 @@ Contributions are welcome — whether you're fixing a bug, improving the reader,
 
 1. **Application code** — [MIT License](LICENSE)
 2. **Educational content** (`static/content/`) — a **per-book** Creative Commons licence, not one blanket licence: Efnafræði, Líffræði and Örverufræði are CC BY 4.0, while **Lífræn efnafræði and Eðlisfræði are CC BY-NC-SA 4.0** (no commercial use, ShareAlike required). The authoritative per-book values live in the sister repo, `namsbokasafn-efni/books/<slug>/book-config.json`; content is synced in at build time and is not tracked here.
-3. **Bundled fonts** (`static/fonts/`, `static/assets/fonts/`) — third-party (Bricolage Grotesque, Literata, JetBrains Mono, OpenDyslexic, KaTeX), each under its own upstream licence, not the MIT grant above.
+3. **Bundled fonts** (`static/fonts/`, `static/assets/fonts/`) — third-party, not the MIT grant above: Bricolage Grotesque, Literata, JetBrains Mono and OpenDyslexic under [SIL OFL-1.1](static/fonts/OFL.txt), KaTeX under [MIT](static/assets/fonts/LICENSE-KaTeX.txt). Details: [static/fonts/LICENSES.md](static/fonts/LICENSES.md).
 
 ### Content attribution
 
