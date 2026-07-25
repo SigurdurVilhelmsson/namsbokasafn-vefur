@@ -6,16 +6,21 @@
  * efni's D5 lands) must NOT show a dead sidebar link, and the route must degrade to a
  * friendly "not available yet" state instead of a red error block.
  *
- * Fixtures: efnafraedi-2e HAS a glossary; orverufraedi does NOT.
+ * Fixtures are chosen from the synced content at run time, not hardcoded: which books
+ * ship a glossary changes as efni's content advances. The sibling index-gating spec
+ * pinned a slug this way and went red when that book gained an index, while the app
+ * was correct — the comment above even anticipates orverufraedi gaining one.
  */
 
 import { test, expect } from '@playwright/test';
+import { bookWith, bookWithout } from './helpers/content-fixtures';
 
-const WITH_GLOSSARY = 'efnafraedi-2e';
-const WITHOUT_GLOSSARY = 'orverufraedi';
+const WITH_GLOSSARY = bookWith('glossary');
+const WITHOUT_GLOSSARY = bookWithout('glossary');
 
 test.describe('Orðasafn gating (R6-6)', () => {
 	test('sidebar shows the Orðasafn link for a book that has a glossary', async ({ page }) => {
+		test.skip(!WITH_GLOSSARY, 'no synced book ships a glossary — nothing to assert the positive case on');
 		await page.goto(`/${WITH_GLOSSARY}`);
 		await page.waitForLoadState('networkidle');
 		// Minniskort is unconditional — its presence proves the sidebar toc loaded.
@@ -26,6 +31,7 @@ test.describe('Orðasafn gating (R6-6)', () => {
 	});
 
 	test('sidebar hides the Orðasafn link for a book with no glossary', async ({ page }) => {
+		test.skip(!WITHOUT_GLOSSARY, 'every synced book now ships a glossary — no fixture for the negative case');
 		await page.goto(`/${WITHOUT_GLOSSARY}`);
 		await page.waitForLoadState('networkidle');
 		await expect(
@@ -39,6 +45,7 @@ test.describe('Orðasafn gating (R6-6)', () => {
 	test('Orðasafn route degrades gracefully (not a red error) when the book has no glossary', async ({
 		page
 	}) => {
+		test.skip(!WITHOUT_GLOSSARY, 'every synced book now ships a glossary — no fixture for the negative case');
 		await page.goto(`/${WITHOUT_GLOSSARY}/ordabok`);
 		await page.waitForLoadState('networkidle');
 		const main = page.locator('main');
