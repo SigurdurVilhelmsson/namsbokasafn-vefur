@@ -396,7 +396,7 @@ with
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run scripts/lib/overlay.test.js`
-Expected: PASS — 15 tests.
+Expected: PASS — 16 tests.
 
 - [ ] **Step 5: Commit**
 
@@ -587,7 +587,7 @@ export function resolveChapterDuplicates(dir, faithfulDir) {
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run scripts/lib/overlay.test.js`
-Expected: PASS — 22 tests.
+Expected: PASS — 23 tests.
 
 - [ ] **Step 5: Commit**
 
