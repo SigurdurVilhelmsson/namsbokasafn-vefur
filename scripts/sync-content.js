@@ -47,6 +47,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
 const destDir = resolve(projectRoot, 'static', 'content');
 
+// Argv for the generate-toc.js child process. Forwarding --efni-path keeps
+// the TOC's `reviewed` flags computed against the SAME source tree this sync
+// run just copied content from — without it, generate-toc.js falls back to
+// its own default (../namsbokasafn-efni), which silently disagrees with a
+// sync invoked with a custom --source.
+export function tocRegenArgs(bookSlug, sourceDir) {
+	return ['scripts/generate-toc.js', bookSlug, '--efni-path', sourceDir];
+}
+
 // Default source: sibling directory
 const DEFAULT_SOURCE = resolve(projectRoot, '..', 'namsbokasafn-efni');
 
@@ -264,9 +273,9 @@ function syncBook(sourceDir, bookSlug, dryRun) {
 	if (!dryRun) {
 		console.log(`  Regenerating toc.json...`);
 		try {
-			// execFileSync (not execSync) so the slug is passed as an argument,
-			// never interpreted by a shell
-			execFileSync('node', ['scripts/generate-toc.js', bookSlug], {
+			// execFileSync (not execSync) so the slug and source path are passed
+			// as arguments, never interpreted by a shell
+			execFileSync('node', tocRegenArgs(bookSlug, sourceDir), {
 				cwd: projectRoot,
 				stdio: 'inherit'
 			});
@@ -474,9 +483,9 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 		// Regenerate toc.json based on actual content
 		console.log(`  Regenerating toc.json...`);
 		try {
-			// execFileSync (not execSync) so the slug is passed as an argument,
-			// never interpreted by a shell
-			execFileSync('node', ['scripts/generate-toc.js', bookSlug], {
+			// execFileSync (not execSync) so the slug and source path are passed
+			// as arguments, never interpreted by a shell
+			execFileSync('node', tocRegenArgs(bookSlug, sourceDir), {
 				cwd: projectRoot,
 				stdio: 'inherit'
 			});

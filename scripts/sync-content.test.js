@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, chmodSync } from 'fs';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
-import { pruneSupersededFiles } from './sync-content.js';
+import { pruneSupersededFiles, tocRegenArgs } from './sync-content.js';
 import { resetIdentityCache } from './lib/overlay.js';
 
 let root;
@@ -97,5 +97,22 @@ describe('pruneSupersededFiles', () => {
 			// Restore write permission so afterEach's rmSync can clean up root.
 			chmodSync(chapterDir, 0o755);
 		}
+	});
+});
+
+describe('tocRegenArgs', () => {
+	it('forwards the source path as --efni-path, separate from the slug', () => {
+		const args = tocRegenArgs('efnafraedi-2e', '/tmp/some-source-tree');
+
+		expect(args).toContain('efnafraedi-2e');
+		expect(args).toContain('--efni-path');
+		expect(args).toContain('/tmp/some-source-tree');
+
+		// The path must be its own array element (never concatenated into the
+		// slug or an existing flag) — that is what keeps execFileSync from ever
+		// needing a shell to interpret it.
+		const efniPathIndex = args.indexOf('--efni-path');
+		expect(args[efniPathIndex + 1]).toBe('/tmp/some-source-tree');
+		expect(args[efniPathIndex + 1]).not.toBe('efnafraedi-2e');
 	});
 });
