@@ -6,7 +6,8 @@ import {
 	moduleIdOf,
 	fileIdentity,
 	chapterIdentityIndex,
-	resetIdentityCache
+	resetIdentityCache,
+	chapterFullyFaithful
 } from './overlay.js';
 
 let root;
@@ -120,5 +121,46 @@ describe('chapterIdentityIndex', () => {
 		expect(chapterIdentityIndex(root).size).toBe(1);
 		resetIdentityCache();
 		expect(chapterIdentityIndex(root).size).toBe(2);
+	});
+});
+
+describe('chapterFullyFaithful', () => {
+	/** Build faithful/ and mt-preview/ chapter dirs, return their chapters/ roots. */
+	function tracks() {
+		return {
+			faithful: resolve(root, 'faithful', 'chapters'),
+			mt: resolve(root, 'mt-preview', 'chapters')
+		};
+	}
+
+	it('is true when a reviewed module was renamed but every module is covered', () => {
+		const { faithful, mt } = tracks();
+		writeModule(resolve(mt, '03'), '3-3-fitusyrur.html', 'm66441');
+		writeRollup(resolve(mt, '03'), '3-summary.html');
+		writeModule(resolve(faithful, '03'), '3-3-lipid.html', 'm66441');
+		expect(chapterFullyFaithful(faithful, mt, '03')).toBe(true);
+	});
+
+	it('is false when a module has no reviewed version at all', () => {
+		const { faithful, mt } = tracks();
+		writeModule(resolve(mt, '03'), '3-3-lipid.html', 'm66441');
+		writeModule(resolve(mt, '03'), '3-4-protin.html', 'm66442');
+		writeModule(resolve(faithful, '03'), '3-3-lipid.html', 'm66441');
+		expect(chapterFullyFaithful(faithful, mt, '03')).toBe(false);
+	});
+
+	it('is true when the chapter exists only in faithful', () => {
+		const { faithful, mt } = tracks();
+		mkdirSync(mt, { recursive: true });
+		writeModule(resolve(faithful, '03'), '3-3-lipid.html', 'm66441');
+		expect(chapterFullyFaithful(faithful, mt, '03')).toBe(true);
+	});
+
+	it('ignores rollups when judging coverage', () => {
+		const { faithful, mt } = tracks();
+		writeModule(resolve(mt, '03'), '3-3-lipid.html', 'm66441');
+		writeRollup(resolve(mt, '03'), '3-exercises.html');
+		writeModule(resolve(faithful, '03'), '3-3-lipid.html', 'm66441');
+		expect(chapterFullyFaithful(faithful, mt, '03')).toBe(true);
 	});
 });

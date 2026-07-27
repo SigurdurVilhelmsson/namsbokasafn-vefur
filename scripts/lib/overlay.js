@@ -68,6 +68,8 @@ function readingModuleFiles(chapterDir) {
 /**
  * Is the chapter fully covered by faithful — i.e. does `faithful` contain a
  * version of every reading module that `mt-preview` has for this chapter?
+ * Matched by module identity, so a reviewed title correction (which renames the
+ * file) still counts as coverage.
  * Only then are faithful's chapter rollups complete enough to use.
  *
  * @param faithfulChaptersDir  …/faithful/chapters
@@ -79,13 +81,16 @@ export function chapterFullyFaithful(faithfulChaptersDir, mtChaptersDir, chapter
 	// Chapter exists only in faithful (no mt baseline to be incomplete against).
 	if (!existsSync(mtDir)) return true;
 
-	const faithfulFiles = new Set(
-		existsSync(resolve(faithfulChaptersDir, chapterDir))
-			? readdirSync(resolve(faithfulChaptersDir, chapterDir))
-			: []
+	// Compare by module IDENTITY, not filename: a reviewed title correction
+	// renames the file, and a filename comparison would read a fully reviewed
+	// chapter as incomplete — freezing its rollups on mt-preview and leaving the
+	// machine-translation banner up forever.
+	const faithfulIdentities = new Set(
+		chapterIdentityIndex(resolve(faithfulChaptersDir, chapterDir)).values()
 	);
-	const mtModules = readingModuleFiles(mtDir);
-	return mtModules.every((f) => faithfulFiles.has(f));
+	const mtIdentities = chapterIdentityIndex(mtDir);
+
+	return readingModuleFiles(mtDir).every((f) => faithfulIdentities.has(mtIdentities.get(f)));
 }
 
 /**
