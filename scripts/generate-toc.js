@@ -19,8 +19,8 @@
 
 import { existsSync, readdirSync, readFileSync, writeFileSync, statSync } from 'fs';
 import { resolve, dirname, basename, extname } from 'path';
-import { fileURLToPath } from 'url';
-import { isAggregationFile, chapterFullyFaithful } from './lib/overlay.js';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { isAggregationFile, chapterFullyFaithful, resolveChapterDuplicates } from './lib/overlay.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -293,6 +293,44 @@ function loadExistingToc(bookPath) {
 	}
 }
 
+// Duplicates no reviewed version can adjudicate, collected across the whole run
+// so they get a summary at the end instead of scrolling past.
+export const unresolvedDuplicates = [];
+
+// The HTML pages in a directory that should become TOC entries.
+//
+// A reviewed title correction renames the rendered file, so the overlay can
+// leave both the old and the new name on disk — the same module published
+// twice. sync-content.js prunes those, but this script also runs standalone and
+// against destinations synced by older versions, so it applies the same verdict
+// itself. Where no reviewed version can choose a winner, both are kept and
+// reported: that is a content defect to fix in namsbokasafn-efni.
+export function usablePages(dir, bookSlug, dirName, options) {
+	const faithfulDir = resolve(
+		options.efniPath,
+		'books',
+		bookSlug,
+		'05-publication',
+		'faithful',
+		'chapters',
+		dirName
+	);
+	const { superseded, conflicts } = resolveChapterDuplicates(dir, faithfulDir);
+
+	for (const file of superseded) {
+		console.log(`    Skipping superseded page (reviewed rename): chapters/${dirName}/${file}`);
+	}
+	for (const { identity, files } of conflicts) {
+		unresolvedDuplicates.push({ bookSlug, dirName, identity, files });
+		console.warn(
+			`    ⚠️  Duplicate module in chapters/${dirName} (${identity}): ${files.join(', ')} — kept both.`
+		);
+	}
+
+	const dropped = new Set(superseded);
+	return readdirSync(dir).filter((f) => f.endsWith('.html') && !dropped.has(f));
+}
+
 // Scan front-matter directory (chapters/00/) and generate front-matter entries.
 // Front matter (e.g. the preface / formáli) is rendered before Chapter 1 and is
 // NOT a numbered chapter — it lives in toc.frontMatter, not toc.chapters.
@@ -303,9 +341,7 @@ function scanFrontMatter(bookPath, bookSlug, options) {
 		return [];
 	}
 
-	const files = readdirSync(dir)
-		.filter((f) => f.endsWith('.html'))
-		.sort();
+	const files = usablePages(dir, bookSlug, '00', options).sort();
 
 	const entries = [];
 
@@ -346,7 +382,7 @@ function scanFrontMatter(bookPath, bookSlug, options) {
 }
 
 // Scan appendix directory and generate appendix entries
-function scanAppendices(bookPath) {
+function scanAppendices(bookPath, bookSlug, options) {
 	// Check for appendices in multiple possible locations
 	const possibleDirs = [
 		resolve(bookPath, 'chapters', 'appendix'),
@@ -366,9 +402,7 @@ function scanAppendices(bookPath) {
 		return [];
 	}
 
-	const appendixFiles = readdirSync(appendixDir)
-		.filter((f) => f.endsWith('.html'))
-		.sort();
+	const appendixFiles = usablePages(appendixDir, bookSlug, basename(appendixDir), options).sort();
 
 	const appendices = [];
 
@@ -496,7 +530,7 @@ function generateToc(bookSlug, options) {
 		const chapterMeta = loadChapterMetadata(options.efniPath, bookSlug, chapterNum);
 
 		// Find all HTML content files in chapter
-		const contentFiles = readdirSync(chapterPath).filter((f) => f.endsWith('.html'));
+		const contentFiles = usablePages(chapterPath, bookSlug, chapterDir, options);
 
 		const sections = [];
 
@@ -613,7 +647,7 @@ function generateToc(bookSlug, options) {
 	}
 
 	// Scan for appendices
-	const appendices = scanAppendices(bookPath);
+	const appendices = scanAppendices(bookPath, bookSlug, options);
 	if (appendices.length > 0) {
 		toc.appendices = appendices;
 		console.log(`  Found ${appendices.length} appendix/appendices`);
@@ -746,8 +780,23 @@ function main() {
 		success++;
 	}
 
+	if (unresolvedDuplicates.length > 0) {
+		console.warn(
+			`\n⚠️  ${unresolvedDuplicates.length} unresolved duplicate module(s) — one module, two published pages:`
+		);
+		for (const d of unresolvedDuplicates) {
+			console.warn(`   ${d.bookSlug} chapters/${d.dirName} (${d.identity}): ${d.files.join(', ')}`);
+		}
+		console.warn(
+			'   Vefur cannot choose between them. Fix at the source in namsbokasafn-efni: prune the stale render.'
+		);
+	}
+
 	console.log(`\nComplete: ${success} succeeded, ${failed} failed`);
 	process.exit(failed > 0 ? 1 : 0);
 }
 
-main();
+// Only run as a CLI — importing this module (tests) must not start a run.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+	main();
+}
