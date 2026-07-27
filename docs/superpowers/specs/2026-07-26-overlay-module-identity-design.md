@@ -189,6 +189,20 @@ A new exported `pruneSupersededFiles(bookDest, faithfulPath)`:
   same process sees the truth. (`generate-toc.js` runs as a separate process via
   `execFileSync`, so it is unaffected either way.)
 - Skipped under `--dry-run`, matching the overlay step.
+- **Failures are contained per book.** The call is wrapped in a try/catch in _both_ sync
+  paths; a throw logs, marks that book failed, and lets the loop continue to the next one.
+  Without this, an `rmSync` failure on the rsync path — the default whenever rsync is
+  installed — propagates uncaught out of `main()` and kills the process, leaving every
+  remaining book unsynced and skipping the provenance sync, the post-sync audit and the
+  summary. `rmSync` also takes `{ force: true }`, so a file that vanished between
+  `readdirSync` and the delete no-ops instead of throwing.
+- **Unresolved conflicts are counted and re-reported at the end of the run**, after the
+  `Sync complete: N succeeded, M failed` line. A mid-run warning is easy to miss in a long
+  log, and being loud is the entire value of the no-authority case. A conflict does **not**
+  change the exit status — it is a content defect in efni, not a sync failure, and failing
+  the sync would block a deploy over something vefur cannot fix. A genuine I/O error is
+  different: it fails its book and so does affect the exit code, like any other book-level
+  failure.
 
 `sync-content.js` gains the `import.meta.url === pathToFileURL(process.argv[1]).href` guard
 around `main()` and a named export for the sweep, so the deletion loop is unit-testable.
