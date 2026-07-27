@@ -22,13 +22,14 @@
 
 ## File Structure
 
-| File                                    | Responsibility                                                                                                                                 |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scripts/lib/overlay.js` (modify)       | All overlay decisions. Gains module identity, an identity-based `chapterFullyFaithful`, and the `resolveChapterDuplicates` planner. Read-only. |
-| `scripts/lib/overlay.test.js` (create)  | Unit tests for every decision in `overlay.js`. It has none today.                                                                              |
-| `scripts/sync-content.js` (modify)      | Executes the plan: deletes superseded pages after the overlay, reports conflicts. Gains a `main()` guard so the sweep is importable.           |
-| `scripts/sync-content.test.js` (create) | Unit tests for the deletion sweep.                                                                                                             |
-| `scripts/generate-toc.js` (modify)      | Applies the same plan as a backstop at its three enumeration sites, plus an end-of-run conflict summary.                                       |
+| File                                    | Responsibility                                                                                                                                       |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/lib/overlay.js` (modify)       | All overlay decisions. Gains module identity, an identity-based `chapterFullyFaithful`, and the `resolveChapterDuplicates` planner. Read-only.       |
+| `scripts/lib/overlay.test.js` (create)  | Unit tests for every decision in `overlay.js`. It has none today.                                                                                    |
+| `scripts/sync-content.js` (modify)      | Executes the plan: deletes superseded pages after the overlay, reports conflicts. Gains a `main()` guard so the sweep is importable.                 |
+| `scripts/sync-content.test.js` (create) | Unit tests for the deletion sweep.                                                                                                                   |
+| `scripts/generate-toc.js` (modify)      | Applies the same plan as a backstop at its three enumeration sites, plus an end-of-run conflict summary. Gains a `main()` guard so it is importable. |
+| `scripts/generate-toc.test.js` (create) | Unit tests for the backstop helper.                                                                                                                  |
 
 ---
 
@@ -884,13 +885,16 @@ namsbokasafn-efni, and vefur has no basis to pick a translation."
 
 **Files:**
 
-- Modify: `scripts/generate-toc.js` (import line 23; new helper before `scanFrontMatter` at line 300; call sites at lines 306, 369, 499; `scanAppendices` signature line 349 and its call site line 616; summary in `main()`)
-- Test: manual, per the verification step below — `generate-toc.js` is a CLI with a hardcoded `contentDir`, and all of its decision logic now lives in the unit-tested `overlay.js`.
+- Modify: `scripts/generate-toc.js` (import line 23; new helper before `scanFrontMatter` at line 300; call sites at lines 306, 369, 499; `scanAppendices` signature line 349 and its call site line 616; summary in `main()`; `main()` guard at the tail)
+- Test: `scripts/generate-toc.test.js` (create)
 
 **Interfaces:**
 
 - Consumes: `resolveChapterDuplicates(dir, faithfulDir)` from Task 3.
-- Produces: no new exports. `scanAppendices` changes signature from `(bookPath)` to `(bookPath, bookSlug, options)`.
+- Produces:
+  - `usablePages(dir, bookSlug, dirName, options): string[]` — exported for tests. `options` needs only `{ efniPath }`.
+  - `unresolvedDuplicates: Array<{ bookSlug, dirName, identity, files }>` — exported module-level accumulator, drained by the end-of-run summary.
+  - `scanAppendices` changes signature from `(bookPath)` to `(bookPath, bookSlug, options)`.
 
 - [ ] **Step 1: Extend the overlay import**
 
@@ -911,7 +915,7 @@ Insert immediately before `scanFrontMatter` (line 300):
 ```js
 // Duplicates no reviewed version can adjudicate, collected across the whole run
 // so they get a summary at the end instead of scrolling past.
-const unresolvedDuplicates = [];
+export const unresolvedDuplicates = [];
 
 // The HTML pages in a directory that should become TOC entries.
 //
@@ -921,7 +925,7 @@ const unresolvedDuplicates = [];
 // against destinations synced by older versions, so it applies the same verdict
 // itself. Where no reviewed version can choose a winner, both are kept and
 // reported: that is a content defect to fix in namsbokasafn-efni.
-function usablePages(dir, bookSlug, dirName, options) {
+export function usablePages(dir, bookSlug, dirName, options) {
   const faithfulDir = resolve(
     options.efniPath,
     "books",
@@ -1008,7 +1012,157 @@ if (unresolvedDuplicates.length > 0) {
 }
 ```
 
-- [ ] **Step 5: Verify against the real content tree**
+- [ ] **Step 5: Guard `main()` so the module is importable**
+
+`generate-toc.js` currently calls `main()` unconditionally at its tail, so importing it
+would start a TOC generation run. Replace the bare `main();` on the last line with the same
+guard `sync-content.js` gets in Task 4:
+
+```js
+// Only run as a CLI — importing this module (tests) must not start a run.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}
+```
+
+and extend the `url` import on line 22 to provide `pathToFileURL`:
+
+```js
+import { fileURLToPath, pathToFileURL } from "url";
+```
+
+- [ ] **Step 6: Write the failing tests**
+
+Create `scripts/generate-toc.test.js`:
+
+```js
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "fs";
+import { tmpdir } from "os";
+import { resolve } from "path";
+import { usablePages, unresolvedDuplicates } from "./generate-toc.js";
+import { resetIdentityCache } from "./lib/overlay.js";
+
+let root;
+
+beforeEach(() => {
+  root = mkdtempSync(resolve(tmpdir(), "generate-toc-"));
+  unresolvedDuplicates.length = 0;
+  resetIdentityCache();
+  vi.spyOn(console, "log").mockImplementation(() => {});
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+});
+
+afterEach(() => {
+  rmSync(root, { recursive: true, force: true });
+  unresolvedDuplicates.length = 0;
+  resetIdentityCache();
+  vi.restoreAllMocks();
+});
+
+function writeModule(dir, filename, moduleId) {
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    resolve(dir, filename),
+    `<article class="cnx-module" data-module-id="${moduleId}"><h1 id="title">T</h1></article>`,
+  );
+}
+
+/** A synced destination dir plus the matching faithful source dir. */
+function tracks(dirName) {
+  const dest = resolve(root, "dest", "chapters", dirName);
+  const efniPath = resolve(root, "efni");
+  const faithful = resolve(
+    efniPath,
+    "books",
+    "liffraedi-2e",
+    "05-publication",
+    "faithful",
+    "chapters",
+    dirName,
+  );
+  return { dest, faithful, options: { efniPath } };
+}
+
+describe("usablePages", () => {
+  it("drops the baseline page a reviewed rename superseded", () => {
+    const { dest, faithful, options } = tracks("03");
+    writeModule(dest, "3-3-fitusyrur.html", "m66441");
+    writeModule(dest, "3-3-lipid.html", "m66441");
+    writeModule(faithful, "3-3-lipid.html", "m66441");
+
+    expect(usablePages(dest, "liffraedi-2e", "03", options)).toEqual([
+      "3-3-lipid.html",
+    ]);
+  });
+
+  it("records no unresolved duplicate when the rename is resolved", () => {
+    const { dest, faithful, options } = tracks("03");
+    writeModule(dest, "3-3-fitusyrur.html", "m66441");
+    writeModule(dest, "3-3-lipid.html", "m66441");
+    writeModule(faithful, "3-3-lipid.html", "m66441");
+
+    usablePages(dest, "liffraedi-2e", "03", options);
+    expect(unresolvedDuplicates).toEqual([]);
+  });
+
+  it("keeps both pages when no reviewed version can choose", () => {
+    const { dest, options } = tracks("10");
+    writeModule(dest, "10-5-fast-astand-efnis.html", "m68770");
+    writeModule(dest, "10-5-fastur-efnishamur.html", "m68770");
+
+    expect(usablePages(dest, "liffraedi-2e", "10", options).sort()).toEqual([
+      "10-5-fast-astand-efnis.html",
+      "10-5-fastur-efnishamur.html",
+    ]);
+  });
+
+  it("records the unresolved duplicate for the end-of-run summary", () => {
+    const { dest, options } = tracks("10");
+    writeModule(dest, "10-5-fast-astand-efnis.html", "m68770");
+    writeModule(dest, "10-5-fastur-efnishamur.html", "m68770");
+
+    usablePages(dest, "liffraedi-2e", "10", options);
+    expect(unresolvedDuplicates).toEqual([
+      {
+        bookSlug: "liffraedi-2e",
+        dirName: "10",
+        identity: "module:m68770",
+        files: ["10-5-fast-astand-efnis.html", "10-5-fastur-efnishamur.html"],
+      },
+    ]);
+  });
+
+  it("returns every page in a directory without duplicates", () => {
+    const { dest, options } = tracks("03");
+    writeModule(dest, "3-3-lipid.html", "m66441");
+    writeModule(dest, "3-4-protin.html", "m66442");
+
+    expect(usablePages(dest, "liffraedi-2e", "03", options).sort()).toEqual([
+      "3-3-lipid.html",
+      "3-4-protin.html",
+    ]);
+  });
+
+  it("ignores non-html files", () => {
+    const { dest, options } = tracks("03");
+    writeModule(dest, "3-3-lipid.html", "m66441");
+    writeFileSync(resolve(dest, "toc.json"), "{}");
+
+    expect(usablePages(dest, "liffraedi-2e", "03", options)).toEqual([
+      "3-3-lipid.html",
+    ]);
+  });
+});
+```
+
+- [ ] **Step 7: Run the tests to verify they pass**
+
+Run: `npx vitest run scripts/generate-toc.test.js`
+Expected: PASS — 6 tests. If the run hangs or prints TOC output, the `main()` guard in Step 5
+is wrong.
+
+- [ ] **Step 8: Verify against the real content tree**
 
 Run: `node scripts/generate-toc.js --dry-run efnafraedi-2e`
 
@@ -1018,10 +1172,10 @@ Expected: the run completes, and the summary reports exactly one unresolved dupl
 
 If `static/content/` is empty on this machine the script reports no books; that is not a failure of this task, but the check has not then been performed — say so rather than claiming it passed.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 9: Commit**
 
 ```bash
-git add scripts/generate-toc.js
+git add scripts/generate-toc.js scripts/generate-toc.test.js
 git commit -m "fix(toc): skip pages a reviewed rename superseded, report the rest"
 ```
 
