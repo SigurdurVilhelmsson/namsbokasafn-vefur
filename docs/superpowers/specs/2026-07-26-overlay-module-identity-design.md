@@ -243,7 +243,8 @@ about efni's content that expires.
 | 1   | `moduleIdOf` on a rendered module                                             | returns the id                                                 |
 | 2   | `moduleIdOf` on a rollup with no id                                           | returns `null`                                                 |
 | 3   | `fileIdentity` — reading module                                               | `module:<id>`                                                  |
-| 4   | `fileIdentity` — rollup without an id                                         | `file:<filename>`                                              |
+| 4   | `fileIdentity` — a rollup, with or without an id                              | `agg:<filename>`                                               |
+| 4b  | `fileIdentity` — a non-aggregation page carrying no module id                 | `file:<filename>`                                              |
 | 5   | `fileIdentity` — `key-terms` carrying a synthetic id                          | `agg:<filename>` (aggregation branch wins)                     |
 | 6   | `chapterFullyFaithful` — chapter complete but one module renamed              | **`true`** (regression for the stuck banner)                   |
 | 7   | `chapterFullyFaithful` — a module genuinely missing from faithful             | `false`                                                        |

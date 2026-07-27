@@ -95,6 +95,15 @@ function writeRollup(dir, filename) {
   );
 }
 
+/** A page the pipeline emitted without a module id — the identity fallback. */
+function writeIdlessPage(dir, filename) {
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    resolve(dir, filename),
+    '<article class="cnx-module"><h1 id="title">T</h1></article>',
+  );
+}
+
 describe("moduleIdOf", () => {
   it("returns the module id of a rendered module", () => {
     writeModule(root, "3-3-lipid.html", "m66441");
@@ -117,9 +126,16 @@ describe("fileIdentity", () => {
     expect(fileIdentity(root, "3-3-lipid.html")).toBe("module:m66441");
   });
 
-  it("keys a rollup without a module id on its filename", () => {
+  it("keys a rollup on its filename in the aggregation namespace", () => {
     writeRollup(root, "3-summary.html");
-    expect(fileIdentity(root, "3-summary.html")).toBe("file:3-summary.html");
+    expect(fileIdentity(root, "3-summary.html")).toBe("agg:3-summary.html");
+  });
+
+  it("keys a page with no module id on its filename", () => {
+    writeIdlessPage(root, "3-6-no-module-id.html");
+    expect(fileIdentity(root, "3-6-no-module-id.html")).toBe(
+      "file:3-6-no-module-id.html",
+    );
   });
 
   it("keys key-terms on its filename despite its synthetic module id", () => {
@@ -143,7 +159,7 @@ describe("chapterIdentityIndex", () => {
     expect(chapterIdentityIndex(root)).toEqual(
       new Map([
         ["3-1-kolvetni.html", "module:m66440"],
-        ["3-summary.html", "file:3-summary.html"],
+        ["3-summary.html", "agg:3-summary.html"],
       ]),
     );
   });
@@ -255,7 +271,7 @@ export function resetIdentityCache() {
 - [ ] **Step 4: Run the tests to verify they pass**
 
 Run: `npx vitest run scripts/lib/overlay.test.js`
-Expected: PASS — 11 tests.
+Expected: PASS — 12 tests.
 
 - [ ] **Step 5: Commit**
 
