@@ -1212,8 +1212,26 @@ Proves the two branches through the real `sync-content.js`, including rsync, wit
 
 - [ ] **Step 1: Build a synthetic efni source tree**
 
+> **⚠️ Read this before running anything.** `sync-content.js`'s end-of-run cleanup removes
+> every directory in `static/content/` that is not a book **in the source tree** — and it
+> does that regardless of which books you asked it to sync. A source holding only the
+> fixture therefore makes all five real books "stale" and **deletes them**. They are
+> gitignored and re-syncable from efni, but that is a long detour for no reason.
+>
+> The fix is in this step: the temp source **symlinks every real efni book** alongside the
+> fixture, so `availableBooks` covers them all and nothing is stale. `getSourceBooks` uses
+> `statSync`, which follows symlinks, so the real books resolve normally. Combined with
+> naming the fixture explicitly on the command line, only the fixture is actually synced.
+
 ```bash
 SRC=$(mktemp -d)
+mkdir -p "$SRC/books"
+
+# Symlink the real books in so the stale-cleanup sees them as still present.
+for b in /home/siggi/dev/repos/namsbokasafn-efni/books/*/; do
+  ln -s "${b%/}" "$SRC/books/$(basename "${b%/}")"
+done
+
 BOOK="$SRC/books/__c9-fixture__/05-publication"
 mkdir -p "$BOOK/mt-preview/chapters/03" "$BOOK/faithful/chapters/03" "$BOOK/mt-preview/chapters/10"
 
@@ -1228,14 +1246,28 @@ mod "$BOOK/mt-preview/chapters/10/10-5-b.html" m68770 "Fastur efnishamur"
 echo "SRC=$SRC"
 ```
 
+Before going on, confirm the guard worked:
+
+```bash
+ls "$SRC/books"   # expect the five real book slugs PLUS __c9-fixture__
+ls static/content # expect the five real books, still present
+```
+
 - [ ] **Step 2: Sync the fixture book**
 
 Run: `node scripts/sync-content.js --source "$SRC" __c9-fixture__`
+
+Naming the fixture explicitly matters — without it, every symlinked real book is synced too.
 
 Expected in the output:
 
 - `Removed superseded page (reviewed rename): chapters/03/3-3-fitusyrur.html`
 - a `⚠️  DUPLICATE MODULE — __c9-fixture__ chapters/10 (module:m68770)` block naming both files
+- the end-of-run unresolved-conflict summary reporting 1
+- no `Removing stale content:` lines at all. If you see one naming a real book, **stop
+  immediately** and report it — the symlink guard failed.
+- a warning that the provenance summary was not found. That is expected: the temp source has
+  no `docs/provenance/`, and it is non-fatal.
 
 - [ ] **Step 3: Assert the destination and the generated TOC**
 
@@ -1252,9 +1284,12 @@ Expected: chapter 3 has one section, `3-3-lipid.html`, marked reviewed. Chapter 
 
 ```bash
 rm -rf static/content/__c9-fixture__ "$SRC"
+ls static/content   # expect exactly the five real books, no fixture
 ```
 
-`static/content/` is gitignored, so nothing was staged; the next real sync also prunes unknown book directories.
+`static/content/` is gitignored, so nothing was staged. Removing `$SRC` deletes only the
+symlinks and the fixture — never the real efni books they point at, since `rm -rf` on a
+symlink removes the link, not the target.
 
 - [ ] **Step 5: Run the full gates**
 
