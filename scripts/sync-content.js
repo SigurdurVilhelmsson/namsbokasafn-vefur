@@ -33,8 +33,15 @@
 import { execFileSync, execSync, spawnSync } from 'child_process';
 import { existsSync, readdirSync, statSync, rmSync, cpSync, mkdirSync } from 'fs';
 import { resolve, dirname, relative, sep } from 'path';
-import { fileURLToPath } from 'url';
-import { chapterFullyFaithful, faithfulFileWins, faithfulRollupsComplete, ROLLUPS_COMPLETE_MARKER } from './lib/overlay.js';
+import { fileURLToPath, pathToFileURL } from 'url';
+import {
+	chapterFullyFaithful,
+	faithfulFileWins,
+	faithfulRollupsComplete,
+	resolveChapterDuplicates,
+	resetIdentityCache,
+	ROLLUPS_COMPLETE_MARKER
+} from './lib/overlay.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -229,6 +236,13 @@ function syncBook(sourceDir, bookSlug, dryRun) {
 		overlayFaithful(layers.overlay.path, layers.baseline.path, bookDest);
 	}
 
+	// 3. Drop baseline pages the overlay republished under a new filename, and
+	// report duplicates it cannot adjudicate. Runs before toc regeneration so
+	// the TOC is always generated from a pruned destination.
+	if (!dryRun) {
+		pruneSupersededFiles(bookDest, layers.overlay?.path ?? null, bookSlug);
+	}
+
 	// Regenerate toc.json based on actual content
 	if (!dryRun) {
 		console.log(`  Regenerating toc.json...`);
@@ -324,6 +338,66 @@ function overlayFaithful(faithfulPath, mtPath, bookDest) {
 	});
 }
 
+/**
+ * Remove baseline pages that the faithful overlay republished under a new
+ * filename, and report duplicates the overlay cannot adjudicate.
+ *
+ * A section's filename is derived from its title, so a review that corrects a
+ * title renames the rendered file. The overlay is copied WITHOUT --delete (so a
+ * partial review can never wipe baseline chapters), which means a rename ADDS
+ * the new name instead of replacing the old one — and the module gets published
+ * twice, once under the corrected title and once under the stale one.
+ *
+ * Runs whether or not the book has an overlay: a stale render left behind in
+ * mt-preview produces the same duplicate with no faithful file in sight. That
+ * case is a CONTENT defect, not a vefur one — vefur has no basis to choose
+ * between two translations, so it warns and keeps both.
+ *
+ * @param bookDest      static/content/<book>
+ * @param faithfulPath  the faithful publication dir (holding chapters/), or null
+ * @param bookSlug      for the warning message
+ * @returns {number}    unresolved conflicts reported
+ */
+export function pruneSupersededFiles(bookDest, faithfulPath, bookSlug) {
+	const chaptersDest = resolve(bookDest, 'chapters');
+	if (!existsSync(chaptersDest)) return 0;
+
+	let conflictCount = 0;
+	let removed = 0;
+
+	// Every direct subdirectory holds pages: numbered chapters, front matter
+	// (00) and the appendix dir (appendices/). Images live one level deeper,
+	// inside a chapter dir.
+	for (const dirName of readdirSync(chaptersDest).sort()) {
+		const dir = resolve(chaptersDest, dirName);
+		if (!statSync(dir).isDirectory()) continue;
+
+		const faithfulDir = faithfulPath ? resolve(faithfulPath, 'chapters', dirName) : null;
+		const { superseded, conflicts } = resolveChapterDuplicates(dir, faithfulDir);
+
+		for (const file of superseded) {
+			rmSync(resolve(dir, file));
+			removed++;
+			console.log(`    Removed superseded page (reviewed rename): chapters/${dirName}/${file}`);
+		}
+
+		for (const { identity, files } of conflicts) {
+			conflictCount++;
+			console.warn(
+				`\n  ⚠️  DUPLICATE MODULE — ${bookSlug} chapters/${dirName} (${identity})\n` +
+					files.map((f) => `        ${f}`).join('\n') +
+					`\n      One module, two published pages, and no reviewed version to choose between them.` +
+					`\n      Both were kept. Fix at the source in namsbokasafn-efni: prune the stale render.\n`
+			);
+		}
+	}
+
+	// The index memo predates these deletions.
+	if (removed > 0) resetIdentityCache();
+
+	return conflictCount;
+}
+
 // Fallback sync using cp (if rsync not available). Mirrors the rsync path:
 // copy the baseline, then overlay reviewed modules on top.
 function syncBookFallback(sourceDir, bookSlug, dryRun) {
@@ -370,6 +444,9 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 		if (layers.overlay) {
 			overlayFaithful(layers.overlay.path, layers.baseline.path, bookDest);
 		}
+
+		// Drop baseline pages the overlay republished under a new filename.
+		pruneSupersededFiles(bookDest, layers.overlay?.path ?? null, bookSlug);
 
 		// Regenerate toc.json based on actual content
 		console.log(`  Regenerating toc.json...`);
@@ -572,4 +649,7 @@ function main() {
 	process.exit(failed > 0 ? 1 : 0);
 }
 
-main();
+// Only run as a CLI — importing this module (tests) must not start a sync.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+	main();
+}
