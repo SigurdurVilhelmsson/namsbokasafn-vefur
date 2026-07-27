@@ -71,9 +71,14 @@ detection, not repair.**
 - `data-module-id` sits on `<article class="cnx-module">`, **at most one per file**
   (checked across every rendered HTML file in all five books).
 - It is present on **every reading module, front-matter page, and appendix page**.
-- It is absent **only** on chapter aggregation rollups — `summary`, `exercises`,
-  `answer-key`, per-type exercise pages. `key-terms` is the exception: it is an
-  aggregation page but carries a _synthetic_ chapter-scoped id (`03-key-terms`).
+- It is absent on most chapter aggregation rollups — `summary`, `exercises`,
+  `answer-key`, per-type exercise pages. Some aggregation pages carry a
+  _synthetic_, chapter-scoped id instead of a real module id: `key-terms` (25
+  files across the synced content), `key-equations` (18 files), and one
+  `summary` (`edlisfraedi-2e/chapters/04/4-summary.html`, id `04-summary`).
+  `key-terms` is not the only exception — the synthetic id looks like
+  inconsistent emission from the rendering pipeline, not a rule tied to page
+  type.
 - Aggregation and appendix filenames are chapter- or letter-derived, not title-derived, so
   they are not rename-prone; reading-module, front-matter and appendix **slugs are
   title-derived** and are.
@@ -171,7 +176,8 @@ One function, both callers, same verdict — by construction the two scripts can
 
 ### `sync-content.js` — post-overlay prune sweep
 
-A new exported `pruneSupersededFiles(bookDest, faithfulPath)`:
+A new exported `pruneSupersededFiles(bookDest, faithfulPath, bookSlug)` (`bookSlug` is used only to
+name the book in the conflict warning message):
 
 - Runs **after** the overlay and **before** the `generate-toc.js` regeneration, in **both**
   the rsync path (`syncBook`) and the cp-fallback path (`syncBookFallback`) — so the TOC is
@@ -181,7 +187,8 @@ A new exported `pruneSupersededFiles(bookDest, faithfulPath)`:
   overlay, `faithfulPath` is `null` and every duplicate group reports as a conflict.
 - Iterates **every** subdirectory of `bookDest/chapters/` — `00`, `01…NN`, and
   `appendices` / `appendix` / `99` — not just `/^\d{2}$/`.
-- Deletes each `superseded` file and logs the deletion with its module id.
+- Deletes each `superseded` file and logs the deletion with its chapter-relative path (not
+  its module id — the id appears in the conflict block below, not the deletion log line).
 - For each conflict, prints a delimited `⚠️` block naming book, directory, module id and
   the competing filenames, and states the repair belongs in namsbokasafn-efni (prune the
   stale render). Not fatal; both files stay.
@@ -226,6 +233,42 @@ resolve against `toc.json`.
 `isReviewedModule` needs **no change**: after the sweep the served file _is_ the faithful
 filename, so its `existsSync` check is correct again.
 
+## Known edge case — the two callers can consult the faithful tree under different preconditions (not fixed, not observed)
+
+`generate-toc.js`'s `usablePages` builds its faithful comparison directory unconditionally
+from `<efniPath>/books/<slug>/05-publication/faithful/chapters/<dirName>` and hands it to
+`resolveChapterDuplicates`, which only checks that the path exists. `sync-content.js` is more
+selective: it only treats `faithful` as an overlay when `getPublicationLayers` recognises it,
+and `variantWithChapters` requires the faithful `chapters/` tree to contain **at least one**
+subdirectory matching `/^\d{2}$/`. `00` and `99` satisfy that test, so a faithful tree
+containing either is recognised as an overlay and the disagreement below does not arise. Only
+a faithful tree whose sole `chapters/` subdirectory is non-numeric — `appendices/` or
+`appendix/` — escapes the check.
+
+So a faithful tree holding **only** `chapters/appendices/` (or `chapters/appendix/`) — nothing
+numbered — is invisible to `sync-content.js`: `variantWithChapters` returns `null`, the book
+syncs with no overlay, and that appendix directory's faithful content is never copied into the
+destination. `generate-toc.js` has no such gate: it reads straight from
+`<efniPath>/.../faithful/chapters/appendices` regardless of what sync decided.
+
+Reaching a wrong TOC verdict from this needs two things to coincide, not just the tree shape
+above: (1) the synced destination's appendix directory must already hold a duplicate — two
+files sharing one module id, the same failure class as chapter 10's mt-preview duplicate,
+which needs no overlay at all to occur — and (2) exactly one of those two filenames must also
+exist, by exact name, in efni's faithful appendix directory, even though that faithful content
+was never copied into the destination because sync did not recognise the tree as an overlay.
+Only then does `usablePages` pick a "winner" and drop the other appendix page from
+`toc.json`, on the authority of a faithful file the sync run never applied.
+
+This is a constructed scenario, not an observed one: every other shape tried (faithful-only
+book, mt-only book, a chapter present in one track but not the other, a chapter missing from
+faithful entirely, no efni tree at all) gives both callers the same answer, several checked
+against real synced content. This specific stacked condition — a numbered-appendix-only
+faithful tree combined with an mt-preview appendix duplicate that also collides by filename
+with a faithful appendix file — was not found in any of the five books' publication trees at
+the time of writing, and is not fixed in code. Recorded here so a future reader does not have
+to rederive the reachability conditions from scratch.
+
 ## Out of scope — deliberate
 
 - **Redirects for renamed slugs.** Deleting a superseded baseline file makes its URL 404.
@@ -259,7 +302,7 @@ about efni's content that expires.
 | 3   | `fileIdentity` — reading module                                               | `module:<id>`                                                  |
 | 4   | `fileIdentity` — a rollup, with or without an id                              | `agg:<filename>`                                               |
 | 4b  | `fileIdentity` — a non-aggregation page carrying no module id                 | `file:<filename>`                                              |
-| 5   | `fileIdentity` — `key-terms` carrying a synthetic id                          | `agg:<filename>` (aggregation branch wins)                     |
+| 5   | `fileIdentity` — aggregation page carrying a synthetic id (e.g. `key-terms`)  | `agg:<filename>` (aggregation branch wins)                     |
 | 6   | `chapterFullyFaithful` — chapter complete but one module renamed              | **`true`** (regression for the stuck banner)                   |
 | 7   | `chapterFullyFaithful` — a module genuinely missing from faithful             | `false`                                                        |
 | 8   | `chapterFullyFaithful` — chapter present only in faithful                     | `true`                                                         |

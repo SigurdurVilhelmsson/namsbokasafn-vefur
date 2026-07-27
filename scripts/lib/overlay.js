@@ -146,6 +146,18 @@ export function moduleIdOf(filePath) {
  * they never rename.
  *
  * The three prefixes keep the namespaces from ever colliding.
+ *
+ * The `file:` fallback is a SILENT degradation to the pre-fix, filename-keyed
+ * behaviour this design replaces: `moduleIdOf` matches only a double-quoted
+ * `data-module-id` attribute, so if the efni pipeline ever changed its
+ * attribute quoting (or stopped emitting the attribute), every reading module
+ * would key on `file:` again and a renamed module would once more publish
+ * twice. Nothing here warns when that happens — filename-keyed identities are
+ * unique within a directory by construction, so they never form a duplicate
+ * group to flag. The failure direction is safe (a missed detection, never a
+ * wrong deletion), which is why this is a comment and not a runtime check —
+ * but do not read the absence of a warning as proof the pipeline's attribute
+ * format is guaranteed.
  */
 export function fileIdentity(dir, filename) {
 	if (isAggregationFile(filename)) return `agg:${filename}`;
