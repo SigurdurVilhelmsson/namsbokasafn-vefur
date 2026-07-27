@@ -321,9 +321,76 @@ These are heuristics you apply with judgment, not hard gates.
 - `scripts/generate-pdfs.js`: Renders per-chapter and full-book PDFs from the `/print/*` routes (Playwright Chromium + pdf-lib): continuous page numbering, running headers, TOC with page numbers, PDF outline, appendices. Run after `sync-content`, before `build` (`npm run pdfs`). Set `PDF_CHROMIUM_PATH` to use a system Chromium instead of the Playwright-managed download.
 - `scripts/generate-component-inventory.js`: Generates component documentation (`npm run docs:generate`).
 
-**Pre-commit hooks:** Husky runs lint-staged on commit, which auto-fixes ESLint and Prettier issues on staged files. If a commit is blocked, check the lint-staged output for the specific error.
+**Pre-commit hooks:** Husky runs lint-staged on commit, which auto-fixes ESLint and Prettier
+issues on staged files. If a commit is blocked, check the lint-staged output for the specific
+error. Note the split: lint-staged runs `eslint --fix` on `*.{ts,js,mjs,svelte}` and
+`prettier --write` only on `*.{json,md,css,html}`, which is why JS keeps tabs and single
+quotes. ⚠️ **There is no Prettier config** (only `.prettierignore`), so `npm run format`
+(`prettier --write .`) would reformat every `.js`/`.ts` in the repo to Prettier's defaults.
+Don't run it until a `.prettierrc` with `"useTabs": true` exists. (efni's config won't
+transplant — it sets `tabWidth: 2` with no `useTabs`.)
+
+### The overlay identifies a section by MODULE ID, not filename
+
+A section's rendered filename is derived from its title, so a review that corrects a title
+**renames the file**. Anything keyed on filename breaks, in two ways that look nothing alike:
+the overlay _adds_ the new name instead of replacing the old one (one module, two published
+pages — the corrected title plus the stale mistranslation, still reachable), and
+`chapterFullyFaithful` reads a fully-reviewed chapter as incomplete, so its rollups never
+switch to faithful and the MT banner never clears — silently, with no duplicate and no error.
+
+`scripts/lib/overlay.js` owns the rule; `sync-content.js` and `generate-toc.js` both import it
+so they cannot disagree.
+
+- **`fileIdentity(dir, filename)`** — `agg:<filename>` for aggregation rollups,
+  `module:<id>` from `data-module-id` otherwise, `file:<filename>` as a last resort. **The
+  aggregation check runs first**: some rollups carry a _synthetic_ chapter-scoped id
+  (`key-terms`, `key-equations`, and one `summary`) that must never be read as a module.
+- **`resolveChapterDuplicates(dir, faithfulDir)`** → `{ superseded, conflicts }`. Sync deletes
+  `superseded` after the overlay and before regenerating the TOC; generate-toc applies the same
+  verdict as a backstop, since it also runs standalone and against destinations synced by older
+  script versions. Both cover numbered chapters, front matter (`00`) **and** the appendix
+  directory — appendix and front-matter pages carry module ids and title-derived slugs too.
+- **Precondition:** `dir` must be the post-sync **destination**. A filename match in
+  `faithfulDir` is only a valid proxy for "this page came from faithful" under that framing.
+
+**Never add a tiebreak between two baseline files.** When one module has two pages and neither
+comes from `faithful`, vefur has no content-derived basis to choose: they are different
+human-visible translations, and the chapter-outline nav can point at the _stale_ one (it did,
+in efnafraedi ch10 — the intro was rendered before the rename landed). `mtime` and git order
+are not content properties and are not reproducible across a fresh clone or rsync. Conflicts
+are warned about loudly, both files kept, and the count re-reported after the run summary. A
+conflict deliberately does **not** change the sync's exit code — it is an efni content defect,
+and failing the sync would block a deploy over something vefur cannot fix. A genuine I/O error
+does fail its book.
+
+`sync-content.js` forwards its `--source` to `generate-toc.js` as `--efni-path`; without that
+the two consult different efni trees and every `reviewed` flag comes from the wrong one.
 
 ## Current Development Status
+
+### 2026-07-27 — overlay keyed on module identity (issue #197 / efni C9)
+
+- **PR #200** replaces filename-keyed overlay decisions with module identity — see "The
+  overlay identifies a section by MODULE ID, not filename" above. Also fixes a second, silent
+  bug found on the way (a rename froze a fully-reviewed chapter's rollups and MT banner), and
+  folds in `--source` → `--efni-path` forwarding. Design + plan in
+  `docs/superpowers/specs/2026-07-26-overlay-module-identity-design.md` and the sibling plan.
+- **⚠️ The bug was NOT hypothetical — it is live on namsbokasafn.is and this PR does not clear
+  it.** `efnafraedi-2e` ch10 publishes module `m68770` twice
+  (`10-5-fast-astand-efnis.html` + `10-5-fastur-efnishamur.html`). **Both are in efni's
+  `mt-preview`** — a re-render corrected the title and the old file was never pruned — so no
+  overlay is involved and no vefur change can adjudicate them. After this ships, a sync
+  _reports_ it as an unresolved conflict; that is the intended behaviour.
+- **Remaining, efni-side (⏰ before fall semester):** prune-on-rename in the render pipeline;
+  delete the stale `10-5-fast-astand-efnis.html`; re-render the ch10 intro, whose
+  `chapter-outline` nav points at a slug that 404s once the stale file goes.
+- **Remaining, vefur-side:** redirects for renamed slugs. Deleting a superseded page 404s its
+  old URL; a redirect needs an old-slug → new-slug map persisted across syncs, because after
+  this fix the old filename no longer exists to derive one from. Two mt-preview→mt-preview
+  renames already queued on `liffraedi-2e` ch03 argue for it independently.
+- The overlay-rename path itself has **still never fired** — a dry run across all five books
+  reports zero superseded pages. It fires on the first genuine Pass-1 title correction.
 
 ### 2026-07-25 — repo went public; CI restored; main green
 
