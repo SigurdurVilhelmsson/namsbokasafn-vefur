@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, chmodSync } from 'fs';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
 import { pruneSupersededFiles } from './sync-content.js';
@@ -69,5 +69,33 @@ describe('pruneSupersededFiles', () => {
 
 	it('returns 0 for a book with no chapters directory', () => {
 		expect(pruneSupersededFiles(resolve(root, 'empty'), null, 'x')).toBe(0);
+	});
+
+	it('propagates a filesystem error instead of silently swallowing it', () => {
+		// Root bypasses directory permission checks, so this can't force EACCES
+		// there (e.g. some CI containers run as root). Skip rather than assert
+		// a weaker thing.
+		if (process.getuid && process.getuid() === 0) return;
+
+		const dest = resolve(root, 'dest');
+		const faithful = resolve(root, 'faithful');
+		const chapterDir = resolve(dest, 'chapters', '03');
+		writeModule(chapterDir, '3-3-fitusyrur.html', 'm66441');
+		writeModule(chapterDir, '3-3-lipid.html', 'm66441');
+		writeModule(resolve(faithful, 'chapters', '03'), '3-3-lipid.html', 'm66441');
+
+		// Deleting a directory entry needs write permission on its PARENT
+		// directory, not the file's own mode — so this forces the removal of
+		// the superseded file to fail with EACCES regardless of the file's own
+		// permissions. { force: true } (added for Finding 2 — tolerating a file
+		// that vanished between readdirSync and rmSync) only suppresses ENOENT
+		// for an already-missing path; it must NOT suppress this.
+		chmodSync(chapterDir, 0o555);
+		try {
+			expect(() => pruneSupersededFiles(dest, faithful, 'liffraedi-2e')).toThrow(/EACCES|permission/i);
+		} finally {
+			// Restore write permission so afterEach's rmSync can clean up root.
+			chmodSync(chapterDir, 0o755);
+		}
 	});
 });
