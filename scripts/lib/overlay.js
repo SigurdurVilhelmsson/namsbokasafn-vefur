@@ -18,7 +18,7 @@
  * `reviewed`) import these so the two can never disagree.
  */
 
-import { existsSync, readdirSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 
 // Chapter-level aggregation files (roll up content from across the chapter's
@@ -115,4 +115,66 @@ export const ROLLUPS_COMPLETE_MARKER = 'rollups-complete';
 
 export function faithfulRollupsComplete(faithfulPublicationDir) {
 	return existsSync(resolve(faithfulPublicationDir, ROLLUPS_COMPLETE_MARKER));
+}
+
+/**
+ * The CNXML module id of a rendered page, or null when it carries none.
+ *
+ * The pipeline emits at most one `<article class="cnx-module" data-module-id>`
+ * per file. Chapter rollups (summary/exercises/answer-key) carry none.
+ */
+export function moduleIdOf(filePath) {
+	if (!existsSync(filePath)) return null;
+	const match = readFileSync(filePath, 'utf-8').match(/data-module-id="([^"]+)"/);
+	return match ? match[1] : null;
+}
+
+/**
+ * Stable identity of a page within its directory — what "the same section"
+ * means when the filename is not stable.
+ *
+ * A section's filename is derived from its title, so correcting a title in
+ * review RENAMES the file. Identity must therefore key on the module id, which
+ * survives the rename. Aggregation rollups key on filename instead: they carry
+ * no module id (key-terms carries a SYNTHETIC chapter-scoped one, which must
+ * never be treated as a module), and their filenames are chapter-derived, so
+ * they never rename.
+ *
+ * The three prefixes keep the namespaces from ever colliding.
+ */
+export function fileIdentity(dir, filename) {
+	if (isAggregationFile(filename)) return `agg:${filename}`;
+	const moduleId = moduleIdOf(resolve(dir, filename));
+	return moduleId ? `module:${moduleId}` : `file:${filename}`;
+}
+
+// Memoized filename -> identity, keyed on resolved directory path.
+// isReviewedModule runs once per file and calls chapterFullyFaithful, which
+// reads two directories; unmemoized that is O(n^2) file reads on a 252-file
+// book. Only sync's own prune sweep mutates a directory in-process, and it
+// calls resetIdentityCache() afterwards.
+const identityCache = new Map();
+
+/** Map of filename -> identity for every .html page in a directory. */
+export function chapterIdentityIndex(dir) {
+	const key = resolve(dir);
+	const cached = identityCache.get(key);
+	if (cached) return cached;
+
+	const index = new Map();
+	if (existsSync(key)) {
+		for (const filename of readdirSync(key)) {
+			if (filename.endsWith('.html')) {
+				index.set(filename, fileIdentity(key, filename));
+			}
+		}
+	}
+
+	identityCache.set(key, index);
+	return index;
+}
+
+/** Drop the memo — for tests, and after a directory is mutated in-process. */
+export function resetIdentityCache() {
+	identityCache.clear();
 }
