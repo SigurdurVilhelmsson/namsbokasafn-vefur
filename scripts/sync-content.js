@@ -33,15 +33,37 @@
 import { execFileSync, execSync, spawnSync } from 'child_process';
 import { existsSync, readdirSync, statSync, rmSync, cpSync, mkdirSync } from 'fs';
 import { resolve, dirname, relative, sep } from 'path';
-import { fileURLToPath } from 'url';
-import { chapterFullyFaithful, faithfulFileWins, faithfulRollupsComplete, ROLLUPS_COMPLETE_MARKER } from './lib/overlay.js';
+import { fileURLToPath, pathToFileURL } from 'url';
+import {
+	chapterFullyFaithful,
+	faithfulFileWins,
+	faithfulRollupsComplete,
+	resolveChapterDuplicates,
+	resetIdentityCache,
+	ROLLUPS_COMPLETE_MARKER
+} from './lib/overlay.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
 const destDir = resolve(projectRoot, 'static', 'content');
 
+// Argv for the generate-toc.js child process. Forwarding --efni-path keeps
+// the TOC's `reviewed` flags computed against the SAME source tree this sync
+// run just copied content from — without it, generate-toc.js falls back to
+// its own default (../namsbokasafn-efni), which silently disagrees with a
+// sync invoked with a custom --source.
+export function tocRegenArgs(bookSlug, sourceDir) {
+	return ['scripts/generate-toc.js', bookSlug, '--efni-path', sourceDir];
+}
+
 // Default source: sibling directory
 const DEFAULT_SOURCE = resolve(projectRoot, '..', 'namsbokasafn-efni');
+
+// Running total of unresolved duplicate-module conflicts (see
+// pruneSupersededFiles) across every book synced in this run. Read by main()
+// to print an end-of-run summary — the per-book ⚠️ warning alone is easy to
+// miss in a long CI log. Reset at the start of each sync run.
+let unresolvedConflicts = 0;
 
 // Parse command line arguments
 function parseArgs(args) {
@@ -229,13 +251,31 @@ function syncBook(sourceDir, bookSlug, dryRun) {
 		overlayFaithful(layers.overlay.path, layers.baseline.path, bookDest);
 	}
 
+	// 3. Drop baseline pages the overlay republished under a new filename, and
+	// report duplicates it cannot adjudicate. Runs before toc regeneration so
+	// the TOC is always generated from a pruned destination.
+	//
+	// Wrapped in try/catch (mirroring syncBookFallback's own try/catch below)
+	// so a filesystem error here (permissions, full disk, a concurrent edit)
+	// fails only this book. Without it, an uncaught throw here would escape
+	// syncBook entirely — main()'s loop has no enclosing try either — killing
+	// the whole process and leaving every remaining book unsynced.
+	if (!dryRun) {
+		try {
+			unresolvedConflicts += pruneSupersededFiles(bookDest, layers.overlay?.path ?? null, bookSlug);
+		} catch (error) {
+			console.error(`  Error pruning superseded pages for ${bookSlug}: ${error.message}`);
+			return false;
+		}
+	}
+
 	// Regenerate toc.json based on actual content
 	if (!dryRun) {
 		console.log(`  Regenerating toc.json...`);
 		try {
-			// execFileSync (not execSync) so the slug is passed as an argument,
-			// never interpreted by a shell
-			execFileSync('node', ['scripts/generate-toc.js', bookSlug], {
+			// execFileSync (not execSync) so the slug and source path are passed
+			// as arguments, never interpreted by a shell
+			execFileSync('node', tocRegenArgs(bookSlug, sourceDir), {
 				cwd: projectRoot,
 				stdio: 'inherit'
 			});
@@ -324,6 +364,70 @@ function overlayFaithful(faithfulPath, mtPath, bookDest) {
 	});
 }
 
+/**
+ * Remove baseline pages that the faithful overlay republished under a new
+ * filename, and report duplicates the overlay cannot adjudicate.
+ *
+ * A section's filename is derived from its title, so a review that corrects a
+ * title renames the rendered file. The overlay is copied WITHOUT --delete (so a
+ * partial review can never wipe baseline chapters), which means a rename ADDS
+ * the new name instead of replacing the old one — and the module gets published
+ * twice, once under the corrected title and once under the stale one.
+ *
+ * Runs whether or not the book has an overlay: a stale render left behind in
+ * mt-preview produces the same duplicate with no faithful file in sight. That
+ * case is a CONTENT defect, not a vefur one — vefur has no basis to choose
+ * between two translations, so it warns and keeps both.
+ *
+ * @param bookDest      static/content/<book>
+ * @param faithfulPath  the faithful publication dir (holding chapters/), or null
+ * @param bookSlug      for the warning message
+ * @returns {number}    unresolved conflicts reported
+ */
+export function pruneSupersededFiles(bookDest, faithfulPath, bookSlug) {
+	const chaptersDest = resolve(bookDest, 'chapters');
+	if (!existsSync(chaptersDest)) return 0;
+
+	let conflictCount = 0;
+	let removed = 0;
+
+	// Every direct subdirectory holds pages: numbered chapters, front matter
+	// (00) and the appendix dir (appendices/). Images live one level deeper,
+	// inside a chapter dir.
+	for (const dirName of readdirSync(chaptersDest).sort()) {
+		const dir = resolve(chaptersDest, dirName);
+		if (!statSync(dir).isDirectory()) continue;
+
+		const faithfulDir = faithfulPath ? resolve(faithfulPath, 'chapters', dirName) : null;
+		const { superseded, conflicts } = resolveChapterDuplicates(dir, faithfulDir);
+
+		for (const file of superseded) {
+			// force: true so a file that vanished between readdirSync and here
+			// (e.g. removed by a concurrent run) no-ops instead of throwing —
+			// leaving the try/catch at each call site to catch failures that
+			// actually deserve a failed book (permissions, full disk, etc.).
+			rmSync(resolve(dir, file), { force: true });
+			removed++;
+			console.log(`    Removed superseded page (reviewed rename): chapters/${dirName}/${file}`);
+		}
+
+		for (const { identity, files } of conflicts) {
+			conflictCount++;
+			console.warn(
+				`\n  ⚠️  DUPLICATE MODULE — ${bookSlug} chapters/${dirName} (${identity})\n` +
+					files.map((f) => `        ${f}`).join('\n') +
+					`\n      One module, two published pages, and no reviewed version to choose between them.` +
+					`\n      Both were kept. Fix at the source in namsbokasafn-efni: prune the stale render.\n`
+			);
+		}
+	}
+
+	// The index memo predates these deletions.
+	if (removed > 0) resetIdentityCache();
+
+	return conflictCount;
+}
+
 // Fallback sync using cp (if rsync not available). Mirrors the rsync path:
 // copy the baseline, then overlay reviewed modules on top.
 function syncBookFallback(sourceDir, bookSlug, dryRun) {
@@ -371,12 +475,17 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 			overlayFaithful(layers.overlay.path, layers.baseline.path, bookDest);
 		}
 
+		// Drop baseline pages the overlay republished under a new filename.
+		// Already inside this function's own try/catch, so a throw here is
+		// reported as a failed sync for this book without killing the process.
+		unresolvedConflicts += pruneSupersededFiles(bookDest, layers.overlay?.path ?? null, bookSlug);
+
 		// Regenerate toc.json based on actual content
 		console.log(`  Regenerating toc.json...`);
 		try {
-			// execFileSync (not execSync) so the slug is passed as an argument,
-			// never interpreted by a shell
-			execFileSync('node', ['scripts/generate-toc.js', bookSlug], {
+			// execFileSync (not execSync) so the slug and source path are passed
+			// as arguments, never interpreted by a shell
+			execFileSync('node', tocRegenArgs(bookSlug, sourceDir), {
 				cwd: projectRoot,
 				stdio: 'inherit'
 			});
@@ -501,6 +610,7 @@ function main() {
 	// Sync each book
 	let success = 0;
 	let failed = 0;
+	unresolvedConflicts = 0;
 
 	for (const bookSlug of booksToSync) {
 		const result = useRsync
@@ -538,6 +648,17 @@ function main() {
 
 	console.log(`\nSync complete: ${success} succeeded, ${failed} failed`);
 
+	// Surface unresolved duplicate-module conflicts at the end of the run too —
+	// the per-book ⚠️  DUPLICATE MODULE warning above is easy to miss in a long
+	// CI log. Not a sync failure: a duplicate is a content defect to fix at the
+	// source in namsbokasafn-efni, not something vefur can adjudicate, so this
+	// does not affect the exit code.
+	if (unresolvedConflicts > 0) {
+		console.warn(
+			`\n⚠️  ${unresolvedConflicts} unresolved duplicate module${unresolvedConflicts === 1 ? '' : 's'} — see the DUPLICATE MODULE warning(s) above. Fix at the source in namsbokasafn-efni.`
+		);
+	}
+
 	// Sync the public-facing provenance summary (independent of per-book results).
 	syncProvenance(options.source, options.dryRun);
 
@@ -572,4 +693,7 @@ function main() {
 	process.exit(failed > 0 ? 1 : 0);
 }
 
-main();
+// Only run as a CLI — importing this module (tests) must not start a sync.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+	main();
+}
