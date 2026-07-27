@@ -7,7 +7,8 @@ import {
 	fileIdentity,
 	chapterIdentityIndex,
 	resetIdentityCache,
-	chapterFullyFaithful
+	chapterFullyFaithful,
+	resolveChapterDuplicates
 } from './overlay.js';
 
 let root;
@@ -162,5 +163,95 @@ describe('chapterFullyFaithful', () => {
 		writeRollup(resolve(mt, '03'), '3-exercises.html');
 		writeModule(resolve(faithful, '03'), '3-3-lipid.html', 'm66441');
 		expect(chapterFullyFaithful(faithful, mt, '03')).toBe(true);
+	});
+});
+
+describe('resolveChapterDuplicates', () => {
+	it('supersedes the baseline page a reviewed rename replaced', () => {
+		const dest = resolve(root, 'dest', '03');
+		const faithful = resolve(root, 'faithful', 'chapters', '03');
+		writeModule(dest, '3-3-fitusyrur.html', 'm66441');
+		writeModule(dest, '3-3-lipid.html', 'm66441');
+		writeModule(faithful, '3-3-lipid.html', 'm66441');
+
+		expect(resolveChapterDuplicates(dest, faithful)).toEqual({
+			superseded: ['3-3-fitusyrur.html'],
+			conflicts: []
+		});
+	});
+
+	it('reports a conflict and deletes nothing when no reviewed version exists', () => {
+		const dest = resolve(root, 'dest', '10');
+		const faithful = resolve(root, 'faithful', 'chapters', '10');
+		mkdirSync(faithful, { recursive: true });
+		writeModule(dest, '10-5-fast-astand-efnis.html', 'm68770');
+		writeModule(dest, '10-5-fastur-efnishamur.html', 'm68770');
+
+		expect(resolveChapterDuplicates(dest, faithful)).toEqual({
+			superseded: [],
+			conflicts: [
+				{
+					identity: 'module:m68770',
+					files: ['10-5-fast-astand-efnis.html', '10-5-fastur-efnishamur.html']
+				}
+			]
+		});
+	});
+
+	it('reports a conflict when the book has no faithful overlay at all', () => {
+		const dest = resolve(root, 'dest', '10');
+		writeModule(dest, '10-5-fast-astand-efnis.html', 'm68770');
+		writeModule(dest, '10-5-fastur-efnishamur.html', 'm68770');
+
+		const result = resolveChapterDuplicates(dest, null);
+		expect(result.superseded).toEqual([]);
+		expect(result.conflicts).toHaveLength(1);
+	});
+
+	it('reports a conflict when both duplicates exist in faithful', () => {
+		const dest = resolve(root, 'dest', '03');
+		const faithful = resolve(root, 'faithful', 'chapters', '03');
+		writeModule(dest, '3-3-a.html', 'm66441');
+		writeModule(dest, '3-3-b.html', 'm66441');
+		writeModule(faithful, '3-3-a.html', 'm66441');
+		writeModule(faithful, '3-3-b.html', 'm66441');
+
+		const result = resolveChapterDuplicates(dest, faithful);
+		expect(result.superseded).toEqual([]);
+		expect(result.conflicts).toHaveLength(1);
+	});
+
+	it('finds nothing in a chapter without duplicates', () => {
+		const dest = resolve(root, 'dest', '03');
+		const faithful = resolve(root, 'faithful', 'chapters', '03');
+		writeModule(dest, '3-3-lipid.html', 'm66441');
+		writeModule(dest, '3-4-protin.html', 'm66442');
+		writeRollup(dest, '3-summary.html');
+		writeModule(faithful, '3-3-lipid.html', 'm66441');
+
+		expect(resolveChapterDuplicates(dest, faithful)).toEqual({
+			superseded: [],
+			conflicts: []
+		});
+	});
+
+	it('never groups rollups together, so a baseline rollup is never superseded', () => {
+		const dest = resolve(root, 'dest', '03');
+		const faithful = resolve(root, 'faithful', 'chapters', '03');
+		writeRollup(dest, '3-summary.html');
+		writeRollup(dest, '3-exercises.html');
+		writeRollup(faithful, '3-summary.html');
+
+		expect(resolveChapterDuplicates(dest, faithful)).toEqual({
+			superseded: [],
+			conflicts: []
+		});
+	});
+
+	it('returns empty lists for a directory that does not exist', () => {
+		expect(resolveChapterDuplicates(resolve(root, 'absent'), null)).toEqual({
+			superseded: [],
+			conflicts: []
+		});
 	});
 });

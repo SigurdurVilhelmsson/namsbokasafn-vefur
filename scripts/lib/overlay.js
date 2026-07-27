@@ -183,3 +183,67 @@ export function chapterIdentityIndex(dir) {
 export function resetIdentityCache() {
 	identityCache.clear();
 }
+
+/**
+ * Group a synced destination directory's pages by module identity and decide
+ * which duplicates the faithful overlay authorises us to drop.
+ *
+ * `superseded` — baseline pages that the overlay republished under a new
+ * filename. Safe to remove: faithful carries the same module under the
+ * winning name, so nothing is lost.
+ *
+ * `conflicts` — a module identity whose duplicate filenames don't resolve to
+ * exactly one reviewed candidate: either none of them came from faithful (e.g.
+ * a stale render left behind in mt-preview after a title correction), or two
+ * or more of them did (faithful itself carries the module under two names).
+ * Either way vefur has NO content-derived basis to pick a winner — the
+ * competing files are different human-visible translations, and even the
+ * chapter's own nav can point at the stale slug. The caller warns and keeps
+ * every file; the repair belongs at the source, in namsbokasafn-efni.
+ *
+ * A file is judged "reviewed" by checking whether faithfulDir has an entry
+ * under that exact filename — valid only because `dir` is the POST-SYNC
+ * destination (faithful already copied on top without deleting mt-preview),
+ * so a filename present in faithfulDir is, by construction, the same file
+ * that landed in `dir` under that name. Do not call this with `dir` pointing
+ * at an unsynced efni source track — the proxy only holds for the merged
+ * destination.
+ *
+ * @param dir          a synced chapter / front-matter / appendix directory
+ * @param faithfulDir  the matching faithful source directory, or null when the
+ *                     book has no overlay (a nonexistent path means the same)
+ */
+export function resolveChapterDuplicates(dir, faithfulDir) {
+	const superseded = [];
+	const conflicts = [];
+
+	if (!existsSync(dir)) return { superseded, conflicts };
+
+	const groups = new Map();
+	for (const [filename, identity] of chapterIdentityIndex(dir)) {
+		if (!groups.has(identity)) groups.set(identity, []);
+		groups.get(identity).push(filename);
+	}
+
+	const hasFaithful = Boolean(faithfulDir) && existsSync(faithfulDir);
+
+	for (const [identity, files] of groups) {
+		if (files.length < 2) continue;
+
+		const sorted = [...files].sort();
+		const reviewed = hasFaithful
+			? sorted.filter((f) => existsSync(resolve(faithfulDir, f)))
+			: [];
+
+		if (reviewed.length === 1) {
+			superseded.push(...sorted.filter((f) => f !== reviewed[0]));
+		} else {
+			conflicts.push({ identity, files: sorted });
+		}
+	}
+
+	superseded.sort();
+	conflicts.sort((a, b) => a.identity.localeCompare(b.identity));
+
+	return { superseded, conflicts };
+}
