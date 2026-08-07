@@ -280,7 +280,16 @@ This project works together with `namsbokasafn-efni` (content repository). When 
 
 ### After syncing new content
 
-Run `node scripts/generate-toc.js` to regenerate `toc.json` from the chapter directories on disk. The landing page reads chapter counts from `toc.json` dynamically.
+`sync-content.js` regenerates `toc.json` itself (it shells out to `generate-toc.js` after the rsync), so run `node scripts/generate-toc.js` by hand only if you changed chapter files without syncing. The landing page reads chapter counts from `toc.json` dynamically.
+
+**⚠️ DURABLE — `deleting toc.json` in the sync output is EXPECTED; do not abort on it. But a FAILED regeneration is silent, exits 0, and removes an entire book from the built site.**
+Three steps, and only the first is loud:
+
+1. efni has no `toc.json`, and the `mt-preview` baseline is mirrored **with `--delete`** — so rsync deletes the existing one and prints `deleting toc.json`. Alarming, normal.
+2. `sync-content.js` then regenerates it — but that call is wrapped in `try/catch` and only prints `Warning: Failed to regenerate toc.json`. **It cannot fail the sync**, which still reports `succeeded` and exits 0.
+3. `process-content.js` selects books with `isDirectory() && existsSync(join(path, 'toc.json'))` — so a book with no `toc.json` is not _partly_ broken, it is **invisible**, and the next `npm run build` emits a site without it.
+
+**`Sync complete: N succeeded, 0 failed` therefore does not cover the TOC.** Confirm the `Regenerating toc.json...` line appeared _and_ that no `Warning: Failed to regenerate` did — or check the file's mtime. Same family as the sync's conflict warnings: warn-only, exit code stays green. _(Traced 2026-08-07 during the orverufraedi delivery, after the `deleting toc.json` line was nearly treated as a reason to abort.)_
 
 **Cross-repo CSS contract:** `static/styles/content.css` styles the pre-rendered HTML produced by namsbokasafn-efni's `cnxml-render.js`. It is loaded via `<link>` in `src/routes/+layout.svelte`. Changes to this stylesheet must be coordinated with the CNXML rendering pipeline's class names and structure. The sister repo's `tools/__tests__/css-contract.test.js` is the checker — run it from there with `VEFUR_CONTRACT=1`; when a class here gains a real rule, remove it from efni's `KNOWN_GAPS` so the contract re-arms. Its parser reads **only the last selector line before `{`**, so a class on an earlier line of a comma-separated selector is invisible to it.
 
