@@ -7,9 +7,14 @@ import {
 	getSectionPath,
 	ContentLoadError
 } from '$lib/utils/contentLoader';
-import { error, isHttpError } from '@sveltejs/kit';
+import { error, isHttpError, isRedirect, redirect } from '@sveltejs/kit';
 import type { NavigationContext } from '$lib/types/content';
 import { books } from '$lib/types/book';
+import {
+	SECTION_REDIRECTS,
+	findSectionRedirect,
+	exactSectionExists
+} from '$lib/data/sectionRedirects';
 
 export const prerender = true;
 
@@ -40,6 +45,28 @@ export async function entries() {
 				});
 			}
 		}
+
+		// Renamed slugs (§C9): prerender a redirect stub for each old URL. Once
+		// efni prunes the superseded page the old slug leaves toc.json, so
+		// nothing above would generate it. Deduped, because before that prune
+		// the TOC still lists it and two entries for one path would have the
+		// prerenderer write both the real page and the stub to the same file.
+		for (const r of SECTION_REDIRECTS) {
+			if (r.bookSlug !== book.slug) continue;
+			const already = entries.some(
+				(e) =>
+					e.bookSlug === r.bookSlug &&
+					e.chapterSlug === r.fromChapter &&
+					e.sectionSlug === r.fromSlug
+			);
+			if (!already) {
+				entries.push({
+					bookSlug: r.bookSlug,
+					chapterSlug: r.fromChapter,
+					sectionSlug: r.fromSlug
+				});
+			}
+		}
 	}
 	return entries;
 }
@@ -50,6 +77,20 @@ export const load: PageLoad = async ({ params, fetch }) => {
 	try {
 		// Load TOC first to get pre-parsed metadata
 		const toc = await loadTableOfContents(bookSlug, fetch);
+
+		// A Pass-1 title correction renames the rendered file, so the old URL
+		// stops resolving. Check BEFORE findSectionBySlug: while both the stale
+		// and corrected pages are still published, findSectionBySlug succeeds for
+		// the old slug and a check placed in its 404 branch would never run.
+		// Only redirect when the exact target is published — our own overlay can
+		// delete the page efni recorded as the target.
+		const rename = findSectionRedirect(bookSlug, chapterSlug, sectionSlug);
+		if (rename && exactSectionExists(toc, rename.toChapter, rename.toSlug)) {
+			// Trailing slash is required: trailingSlash is 'always', and the
+			// prerenderer copies this Location verbatim into the redirect stub.
+			throw redirect(301, `/${bookSlug}/kafli/${rename.toChapter}/${rename.toSlug}/`);
+		}
+
 		const result = findSectionBySlug(toc, chapterSlug, sectionSlug);
 
 		if (!result) {
@@ -123,7 +164,10 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			chapterNumber: chapter.number
 		};
 	} catch (e) {
-		if (isHttpError(e)) throw e;
+		// isRedirect is essential: SvelteKit throws redirects as a Redirect, which
+		// isHttpError does NOT match. Without it, the redirect above is swallowed
+		// and turned into a 404 — silently, and with the build still green.
+		if (isHttpError(e) || isRedirect(e)) throw e;
 		console.error('Failed to load section:', e);
 
 		// Handle offline errors with specific messaging
