@@ -140,3 +140,39 @@ id counters (`MJX-6-…` vs `MJX-35-…`) whose starting value depends on how ma
 earlier in the pass; glyph data is identical. **A content diff after a re-sync will show noise on
 every math-bearing page** — normalise `MJX-\d+-` before comparing, or you will read a routine
 re-render as a regression.
+
+---
+
+## Addendum — added in vefur 2026-08-18, after measuring prod and consulting the efni session
+
+Not part of the original handoff. Recorded here because this doc is the first thing a future session
+reads.
+
+1. 🔴 **SCOPE ANY VERIFICATION SYNC TO ONE BOOK.**
+   `node scripts/sync-content.js --source ../namsbokasafn-efni` with **no book argument syncs every
+   book**, and `liffraedi-2e` is under a live [LEAD] publication hold in efni's register ("do not
+   sync"): ch03+ch05 are corrected on disk but the whole book is queued for re-extraction + re-MT, so
+   an unscoped sync publishes a page already recorded as known-bad. **Nothing in the tooling blocks
+   this.** §C9 is a chemistry change — name the book:
+   `node scripts/sync-content.js --source ../namsbokasafn-efni efnafraedi-2e`
+
+2. **"Until it ships the old ch10 URL 404s" is true only of the post-sync state.** Measured on prod
+   2026-08-18: both ch10 pages are still live (200/21674 B and 200/21731 B, with a nonsense control
+   returning 404/162 B), and the slug map is not deployed. efni's prune has not reached this site.
+   Because the prune and the map arrive in the **same** sync, there is no interim 404 window — and if
+   the consumer merges first, one deploy carries prune + map + redirect atomically and readers never
+   see a 404. efni has accepted this correction and is recording it in its register.
+
+3. ⚠️ **"Route status codes are meaningless here" led to the wrong test strategy.** Status codes are
+   uniform, but **size and `cache-control` discriminate perfectly**: a real prerendered page is
+   ~314 KB with no `cache-control`; the fallback shell is exactly 3 012 B _with_ one; a redirect stub
+   is ~126 B. Page URLs **are** testable — assert on size, not status.
+
+4. ❌ **The `hooks.server.ts` option does not exist.** This is `adapter-static` with
+   `fallback: '200.html'` — there is no server at runtime, so a `hooks.server.ts` runs during
+   prerender only and never sees a visitor. There is one shape, not two.
+
+5. **Appendix renames: not yet.** `/vidauki/<letter>` is ordinal-derived (`generate-toc.js:431-437`),
+   so a title correction changes no URL. Nothing for the map to feed.
+
+▶ Full analysis, design and sequencing: `docs/plans/2026-08-18-c9-redirect-consumer-plan.md`
