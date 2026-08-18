@@ -16,6 +16,7 @@ import { readdirSync, readFileSync, existsSync, statSync } from 'fs';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { build } from 'esbuild';
+import { renamesFromMap, missingRedirects, suggestionLine } from './lib/rename-detector.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -269,6 +270,74 @@ async function validateAttributions() {
 }
 
 /**
+ * Tripwire for §C9 section renames efni has recorded but we do not redirect.
+ *
+ * WARN-ONLY, deliberately. `deploy.yml` runs `npm run build`, which runs this
+ * validator, so an error here would let a content change in the sister repo
+ * block a deploy — inverting the repo's own rule that an efni content defect
+ * must never fail vefur's sync. The point is to make a silent 404 loud, not to
+ * gate the pipeline.
+ *
+ * Why it is needed at all: after efni prunes cleanly there is no duplicate, so
+ * `resolveChapterDuplicates` reports no conflict and the old URL simply starts
+ * 404ing with nothing in the sync output.
+ */
+async function validateSectionRedirects(books) {
+	const libDir = resolve(projectRoot, 'src', 'lib');
+	let sectionRedirects;
+	try {
+		const result = await build({
+			entryPoints: [resolve(libDir, 'data', 'sectionRedirects.ts')],
+			bundle: true,
+			format: 'esm',
+			platform: 'node',
+			write: false,
+			logLevel: 'silent',
+			alias: { $lib: libDir }
+		});
+		const code = result.outputFiles[0].text;
+		const dataUrl = 'data:text/javascript;base64,' + Buffer.from(code).toString('base64');
+		sectionRedirects = (await import(dataUrl)).SECTION_REDIRECTS;
+	} catch (e) {
+		warning('src/lib/data/sectionRedirects.ts', 0, `Could not load section redirects: ${e.message}`);
+		return;
+	}
+
+	for (const bookSlug of books) {
+		const bookDir = join(contentDir, bookSlug);
+		if (!existsSync(bookDir)) continue;
+
+		// Track-qualified by design: vefur flattens both tracks into one
+		// directory, so a shared slug-map.json would have whichever track synced
+		// last overwrite the other's.
+		const maps = readdirSync(bookDir).filter(
+			(f) => f.startsWith('slug-map.') && f.endsWith('.json')
+		);
+
+		for (const mapFile of maps) {
+			const mapPath = join(bookDir, mapFile);
+			let parsed;
+			try {
+				parsed = JSON.parse(readFileSync(mapPath, 'utf-8'));
+			} catch (e) {
+				warning(mapPath, 0, `Could not parse slug map: ${e.message}`);
+				continue;
+			}
+
+			const missing = missingRedirects(bookSlug, renamesFromMap(parsed), sectionRedirects);
+			for (const entry of missing) {
+				warning(
+					mapPath,
+					0,
+					`Section renamed but not redirected: /${bookSlug}/kafli/${entry.fromChapter}/${entry.fromSlug} ` +
+						`now 404s. Add to src/lib/data/sectionRedirects.ts:\n      ${suggestionLine(entry)},`
+				);
+			}
+		}
+	}
+}
+
+/**
  * Main function
  */
 async function main() {
@@ -303,6 +372,9 @@ async function main() {
 
 	// Attribution/licence metadata gate (book.ts is the source of truth).
 	await validateAttributions();
+
+	// §C9 tripwire: renames efni recorded that we do not redirect (warn-only).
+	await validateSectionRedirects(books);
 
 	const success = printResults();
 	process.exit(success ? 0 : 1);
