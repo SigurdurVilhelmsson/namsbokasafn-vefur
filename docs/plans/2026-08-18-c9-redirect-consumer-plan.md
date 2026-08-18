@@ -76,13 +76,14 @@ would otherwise have shipped as a silent no-op that tests green.
    Status codes are indeed uniform (200 everywhere), but **sizes and `cache-control` discriminate
    perfectly**. Measured on prod:
 
-   | URL                                                                                             | status | size          | `cache-control` |
-   | ----------------------------------------------------------------------------------------------- | ------ | ------------- | --------------- |
-   | `/efnafraedi-2e/kafli/10/10-5-fast-astand-efnis/`                                               | 200    | **314 522 B** | _(none)_        |
-   | `/efnafraedi-2e/kafli/99/` (nonsense)                                                           | 200    | **3 012 B**   | `max-age=0`     |
-   | `/efnafraedi-2e/vidauki/A/` (a redirect stub)                                                   | 200    | **126 B**     | _(none)_        |
-   | Page URLs **are** testable. The fallback shell is exactly 3 012 B and carries `cache-control`;  |
-   | real prerendered pages carry none. Test page routes directly — just assert on size, not status. |
+   | URL                                               | status | size          | `cache-control` |
+   | ------------------------------------------------- | ------ | ------------- | --------------- |
+   | `/efnafraedi-2e/kafli/10/10-5-fast-astand-efnis/` | 200    | **314 522 B** | _(none)_        |
+   | `/efnafraedi-2e/kafli/99/` (nonsense)             | 200    | **3 012 B**   | `max-age=0`     |
+   | `/efnafraedi-2e/vidauki/A/` (a redirect stub)     | 200    | **126 B**     | _(none)_        |
+
+   Page URLs **are** testable. The fallback shell is exactly 3 012 B and carries `cache-control`;
+   real prerendered pages carry none. Test page routes directly — just assert on size, not status.
 
 2. **`hooks.server.ts` cannot work.** The handoff offers it as one of two shapes, saying it "catches
    every route uniformly." This is `@sveltejs/adapter-static` with `fallback: '200.html'` — **there is
