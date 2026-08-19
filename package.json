@@ -29,31 +29,31 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.62.0",
+    "@playwright/test": "^1.62.1",
     "@sveltejs/adapter-static": "^3.0.10",
-    "@sveltejs/kit": "^2.70.1",
-    "@sveltejs/vite-plugin-svelte": "^7.2.0",
+    "@sveltejs/kit": "^2.70.2",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@tailwindcss/vite": "^4.3.3",
-    "@types/node": "^26.1.1",
+    "@types/node": "^26.2.0",
     "@vite-pwa/sveltekit": "^1.1.0",
     "@vitest/coverage-v8": "^4.1.10",
-    "esbuild": "0.28.1",
-    "eslint": "^10.8.0",
+    "esbuild": "0.28.2",
+    "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-svelte": "^3.22.0",
-    "globals": "^17.8.0",
+    "eslint-plugin-svelte": "^3.23.0",
+    "globals": "^17.11.0",
     "husky": "^9.1.7",
-    "jsdom": "^29.0.2",
-    "lint-staged": "^17.2.0",
+    "jsdom": "^30.0.1",
+    "lint-staged": "^17.3.0",
     "pdf-lib": "^1.17.1",
     "prettier": "^3.9.6",
     "prettier-plugin-svelte": "^4.1.1",
-    "svelte": "^5.56.8",
-    "svelte-check": "^4.7.3",
+    "svelte": "^5.56.9",
+    "svelte-check": "^4.7.6",
     "tailwindcss": "^4.2.1",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.65.0",
-    "vite": "^8.1.5",
+    "typescript-eslint": "^8.67.0",
+    "vite": "^8.2.1",
     "vitest": "^4.0.18"
   },
   "overrides": {
@@ -79,6 +79,6 @@
     "lucide": "^1.31.0"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=22.22.2"
   }
 }
