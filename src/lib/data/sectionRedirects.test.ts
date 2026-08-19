@@ -44,6 +44,19 @@ describe('SECTION_REDIRECTS data invariants', () => {
 			})
 		);
 	});
+
+	// This one is NOT in efni's slug map — the C56 re-render predates §C9, so the
+	// rename detector cannot see it. Pinning it here is the only thing standing
+	// between the old URL and a 404.
+	it('records the chemistry ch20 rename (m68848, pre-§C9, unmapped)', () => {
+		expect(SECTION_REDIRECTS).toContainEqual(
+			expect.objectContaining({
+				bookSlug: 'efnafraedi-2e',
+				fromSlug: '20-3-aldehyd-ketonar-karboxylsyrur-og-estrar',
+				toSlug: '20-3-aldehyd-keton-karboxylsyrur-og-estrar'
+			})
+		);
+	});
 });
 
 describe('findSectionRedirect', () => {
