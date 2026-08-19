@@ -36,6 +36,21 @@ export const SECTION_REDIRECTS: SectionRedirect[] = [
 		toChapter: '10',
 		toSlug: '10-5-fastur-efnishamur',
 		moduleId: 'm68770'
+	},
+	// NOT from a slug map. efni's C56 re-extract + re-MT of ch20 (efni c17bb7cf,
+	// 2026-08-12) predates §C9 prune-on-rename, so the rename was never recorded
+	// and `renamesFromMap` cannot see it — validate-content's detector stayed
+	// silent while the old URL was live in the deployed sitemap. Found instead by
+	// diffing the DEPLOYED toc.json against a freshly built one; that diff, not
+	// the slug map, is the backstop that catches pre-§C9 renames.
+	// Title corrected "Aldehýð, ketónar, ..." -> "Aldehýð, ketón, ...".
+	{
+		bookSlug: 'efnafraedi-2e',
+		fromChapter: '20',
+		fromSlug: '20-3-aldehyd-ketonar-karboxylsyrur-og-estrar',
+		toChapter: '20',
+		toSlug: '20-3-aldehyd-keton-karboxylsyrur-og-estrar',
+		moduleId: 'm68848'
 	}
 ];
 

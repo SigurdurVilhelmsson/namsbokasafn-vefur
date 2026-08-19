@@ -232,7 +232,16 @@ function syncBook(sourceDir, bookSlug, dryRun) {
 	console.log(`  Syncing ${bookSlug} (${label})...`);
 
 	// 1. Baseline — mirror with --delete so dest matches the complete source.
-	const baseArgs = ['-av', '--delete', ...SYNC_EXCLUDES];
+	//
+	// --delete-excluded is NOT optional. Plain --delete *protects* files that
+	// match an --exclude: rsync reads the pattern as "this file is none of my
+	// business", so anything already in the destination is left alone forever.
+	// Editor artifacts that landed here before SYNC_EXCLUDES existed therefore
+	// survived every subsequent sync, got copied into build/, and were served
+	// publicly — 9,638 files / 879 MB on efnafraedi-2e alone, found 2026-08-19.
+	// With --delete-excluded the exclude list means "never here", which is what
+	// the SYNC_EXCLUDES comment already claims.
+	const baseArgs = ['-av', '--delete', '--delete-excluded', ...SYNC_EXCLUDES];
 	if (dryRun) baseArgs.push('--dry-run');
 	// Source must end with / to sync contents, not the directory itself
 	baseArgs.push(`${layers.baseline.path}/`, `${bookDest}/`);
