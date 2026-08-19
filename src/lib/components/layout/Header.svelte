@@ -52,14 +52,21 @@
 	let currentSection = $derived(toc && chapterSlug && sectionSlug ? findSectionBySlug(toc, chapterSlug, sectionSlug)?.section : undefined);
 	let isDark = $derived($theme === 'dark');
 
-	// Back navigation: section -> chapter, chapter -> book home, book home -> catalog
-	let backHref = $derived(sectionSlug && chapterSlug
+	// Front matter (formáli) is served from chapter dir "00" but is NOT a
+	// chapter — it lives in toc.frontMatter, so /kafli/00 has no page at all.
+	// On the live site that URL is an nginx 403 (a directory with no
+	// index.html), which is what this button pointed at.
+	let isFrontMatter = $derived(!!chapterSlug && parseInt(chapterSlug, 10) === 0);
+
+	// Back navigation: section -> chapter, front matter/chapter -> book home,
+	// book home -> catalog
+	let backHref = $derived(sectionSlug && chapterSlug && !isFrontMatter
 		? `/${bookSlug}/kafli/${chapterSlug}`
 		: chapterSlug
 			? `/${bookSlug}`
 			: '/');
 
-	let backLabel = $derived(sectionSlug && chapterSlug
+	let backLabel = $derived(sectionSlug && chapterSlug && !isFrontMatter
 		? 'Til baka í kafla'
 		: chapterSlug
 			? 'Til baka á heim síðu'
