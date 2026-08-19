@@ -76,7 +76,7 @@
   "dependencies": {
     "date-fns": "^4.4.0",
     "fuse.js": "^7.5.0",
-    "lucide": "^1.27.0"
+    "lucide": "^1.31.0"
   },
   "engines": {
     "node": ">=20.19.0"
