@@ -51,6 +51,55 @@ export const SECTION_REDIRECTS: SectionRedirect[] = [
 		toChapter: '20',
 		toSlug: '20-3-aldehyd-keton-karboxylsyrur-og-estrar',
 		moduleId: 'm68848'
+	},
+
+	// edlisfraedi-2e ch04 — FOUR renames, landed here BEFORE the sync that
+	// activates them. All four old slugs are live on namsbokasafn.is and in the
+	// deployed sitemap today; efni's mt-preview already carries the new names,
+	// so the next `sync-content.js edlisfraedi-2e` retires all four at once.
+	//
+	// These entries are deliberately INERT until then: `load` only redirects
+	// when `exactSectionExists` finds the target published, and the new slugs
+	// are not in vefur's toc.json yet. So this ships safely ahead of the
+	// content — which is the only ordering that gives readers no 404 window.
+	//
+	// There is NO slug map for edlisfraedi-2e at all, so `renamesFromMap` has
+	// nothing to read and the §C9 detector cannot warn. Found instead by
+	// diffing vefur's published chapters against efni's mt-preview keyed on
+	// `data-module-id`; a sweep of all five books found these four and nothing
+	// else. Module id is identical across each pair, so each is one module
+	// under two names, not a delete-plus-add.
+	{
+		bookSlug: 'edlisfraedi-2e',
+		fromChapter: '04',
+		fromSlug: '4-1-throun-krafthugtaksins',
+		toChapter: '04',
+		toSlug: '4-1-throun-kraftshugtaksins',
+		moduleId: 'm42069'
+	},
+	{
+		bookSlug: 'edlisfraedi-2e',
+		fromChapter: '04',
+		fromSlug: '4-5-thverkraftur-spenna-og-onnur-daemi-um-krafta',
+		toChapter: '04',
+		toSlug: '4-5-thverkraftur-togkraftur-og-onnur-daemi-um-krafta',
+		moduleId: 'm42075'
+	},
+	{
+		bookSlug: 'edlisfraedi-2e',
+		fromChapter: '04',
+		fromSlug: '4-6-lausn-vandamala',
+		toChapter: '04',
+		toSlug: '4-6-lausnaradferdir-vid-urlausn-verkefna',
+		moduleId: 'm42076'
+	},
+	{
+		bookSlug: 'edlisfraedi-2e',
+		fromChapter: '04',
+		fromSlug: '4-8-itarefni-inngangur-ad-grunnkroftunum-fjorum',
+		toChapter: '04',
+		toSlug: '4-8-itarefni-grunnkraftarnir-fjorir-inngangur',
+		moduleId: 'm42137'
 	}
 ];
 

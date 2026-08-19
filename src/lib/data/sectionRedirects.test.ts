@@ -45,6 +45,25 @@ describe('SECTION_REDIRECTS data invariants', () => {
 		);
 	});
 
+	// edlisfraedi-2e has no slug map at all, so nothing warns about these four.
+	// They are pinned here ahead of the sync that publishes their targets.
+	it.each([
+		['4-1-throun-krafthugtaksins', '4-1-throun-kraftshugtaksins'],
+		[
+			'4-5-thverkraftur-spenna-og-onnur-daemi-um-krafta',
+			'4-5-thverkraftur-togkraftur-og-onnur-daemi-um-krafta'
+		],
+		['4-6-lausn-vandamala', '4-6-lausnaradferdir-vid-urlausn-verkefna'],
+		[
+			'4-8-itarefni-inngangur-ad-grunnkroftunum-fjorum',
+			'4-8-itarefni-grunnkraftarnir-fjorir-inngangur'
+		]
+	])('records the physics ch04 rename %s', (fromSlug, toSlug) => {
+		expect(SECTION_REDIRECTS).toContainEqual(
+			expect.objectContaining({ bookSlug: 'edlisfraedi-2e', fromSlug, toSlug })
+		);
+	});
+
 	// This one is NOT in efni's slug map — the C56 re-render predates §C9, so the
 	// rename detector cannot see it. Pinning it here is the only thing standing
 	// between the old URL and a 404.
