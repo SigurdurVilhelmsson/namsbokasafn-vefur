@@ -113,7 +113,7 @@ src/
 │   │   ├── annotation.ts  # Highlights & notes
 │   │   └── ...
 │   ├── actions/           # Svelte actions
-│   │   ├── equations.ts   # KaTeX rendering
+│   │   ├── equations.ts   # MathJax equation handling
 │   │   ├── practiceProblems.ts
 │   │   ├── crossReferences.ts
 │   │   └── figureViewer.ts

@@ -157,11 +157,11 @@ All fonts are **self-hosted** in `static/fonts/` — no external CDN dependencie
 
 **Repository licensing — three separate things, do not conflate them:**
 
-| What                                                    | Licence                                 | Where                              |
-| ------------------------------------------------------- | --------------------------------------- | ---------------------------------- |
-| Application code (TS/JS/CSS/config)                     | **MIT**                                 | root `LICENSE` §1                  |
-| Educational content (`static/content/`)                 | **per-book CC** — see below             | `LICENSE` §2, `CONTENT-LICENSE.md` |
-| Bundled fonts (`static/fonts/`, `static/assets/fonts/`) | **third-party**: OFL-1.1 ×4 + KaTeX MIT | `static/fonts/LICENSES.md`         |
+| What                                    | Licence                     | Where                              |
+| --------------------------------------- | --------------------------- | ---------------------------------- |
+| Application code (TS/JS/CSS/config)     | **MIT**                     | root `LICENSE` §1                  |
+| Educational content (`static/content/`) | **per-book CC** — see below | `LICENSE` §2, `CONTENT-LICENSE.md` |
+| Bundled fonts (`static/fonts/`)         | **third-party**: OFL-1.1 ×4 | `static/fonts/LICENSES.md`         |
 
 - Fonts are **not** covered by the MIT grant. OFL-1.1 requires its text travel with
   the fonts, which is why `static/fonts/OFL.txt` sits beside them and ships to

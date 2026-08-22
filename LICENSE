@@ -83,9 +83,9 @@ https://creativecommons.org/licenses/by-nc-sa/4.0/
 
 ## 3. Bundled fonts - third-party
 
-The font binaries under `static/fonts/` and `static/assets/fonts/` are
-third-party works under their own licences (SIL OFL-1.1 and MIT), not the MIT
-grant in section 1. See `static/fonts/LICENSES.md`.
+The font binaries under `static/fonts/` are third-party works under their own
+licences (SIL OFL-1.1), not the MIT grant in section 1. See
+`static/fonts/LICENSES.md`.
 
 Translation and Adaptation:
 - Method: machine translation (Erlendur, Miðeind) with human editorial review.
