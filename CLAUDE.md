@@ -117,7 +117,7 @@ Example:
 - date-fns (date formatting), fuse.js (fuzzy search)
 - Husky + lint-staged pre-commit hooks (ESLint + Prettier)
 - Vitest + Playwright for tests
-- Node >= 20.19.0 required
+- Node >= 22.22.2 required (`.nvmrc` pins 22) — see dependency rule 3 below
 
 ## SRS Algorithm
 
@@ -224,16 +224,24 @@ branch). It is **working again**, and `main` is fully green.
   `npm run lint` is eslint only while CI _also_ runs `npm run format:check`, and
   `npm test` is the unit suite while CI _also_ runs Playwright.
 - **The `security` job is split on purpose.** Blocking = `npm audit --audit-level=high
---omit=dev` (production tree, currently **0**). Informational =
-  the full tree with `continue-on-error`, because one advisory is genuinely
-  _unfixable_: brace-expansion's OOM (`GHSA-mh99-v99m-4gvg`) has range `<=5.0.7`,
-  which npm applies across all majors, so the 2.x copy stays flagged forever. Do not
-  "fix" this by making the full-tree audit blocking again.
+--omit=dev` (production tree, **0** as of 2026-08-22 — that zero is also your control
+  that the audit tooling and registry access work). Informational = the full tree with
+  `continue-on-error`. **It is not expected to be clean, and it is not one known-benign
+  advisory — READ the output before dismissing it.** Measured 2026-08-22: three packages
+  at high, all dev-tree only — `brace-expansion` (now carrying a second advisory,
+  `GHSA-rgw5-rvv9-x895`, at the widened range `2.0.0 - 2.1.3 || 4.0.0 - 5.0.8`),
+  `fast-uri`, and `undici` (the last via jsdom 30). npm prints `fix available via npm
+audit fix` for all three: the `overrides` block in `package.json` has been overtaken by
+  widened ranges, so this is ordinary staleness, not a permanent condition. **Do not make
+  the full-tree audit blocking** — but do re-pin the overrides. ⚠️ The older claim that
+  brace-expansion is _unfixable forever_ (because 5.x exports an object where
+  `minimatch@5.1.9` calls a function) no longer holds: 2.1.4 is published, outside the
+  advisory range, and still a function export.
 - **No repo secrets.** `EFNI_TOKEN` was deleted once efni went public —
   `github.token` reads a public repo fine. Keep `persist-credentials: false`; it is
   about _any_ credential, not just that PAT.
 
-### Two dependency rules that will bite you
+### Three dependency rules that will bite you
 
 1. **`typescript` is pinned `~6.0.3` — tilde, not caret, and not 7.x.** TypeScript 7
    makes `npm ci` fail on a fresh clone (ERESOLVE). `@sveltejs/kit` peers
@@ -243,6 +251,14 @@ branch). It is **working again**, and `main` is fully green.
    #195 closed). Lift the ignore only when _both_ peers admit 7.
 2. **`package-lock.json` is in `.prettierignore`.** npm owns its formatting; prettier
    rewrites it and the next `npm install` rewrites it back, forever.
+3. **The Node floor is `>=22.22.2`, and `.nvmrc` says `22`.** Raised 2026-08-19 with
+   PR #205 because **jsdom 30** requires `^22.22.2 || ^24.15.0 || >=26.0.0` (jsdom 29
+   allowed `^20.19.0`). Before that, three declarations disagreed: `engines` said
+   `>=20.19.0`, `.nvmrc` said `20`, CI said `node-version: '22'` — so **CI stayed green
+   while anyone following `.nvmrc` had broken tests**. There is no `.npmrc`, so engines
+   are advisory: npm warns rather than fails, and the breakage surfaces at test runtime.
+   Keep all three in step. efni requires `>=22.0.0`; ours is stricter on purpose, because
+   efni has no jsdom dependency.
 
 ### E2E gating fixtures must be derived, never hardcoded
 
@@ -262,6 +278,15 @@ skipped sync fails loudly instead of turning every gating test green.
 - HSTS (`max-age=63072000; includeSubDomains; preload`)
 - Permissions-Policy (camera, microphone, geolocation, payment all denied)
 - CSP (`default-src 'self'`; fonts, styles, scripts all self-hosted; `frame-src` allows only PhET/YouTube for content embeds)
+
+⚠️ **`nginx-config-example.conf` is a RECOMMENDATION, not a mirror of production.** nginx is
+applied by hand on the server and CI never touches it, so the two drift. Measured 2026-08-22 on
+the live host: **0** occurrences of `frame-src` across **10** `Content-Security-Policy` headers
+(that 10 is the control proving the grep matches), so **PhET and YouTube embeds are blocked on
+namsbokasafn.is right now** — `default-src 'self'` catches frames when `frame-src` is absent.
+Fixing it means editing all 10 blocks, because an `add_header` inside a `location` replaces the
+server-level header wholesale rather than inheriting it. Verify against the server, never against
+this file: `ssh <host> 'grep -c frame-src /etc/nginx/sites-available/namsbokasafn.is'`.
 
 ## Two-Repository Workflow
 
@@ -409,7 +434,59 @@ does fail its book.
 `sync-content.js` forwards its `--source` to `generate-toc.js` as `--efni-path`; without that
 the two consult different efni trees and every `reviewed` flag comes from the wrong one.
 
+### A rename retires a reader URL — redirects live in `sectionRedirects.ts`
+
+A title correction renames the rendered file, which renames the URL. `src/lib/data/sectionRedirects.ts`
+holds the old→new map and the section route consumes it, prerendering a ~200-byte meta-refresh stub
+for each retired slug. **It is a checked-in constant, not a reader of efni's `slug-map.<track>.json`** —
+that file is gitignored here and absent in CI and in a clean checkout, so anything derived from it
+would vanish exactly when the build needs it.
+
+- **`load` gates on `exactSectionExists`**, so an entry is INERT until its target is actually
+  published. That is what lets a redirect land _before_ the sync that retires the old page — the
+  only ordering with no 404 window. Four `edlisfraedi-2e` entries are inert right now, waiting on
+  that book's next sync.
+- **The catch block must keep `|| isRedirect(e)`.** SvelteKit throws redirects as a `Redirect`,
+  which `isHttpError` does not match; without it every redirect silently becomes a 404 and the
+  build stays green.
+- **`trailingSlash = 'always'` (`src/routes/+layout.ts`) is load-bearing.** nginx has no
+  `try_files $uri.html`, so a stub is only reachable as `<slug>/index.html`.
+- **The §C9 detector (`scripts/lib/rename-detector.js`, warn-only in `validate-content.js`) reads
+  only `slug-map.<track>.json`.** Renames from before efni's prune-on-rename were never written
+  there, so it cannot see them — and it only sees any map after that book has been synced. **The
+  real backstop is diffing the DEPLOYED `toc.json`/sitemap against a freshly built one before every
+  deploy**, plus, before syncing, comparing vefur's published `chapters/` against efni's
+  `05-publication/mt-preview/chapters/` paired on `data-module-id` (same id ⇒ rename, no match ⇒
+  deletion). efni structurally cannot run that second check — it cannot see what is deployed.
+- The commented `return 301` blocks in `nginx-config-example.conf` are an optional SEO upgrade over
+  the stub, **never load-bearing**, and must not be applied until the old page is gone from the
+  deployed tree (`return 301` runs before `try_files` and has no on-disk guard).
+
 ## Current Development Status
+
+### 2026-08-22 — dependency queue cleared; Node floor raised; docs re-verified
+
+- **Dependabot queue is empty.** #202 (lucide `^1.31.0`, production group) and #205 (dev group,
+  14 updates + the Node floor) merged. ⚠️ **A `@dependabot rebase` can move the VERSION, not just
+  the base** — #202 was titled 1.27→1.29 and landed **1.31.0**, so any manual verification done
+  before the rebase no longer describes what merges. Re-read the head's `package.json` and re-run
+  the check that justified merging.
+- **Node floor is now `>=22.22.2` / `.nvmrc 22`** — see dependency rule 3. Verified before raising:
+  prod runs v22.23.1, CI pins `'22'` in all four job declarations, **0 of 406** installed packages
+  with an `engines.node` field exclude it (control: Node 18 is excluded by 74), and the suite was
+  run at the boundary on v22.22.2 exactly.
+- **CI e2e can hang ~60 min at `npx playwright install --with-deps`** (apt lock). Logs are
+  unreadable mid-run but **step status is**:
+  `gh api repos/<owner>/<repo>/actions/jobs/<jobId> --jq '.steps[]|"\(.status) \(.name)"'`.
+  Cancel + re-run distinguishes a transient stall from a regression — the re-run cleared the same
+  step in <40s.
+- **Docs audited against the tree** (74-agent sweep, adversarially verified). Corrected here: the
+  Node references, the `security`-job bullet (the "one unfixable advisory" claim was wrong on every
+  count), and the missing section-redirects documentation. ⚠️ **The `overrides` block in
+  `package.json` has been overtaken by widened advisory ranges** (brace-expansion, fast-uri,
+  undici — all dev-tree) and wants re-pinning; `npm audit fix` reports a fix available.
+- ⚠️ **`liffraedi-2e` is under a live efni-side `[LEAD]` sync hold** pending re-extraction, enforced
+  by nothing but discipline. A bare `sync-content.js` publishes every book. **Always name the book.**
 
 ### 2026-08-19 — §C9 redirects shipped and DEPLOYED; the ch10 duplicate is gone from prod
 
@@ -448,6 +525,12 @@ the two consult different efni trees and every `reviewed` flag comes from the wr
   still carries pre-review terminology for the reviewed §1.1.
 
 ### 2026-07-27 — overlay keyed on module identity (issue #197 / efni C9)
+
+> ⚠️ **Superseded on the operational points — read the 2026-08-19 entry above first.** The ch10
+> duplicate is **fixed and deployed**; efni pruned the stale page and the old URL now redirects.
+> The "Remaining, vefur-side: redirects" item is **done** (`sectionRedirects.ts`, PRs #206–#209).
+> The two `liffraedi-2e` ch03 renames named below are still unshipped, but that book is under a
+> live efni-side `[LEAD]` **sync hold**. The rest of this entry is accurate for its date.
 
 - **PR #200** replaces filename-keyed overlay decisions with module identity — see "The
   overlay identifies a section by MODULE ID, not filename" above. Also fixes a second, silent

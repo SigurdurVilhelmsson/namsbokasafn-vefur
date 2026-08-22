@@ -63,12 +63,18 @@ export const SECTION_REDIRECTS: SectionRedirect[] = [
 	// are not in vefur's toc.json yet. So this ships safely ahead of the
 	// content — which is the only ordering that gives readers no 404 window.
 	//
-	// There is NO slug map for edlisfraedi-2e at all, so `renamesFromMap` has
-	// nothing to read and the §C9 detector cannot warn. Found instead by
-	// diffing vefur's published chapters against efni's mt-preview keyed on
-	// `data-module-id`; a sweep of all five books found these four and nothing
-	// else. Module id is identical across each pair, so each is one module
-	// under two names, not a delete-plus-add.
+	// When these were found there was NO slug map for edlisfraedi-2e at all, so
+	// `renamesFromMap` had nothing to read and the §C9 detector could not warn.
+	// Found instead by diffing vefur's published chapters against efni's
+	// mt-preview keyed on `data-module-id`; a sweep of all five books found
+	// these four and nothing else. Module id is identical across each pair, so
+	// each is one module under two names, not a delete-plus-add.
+	//
+	// efni has since backfilled the map (2026-08-19), so the detector WILL now
+	// cover these four once the book is synced — simulated against the real
+	// detector: 0 uncovered, with a fabricated rename as control reporting 1.
+	// That does not make these entries redundant: the map only reaches
+	// `static/content/` on a sync of that book, and the detector is warn-only.
 	{
 		bookSlug: 'edlisfraedi-2e',
 		fromChapter: '04',
