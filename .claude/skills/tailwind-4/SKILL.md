@@ -35,6 +35,18 @@ No `tailwind.config.js` needed. Configuration is in `src/app.css`:
 
 Accent is **amber/gold**, never blue — see CLAUDE.md "Design System" for when blue is allowed (semantic content only).
 
+> **The values above are mirrored from `src/app.css`. If they disagree, `app.css` wins — go
+> fix them here.** They drifted once already: this file taught `--accent-color: #1a7d5c`, a
+> green, for a site whose accent has been amber since the design system landed.
+
+⚠️ **`tailwind.config.js` still exists at the repo root and is DEAD — do not edit it expecting
+an effect.** It is a v3 leftover (dated 2026-01-09). Tailwind v4 only reads a JS config when
+CSS asks for it with `@config`, and `src/app.css` never does — verified: no `@config` anywhere,
+and `font-dyslexic`, the one utility that file uniquely declares, appears in no source file and
+in no built CSS. Its `darkMode: 'class'` is really `@custom-variant dark` in `app.css`, and its
+`fontFamily.dyslexic` is really an `@font-face` in `app.css` plus the `fontFamily` setting in
+`src/lib/stores/settings.ts`. Change theme things in `app.css`.
+
 ## Using Theme Variables
 
 Reference CSS variables directly:
