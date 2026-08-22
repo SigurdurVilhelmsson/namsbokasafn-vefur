@@ -15,3 +15,9 @@ test-results/
 coverage/
 docs/_generated/
 node_modules/
+
+# Frozen historical records. These are moved here to stop being maintained, not to
+# start being reformatted — running prettier over them rewrites documents whose value
+# is that they say what they said at the time, and buries a one-line link fix in a
+# 100-line diff. (Same spirit as the append-only rule for decision files.)
+docs/archive/
