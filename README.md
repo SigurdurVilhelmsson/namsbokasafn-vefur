@@ -26,7 +26,7 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 
 ## Tech Stack
 
-- **Runtime:** Node.js >= 20 (see `.nvmrc`)
+- **Runtime:** Node.js >= 22.22.2 (see `.nvmrc`)
 - **Framework:** SvelteKit 2 + Svelte 5, TypeScript 6
 - **Build:** Vite 8, `@sveltejs/adapter-static` → outputs to `build/`
 - **Styling:** Tailwind CSS 4 + PostCSS
@@ -53,7 +53,7 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) >= 20 (use `nvm use` — `.nvmrc` is included)
+- [Node.js](https://nodejs.org/) >= 22.22.2 (use `nvm use` — `.nvmrc` is included)
 - npm
 
 ## Setup
