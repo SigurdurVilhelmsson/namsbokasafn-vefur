@@ -18,19 +18,22 @@ No `tailwind.config.js` needed. Configuration is in `src/app.css`:
 
 @layer base {
   :root {
-    --bg-primary: #faf8f5;
-    --text-primary: #1a1a1a;
-    --accent-color: #1a7d5c;
+    --bg-primary: #f7f4ef;
+    --accent-color: #c78c20;
+    --accent-hover: #a87518;
     /* ... */
   }
 
   .dark {
-    --bg-primary: #1a1a2e;
-    --text-primary: #e2e8f0;
+    --bg-primary: #16161c;
+    --accent-color: #e8a838;
+    --accent-hover: #f0bc5a;
     /* ... */
   }
 }
 ```
+
+Accent is **amber/gold**, never blue — see CLAUDE.md "Design System" for when blue is allowed (semantic content only).
 
 ## Using Theme Variables
 
@@ -60,17 +63,18 @@ This project uses class-based dark mode (`.dark` on html element):
 
 ## Key Differences from Tailwind v3
 
-| v3 | v4 |
-|----|-----|
-| `tailwind.config.js` | CSS `@theme` or `@layer base` |
-| `theme.extend.colors` | CSS variables in `:root` |
-| Plugin system (JS) | `@plugin` directive (CSS) |
-| JIT always | Native CSS features |
+| v3                    | v4                            |
+| --------------------- | ----------------------------- |
+| `tailwind.config.js`  | CSS `@theme` or `@layer base` |
+| `theme.extend.colors` | CSS variables in `:root`      |
+| Plugin system (JS)    | `@plugin` directive (CSS)     |
+| JIT always            | Native CSS features           |
 
 ## Project-Specific Variables
 
-See `src/app.css` for the full list. Key ones:
+See `src/app.css` for the full, current list. Key ones:
+
 - `--bg-primary`, `--bg-secondary`, `--bg-tertiary`
 - `--text-primary`, `--text-secondary`
-- `--accent-color`, `--accent-hover`
+- `--accent-color`, `--accent-hover`, `--accent-light`, `--accent-subtle`
 - `--font-size-base`, `--line-height-normal`

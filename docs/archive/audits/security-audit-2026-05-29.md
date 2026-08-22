@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-29
 **Method:** 6 audit dimensions, each finding adjudicated by 2 independent adversarial lenses (refute-reachability + impact-for-architecture), severity gated strictly on a traced untrusted-source-to-sink path.
-**Prior baseline:** `AUDIT-REPORT.md` (2026-02-11).
+**Prior baseline:** [`AUDIT-REPORT.md`](./AUDIT-REPORT.md) (2026-02-11; moved here from the repo root 2026-08-22).
 
 ---
 
@@ -62,7 +62,7 @@ Ordered by severity, then by delta importance.
 
 ---
 
-## Delta vs AUDIT-REPORT.md
+## Delta vs [AUDIT-REPORT.md](./AUDIT-REPORT.md)
 
 The prior report (2026-02-11) closed essentially all P0–P2 items. This re-audit's value is the **delta**, not a re-enumeration.
 
