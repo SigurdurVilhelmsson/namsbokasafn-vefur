@@ -145,6 +145,17 @@ All fonts are **self-hosted** in `static/fonts/` — no external CDN dependencie
 - Bricolage Grotesque (headings), Literata (body), JetBrains Mono (code) — woff2 with unicode-range subsetting
 - OpenDyslexic (accessibility option) — woff
 
+⚠️ **Anything you drop in `static/` is shipped AND precached.** The service-worker glob is
+`client/**/*.{js,css,html,ico,png,svg,woff,woff2}`, and `static/` is copied into the client
+output, so an unused font is not merely dead weight in the repo — every PWA install downloads
+and stores it. 60 unused KaTeX fonts (a leftover from the pre-SvelteKit markdown reader) cost
+**40 precache entries and 547 KiB** until they were removed 2026-08-22. Maths here is
+pre-rendered **MathJax SVG** (`equations.ts` reads `.mathjax-display`); it needs no font files.
+**Before deleting an asset you believe is unused, verify at RUNTIME with a control** — grep
+cannot see a URL assembled at runtime. A Playwright probe over four pages recorded 0 requests
+for them against a control of 10 real font requests; a zero with no control would only have
+meant the probe was broken.
+
 ### Glossary System
 
 `src/lib/actions/glossaryTerms.ts` uses **semantic-only** term detection — it only processes `<dfn class="term">` elements from the CNXML pipeline. A previous text-matching pass was removed to avoid false positives on common Icelandic words like "efni".
@@ -465,6 +476,21 @@ would vanish exactly when the build needs it.
 ## Current Development Status
 
 ### 2026-08-22 — dependency queue cleared; Node floor raised; docs re-verified
+
+- **Housekeeping (#213, #214).** Repo root went from 27 tracked entries to 21: `Screenshots/`
+  (9 PNGs, 1.1 MB, unreferenced, documenting a 2025 UI) and two 2-byte `place` files deleted;
+  `AUDIT-REPORT.md`, `IMPROVEMENT-PLAN.md`, `CNXML_TAG_ANALYSIS.md` and `UI_UX_IMPROVEMENT_PLAN.md`
+  moved to `docs/archive/`; 60 unused KaTeX fonts removed (see Fonts above).
+- **`docs/archive/` is now in `.prettierignore`.** lint-staged had reformatted the archived
+  files on the way in — 118 lines in one — turning clean renames into churn and burying a
+  one-line link fix. Archives exist to stop being maintained, not to start being reformatted.
+- ⚠️ **`git add -A` in a `--amend` swept two unrelated things into #213**: the `tailwind-4`
+  skill restructure (`.claude/skills/tailwind-4.md` → `tailwind-4/SKILL.md`) and
+  `.codegraph/.gitignore`. Neither is harmful — the `.codegraph` file is a self-ignoring
+  stub that is _meant_ to be tracked — but the commit message describes neither. **Stage
+  explicit paths when amending.**
+- ⚠️ **Prod still serves the removed KaTeX fonts** until the next deploy; the rsync's
+  `--delete` clears them then. Nothing breaks meanwhile.
 
 - **Dependabot queue is empty.** #202 (lucide `^1.31.0`, production group) and #205 (dev group,
   14 updates + the Node floor) merged. ⚠️ **A `@dependabot rebase` can move the VERSION, not just
