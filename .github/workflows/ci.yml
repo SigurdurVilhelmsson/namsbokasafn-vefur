@@ -132,20 +132,24 @@ jobs:
 
       # Visibility, non-blocking: the full tree including build tooling.
       #
-      # Not a gate, because one advisory here is genuinely unfixable rather than
-      # merely unfixed. brace-expansion's OOM advisory (GHSA-mh99-v99m-4gvg) has
-      # range `<=5.0.7`, which npm applies across ALL majors, so the 2.x copy under
-      # filelist -> minimatch stays flagged even at 2.1.2 — the 2.x line never got
-      # that patch. It cannot be overridden to 5.x: minimatch@5.1.9 calls
-      # `require('brace-expansion')` as a FUNCTION and 5.x exports an OBJECT, so
-      # forcing it throws "expand is not a function" at build time. It cannot be
-      # upgraded away either: @vite-pwa/sveltekit, vite-plugin-pwa and workbox-build
-      # are all already at their latest releases.
+      # Measured 2026-08-22: 0 vulnerabilities at every severity. Do NOT read that
+      # as a steady state — a dev-tree advisory can appear any week, and it is
+      # usually FIXABLE by re-pinning the `overrides` block in package.json.
+      # READ the output before dismissing it.
       #
-      # Gating on it would mean a permanently red build that everyone learns to
-      # ignore — which is exactly how the TypeScript 7 breakage slipped in. Keep it
-      # visible and honest, but do not let it mask a real regression in the blocking
-      # step above. Revisit making it blocking when the PWA chain moves.
+      # This comment previously claimed brace-expansion's OOM advisory was
+      # permanently unfixable, because minimatch@5.1.9 calls
+      # `require('brace-expansion')` as a FUNCTION while 5.x exports an OBJECT.
+      # The export hazard is real; the conclusion was not. The two selectors
+      # `brace-expansion@^2` / `brace-expansion@^5` pin each major independently,
+      # and 2.1.4 is published, outside the advisory range, and still a function
+      # export (verified at runtime, not from the registry metadata).
+      #
+      # Still non-blocking, for the original reason: this is a static site with no
+      # server code, so the production tree above is what ships. A dev-tree advisory
+      # with no fix yet must not block a deploy, and a permanently red step is one
+      # everyone learns to ignore — which is exactly how the TypeScript 7 breakage
+      # slipped in.
       - name: Security audit (full tree, informational)
         continue-on-error: true
         run: npm audit --audit-level=high

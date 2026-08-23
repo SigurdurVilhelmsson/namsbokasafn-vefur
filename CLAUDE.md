@@ -235,19 +235,39 @@ branch). It is **working again**, and `main` is fully green.
   `npm run lint` is eslint only while CI _also_ runs `npm run format:check`, and
   `npm test` is the unit suite while CI _also_ runs Playwright.
 - **The `security` job is split on purpose.** Blocking = `npm audit --audit-level=high
---omit=dev` (production tree, **0** as of 2026-08-22 — that zero is also your control
-  that the audit tooling and registry access work). Informational = the full tree with
-  `continue-on-error`. **It is not expected to be clean, and it is not one known-benign
-  advisory — READ the output before dismissing it.** Measured 2026-08-22: three packages
-  at high, all dev-tree only — `brace-expansion` (now carrying a second advisory,
-  `GHSA-rgw5-rvv9-x895`, at the widened range `2.0.0 - 2.1.3 || 4.0.0 - 5.0.8`),
-  `fast-uri`, and `undici` (the last via jsdom 30). npm prints `fix available via npm
-audit fix` for all three: the `overrides` block in `package.json` has been overtaken by
-  widened ranges, so this is ordinary staleness, not a permanent condition. **Do not make
-  the full-tree audit blocking** — but do re-pin the overrides. ⚠️ The older claim that
-  brace-expansion is _unfixable forever_ (because 5.x exports an object where
-  `minimatch@5.1.9` calls a function) no longer holds: 2.1.4 is published, outside the
-  advisory range, and still a function export.
+--omit=dev` (production tree). Informational = the full tree with `continue-on-error`.
+  **Do not make the full-tree audit blocking** — a dev-tree advisory with no fix yet must
+  not block a deploy of a static site whose production tree is the thing that ships.
+  **But do READ the output; it is not expected to stay clean.** Both were **0 at every
+  severity** as of 2026-08-22, after the overrides re-pin below. ⚠️ **A zero is not by
+  itself a control** — a bare `npm audit` reports `found 0 vulnerabilities` whether the
+  tree is clean or the auditor never looked. Control it against a scratch project holding
+  a known-bad package (`npm install --package-lock-only minimist@1.2.0` → 1 critical,
+  exit 1).
+- 🔑 **An `overrides` entry is a standing instruction that outlives its reason — and can
+  force a dependency BACKWARDS into a vulnerable major.** `"undici": "^7.28.0"` was added
+  when that was the patched version; jsdom then moved to `undici: ^8.9.0`, which no
+  advisory covers, and the override dragged it back to 7.28.0 — the top of the vulnerable
+  range, carrying five advisories. **The fix was deleting the override, not bumping it.**
+  Before re-pinning any override, read the CONSUMER's own declared range
+  (`node -p "require('./node_modules/<consumer>/package.json').dependencies['<dep>']"`);
+  if the consumer has moved past the override, delete it. Re-pinned 2026-08-22:
+  brace-expansion `^2.1.4` / `^5.0.9`, fast-uri `^3.1.5`, undici override **removed**.
+- **`brace-expansion` needs the split selectors, and 5.x is NOT a drop-in for 2.x.**
+  `minimatch@5.1.9` (via `filelist`, in the PWA/workbox chain) calls
+  `require('brace-expansion')` as a **function**; 5.x exports an **object**, so a blanket
+  override throws `expand is not a function` at build time. `brace-expansion@^2` and
+  `brace-expansion@^5` pin each major independently. Verify the export shape at RUNTIME,
+  not from registry metadata:
+  `node -e "console.log(typeof require('./node_modules/filelist/node_modules/brace-expansion'))"`
+  must print `function`. ⚠️ The selectors leave 3.x/4.x uncovered even though advisory
+  ranges span `4.0.0 - 5.0.8`; nothing in the tree resolves there today.
+- **A clean audit proves nothing about breakage — each override has its own exerciser.**
+  undici → `npm test` (jsdom is the Vitest environment); brace-expansion 2.x + fast-uri →
+  `npm run build` (workbox-build → `minimatch@5.1.9`, and `ajv@8.20.0`); brace-expansion
+  5.x → `npm run lint` (eslint → `minimatch@10.2.5`). Confirm workbox actually ran rather
+  than being skipped: `build/sw.js` must carry a precache manifest (110 entries,
+  2026-08-22).
 - **No repo secrets.** `EFNI_TOKEN` was deleted once efni went public —
   `github.token` reads a public repo fine. Keep `persist-credentials: false`; it is
   about _any_ credential, not just that PAT.
@@ -508,9 +528,15 @@ would vanish exactly when the build needs it.
   step in <40s.
 - **Docs audited against the tree** (74-agent sweep, adversarially verified). Corrected here: the
   Node references, the `security`-job bullet (the "one unfixable advisory" claim was wrong on every
-  count), and the missing section-redirects documentation. ⚠️ **The `overrides` block in
-  `package.json` has been overtaken by widened advisory ranges** (brace-expansion, fast-uri,
-  undici — all dev-tree) and wants re-pinning; `npm audit fix` reports a fix available.
+  count), and the missing section-redirects documentation.
+- **`overrides` re-pinned; both audits are now 0 at every severity.** brace-expansion
+  `^2.1.2`→`^2.1.4` and `>=5.0.8`→`^5.0.9`, fast-uri `^3.1.4`→`^3.1.5`, and the **`undici`
+  override deleted** — it was forcing jsdom's `^8.9.0` back down to 7.28.0, i.e. the override
+  itself was what put the tree inside the advisory range. Lockfile moved exactly those four
+  packages and nothing else (`typescript` and `@sveltejs/kit` verified unmoved). Exercised with
+  lint / check / test (553 pass) / `build:no-validate` / `npm ci` from a clean clone, not just
+  the audit. The false "unfixable advisory" comment in `ci.yml` was rewritten; the step stays
+  `continue-on-error`. See the `security`-job bullets above for the durable rules.
 - ⚠️ **`liffraedi-2e` is under a live efni-side `[LEAD]` sync hold** pending re-extraction, enforced
   by nothing but discipline. A bare `sync-content.js` publishes every book. **Always name the book.**
 
