@@ -529,14 +529,19 @@ would vanish exactly when the build needs it.
 - **Docs audited against the tree** (74-agent sweep, adversarially verified). Corrected here: the
   Node references, the `security`-job bullet (the "one unfixable advisory" claim was wrong on every
   count), and the missing section-redirects documentation.
-- **`overrides` re-pinned; both audits are now 0 at every severity.** brace-expansion
-  `^2.1.2`→`^2.1.4` and `>=5.0.8`→`^5.0.9`, fast-uri `^3.1.4`→`^3.1.5`, and the **`undici`
-  override deleted** — it was forcing jsdom's `^8.9.0` back down to 7.28.0, i.e. the override
-  itself was what put the tree inside the advisory range. Lockfile moved exactly those four
-  packages and nothing else (`typescript` and `@sveltejs/kit` verified unmoved). Exercised with
-  lint / check / test (553 pass) / `build:no-validate` / `npm ci` from a clean clone, not just
-  the audit. The false "unfixable advisory" comment in `ci.yml` was rewritten; the step stays
+- **`overrides` re-pinned — PR #217, merged 2026-08-23; both audits now 0 at every severity.**
+  brace-expansion `^2.1.2`→`^2.1.4` and `>=5.0.8`→`^5.0.9` (the latter also adds a `<6.0.0`
+  ceiling, deliberately), fast-uri `^3.1.4`→`^3.1.5`, and the **`undici` override deleted** — it
+  was forcing jsdom's `^8.9.0` back down to 7.28.0, i.e. the override itself was what put the
+  tree inside the advisory range. Lockfile moved exactly those four packages and nothing else
+  (`typescript` and `@sveltejs/kit` verified unmoved). Exercised with lint / check / test (553
+  pass) / `build` / `npm ci` from a clean tree, not just the audit. Green on the PR and on `main`
+  after merge. The false "unfixable advisory" comment in `ci.yml` was rewritten; the step stays
   `continue-on-error`. See the `security`-job bullets above for the durable rules.
+- ⏳ **Three overrides remain unexamined for the same defect.** `@babel/core` arrived on the very
+  same commit as the stale undici override (`bab9395`), and `cookie` / `serialize-javascript` are
+  older still. None was touched by #217. Check each the same way — read the CONSUMER's declared
+  range and delete the override if the consumer has moved past it.
 - ⚠️ **`liffraedi-2e` is under a live efni-side `[LEAD]` sync hold** pending re-extraction, enforced
   by nothing but discipline. A bare `sync-content.js` publishes every book. **Always name the book.**
 
