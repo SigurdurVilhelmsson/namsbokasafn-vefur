@@ -106,6 +106,50 @@ export const SECTION_REDIRECTS: SectionRedirect[] = [
 		toChapter: '04',
 		toSlug: '4-8-itarefni-grunnkraftarnir-fjorir-inngangur',
 		moduleId: 'm42137'
+	},
+
+	// lifraen-efnafraedi ch03 — THREE renames, from efni's
+	// `slug-map.mt-preview.json` (recorded 2026-09-02). A fresh paid MT of organic
+	// ch03 (efni §C118 ⑯/⑲) retitled three sections, and efni's prune-on-rename
+	// deleted the old pages and recorded old -> new.
+	//
+	// Landed here BEFORE the sync that activates them, for the same reason as the
+	// physics block above: `load` only redirects when `exactSectionExists` finds
+	// the target published, so these are INERT until then — the only ordering with
+	// no 404 window. Verified against efni's tree at the time of writing: all three
+	// targets exist under `05-publication/mt-preview/chapters/03/`, and all three
+	// sources are pruned.
+	//
+	// ⚠️ THE 3-6 AND 3-7 PAIRS CROSS OVER — 3-6 goes `stellingar` -> `afbrigdi`
+	// while 3-7 goes `afbrigdi` -> `stellingar`. That is what efni recorded and it
+	// is not a transcription slip; do not "normalise" them into the same direction.
+	//
+	// ⚠️ efni's branch `feat/c82-action3-full-corpus-loop` carries these pages and
+	// has NOT merged to efni `main`, so a sync from `main` will not publish the
+	// targets yet. These entries simply stay inert until it does.
+	{
+		bookSlug: 'lifraen-efnafraedi',
+		fromChapter: '03',
+		fromSlug: '3-2-alkanar-og-hverfur-alkana',
+		toChapter: '03',
+		toSlug: '3-2-alkanar-og-alkanhverfur',
+		moduleId: 'm00033'
+	},
+	{
+		bookSlug: 'lifraen-efnafraedi',
+		fromChapter: '03',
+		fromSlug: '3-6-stellingar-etans',
+		toChapter: '03',
+		toSlug: '3-6-afbrigdi-etans',
+		moduleId: 'm00037'
+	},
+	{
+		bookSlug: 'lifraen-efnafraedi',
+		fromChapter: '03',
+		fromSlug: '3-7-afbrigdi-annarra-alkana',
+		toChapter: '03',
+		toSlug: '3-7-stellingar-annarra-alkana',
+		moduleId: 'm00038'
 	}
 ];
 
