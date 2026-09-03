@@ -64,6 +64,30 @@ describe('SECTION_REDIRECTS data invariants', () => {
 		);
 	});
 
+	// lifraen-efnafraedi ch03 — three renames from efni's slug-map.mt-preview.json
+	// (§C118 ⑯/⑲, recorded 2026-09-02), pinned ahead of the sync that publishes
+	// their targets.
+	// ⚠️ 3-6 AND 3-7 CROSS OVER: 3-6 goes `stellingar` -> `afbrigdi` and 3-7 goes
+	// `afbrigdi` -> `stellingar`. Asserted as PAIRS precisely so a transcription
+	// that "normalises" them in one direction goes red rather than silently
+	// redirecting two URLs at each other.
+	it.each([
+		['3-2-alkanar-og-hverfur-alkana', '3-2-alkanar-og-alkanhverfur', 'm00033'],
+		['3-6-stellingar-etans', '3-6-afbrigdi-etans', 'm00037'],
+		['3-7-afbrigdi-annarra-alkana', '3-7-stellingar-annarra-alkana', 'm00038']
+	])('records the organic ch03 rename %s', (fromSlug, toSlug, moduleId) => {
+		expect(SECTION_REDIRECTS).toContainEqual(
+			expect.objectContaining({
+				bookSlug: 'lifraen-efnafraedi',
+				fromChapter: '03',
+				fromSlug,
+				toChapter: '03',
+				toSlug,
+				moduleId
+			})
+		);
+	});
+
 	// This one is NOT in efni's slug map — the C56 re-render predates §C9, so the
 	// rename detector cannot see it. Pinning it here is the only thing standing
 	// between the old URL and a 404.
