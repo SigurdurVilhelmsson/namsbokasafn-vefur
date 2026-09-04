@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, chmodSync } from 'fs';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
-import { pruneSupersededFiles, tocRegenArgs } from './sync-content.js';
+import { pruneSupersededFiles, selectBooks, tocRegenArgs } from './sync-content.js';
 import { resetIdentityCache } from './lib/overlay.js';
 
 let root;
@@ -114,5 +114,81 @@ describe('tocRegenArgs', () => {
 		const efniPathIndex = args.indexOf('--efni-path');
 		expect(args[efniPathIndex + 1]).toBe('/tmp/some-source-tree');
 		expect(args[efniPathIndex + 1]).not.toBe('efnafraedi-2e');
+	});
+});
+
+describe('selectBooks', () => {
+	// The publication tree as it stands in namsbokasafn-efni.
+	const SOURCE = [
+		'edlisfraedi-2e',
+		'efnafraedi-2e',
+		'liffraedi-2e',
+		'lifraen-efnafraedi',
+		'orverufraedi'
+	];
+
+	it('a bare run syncs only the permitted books and reports the rest', () => {
+		const result = selectBooks({ availableBooks: SOURCE });
+		expect(result.error).toBeUndefined();
+		expect(result.books).toEqual(['efnafraedi-2e', 'lifraen-efnafraedi']);
+		expect(result.skipped).toEqual(['edlisfraedi-2e', 'liffraedi-2e', 'orverufraedi']);
+		expect(result.overridden).toEqual([]);
+	});
+
+	it('refuses a named book that is held back, rather than skipping it silently', () => {
+		const result = selectBooks({ availableBooks: SOURCE, requested: ['liffraedi-2e'] });
+		expect(result.error).toBe('withheld');
+		expect(result.refused).toEqual(['liffraedi-2e']);
+		expect(result.books).toEqual([]);
+	});
+
+	it('refuses a mixed request as a whole — a permitted book does not carry a withheld one', () => {
+		const result = selectBooks({
+			availableBooks: SOURCE,
+			requested: ['efnafraedi-2e', 'orverufraedi']
+		});
+		expect(result.error).toBe('withheld');
+		expect(result.refused).toEqual(['orverufraedi']);
+		expect(result.books).toEqual([]);
+	});
+
+	it('syncs a named permitted book', () => {
+		const result = selectBooks({ availableBooks: SOURCE, requested: ['efnafraedi-2e'] });
+		expect(result.error).toBeUndefined();
+		expect(result.books).toEqual(['efnafraedi-2e']);
+	});
+
+	it('--allow-withheld publishes the named book and names it as an override', () => {
+		const result = selectBooks({
+			availableBooks: SOURCE,
+			requested: ['liffraedi-2e'],
+			allowWithheld: true
+		});
+		expect(result.error).toBeUndefined();
+		expect(result.books).toEqual(['liffraedi-2e']);
+		expect(result.overridden).toEqual(['liffraedi-2e']);
+	});
+
+	it('reports a book missing from the source before applying the ruling', () => {
+		const result = selectBooks({ availableBooks: SOURCE, requested: ['stjornufraedi'] });
+		expect(result.error).toBe('not-found');
+		expect(result.invalid).toEqual(['stjornufraedi']);
+	});
+
+	it('errors rather than sweeping when the source holds only withheld books', () => {
+		const result = selectBooks({ availableBooks: ['liffraedi-2e', 'orverufraedi'] });
+		expect(result.error).toBe('empty');
+		expect(result.books).toEqual([]);
+	});
+
+	// 🔴 The regression this exists to catch: the stale-directory sweep in main()
+	// is keyed on `availableBooks`, not on the selection. If a future change ever
+	// filters the source list by the allowlist instead of filtering the sync list,
+	// every held-back book is swept out of static/content/ — turning a freeze into
+	// a deletion of live pages. selectBooks must never narrow its input.
+	it('leaves the source list untouched, so the sweep stays a freeze not a delete', () => {
+		const availableBooks = [...SOURCE];
+		selectBooks({ availableBooks });
+		expect(availableBooks).toEqual(SOURCE);
 	});
 });

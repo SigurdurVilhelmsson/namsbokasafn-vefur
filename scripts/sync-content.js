@@ -17,17 +17,23 @@
  * Destination structure (namsbokasafn-vefur):
  *   static/content/{bookSlug}/
  *
+ * Only the books on the publication allowlist (scripts/lib/published-books.js)
+ * are synced. A bare run is therefore safe: it publishes the permitted books and
+ * names the ones it skipped. Naming a withheld book is an error rather than a
+ * silent skip — see --allow-withheld.
+ *
  * Usage:
- *   node scripts/sync-content.js                    # Sync all books
+ *   node scripts/sync-content.js                    # Sync every permitted book
  *   node scripts/sync-content.js efnafraedi-2e        # Sync specific book
  *   node scripts/sync-content.js --dry-run          # Preview changes
  *   node scripts/sync-content.js --source ../path   # Custom source path
  *
  * Options:
- *   --dry-run, -n     Preview changes without syncing
- *   --source, -s      Path to content repo (default: ../namsbokasafn-efni)
- *   --validate, -v    Run content validation after sync
- *   --help, -h        Show this help message
+ *   --dry-run, -n         Preview changes without syncing
+ *   --source, -s          Path to content repo (default: ../namsbokasafn-efni)
+ *   --validate, -v        Run content validation after sync
+ *   --allow-withheld      Sync a book the publication ruling holds back
+ *   --help, -h            Show this help message
  */
 
 import { execFileSync, execSync, spawnSync } from 'child_process';
@@ -42,6 +48,7 @@ import {
 	resetIdentityCache,
 	ROLLUPS_COMPLETE_MARKER
 } from './lib/overlay.js';
+import { RULING_REFERENCE, publishableBooks, withheldBooks } from './lib/published-books.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -72,6 +79,7 @@ function parseArgs(args) {
 		validate: false,
 		source: DEFAULT_SOURCE,
 		books: [],
+		allowWithheld: false,
 		help: false
 	};
 
@@ -86,6 +94,8 @@ function parseArgs(args) {
 			options.validate = true;
 		} else if (arg === '--source' || arg === '-s') {
 			options.source = resolve(args[++i] || DEFAULT_SOURCE);
+		} else if (arg === '--allow-withheld') {
+			options.allowWithheld = true;
 		} else if (!arg.startsWith('-')) {
 			options.books.push(arg);
 		}
@@ -102,17 +112,23 @@ Usage:
   node scripts/sync-content.js [options] [book...]
 
 Examples:
-  node scripts/sync-content.js                    Sync all books
+  node scripts/sync-content.js                    Sync every permitted book
   node scripts/sync-content.js efnafraedi-2e        Sync specific book
   node scripts/sync-content.js -n                 Preview changes (dry-run)
   node scripts/sync-content.js -v                 Sync and validate
   node scripts/sync-content.js -s ../my-content   Custom source path
 
 Options:
-  --dry-run, -n     Preview changes without syncing
-  --source, -s      Path to content repo (default: ../namsbokasafn-efni)
-  --validate, -v    Run content validation after sync
-  --help, -h        Show this help message
+  --dry-run, -n         Preview changes without syncing
+  --source, -s          Path to content repo (default: ../namsbokasafn-efni)
+  --validate, -v        Run content validation after sync
+  --allow-withheld      Sync a book the publication ruling holds back
+  --help, -h            Show this help message
+
+Publication allowlist:
+  Only the books in scripts/lib/published-books.js are synced; everything else
+  in the source tree is skipped and named. This governs what is SYNCED, not what
+  is already deployed — a withheld book keeps whatever is already published.
 
 Source structure:
   The script merges two publication variants:
@@ -184,6 +200,53 @@ function getPublicationLayers(sourceDir, bookSlug) {
 	}
 
 	return null;
+}
+
+/**
+ * Decide which books this run syncs, applying the publication allowlist.
+ *
+ * Pure and exported so the policy is testable without running the sync — the
+ * script itself refuses to run as root, and the decision is the part worth
+ * pinning anyway.
+ *
+ * Returns `{ books, skipped, overridden }`, or `{ error, ... }` for a condition
+ * main() must turn into a non-zero exit:
+ *   - `not-found`  a named book is not in the source tree (`invalid`)
+ *   - `withheld`   a named book is held back by the ruling (`refused`)
+ *   - `empty`      nothing is left to sync
+ */
+export function selectBooks({ availableBooks, requested = [], allowWithheld = false }) {
+	const named = requested.length > 0;
+	const candidates = named ? requested : availableBooks;
+
+	const invalid = candidates.filter((b) => !availableBooks.includes(b));
+	if (invalid.length > 0) {
+		return { error: 'not-found', invalid, books: [], skipped: [], overridden: [] };
+	}
+
+	// The override is deliberately blunt: it publishes exactly what was asked
+	// for, and says so. It exists for the day the hold lifts.
+	if (allowWithheld) {
+		return { books: candidates, skipped: [], overridden: withheldBooks(candidates) };
+	}
+
+	// A book NAMED on the command line and held back is an error, not a silent
+	// skip: someone typed that slug on purpose and needs to be told why nothing
+	// happened. A book reached only by a bare run is skipped and reported, which
+	// is what makes a bare run safe.
+	if (named) {
+		const refused = withheldBooks(candidates);
+		if (refused.length > 0) {
+			return { error: 'withheld', refused, books: [], skipped: [], overridden: [] };
+		}
+		return { books: candidates, skipped: [], overridden: [] };
+	}
+
+	const books = publishableBooks(candidates);
+	if (books.length === 0) {
+		return { error: 'empty', books: [], skipped: withheldBooks(candidates), overridden: [] };
+	}
+	return { books, skipped: withheldBooks(candidates), overridden: [] };
 }
 
 // Get list of books in source directory
@@ -589,14 +652,46 @@ function main() {
 		process.exit(1);
 	}
 
-	let booksToSync = options.books.length > 0 ? options.books : availableBooks;
+	const selection = selectBooks({
+		availableBooks,
+		requested: options.books,
+		allowWithheld: options.allowWithheld
+	});
 
-	// Validate requested books exist
-	const invalidBooks = booksToSync.filter((b) => !availableBooks.includes(b));
-	if (invalidBooks.length > 0) {
-		console.error(`Error: Books not found in source: ${invalidBooks.join(', ')}`);
+	if (selection.error === 'not-found') {
+		console.error(`Error: Books not found in source: ${selection.invalid.join(', ')}`);
 		console.error(`Available books: ${availableBooks.join(', ')}`);
 		process.exit(1);
+	}
+
+	if (selection.error === 'withheld') {
+		console.error(
+			`Error: these books are held back from publication: ${selection.refused.join(', ')}`
+		);
+		console.error(`Ruling: ${RULING_REFERENCE}`);
+		console.error('Pass --allow-withheld to override, once the hold is lifted.');
+		process.exit(1);
+	}
+
+	if (selection.error === 'empty') {
+		console.error('No books to sync: every book in the source is held back from publication.');
+		console.error(`Ruling: ${RULING_REFERENCE}`);
+		process.exit(1);
+	}
+
+	const booksToSync = selection.books;
+
+	if (selection.skipped.length > 0) {
+		console.log(`Held back from publication: ${selection.skipped.join(', ')}`);
+		console.log(`  ${RULING_REFERENCE}\n`);
+	}
+
+	// Loud when the allowlist is being overridden — this is the line a reviewer
+	// looks for in a log that published something it should not have.
+	if (selection.overridden.length > 0) {
+		console.log(
+			`⚠️  --allow-withheld: publishing held-back books: ${selection.overridden.join(', ')}\n`
+		);
 	}
 
 	console.log(`Books to sync: ${booksToSync.join(', ')}\n`);
@@ -633,7 +728,17 @@ function main() {
 		}
 	}
 
-	// Clean up stale content directories no longer present in source
+	// Clean up stale content directories no longer present in source.
+	//
+	// 🔴 KEYED ON `availableBooks` (the SOURCE tree), NEVER ON `booksToSync`, and
+	// that is what makes the publication allowlist a FREEZE rather than a
+	// DELETE. Filtering this by the allowlist would sweep every held-back book
+	// out of static/content/ on the next run — retiring live pages as a side
+	// effect of a rule that only meant "stop publishing new ones". Retiring
+	// deployed pages is a separate decision; it is not this sweep's job.
+	//
+	// The sweep still does its own job: a directory for a book that has left the
+	// source tree entirely is removed as before.
 	if (existsSync(destDir)) {
 		const existingContentDirs = readdirSync(destDir).filter((name) => {
 			const fullPath = resolve(destDir, name);
