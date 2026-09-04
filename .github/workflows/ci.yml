@@ -132,9 +132,17 @@ jobs:
 
       # Visibility, non-blocking: the full tree including build tooling.
       #
-      # Measured 2026-08-22: 0 vulnerabilities at every severity. Do NOT read that
-      # as a steady state — a dev-tree advisory can appear any week, and it is
-      # usually FIXABLE by re-pinning the `overrides` block in package.json.
+      # Measured 2026-09-04: 0 vulnerabilities at every severity. Do NOT read that
+      # as a steady state — this exact line said the same thing on 2026-08-22 and
+      # was false within a fortnight: the tree drifted to 3 (browserslist,
+      # postcss-selector-parser, and fast-uri) with nothing reporting it, because
+      # this step is `continue-on-error` and nobody read the output.
+      #
+      # A dev-tree advisory can appear any week, and it is usually fixable — but
+      # NOT always by re-pinning `overrides`. In 2026-09 the fix was DELETING the
+      # `fast-uri` override: pinned at `^3.1.5` it sat at the top of the advisory
+      # range while its consumer `ajv` declared only `^3.0.1`, so the override was
+      # itself what held the tree inside the range. Same shape as undici in #217.
       # READ the output before dismissing it.
       #
       # This comment previously claimed brace-expansion's OOM advisory was

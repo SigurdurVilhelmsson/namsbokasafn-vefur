@@ -238,8 +238,12 @@ branch). It is **working again**, and `main` is fully green.
 --omit=dev` (production tree). Informational = the full tree with `continue-on-error`.
   **Do not make the full-tree audit blocking** — a dev-tree advisory with no fix yet must
   not block a deploy of a static site whose production tree is the thing that ships.
-  **But do READ the output; it is not expected to stay clean.** Both were **0 at every
-  severity** as of 2026-08-22, after the overrides re-pin below. ⚠️ **A zero is not by
+  **But do READ the output; it is not expected to stay clean — and this file has already
+  been wrong about it once.** This sentence claimed **0 at every severity** as of
+  2026-08-22; by 2026-09-04 the full tree measured **3** (1 low, 2 high — `browserslist`,
+  `postcss-selector-parser`, `fast-uri`) and nothing had reported it, because the
+  informational step is `continue-on-error` and nobody read it. Back to **0 at every
+  severity** on 2026-09-04. ⚠️ **A zero is not by
   itself a control** — a bare `npm audit` reports `found 0 vulnerabilities` whether the
   tree is clean or the auditor never looked. Control it against a scratch project holding
   a known-bad package (`npm install --package-lock-only minimist@1.2.0` → 1 critical,
@@ -416,6 +420,13 @@ These are heuristics you apply with judgment, not hard gates — **except the tw
 - `scripts/generate-sitemap.js`: Generates `sitemap.xml` from `toc.json`. Runs automatically as part of `prepare-content`.
 - `scripts/validate-content.js`: Validates TOC structure and glossary consistency. HTML content is validated upstream in the CNXML pipeline. Runs before production builds.
 - `scripts/sync-content.js`: Syncs content from namsbokasafn-efni repo. **Overlay model:** `mt-preview` is the complete baseline (mirrored with `--delete`); `faithful` is copied on top **without** `--delete`, so reviewed modules replace their machine-translated counterparts one at a time and a partial `faithful` can never wipe baseline chapters. Editor artifacts (`*.backup.*`, `*.pre-fix-*`, `*.orig`, `*.bak`, `*~`) are excluded. **Aggregation pages** (chapter rollups — summary/key-terms/exercises/answer-key — and book glossary/index) are chapter/book-scoped, not per-module: a faithful rollup is only served when the whole chapter/book is faithful, **or** when efni drops a `rollups-complete` marker in `05-publication/faithful/` signalling its rollups are built complete (faithful + MT fallback). The MT banner is independent — a rollup stays unreviewed until every module in its chapter is faithful. Shared overlay rules live in `scripts/lib/overlay.js`.
+
+**Which books get published is an allowlist in code, not a rule in prose** — `scripts/lib/published-books.js`, read by `sync-content.js`, with its own test. Today it is `efnafraedi-2e` and `lifraen-efnafraedi`; `edlisfraedi-2e`, `liffraedi-2e` and `orverufraedi` are held back ([LEAD] 2026-08-22, efni §C109 — a **pause**, indefinite and reversible, nothing deleted in either repo). Don't restate the list anywhere else; efni's own copy of it carries an explicit self-destruct that fires when this file exists.
+
+- **A bare run is now safe** — it syncs the permitted books and names the ones it skipped. Naming a held-back book is an **error**, not a silent skip, because someone typed that slug on purpose. `--allow-withheld` overrides, loudly, for the day the hold lifts.
+- 🔴 **It is SLUG-keyed, and it must stay that way.** `src/lib/types/book.ts` marks four of five books `status: 'preview'` — **including the kept `lifraen-efnafraedi`** — so any rule phrased over status unpublishes organic chemistry.
+- 🔴 **It governs SYNC, not what is already deployed, and the difference lives in one variable.** The stale-directory sweep at the end of `main()` is keyed on `availableBooks` (the **source** tree), never on the sync list. Filter _that_ by the allowlist and every held-back book is swept out of `static/content/` — a freeze silently becomes a deletion of live pages. `selectBooks()` is pure, exported and has a test pinning exactly this.
+- **Retiring already-live pages is a separate decision with a trap of its own:** `svelte.config.js` sets `fallback: '200.html'` and nginx does `try_files $uri $uri/ /200.html`, so a removed page answers **HTTP 200 with the SPA shell**, not 404 — removal without server-side work converts real pages into indexed soft-404s. A 301 is also the wrong signal for a pause described as reversible.
 - `scripts/generate-pdfs.js`: Renders per-chapter and full-book PDFs from the `/print/*` routes (Playwright Chromium + pdf-lib): continuous page numbering, running headers, TOC with page numbers, PDF outline, appendices. Run after `sync-content`, before `build` (`npm run pdfs`). Set `PDF_CHROMIUM_PATH` to use a system Chromium instead of the Playwright-managed download.
 - `scripts/generate-component-inventory.js`: Generates component documentation (`npm run docs:generate`).
 
@@ -538,12 +549,23 @@ would vanish exactly when the build needs it.
   pass) / `build` / `npm ci` from a clean tree, not just the audit. Green on the PR and on `main`
   after merge. The false "unfixable advisory" comment in `ci.yml` was rewritten; the step stays
   `continue-on-error`. See the `security`-job bullets above for the durable rules.
-- ⏳ **Three overrides remain unexamined for the same defect.** `@babel/core` arrived on the very
-  same commit as the stale undici override (`bab9395`), and `cookie` / `serialize-javascript` are
-  older still. None was touched by #217. Check each the same way — read the CONSUMER's declared
-  range and delete the override if the consumer has moved past it.
-- ⚠️ **`liffraedi-2e` is under a live efni-side `[LEAD]` sync hold** pending re-extraction, enforced
-  by nothing but discipline. A bare `sync-content.js` publishes every book. **Always name the book.**
+- ✅ **The three unexamined overrides were examined 2026-09-04 — and the defect was in a FOURTH,
+  the one this entry called freshly settled.** Verdicts, each from the consumer's own declared
+  range in the lockfile: `@babel/core` **deleted** (sole non-peer consumer `workbox-build`
+  declares `^7.24.4`; strict no-op, version unmoved at 7.29.7); `serialize-javascript` **deleted**
+  (byte-identical to `@rollup/plugin-terser`'s own `^7.0.3`; no-op); `cookie` **KEPT** — it is the
+  _inverse_ of the undici defect, because `@sveltejs/kit` declares `^0.6.0` and is therefore
+  **behind** the override, so deleting it would drop cookie to 0.6.x and take the audit 3 → 7.
+- 🔑 **`fast-uri` was the live instance, re-pinned to `^3.1.5` on 2026-08-22 and inside advisory
+  range 3.0.0–3.1.5 by 2026-09.** Its consumer `ajv` declares only `^3.0.1`, so **the override was
+  what held the tree inside the range** — deleted, and it re-resolves to 3.1.7. ▶ **The durable
+  lesson is not "check the three named overrides" but "pinning to today's newest version is not a
+  durable fix"** — that is what created both the undici and the fast-uri instances. Re-read every
+  override's consumer range whenever the audit moves; a re-pin dated last month is not evidence.
+- ⚠️ **THREE books are held back from publication, not one — and the sync now enforces it.**
+  Superseded 2026-09-04; the old wording named `liffraedi-2e` alone, so a session following it
+  _correctly_ would avoid biology and then publish physics and microbiology. See the publication
+  allowlist bullet under Build Scripts.
 
 ### 2026-08-19 — §C9 redirects shipped and DEPLOYED; the ch10 duplicate is gone from prod
 
@@ -586,8 +608,9 @@ would vanish exactly when the build needs it.
 > ⚠️ **Superseded on the operational points — read the 2026-08-19 entry above first.** The ch10
 > duplicate is **fixed and deployed**; efni pruned the stale page and the old URL now redirects.
 > The "Remaining, vefur-side: redirects" item is **done** (`sectionRedirects.ts`, PRs #206–#209).
-> The two `liffraedi-2e` ch03 renames named below are still unshipped, but that book is under a
-> live efni-side `[LEAD]` **sync hold**. The rest of this entry is accurate for its date.
+> The two `liffraedi-2e` ch03 renames named below are still unshipped, and that book is now
+> **held back from publication entirely** (see the publication allowlist under Build Scripts), so
+> they are dormant rather than pending. The rest of this entry is accurate for its date.
 
 - **PR #200** replaces filename-keyed overlay decisions with module identity — see "The
   overlay identifies a section by MODULE ID, not filename" above. Also fixes a second, silent
