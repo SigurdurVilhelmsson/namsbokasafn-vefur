@@ -45,6 +45,30 @@ export function extractEnglishKey(text: string): string {
 		.toLowerCase();
 }
 
+/**
+ * The English term from a `<dfn>`'s `data-en` attribute, lowercased (empty if
+ * absent). The attribute is the pipeline's structured replacement for the inline
+ * "(e. …)" gloss `extractEnglishKey` scrapes; both feed the same English lookup.
+ *
+ * ⚠️ `data-en` is CASE-PRESERVING while the inline gloss is lowercased by efni's
+ * inject-side annotator, so this must lowercase before it can match `byEnglish`
+ * (whose keys are lowercased in buildTermIndex). Attribute values are HTML-escaped
+ * in the published markup, so entities are decoded here — the glossary JSON this
+ * is matched against holds decoded text.
+ */
+export function extractDataEnKey(attrs: string): string {
+	const m = /\bdata-en="([^"]*)"/i.exec(attrs);
+	if (!m) return '';
+	return m[1]
+		.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>')
+		.replace(/&quot;/g, '"')
+		.replace(/&#39;/g, "'")
+		.replace(/&amp;/g, '&')
+		.trim()
+		.toLowerCase();
+}
+
 export interface TermIndex {
 	byTerm: Map<string, number>;
 	byEnglish: Map<string, number>;
@@ -61,10 +85,13 @@ export function buildTermIndex(sorted: GlossaryTerm[]): TermIndex {
 	const byEnglish = new Map<string, number>();
 	sorted.forEach((t, i) => {
 		const k = t.term.trim().toLowerCase();
-		if (!byTerm.has(k)) byTerm.set(k, i);
+		if (k && !byTerm.has(k)) byTerm.set(k, i);
 		if (t.english) {
 			const e = t.english.trim().toLowerCase();
-			if (!byEnglish.has(e)) byEnglish.set(e, i);
+			// An empty key would be matched by every lookup miss — both
+			// extractEnglishKey and extractDataEnKey return '' when absent — and
+			// would link every unmatched dfn to this one entry.
+			if (e && !byEnglish.has(e)) byEnglish.set(e, i);
 		}
 	});
 	return { byTerm, byEnglish };
@@ -86,9 +113,15 @@ export function linkGlossaryTerms(html: string, index: TermIndex): string {
 	const seen = new Set<number>();
 	const linked = html.replace(
 		/<dfn\b([^>]*\bclass="[^"]*\bterm\b[^"]*"[^>]*)>([\s\S]*?)<\/dfn>/gi,
-		(match, _attrs, inner) => {
+		(match, attrs, inner) => {
 			const text = inner.replace(/<[^>]*>/g, '');
-			const n = index.byTerm.get(normalizeTermKey(text)) ?? index.byEnglish.get(extractEnglishKey(text));
+			// Icelandic exact, then English — from the inline gloss if the page
+			// still carries one, else from data-en. Keeping both is what lets a
+			// mixed corpus resolve while efni's re-render rolls out per chapter.
+			const n =
+				index.byTerm.get(normalizeTermKey(text)) ??
+				index.byEnglish.get(extractEnglishKey(text)) ??
+				index.byEnglish.get(extractDataEnKey(attrs));
 			if (n == null || seen.has(n)) return match;
 			seen.add(n);
 			return `<a class="glossary-link" href="#gloss-${n}">${match}</a>`;

@@ -51,4 +51,59 @@ describe('htmlToPlainText', () => {
 	it('keeps ordinary prose intact', () => {
 		expect(htmlToPlainText('<p>Bara <em>texti</em> hér.</p>')).toBe('Bara texti hér.');
 	});
+
+	// The search index is built from raw published HTML, so an English term only
+	// reaches it as text. The inline "(e. …)" gloss is text and survives; data-en
+	// is an attribute and is discarded with its tag unless it is hoisted first.
+	// efni retiring the inline gloss (spec §4.7) is what makes this load-bearing.
+	describe('data-en hoisting (search index)', () => {
+		it('puts the English term in the text, alongside the Icelandic', () => {
+			const text = htmlToPlainText(
+				'<p><dfn id="term-00001" class="term" data-en="formula mass">formúlumassa</dfn> er hugtak.</p>'
+			);
+			expect(text).toContain('formula mass');
+			expect(text).toContain('formúlumassa');
+		});
+
+		// Control: the same element WITHOUT data-en must not gain English, or the
+		// assertion above would pass on any input and prove nothing.
+		it('adds nothing when the attribute is absent', () => {
+			const text = htmlToPlainText(
+				'<p><dfn id="term-00001" class="term">formúlumassa</dfn> er hugtak.</p>'
+			);
+			expect(text).not.toContain('formula mass');
+			expect(text).toBe('formúlumassa er hugtak.');
+		});
+
+		it('still carries an inline gloss, so a mixed corpus indexes either form', () => {
+			const text = htmlToPlainText(
+				'<p><dfn class="term">mól (e. mole)</dfn> og <dfn class="term" data-en="dilution">þynning</dfn>.</p>'
+			);
+			expect(text).toContain('mole');
+			expect(text).toContain('dilution');
+		});
+
+		it('decodes entities in the attribute value', () => {
+			const text = htmlToPlainText(
+				'<dfn class="term" data-en="Avogadro&#39;s number">Avogadrosartala</dfn>'
+			);
+			expect(text).toContain("Avogadro's number");
+		});
+
+		// data-en is case-preserving; the index is matched fuzzily, so the value
+		// is carried through verbatim rather than normalised here.
+		it('preserves the attribute case', () => {
+			expect(htmlToPlainText('<dfn class="term" data-en="Alkyl halides">alkýlhalíð</dfn>')).toContain(
+				'Alkyl halides'
+			);
+		});
+
+		it('does not resurrect text from a stripped math block', () => {
+			const text = htmlToPlainText(
+				'<span class="math-inline"><math assistive-mathml="true" data-en="should not appear"><mi>x</mi></math></span> eftir'
+			);
+			expect(text).not.toContain('should not appear');
+			expect(text).toBe('eftir');
+		});
+	});
 });

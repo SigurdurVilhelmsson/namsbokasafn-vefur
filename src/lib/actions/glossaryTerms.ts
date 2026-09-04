@@ -6,10 +6,15 @@
  * Only semantic <dfn> tags are processed — no text-matching is performed
  * to avoid false-positive highlights on common Icelandic words.
  *
- * Term matching uses three tiers:
+ * Term matching uses four tiers:
  * 1. data-term attribute (from pipeline, highest confidence)
- * 2. Icelandic text exact match (current behavior)
- * 3. English fallback from "(e. ...)" suffix
+ * 2. Icelandic text exact match
+ * 3. English from the pipeline's data-en attribute
+ * 4. English scraped from an inline "(e. ...)" suffix
+ *
+ * Tiers 3 and 4 are the same lookup over two sources of the same fact. efni is
+ * migrating from the inline gloss to data-en per chapter, so a real corpus
+ * carries both; tier 4 must stay until no published page relies on it.
  */
 
 import { browser } from '$app/environment';
@@ -238,6 +243,44 @@ function stripEnglishSuffix(text: string): string {
 }
 
 /**
+ * Look an English term up in the glossary's English index, widening the query
+ * the same way for every caller: exact, then with inner parentheticals stripped,
+ * then singularized (both forms).
+ *
+ * Shared by the two English tiers — the `data-en` attribute and the inline
+ * "(e. …)" gloss scraped from display text — so a term that resolves from one
+ * source resolves identically from the other. `english` must already be
+ * lowercased: `englishMap`'s keys are.
+ */
+function lookupEnglish(
+	englishMap: Map<string, GlossaryTerm>,
+	english: string
+): GlossaryTerm | undefined {
+	if (!english) return undefined;
+
+	let match = englishMap.get(english);
+	if (match) return match;
+
+	// Try stripping inner parentheticals, e.g. "alpha particles (α particles)"
+	const stripped = stripInnerParenthetical(english);
+	if (stripped !== english) {
+		match = englishMap.get(stripped);
+		if (match) return match;
+		for (const sg of singularize(stripped)) {
+			match = englishMap.get(sg.toLowerCase());
+			if (match) return match;
+		}
+	}
+
+	for (const sg of singularize(english)) {
+		match = englishMap.get(sg.toLowerCase());
+		if (match) return match;
+	}
+
+	return undefined;
+}
+
+/**
  * Svelte action: scans content for <dfn class="term"> elements and adds tooltips
  */
 export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) {
@@ -321,10 +364,11 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 				const dfnEl = dfn as HTMLElement;
 				const fullText = (dfnEl.textContent || '').trim();
 
-				// Three-tier matching:
+				// Four-tier matching:
 				// 1. data-term attribute (highest confidence, from pipeline)
 				// 2. Icelandic text exact match
-				// 3. English fallback from "(e. ...)" suffix
+				// 3. English from the data-en attribute
+				// 4. English scraped from an inline "(e. ...)" suffix
 				let glossaryTerm: GlossaryTerm | undefined;
 
 				// Tier 1: data-term attribute
@@ -340,34 +384,29 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 					glossaryTerm = termMap.get(normalized);
 				}
 
-				// Tier 3: English fallback (with singularization and parenthetical stripping)
+				// Tier 3: English from the pipeline's data-en attribute.
+				//
+				// Placed AFTER the Icelandic tier on purpose: englishMap is not a
+				// clean key space (a few English headwords are shared by two
+				// Icelandic terms, resolved first-wins by descending term length),
+				// so letting data-en run earlier could override a match that is
+				// correct today. Here it can only add matches, never change one.
+				//
+				// ⚠️ data-en is CASE-PRESERVING; englishMap's keys are lowercased.
+				if (!glossaryTerm) {
+					const dataEn = (dfnEl.getAttribute('data-en') || '').replace(/\s+/g, ' ').trim();
+					glossaryTerm = lookupEnglish(englishMap, dataEn.toLowerCase());
+				}
+
+				// Tier 4: English scraped from the inline "(e. ...)" gloss.
+				//
+				// This tier is load-bearing today and is the reason tier 3 exists:
+				// once efni retires the inline gloss (spec §4.7), every element
+				// resolving only here loses its tooltip, not merely its gloss text.
 				if (!glossaryTerm) {
 					const english = extractEnglish(fullText);
 					if (english) {
-						const enLower = english.toLowerCase();
-						glossaryTerm = englishMap.get(enLower);
-
-						// Try stripping inner parentheticals
-						if (!glossaryTerm) {
-							const stripped = stripInnerParenthetical(enLower);
-							if (stripped !== enLower) {
-								glossaryTerm = englishMap.get(stripped);
-								if (!glossaryTerm) {
-									for (const sg of singularize(stripped)) {
-										glossaryTerm = englishMap.get(sg.toLowerCase());
-										if (glossaryTerm) break;
-									}
-								}
-							}
-						}
-
-						// Try singularizing
-						if (!glossaryTerm) {
-							for (const sg of singularize(enLower)) {
-								glossaryTerm = englishMap.get(sg.toLowerCase());
-								if (glossaryTerm) break;
-							}
-						}
+						glossaryTerm = lookupEnglish(englishMap, english.toLowerCase());
 					}
 				}
 
