@@ -80,7 +80,9 @@ vi.mock('$lib/utils/html', () => ({
 // --- Helpers ---
 
 /** Create a container with dfn.term elements */
-function createContentNode(dfnSpecs: Array<{ text: string; dataTerm?: string }>): HTMLDivElement {
+function createContentNode(
+	dfnSpecs: Array<{ text: string; dataTerm?: string; dataEn?: string }>
+): HTMLDivElement {
 	const container = document.createElement('div');
 	for (const spec of dfnSpecs) {
 		const dfn = document.createElement('dfn');
@@ -88,6 +90,9 @@ function createContentNode(dfnSpecs: Array<{ text: string; dataTerm?: string }>)
 		dfn.textContent = spec.text;
 		if (spec.dataTerm) {
 			dfn.setAttribute('data-term', spec.dataTerm);
+		}
+		if (spec.dataEn) {
+			dfn.setAttribute('data-en', spec.dataEn);
 		}
 		container.appendChild(document.createElement('p')).appendChild(dfn);
 	}
@@ -123,7 +128,7 @@ describe('glossaryTerms action', () => {
 		mockLoadFn?.mockClear();
 	});
 
-	describe('three-tier term matching', () => {
+	describe('four-tier term matching', () => {
 		it('should match via data-term attribute (tier 1)', async () => {
 			const node = createContentNode([
 				{ text: 'tilgátuna', dataTerm: 'tilgáta' } // inflected form, but data-term has base
@@ -433,6 +438,85 @@ describe('glossaryTerms action', () => {
 
 			// Should remove: mouseenter, mouseleave, focus, blur, click = 5 listeners
 			expect(removeEventListenerSpy).toHaveBeenCalledTimes(5);
+		});
+	});
+
+	// Tier 3. efni is migrating English from an inline "(e. …)" gloss to a
+	// data-en attribute, per chapter. Until vefur reads the attribute, every dfn
+	// whose ONLY route to the glossary is that gloss loses its TOOLTIP when efni
+	// retires it (spec §4.7) — not merely its gloss text.
+	describe('data-en term matching (tier 3)', () => {
+		it('matches from data-en with no inline gloss present', async () => {
+			const node = createContentNode([{ text: 'efnisins', dataEn: 'matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			const dfn = getDfnElements(node)[0];
+			expect(dfn.classList.contains('glossary-term')).toBe(true);
+			expect(dfn.dataset.glossaryMatch).toBe('efni');
+
+			action.destroy();
+		});
+
+		// Control: identical element minus the attribute. If this also matched,
+		// the assertion above would be proving nothing.
+		it('does not match the same element without data-en', async () => {
+			const node = createContentNode([{ text: 'efnisins' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			const dfn = getDfnElements(node)[0];
+			expect(dfn.classList.contains('glossary-term')).toBe(false);
+
+			action.destroy();
+		});
+
+		// data-en is case-preserving; englishMap's keys are lowercased.
+		it('matches a capitalised data-en value', async () => {
+			const node = createContentNode([{ text: 'efnisins', dataEn: 'Matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(getDfnElements(node)[0].dataset.glossaryMatch).toBe('efni');
+
+			action.destroy();
+		});
+
+		it('applies the same widening as the inline tier (plural)', async () => {
+			const node = createContentNode([{ text: 'sameindirnar', dataEn: 'molecules' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(getDfnElements(node)[0].dataset.glossaryMatch).toBe('sameind');
+
+			action.destroy();
+		});
+
+		// Ordering matters: englishMap is not a clean key space, so data-en must
+		// never override an Icelandic match that is correct today.
+		it('lets the Icelandic tier win when both would resolve', async () => {
+			const node = createContentNode([{ text: 'sameind', dataEn: 'matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(getDfnElements(node)[0].dataset.glossaryMatch).toBe('sameind');
+
+			action.destroy();
+		});
+
+		it('still matches an inline gloss, so a mixed corpus resolves either way', async () => {
+			const node = createContentNode([
+				{ text: 'efni (e. matter)' },
+				{ text: 'sameindin', dataEn: 'molecule' }
+			]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			const dfns = getDfnElements(node);
+			expect(dfns[0].dataset.glossaryMatch).toBe('efni');
+			expect(dfns[1].dataset.glossaryMatch).toBe('sameind');
+
+			action.destroy();
 		});
 	});
 });
