@@ -85,12 +85,29 @@ jobs:
           printf '%s\n' "$SSH_KEY" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+          # The exclude list is DERIVED, never hardcoded here: it is the
+          # complement of the publication allowlist over efni's source tree.
+          # It protects two different things, for two different reasons:
+          #
+          #   downloads/  PDFs are generated separately (npm run build:full)
+          #               and live only on the server; this build does not
+          #               produce them.
+          #   <book>/     Books the allowlist holds back are no longer IN the
+          #               build, so --delete would remove their live pages —
+          #               turning a publication freeze into a deletion. rsync
+          #               protects excluded paths from --delete, which is the
+          #               whole mechanic here.
+          #
+          # ⚠️ Never add --delete-excluded: it inverts this and deletes exactly
+          # what the list preserves. See scripts/deploy-excludes.js.
+          node scripts/deploy-excludes.js --source ./namsbokasafn-efni > /tmp/rsync-excludes.txt
+          echo "Protecting from --delete:"
+          sed 's/^/  /' /tmp/rsync-excludes.txt
+
           # The forced rrsync command on the server roots the remote path at
           # the build directory, so the destination is "/".
-          # --exclude=downloads/ : PDFs are generated separately (npm run
-          # build:full) and live on the server; this build doesn't produce
-          # them, and without the exclude --delete would wipe them.
-          rsync -az --delete --exclude=downloads/ \
+          rsync -az --delete --exclude-from=/tmp/rsync-excludes.txt \
             -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts -o IdentitiesOnly=yes" \
             build/ "$DEPLOY_USER@$DEPLOY_HOST:/"
           echo "Deployed $(git rev-parse --short HEAD) to https://namsbokasafn.is"
