@@ -1243,6 +1243,27 @@
   outline: none;
 }
 
+/* English gloss injected by the glossaryTerms action from efni's data-en.
+ *
+ * A real element, not a ::after — generated content is not selectable, not
+ * copyable, and is announced inconsistently. In a textbook a student may
+ * legitimately want to copy the English term.
+ *
+ * Lives here rather than in static/styles/content.css: that file is the
+ * cross-repo contract for classes efni EMITS, and this one is ours.
+ *
+ * --text-secondary, not --text-tertiary: measured against --bg-primary,
+ * tertiary is 2.90:1 light / 3.13:1 dark and fails WCAG AA at this size,
+ * while secondary is 5.45:1 / 6.07:1 and passes.
+ */
+.term-en {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 0.9em;
+  /* Never inherit the term's dotted underline — the gloss is not the term. */
+  border-bottom: none;
+}
+
 /* Figure caption anchor offset is now handled globally by
    `html { scroll-padding-top }` (see @layer base). A per-target
    scroll-margin-top here would stack with that padding and double the offset. */
@@ -2266,6 +2287,15 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   .glossary-term {
     border-bottom: none !important;
     cursor: default;
+  }
+
+  /* The gloss is CONTENT, so it stays on paper — unlike the tooltip, which is
+   * interactive and hidden below. Only this print surface sees it: the /print/*
+   * PDF routes render bare {@html} without mounting the action, so no span is
+   * ever injected there. */
+  .term-en {
+    color: inherit;
+    font-style: italic;
   }
 
   .glossary-tooltip {

@@ -19,7 +19,7 @@
 
 import { browser } from '$app/environment';
 import { glossaryStore } from '$lib/stores/glossary';
-import { glossaryHighlighting } from '$lib/stores/settings';
+import { glossaryHighlighting, showTermEnglish } from '$lib/stores/settings';
 import { get } from 'svelte/store';
 import type { GlossaryTerm } from '$lib/types/content';
 import { escapeHtml } from '$lib/utils/html';
@@ -280,6 +280,26 @@ function lookupEnglish(
 	return undefined;
 }
 
+/** Class on the English gloss span this action injects. */
+const TERM_EN_CLASS = 'term-en';
+
+/**
+ * An element's own text, excluding any English gloss THIS action injected.
+ *
+ * Everything that reasons about a term's text — the matcher's tiers, the
+ * marker dedupe — must see the published content, not our own decoration.
+ * Without this the injected " (e. …)" would read as an inline gloss and the
+ * pass would stop being idempotent.
+ */
+function contentTextOf(el: HTMLElement): string {
+	if (!el.querySelector(`span.${TERM_EN_CLASS}`)) return (el.textContent || '').trim();
+	const clone = el.cloneNode(true) as HTMLElement;
+	for (const span of Array.from(clone.querySelectorAll(`span.${TERM_EN_CLASS}`))) {
+		span.remove();
+	}
+	return (clone.textContent || '').trim();
+}
+
 /**
  * Svelte action: scans content for <dfn class="term"> elements and adds tooltips
  */
@@ -362,7 +382,7 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 			for (const dfn of dfnElements) {
 				if (destroyed) return;
 				const dfnEl = dfn as HTMLElement;
-				const fullText = (dfnEl.textContent || '').trim();
+				const fullText = contentTextOf(dfnEl);
 
 				// Four-tier matching:
 				// 1. data-term attribute (highest confidence, from pipeline)
@@ -416,10 +436,18 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 				dfnEl.dataset.glossaryMatch = glossaryTerm.term;
 				dfnEl.setAttribute('role', 'button');
 				dfnEl.setAttribute('tabindex', '0');
+				// An aria-label REPLACES the element's content for assistive tech, so
+				// the injected gloss span is not announced on a matched term. Prefer
+				// the element's own data-en over the glossary's `english` here: the
+				// glossary value is systematically lowercased, so without this a
+				// screen-reader user hears a different string than the one on screen.
+				const ariaEnglish =
+					(dfnEl.getAttribute('data-en') || '').replace(/\s+/g, ' ').trim() ||
+					glossaryTerm.english ||
+					'';
 				dfnEl.setAttribute(
 					'aria-label',
-					`Skilgreining: ${glossaryTerm.term}` +
-						(glossaryTerm.english ? ` (${glossaryTerm.english})` : '')
+					`Skilgreining: ${glossaryTerm.term}` + (ariaEnglish ? ` (${ariaEnglish})` : '')
 				);
 
 				processedDfnElements.push(dfnEl);
@@ -490,6 +518,63 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 		isProcessed = false;
 	}
 
+	// --- English gloss pass -------------------------------------------------
+	//
+	// 🔴 DELIBERATELY OUTSIDE init(). init() is reached only from the
+	// glossaryHighlighting subscription and from an observer gated on it, and it
+	// returns early when the book ships no glossary (`!state.terms.length`).
+	// A gloss placed in there would vanish for any reader who turns glossary
+	// highlighting off, and would never appear at all in lifraen-efnafraedi or
+	// orverufraedi — which publish 358 <dfn class="term"> between them and no
+	// glossary.json. This pass owns its own setting, its own tracking and its
+	// own removal.
+	let glossedElements: HTMLElement[] = [];
+
+	/** Remove every injected gloss, and heal the text nodes the removal splits. */
+	function removeGlosses() {
+		// Sweep the live node rather than only the tracked list: a client-side
+		// navigation can replace innerHTML, detaching elements we still hold.
+		for (const span of Array.from(node.querySelectorAll(`span.${TERM_EN_CLASS}`))) {
+			const parent = span.parentElement;
+			span.remove();
+			parent?.normalize();
+		}
+		glossedElements = [];
+	}
+
+	function renderGlosses() {
+		// Idempotent by construction: clear first, so a re-run cannot stack spans
+		// and contentTextOf() never sees a previous run's output.
+		removeGlosses();
+		if (destroyed) return;
+
+		// Only <dfn class="term"> today. efni also emits data-en on <dt> in the
+		// key-terms rollups; widening THIS selector (never the tooltip loop) is
+		// option (i) of the open cross-repo decision, deliberately not taken here.
+		for (const el of Array.from(node.querySelectorAll('dfn.term[data-en]'))) {
+			const dfnEl = el as HTMLElement;
+			const dataEn = (dfnEl.getAttribute('data-en') || '').replace(/\s+/g, ' ').trim();
+			if (!dataEn) continue;
+
+			const text = contentTextOf(dfnEl);
+
+			// 🔴 DEDUPE ON THE MARKER, NEVER ON EQUALITY WITH data-en. The inline
+			// gloss is lowercased by efni's inject-side annotator while data-en is
+			// case-preserving, so on a page carrying both, an equality test never
+			// matches and the gloss renders twice.
+			if (stripEnglishSuffix(text) !== text) continue;
+
+			// "R (e. R)" helps nobody. efni's own annotator skips this case.
+			if (dataEn.toLowerCase() === text.toLowerCase()) continue;
+
+			const span = document.createElement('span');
+			span.className = TERM_EN_CLASS;
+			span.textContent = ` (e. ${dataEn})`;
+			dfnEl.appendChild(span);
+			glossedElements.push(dfnEl);
+		}
+	}
+
 	// Keep tooltip visible when mouse enters it, and set up tap-outside-to-dismiss
 	function setupTooltipHover() {
 		if (tooltipHoverSetUp) return;
@@ -522,13 +607,18 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 	// replaces innerHTML but doesn't remount the action)
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 	const observer = new MutationObserver(() => {
-		if (destroyed || !get(glossaryHighlighting)) return;
+		if (destroyed) return;
 		if (debounceTimer) clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(() => {
 			debounceTimer = null;
-			if (destroyed || !get(glossaryHighlighting)) return;
-			teardown();
-			init();
+			if (destroyed) return;
+			// The two halves are independent: new content must get its glosses even
+			// when glossary highlighting is off.
+			if (get(glossaryHighlighting)) {
+				teardown();
+				init();
+			}
+			if (get(showTermEnglish)) renderGlosses();
 		}, 50);
 	});
 	observer.observe(node, { childList: true });
@@ -542,13 +632,26 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 		}
 	});
 
+	// Its own subscription — see the gloss pass note above for why this is not
+	// folded into the one above.
+	const unsubscribeGloss = showTermEnglish.subscribe((enabled) => {
+		if (destroyed) return;
+		if (enabled) {
+			renderGlosses();
+		} else {
+			removeGlosses();
+		}
+	});
+
 	return {
 		destroy() {
 			destroyed = true;
 			if (debounceTimer) clearTimeout(debounceTimer);
 			observer.disconnect();
 			unsubscribe();
+			unsubscribeGloss();
 			teardown();
+			removeGlosses();
 		}
 	};
 }

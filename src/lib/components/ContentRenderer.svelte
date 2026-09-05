@@ -51,8 +51,11 @@
 	</div>
 {:else if html}
 	<!-- bionicReadingAction wraps/unwraps <b> elements in place (no innerHTML
-		 snapshot), so it cannot orphan listeners attached by the other actions
-		 and the action order carries no constraints. -->
+		 snapshot), so it cannot orphan listeners attached by the other actions.
+		 ⚠️ That no longer makes the order free: glossaryTerms now INJECTS a
+		 <span class="term-en"> node, so bionic must skip it (it is in that
+		 action's SKIP_SELECTORS) and any future action that rewrites this
+		 subtree must not swallow it. -->
 	<div
 		class="reading-content"
 		class:hide-static-objectives={hideStaticObjectives}

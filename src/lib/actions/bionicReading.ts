@@ -22,6 +22,9 @@ const SKIP_SELECTORS = [
 	'script',
 	'style',
 	'.bionic-bold',
+	// The English gloss glossaryTerms injects. Bolding it would defeat its own
+	// de-emphasis, and an Icelandic-tuned word regex would be bolding English.
+	'.term-en',
 	'[data-bionic-processed]'
 ];
 
