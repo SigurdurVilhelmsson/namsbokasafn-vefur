@@ -16,6 +16,49 @@ import type { TextRange } from '$lib/types/annotation';
 const CONTEXT_LENGTH = 30; // Characters of context before/after highlight
 
 /**
+ * Decorations vefur INJECTS into the content, which anchoring must not see.
+ *
+ * 🔴 Highlights are anchored by text offset. `.term-en` is an English gloss the
+ * glossaryTerms action appends inside a <dfn>, under a setting the reader can
+ * toggle — so without this, the same highlight anchors differently with the
+ * setting on and off, and every highlight saved before a chapter gained
+ * `data-en` would find its ±30-character context changed underneath it. The
+ * context check would then fail and fall through to a bare indexOf, which can
+ * silently restore the highlight over the WRONG occurrence.
+ *
+ * Anchoring therefore reads the PUBLISHED text only. Both the offset source
+ * (contentText) and the offset consumer (createRangeAtPosition) must apply the
+ * same filter, or their offsets desync.
+ */
+const INJECTED_SELECTOR = '.term-en';
+
+function contentTextWalker(container: HTMLElement): TreeWalker {
+	return document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+		acceptNode: (node) =>
+			node.parentElement?.closest(INJECTED_SELECTOR)
+				? NodeFilter.FILTER_REJECT
+				: NodeFilter.FILTER_ACCEPT
+	});
+}
+
+/** A container's text with injected decorations excluded. */
+function contentText(container: HTMLElement): string {
+	const walker = contentTextWalker(container);
+	let text = '';
+	while (walker.nextNode()) text += (walker.currentNode as Text).data;
+	return text;
+}
+
+/** A range's text with injected decorations excluded. */
+function rangeContentText(range: Range): string {
+	const fragment = range.cloneContents();
+	for (const el of Array.from(fragment.querySelectorAll(INJECTED_SELECTOR))) {
+		el.remove();
+	}
+	return fragment.textContent || '';
+}
+
+/**
  * Serialize a DOM Range to a text-based TextRange.
  *
  * @param range - The DOM Range from user selection
@@ -23,7 +66,7 @@ const CONTEXT_LENGTH = 30; // Characters of context before/after highlight
  * @returns TextRange with text-based anchoring
  */
 export function serializeRange(range: Range, container: HTMLElement): TextRange {
-	const exact = range.toString();
+	const exact = rangeContentText(range);
 
 	// Get surrounding context
 	const { prefix, suffix } = getTextContext(range, container);
@@ -87,13 +130,13 @@ function getTextContext(
 	const preRange = document.createRange();
 	preRange.setStart(container, 0);
 	preRange.setEnd(range.startContainer, range.startOffset);
-	const preText = preRange.toString();
+	const preText = rangeContentText(preRange);
 
 	// Create a range from selection end to container end
 	const postRange = document.createRange();
 	postRange.setStart(range.endContainer, range.endOffset);
 	postRange.setEnd(container, container.childNodes.length);
-	const postText = postRange.toString();
+	const postText = rangeContentText(postRange);
 
 	return {
 		prefix: preText.slice(-CONTEXT_LENGTH),
@@ -164,7 +207,7 @@ function findTextWithContext(
 	suffix: string,
 	container: HTMLElement
 ): Range | null {
-	const fullText = container.textContent || '';
+	const fullText = contentText(container);
 
 	// Find all occurrences of the exact text
 	const matches: number[] = [];
@@ -205,7 +248,7 @@ function findTextWithContext(
  * Find exact text without context (fallback).
  */
 function findExactText(exact: string, container: HTMLElement): Range | null {
-	const fullText = container.textContent || '';
+	const fullText = contentText(container);
 	const pos = fullText.indexOf(exact);
 
 	if (pos === -1) {
@@ -242,7 +285,8 @@ function createRangeAtPosition(
 	length: number
 ): Range | null {
 	const range = document.createRange();
-	const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+	// Same filter as contentText() — offsets come from there and must agree.
+	const walker = contentTextWalker(container);
 
 	let currentPos = 0;
 	let startNode: Text | null = null;

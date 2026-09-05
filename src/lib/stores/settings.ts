@@ -54,6 +54,7 @@ interface SettingsState {
 	shortcutPreferences: ShortcutPreferences;
 	bionicReading: boolean;
 	glossaryHighlighting: boolean;
+	showTermEnglish: boolean;
 }
 
 const STORAGE_KEY = 'namsbokasafn:settings';
@@ -67,7 +68,8 @@ const defaultSettings: SettingsState = {
 	sidebarOpen: false,
 	shortcutPreferences: {},
 	bionicReading: false,
-	glossaryHighlighting: true
+	glossaryHighlighting: true,
+	showTermEnglish: true
 };
 
 const settingsValidators = {
@@ -79,7 +81,8 @@ const settingsValidators = {
 	sidebarOpen: isBoolean,
 	shortcutPreferences: isObject,
 	bionicReading: isBoolean,
-	glossaryHighlighting: isBoolean
+	glossaryHighlighting: isBoolean,
+	showTermEnglish: isBoolean
 };
 
 function loadSettings(): SettingsState {
@@ -179,6 +182,8 @@ function createSettingsStore() {
 		// Glossary highlighting methods
 		setGlossaryHighlighting: (enabled: boolean) => update((s) => ({ ...s, glossaryHighlighting: enabled })),
 		toggleGlossaryHighlighting: () => update((s) => ({ ...s, glossaryHighlighting: !s.glossaryHighlighting })),
+		setShowTermEnglish: (enabled: boolean) => update((s) => ({ ...s, showTermEnglish: enabled })),
+		toggleShowTermEnglish: () => update((s) => ({ ...s, showTermEnglish: !s.showTermEnglish })),
 
 		getShortcut: (action: ShortcutAction): string => {
 			const state = get({ subscribe });
@@ -200,3 +205,4 @@ export const lineWidth = derived(settings, ($settings) => $settings.lineWidth);
 export const sidebarOpen = derived(settings, ($settings) => $settings.sidebarOpen);
 export const bionicReading = derived(settings, ($settings) => $settings.bionicReading);
 export const glossaryHighlighting = derived(settings, ($settings) => $settings.glossaryHighlighting);
+export const showTermEnglish = derived(settings, ($settings) => $settings.showTermEnglish);

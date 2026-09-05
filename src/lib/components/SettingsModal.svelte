@@ -13,6 +13,7 @@
 		lineWidth,
 		bionicReading,
 		glossaryHighlighting,
+		showTermEnglish,
 		type FontSize,
 		type FontFamily,
 		type LineHeight,
@@ -317,6 +318,38 @@
 							>
 								<span
 									class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {$glossaryHighlighting
+										? 'translate-x-6'
+										: 'translate-x-1'}"
+								></span>
+							</button>
+						</div>
+					</div>
+
+					<!-- English term glosses -->
+					<div>
+						<div class="flex items-center justify-between">
+							<div>
+								<label for="show-term-english-toggle" class="text-sm font-medium text-[var(--text-primary)]">
+									Enskt heiti hugtaka
+								</label>
+								<p class="text-xs text-[var(--text-secondary)] mt-0.5">
+									Sýna enska heitið á eftir hugtaki, t.d. „formúlumassa (e. formula mass)“
+								</p>
+							</div>
+							<button
+								id="show-term-english-toggle"
+								role="switch"
+								aria-checked={$showTermEnglish}
+								aria-label={$showTermEnglish
+									? 'Fela enskt heiti hugtaka'
+									: 'Sýna enskt heiti hugtaka'}
+								onclick={() => settings.toggleShowTermEnglish()}
+								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$showTermEnglish
+									? 'bg-[var(--accent-color)]'
+									: 'bg-gray-300 dark:bg-gray-600'}"
+							>
+								<span
+									class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {$showTermEnglish
 										? 'translate-x-6'
 										: 'translate-x-1'}"
 								></span>

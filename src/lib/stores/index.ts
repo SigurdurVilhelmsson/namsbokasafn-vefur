@@ -13,6 +13,7 @@ export {
 	sidebarOpen,
 	bionicReading,
 	glossaryHighlighting,
+	showTermEnglish,
 	DEFAULT_SHORTCUTS,
 	type Theme,
 	type FontSize,
