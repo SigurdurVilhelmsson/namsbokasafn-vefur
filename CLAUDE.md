@@ -160,6 +160,23 @@ meant the probe was broken.
 
 `src/lib/actions/glossaryTerms.ts` uses **semantic-only** term detection — it only processes `<dfn class="term">` elements from the CNXML pipeline. A previous text-matching pass was removed to avoid false positives on common Icelandic words like "efni".
 
+**A term's English has THREE consumers here, not one — and only one of them is the reader.** efni is migrating each term's English from an inline `(e. …)` gloss inside the element's text to a `data-en` attribute, per chapter (its spec §4.7 retires the gloss once vefur reads the attribute). The gloss is **load-bearing for MATCHING, not display**: replayed over efni's published corpus, **482 of 975 `<dfn>` resolve ONLY through it** and lose their _tooltip_, not merely their gloss text, when it goes.
+
+- `glossaryTerms.ts` — the reader's tooltip matcher, now **four tiers**: `data-term`, Icelandic exact, `data-en`, inline gloss. `data-en` sits **after** the Icelandic tier on purpose — `englishMap` is not a clean key space, so an earlier position could override a match that is correct today; there it can only add matches. ⚠️ **Tier 1 (`data-term`) resolves 0 across the entire corpus** — dead code in production.
+- `src/lib/utils/printGlossary.ts` — the PDF `#gloss-N` anchor index, which scrapes the same marker out of `<dfn>` text.
+- `src/lib/utils/html.ts` — the **full-text search index, which no DOM change can reach**: `search.worker.ts` builds it from _raw published HTML_ and the tag-strip discards every attribute, so `data-en` is hoisted into the text **before** that strip.
+
+⚠️ **`data-en` is case-preserving; the inline gloss is lowercased by efni's annotator.** So dedupe on the **marker** (`stripEnglishSuffix(text) !== text`), never on equality with `data-en` — an equality test never matches and renders the gloss twice on a mixed page. Lowercase `data-en` before any `englishMap` lookup.
+
+**The `.term-en` gloss span has four constraints the obvious implementation violates** — each has a test that fails if you do it the obvious way:
+
+1. **Outside `init()`.** `init()` is reached only from the `glossaryHighlighting` subscription and an observer gated on it, so a gloss inside it vanishes when a reader turns _highlighting_ off.
+2. **Outside the glossary early return.** `init()` bails at `!state.terms.length`; `lifraen-efnafraedi` and `orverufraedi` publish 358 `<dfn class="term">` between them with **no `glossary.json`**.
+3. **Its own removal.** `teardown()` removes classes and attributes, never a child node.
+4. **Dedupe on the marker**, plus skip `EN === IS` ("R (e. R)").
+
+🔴 **An injected node in the content is never local.** The span reaches three other systems: `bionicReading` would bold it (it is in that action's `SKIP_SELECTORS`); `aria-label` **replaces** content, so the label prefers the element's own `data-en` over the glossary's lowercased `english` or a screen reader announces a different string than the one on screen; and **`textAnchor` anchors highlights by TEXT OFFSET**, so anchoring reads published text only, filtering `.term-en` on **both** sides — `contentText()` produces the offsets and `createRangeAtPosition()` consumes them, and filtering either alone silently desyncs every restore. Style it in `src/app.css`, **not** `static/styles/content.css` — that file is the cross-repo contract for classes efni _emits_.
+
 ## Attribution & Licensing
 
 > **⚠️ This repository is PUBLIC (since 2026-07-25).** Assume anything committed is
@@ -509,6 +526,23 @@ would vanish exactly when the build needs it.
   deployed tree (`return 301` runs before `try_files` and has no on-disk guard).
 
 ## Current Development Status
+
+### 2026-09-05 — the publication hold became code, and the data-en contract landed vefur-side
+
+Five merges in one session (#223–#227). `main` = `4752f22` plus #227 pending.
+
+- **The publication hold is enforced by code** (#223) and **frozen against the deploy** (#226). Both are documented under Build Scripts; the durable trap is that #223 _armed_ the deletion #226 defuses — stopping a book being synced is not the same as protecting what is already live.
+- **All three consumers of the inline gloss read `data-en`** (#224), and the **visible span + `showTermEnglish`** (#227) followed. Rules under Glossary System above.
+- **The relay to efni is committed**, not messaged → `docs/handoffs/2026-09-05-data-en-consumer-shipped-for-efni.md` (#225). 🔴 **The gate efni is waiting on is still SHUT**: `tools/generate-glossary.js` and `tools/generate-index.js` both scrape the marker and neither knows `termEnglish` (0 hits each, against a control of 9 in `cnxml-render.js`). A flip today silently empties 853/867 glossary `english` values and 813/827 index `termEn` values. **Do not tell efni it is clear to retire `annotateInlineTerms`.**
+- ⏳ **Still open, and both are [USER]/[LEAD] calls:** full retirement of the withheld books' live URLs (needs nginx work for real 404s — the freeze deliberately stops short), and the `<dt data-en>` (i)-vs-(ii) decision. Evidence favours (i); a comment in `renderGlosses()` marks the one selector that would change.
+
+**Three method lessons this session, each paid for:**
+
+- 🔴 **A CONTROL CAUGHT MY OWN HARNESS TWICE, NOT THE CODE.** The rsync freeze proof first reported "KEPT" in _both_ arms — because `rsync` is not installed in the web container and neither arm ran. Then two of three new `textAnchor` tests passed with _and_ without the fix, asserting a round trip the unfiltered code also satisfied. **A test that cannot fail is not evidence**; run every new assertion against the pre-change tree and keep a control that passes both ways.
+- ⚠️ **rsync's size+mtime quick check silently skips a transfer.** Fixture files of equal size written in the same second look un-updated. Give them different sizes.
+- ⚠️ **Reading `$?` after a pipe gives you the LAST command's status.** Cost one wrong "the auditor is live" reading before it was caught — the same trap efni's register already records.
+
+⚠️ **The Codex review bot was rate-limited on all five PRs** ("You have reached your Codex usage limits"), so none of this session's code received an automated second opinion. If that bot is treated as a gate, it did not run — the evidence is the CI runs plus the measurements in each PR body.
 
 ### 2026-08-22 — dependency queue cleared; Node floor raised; docs re-verified
 
