@@ -158,3 +158,134 @@ hover tooltip to nearly every key-terms entry, where ~90% of those tooltips woul
 printed directly beneath. Making (ii) safe requires _adding_ an exclusion to vefur's existing walker
 — the same permanent second selector (i) is charged with. That decision has not been taken; nothing
 in this note depends on it.
+
+---
+
+# Addendum, later on 2026-09-05 — the ask: please re-render organic ch03
+
+**vefur `main` is now `da06b2b`** (the note above was written at `12d8389`).
+**Measured against efni `origin/main` `16616d04`.**
+
+## A1. vefur's half is now complete, not just the matcher
+
+[#227](https://github.com/SigurdurVilhelmsson/namsbokasafn-vefur/pull/227) landed after the note
+above was written. `data-en` is now not only _read_ by the three consumers of §3 — it is also
+_displayed_: a `.term-en` span renders ` (e. …)` from the attribute, behind a reader setting
+(**Enskt heiti hugtaka**, default on). So when efni stops emitting the inline gloss, the English
+does not disappear from the page; the source of the visible text just moves from the content to
+the attribute.
+
+Nothing further is needed from vefur for the `<dfn>` half of the contract. `<dt data-en>` remains
+open (see _Not covered here_, above) and is unaffected by this ask.
+
+## A2. The ask
+
+```bash
+node tools/cnxml-render.js --book lifraen-efnafraedi --chapter 3
+```
+
+⚠️ **`--book` is parsed but is missing from `--help`.** `BOOK_OPTION` is in `parseCliArgs` and
+`BOOK_SLUG = args.book` at `tools/cnxml-render.js:3461`, but neither the header block (`:14-23`)
+nor the printed usage (`:579-599`) mentions it, and the default is `efnafraedi-2e`. Omitting it
+renders the wrong book silently. Worth adding to the usage text while you are in there.
+
+## A3. Why this chapter, and why it is unblocked _now_
+
+Organic ch03 has a **complete** `termEnglish` map that has never reached a render. Counting unit =
+keys in `termEnglish` per manifest, from `02-structure/ch03/*-manifest.json` at `origin/main`:
+
+| module    | `termEnglish` keys | published file                       | `<dfn class="term">` |
+| --------- | ------------------ | ------------------------------------ | -------------------- |
+| m00031    | 0                  | `3-0-introduction.html`              | 0                    |
+| m00032    | 16                 | `3-1-virknihopar.html`               | 16                   |
+| m00033    | 8                  | `3-2-alkanar-og-alkanhverfur.html`   | 8                    |
+| m00034    | 2                  | `3-3-alkilhopar.html`                | 2                    |
+| m00035    | 1                  | `3-4-nafngiftir-alkana.html`         | 1                    |
+| m00036    | 0                  | `3-5-eiginleikar-alkana.html`        | 0                    |
+| m00037    | 9                  | `3-6-afbrigdi-etans.html`            | 9                    |
+| m00038    | 3                  | `3-7-stellingar-annarra-alkana.html` | 3                    |
+| **total** | **39**             | —                                    | **39**               |
+
+The map matches the published `<dfn>` count **per module**, not just in aggregate — so the join is
+expected to reach 39/39 with no shortfall to explain. Today the published tree carries
+**`data-en` = 0**.
+
+**The reason is ordering, not a defect.** The chapter was published at `02b407cf`
+(2026-09-02 19:25Z); every piece of the `data-en` machinery landed the following day —
+manifests `92f1ab81` (16:25Z), the `<dfn>` emitter `59ccff17` (17:25Z), the key-terms `<dt>`
+emitter `013956da` (17:48Z), the coverage report `a4f2464d` (17:52Z). The chapter simply predates
+its own attributes.
+
+Its **translated CNXML has not moved since 2026-09-02** (`6826adef`), which is what makes this a
+cheap pilot rather than an undelivered re-translation — the distinction §5 draws against
+chemistry ch03.
+
+## A4. The post-render check is already built in
+
+Do not grep for it. `cnxml-render.js:3798-3804` prints, per module:
+
+```
+terms: <N>/<M> <dfn id> carry data-en
+```
+
+Expect `16/16`, `8/8`, `2/2`, `1/1`, `9/9`, `3/3` — **39/39 for the chapter**. Anything less, and
+the line names the remedy itself (a stale manifest tells you to re-run `cnxml-extract.js`).
+
+`59ccff17`'s own message already claims "39/39" for this chapter, so the emitter has been measured
+against it; what has not happened is the result being **published**.
+
+## A5. What this pilot proves — and what it deliberately does not
+
+Being precise, because the pilot is narrower than "end-to-end":
+
+**It proves:** the attribute is emitted correctly on real content, at full coverage, keyed on the
+id the render exposes; and that vefur's three consumers ingest a real `data-en` corpus without
+double-rendering.
+
+**It does not exercise:**
+
+- **Tooltips.** `lifraen-efnafraedi` ships **no `glossary.json`**, so the matcher's `data-en` tier
+  has nothing to match against here. Expected, and a property of the book (§5 already flags it).
+- **The key-terms `<dt>` half.** Organic ch03's `3-key-terms.html` yields **0** `<dt>`
+  (control: chemistry ch03's yields **20**).
+- 🔑 **The visible `.term-en` span — and this one is the counter-intuitive part.** With
+  `annotateInlineTerms` still on (as the gate requires), the render emits the inline gloss _and_
+  the attribute. vefur dedupes on the **marker**, so all 38 glossed `<dfn>` are skipped; the 39th
+  is `<dfn>R</dfn>`, whose `termEnglish` value is the string `"R"`, which the `EN === IS` guard
+  skips. **Net new spans on organic ch03: zero.** That is correct behaviour, not a null result —
+  it is the no-double-render property being demonstrated on real content. The span only becomes
+  visible when the gloss goes, which is exactly the flip the gate is holding.
+
+## A6. Correction to §5 above: "removes no glosses" needs one word of care
+
+§5 says organic ch03 "removes no glosses". That is true of the **re-render** — no existing gloss is
+removed by adding the attribute. But the counts are not equal and a reader could be misled:
+**39 `<dfn>`, 38 inline glosses.** The odd one out is `<dfn id="term-00002" class="term">R</dfn>` in
+`3-3-alkilhopar.html`, which never carried a gloss because efni's own annotator skips `EN === IS`.
+Its manifest entry is `"term-00002": "R"`, so after the re-render it **will** carry
+`data-en="R"` — attribute present, gloss absent, and vefur suppresses the span. All three sides
+agree; only the two counts differ.
+
+## A7. Two caveats on the re-render itself
+
+- **It is not attribute-only at the tool level.** Nineteen commits touched `tools/cnxml-render.js`
+  or `tools/lib/` between the 2026-09-02 publish and `16616d04`. Most are figure-review work that
+  cannot fire here — the only `figure-text` sidecars in the whole tree are three under
+  `__e2e-fixture__`, and organic ch03 has none, so no `data-figure-review` is expected — but
+  `94ad869e` (math labels) and `700b1800` (order-independent `<term>` id) do change render output
+  in general. Diff the output, don't assume it is a one-attribute delta.
+- **The render prunes superseded pages and writes `slug-map.<track>.json`.** The 2026-09-02 publish
+  message records "3 slugs pruned". If this run renames anything, **tell vefur**: a rename retires
+  a reader URL, and the redirect must be added to `src/lib/data/sectionRedirects.ts` — which is a
+  checked-in constant here, not a reader of your slug map. No rename is expected (the CNXML is
+  unchanged and none of the seven section titles contains math), but "expected" is not "checked".
+
+## A8. 🔴 Unchanged: do not flip `annotateEn`
+
+This ask does **not** move the gate of §2. `tools/generate-glossary.js` and
+`tools/generate-index.js` still scrape the marker and still know nothing of `termEnglish`
+(0 hits each; control: 9 in `cnxml-render.js`). A flip today still empties 853/867 glossary
+`english` values and 813/827 index `termEn` values, silently.
+
+Re-rendering organic ch03 with the gloss **still emitted** is safe precisely because it changes
+none of that. Keep `annotateInlineTerms` on.
