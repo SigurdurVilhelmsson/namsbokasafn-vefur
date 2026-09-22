@@ -39,6 +39,10 @@
   /* Legacy aliases (keep for backwards compatibility) */
   --note-link-learning-bg: var(--note-blue-bg);
   --note-link-learning-border: var(--note-blue-border);
+  /* CNXML <quote> callouts (efni §C179) — aliased to the yellow pair rather than
+     given their own colour, so the .dark block below re-themes them for free. */
+  --callout-bg: var(--note-yellow-bg);
+  --callout-border: var(--note-yellow-border);
   --note-everyday-life-bg: var(--note-yellow-bg);
   --note-everyday-life-border: var(--note-yellow-border);
   --note-sciences-bg: var(--note-green-bg);
@@ -184,6 +188,82 @@ article.cnx-module p {
 
 article.cnx-module dfn.term {
   font-weight: 700;
+  font-style: normal;
+}
+
+/* ==============================================
+   CALLOUT (CNXML <quote> — named-rule boxes)
+   ============================================== */
+
+/* Emitted by efni's cnxml-render as <blockquote class="cnx-callout">, from CNXML
+   <quote>. Organic chemistry only: 4 elements in 3 modules, every one an
+   OpenStax named-rule callout — Markovnikov's rule, the Hammond postulate —
+   which the source sets off as a box after a sentence ending "...known as:".
+
+   Until efni gained a builder for it the wrapper was dropped entirely and the
+   rule rendered as an ordinary paragraph: the words reached the reader, the
+   emphasis did not. A bare <blockquote> already indents on browser defaults, so
+   this rule is what restores the boxed presentation rather than what rescues
+   the text.
+
+   Left border + tint follows the .note-* idiom so callouts read as part of the
+   same family. ⚠️ It aliases the EXISTING yellow pair rather than introducing a
+   colour: the `.dark` block at the foot of this file redefines --note-yellow-*,
+   so dark mode is inherited instead of being a second thing to remember. A first
+   draft invented --content-accent / --content-callout-bg, which exist nowhere —
+   the fallbacks would have fired every time and dark mode would have been wrong. */
+article.cnx-module blockquote.cnx-callout {
+  margin: 20px 0;
+  padding: 12px 16px;
+  border-left: 4px solid var(--callout-border);
+  background-color: var(--callout-bg);
+  border-radius: 0 4px 4px 0;
+}
+
+article.cnx-module blockquote.cnx-callout p:first-child {
+  margin-top: 0;
+}
+
+article.cnx-module blockquote.cnx-callout p:last-child {
+  margin-bottom: 0;
+}
+
+/* ==============================================
+   SMALL CAPS (D/L carbohydrate notation)
+   ============================================== */
+
+/* Emitted by efni's cnxml-render as <span class="smallcaps">, from CNXML
+   <emphasis effect="smallcaps">. Organic chemistry carries 116 occurrences across
+   12 modules, all of them the D/L stereochemical prefix (D x86, L x28, BC x2).
+
+   ⚠️ NOT organic-only, though an earlier draft of this comment said so:
+   edlisfraedi-2e carries 2 more (ch02/m42096, the A.M. time prefix). Chemistry
+   has zero. Physics is withheld from sync today, so there is no reader impact —
+   but the scope claim is recorded here as measured fact, and it was wrong.
+
+   ⚠️ IT MUST NOT BE ITALIC. Before efni gave smallcaps its own marker type these
+   fell through to the renderer's default and came out as <em> — and in chemical
+   nomenclature the alpha/beta prefixes ARE italic while D/L are not, so italics
+   here states something false rather than merely looking wrong.
+
+   font-variant-caps is the modern property; font-variant is the wider-supported
+   shorthand. Both are given so the rule degrades to correct-but-plain rather
+   than to italics.
+
+   font-style: normal is NOT defensive boilerplate and NOT about an enclosing
+   <em> — an earlier draft claimed that and it was wrong. Measured: 2 of the 116
+   sit in a <figure><caption>, which this stylesheet renders italic as
+   `figcaption` (see FIGURES below). Those two are what the declaration actually
+   rescues. The other 114 are in no italic context: 102 are direct <para>
+   children, and all 6 with an <emphasis> parent are effect="bold" -> <strong>,
+   which does not italicise. Without any rule the browser shows a normal capital D, which
+   is what readers see today — so this is safe to land before the content does,
+   and that ordering is deliberate: this file is the cross-repo contract, and
+   efni's css-contract test scans PUBLISHED HTML, so the gap would otherwise open
+   at publish time rather than now. */
+article.cnx-module .smallcaps {
+  font-variant-caps: small-caps;
+  font-variant: small-caps;
   font-style: normal;
 }
 
