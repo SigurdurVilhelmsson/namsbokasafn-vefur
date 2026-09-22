@@ -233,8 +233,13 @@ article.cnx-module blockquote.cnx-callout p:last-child {
    ============================================== */
 
 /* Emitted by efni's cnxml-render as <span class="smallcaps">, from CNXML
-   <emphasis effect="smallcaps">. Organic chemistry only: 116 occurrences across
+   <emphasis effect="smallcaps">. Organic chemistry carries 116 occurrences across
    12 modules, all of them the D/L stereochemical prefix (D x86, L x28, BC x2).
+
+   ⚠️ NOT organic-only, though an earlier draft of this comment said so:
+   edlisfraedi-2e carries 2 more (ch02/m42096, the A.M. time prefix). Chemistry
+   has zero. Physics is withheld from sync today, so there is no reader impact —
+   but the scope claim is recorded here as measured fact, and it was wrong.
 
    ⚠️ IT MUST NOT BE ITALIC. Before efni gave smallcaps its own marker type these
    fell through to the renderer's default and came out as <em> — and in chemical
@@ -243,7 +248,15 @@ article.cnx-module blockquote.cnx-callout p:last-child {
 
    font-variant-caps is the modern property; font-variant is the wider-supported
    shorthand. Both are given so the rule degrades to correct-but-plain rather
-   than to italics. Without any rule the browser shows a normal capital D, which
+   than to italics.
+
+   font-style: normal is NOT defensive boilerplate and NOT about an enclosing
+   <em> — an earlier draft claimed that and it was wrong. Measured: 2 of the 116
+   sit in a <figure><caption>, which this stylesheet renders italic as
+   `figcaption` (see FIGURES below). Those two are what the declaration actually
+   rescues. The other 114 are in no italic context: 102 are direct <para>
+   children, and all 6 with an <emphasis> parent are effect="bold" -> <strong>,
+   which does not italicise. Without any rule the browser shows a normal capital D, which
    is what readers see today — so this is safe to land before the content does,
    and that ordering is deliberate: this file is the cross-repo contract, and
    efni's css-contract test scans PUBLISHED HTML, so the gap would otherwise open
