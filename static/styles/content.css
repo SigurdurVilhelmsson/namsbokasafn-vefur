@@ -39,6 +39,10 @@
   /* Legacy aliases (keep for backwards compatibility) */
   --note-link-learning-bg: var(--note-blue-bg);
   --note-link-learning-border: var(--note-blue-border);
+  /* CNXML <quote> callouts (efni §C179) — aliased to the yellow pair rather than
+     given their own colour, so the .dark block below re-themes them for free. */
+  --callout-bg: var(--note-yellow-bg);
+  --callout-border: var(--note-yellow-border);
   --note-everyday-life-bg: var(--note-yellow-bg);
   --note-everyday-life-border: var(--note-yellow-border);
   --note-sciences-bg: var(--note-green-bg);
@@ -185,6 +189,43 @@ article.cnx-module p {
 article.cnx-module dfn.term {
   font-weight: 700;
   font-style: normal;
+}
+
+/* ==============================================
+   CALLOUT (CNXML <quote> — named-rule boxes)
+   ============================================== */
+
+/* Emitted by efni's cnxml-render as <blockquote class="cnx-callout">, from CNXML
+   <quote>. Organic chemistry only: 4 elements in 3 modules, every one an
+   OpenStax named-rule callout — Markovnikov's rule, the Hammond postulate —
+   which the source sets off as a box after a sentence ending "...known as:".
+
+   Until efni gained a builder for it the wrapper was dropped entirely and the
+   rule rendered as an ordinary paragraph: the words reached the reader, the
+   emphasis did not. A bare <blockquote> already indents on browser defaults, so
+   this rule is what restores the boxed presentation rather than what rescues
+   the text.
+
+   Left border + tint follows the .note-* idiom so callouts read as part of the
+   same family. ⚠️ It aliases the EXISTING yellow pair rather than introducing a
+   colour: the `.dark` block at the foot of this file redefines --note-yellow-*,
+   so dark mode is inherited instead of being a second thing to remember. A first
+   draft invented --content-accent / --content-callout-bg, which exist nowhere —
+   the fallbacks would have fired every time and dark mode would have been wrong. */
+article.cnx-module blockquote.cnx-callout {
+  margin: 20px 0;
+  padding: 12px 16px;
+  border-left: 4px solid var(--callout-border);
+  background-color: var(--callout-bg);
+  border-radius: 0 4px 4px 0;
+}
+
+article.cnx-module blockquote.cnx-callout p:first-child {
+  margin-top: 0;
+}
+
+article.cnx-module blockquote.cnx-callout p:last-child {
+  margin-bottom: 0;
 }
 
 /* ==============================================
