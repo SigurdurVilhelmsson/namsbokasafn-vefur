@@ -188,6 +188,32 @@ article.cnx-module dfn.term {
 }
 
 /* ==============================================
+   SMALL CAPS (D/L carbohydrate notation)
+   ============================================== */
+
+/* Emitted by efni's cnxml-render as <span class="smallcaps">, from CNXML
+   <emphasis effect="smallcaps">. Organic chemistry only: 116 occurrences across
+   12 modules, all of them the D/L stereochemical prefix (D x86, L x28, BC x2).
+
+   ⚠️ IT MUST NOT BE ITALIC. Before efni gave smallcaps its own marker type these
+   fell through to the renderer's default and came out as <em> — and in chemical
+   nomenclature the alpha/beta prefixes ARE italic while D/L are not, so italics
+   here states something false rather than merely looking wrong.
+
+   font-variant-caps is the modern property; font-variant is the wider-supported
+   shorthand. Both are given so the rule degrades to correct-but-plain rather
+   than to italics. Without any rule the browser shows a normal capital D, which
+   is what readers see today — so this is safe to land before the content does,
+   and that ordering is deliberate: this file is the cross-repo contract, and
+   efni's css-contract test scans PUBLISHED HTML, so the gap would otherwise open
+   at publish time rather than now. */
+article.cnx-module .smallcaps {
+  font-variant-caps: small-caps;
+  font-variant: small-caps;
+  font-style: normal;
+}
+
+/* ==============================================
    FIGURES
    ============================================== */
 
