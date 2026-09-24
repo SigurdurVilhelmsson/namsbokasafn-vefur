@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="is">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Lífræn efnafræði — Námsbókasafn</title>
+    <!--
+  Served by nginx with HTTP 404 at /lifraen-efnafraedi and /lifraen-efnafraedi/
+  ([USER] ruling 2026-09-23, efni docs/decisions/2026-09-23-organic-translation-stopped-openstax-notice.md).
+  Lives OUTSIDE build/ on the server — see nginx-config-example.conf — so the
+  deploy's rsync --delete cannot remove it. Self-contained on purpose: no app
+  bundle, no fonts, no external requests.
+-->
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #faf8f5;
+        --fg: #1f1d1a;
+        --muted: #5c574f;
+        --accent: #c78c20;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #1a1917;
+          --fg: #ece8e1;
+          --muted: #a8a197;
+          --accent: #e8a838;
+        }
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          1.125rem/1.6 Georgia,
+          "Times New Roman",
+          serif;
+      }
+      main {
+        max-width: 36rem;
+        padding: 2rem 1rem;
+      }
+      h1 {
+        font:
+          600 1.75rem/1.25 system-ui,
+          sans-serif;
+        margin: 0 0 1rem;
+      }
+      p {
+        margin: 0 0 1.5rem;
+        color: var(--muted);
+      }
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Lífræn efnafræði</h1>
+      <p>
+        Lífræn efnafræði hefur verið tekin úr birtingu. Þýðing bókarinnar hefur
+        ekki fengið heimild frá OpenStax að svo stöddu.
+      </p>
+      <p><a href="/">Til baka á forsíðu Námsbókasafns</a></p>
+    </main>
+  </body>
+</html>
