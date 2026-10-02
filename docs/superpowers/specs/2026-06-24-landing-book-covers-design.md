@@ -1,7 +1,7 @@
 # Landing-page procedural book covers — design
 
 **Date:** 2026-06-24
-**Status:** Approved (design); pending implementation plan
+**Status:** Approved (design); implemented per `docs/superpowers/plans/2026-06-24-landing-book-covers.md` and shipped in PR #167 (merged 2026-06-24)
 **Scope:** The two book grids on the landing page (`src/routes/+page.svelte`) — the
 Tier-1 "Þýðingar" translations and the "Sýnishorn" samples. **Out of scope:** the
 Tier-2 "OpenStax safnið" compact accordion list, the hero, tools, about, and FAQ

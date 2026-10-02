@@ -12,8 +12,11 @@
  * Accuracy principle (method-based, not blanket): the chemistry first draft is MACHINE
  * translation (Erlendur/Miðeind) that humans then edit — so the machine is the
  * translator and the humans are ritstjórn/yfirlestur. Raw machine-translated previews
- * credit the machine only (no reviewer claim). Manually translated content (biology)
- * credits the human translator. We never claim yfirlestur where it has not happened.
+ * credit the machine only (no reviewer claim). Manually translated content credits the
+ * human translator, but no published book is manually translated today: biology, the one
+ * book that names a human translator, moved to machine translation first under efni's
+ * [LEAD] decision of 2026-07-25, and as a `status: 'preview'` book it gets the machine
+ * credit (R6-2). We never claim yfirlestur where it has not happened.
  *
  * All strings Icelandic (UI language); inserted verbatim from editorial copy.
  */

@@ -1,7 +1,8 @@
 /**
  * Canonical icon registry — single source for the unified icon set.
  *
- * Per docs/design/icon-guidance-2026-06.md: one Lucide set, one wrapper
+ * Per icon-guidance-2026-06.md (never committed here; see
+ * docs/design/icon-handback-2026-06.md): one Lucide set, one wrapper
  * (`Icon.svelte`), three sizes. Glyphs are bundled from the `lucide` package
  * (no runtime CDN), so a set-wide change is one import here.
  *

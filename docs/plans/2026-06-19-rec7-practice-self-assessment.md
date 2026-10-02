@@ -3,6 +3,8 @@
 > **For agentic workers:** Use `superpowers:subagent-driven-development` (recommended) or
 > `superpowers:executing-plans` to implement task-by-task. Steps use `- [ ]` checkboxes.
 
+> **Status (2026-10-01):** Shipped in PR #150 (merged 2026-06-19); the checkboxes below were not back-filled. Task E: PR #150's body records Steps 1 and 3 — inline entries land in the store and `/prof` surfaces them with the real question; AdaptiveQuiz was left untouched per decision #2, and no follow-up was opened. Step 2 was confirmed by a Playwright run on 2026-10-01: rated problems appear in `/nam` practice, and in `/nam` review once their 1-day interval has passed. Under "Deferred / out of scope": M4 was fixed in #151 the same day, and M2 had already been fixed in 88243f1 (#115).
+
 **Goal:** Give the inert practice-tracking → adaptive pipeline a real data source by adding
 a lightweight, optional self-assessment to the path-(a) Example reveal that writes mastery
 to the quiz store, feeding the `/nam` spaced practice/review phases.

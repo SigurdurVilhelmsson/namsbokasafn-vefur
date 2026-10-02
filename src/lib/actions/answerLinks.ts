@@ -256,8 +256,11 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 					if (hasAnswer !== 'true') return;
 				} else {
 					// Fallback for pages rendered before the efni change (no
-					// data-has-answer yet): legacy parity heuristic. Drop once
-					// efnafraedi-2e is re-rendered + synced. Number format is
+					// data-has-answer yet): legacy parity heuristic. efnafraedi-2e now
+					// carries the attribute on every exercise, but the paused books are
+					// not re-synced and two of them still lack it (as of 2026-10-01:
+					// edlisfraedi-2e 0 of 141, orverufraedi 0 of 80). Drop only once
+					// every live book carries it. Number format is
 					// "1.1" / "9.105" (chapter.exerciseNum) — use the part after ".".
 					const numStr = exerciseNum || '0';
 					const num = numStr.includes('.')

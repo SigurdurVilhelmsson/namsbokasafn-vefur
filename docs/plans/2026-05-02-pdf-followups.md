@@ -2,6 +2,8 @@
 
 Tracking items from the PDF-download work (commit `92936c1` on main, May 2026) and the broken-link investigation that came out of it.
 
+> **Status (2026-10-01):** Continuous page numbering is **done** (`stampPages` + `toc-pages.json` in `scripts/generate-pdfs.js`; in the 2026-07-01 book PDF the folios run continuously across all 1,452 numbered pages and all 23 TOC page numbers land on the right pages). `handleMissingId` is still `'warn'`, but its blocker no longer reproduces: seven sampled CI builds between 2026-07-06 and 2026-09-24 logged 0 "no element with id" warnings. efni never built the book-wide id map, but its appendix id map (`buildAppendixIdMap`) now resolves the chapter→appendix links this setting was added for. Nothing now blocks re-tightening it. The 2026-07-01 book PDF is 124,117,491 B (1,455 pages), not ~50 MB. No PDF is served on namsbokasafn.is yet.
+
 ## Open in this repo
 
 ### Re-tighten `handleMissingId` once renderer is fixed

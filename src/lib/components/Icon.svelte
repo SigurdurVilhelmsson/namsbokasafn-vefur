@@ -1,6 +1,7 @@
 <script lang="ts">
 	/**
-	 * Unified icon wrapper (docs/design/icon-guidance-2026-06.md §3).
+	 * Unified icon wrapper (icon-guidance-2026-06.md §3 — that spec was never
+	 * committed here; see docs/design/icon-handback-2026-06.md).
 	 *
 	 * Owns the four standard Lucide attributes so stroke/viewBox can't drift, and
 	 * the size token so every icon resolves to --icon-sm/md/lg. Components pass a

@@ -2,6 +2,8 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
+> **Status (2026-10-01):** Shipped 2026-02-20 — `5d3dc31` "feat: Nordic Clarity full site redesign" and its sibling commits are on `main`. The unticked boxes below are visual-QA checklists that were never back-filled.
+
 **Goal:** Full visual redesign of Námsbókasafn with the "Nordic Clarity" aesthetic — warm amber/gold accent, Bricolage Grotesque + Literata typography, knowledge-graph hero, left-border content blocks, FAB replacing mobile bottom nav, first-class dark mode.
 
 **Architecture:** CSS-first approach. Phase 1 updates design tokens (CSS variables, fonts) so the entire site inherits the new palette immediately. Subsequent phases rework individual components. The existing Svelte component structure, stores, and routing stay unchanged — this is a visual overhaul, not an architectural rewrite.

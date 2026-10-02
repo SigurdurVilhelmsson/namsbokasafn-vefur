@@ -124,9 +124,12 @@ export const SECTION_REDIRECTS: SectionRedirect[] = [
 	// while 3-7 goes `afbrigdi` -> `stellingar`. That is what efni recorded and it
 	// is not a transcription slip; do not "normalise" them into the same direction.
 	//
-	// ⚠️ efni's branch `feat/c82-action3-full-corpus-loop` carries these pages and
-	// has NOT merged to efni `main`, so a sync from `main` will not publish the
-	// targets yet. These entries simply stay inert until it does.
+	// ⚠️ SUPERSEDED (2026-10-01). efni `main` now carries this chapter's pages, so a
+	// sync from `main` would activate these rows, and efni's slug map no longer
+	// matches two of them: m00033 now goes to `3-2-alkanar-og-alkana-hverfur`, and
+	// m00037 runs the other way (`3-6-afbrigdi-etans` -> `3-6-stellingar-etans`).
+	// Organic chemistry was withdrawn on 2026-09-23, so all three rows are due for
+	// REMOVAL with the app-side retirement of the book, not for retargeting.
 	{
 		bookSlug: 'lifraen-efnafraedi',
 		fromChapter: '03',

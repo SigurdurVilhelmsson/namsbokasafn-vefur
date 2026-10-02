@@ -1,5 +1,7 @@
 # Component & API Documentation
 
+> ⚠️ **Partly historical (status 2026-10-01).** The **State Management**, **Custom Hooks** and **Component Reference** sections describe the React app that the SvelteKit migration replaced — Zustand stores, `@/hooks/*` hooks and `.tsx` components — none of which is used now: state lives in Svelte stores under `src/lib/stores/`, and of the ten components listed only `Header`, `Sidebar`, `SearchModal` and `SettingsModal` still exist, as `.svelte` files. The **Utility Functions** and **Type Definitions** sections still name real code in `src/lib/utils/` (`contentLoader.ts`, `srs.ts`, `searchIndex.ts`) and `src/lib/types/`, imported from `$lib/...` rather than `@/...`.
+
 ## Table of Contents
 
 1. [State Management (Stores)](#state-management-stores)

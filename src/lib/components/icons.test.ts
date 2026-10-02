@@ -1,6 +1,7 @@
 /**
  * Tests for the icon registry — the testable core behind Icon.svelte.
- * Per docs/design/icon-guidance-2026-06.md: one canonical Lucide set, three sizes.
+ * Per icon-guidance-2026-06.md (never committed here; see
+ * docs/design/icon-handback-2026-06.md): one canonical Lucide set, three sizes.
  */
 
 import { describe, it, expect } from 'vitest';

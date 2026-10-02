@@ -204,3 +204,12 @@ re-render can proceed whenever the content track is ready; vefur's CSS is alread
 - vefur memory: `css-cross-book-gaps`, `embed-csp-frame-src-deploy`,
   `efni-campaign-handoff-2026-07-17`, `ci-blocked-actions-billing`
 - efni memory: `d4-iframe-embeds`, `vefur-embed-css-item11-2026-07-17`
+
+## Correction, 2026-10-01
+
+- **Findings 1 and 2 are done; do not act on them again.** efni PR #297 ("css-contract
+  selector-block parse + embed-host CSP allowlist gate", merged 2026-07-17) makes
+  `extractCssClasses` read the whole selector block, with a regression test for a class on an
+  earlier line of a comma-separated selector, and makes efni fail loud on an embed host
+  outside `{www.youtube.com, phet.colorado.edu}` (`ALLOWED_EMBED_HOSTS`).
+- **The deploy gate is still open:** on 2026-10-01 the live CSP still has no `frame-src`.

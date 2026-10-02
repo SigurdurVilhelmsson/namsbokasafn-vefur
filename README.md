@@ -8,17 +8,19 @@ Iceland's small language community means that high-quality science textbooks in 
 
 The reader is a static SvelteKit site with no backend — all user state (progress, bookmarks, flashcard history) lives in localStorage. Content is pre-rendered HTML produced by a translation pipeline in the sister repository [namsbokasafn-efni](https://github.com/SigurdurVilhelmsson/namsbokasafn-efni).
 
-This is an active open educational resource (OER) project. The code is MIT-licensed and the translated content is CC BY 4.0. If you're working on similar textbook translation projects for other languages, this codebase is designed to be forked and adapted.
+This is an active open educational resource (OER) project. The code is MIT-licensed; the translated content carries a per-book Creative Commons licence — CC BY 4.0 or CC BY-NC-SA 4.0, depending on the book (see [License](#license)). If you're working on similar textbook translation projects for other languages, this codebase is designed to be forked and adapted.
 
 ### Available books
 
-| Book                                     | Status      | Progress          |
-| ---------------------------------------- | ----------- | ----------------- |
-| **Efnafræði** (Chemistry 2e)             | Available   | 21 of 21 chapters |
-| **Líffræði** (Biology 2e)                | In progress | 2 chapters        |
-| **Lífræn efnafræði** (Organic Chemistry) | Preview     | 1 chapter         |
-| **Örverufræði** (Microbiology)           | Preview     | 1 chapter         |
-| **Eðlisfræði** (Physics)                 | Preview     | 1 chapter         |
+| Book                                     | Status               | Progress          |
+| ---------------------------------------- | -------------------- | ----------------- |
+| **Efnafræði** (Chemistry 2e)             | Available            | 21 of 21 chapters |
+| **Líffræði** (Biology 2e)                | Preview — paused     | 2 chapters (3, 5) |
+| **Lífræn efnafræði** (Organic Chemistry) | Withdrawn 2026-09-23 | 1 chapter (3)     |
+| **Örverufræði** (Microbiology)           | Preview — paused     | 2 chapters (1, 5) |
+| **Eðlisfræði** (Physics)                 | Preview — paused     | 1 chapter (4)     |
+
+Paused books (a ruling of 2026-08-22) stay online as they are but receive no new content. Lífræn efnafræði was withdrawn because OpenStax has not authorised the translation; it stays online until the removal is deployed.
 
 ## Demo / Live Version
 
@@ -239,8 +241,10 @@ already enforces in code (`src/lib/data/bookCredits.ts`). For most books the
 first draft is machine translation (Erlendur, Miðeind) which people then edit,
 so the machine is credited as the translator and the people are credited for
 **ritstjórn** and **yfirlestur**. Chapters marked _forskoðun_ are raw machine
-translation with no reviewer claim. Biology is the exception — it is
-human-translated.
+translation with no reviewer claim. Biology follows the same method: on 2026-07-25
+it moved to machine translation first (its editor's own chapter-3 translation is
+kept in the sister repo as a reference), and its published chapters are raw
+machine translation, credited that way.
 
 | Hlutverk                         |                                           |
 | -------------------------------- | ----------------------------------------- |
@@ -254,9 +258,11 @@ Icelandic edition: machine translation with human editorial review. CC BY 4.0.
 
 ## Status
 
-Actively maintained. The reader is stable and in use. New chapters are added as translations are completed in the sister repo.
+Actively maintained. The reader is stable and in use. New content is now added only to the chemistry book, as translations are completed in the sister repo; the other four books are paused or withdrawn (see [Available books](#available-books)).
 
-### Current development (June 2026)
+### Reader development (as of June 2026)
+
+_Status 2026-10-01: neither release branch below has been merged or released — `package.json` is still at 1.0.0 and the repository has no release tags._
 
 A full codebase audit and remediation landed on `main` in June 2026 — see
 [`docs/code-review-2026-06.md`](docs/code-review-2026-06.md) for the findings

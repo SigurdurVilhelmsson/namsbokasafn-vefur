@@ -1,6 +1,6 @@
 # PDF Output Redesign — Design Spec & Implementation Plan
 
-> **Status (branch `feature/pdf-redesign`, PR #182 opened 2026-07-02):** **Phase 0** (spikes) ✓ · **Phase 1** (visual redesign, incl. duplex margins + pagination) ✓ · **Task 1.8** (build date + MT watermark) ✓ · **Task 4.1** (standalone-only colophon) ✓ · **Phase 2 core** — content-link resurrection + clickable TOC ✓ (2.1 fonts deferred, 2.2 section outline blocked-noted). **Next:** Phase 3 link _styling_ (dark-amber cross-refs) + exercise↔answer + back-of-book glossary; Phase 4.2/4.3 metadata/footer; Phase 5 profiles. Created 2026-07-01.
+> **Status (2026-10-01):** PR #182 merged to `main` on 2026-07-02. Done: **Phase 0** (spikes) ✓ · **Phase 1** (visual redesign, incl. duplex margins + pagination) ✓ · **Task 1.8** (build date + MT watermark) ✓ · **Task 4.1** (standalone-only colophon) ✓ · **Phase 2 core** — content-link resurrection + clickable TOC ✓ (2.1 fonts deferred, 2.2 section outline blocked-noted) · **Phase 3** — link styling ✓ and back-of-book glossary with term-links ✓. **Next:** Task 3.3 exercise↔answer — no longer blocked (synced chemistry carries `data-has-answer` on all 22 `.eoc-exercise` files) but not built; Phase 4.2/4.3 metadata/footer; Phase 5 profiles. No PDF is served on namsbokasafn.is yet (`/downloads/efnafraedi-2e/manifest.json` answers with the 3,012-byte app shell). Created 2026-07-01.
 > **For agentic workers:** use `superpowers:subagent-driven-development` or `superpowers:executing-plans` to implement task-by-task. Steps use `- [ ]` checkboxes.
 > **Attached to:** `docs/plans/2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md` (§ Planned) and the open-work triage `docs/plans/2026-06-30-open-work-triage-vs-efni.md` (backlog).
 
@@ -212,12 +212,13 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 - **Structure finding:** "Kannaðu þekkingu þína" is authored _inside_ `<aside class="example">` (nested, last child), so an example and its test-your-knowledge are one HTML block and stay together whenever the block fits a page.
 
 - **(a) Equation density — the dominant lever (done).** `content.css` gives every `div.equation` 20px margins + 0.25rem padding and an inner 10px `mjx-container` padding — fine on screen, wasteful in print where worked examples stack many calculation steps. Tightened in print to `div.equation { margin: 0.35em; padding: 0 }` + inner `padding: 1px` + display-math `margin: 0.35em`. **Measured on kafli-15 (16 examples, A4 content box ≈ 956px, via a browser `getBoundingClientRect` pass):**
-  | metric | before | after tightening |
-  | --- | --- | --- |
-  | examples whose **core** (problem+solution) alone > 1 page | 8 | **2** (15.12, 15.16) |
-  | examples whose **full** block > 1 page | 14 | 6 |
-  | kafli-15 total pages | 63 | **53** (−16%) |
-  Equations remain visually well-spaced (not cramped); Dæmi 15.6 went from spanning 2 pages to fitting whole (incl. test-your-knowledge).
+
+  | metric                                                                                                                                  | before | after tightening     |
+  | --------------------------------------------------------------------------------------------------------------------------------------- | ------ | -------------------- |
+  | examples whose **core** (problem+solution) alone > 1 page                                                                               | 8      | **2** (15.12, 15.16) |
+  | examples whose **full** block > 1 page                                                                                                  | 14     | 6                    |
+  | kafli-15 total pages                                                                                                                    | 63     | **53** (−16%)        |
+  | Equations remain visually well-spaced (not cramped); Dæmi 15.6 went from spanning 2 pages to fitting whole (incl. test-your-knowledge). |
 
 - **(b) Cohesion — seam-break (done; policy confirmed by reviewer).** Removed `aside.example` from the global `break-inside: avoid` list; instead fence the core so the problem+solution can't split (each direct child `break-inside: avoid`, `break-before: avoid` between consecutive core children) while leaving the nested check-knowledge as the single permitted break point. So: example stays whole when it fits; for the ~4 borderline cases (core fits, full block doesn't) the test-your-knowledge drops to the next page instead of leaving a ~40% gap; **never splits mid-solution.** Seam protection: `break-after: avoid` on `.note-type`/note `h4`/`.para-title`/example label so no heading is stranded.
 

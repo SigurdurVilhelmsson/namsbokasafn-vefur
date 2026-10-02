@@ -42,7 +42,8 @@
     --radius-xl: 1rem;
     --radius-full: 9999px;
 
-    /* Icon sizing scale (docs/design/icon-guidance-2026-06.md §2).
+    /* Icon sizing scale (icon-guidance-2026-06.md §2 — that spec was never
+       committed here; see docs/design/icon-handback-2026-06.md).
        stroke-width stays 2 at every size; only the box scales. */
     --icon-sm: 1rem; /* 16px — inline in text, chips, dense lists */
     --icon-md: 1.25rem; /* 20px — buttons, header actions, kickers (default) */

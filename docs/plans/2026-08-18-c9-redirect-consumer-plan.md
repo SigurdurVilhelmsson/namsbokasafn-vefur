@@ -4,6 +4,8 @@
 Everything below was measured — against this repo, against `../namsbokasafn-efni`, and against live
 prod — not recalled. Where it contradicts the handoff, the measurement is cited.
 
+> **Status (2026-10-01):** Shipped: the consumer and the `isRedirect` fix in #206 and the warn-only rename detector in #207 (both merged 2026-08-18), then redirect rows in #208 (chemistry ch20) and #209 (four physics ch04 slugs, inert while physics is withheld). The ch10 and ch20 redirect stubs are live. Two decisions below are superseded: §4's "Do NOT build … a `slug-map.*.json` reader" — on 2026-09-02 [USER] asked for that generic consumer to be scheduled ASAP, and it is not built yet; and §5 / §7.1's "revisit if a second rename lands" — #208 was that second rename, and no section-slug localStorage migration exists yet.
+
 ---
 
 ## 0. State of the world, measured 2026-08-18
