@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 /**
- * Print the rsync exclude patterns the production deploy must use.
+ * The rsync rules the production deploy must use. `scripts/deploy.js` (both
+ * deploy paths) passes deployFilterRules() to rsync; run this file directly to
+ * print just the freeze's exclude patterns.
  *
  * WHY THIS EXISTS
  *
- * `deploy.yml` ships the build with `rsync -az --delete`. Since the publication
+ * The deploy ships the build with `rsync --delete`. Since the publication
  * allowlist landed (scripts/lib/published-books.js), a build no longer CONTAINS
  * the held-back books — so `--delete` would remove their pages from the server.
  * That would turn a freeze into a deletion of live pages as a side effect of a
@@ -41,13 +43,16 @@
  * Usage:
  *   node scripts/deploy-excludes.js [--source ../namsbokasafn-efni]
  *
- * Writes one pattern per line on stdout, for `rsync --exclude-from=-` or a file.
+ * Writes the freeze's exclude patterns, one per line, to stdout (for
+ * inspection). The deploy itself needs the full rule set — see
+ * deployFilterRules() below and scripts/deploy.js.
  */
 
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getSourceBooks } from './sync-content.js';
 import { withheldBooks } from './lib/published-books.js';
+import { EDITOR_ARTIFACT_PATTERNS } from './lib/editor-artifacts.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -62,6 +67,32 @@ const DEFAULT_SOURCE = resolve(projectRoot, '..', 'namsbokasafn-efni');
  */
 export function deployExcludes(availableBooks) {
 	return ['downloads/', ...withheldBooks(availableBooks).map((slug) => `${slug}/`)];
+}
+
+/**
+ * The full rsync filter rule set for the deploy, one rule per line, for
+ * `rsync --filter='merge FILE'` (scripts/deploy.js writes and passes the file).
+ *
+ * - `P /_app/immutable/**` protects every hashed CSS/JS file already on the
+ *   server from --delete, while the new build's files still upload: the frozen
+ *   books' kept pages load the assets of the build they were deployed with. `P`
+ *   is receiver-only; `/**` is needed because `P /_app/immutable/` would match
+ *   only the directory, which the new build also has. Old assets therefore pile
+ *   up on the server by design.
+ * - `- <pattern>` for everything deployExcludes() protects (neither sent nor
+ *   deleted) and for editor artifacts (never sent).
+ *
+ * ⚠️ These must reach rsync through --filter, never --exclude-from: an
+ * exclude-from file takes only `+ `/`- ` rules, so it reads the `P` line as a
+ * literal exclude pattern that matches nothing — and the old assets are
+ * deleted without any warning.
+ */
+export function deployFilterRules(availableBooks) {
+	return [
+		'P /_app/immutable/**',
+		...deployExcludes(availableBooks).map((pattern) => `- ${pattern}`),
+		...EDITOR_ARTIFACT_PATTERNS.map((pattern) => `- ${pattern}`)
+	];
 }
 
 function parseArgs(args) {

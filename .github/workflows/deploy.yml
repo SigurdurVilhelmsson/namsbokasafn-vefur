@@ -5,11 +5,22 @@
 # rrsync command locked to the build directory — it can write
 # /var/www/namsbokasafn-vefur/build and nothing else (no shell, no other
 # paths). Setup instructions: docs/guides/deployment.md
+#
+# Content is published from an EXPLICIT efni commit, never from efni's default
+# branch: a manual run takes the `efni_ref` input, a tag run the
+# EFNI_PUBLISHED_REF variable, and the run stops if neither is set. efni's main
+# can be ahead of what is meant to be live (renamed pages whose redirects have
+# not landed, books under a hold), so publishing it by default is not safe.
 
 name: Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      efni_ref:
+        description: 'Full 40-character efni commit SHA whose content to publish'
+        required: true
+        type: string
   push:
     tags: ['v*.*.*']
 
@@ -35,11 +46,34 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
+      # Inputs reach the shell through env, never by interpolating them into
+      # the script, so a crafted ref cannot inject commands.
+      - name: Resolve the efni commit to publish
+        id: efni
+        env:
+          INPUT_REF: ${{ inputs.efni_ref }}
+          PINNED_REF: ${{ vars.EFNI_PUBLISHED_REF }}
+        run: |
+          REF="${INPUT_REF:-$PINNED_REF}"
+          if [ -z "$REF" ]; then
+            echo "::error::No efni ref to publish. Pass the efni_ref input, or set the EFNI_PUBLISHED_REF variable for tag runs. This workflow never publishes efni's default branch implicitly."
+            exit 1
+          fi
+          # A full commit SHA only: a branch name would move under the deploy,
+          # which is exactly what pinning is meant to prevent.
+          if ! printf '%s' "$REF" | grep -Eq '^[0-9a-f]{40}$'; then
+            echo "::error::efni ref must be a full 40-character commit SHA, got: $REF"
+            exit 1
+          fi
+          echo "Publishing efni content from: $REF"
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+
       - name: Checkout content repo
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: SigurdurVilhelmsson/namsbokasafn-efni
           path: namsbokasafn-efni
+          ref: ${{ steps.efni.outputs.ref }}
           # namsbokasafn-efni went public 2026-07-25 — the default workflow
           # token can read it; no PAT needed.
           token: ${{ github.token }}
@@ -74,6 +108,7 @@ jobs:
           KNOWN_HOSTS: ${{ vars.DEPLOY_KNOWN_HOSTS }}
           DEPLOY_USER: ${{ vars.DEPLOY_USER }}
           DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+          EFNI_REF: ${{ steps.efni.outputs.ref }}
         run: |
           if [ -z "$SSH_KEY" ] || [ -z "$KNOWN_HOSTS" ] || [ -z "$DEPLOY_USER" ] || [ -z "$DEPLOY_HOST" ]; then
             echo "Deploy credentials are not configured (production environment" \
@@ -86,28 +121,18 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
 
-          # The exclude list is DERIVED, never hardcoded here: it is the
-          # complement of the publication allowlist over efni's source tree.
-          # It protects two different things, for two different reasons:
+          # scripts/deploy.js is the same command a manual deploy uses. It
+          # derives its rsync rules from the publication allowlist and efni's
+          # source tree, never from a list hardcoded here, and prints them:
+          #   P /_app/immutable/**  keep earlier builds' hashed CSS/JS, which the
+          #                         frozen books' pages still load
+          #   - downloads/          PDFs exist only on the server
+          #   - <book>/             withheld books: neither sent nor deleted
+          #   - <editor artifact>   never sent
+          # ⚠️ Never add --delete-excluded. See scripts/deploy-excludes.js.
           #
-          #   downloads/  PDFs are generated separately (npm run build:full)
-          #               and live only on the server; this build does not
-          #               produce them.
-          #   <book>/     Books the allowlist holds back are no longer IN the
-          #               build, so --delete would remove their live pages —
-          #               turning a publication freeze into a deletion. rsync
-          #               protects excluded paths from --delete, which is the
-          #               whole mechanic here.
-          #
-          # ⚠️ Never add --delete-excluded: it inverts this and deletes exactly
-          # what the list preserves. See scripts/deploy-excludes.js.
-          node scripts/deploy-excludes.js --source ./namsbokasafn-efni > /tmp/rsync-excludes.txt
-          echo "Protecting from --delete:"
-          sed 's/^/  /' /tmp/rsync-excludes.txt
-
           # The forced rrsync command on the server roots the remote path at
           # the build directory, so the destination is "/".
-          rsync -az --delete --exclude-from=/tmp/rsync-excludes.txt \
-            -e "ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts -o IdentitiesOnly=yes" \
-            build/ "$DEPLOY_USER@$DEPLOY_HOST:/"
-          echo "Deployed $(git rev-parse --short HEAD) to https://namsbokasafn.is"
+          export RSYNC_RSH="ssh -i ~/.ssh/deploy_key -o UserKnownHostsFile=~/.ssh/known_hosts -o IdentitiesOnly=yes"
+          node scripts/deploy.js --source ./namsbokasafn-efni --target "$DEPLOY_USER@$DEPLOY_HOST:/" --apply
+          echo "Deployed $(git rev-parse --short HEAD) with efni $EFNI_REF to https://namsbokasafn.is"
