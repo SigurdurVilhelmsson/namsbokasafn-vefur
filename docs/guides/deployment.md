@@ -26,8 +26,9 @@ of what should go live (renamed pages whose redirects have not landed).
 ⚠️ The SHA picks a content **revision**, not which books: every run re-syncs
 every book on the publication allowlist at that revision, then deploys with no
 dry-run stop. While a book is under a hold (see `CLAUDE.md`, Current
-Development Status), don't run the workflow — or pin the efni commit whose
-content is already live, and diff the live sitemap against the built one first.
+Development Status), don't run the workflow. Nothing yet records which efni
+commit the live content came from, so there is no known-safe SHA to pin
+instead.
 
 The workflow re-verifies the exact commit it ships (lint, type-check, unit
 tests, build with content validation) before rsyncing, so what was tested
@@ -84,8 +85,9 @@ Repo → Settings → Secrets and variables → Actions → **Variables** tab:
 
 ### 3. Verify
 
-Run Actions → Deploy → "Run workflow" on `main` with the efni SHA, approve
-it, and check the run log ends with "Deployed <sha>". Because of the forced command, even a
+Only when no book is under a hold (see the warning above): run Actions → Deploy
+→ "Run workflow" on `main` with the efni SHA, approve it, and check the run log
+ends with "Deployed <sha>". Because of the forced command, even a
 leaked key could only overwrite the static build directory — and the site
 is restored by simply re-running the deploy.
 
@@ -120,8 +122,10 @@ On the server itself, a local path works as the target
 The script needs the efni checkout (`../namsbokasafn-efni`, or `--source`), and
 refuses to run if it holds no books: the list of books to protect is derived
 from it, plus every book vefur registers, so a frozen book stays protected even
-when that efni checkout lacks it (the run prints a warning). It hands rsync
-these rules, and prints them on every run:
+when that efni checkout lacks it (the run prints a warning). It also refuses if
+the build has no content for a book the allowlist publishes, since deploying
+would delete that live book. It hands rsync these rules, and prints them on
+every run:
 
 - `P /_app/immutable/**` — keeps the hashed CSS/JS of earlier builds on the
   server while the new build's files upload. The frozen books' pages are never
@@ -135,8 +139,9 @@ these rules, and prints them on every run:
   nor deleted, so the paused books stay live as they are.
 - `H *.backup.*` and the other editor-artifact patterns: never sent, although a
   build copies them out of `static/content`. They are hide rules, not
-  excludes, so a copy already on the server is deleted (except inside a frozen
-  book, which is left as it is).
+  excludes, so a copy already on the server is deleted — except inside a frozen
+  book, `downloads/` or `_app/immutable/`, which the rules above leave as they
+  are.
 
 ⚠️ Do not deploy with a hand-written rsync. The rules only work when passed
 with `--filter='merge FILE'` (an `--exclude-from` file silently ignores the `P`

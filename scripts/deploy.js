@@ -41,7 +41,7 @@ import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getSourceBooks } from './sync-content.js';
 import { deployFilterRules } from './deploy-excludes.js';
-import { KNOWN_BOOKS, withheldBooks } from './lib/published-books.js';
+import { KNOWN_BOOKS, PUBLISHED_BOOKS, withheldBooks } from './lib/published-books.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -113,11 +113,21 @@ function buildVersion(buildDir) {
  */
 export function deploy({ source, build, target, apply, log = console.log }) {
 	const version = buildVersion(build);
+	// The freeze covers withheld books only. A published book with no content in
+	// the build (synced from an efni commit that predates it, say) would be
+	// deleted from the server — taking it down must be a decision, not this.
+	const absent = PUBLISHED_BOOKS.filter((slug) => !existsSync(join(build, 'content', slug)));
+	if (absent.length > 0) {
+		throw new Error(
+			`The build has no content for ${absent.join(', ')}, which the allowlist publishes: ` +
+				'deploying it would delete the live book. Sync it, or take it off PUBLISHED_BOOKS on purpose.'
+		);
+	}
 	const availableBooks = getSourceBooks(source);
 	// No books at all means --source points at the wrong place: stop rather than
 	// deploy on a guess.
 	if (availableBooks.length === 0) {
-		throw new Error(`No books found in ${source}: refusing to deploy without the freeze list.`);
+		throw new Error(`No books found in ${source}: is --source the efni checkout?`);
 	}
 	const rules = deployFilterRules(availableBooks);
 	// The rules protect these anyway (KNOWN_BOOKS); say so, since an efni tree
@@ -168,10 +178,13 @@ function main() {
 	}
 }
 
-// Compare REAL paths: Node gives the entry module its resolved path, while
-// process.argv[1] keeps the one it was called by, so a symlinked checkout would
-// otherwise skip main() and exit 0 having done nothing.
+// import.meta.main is true for the entry module however it was named — through
+// a symlink, or without its .js extension. Comparing process.argv[1] with the
+// module's path got both wrong: main() was skipped and the deploy exited 0
+// having done nothing. The realpath comparison is a fallback for a runtime
+// without import.meta.main.
 function isEntryPoint() {
+	if (typeof import.meta.main === 'boolean') return import.meta.main;
 	if (!process.argv[1]) return false;
 	try {
 		return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));

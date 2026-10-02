@@ -15,8 +15,8 @@
 # ⚠️ The pin chooses a content REVISION, not which books: every run re-syncs
 # every book on the publication allowlist at that revision and deploys with no
 # dry-run stop. While a book is under a hold (CLAUDE.md, Current Development
-# Status), do not run this workflow — or pin the efni commit whose content is
-# already live and diff the live sitemap against the built one first.
+# Status), do not run this workflow. (Nothing yet records which efni commit
+# prod's content came from, so there is no known-safe pin to fall back on.)
 
 name: Deploy
 
@@ -130,13 +130,16 @@ jobs:
           printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
 
           # scripts/deploy.js is the same command a manual deploy uses. It
-          # derives its rsync rules from the publication allowlist and efni's
-          # source tree, never from a list hardcoded here, and prints them:
+          # derives its rsync rules from the publication allowlist, efni's
+          # source tree and KNOWN_BOOKS, never from a list hardcoded here, and
+          # prints them:
           #   P /_app/immutable/**  keep earlier builds' hashed CSS/JS, which the
           #                         frozen books' pages still load
           #   - downloads/          PDFs exist only on the server
           #   - <book>/             withheld books: neither sent nor deleted
-          #   - <editor artifact>   never sent
+          #   H <editor artifact>   never sent; copies already on the server
+          #                         are deleted
+          # It refuses to run if the build lacks a published book's content.
           # ⚠️ Never add --delete-excluded. See scripts/deploy-excludes.js.
           #
           # The forced rrsync command on the server roots the remote path at

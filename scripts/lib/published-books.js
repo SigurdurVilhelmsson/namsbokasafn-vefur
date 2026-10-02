@@ -42,7 +42,9 @@ export const PUBLISHED_BOOKS = Object.freeze(['efnafraedi-2e', 'lifraen-efnafrae
  * EVEN WHEN the efni checkout it reads lacks the book — a deploy pinned to an
  * older efni commit, or a book left with no rendered chapters, must not delete
  * a frozen book's live pages. Taking a book off the server is a decision, never
- * a side effect of what one efni tree happens to contain.
+ * a side effect of what one efni tree happens to contain. (Published books get
+ * the same guarantee from scripts/deploy.js, which refuses a build that lacks
+ * one.)
  */
 export const KNOWN_BOOKS = Object.freeze([
 	'edlisfraedi-2e',

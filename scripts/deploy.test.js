@@ -149,6 +149,9 @@ function makeFixture() {
 	write(root, 'build/_app/immutable/assets/0.NEW.css', 'n'.repeat(222));
 	write(root, 'build/_app/immutable/chunks/new.js', 'n'.repeat(333));
 	write(root, 'build/content/efnafraedi-2e/toc.json', 'n'.repeat(555));
+	// Every published book has content in a real build (the deploy refuses
+	// otherwise, since it would delete that live book).
+	write(root, 'build/content/lifraen-efnafraedi/toc.json', 'n'.repeat(556));
 	write(root, 'build/efnafraedi-2e/kafli/01/index.html', 'n'.repeat(777));
 	write(root, 'build/efnafraedi-2e/kafli/01/index.html.backup.2026-03-29T10-57-57', 'n'.repeat(999));
 	return root;
@@ -294,6 +297,22 @@ describe.skipIf(!hasRsync && !process.env.CI)('deploy against a real rsync', () 
 		expect(onServer(root, 'stale/index.html')).toBe(true);
 	});
 
+	// A build with no content for a published book — synced from an efni
+	// commit that predates the book, say — would delete that live book from the
+	// server with exit 0. The freeze only covers withheld books.
+	it('refuses when the build has no content for a published book', () => {
+		rmSync(join(root, 'build/content/lifraen-efnafraedi'), { recursive: true });
+		expect(() => run(true)).toThrow(/lifraen-efnafraedi/);
+		expect(onServer(root, 'stale/index.html')).toBe(true);
+	});
+
+	it('warns when the efni tree lacks a frozen book', () => {
+		rmSync(join(root, 'efni/books/edlisfraedi-2e'), { recursive: true });
+		const lines = [];
+		deploy({ source: join(root, 'efni'), build: join(root, 'build'), target: join(root, 'server') + '/', apply: false, log: (line) => lines.push(line) });
+		expect(lines.some((line) => line.includes('edlisfraedi-2e') && line.includes('missing'))).toBe(true);
+	});
+
 	// Control: today's deploy.yml rules (an --exclude-from file of the freeze
 	// patterns) on the same fixture. It must delete the old assets, or the
 	// fixture cannot tell the fix from the bug.
@@ -322,5 +341,13 @@ describe('the deploy command', () => {
 		} finally {
 			rmSync(dir, { recursive: true, force: true });
 		}
+	});
+
+	// `node scripts/deploy` (no .js) runs the module, but process.argv[1] then
+	// names a path that does not exist, so a path-comparing guard skipped main().
+	it('runs when invoked without the .js extension', () => {
+		const res = spawnSync(process.execPath, [DEPLOY_SCRIPT.replace(/\.js$/, ''), '--no-such-flag'], { encoding: 'utf-8' });
+		expect(res.status).toBe(1);
+		expect(res.stderr).toContain('Unknown argument: --no-such-flag');
 	});
 });

@@ -253,8 +253,9 @@ export function selectBooks({ availableBooks, requested = [], allowWithheld = fa
 // Get list of books in source directory.
 //
 // Exported because the deploy's freeze list is the complement of the
-// publication allowlist over THIS set — see scripts/deploy-excludes.js. Both
-// must read the same source tree or a book can be neither synced nor protected.
+// publication allowlist over THIS set plus KNOWN_BOOKS — see
+// scripts/deploy-excludes.js. The KNOWN_BOOKS half keeps a frozen book
+// protected even when the tree a deploy reads lacks it.
 export function getSourceBooks(sourceDir) {
 	const booksDir = resolve(sourceDir, 'books');
 
