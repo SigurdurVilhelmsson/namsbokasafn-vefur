@@ -21,8 +21,13 @@ deploy workflow runs on two triggers only:
 
 The workflow never publishes efni's default branch: with neither an efni SHA
 nor `EFNI_PUBLISHED_REF` it stops before building. efni's `main` can be ahead
-of what should go live (renamed pages whose redirects have not landed, books
-under a hold).
+of what should go live (renamed pages whose redirects have not landed).
+
+⚠️ The SHA picks a content **revision**, not which books: every run re-syncs
+every book on the publication allowlist at that revision, then deploys with no
+dry-run stop. While a book is under a hold (see `CLAUDE.md`, Current
+Development Status), don't run the workflow — or pin the efni commit whose
+content is already live, and diff the live sitemap against the built one first.
 
 The workflow re-verifies the exact commit it ships (lint, type-check, unit
 tests, build with content validation) before rsyncing, so what was tested
@@ -113,8 +118,10 @@ On the server itself, a local path works as the target
 `RSYNC_RSH` variable.
 
 The script needs the efni checkout (`../namsbokasafn-efni`, or `--source`), and
-refuses to run without it: the list of books to protect is derived from it.
-It hands rsync these rules, and prints them on every run:
+refuses to run if it holds no books: the list of books to protect is derived
+from it, plus every book vefur registers, so a frozen book stays protected even
+when that efni checkout lacks it (the run prints a warning). It hands rsync
+these rules, and prints them on every run:
 
 - `P /_app/immutable/**` — keeps the hashed CSS/JS of earlier builds on the
   server while the new build's files upload. The frozen books' pages are never
@@ -126,8 +133,10 @@ It hands rsync these rules, and prints them on every run:
   without the exclude `--delete` would remove any PDFs on the server.
 - `- <book>/` for every book the publication allowlist holds back: neither sent
   nor deleted, so the paused books stay live as they are.
-- `- *.backup.*` and the other editor-artifact patterns: never sent, although a
-  build copies them out of `static/content`.
+- `H *.backup.*` and the other editor-artifact patterns: never sent, although a
+  build copies them out of `static/content`. They are hide rules, not
+  excludes, so a copy already on the server is deleted (except inside a frozen
+  book, which is left as it is).
 
 ⚠️ Do not deploy with a hand-written rsync. The rules only work when passed
 with `--filter='merge FILE'` (an `--exclude-from` file silently ignores the `P`

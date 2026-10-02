@@ -37,8 +37,11 @@
  * later. An anchored list would silently miss that new route.
  *
  * The freeze list is DERIVED, never restated: it is the complement of the
- * allowlist over the books that actually exist in the efni source tree, so a
- * book cannot be both unsynced and unprotected.
+ * allowlist over the books in the efni source tree PLUS every book vefur
+ * registers (KNOWN_BOOKS). The efni half means a book efni has and vefur has
+ * not heard of yet is protected; the KNOWN_BOOKS half means a frozen book stays
+ * protected when the efni tree a deploy reads lacks it (a pinned older commit, a
+ * book with no rendered chapters) — deriving from efni alone deleted it.
  *
  * Usage:
  *   node scripts/deploy-excludes.js [--source ../namsbokasafn-efni]
@@ -51,7 +54,7 @@
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getSourceBooks } from './sync-content.js';
-import { withheldBooks } from './lib/published-books.js';
+import { KNOWN_BOOKS, withheldBooks } from './lib/published-books.js';
 import { EDITOR_ARTIFACT_PATTERNS } from './lib/editor-artifacts.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -66,7 +69,8 @@ const DEFAULT_SOURCE = resolve(projectRoot, '..', 'namsbokasafn-efni');
  * would wipe them. That exclusion predates the freeze and is unrelated to it.
  */
 export function deployExcludes(availableBooks) {
-	return ['downloads/', ...withheldBooks(availableBooks).map((slug) => `${slug}/`)];
+	const books = [...availableBooks, ...KNOWN_BOOKS.filter((slug) => !availableBooks.includes(slug))];
+	return ['downloads/', ...withheldBooks(books).map((slug) => `${slug}/`)];
 }
 
 /**
@@ -80,7 +84,12 @@ export function deployExcludes(availableBooks) {
  *   only the directory, which the new build also has. Old assets therefore pile
  *   up on the server by design.
  * - `- <pattern>` for everything deployExcludes() protects (neither sent nor
- *   deleted) and for editor artifacts (never sent).
+ *   deleted).
+ * - `H <pattern>` (hide: sender side only) for editor artifacts: never sent,
+ *   and NOT protected on the server, so --delete removes any that reached it
+ *   by an older route. A `-` rule here would keep them there forever. Inside a
+ *   frozen book they stay, like the rest of that book: its `- <book>/` rule
+ *   shields the whole directory.
  *
  * ⚠️ These must reach rsync through --filter, never --exclude-from: an
  * exclude-from file takes only `+ `/`- ` rules, so it reads the `P` line as a
@@ -91,7 +100,7 @@ export function deployFilterRules(availableBooks) {
 	return [
 		'P /_app/immutable/**',
 		...deployExcludes(availableBooks).map((pattern) => `- ${pattern}`),
-		...EDITOR_ARTIFACT_PATTERNS.map((pattern) => `- ${pattern}`)
+		...EDITOR_ARTIFACT_PATTERNS.map((pattern) => `H ${pattern}`)
 	];
 }
 

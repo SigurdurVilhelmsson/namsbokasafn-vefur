@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { books } from '../../src/lib/types/book.ts';
 import {
+	KNOWN_BOOKS,
 	PUBLISHED_BOOKS,
 	RULING_REFERENCE,
 	isPublished,
@@ -31,6 +33,16 @@ describe('PUBLISHED_BOOKS', () => {
 	it('points at the ruling rather than restating it', () => {
 		expect(RULING_REFERENCE).toContain('C109');
 		expect(RULING_REFERENCE).toContain('2026-08-22');
+	});
+});
+
+// The deploy's freeze protects every known book the allowlist holds back, even
+// when the efni checkout it reads lacks one (an older pinned commit, a book with
+// no rendered chapters). A book the reader registers but this list misses would
+// lose that protection and be deleted from the server by the next deploy.
+describe('KNOWN_BOOKS', () => {
+	it('names every book the reader registers in book.ts', () => {
+		expect([...KNOWN_BOOKS].sort()).toEqual(books.map((b) => b.slug).sort());
 	});
 });
 

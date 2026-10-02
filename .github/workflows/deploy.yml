@@ -10,7 +10,13 @@
 # branch: a manual run takes the `efni_ref` input, a tag run the
 # EFNI_PUBLISHED_REF variable, and the run stops if neither is set. efni's main
 # can be ahead of what is meant to be live (renamed pages whose redirects have
-# not landed, books under a hold), so publishing it by default is not safe.
+# not landed), so publishing it by default is not safe.
+#
+# ⚠️ The pin chooses a content REVISION, not which books: every run re-syncs
+# every book on the publication allowlist at that revision and deploys with no
+# dry-run stop. While a book is under a hold (CLAUDE.md, Current Development
+# Status), do not run this workflow — or pin the efni commit whose content is
+# already live and diff the live sitemap against the built one first.
 
 name: Deploy
 
@@ -60,8 +66,10 @@ jobs:
             exit 1
           fi
           # A full commit SHA only: a branch name would move under the deploy,
-          # which is exactly what pinning is meant to prevent.
-          if ! printf '%s' "$REF" | grep -Eq '^[0-9a-f]{40}$'; then
+          # which is exactly what pinning is meant to prevent. [[ =~ ]] tests the
+          # WHOLE string; grep would pass a multi-line value line by line, and a
+          # second "ref=" line would then override the output.
+          if [[ ! "$REF" =~ ^[0-9a-f]{40}$ ]]; then
             echo "::error::efni ref must be a full 40-character commit SHA, got: $REF"
             exit 1
           fi

@@ -9,9 +9,11 @@
  *   pages are never rebuilt, so they keep loading the assets of the build they
  *   were deployed with; nginx answers a missing one with 404. Those files stay on
  *   the server (a receiver-side `P` rule) while the new build's files upload.
- * - The withheld books and `downloads/`: neither sent nor deleted (the freeze).
+ * - The withheld books and `downloads/`: neither sent nor deleted (the freeze),
+ *   including a frozen book the efni checkout lacks.
  * - Editor artifacts: never sent, even though a build copies them from
- *   static/content into build/.
+ *   static/content into build/; copies already on the server outside a frozen
+ *   book are deleted.
  *
  * The rules travel as `--filter='merge FILE'`. Never put them in an
  * `--exclude-from` file (it reads the `P` rule as an exclude that matches
@@ -27,17 +29,19 @@
  *             (DEPLOY_TARGET in the environment also works). SSH options go in
  *             rsync's own RSYNC_RSH variable.
  *   --source  the efni checkout. The freeze list is derived from the books in
- *             it, so the deploy refuses to run if it holds none.
+ *             it plus every book vefur registers (KNOWN_BOOKS); the deploy
+ *             refuses to run if it holds no books at all.
  *   --build   the built site (default: build).
  */
 
 import { spawnSync } from 'child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve, dirname } from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { fileURLToPath } from 'url';
 import { getSourceBooks } from './sync-content.js';
 import { deployFilterRules } from './deploy-excludes.js';
+import { KNOWN_BOOKS, withheldBooks } from './lib/published-books.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -110,12 +114,15 @@ function buildVersion(buildDir) {
 export function deploy({ source, build, target, apply, log = console.log }) {
 	const version = buildVersion(build);
 	const availableBooks = getSourceBooks(source);
-	// An empty book list would make an empty freeze list and expose every frozen
-	// book to --delete.
+	// No books at all means --source points at the wrong place: stop rather than
+	// deploy on a guess.
 	if (availableBooks.length === 0) {
 		throw new Error(`No books found in ${source}: refusing to deploy without the freeze list.`);
 	}
 	const rules = deployFilterRules(availableBooks);
+	// The rules protect these anyway (KNOWN_BOOKS); say so, since an efni tree
+	// missing a frozen book usually means an old pin or a partial checkout.
+	const missing = withheldBooks(KNOWN_BOOKS).filter((slug) => !availableBooks.includes(slug));
 
 	const tmp = mkdtempSync(join(tmpdir(), 'vefur-deploy-'));
 	const filterFile = join(tmp, 'rules');
@@ -126,6 +133,9 @@ export function deploy({ source, build, target, apply, log = console.log }) {
 	log(`  target: ${target}`);
 	log('  rules:');
 	for (const rule of rules) log(`    ${rule}`);
+	for (const slug of missing) {
+		log(`  ⚠️ ${slug} is held back but missing from ${source}; protecting it on the server anyway.`);
+	}
 
 	try {
 		const result = spawnSync('rsync', rsyncArgs({ buildDir: build, target, filterFile, apply }), {
@@ -158,6 +168,18 @@ function main() {
 	}
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+// Compare REAL paths: Node gives the entry module its resolved path, while
+// process.argv[1] keeps the one it was called by, so a symlinked checkout would
+// otherwise skip main() and exit 0 having done nothing.
+function isEntryPoint() {
+	if (!process.argv[1]) return false;
+	try {
+		return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+	} catch {
+		return false;
+	}
+}
+
+if (isEntryPoint()) {
 	main();
 }
