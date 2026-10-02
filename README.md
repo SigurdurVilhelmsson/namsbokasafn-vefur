@@ -125,15 +125,21 @@ E2E. **CI does not deploy.**
 
 Deployment runs via the separate **Deploy workflow** (`deploy.yml`):
 triggered manually from the Actions tab or by pushing a release tag
-(`v*.*.*`), it re-verifies the commit and rsyncs the build to the server
-over a directory-restricted SSH key. One-time setup and the security model
-are documented in [docs/guides/deployment.md](docs/guides/deployment.md).
-Manual fallback from a machine with server access:
+(`v*.*.*`), it re-verifies the commit, syncs content from an explicit efni
+commit and rsyncs the build to the server over a directory-restricted SSH
+key. One-time setup and the security model are documented in
+[docs/guides/deployment.md](docs/guides/deployment.md).
+Manual fallback from a machine with server access — the same
+`scripts/deploy.js` the workflow runs, a dry run unless `--apply` is given:
 
 ```bash
 npm run build
-rsync -avz --delete --exclude=downloads/ build/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/
+node scripts/deploy.js --target siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/          # dry run
+node scripts/deploy.js --target siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/ --apply  # deploy
 ```
+
+Don't replace it with a hand-written rsync: the script's rules keep the paused
+books and the hashed assets their pages load (see the deployment guide).
 
 See [docs/guides/deployment.md](docs/guides/deployment.md) for the full deployment guide including nginx configuration, SSL setup, and maintenance procedures.
 

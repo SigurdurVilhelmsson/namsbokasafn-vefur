@@ -36,6 +36,24 @@
 /** Book slugs permitted to be synced into `static/content/`. */
 export const PUBLISHED_BOOKS = Object.freeze(['efnafraedi-2e', 'lifraen-efnafraedi']);
 
+/**
+ * Every book the reader registers (`src/lib/types/book.ts`; a test keeps the two
+ * equal). The deploy's freeze protects each of these the allowlist holds back
+ * EVEN WHEN the efni checkout it reads lacks the book — a deploy pinned to an
+ * older efni commit, or a book left with no rendered chapters, must not delete
+ * a frozen book's live pages. Taking a book off the server is a decision, never
+ * a side effect of what one efni tree happens to contain. (Published books get
+ * the same guarantee from scripts/deploy.js, which refuses a build that lacks
+ * one.)
+ */
+export const KNOWN_BOOKS = Object.freeze([
+	'edlisfraedi-2e',
+	'efnafraedi-2e',
+	'liffraedi-2e',
+	'lifraen-efnafraedi',
+	'orverufraedi'
+]);
+
 /** Where the ruling lives, quoted in errors so the reader can go read it. */
 export const RULING_REFERENCE =
 	'[LEAD] 2026-08-22 — namsbokasafn-efni §C109, docs/decisions/2026-08-22-two-book-focus-and-publication-withdrawal.md';

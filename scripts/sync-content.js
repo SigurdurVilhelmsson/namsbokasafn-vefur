@@ -49,6 +49,7 @@ import {
 	ROLLUPS_COMPLETE_MARKER
 } from './lib/overlay.js';
 import { RULING_REFERENCE, publishableBooks, withheldBooks } from './lib/published-books.js';
+import { EDITOR_ARTIFACT_PATTERNS } from './lib/editor-artifacts.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -252,8 +253,9 @@ export function selectBooks({ availableBooks, requested = [], allowWithheld = fa
 // Get list of books in source directory.
 //
 // Exported because the deploy's freeze list is the complement of the
-// publication allowlist over THIS set — see scripts/deploy-excludes.js. Both
-// must read the same source tree or a book can be neither synced nor protected.
+// publication allowlist over THIS set plus KNOWN_BOOKS — see
+// scripts/deploy-excludes.js. The KNOWN_BOOKS half keeps a frozen book
+// protected even when the tree a deploy reads lacks it.
 export function getSourceBooks(sourceDir) {
 	const booksDir = resolve(sourceDir, 'books');
 
@@ -271,15 +273,9 @@ export function getSourceBooks(sourceDir) {
 	});
 }
 
-// Editor/working artifacts that must never reach published content.
-const SYNC_EXCLUDES = [
-	'--exclude', '.DS_Store',
-	'--exclude', '*.bak',
-	'--exclude', '*~',
-	'--exclude', '*.backup.*', // e.g. 1-summary.html.backup.2026-06-16T14-48-50
-	'--exclude', '*.pre-fix-*', // e.g. 21-2-kjarnajofnur.html.pre-fix-20260418T135933
-	'--exclude', '*.orig'
-];
+// Editor/working artifacts that must never reach published content. The list is
+// shared with the deploy (scripts/lib/editor-artifacts.js) so the two cannot drift.
+const SYNC_EXCLUDES = EDITOR_ARTIFACT_PATTERNS.flatMap((pattern) => ['--exclude', pattern]);
 
 // Sync a single book using rsync: mirror the baseline, then overlay reviewed
 // modules on top (without --delete) so a partial overlay can't remove baseline

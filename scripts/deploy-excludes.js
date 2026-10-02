@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 /**
- * Print the rsync exclude patterns the production deploy must use.
+ * The rsync rules the production deploy must use. `scripts/deploy.js` (both
+ * deploy paths) passes deployFilterRules() to rsync; run this file directly to
+ * print just the freeze's exclude patterns.
  *
  * WHY THIS EXISTS
  *
- * `deploy.yml` ships the build with `rsync -az --delete`. Since the publication
+ * The deploy ships the build with `rsync --delete`. Since the publication
  * allowlist landed (scripts/lib/published-books.js), a build no longer CONTAINS
  * the held-back books — so `--delete` would remove their pages from the server.
  * That would turn a freeze into a deletion of live pages as a side effect of a
@@ -35,19 +37,25 @@
  * later. An anchored list would silently miss that new route.
  *
  * The freeze list is DERIVED, never restated: it is the complement of the
- * allowlist over the books that actually exist in the efni source tree, so a
- * book cannot be both unsynced and unprotected.
+ * allowlist over the books in the efni source tree PLUS every book vefur
+ * registers (KNOWN_BOOKS). The efni half means a book efni has and vefur has
+ * not heard of yet is protected; the KNOWN_BOOKS half means a frozen book stays
+ * protected when the efni tree a deploy reads lacks it (a pinned older commit, a
+ * book with no rendered chapters) — deriving from efni alone deleted it.
  *
  * Usage:
  *   node scripts/deploy-excludes.js [--source ../namsbokasafn-efni]
  *
- * Writes one pattern per line on stdout, for `rsync --exclude-from=-` or a file.
+ * Writes the freeze's exclude patterns, one per line, to stdout (for
+ * inspection). The deploy itself needs the full rule set — see
+ * deployFilterRules() below and scripts/deploy.js.
  */
 
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getSourceBooks } from './sync-content.js';
-import { withheldBooks } from './lib/published-books.js';
+import { KNOWN_BOOKS, withheldBooks } from './lib/published-books.js';
+import { EDITOR_ARTIFACT_PATTERNS } from './lib/editor-artifacts.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -61,7 +69,39 @@ const DEFAULT_SOURCE = resolve(projectRoot, '..', 'namsbokasafn-efni');
  * would wipe them. That exclusion predates the freeze and is unrelated to it.
  */
 export function deployExcludes(availableBooks) {
-	return ['downloads/', ...withheldBooks(availableBooks).map((slug) => `${slug}/`)];
+	const books = [...availableBooks, ...KNOWN_BOOKS.filter((slug) => !availableBooks.includes(slug))];
+	return ['downloads/', ...withheldBooks(books).map((slug) => `${slug}/`)];
+}
+
+/**
+ * The full rsync filter rule set for the deploy, one rule per line, for
+ * `rsync --filter='merge FILE'` (scripts/deploy.js writes and passes the file).
+ *
+ * - `P /_app/immutable/**` protects every hashed CSS/JS file already on the
+ *   server from --delete, while the new build's files still upload: the frozen
+ *   books' kept pages load the assets of the build they were deployed with. `P`
+ *   is receiver-only; `/**` is needed because `P /_app/immutable/` would match
+ *   only the directory, which the new build also has. Old assets therefore pile
+ *   up on the server by design.
+ * - `- <pattern>` for everything deployExcludes() protects (neither sent nor
+ *   deleted).
+ * - `H <pattern>` (hide: sender side only) for editor artifacts: never sent,
+ *   and NOT protected on the server, so --delete removes any that reached it
+ *   by an older route. A `-` rule here would keep them there forever. Inside a
+ *   frozen book they stay, like the rest of that book: its `- <book>/` rule
+ *   shields the whole directory.
+ *
+ * ⚠️ These must reach rsync through --filter, never --exclude-from: an
+ * exclude-from file takes only `+ `/`- ` rules, so it reads the `P` line as a
+ * literal exclude pattern that matches nothing — and the old assets are
+ * deleted without any warning.
+ */
+export function deployFilterRules(availableBooks) {
+	return [
+		'P /_app/immutable/**',
+		...deployExcludes(availableBooks).map((pattern) => `- ${pattern}`),
+		...EDITOR_ARTIFACT_PATTERNS.map((pattern) => `H ${pattern}`)
+	];
 }
 
 function parseArgs(args) {
