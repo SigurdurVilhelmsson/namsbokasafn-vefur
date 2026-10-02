@@ -202,3 +202,12 @@ it isn't conflated with the content bugs above. (If anything, it validates that
 
 Nothing here blocks the current vefur deploy of the WS5 sync — it is a net improvement over
 what is live today.
+
+## Correction, 2026-10-01
+
+**Both bugs are fixed and live; nothing here remains to do.** Bug B was fixed by efni PR #238
+(merged 2026-07-06) and Bug A by a later efni re-render; both fixes are in the synced content.
+Live `12-5-arekstrakenningin.html` (byte-identical to the synced copy) has one `<title>` (in
+`<head>`), and `Dæmi 12.13`'s `<h4>` carries the example's own title instead of `Lausn`. Across
+all 251 non-backup chemistry pages, every page has exactly one `<title>`, none has a heading
+that reads just `Lausn`, and none repeats a list item as a following paragraph.

@@ -1,5 +1,7 @@
 # Cache Strategy
 
+> ⚠️ **Correction (status 2026-10-01).** `book-content` (`/content/**/*.{html,md,json}`) is **NetworkFirst** in `vite.config.ts` (with `networkTimeoutSeconds: 3`, since `b7a3b88`, 2026-02-05) — not CacheFirst as the table and the sections below say: the service worker asks the network first and uses its cached copy only when the network fails or takes longer than 3 s. That request still passes through the browser's HTTP cache, and nginx serves these files with `max-age=86400`, so a copy fetched in the last day can still be served. Only `book-images` is CacheFirst (30 days, 200 entries), so a changed image at an unchanged URL can be served from cache for up to 30 days.
+
 This document describes the caching architecture for offline support in Námsbókasafn.
 
 ## Overview

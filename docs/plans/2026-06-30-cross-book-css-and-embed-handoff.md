@@ -1,7 +1,7 @@
 # Cross-book CSS + D4 embed styling + a11y MathML — implementation handoff
 
 **Created:** 2026-06-30 (handed off from a namsbokasafn-efni session). **Updated:** 2026-07-17. **Repo:** namsbokasafn-vefur.
-**Status:** **Task 1 DONE** (vefur PR #191 + efni PR #295, 2026-07-17) · **Task 2 effectively closed for biology; 8 organic/physics classes remain** · **Task 3a DONE** (PR #176), 3b/3c verify-only. **Owner:** vefur.
+**Status (2026-10-01):** **Task 1 DONE** (vefur PR #191 + efni PR #295, 2026-07-17; the server's nginx still lacks `frame-src`) · **Task 2 effectively closed for biology; 8 organic/physics classes remain** — the 5 organic ones are moot now that [USER] has ruled organic withdrawn (2026-09-23); the 3 physics ones sit on live but frozen pages · **Task 3a DONE** (PR #176) · **Task 3b** legs 1–2 DONE (PR #180, 2026-07-01), leg 3 (the screen-reader check) still open · **3c** holds: no `math` or `.assistive-mathml` rule in `content.css`, `app.css` or `print.css`. **Owner:** vefur.
 
 > ## ✅ 2026-07-17 — Task 1 shipped (campaign item 11)
 >

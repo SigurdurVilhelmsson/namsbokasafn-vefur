@@ -1,19 +1,21 @@
 # Roadmap — June 2026: audit remediation → production, then Reader v1.1
 
-**Date:** 2026-06-10 (status updated 2026-06-11)
+**Date:** 2026-06-10 (status updated 2026-10-01)
 **Context:** Follows the full codebase review in `docs/code-review-2026-06.md` (PR #108) and the reader development plan in `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`.
 
-## Status summary (2026-06-11)
+## Status summary (2026-10-01)
 
-| Track                     | State                                                                                                                                            |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Phase 1 (audit → main)    | **Complete** — all items below merged (#115 pipeline, #116 SRS, #117 Icelandic, #118 delivery, plus #126 CI gate, #130 audit-1.3 fix, #131 P2.4) |
-| Reader v1.1 / plan P0     | **Complete** on `feature/reader-v1.1` (#119–#122) — gated on QA batches D–E + 3 judgment calls                                                   |
-| Reader v1.2 / plan P1     | **Complete** on `feature/reader-v1.2` (#124, #125, #127, #128) — gated on QA batch G                                                             |
-| Production deploy         | Pending: server pull/build/rsync + apply nginx changes (QA batch F)                                                                              |
-| Releases                  | v1.1.0 after D–E verdicts; v1.2.0 after G, following v1.1.0                                                                                      |
-| Reader plan P2.1–P2.3     | Not started (P2.4 done in #131; P2.1 label shipped inside P0.4, scroll-bar replacement open)                                                     |
-| Reader plan P3 (AI tutor) | Deferred pending classroom feedback on P0/P1                                                                                                     |
+| Track                     | State                                                                                                                                                                                                                                                                                                                  |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 1 (audit → main)    | **Complete** — all items below merged (#115 pipeline, #116 SRS, #117 Icelandic, #118 delivery, plus #126 CI gate, #130 audit-1.3 fix, #131 P2.4)                                                                                                                                                                       |
+| Deferred audit items      | M4 fixed in #151 (2026-06-19); M2 and M6 had already been fixed in 88243f1 (#115). M8, M12, the focus-trap extraction and most §4 cleanups are still open — per-finding status at the top of `docs/code-review-2026-06.md`                                                                                             |
+| Reader v1.1 / plan P0     | Code complete on `feature/reader-v1.1` (#119–#122), **not merged**: last commit 2026-06-10, 257 commits behind `main`, conflicts with it in the section page, and its head has no CI result. QA batches D–E and the 3 judgment calls not run                                                                           |
+| Reader v1.2 / plan P1     | Code complete on `feature/reader-v1.2` (#124, #125, #127, #128), **not merged**: 253 commits behind `main`, conflicts in `AnalyticsTabs.svelte` and the section page; its head's only CI run (2026-07-25) failed within 3 s. QA batch G not run                                                                        |
+| Production deploy         | Manual (`deploy.yml` has never completed a deploy). Live: a 2026-08-19 build of `main`; QA batch F's header and redirect checks pass, but `frame-src` (#191) and the organic withdrawal (#234) are not applied on the server, and the 22 merges to `main` since that build (2026-08-19 to 2026-09-24) are not deployed |
+| Releases                  | None yet — `package.json` is still 1.0.0 and there are no tags. Plan: v1.1.0 after D–E verdicts; v1.2.0 after G, following v1.1.0                                                                                                                                                                                      |
+| Reader plan P2.1–P2.3     | Not started (P2.4 done in #131; the P2.1 position label exists only inside P0.4 on the unmerged v1.1 branch; scroll-bar replacement open)                                                                                                                                                                              |
+| PDF redesign              | Core merged in #182 (2026-07-02); Task 3.3, Phase 4.2/4.3 and Phase 5 open; no PDF is served on namsbokasafn.is yet (see the plan's status line)                                                                                                                                                                       |
+| Reader plan P3 (AI tutor) | Deferred pending classroom feedback on P0/P1                                                                                                                                                                                                                                                                           |
 
 Manual verification lives in `docs/manual-qa-2026-06.md`. The sections below
 are the original plan, kept for the record.
@@ -45,8 +47,9 @@ are the original plan, kept for the record.
    decision removed that source, so the pipeline stayed empty. The data source has been
    re-established via the Example "Kannaðu þekkingu þína" reveal (inline self-assessment):
    see `docs/plans/2026-06-19-rec7-practice-self-assessment.md`. The dead
-   `.practice-problem-container` writer is being removed there. (M4 still deferred —
-   see below; M2 revisits with the Phase-2 quiz bank.)
+   `.practice-problem-container` writer is being removed there. (M4 was fixed in #151 the
+   same day; M2 had already been fixed in 88243f1 (#115) — the Phase-2 quiz bank must still
+   set `questionId`, because dedupe falls back to the option id without it.)
 2. **SRS ease-factor cap** — add the documented 2.5 upper clamp in
    `utils/srs.ts` (CLAUDE.md and standard SM-2 both specify 1.3–2.5); update
    the test that codified the unbounded behavior.
@@ -120,4 +123,6 @@ the practice-pipeline data wired up in Phase 1.
   exercise↔answer links) and print/bind-friendly (spiral, 4-hole) PDF, with
   complete CC-BY / CC-BY-NC-SA attribution on both full-book and per-chapter
   artifacts. Benchmarked against the OpenStax `Chemistry2e-WEB.pdf` reference
-  (gitignored in repo root). Not started; Phase 0 spikes gate the rest.
+  (gitignored in repo root). Core merged in #182 on 2026-07-02 (Phases 0–1, Phase 2
+  core, Phase 3 except Task 3.3, Task 4.1); Task 3.3, Phase 4.2/4.3 and Phase 5 remain,
+  and no PDF is served on namsbokasafn.is yet — see the plan's own status line.

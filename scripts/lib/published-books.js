@@ -2,11 +2,17 @@
  * Which books may reach the website — the allowlist the sync reads.
  *
  * [LEAD] ruling 2026-08-22 (efni §C109): only chemistry and organic chemistry
- * are published. `edlisfraedi-2e`, `liffraedi-2e` and `orverufraedi` are held
- * back. It is a PAUSE, not a withdrawal — indefinite, reversible, and nothing
+ * were to be published. `edlisfraedi-2e`, `liffraedi-2e` and `orverufraedi` are
+ * held back. It is a PAUSE, not a withdrawal — indefinite, reversible, and nothing
  * is deleted in either repo. The decision record is efni's
  * `docs/decisions/2026-08-22-two-book-focus-and-publication-withdrawal.md`;
  * status is owned by its active register (§C109), not by this file.
+ *
+ * ⚠️ SUPERSEDED IN PART, 2026-09-23: [USER] withdrew `lifraen-efnafraedi` (organic
+ * only; the three books above stay paused as-is) — efni's
+ * `docs/decisions/2026-09-23-organic-translation-stopped-openstax-notice.md`.
+ * It is STILL LISTED below until the app-side removal lands, so as of 2026-10-01
+ * a bare sync still syncs it.
  *
  * ⚠️ THE LIST IS AN ALLOWLIST, NOT A DENYLIST, AND THAT IS DELIBERATE. A book
  * that appears in efni and is not named here is withheld by default. efni gains
@@ -15,8 +21,8 @@
  * failing to publish something ready.
  *
  * 🔴 SLUG-KEYED, NEVER STATUS-KEYED. `src/lib/types/book.ts` marks four of five
- * books `status: 'preview'` — INCLUDING `lifraen-efnafraedi`, which this ruling
- * keeps. Excluding "the preview books" would unpublish organic chemistry.
+ * books `status: 'preview'` — INCLUDING `lifraen-efnafraedi`, which the 2026-08-22
+ * ruling kept. Excluding "the preview books" would have unpublished organic chemistry.
  *
  * ⚠️ THIS GOVERNS WHAT IS SYNCED, NOT WHAT IS ALREADY DEPLOYED. Withheld books
  * keep whatever is already in `static/content/` and on the server; the sync's

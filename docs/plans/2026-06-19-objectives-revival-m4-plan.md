@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Status (2026-10-01):** Shipped in PR #151 (merged 2026-06-19); the checkboxes below were not back-filled. Task 6 Step 2's efni gate has cleared — efni has emitted page-data objectives since its PR #140 (2026-06-19), and 133 of 216 chemistry sections carry them in the live `toc.json` — but #151's QA used seeded page-data, and no run of the live check (toggle, `/markmid` coverage below 100%, ReflectPhase confidence) is recorded.
+
 **Goal:** Revive the inert learning-objectives feature and fix audit bug M4 (progress always 100%) by sourcing real objective totals and reframing `/markmid` around confidence calibration with a true coverage bar.
 
 **Architecture:** efni emits a structured `objectives` array into section page-data (separate efni session — prerequisite for live data). In vefur, `process-content.js` reads it into `toc.json`; the section reader's existing checkbox UI then renders; the objectives store computes progress against the real total and gains an upsert path; `/markmid` shows a confidence-calibration headline plus a real `assessed/total` coverage bar; ReflectPhase records via the upsert. The vefur half is fully unit-testable now with fixtures/seeded data; full end-to-end verification waits on the efni change landing + sync.

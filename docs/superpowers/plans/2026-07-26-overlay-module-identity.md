@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Status (2026-10-01):** Shipped in PR #200 (merged 2026-07-27, merge commit 3058906); the checkboxes below were not back-filled. Task 7 Step 1 was done — the comment on issue #197 was posted on 2026-07-27 — but #197 itself is still open, because #200 used no closing keyword.
+
 **Goal:** Make the `mt-preview` → `faithful` content overlay identify a section by its CNXML module id instead of its filename, so a review that corrects a section title stops publishing that section twice and stops silently freezing its chapter's review state.
 
 **Architecture:** All identity logic lands in `scripts/lib/overlay.js`, the shared library whose stated purpose is that `sync-content.js` and `generate-toc.js` "can never disagree". One planner, `resolveChapterDuplicates`, is consumed by both: `sync-content.js` deletes what the faithful overlay authorises it to delete, and `generate-toc.js` applies the same verdict as a backstop for standalone runs. Where the overlay supplies no authority, both warn loudly and keep every file — vefur has no content-derived basis to choose between two competing translations.

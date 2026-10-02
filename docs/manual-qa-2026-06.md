@@ -20,6 +20,20 @@ svelte-check, ESLint, the full Vitest suite, and Playwright e2e (incl. the
 pagination spec) — all green in CI, which also gates the `feature/**`
 branches.
 
+_(2026-10-01: not true of the release branches today. `feature/reader-v1.1`'s
+head (4bfd570) has no CI run at all, and `feature/reader-v1.2`'s head (e3b29c7)
+has one run, from 2026-07-25, in which lint-and-test and security failed within
+3 seconds and e2e was skipped — the infrastructure-failure signature, not a real
+result. Both branches are more than 250 commits behind `main` and no longer
+merge cleanly.)_
+
+_Status 2026-10-01: CI is still configured to run on `feature/**`, but neither
+release branch has a real CI result on its current head — `feature/reader-v1.1`
+(`4bfd570`) has 0 check-runs, and the only run on `feature/reader-v1.2` (`e3b29c7`,
+2026-07-25) failed in about 3 s, before a runner started. Both are 250+ commits
+behind `main`: merge `main` in and let CI run before relying on "all green" for
+D–E or G._
+
 **Automated verification of Batches A & B (2026-06-17):** driven end-to-end with
 Playwright/Chromium against `npm run dev`, using **in-app SPA navigation**
 (clicking Næsta / book links) so the SvelteKit component-reuse path the
@@ -83,13 +97,20 @@ The reactivity sweep (#112), store fixes (#113, #115, #116) and Icelandic (#117)
 - [x] `/greining` → "Hreinsa gögn": the summary cards (Heildartími, Nýleg
       virkni, weekly) clear along with the chart.
       _auto ✓: seeded 11s reading time (Heildartími) → 0 after Hreinsa gögn._
-- [ ] Solve 2–3 practice problems in a section using "Rétt hjá mér" /
+- [x] Solve 2–3 practice problems in a section using "Rétt hjá mér" /
       "Þarf að æfa meira", then open `/prof` — the adaptive quiz now offers
       those problems with mastery badges. `/nam` practice/review phases pick
       them up too.
-      _N/A (not auto-verifiable): no `.practice-problem-container` content in any
-      synced book, so the practice→quiz path can't be driven. Needs manual /
-      content check._
+      _Superseded N/A: the earlier note was written against the dead
+      `.practice-problem-container` flow, which rec7 (PR #150, merged 2026-06-19)
+      replaced with the inline self-assessment this box describes._
+      _auto ✓ (PR #150): Playwright vs dev server on 1-4-maelingar — the store gets
+      `source:'inline'` entries with the full question text; `/nam` mounts and
+      persists; `/prof` AdaptiveQuiz surfaces the inline data with the real
+      question rendered._
+      _auto ✓ (2026-10-01 audit run, local build of 2026-08-22): `/prof` shows the
+      mastery badge for a rated problem; `/nam` lists rated problems under
+      practice at once and under review after their 1-day interval._
 - [x] Open the _other_ book's glossary after using the first book's — terms
       belong to the right book (tooltips too).
       _auto ✓: in-app SPA round-trip Chemistry→Biology→Chemistry showed
@@ -226,18 +247,33 @@ Run against a `feature/reader-v1.2` build. Gates the v1.2.0 merge
 
 ## Batch F — Server (Linode, during the deploy window)
 
-- [ ] Apply the new nginx config (from `nginx-config-example.conf`),
+- [x] Apply the new nginx config (from `nginx-config-example.conf`),
       `sudo nginx -t`, reload.
-- [ ] `curl -sI https://namsbokasafn.is/_app/immutable/...` (any built
+      _live ✓ (2026-10-01): the June policy is in effect — the four checks below
+      pass. Later additions to the example are NOT applied on the server:
+      `frame-src` (5d640da, 2026-07-17) is absent from the live CSP, and the
+      `lifraen-efnafraedi` withdrawal blocks (#234) are not live — that URL still
+      answers 200._
+- [x] `curl -sI https://namsbokasafn.is/_app/immutable/...` (any built
       asset) → `Cache-Control: public, immutable`.
-- [ ] `curl -sI https://namsbokasafn.is/styles/content.css` →
+      _live ✓ (2026-10-01): `/_app/immutable/assets/Icon.Dc6oSaul.css` →
+      `max-age=31536000` + `public, immutable`._
+- [x] `curl -sI https://namsbokasafn.is/styles/content.css` →
       `Cache-Control: public, must-revalidate`, `Expires` ≈ 1 day.
-- [ ] `curl -sI https://namsbokasafn.is/` → CSP header includes
+      _live ✓ (2026-10-01): `max-age=86400` + `public, must-revalidate`;
+      `Expires` = `Date` + 24 h._
+- [x] `curl -sI https://namsbokasafn.is/` → CSP header includes
       `object-src 'none'`, `base-uri 'self'`, `frame-ancestors 'none'`.
-- [ ] `curl -sI https://namsbokasafn.is/efnafraedi/kafli/01` → `301` to
+      _live ✓ (2026-10-01): all three present._
+- [x] `curl -sI https://namsbokasafn.is/efnafraedi/kafli/01` → `301` to
       `/efnafraedi-2e/...`; same for a `/content/efnafraedi/...` image URL.
+      _live ✓ (2026-10-01): both answer 301 to the `efnafraedi-2e` path
+      (control: `/efnafraedi-2e/` → 200)._
 - [ ] Browse the site normally for a few minutes watching the console for
       CSP violations (especially GoatCounter's image ping).
+      _Not done in a browser. Static check only (2026-10-01): the live CSP
+      allows `https://gc.zgo.at` (script-src) and `https://*.goatcounter.com`
+      (img-src, connect-src)._
 
 ---
 

@@ -50,3 +50,21 @@ Biology note headers render **English + a console warn by design** (R5-3 label V
 - efni register: `docs/plans/2026-06-28-pipeline-architecture-implementation-plan.md` (R4-3-BUG row + post-merge review block)
 - efni delivery script (§6 prints these steps): `scripts/rerender-remediation-delivery.sh`
 - efni Phase-0 plan lead-gate checklist (all render items checked): `docs/superpowers/plans/2026-07-10-remediation-phase-0.md`
+
+## Correction, 2026-10-01
+
+**This step is done; do not run the command above again.** The content this handoff
+delivered is live: production serves a build from 2026-08-19, and on 2026-10-01 five of the
+six post-deploy spot-checks passed on the live site. The sixth fails on one page: microbiology
+`5-4-thorungar` still shows a literal `[[b:]]`, an efni content defect (efni register §C29)
+in a book that is now withheld from sync.
+
+The command is also unsafe as written today. Without a book argument, `sync-content.js`
+syncs every book on the allowlist in `scripts/lib/published-books.js`: currently
+`efnafraedi-2e`, whose sync [USER] is holding (2026-09-28) until its redirect rows are
+recomputed and landed, and `lifraen-efnafraedi`, which [USER] ruled withdrawn on 2026-09-23.
+
+The note-header caveat never applied to published pages: all 20 note headers in published
+biology (ch03, ch05) are Icelandic. The labels still missing in efni are for the `everyday`
+and `scientific` note types, which first appear in biology ch06; only ch03 and ch05 are
+published, and biology is withheld.

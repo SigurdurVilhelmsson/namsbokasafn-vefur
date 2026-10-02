@@ -10,7 +10,7 @@ Námsbókasafn (Textbook Library) is an interactive web-based reader for Iceland
 
 ## Notes for Code Reviewers
 
-- Migrated from React to SvelteKit January 2025 — some patterns may be carry-overs
+- Migrated from React to SvelteKit January 2026 — some patterns may be carry-overs
 - No backend — all user state in localStorage (intentional, not an oversight)
 - Content directory is gitignored and synced from sister repo
 - Built iteratively with AI assistance; patterns may be inconsistent across files
@@ -42,7 +42,7 @@ npm run format           # Prettier formatting
 ### State Management
 
 - **Svelte stores** (`src/lib/stores/`) with localStorage persistence
-- `settings.ts`: Theme, typography (font family/size, line height/width), reading mode, keyboard shortcuts, sidebar state
+- `settings.ts`: Theme, typography (font family/size, line height/width), keyboard shortcuts, sidebar state, bionic reading, glossary highlighting, `showTermEnglish` (`readingMode` is only on the `feature/reader-v1.1` and `feature/reader-v1.2` branches)
 - `reader.ts`: Reading progress, bookmarks, current location
 - `flashcard.ts`: SM-2 spaced repetition, study sessions, card ratings
 - `quiz.ts`: Quiz attempts and scores
@@ -78,9 +78,11 @@ npm run format           # Prettier formatting
 - `/:bookSlug/greining` - Study analytics
 - `/:bookSlug/bokamerki` - Bookmarks
 - `/:bookSlug/markmid` - Learning objectives
-- `/:bookSlug/svarlykill` - Answer key
-- `/:bookSlug/vidauki` - Appendix
+- `/:bookSlug/svarlykill/:chapter` - Answer key (one page per chapter)
+- `/:bookSlug/vidauki/:appendixLetter` - Appendix (one page per appendix letter)
+- `/:bookSlug/leyfi` - Colophon: licence and full multi-source attribution
 - `/:bookSlug/yfirlit` - Overview/dashboard
+- `/print/:bookSlug/{bok,kafli/:chapterSlug,vidauki,ordabok,colophon}` - Print-only views that `generate-pdfs.js` renders to PDF
 
 ### Key Patterns
 
@@ -199,8 +201,10 @@ meant the probe was broken.
 - Sister repo `namsbokasafn-efni` splits **MIT** (`tools/`, `scripts/`) from
   **AGPL-3.0** (`server/` — Ritstjóri). Respect that boundary if you work there.
 - **Credit follows the METHOD, not the job title** — the machine is the translator;
-  people are credited for _ritstjórn_ / _yfirlestur_. Biology alone is
-  human-translated ("Þýðing", Þórhallur Halldórsson). `src/lib/data/bookCredits.ts`
+  people are credited for _ritstjórn_ / _yfirlestur_. Biology names a human
+  translator (Þórhallur Halldórsson) in `book.ts`, but it has been `status: 'preview'` since
+  27d8ffe (2026-07-10, R6-2), so `compactCreditPair` gives it the machine credit (27d8ffe:
+  restore the human credit when faithful biology lands). `src/lib/data/bookCredits.ts`
   encodes this and its test asserts the credit must never read `Þýðandi: <human>`
   for MT content. Keep prose docs in step with it.
 
@@ -216,7 +220,7 @@ The catalogue carries **two content licences**: most titles are CC BY 4.0, but O
 ## Key Actions & Components
 
 - `src/lib/actions/equations.ts`: Equation rendering
-- `src/lib/actions/practiceProblems.ts`: Interactive problem handling
+- `src/lib/actions/practiceReveal.ts`: Example-answer reveal toggle and practice self-assessment (feeds `quizStore`; replaced `practiceProblems.ts` in #150)
 - `src/lib/actions/crossReferences.ts`: Internal link handling
 - `src/lib/actions/figureViewer.ts`: Image lightbox with zoom, pan, keyboard nav, and touch gestures (pinch-to-zoom, double-tap)
 - `src/lib/actions/glossaryTerms.ts`: Semantic glossary term tooltips (dfn elements only)
@@ -235,7 +239,7 @@ The catalogue carries **two content licences**: most titles are CC BY 4.0, but O
 
 Static site on a Linode server (nginx). Output goes to the `build/` directory. No backend — all state is client-side in localStorage.
 
-**CI does not deploy.** GitHub Actions (`ci.yml`) runs lint/type-check/tests/build/E2E on pushes and PRs for `main` and the `feature/**` integration branches. Deployment is the separate `deploy.yml` workflow — manual trigger or release tag (`v*.*.*`), rsync over a directory-restricted SSH key (setup in `docs/guides/deployment.md`) — with manual rsync as fallback. nginx changes must be applied on the server to match `nginx-config-example.conf`; the workflow never touches nginx.
+**CI does not deploy.** GitHub Actions (`ci.yml`) runs lint/type-check/tests/build/E2E on pushes and PRs for `main` and the `feature/**` integration branches. The separate `deploy.yml` workflow — manual trigger or release tag (`v*.*.*`), rsync over a directory-restricted SSH key (setup in `docs/guides/deployment.md`) — has **never completed a deploy**: 0 successful runs of 313, both manual dispatches (2026-01-09, 2026-06-17) failed, and its `production` environment holds 0 secrets and 0 variables (2026-10-01). Every deploy so far has been manual. nginx changes must be applied on the server to match `nginx-config-example.conf`; the workflow never touches nginx.
 
 ### CI — read this before trusting or blaming a red check
 
@@ -248,7 +252,12 @@ branch). It is **working again**, and `main` is fully green.
 - **`workflow_dispatch` is enabled** on `ci.yml` (and on all five efni gating
   workflows). Re-verify CI health from the Actions tab — never invent a commit.
 - **What the jobs actually run** — verify against _this_, not a similarly-named local
-  script. `lint-and-test`, `security`, `e2e`. In efni the trap is worse:
+  script. `lint-and-test`: a **bare** `sync-content.js` of efni's default branch, then
+  `npm run lint`, `npm run check`, `npm test` and `npm run build:no-validate`. `e2e`: the same
+  sync, `build:no-validate`, `npm run test:e2e`. `security`: the two `npm audit` steps below.
+  ⚠️ **`build:no-validate` skips `validate-content.js`, so its TOC/section-file/glossary checks and
+  the warn-only §C9 rename tripwire never run in CI.** The attribution check still does, as the unit
+  test `src/lib/types/book.test.ts` under `npm test`. In efni the trap is worse:
   `npm run lint` is eslint only while CI _also_ runs `npm run format:check`, and
   `npm test` is the unit suite while CI _also_ runs Playwright.
 - **The `security` job is split on purpose.** Blocking = `npm audit --audit-level=high
@@ -260,7 +269,9 @@ branch). It is **working again**, and `main` is fully green.
   2026-08-22; by 2026-09-04 the full tree measured **3** (1 low, 2 high — `browserslist`,
   `postcss-selector-parser`, `fast-uri`) and nothing had reported it, because the
   informational step is `continue-on-error` and nobody read it. Back to **0 at every
-  severity** on 2026-09-04. ⚠️ **A zero is not by
+  severity** on 2026-09-04 — and it drifted again: on 2026-10-01 the full tree had **4** (3 high:
+  `brace-expansion`, `devalue`, `undici`; 1 moderate: `fast-uri`), all fixable, while the
+  production tree was at 0. ⚠️ **A zero is not by
   itself a control** — a bare `npm audit` reports `found 0 vulnerabilities` whether the
   tree is clean or the auditor never looked. Control it against a scratch project holding
   a known-bad package (`npm install --package-lock-only minimist@1.2.0` → 1 critical,
@@ -297,10 +308,11 @@ branch). It is **working again**, and `main` is fully green.
 
 1. **`typescript` is pinned `~6.0.3` — tilde, not caret, and not 7.x.** TypeScript 7
    makes `npm ci` fail on a fresh clone (ERESOLVE). `@sveltejs/kit` peers
-   `^5.3.3 || ^6.0.0` and `typescript-eslint` peers `>=4.8.4 <6.1.0`; the
-   intersection is 6.0.x. `.github/dependabot.yml` **ignores major typescript
-   bumps** — Dependabot has proposed 7.x twice (#190 merged and broke fresh clones,
-   #195 closed). Lift the ignore only when _both_ peers admit 7.
+   `^5.3.3 || ^6.0.0`, `typescript-eslint` peers `>=4.8.4 <6.1.0` and `svelte-check` peers
+   `^5.0.0 || ^6.0.0` (lockfile, 2026-10-01); the newest TypeScript all three admit is 6.0.x.
+   `.github/dependabot.yml` **ignores major typescript bumps** — Dependabot has proposed 7.x
+   twice (#190 merged and broke fresh clones, #195 closed). Lift the ignore only when _all
+   three_ peers admit 7.
 2. **`package-lock.json` is in `.prettierignore`.** npm owns its formatting; prettier
    rewrites it and the next `npm install` rewrites it back, forever.
 3. **The Node floor is `>=22.22.2`, and `.nvmrc` says `22`.** Raised 2026-08-19 with
@@ -329,13 +341,16 @@ skipped sync fails loudly instead of turning every gating test green.
 
 - HSTS (`max-age=63072000; includeSubDomains; preload`)
 - Permissions-Policy (camera, microphone, geolocation, payment all denied)
-- CSP (`default-src 'self'`; fonts, styles, scripts all self-hosted; `frame-src` allows only PhET/YouTube for content embeds)
+- CSP (`default-src 'self'`; fonts and styles self-hosted; scripts self-hosted except the GoatCounter counter `https://gc.zgo.at/count.js`, which `src/app.html` loads and `script-src` allows; `frame-src` allows only PhET/YouTube for content embeds)
 
 ⚠️ **`nginx-config-example.conf` is a RECOMMENDATION, not a mirror of production.** nginx is
 applied by hand on the server and CI never touches it, so the two drift. Measured 2026-08-22 on
 the live host: **0** occurrences of `frame-src` across **10** `Content-Security-Policy` headers
-(that 10 is the control proving the grep matches), so **PhET and YouTube embeds are blocked on
-namsbokasafn.is right now** — `default-src 'self'` catches frames when `frame-src` is absent.
+(that 10 is the control proving the grep matches), so **PhET and YouTube embeds would be blocked on
+namsbokasafn.is** — `default-src 'self'` catches frames when `frame-src` is absent. Re-measured
+2026-10-01: still no `frame-src`, but the gap is latent — no served page contains an embed (0
+`<iframe>` across all five books); efni's only embed-bearing pages are 2 physics ch04 files, and
+physics is withheld.
 Fixing it means editing all 10 blocks, because an `add_header` inside a `location` replaces the
 server-level header wholesale rather than inheriting it. Verify against the server, never against
 this file: `ssh <host> 'grep -c frame-src /etc/nginx/sites-available/namsbokasafn.is'`.
@@ -368,7 +383,7 @@ Three steps, and only the first is loud:
 
 **`Sync complete: N succeeded, 0 failed` therefore does not cover the TOC.** Confirm the `Regenerating toc.json...` line appeared _and_ that no `Warning: Failed to regenerate` did — or check the file's mtime. Same family as the sync's conflict warnings: warn-only, exit code stays green. _(Traced 2026-08-07 during the orverufraedi delivery, after the `deleting toc.json` line was nearly treated as a reason to abort.)_
 
-**Cross-repo CSS contract:** `static/styles/content.css` styles the pre-rendered HTML produced by namsbokasafn-efni's `cnxml-render.js`. It is loaded via `<link>` in `src/routes/+layout.svelte`. Changes to this stylesheet must be coordinated with the CNXML rendering pipeline's class names and structure. The sister repo's `tools/__tests__/css-contract.test.js` is the checker — run it from there with `VEFUR_CONTRACT=1`; when a class here gains a real rule, remove it from efni's `KNOWN_GAPS` so the contract re-arms. Its parser reads **only the last selector line before `{`**, so a class on an earlier line of a comma-separated selector is invisible to it.
+**Cross-repo CSS contract:** `static/styles/content.css` styles the pre-rendered HTML produced by namsbokasafn-efni's `cnxml-render.js`. It is loaded via `<link>` in `src/routes/+layout.svelte`. Changes to this stylesheet must be coordinated with the CNXML rendering pipeline's class names and structure. The sister repo's `tools/__tests__/css-contract.test.js` is the checker — run it from there with `VEFUR_CONTRACT=1`; when a class here gains a real rule, remove it from efni's `KNOWN_GAPS` so the contract re-arms. Its parser strips comments, then reads everything after the last `}` before each `{`, so every line of a comma-separated multi-line selector counts (efni `ac98904e4`, PR #297, merged 2026-07-17; before that it read only the last selector line).
 
 **Two print surfaces — hiding something for print needs BOTH:** `static/styles/print.css` is loaded _only_ by `/print/*` (the PDF routes, `src/routes/print/+layout.svelte`). A reader pressing Ctrl+P on a normal page gets `src/app.css`'s own `@media print` block instead. A rule in one does not cover the other. Note that the app.css block blanket-hides `header, nav, aside, footer`, which silently removes all `aside.note` content and the module `<header>` — convenient, but it masks bugs and invalidates test fixtures placed there (inject fixtures inside `<main>`).
 
@@ -435,18 +450,18 @@ These are heuristics you apply with judgment, not hard gates — **except the tw
 - `scripts/generate-toc.js`: Scans chapter directories and generates `toc.json` from `.html` files. Run after syncing new content. Marks each section `reviewed: true` when a human-reviewed `faithful` version of that file exists in the efni repo; absence means a machine-translated preview (drives the MT banner in the reader).
 - `scripts/process-content.js`: Enriches `toc.json` with metadata (reading time). Runs automatically before `dev` and `build` via `prepare-content`.
 - `scripts/generate-sitemap.js`: Generates `sitemap.xml` from `toc.json`. Runs automatically as part of `prepare-content`.
-- `scripts/validate-content.js`: Validates TOC structure and glossary consistency. HTML content is validated upstream in the CNXML pipeline. Runs before production builds.
-- `scripts/sync-content.js`: Syncs content from namsbokasafn-efni repo. **Overlay model:** `mt-preview` is the complete baseline (mirrored with `--delete`); `faithful` is copied on top **without** `--delete`, so reviewed modules replace their machine-translated counterparts one at a time and a partial `faithful` can never wipe baseline chapters. Editor artifacts (`*.backup.*`, `*.pre-fix-*`, `*.orig`, `*.bak`, `*~`) are excluded. **Aggregation pages** (chapter rollups — summary/key-terms/exercises/answer-key — and book glossary/index) are chapter/book-scoped, not per-module: a faithful rollup is only served when the whole chapter/book is faithful, **or** when efni drops a `rollups-complete` marker in `05-publication/faithful/` signalling its rollups are built complete (faithful + MT fallback). The MT banner is independent — a rollup stays unreviewed until every module in its chapter is faithful. Shared overlay rules live in `scripts/lib/overlay.js`.
+- `scripts/validate-content.js`: Validates TOC structure, section files and glossary consistency, runs the attribution gate (`validateAllBookAttributions`; errors fail the build) and the warn-only §C9 rename tripwire. HTML content is validated upstream in the CNXML pipeline. Runs in `npm run build` and `npm run lint-content` — **not** in `build:no-validate` (which CI uses) or `build:full`.
+- `scripts/sync-content.js`: Syncs content from namsbokasafn-efni repo. **Overlay model:** `mt-preview` is the complete baseline (mirrored with `--delete --delete-excluded`); `faithful` is copied on top **without** `--delete`, so reviewed modules replace their machine-translated counterparts one at a time and a partial `faithful` can never wipe baseline chapters. Editor artifacts (`*.backup.*`, `*.pre-fix-*`, `*.orig`, `*.bak`, `*~`) are excluded. **Aggregation pages** (chapter rollups — summary/key-terms/exercises/answer-key — and book glossary/index) are chapter/book-scoped, not per-module: a faithful rollup is only served when the whole chapter/book is faithful, **or** when efni drops a `rollups-complete` marker in `05-publication/faithful/` signalling its rollups are built complete (faithful + MT fallback). The MT banner is independent — a rollup stays unreviewed until every module in its chapter is faithful. Shared overlay rules live in `scripts/lib/overlay.js`.
 
-**Which books get published is an allowlist in code, not a rule in prose** — `scripts/lib/published-books.js`, read by `sync-content.js`, with its own test. Today it is `efnafraedi-2e` and `lifraen-efnafraedi`; `edlisfraedi-2e`, `liffraedi-2e` and `orverufraedi` are held back ([LEAD] 2026-08-22, efni §C109 — a **pause**, indefinite and reversible, nothing deleted in either repo). Don't restate the list anywhere else; efni's own copy of it carries an explicit self-destruct that fires when this file exists.
+**Which books get published is an allowlist in code, not a rule in prose** — `scripts/lib/published-books.js`, read by `sync-content.js`, with its own test. Today it is `efnafraedi-2e` and `lifraen-efnafraedi` — organic still, although [USER] ruled on 2026-09-23 to withdraw it; taking it off this list is part of the app-side removal, not started as of 2026-10-01. `edlisfraedi-2e`, `liffraedi-2e` and `orverufraedi` are held back ([LEAD] 2026-08-22, efni §C109 — a **pause**, indefinite and reversible, nothing deleted in either repo); [USER] ruled on 2026-09-23 that they stay frozen as-is. Don't restate the list anywhere else; efni's own copy of it carries an explicit self-destruct that fires when this file exists.
 
-- **A bare run is now safe** — it syncs the permitted books and names the ones it skipped. Naming a held-back book is an **error**, not a silent skip, because someone typed that slug on purpose. `--allow-withheld` overrides, loudly, for the day the hold lifts.
-- 🔴 **It is SLUG-keyed, and it must stay that way.** `src/lib/types/book.ts` marks four of five books `status: 'preview'` — **including the kept `lifraen-efnafraedi`** — so any rule phrased over status unpublishes organic chemistry.
+- **A bare run syncs every allowlisted book** and names the ones it skipped. 🔴 **On 2026-10-01 that is NOT safe, and no code stops it:** both allowlisted books are under [USER] holds the allowlist does not encode — `efnafraedi-2e` (2026-09-28: redirect rows first, after efni's ② re-render) and `lifraen-efnafraedi` (ruled withdrawn 2026-09-23) — so run no sync at all for now. When the chemistry hold lifts, name `efnafraedi-2e`: a bare run also syncs organic until it leaves the allowlist (see the 2026-10-01 status entry). Naming a held-back book is an **error**, not a silent skip, because someone typed that slug on purpose. `--allow-withheld` overrides, loudly, for the day the hold lifts.
+- 🔴 **It is SLUG-keyed, and it must stay that way.** `src/lib/types/book.ts` marks four of five books `status: 'preview'` — **including `lifraen-efnafraedi`**, kept when this was written and ruled withdrawn on 2026-09-23 — so a rule phrased over status cannot tell the book being withdrawn from the three that stay frozen.
 - 🔴 **It governs SYNC, not what is already deployed, and the difference lives in one variable.** The stale-directory sweep at the end of `main()` is keyed on `availableBooks` (the **source** tree), never on the sync list. Filter _that_ by the allowlist and every held-back book is swept out of `static/content/` — a freeze silently becomes a deletion of live pages. `selectBooks()` is pure, exported and has a test pinning exactly this.
-- 🔴 **THE DEPLOY WOULD HAVE DELETED THEM, AND THE ALLOWLIST IS WHAT MADE THAT TRUE.** Once a held-back book is no longer in the build, `deploy.yml`'s `rsync -az --delete` removes its live pages. **`scripts/deploy-excludes.js` is the freeze** — it prints the rsync exclude patterns, and `--delete` _protects_ anything matching an `--exclude` (the same mechanic `downloads/` has always relied on). The list is **derived**, never restated: the complement of the allowlist over efni's source tree, so a book cannot be both unsynced and unprotected. Patterns are **unanchored** (`slug/`), so one per book covers `build/<slug>/`, `build/print/<slug>/` and `build/content/<slug>/` — and keeps covering a per-book route added later.
+- 🔴 **THE DEPLOY WOULD HAVE DELETED THEM, AND THE ALLOWLIST IS WHAT MADE THAT TRUE.** Once a held-back book is no longer in the build, `deploy.yml`'s `rsync -az --delete` removes its live pages. **`scripts/deploy-excludes.js` is the freeze** — it prints the rsync exclude patterns, and `--delete` _protects_ anything matching an `--exclude` (the same mechanic `downloads/` has always relied on). The list is **derived**, never restated: the complement of the allowlist over efni's source tree, so a book cannot be both unsynced and unprotected. Patterns are **unanchored** (`slug/`), so one per book covers `build/<slug>/`, `build/print/<slug>/` and `build/content/<slug>/` — and keeps covering a per-book route added later. ⚠️ **As of 2026-10-01 the freeze has never run against prod:** its only executor is `deploy.yml`, which has never completed a deploy, and prod still runs the 2026-08-19 build, which predates #226 (merged 2026-09-05).
   - ⚠️ **Never add `--delete-excluded` to the deploy.** It inverts this and deletes exactly what the list preserves. (`sync-content.js` _does_ pass it, deliberately and for a different job — clearing editor artifacts. The two scripts want opposite behaviour from the same flag.)
   - **Proved with a control, not from the manual:** against a fixture server holding all five books, the freeze keeps all three withheld books across pages/print/content while the two published books still update; the same rsync _without_ the list deletes all three. Re-run it before trusting a change here — and give fixture files **different sizes**, or rsync's size+mtime quick-check silently skips the transfer and the test proves nothing.
-  - **The sitemap does drop them.** `generate-sitemap.js` reads `static/content`, which no longer holds the withheld books, so their URLs leave `sitemap.xml` while the pages stay live. That is the intended shape of a pause — stop advertising, don't 404.
+  - **The sitemap drops them only in a fresh clone.** `generate-sitemap.js` lists every `static/content` book that has a `toc.json` — there is no allowlist filter — and the stale sweep above leaves withheld books in place, so a build from an existing checkout still advertises them. The live `sitemap.xml` (still the 2026-08-19 build, which predates the 2026-08-22 hold) lists 27 physics, 32 biology and 35 microbiology URLs on 2026-10-01 (and 26 for organic). That is still the intended shape of a pause — stop advertising, don't 404 — but it is not what ships today.
 - **Full removal is still a separate decision, with a trap of its own:** `svelte.config.js` sets `fallback: '200.html'` and nginx does `try_files $uri $uri/ /200.html`, so a removed page answers **HTTP 200 with the SPA shell**, not 404 — removal without server-side work converts real pages into indexed soft-404s. A 301 is also the wrong signal for a pause described as reversible.
 - `scripts/generate-pdfs.js`: Renders per-chapter and full-book PDFs from the `/print/*` routes (Playwright Chromium + pdf-lib): continuous page numbering, running headers, TOC with page numbers, PDF outline, appendices. Run after `sync-content`, before `build` (`npm run pdfs`). Set `PDF_CHROMIUM_PATH` to use a system Chromium instead of the Playwright-managed download.
 - `scripts/generate-component-inventory.js`: Generates component documentation (`npm run docs:generate`).
@@ -457,7 +472,11 @@ error. Note the split: lint-staged runs `eslint --fix` on `*.{ts,js,mjs,svelte}`
 `prettier --write` only on `*.{json,md,css,html}`, which is why JS keeps tabs and single
 quotes. ⚠️ **There is no Prettier config** (only `.prettierignore`), so `npm run format`
 (`prettier --write .`) would reformat every `.js`/`.ts` in the repo to Prettier's defaults.
-Don't run it until a `.prettierrc` with `"useTabs": true` exists. (efni's config won't
+Don't run it — and a `.prettierrc` with `"useTabs": true` would not make it safe: measured
+2026-10-01 over the 152 tracked `.ts`/`.js` files under `src/`, `scripts/` and `e2e/`,
+`prettier --no-config --use-tabs --list-different` flags 140 (137 with Prettier's defaults,
+128 even with `--single-quote` added), since lint-staged runs only ESLint `--fix` on
+JS/TS. (efni's config won't
 transplant — it sets `tabWidth: 2` with no `useTabs`.)
 
 ### The overlay identifies a section by MODULE ID, not filename
@@ -527,7 +546,28 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-10-01 — prod still runs the 2026-08-19 build; both allowlisted books are on hold
+
+Measured on 2026-10-01 against `main` = `6a9cf5c` (#234), efni `main` = `25f8b15`, GitHub and the live site.
+
+- **Prod runs the build of 2026-08-19** (`/_app/version.json` `1787150207749` = 2026-08-19T14:36:47Z). The 22 first-parent merges since — `516f223` #211 through `6a9cf5c` #234 — are **not live**, among them the `data-en` consumer (#224, #227), the KaTeX font removal (#214; prod still serves the fonts) and the `.smallcaps`/`.cnx-callout` rules in `content.css` (#233).
+- **Organic (`lifraen-efnafraedi`) is to be withdrawn — [USER] ruling 2026-09-23 — and only organic:** the three books held back 2026-08-22 (`edlisfraedi-2e`, `liffraedi-2e`, `orverufraedi`) stay frozen as-is. #234 (nginx 404 + notice) merged 2026-09-24 but is **not applied on the server**: `/lifraen-efnafraedi/` still answers 200 with the real book. The app-side removal (retired-books carve-out, catalogue, sitemap, tests, the 3 organic redirect rows) has **not started** — organic is still in `PUBLISHED_BOOKS` and no branch exists. The scope ruling has **not been relayed to efni**.
+- **The chemistry sync is HELD by [USER] (2026-09-28, the ⏹ SYNC PRECONDITION in efni's register):** after efni's ② whole-book re-render, recompute the redirect rows from the final titles, land them in `sectionRedirects.ts`, then sync. 0 of the 20 rows in efni's 2026-09-27 list are on `main` — correct, because they are recomputed at sync time; that list says vefur's 2 existing chemistry rows stay correct. efni's chemistry `mt-preview` last changed 2026-09-22; a sync today would rename about 50 live chemistry section URLs with no redirects.
+- **efni handoffs addressed to vefur since 2026-09-02**, in efni `docs/handoffs/`: `2026-09-05-vefur-ch03-publish-redirects.md` (its chemistry part superseded 09-17, its organic redirect edit by the 09-23 removal); the chemistry redirect handoffs `2026-09-17-vefur-chemistry-ch03-ch04-redirects.md`, `2026-09-19-vefur-chemistry-ch05-redirect.md`, `2026-09-19-vefur-chemistry-ch06-redirect.md`, `2026-09-20-vefur-chemistry-autorun-redirects.md` and `2026-09-27-vefur-chemistry-redirects-after-title-rulings.md` (all folded into the at-sync recompute); and `2026-09-23-vefur-remove-organic-and-retire-withdrawn-books.md` (scope narrowed to organic by the ruling above). ⚠️ One more sits in the **singular** `docs/handoff/`: `2026-09-02-vefur-term-english-contract.md` (vefur's half is merged, not deployed) — a glob over `docs/handoffs/` misses it.
+- 🔴 **Do not run `sync-content.js`.** A bare run syncs both allowlisted books — the held chemistry and organic, which is being withdrawn — and naming either one breaks its hold; the allowlist enforces neither.
+- 🔴 **Do not deploy with the documented manual rsync or with `deploy.yml` until the deploy-procedure PR lands.** The `deploy-excludes.js` freeze has never run against prod: its only executor is `deploy.yml`, and the manual rsync in `README.md` and `docs/guides/deployment.md` omits it. `deploy.yml` has never completed a deploy, and it runs a bare sync of efni's default branch. Any `--delete` deploy removes the hashed `_app/immutable/` CSS/JS that the frozen books' kept pages still load.
+- **npm audit, 2026-10-01:** production tree 0 at every severity; full tree 4 — `brace-expansion`, `devalue` and `undici` (high), `fast-uri` (moderate), all fixable. Open Dependabot PR #236 moves `devalue` and `undici`, not the other two.
+- **Audit tally:** 145 items re-measured — 84 open, 38 waiting, 16 done, 7 moot — plus 46 raised by its verifiers. The working list is a private tracker, deliberately not linked from this public repo.
+
 ### 2026-09-05 — the publication hold became code, and the data-en contract landed vefur-side
+
+> ⚠️ **Superseded on the operational points — read the 2026-10-01 entry above first.** On
+> 2026-10-01 `main` was `6a9cf5c`, and #224/#227 were merged but **not deployed** — prod still
+> runs the 2026-08-19 build. The "full retirement of the withheld books' live URLs" call below was
+> **ruled** by [USER] on 2026-09-23: organic is to be withdrawn, the three August books stay frozen as-is.
+> The gate is still SHUT (0 `termEnglish` in efni's `generate-glossary.js` and `generate-index.js`);
+> the glossary figure still holds at 853/867, but efni `main`'s index is already down to 763/827
+> `termEn` (chemistry 699/763). The `<dt data-en>` (i)-vs-(ii) call is still open.
 
 Five merges in one session (#223–#227). `main` = `4752f22` plus #227 pending.
 
@@ -636,7 +676,9 @@ Five merges in one session (#223–#227). `main` = `4752f22` plus #227 pending.
   real directory with no `index.html`); front matter now returns to the book home.
 - ⚠️ **A bare `sync-content.js` with no book argument syncs ALL books** — it can trip
   another book's pending renames, and biology sits under an efni-side `[LEAD]` hold that
-  nothing in either repo enforces. Always pass the book slug.
+  nothing in either repo enforces. Always pass the book slug. _(Superseded 2026-09-04 by #223: a
+  bare run now syncs only the allowlisted books, which enforces the 2026-08-22 hold — see Build
+  Scripts.)_
 - Still open, efni-side: `index.json` derives slugs from vefur's gitignored `toc.json`, so
   the subject index is structurally one sync stale (efni PR #406 fixes it); `glossary.json`
   still carries pre-review terminology for the reviewed §1.1.
@@ -646,9 +688,12 @@ Five merges in one session (#223–#227). `main` = `4752f22` plus #227 pending.
 > ⚠️ **Superseded on the operational points — read the 2026-08-19 entry above first.** The ch10
 > duplicate is **fixed and deployed**; efni pruned the stale page and the old URL now redirects.
 > The "Remaining, vefur-side: redirects" item is **done** (`sectionRedirects.ts`, PRs #206–#209).
-> The two `liffraedi-2e` ch03 renames named below are still unshipped, and that book is now
-> **held back from publication entirely** (see the publication allowlist under Build Scripts), so
-> they are dormant rather than pending. The rest of this entry is accurate for its date.
+> The two `liffraedi-2e` ch03 renames named below **shipped**: synced 2026-07-26 and live. Their
+> old URLs (`3-1-myndun-lifraenna-storsameinda`, `3-4-protein`) now answer the SPA shell — soft-404s,
+> with no redirect rows (re-measured 2026-10-01). The book has been held back from publication
+> since 2026-08-22 (see the publication allowlist under Build Scripts). The ch10 intro re-render
+> named below is done too: the live intro links `10-5-fastur-efnishamur`. The rest of this entry is
+> accurate for its date.
 
 - **PR #200** replaces filename-keyed overlay decisions with module identity — see "The
   overlay identifies a section by MODULE ID, not filename" above. Also fixes a second, silent
@@ -692,7 +737,8 @@ Five merges in one session (#223–#227). `main` = `4752f22` plus #227 pending.
   bundled fonts have their licences shipped. See Attribution & Licensing above.
 - Sister-repo state: efni is public too, `main` green except **C2** — two Playwright
   specs red since 2026-07-12 (synthetic segment IDs 404'd by the SR-OOS-2 backstop).
-  Tracked in efni's follow-up campaign register; no vefur action.
+  Tracked in efni's follow-up campaign register; no vefur action. _(By 2026-10-01 efni `main`
+  was green: Tests run 36854186194 passed both its `e2e` and `test` jobs.)_
 
 ### Earlier (June 2026)
 
@@ -704,4 +750,4 @@ Five merges in one session (#223–#227). `main` = `4752f22` plus #227 pending.
 
 ## Migration Note
 
-Migrated from React to SvelteKit in January 2025. Original React code in `archive/react-v1` branch.
+Migrated from React to SvelteKit in January 2026 (435b62a, 2026-01-09; this repo's history starts 2025-11-30). Original React code in `archive/react-v1` branch.

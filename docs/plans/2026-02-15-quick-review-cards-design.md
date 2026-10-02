@@ -1,7 +1,7 @@
 # Quick Review Summary Cards (Feature 9.4)
 
 **Date:** 2026-02-15
-**Status:** Approved
+**Status:** Approved; shipped 2026-02-15 — 884d721 (block extraction), 5d138a0 (the `/:bookSlug/yfirlit` page) and 44c2187 (sidebar link), all on `main`
 
 ## Problem
 

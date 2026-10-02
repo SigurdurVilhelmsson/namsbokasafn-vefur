@@ -289,3 +289,63 @@ This ask does **not** move the gate of §2. `tools/generate-glossary.js` and
 
 Re-rendering organic ch03 with the gloss **still emitted** is safe precisely because it changes
 none of that. Keep `annotateInlineTerms` on.
+
+---
+
+# Correction, 2026-10-01 — merged is not live: do not act on "vefur is live" yet
+
+**vefur `main` is `6a9cf5c`. Measured against efni `origin/main` `25f8b15f0` and against
+namsbokasafn.is.** This section corrects the note above; nothing earlier has been edited.
+
+## The consumer is merged, not deployed
+
+§1 ("vefur's half of the contract is live") and §2 ("vefur is live") described `main`, not the
+site. #224 (`12d8389`) and #227 (`da06b2b`) merged on 2026-09-05, but production still runs the
+build of 2026-08-19:
+
+```
+curl -s https://namsbokasafn.is/_app/version.json  →  {"version":"1787150207749"}  = 2026-08-19T14:36:47Z
+# the 25 JS chunks the live home page loads:  showTermEnglish in 0   (control: glossaryHighlighting in 1)
+# live root CSS /_app/immutable/assets/0.BBXCrncq.css:  term-en 0   (control: accent-color 74)
+```
+
+**efni must not treat the consumer as live until a later dated note here confirms a production
+deploy that includes `da06b2b`.** The gate of §2 and A8 is unchanged and still shut:
+`tools/generate-glossary.js` and `tools/generate-index.js` have `termEnglish` on 0 lines each
+(control: 9 lines in `cnxml-render.js` — `grep -c`, as in §2), and the `<dt data-en>` (i)-vs-(ii)
+decision is still open. Nothing here, then or now, says efni may flip `annotateEn` or retire
+`annotateInlineTerms`.
+
+## The PDFs are a surface §4 and A1 did not cover
+
+§4 says "vefur will not need another change", and A1 says the English "does not disappear from the
+page". Both hold for the web reader only. The `/print/*` routes that the PDFs are made from render
+content with bare `{@html}` and never mount the `glossaryTerms` action: `src/routes/print` has 0
+`use:` directives and 0 references to `glossaryTerms` (control: 10 files elsewhere in `src/` do),
+and the print block in `src/app.css` says so. So no `.term-en` span is ever rendered in a PDF: on
+the chapter pages the only term English is the inline gloss. (The full-book PDF's glossary
+appendix, `/print/<book>/ordabok`, takes its English from `glossary.json` — §2's generator gap,
+not this one.) **A flip would remove term English from the PDF chapter pages with nothing in its
+place**, unless vefur first changes the print routes or the loss is explicitly accepted. (The PDF
+glossary's `#gloss-N` anchor index does read `data-en`, since #224.)
+No PDFs are served today — `/downloads/efnafraedi-2e/manifest.json` returns the 3,012-byte SPA
+shell — so this stays latent until PDFs are next uploaded.
+
+## Smaller corrections
+
+- **§5 and A2–A8, the organic ch03 pilot.** efni did the render: organic ch03 on `origin/main`
+  carries `data-en` on 39 of 39 `<dfn class="term">` (`68fec4457`, 2026-09-05, and the batched
+  re-render `ad4375278`, 2026-09-19). But [USER] ruled on 2026-09-23 to withdraw organic chemistry
+  (efni `docs/decisions/2026-09-23-organic-translation-stopped-openstax-notice.md`), so that render
+  is not meant to be published, and §5's "one of the two books §C109 keeps" no longer holds.
+  The first real exercise of the attribute is the next chemistry sync: 131 of the 251 chemistry
+  `mt-preview` `.html` files on `origin/main` carry `data-en`.
+- **§2 table.** `efnafraedi-2e` `index.json` entries with `termEn` are now **699 / 763** (749 / 763
+  on 2026-09-05), although `annotateEn` is still on by default; `glossary.json` is unchanged at
+  739 / 753.
+- **§6.** efni has replaced its CLAUDE.md book-list bullet with a pointer to `published-books.js`
+  (`d4c136c4c`, 2026-09-08). That allowlist still names `lifraen-efnafraedi` until vefur's
+  app-side removal lands, so a bare sync still syncs it.
+- **A2 was wrong when written.** Omitting `--book` does not render the wrong book: `requireBook`
+  (efni `63b32a065`, 2026-06-29) exits with `Error: --book is required` before anything renders.
+  The help-text gap is real: `printHelp()` mentions `--book` 0 times (control: `--chapter` 5).

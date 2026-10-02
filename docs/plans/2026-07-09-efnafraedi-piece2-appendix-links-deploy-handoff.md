@@ -64,3 +64,20 @@ npm run build
 `mt-preview` baseline. It resolves per-module as `faithful` review lands (Pass-1 / B4
 track), and is **not** a vefur bug and **not** a blocker for shipping the clickable-link
 feature.
+
+## Correction, 2026-10-01
+
+- **Deployed and verified live; the "ready for prod push" status above is out of date.** The
+  production build live on 2026-10-01 (built 2026-08-19) carries the links: the
+  `/efnafraedi-2e/kafli/05/5-3-vermi/` page has 3 links to `/efnafraedi-2e/vidauki/G`, live
+  `5-exercises.html` has 7, and `/efnafraedi-2e/vidauki/G` answers one redirect to `/G/` and
+  then the real appendix page. Both post-deploy spot-checks pass (checked from the served HTML).
+- **The English labels (efni #21) are fixed upstream but not yet delivered.** efni `main`'s
+  chemistry render has 0 `Appendix X` labels, a fix from efni's September re-renders rather
+  than from faithful review. Live still shows 37 of 68 labels in English until the next
+  chemistry sync, which [USER] is holding (2026-09-28) until the redirect rows for efni's
+  final titles are recomputed and landed.
+- **Do not re-run the deploy steps above as written.** Without a book argument,
+  `sync-content.js` now syncs every book on the allowlist in `scripts/lib/published-books.js`,
+  which today means the held chemistry and `lifraen-efnafraedi`, which [USER] ruled withdrawn
+  on 2026-09-23.

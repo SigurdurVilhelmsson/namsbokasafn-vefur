@@ -2,6 +2,8 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Status (2026-10-01):** Shipped in PR #167 (merged 2026-06-24): `BookCover.svelte`, `bookCover.ts` and `bookCover.test.ts` are in `src/lib/components/`. The checkboxes below were not back-filled.
+
 **Goal:** Replace the plain book tiles on the landing page with a cover-forward poster grid of procedural, branded book covers generated from book metadata.
 
 **Architecture:** A pure `bookCover.ts` module holds the decorative motif registry and title-sizing logic (unit-tested). A presentational `BookCover.svelte` renders the cover from a book + subject key using those helpers. `src/routes/+page.svelte` composes `<BookCover>` + a caption strip in both book grids. The dead `coverImage` field and unused cover SVGs are removed.
