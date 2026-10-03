@@ -6,6 +6,7 @@ import {
 	type SectionRedirect
 } from './sectionRedirects';
 import type { TableOfContents } from '$lib/types/content';
+import { getBook } from '$lib/types/book';
 
 /**
  * A TOC carrying only the renamed section's NEW file, i.e. the post-prune
@@ -64,28 +65,13 @@ describe('SECTION_REDIRECTS data invariants', () => {
 		);
 	});
 
-	// lifraen-efnafraedi ch03 — three renames from efni's slug-map.mt-preview.json
-	// (§C118 ⑯/⑲, recorded 2026-09-02), pinned ahead of the sync that publishes
-	// their targets.
-	// ⚠️ 3-6 AND 3-7 CROSS OVER: 3-6 goes `stellingar` -> `afbrigdi` and 3-7 goes
-	// `afbrigdi` -> `stellingar`. Asserted as PAIRS precisely so a transcription
-	// that "normalises" them in one direction goes red rather than silently
-	// redirecting two URLs at each other.
-	it.each([
-		['3-2-alkanar-og-hverfur-alkana', '3-2-alkanar-og-alkanhverfur', 'm00033'],
-		['3-6-stellingar-etans', '3-6-afbrigdi-etans', 'm00037'],
-		['3-7-afbrigdi-annarra-alkana', '3-7-stellingar-annarra-alkana', 'm00038']
-	])('records the organic ch03 rename %s', (fromSlug, toSlug, moduleId) => {
-		expect(SECTION_REDIRECTS).toContainEqual(
-			expect.objectContaining({
-				bookSlug: 'lifraen-efnafraedi',
-				fromChapter: '03',
-				fromSlug,
-				toChapter: '03',
-				toSlug,
-				moduleId
-			})
-		);
+	// 🔴 A row for a book the site no longer serves turns that book's 404 into a
+	// redirect to a 404. The three organic ch03 rows went with its retirement
+	// (2026-09-23); a typo in a slug fails here too.
+	it('names only books the site serves', () => {
+		for (const r of SECTION_REDIRECTS) {
+			expect(getBook(r.bookSlug), r.bookSlug).toBeDefined();
+		}
 	});
 
 	// This one is NOT in efni's slug map — the C56 re-render predates §C9, so the

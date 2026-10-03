@@ -54,7 +54,7 @@
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getSourceBooks } from './sync-content.js';
-import { KNOWN_BOOKS, withheldBooks } from './lib/published-books.js';
+import { KNOWN_BOOKS, RETIRED_BOOKS, isRetired, withheldBooks } from './lib/published-books.js';
 import { EDITOR_ARTIFACT_PATTERNS } from './lib/editor-artifacts.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -70,7 +70,11 @@ const DEFAULT_SOURCE = resolve(projectRoot, '..', 'namsbokasafn-efni');
  */
 export function deployExcludes(availableBooks) {
 	const books = [...availableBooks, ...KNOWN_BOOKS.filter((slug) => !availableBooks.includes(slug))];
-	return ['downloads/', ...withheldBooks(books).map((slug) => `${slug}/`)];
+	// A retired book is withheld AND registered, so the union would freeze it.
+	// Subtract it from the OUTPUT: filtering availableBooks instead does
+	// nothing, because the KNOWN_BOOKS half adds it straight back.
+	const frozen = withheldBooks(books).filter((slug) => !isRetired(slug));
+	return ['downloads/', ...frozen.map((slug) => `${slug}/`)];
 }
 
 /**
@@ -85,6 +89,11 @@ export function deployExcludes(availableBooks) {
  *   up on the server by design.
  * - `- <pattern>` for everything deployExcludes() protects (neither sent nor
  *   deleted).
+ * - `H <slug>/` for each retired book: never sent (a local static/content
+ *   still holds it, so a build copies it into build/content/), and not
+ *   protected on the receiver, so --delete removes the server's copy on every
+ *   surface. Unanchored, like the freeze. `downloads/` is excluded first, so a
+ *   retired book's PDFs stay on the server; nginx answers 404 for them.
  * - `H <pattern>` (hide: sender side only) for editor artifacts: never sent,
  *   and NOT protected on the server, so --delete removes any that reached it
  *   by an older route. A `-` rule here would keep them there forever. Inside a
@@ -100,6 +109,7 @@ export function deployFilterRules(availableBooks) {
 	return [
 		'P /_app/immutable/**',
 		...deployExcludes(availableBooks).map((pattern) => `- ${pattern}`),
+		...RETIRED_BOOKS.map((slug) => `H ${slug}/`),
 		...EDITOR_ARTIFACT_PATTERNS.map((pattern) => `H ${pattern}`)
 	];
 }

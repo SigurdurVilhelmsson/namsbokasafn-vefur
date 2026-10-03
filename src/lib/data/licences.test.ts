@@ -133,7 +133,8 @@ describe('LICENCES table', () => {
 
 /**
  * No-commingling gate (R6-1). The catalogue carries two licences — CC BY 4.0 and
- * CC BY-NC-SA 4.0 (Organic Chemistry + College Physics). No aggregate/shared view
+ * CC BY-NC-SA 4.0 (College Physics; Organic Chemistry too, until its 2026-09-23
+ * withdrawal). No aggregate/shared view
  * may present "CC BY 4.0" as a site-wide claim: every mention in these surfaces
  * must sit next to an acknowledgement of the NC-SA alternative. Per-book surfaces
  * (bookCredits, book.ts, LicenceBadge) are data-driven and out of scope here.

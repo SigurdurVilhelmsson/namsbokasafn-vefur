@@ -137,6 +137,13 @@ every run:
   without the exclude `--delete` would remove any PDFs on the server.
 - `- <book>/` for every book the publication allowlist holds back: neither sent
   nor deleted, so the paused books stay live as they are.
+- `H <book>/` for every **retired** book (`RETIRED_BOOKS` in
+  `scripts/lib/published-books.js`; today `lifraen-efnafraedi`): never sent,
+  although a build copies a local `static/content` copy into `build/content/`,
+  and the server's copy is **deleted** on every surface. The dry run says so
+  and lists those deletions; they are expected. Apply the nginx "Withdrawn
+  book" blocks **before** the first deploy that carries a new retirement, or
+  the deleted URLs answer 200 with the SPA shell instead of 404.
 - `H *.backup.*` and the other editor-artifact patterns: never sent, although a
   build copies them out of `static/content`. They are hide rules, not
   excludes, so a copy already on the server is deleted — except inside a frozen
