@@ -49,7 +49,6 @@ import {
 	existsSync,
 	mkdirSync,
 	readFileSync,
-	readdirSync,
 	statSync,
 	writeFileSync,
 	rmSync
@@ -65,6 +64,7 @@ import {
 	mergeChapterDests,
 	writeMergedDests
 } from './lib/pdf-links.js';
+import { assertPrintable, pdfBooks } from './lib/pdf-books.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -92,14 +92,6 @@ function parseArgs(argv) {
 	return args;
 }
 
-function listBooksWithContent() {
-	if (!existsSync(CONTENT_DIR)) return [];
-	return readdirSync(CONTENT_DIR, { withFileTypes: true })
-		.filter((d) => d.isDirectory())
-		.map((d) => d.name)
-		.filter((slug) => existsSync(join(CONTENT_DIR, slug, 'toc.json')));
-}
-
 function loadToc(bookSlug) {
 	return JSON.parse(readFileSync(join(CONTENT_DIR, bookSlug, 'toc.json'), 'utf-8'));
 }
@@ -119,7 +111,7 @@ async function startDevServer(port) {
 }
 
 async function printToPdf(page, url, outFile) {
-	await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+	assertPrintable(await page.goto(url, { waitUntil: 'load', timeout: 60000 }), url);
 	// Give layout/fonts a beat to settle. Pre-rendered MathJax SVG doesn't need
 	// time, but custom fonts swap async on first request.
 	await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
@@ -512,8 +504,13 @@ async function generateForBook(page, baseUrl, bookSlug) {
 
 async function main() {
 	const args = parseArgs(process.argv.slice(2));
-	const allBooks = listBooksWithContent();
-	const targetBooks = args.book ? allBooks.filter((b) => b === args.book) : allBooks;
+	let targetBooks;
+	try {
+		targetBooks = pdfBooks(CONTENT_DIR, args.book);
+	} catch (e) {
+		console.error(e.message);
+		process.exit(1);
+	}
 
 	if (targetBooks.length === 0) {
 		console.error('No books with content found in static/content/.');
