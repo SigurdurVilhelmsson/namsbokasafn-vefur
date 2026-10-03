@@ -211,7 +211,11 @@ equation-heavy section.
 
 - [ ] Available-height heuristic (viewport − 260 px chrome): do pages feel
       right, or chopped too short / too tall? → tune the constant in
-      `PagedReaderControls.availableHeight()`.
+      `PagedReaderControls.availableHeight()`. Measured 2026-10-03 at
+      1280×720: section 1.1 is 18 pages and 3.1 is 29.
+- [ ] Long worked examples and big tables are never split: one taller than
+      the page gets a page of its own and scrolls there (9 of 3.1's 29 pages
+      at 1280×720). Keep that, split long examples, or raise the page budget?
 - [ ] Should the recall prompt fire per _sub-section_ instead of per
       section (the spec's preference — callback already wired)? Decide
       after reading a few chapters paged.
