@@ -106,7 +106,14 @@ test.describe('Paged reading mode', () => {
 			localStorage.setItem('namsbokasafn:settings', JSON.stringify(state));
 		});
 		await page.reload();
-		await page.waitForLoadState('networkidle');
+		// Not networkidle: after a reload the service worker can keep the
+		// network busy past 30 s (it timed out once in a full-suite run).
+		// Wait for the content, then for what the paginator itself waits for
+		// (fonts) plus a margin, so "no controls" cannot pass merely because
+		// paged mode had not drawn them yet.
+		await expect(page.locator('.reading-content')).toBeVisible();
+		await page.evaluate(() => document.fonts.ready);
+		await page.waitForTimeout(1000);
 
 		await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toHaveCount(0);
 		await expect(page.locator('.reading-content [hidden]')).toHaveCount(0);
