@@ -220,57 +220,6 @@ export const books: BookConfig[] = [
     }
   },
   {
-    id: 'lifraen-efnafraedi',
-    slug: 'lifraen-efnafraedi',
-    title: 'Lífræn efnafræði',
-    subtitle: 'Sýnishorn úr OpenStax Organic Chemistry',
-    description: 'Vélþýddur sýniskafli úr Organic Chemistry.',
-    subject: 'raunvisindi',
-    coverMotif: 'benzene',
-    translator: 'Erlendur (Miðeind)',
-    status: 'preview',
-    source: {
-      title: 'Organic Chemistry',
-      publisher: 'OpenStax',
-      url: 'https://openstax.org/details/books/organic-chemistry',
-      authors: ['David Klein'],
-      license: 'CC BY-NC-SA 4.0',
-      licenseUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
-    },
-    attribution: {
-      bookKey: 'lifraen-efnafraedi',
-      originalTitle: 'Organic Chemistry',
-      originalAuthors: ['David Klein'],
-      publisher: 'OpenStax, Rice University',
-      sourceUrl: 'https://openstax.org/details/books/organic-chemistry',
-      translators: MACHINE_TRANSLATION_CREDIT,
-      modifications:
-        'Vélþýddur sýniskafli úr Organic Chemistry, þýtt á íslensku. Breytingarnar fela í sér þýðingu á texta, hugtökum og dæmum yfir á íslensku.',
-      derivativeLicence: 'CC-BY-NC-SA-4.0',
-      derivativeLicenceUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
-      provenanceRef: '/provenance/provenance.md',
-      sources: [
-        {
-          format: 'cnxml',
-          obtained: '2026-03-23',
-          licenceAtObtaining: 'CC-BY-NC-SA-4.0',
-          licenceUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
-          upstreamRepo: 'osbooks-organic-chemistry',
-          collection: 'organic-chemistry',
-          upstreamChangeCommit: '51e417ff (frá fyrsta riti 2022-06-09 — ávallt CC BY-NC-SA)'
-        }
-      ]
-    },
-    stats: {
-      totalChapters: 30,
-      translatedChapters: 1
-    },
-    features: {
-      flashcards: false,
-      exercises: true
-    }
-  },
-  {
     id: 'edlisfraedi-2e',
     slug: 'edlisfraedi-2e',
     title: 'Eðlisfræði',
@@ -323,6 +272,75 @@ export const books: BookConfig[] = [
   }
 ];
 
+/**
+ * Books taken OFF the site, kept out of `books` so that no route prerenders
+ * them, getBook() does not resolve them (a client-side hit on one of their URLs
+ * is a 404), and no catalogue or book list shows them. The slugs are
+ * RETIRED_BOOKS in scripts/lib/published-books.js, which the sync and the
+ * deploy read; a test keeps the two equal.
+ *
+ * The entries stay in this file on purpose: the build's attribution gate still
+ * validates them, and efni's licence-contract test reads `bookKey` and
+ * `derivativeLicence` out of this file's text.
+ *
+ * - lifraen-efnafraedi: withdrawn 2026-09-23 — OpenStax has not authorised the
+ *   translation (efni docs/decisions/2026-09-23-organic-translation-stopped-
+ *   openstax-notice.md). Reversible: move the entry back into `books`.
+ */
+export const retiredBooks: BookConfig[] = [
+  {
+    id: 'lifraen-efnafraedi',
+    slug: 'lifraen-efnafraedi',
+    title: 'Lífræn efnafræði',
+    subtitle: 'Sýnishorn úr OpenStax Organic Chemistry',
+    description: 'Vélþýddur sýniskafli úr Organic Chemistry.',
+    subject: 'raunvisindi',
+    coverMotif: 'benzene',
+    translator: 'Erlendur (Miðeind)',
+    status: 'preview',
+    source: {
+      title: 'Organic Chemistry',
+      publisher: 'OpenStax',
+      url: 'https://openstax.org/details/books/organic-chemistry',
+      authors: ['David Klein'],
+      license: 'CC BY-NC-SA 4.0',
+      licenseUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
+    },
+    attribution: {
+      bookKey: 'lifraen-efnafraedi',
+      originalTitle: 'Organic Chemistry',
+      originalAuthors: ['David Klein'],
+      publisher: 'OpenStax, Rice University',
+      sourceUrl: 'https://openstax.org/details/books/organic-chemistry',
+      translators: MACHINE_TRANSLATION_CREDIT,
+      modifications:
+        'Vélþýddur sýniskafli úr Organic Chemistry, þýtt á íslensku. Breytingarnar fela í sér þýðingu á texta, hugtökum og dæmum yfir á íslensku.',
+      derivativeLicence: 'CC-BY-NC-SA-4.0',
+      derivativeLicenceUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+      provenanceRef: '/provenance/provenance.md',
+      sources: [
+        {
+          format: 'cnxml',
+          obtained: '2026-03-23',
+          licenceAtObtaining: 'CC-BY-NC-SA-4.0',
+          licenceUrl: 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+          upstreamRepo: 'osbooks-organic-chemistry',
+          collection: 'organic-chemistry',
+          upstreamChangeCommit: '51e417ff (frá fyrsta riti 2022-06-09 — ávallt CC BY-NC-SA)'
+        }
+      ]
+    },
+    stats: {
+      totalChapters: 30,
+      translatedChapters: 1
+    },
+    features: {
+      flashcards: false,
+      exercises: true
+    }
+  }
+];
+
 export function getBook(slug: string): BookConfig | undefined {
   return books.find(b => b.slug === slug);
 }
@@ -347,7 +365,7 @@ export function getBookAttribution(slug: string): BookAttribution | undefined {
  */
 export function validateAllBookAttributions(): Record<string, string[]> {
   const problems: Record<string, string[]> = {};
-  for (const book of books) {
+  for (const book of [...books, ...retiredBooks]) {
     const errors = validateAttribution(book.attribution);
     if (errors.length > 0) {
       problems[book.slug] = errors;

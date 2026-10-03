@@ -130,8 +130,13 @@ describe('selectBooks', () => {
 	it('a bare run syncs only the permitted books and reports the rest', () => {
 		const result = selectBooks({ availableBooks: SOURCE });
 		expect(result.error).toBeUndefined();
-		expect(result.books).toEqual(['efnafraedi-2e', 'lifraen-efnafraedi']);
-		expect(result.skipped).toEqual(['edlisfraedi-2e', 'liffraedi-2e', 'orverufraedi']);
+		expect(result.books).toEqual(['efnafraedi-2e']);
+		expect(result.skipped).toEqual([
+			'edlisfraedi-2e',
+			'liffraedi-2e',
+			'lifraen-efnafraedi',
+			'orverufraedi'
+		]);
 		expect(result.overridden).toEqual([]);
 	});
 
@@ -150,6 +155,15 @@ describe('selectBooks', () => {
 		expect(result.error).toBe('withheld');
 		expect(result.refused).toEqual(['orverufraedi']);
 		expect(result.books).toEqual([]);
+	});
+
+	// A bare sync must not bring a retired book back (trap 1 of efni's
+	// 2026-09-23 handoff, in reverse), and naming it is refused like any
+	// withheld book.
+	it('refuses a named retired book', () => {
+		const result = selectBooks({ availableBooks: SOURCE, requested: ['lifraen-efnafraedi'] });
+		expect(result.error).toBe('withheld');
+		expect(result.refused).toEqual(['lifraen-efnafraedi']);
 	});
 
 	it('syncs a named permitted book', () => {

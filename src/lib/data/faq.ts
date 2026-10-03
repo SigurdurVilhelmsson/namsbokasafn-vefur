@@ -21,13 +21,13 @@ export const faqItems: FaqItem[] = [
 		id: 'okeypis',
 		question: 'Er þetta ókeypis?',
 		answer:
-			'Já, allt efni er gjaldfrjálst. Bækurnar eru gefnar út undir opnum Creative Commons leyfum — flestar undir <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>, en tvær (Lífræn efnafræði og Eðlisfræði) undir <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>. Þú mátt nota, afrita og aðlaga efnið svo framarlega sem þú tilgreinir hvaðan það kemur. Fyrir CC BY-NC-SA bækurnar er þó óheimilt að nota efnið í ágóðaskyni og afleitt efni skal bera sama leyfi. Sjá leyfissíðu hverrar bókar.'
+			'Já, allt efni er gjaldfrjálst. Bækurnar eru gefnar út undir opnum Creative Commons leyfum — flestar undir <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>, en ein (Eðlisfræði) undir <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>. Þú mátt nota, afrita og aðlaga efnið svo framarlega sem þú tilgreinir hvaðan það kemur. Fyrir CC BY-NC-SA bókina er þó óheimilt að nota efnið í ágóðaskyni og afleitt efni skal bera sama leyfi. Sjá leyfissíðu hverrar bókar.'
 	},
 	{
 		id: 'kennsla',
 		question: 'Má ég nota þetta í kennslunni minni?',
 		answer:
-			'Auðvitað! Þú getur notað efnið beint í kennslu, aðlagað það að þínum þörfum, búið til verkefni út frá því, eða notað það sem viðbótarefni. Opnu Creative Commons leyfin tryggja að kennarar hafi víðtækan rétt til að nota og aðlaga efnið. Athugaðu að tvær bækur (Lífræn efnafræði og Eðlisfræði) eru undir CC BY-NC-SA 4.0, sem heimilar ekki notkun í ágóðaskyni og krefst sama leyfis á afleiddu efni — sjá leyfissíðu hverrar bókar.'
+			'Auðvitað! Þú getur notað efnið beint í kennslu, aðlagað það að þínum þörfum, búið til verkefni út frá því, eða notað það sem viðbótarefni. Opnu Creative Commons leyfin tryggja að kennarar hafi víðtækan rétt til að nota og aðlaga efnið. Athugaðu að ein bók (Eðlisfræði) er undir CC BY-NC-SA 4.0, sem heimilar ekki notkun í ágóðaskyni og krefst sama leyfis á afleiddu efni — sjá leyfissíðu hverrar bókar.'
 	},
 	{
 		id: 'thyding',

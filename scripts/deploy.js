@@ -10,7 +10,8 @@
  *   were deployed with; nginx answers a missing one with 404. Those files stay on
  *   the server (a receiver-side `P` rule) while the new build's files upload.
  * - The withheld books and `downloads/`: neither sent nor deleted (the freeze),
- *   including a frozen book the efni checkout lacks.
+ *   including a frozen book the efni checkout lacks. A RETIRED book is the
+ *   exception: never sent, and its server copy is deleted (RETIRED_BOOKS).
  * - Editor artifacts: never sent, even though a build copies them from
  *   static/content into build/; copies already on the server outside a frozen
  *   book are deleted.
@@ -41,7 +42,7 @@ import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { getSourceBooks } from './sync-content.js';
 import { deployFilterRules } from './deploy-excludes.js';
-import { KNOWN_BOOKS, PUBLISHED_BOOKS, withheldBooks } from './lib/published-books.js';
+import { KNOWN_BOOKS, PUBLISHED_BOOKS, RETIRED_BOOKS, isRetired, withheldBooks } from './lib/published-books.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -132,7 +133,9 @@ export function deploy({ source, build, target, apply, log = console.log }) {
 	const rules = deployFilterRules(availableBooks);
 	// The rules protect these anyway (KNOWN_BOOKS); say so, since an efni tree
 	// missing a frozen book usually means an old pin or a partial checkout.
-	const missing = withheldBooks(KNOWN_BOOKS).filter((slug) => !availableBooks.includes(slug));
+	const missing = withheldBooks(KNOWN_BOOKS).filter(
+		(slug) => !isRetired(slug) && !availableBooks.includes(slug)
+	);
 
 	const tmp = mkdtempSync(join(tmpdir(), 'vefur-deploy-'));
 	const filterFile = join(tmp, 'rules');
@@ -145,6 +148,9 @@ export function deploy({ source, build, target, apply, log = console.log }) {
 	for (const rule of rules) log(`    ${rule}`);
 	for (const slug of missing) {
 		log(`  ⚠️ ${slug} is held back but missing from ${source}; protecting it on the server anyway.`);
+	}
+	for (const slug of RETIRED_BOOKS) {
+		log(`  ${slug} is retired: never sent, and the server's copy is deleted (expect its paths below).`);
 	}
 
 	try {

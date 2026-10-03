@@ -2,8 +2,8 @@
  * Orðasafn (glossary) gating — R6-6
  *
  * The book glossary only exists for books that ship a glossary.json (→ toc.glossary).
- * Books without one (orverufraedi, lifraen-efnafraedi — 0 <glossary> in source until
- * efni's D5 lands) must NOT show a dead sidebar link, and the route must degrade to a
+ * Books without one (orverufraedi — 0 <glossary> in source until efni's D5 lands)
+ * must NOT show a dead sidebar link, and the route must degrade to a
  * friendly "not available yet" state instead of a red error block.
  *
  * Fixtures are chosen from the synced content at run time, not hardcoded: which books

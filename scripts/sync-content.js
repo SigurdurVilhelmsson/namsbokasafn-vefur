@@ -48,7 +48,13 @@ import {
 	resetIdentityCache,
 	ROLLUPS_COMPLETE_MARKER
 } from './lib/overlay.js';
-import { RULING_REFERENCE, publishableBooks, withheldBooks } from './lib/published-books.js';
+import {
+	RETIREMENT_REFERENCE,
+	RULING_REFERENCE,
+	isRetired,
+	publishableBooks,
+	withheldBooks
+} from './lib/published-books.js';
 import { EDITOR_ARTIFACT_PATTERNS } from './lib/editor-artifacts.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -669,6 +675,12 @@ function main() {
 			`Error: these books are held back from publication: ${selection.refused.join(', ')}`
 		);
 		console.error(`Ruling: ${RULING_REFERENCE}`);
+		const retired = selection.refused.filter(isRetired);
+		if (retired.length > 0) {
+			console.error(`Retired, i.e. taken off the site: ${retired.join(', ')}`);
+			console.error(`  ${RETIREMENT_REFERENCE}`);
+			console.error('  --allow-withheld will not serve it again: see RETIRED_BOOKS.');
+		}
 		console.error('Pass --allow-withheld to override, once the hold is lifted.');
 		process.exit(1);
 	}
@@ -683,7 +695,10 @@ function main() {
 
 	if (selection.skipped.length > 0) {
 		console.log(`Held back from publication: ${selection.skipped.join(', ')}`);
-		console.log(`  ${RULING_REFERENCE}\n`);
+		console.log(`  ${RULING_REFERENCE}`);
+		const retired = selection.skipped.filter(isRetired);
+		if (retired.length > 0) console.log(`  Retired: ${retired.join(', ')} — ${RETIREMENT_REFERENCE}`);
+		console.log('');
 	}
 
 	// Loud when the allowlist is being overridden — this is the line a reviewer

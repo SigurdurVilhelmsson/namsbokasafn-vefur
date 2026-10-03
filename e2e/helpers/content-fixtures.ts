@@ -22,6 +22,7 @@
 import { readdirSync, readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { isRetired } from '../../scripts/lib/published-books.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CONTENT_DIR = join(HERE, '..', '..', 'static', 'content');
@@ -46,7 +47,9 @@ function readToc(slug: string): Toc | null {
 
 /**
  * Book slugs with a readable toc.json, sorted so fixture choice is deterministic
- * across runs and machines.
+ * across runs and machines. A retired book is skipped: a dev machine's
+ * static/content keeps it after retirement (CI never syncs it), and the app
+ * answers 404 for it, so picking it fails every gating test on that machine.
  *
  * Throws when no content is present at all: that means the sync step did not run,
  * which is a broken test setup and must fail loudly rather than silently skipping
@@ -61,7 +64,7 @@ export function syncedBooks(): string[] {
 	const slugs = readdirSync(CONTENT_DIR, { withFileTypes: true })
 		.filter((e) => e.isDirectory())
 		.map((e) => e.name)
-		.filter((slug) => readToc(slug) !== null)
+		.filter((slug) => !isRetired(slug) && readToc(slug) !== null)
 		.sort();
 
 	if (slugs.length === 0) {

@@ -5,7 +5,7 @@ import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { deploy, parseArgs, rsyncArgs, summarizeItemized } from './deploy.js';
-import { deployExcludes } from './deploy-excludes.js';
+import { deployExcludes, deployFilterRules } from './deploy-excludes.js';
 
 // A string, not new URL(): the jsdom test environment replaces the global URL class.
 const DEPLOY_SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'deploy.js');
@@ -134,6 +134,10 @@ function makeFixture() {
 	write(root, 'server/content/edlisfraedi-2e/toc.json', 'o'.repeat(500));
 	write(root, 'server/liffraedi-2e/index.html', 'o'.repeat(410));
 	write(root, 'server/orverufraedi/index.html', 'o'.repeat(420));
+	// The retired book, live on every surface.
+	write(root, 'server/lifraen-efnafraedi/index.html', 'o'.repeat(430));
+	write(root, 'server/print/lifraen-efnafraedi/bok/index.html', 'o'.repeat(440));
+	write(root, 'server/content/lifraen-efnafraedi/toc.json', 'o'.repeat(460));
 	// Editor backups that reached the server by an older route: one in a
 	// published book (junk to remove) and one inside a frozen book (left alone,
 	// like everything else in a frozen book).
@@ -149,8 +153,8 @@ function makeFixture() {
 	write(root, 'build/_app/immutable/assets/0.NEW.css', 'n'.repeat(222));
 	write(root, 'build/_app/immutable/chunks/new.js', 'n'.repeat(333));
 	write(root, 'build/content/efnafraedi-2e/toc.json', 'n'.repeat(555));
-	// Every published book has content in a real build (the deploy refuses
-	// otherwise, since it would delete that live book).
+	// A dev machine's static/content still holds the retired book (gitignored,
+	// and the sync keeps it while efni has it), so a build copies it in.
 	write(root, 'build/content/lifraen-efnafraedi/toc.json', 'n'.repeat(556));
 	write(root, 'build/efnafraedi-2e/kafli/01/index.html', 'n'.repeat(777));
 	write(root, 'build/efnafraedi-2e/kafli/01/index.html.backup.2026-03-29T10-57-57', 'n'.repeat(999));
@@ -301,8 +305,8 @@ describe.skipIf(!hasRsync && !process.env.CI)('deploy against a real rsync', () 
 	// commit that predates the book, say — would delete that live book from the
 	// server with exit 0. The freeze only covers withheld books.
 	it('refuses when the build has no content for a published book', () => {
-		rmSync(join(root, 'build/content/lifraen-efnafraedi'), { recursive: true });
-		expect(() => run(true)).toThrow(/lifraen-efnafraedi/);
+		rmSync(join(root, 'build/content/efnafraedi-2e'), { recursive: true });
+		expect(() => run(true)).toThrow(/efnafraedi-2e/);
 		expect(onServer(root, 'stale/index.html')).toBe(true);
 	});
 
@@ -311,6 +315,61 @@ describe.skipIf(!hasRsync && !process.env.CI)('deploy against a real rsync', () 
 		const lines = [];
 		deploy({ source: join(root, 'efni'), build: join(root, 'build'), target: join(root, 'server') + '/', apply: false, log: (line) => lines.push(line) });
 		expect(lines.some((line) => line.includes('edlisfraedi-2e') && line.includes('missing'))).toBe(true);
+	});
+
+	// 🔴 Retiring a book takes it OFF the server. The freeze must not keep it,
+	// and the build's leftover copy must not be uploaded in its place. The
+	// chemistry page and the stale page show the transfer and --delete both ran.
+	it('removes a retired book from every surface on the server', () => {
+		run(true);
+		expect(statSync(join(root, 'server/efnafraedi-2e/kafli/01/index.html')).size).toBe(777);
+		expect(onServer(root, 'stale/index.html')).toBe(false);
+		expect(onServer(root, 'lifraen-efnafraedi/index.html')).toBe(false);
+		expect(onServer(root, 'print/lifraen-efnafraedi/bok/index.html')).toBe(false);
+		expect(onServer(root, 'content/lifraen-efnafraedi/toc.json')).toBe(false);
+	});
+
+	it('keeps the three paused books while removing the retired one', () => {
+		run(true);
+		expect(onServer(root, 'lifraen-efnafraedi/index.html')).toBe(false);
+		expect(onServer(root, 'edlisfraedi-2e/index.html')).toBe(true);
+		expect(onServer(root, 'liffraedi-2e/index.html')).toBe(true);
+		expect(onServer(root, 'orverufraedi/index.html')).toBe(true);
+	});
+
+	it('removes a retired book the efni tree no longer holds', () => {
+		rmSync(join(root, 'efni/books/lifraen-efnafraedi'), { recursive: true });
+		run(true);
+		expect(onServer(root, 'stale/index.html')).toBe(false);
+		expect(onServer(root, 'lifraen-efnafraedi/index.html')).toBe(false);
+		expect(onServer(root, 'content/lifraen-efnafraedi/toc.json')).toBe(false);
+	});
+
+	// The dry run is what the operator reads before --apply: the retired book's
+	// deletions must be expected there, not mistaken for a broken freeze.
+	it('lists the retired book among the dry run deletions, and says why', () => {
+		const lines = [];
+		const result = deploy({ source: join(root, 'efni'), build: join(root, 'build'), target: join(root, 'server') + '/', apply: false, log: (line) => lines.push(line) });
+		expect(result.deleted).toContain('lifraen-efnafraedi/index.html');
+		expect(lines.some((line) => line.includes('lifraen-efnafraedi') && /retired/i.test(line))).toBe(true);
+	});
+
+	it('does not claim to protect a retired book the efni tree lacks', () => {
+		rmSync(join(root, 'efni/books/lifraen-efnafraedi'), { recursive: true });
+		const lines = [];
+		deploy({ source: join(root, 'efni'), build: join(root, 'build'), target: join(root, 'server') + '/', apply: false, log: (line) => lines.push(line) });
+		expect(lines.some((line) => line.includes('lifraen-efnafraedi') && line.includes('protecting'))).toBe(false);
+	});
+
+	// Control: the same rules without the retired book's hide rule. The build's
+	// leftover copy is uploaded, so the fixture can tell the rule from its absence.
+	it('control: without the hide rule, the leftover copy of the retired book is uploaded', () => {
+		const rulesFile = join(root, 'no-hide.rules');
+		const rules = deployFilterRules(SOURCE_BOOKS).filter((rule) => rule !== 'H lifraen-efnafraedi/');
+		writeFileSync(rulesFile, rules.join('\n') + '\n');
+		const res = spawnSync('rsync', ['-a', '--delete', `--filter=merge ${rulesFile}`, join(root, 'build') + '/', join(root, 'server') + '/']);
+		expect(res.status).toBe(0);
+		expect(statSync(join(root, 'server/content/lifraen-efnafraedi/toc.json')).size).toBe(556);
 	});
 
 	// Control: today's deploy.yml rules (an --exclude-from file of the freeze

@@ -24,7 +24,6 @@
     'efnafraedi-2e': 'chemistry',
     'liffraedi-2e': 'biology',
     'orverufraedi': 'biology',
-    'lifraen-efnafraedi': 'chemistry',
     'edlisfraedi-2e': 'physics'
   };
 

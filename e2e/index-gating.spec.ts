@@ -2,8 +2,8 @@
  * Atriðisorðaskrá (subject index) gating — R6-4
  *
  * The book-wide index only exists for books that ship an index.json (→ toc.index).
- * Books without one (physics/microbiology/organic, and biology before its index
- * syncs) must NOT show a dead sidebar link, and the route must degrade to a
+ * Books without one (microbiology, and physics and biology before their indexes
+ * synced) must NOT show a dead sidebar link, and the route must degrade to a
  * friendly "not available yet" state instead of a red error block.
  *
  * Fixtures are chosen from the synced content at run time, not hardcoded: which

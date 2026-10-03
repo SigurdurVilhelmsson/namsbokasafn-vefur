@@ -578,11 +578,11 @@ describe('glossaryTerms action', () => {
 		});
 
 		// 🔴 init() returns before the dfn loop when the book ships no glossary,
-		// and two published books do exactly that. A gloss appended inside that
-		// loop would never render for them.
+		// and orverufraedi does exactly that (organic did too, until its
+		// withdrawal). A gloss appended inside that loop would never render.
 		it('renders even when the glossary is empty', async () => {
 			const node = createContentNode([{ text: 'alkylhalid', dataEn: 'alkyl halide' }]);
-			const action = glossaryTerms(node, { bookSlug: 'lifraen-efnafraedi' });
+			const action = glossaryTerms(node, { bookSlug: 'orverufraedi' });
 			await flush();
 
 			expect(glossOf(node)).toEqual([' (e. alkyl halide)']);
