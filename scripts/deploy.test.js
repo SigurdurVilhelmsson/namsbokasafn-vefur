@@ -259,8 +259,8 @@ describe.skipIf(!hasRsync && !process.env.CI)('deploy against a real rsync', () 
 		expect(onServer(root, 'orverufraedi/index.html')).toBe(true);
 	});
 
-	// deploy.yml runs the command, not deploy(): a failed transfer must fail the
-	// step, or the workflow reports "Deployed" while the site was not updated.
+	// Whatever runs the command (a person, a script) must see a failed transfer
+	// as a failure, or it reports "Deployed" while the site was not updated.
 	it('exits non-zero from the command line when rsync fails', () => {
 		const res = spawnSync(
 			process.execPath,
@@ -372,7 +372,7 @@ describe.skipIf(!hasRsync && !process.env.CI)('deploy against a real rsync', () 
 		expect(statSync(join(root, 'server/content/lifraen-efnafraedi/toc.json')).size).toBe(556);
 	});
 
-	// Control: today's deploy.yml rules (an --exclude-from file of the freeze
+	// Control: the rules the retired deploy.yml used (an --exclude-from file of the freeze
 	// patterns) on the same fixture. It must delete the old assets, or the
 	// fixture cannot tell the fix from the bug.
 	it('control: the previous rules delete the old assets', () => {

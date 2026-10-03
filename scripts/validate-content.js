@@ -272,7 +272,7 @@ async function validateAttributions() {
 /**
  * Tripwire for §C9 section renames efni has recorded but we do not redirect.
  *
- * WARN-ONLY, deliberately. `deploy.yml` runs `npm run build`, which runs this
+ * WARN-ONLY, deliberately. Every deploy runs `npm run build`, which runs this
  * validator, so an error here would let a content change in the sister repo
  * block a deploy — inverting the repo's own rule that an efni content defect
  * must never fail vefur's sync. The point is to make a silent 404 loud, not to

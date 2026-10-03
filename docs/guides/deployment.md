@@ -1,108 +1,36 @@
 # Deployment
 
 The production site is a static build served by nginx on a Linode Ubuntu
-server. There are two ways to deploy; both run the same command,
-`scripts/deploy.js`, which rsyncs the build into
+server. Deploys are **manual**, from a machine with SSH access to the server,
+with one command, `scripts/deploy.js`, which rsyncs the build into
 `/var/www/namsbokasafn-vefur/build`.
 
-| Method                                                         | When                                    |
-| -------------------------------------------------------------- | --------------------------------------- |
-| **GitHub Actions** (`deploy.yml`)                              | Normal releases — works from any device |
-| **Manual deploy** (`scripts/deploy.js`) from a trusted machine | Fallback, or when GitHub is unavailable |
+**CI (`ci.yml`) never deploys**; it only verifies pushes and PRs. The GitHub
+Deploy workflow (`deploy.yml`) was **retired on 2026-10-03**. It never completed
+a deploy (0 successful runs of 313; no deploy key or secrets were ever set up),
+and every run would have re-synced every allowlisted book with no dry-run stop.
 
-**CI (`ci.yml`) never deploys** — it only verifies pushes and PRs. The
-deploy workflow runs on two triggers only:
+## Before you deploy
 
-- **Manual:** Actions → Deploy → "Run workflow" (pick the branch — `main`
-  for production releases — and give the full SHA of the efni commit whose
-  content to publish). Works from a phone.
-- **Release tag:** pushing a tag like `v1.1.0` deploys that tag, with the efni
-  commit in the `EFNI_PUBLISHED_REF` variable.
+The 2026-10-03 deploy followed these steps; keep to them.
 
-The workflow never publishes efni's default branch: with neither an efni SHA
-nor `EFNI_PUBLISHED_REF` it stops before building. efni's `main` can be ahead
-of what should go live (renamed pages whose redirects have not landed).
+1. **Build** with `npm run build`. Sync content first only if you mean to
+   publish new content (`node scripts/sync-content.js --source ../namsbokasafn-efni <book>`,
+   and only when no hold stands; see `CLAUDE.md`, Current Development Status).
+2. **Back up the live build** on the server, so it can be restored with one rsync:
+   `cp -a /var/www/namsbokasafn-vefur/build ~/backups/namsbokasafn-build-<date>-v<version>`,
+   then compare file counts and checksums with the live copy.
+3. **Dry run** `scripts/deploy.js` (below) and read every deleted path.
+4. **Diff the sitemaps**: `curl -s https://namsbokasafn.is/sitemap.xml` against
+   `build/sitemap.xml`. Any URL that disappears must be expected.
+5. **Without a sync, checksum the content too.** Compare `sha256sum` of every
+   file under `build/content/<book>/` (editor backups excluded) with the server's
+   copy. The sitemap cannot see content changes: on 2026-10-03 two local files
+   were older than the live ones and would have rolled back a fix.
+6. **Deploy** with `--apply`, then check `/_app/version.json` and the pages
+   you changed.
 
-⚠️ The SHA picks a content **revision**, not which books: every run re-syncs
-every book on the publication allowlist at that revision, then deploys with no
-dry-run stop. While a book is under a hold (see `CLAUDE.md`, Current
-Development Status), don't run the workflow. Nothing yet records which efni
-commit the live content came from, so there is no known-safe SHA to pin
-instead.
-
-The workflow re-verifies the exact commit it ships (lint, type-check, unit
-tests, build with content validation) before rsyncing, so what was tested
-is byte-for-byte what goes live.
-
-## One-time setup
-
-### 1. On the server: a key that can only write the build directory
-
-The deploy key is useless for anything except syncing the build output —
-no shell, no other paths. As your normal user on the Linode:
-
-```bash
-# rrsync ships with rsync; put it on PATH if it isn't already
-which rrsync || sudo sh -c 'gzip -dc /usr/share/doc/rsync/scripts/rrsync.gz > /usr/local/bin/rrsync && chmod +x /usr/local/bin/rrsync'
-
-# Generate the deploy keypair (no passphrase; it lives only in GitHub)
-ssh-keygen -t ed25519 -f ~/deploy_key -N '' -C 'github-deploy namsbokasafn-vefur'
-
-# Authorize the PUBLIC key with a forced command locked to the build dir.
-# "restrict" disables port/agent/X11 forwarding and PTY allocation.
-echo "command=\"$(which rrsync || echo /usr/local/bin/rrsync) /var/www/namsbokasafn-vefur/build\",restrict $(cat ~/deploy_key.pub)" >> ~/.ssh/authorized_keys
-```
-
-Copy the contents of `~/deploy_key` (the private key) for step 2, then
-delete both files from the server:
-
-```bash
-cat ~/deploy_key        # copy this into the GitHub secret
-rm ~/deploy_key ~/deploy_key.pub
-```
-
-### 2. On GitHub: a protected `production` environment
-
-Repo → Settings → Environments → New environment → `production`.
-Recommended: add yourself under **Required reviewers**, so every deploy
-(even tag-triggered) waits for your approval click.
-
-In that environment add:
-
-- **Secret** `DEPLOY_SSH_KEY` — the private key from step 1 (the whole
-  file, including the BEGIN/END lines).
-
-Repo → Settings → Secrets and variables → Actions → **Variables** tab:
-
-- `DEPLOY_USER` — the server user the key was authorized for (e.g. `siggi`)
-- `DEPLOY_HOST` — `kvenno.app`
-- `DEPLOY_KNOWN_HOSTS` — the server's host keys, captured from your own
-  machine (NOT generated inside the workflow, so a network MITM can't
-  substitute a host): run `ssh-keyscan kvenno.app` and paste the output.
-- `EFNI_PUBLISHED_REF` — the full 40-character SHA of the efni commit whose
-  content tag runs publish. Change it only when you mean to release new
-  content. Manual runs take the SHA as an input instead.
-
-### 3. Verify
-
-Only when no book is under a hold (see the warning above): run Actions → Deploy
-→ "Run workflow" on `main` with the efni SHA, approve it, and check the run log
-ends with "Deployed <sha>". Because of the forced command, even a
-leaked key could only overwrite the static build directory — and the site
-is restored by simply re-running the deploy.
-
-## Release flow
-
-1. Merge the release PR (e.g. `feature/reader-v1.1` → `main` with the
-   version bump and CHANGELOG entry).
-2. Tag and push: `git tag v1.1.0 && git push origin v1.1.0` — the deploy
-   runs automatically (and waits for approval if configured). It publishes the
-   efni commit in `EFNI_PUBLISHED_REF`; update that first if the release
-   should carry new content.
-3. If the release includes nginx changes, apply them on the server in the
-   same window (see below) — the workflow does not touch nginx.
-
-## Manual deployment (fallback)
+## Running the deploy
 
 ```bash
 npm run build

@@ -17,7 +17,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "lint": "eslint .",
-    "format": "prettier --write .",
+    "format": "prettier --write \"**/*.{json,md,css,html}\"",
     "process-content": "node scripts/process-content.js",
     "prepare-content": "npm run process-content && node scripts/generate-sitemap.js",
     "validate-content": "node scripts/validate-content.js",

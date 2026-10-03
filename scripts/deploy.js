@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Deploy the built site with the rules production needs. ONE command for both
- * paths: `deploy.yml` calls it, and so does a manual deploy.
+ * Deploy the built site with the rules production needs. This is THE deploy
+ * command, run by hand from a machine with SSH access to the server (the
+ * GitHub deploy workflow was retired on 2026-10-03).
  *
  * WHAT IT PROTECTS (rules from deployFilterRules() in scripts/deploy-excludes.js)
  *
