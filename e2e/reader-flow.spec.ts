@@ -195,6 +195,8 @@ test.describe('CSS Build Validation', () => {
 		// Navigate to a book to get the header with icon buttons
 		const bookLink = page.getByRole('link', { name: /Efnafræði/i }).first();
 		await bookLink.click();
+		// Same race as the button-styling test below: wait for the navigation.
+		await expect(page).toHaveURL(/\/efnafraedi-2e\//);
 		await page.waitForLoadState('networkidle');
 
 		// Check that SVG icons have constrained dimensions (Tailwind w-5 h-5 = 20px)
@@ -218,6 +220,10 @@ test.describe('CSS Build Validation', () => {
 
 		const bookLink = page.getByRole('link', { name: /Efnafræði/i }).first();
 		await bookLink.click();
+		// A client-side navigation keeps the same document, so networkidle can
+		// resolve before it starts — and the landing header has a button of its
+		// own. Reading that one gives 0, or NaN once it detaches mid-navigation.
+		await expect(page).toHaveURL(/\/efnafraedi-2e\//);
 		await page.waitForLoadState('networkidle');
 
 		// Check that header buttons have proper padding (Tailwind p-2 = 8px)
