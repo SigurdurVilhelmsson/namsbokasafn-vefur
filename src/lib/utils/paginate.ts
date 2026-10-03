@@ -83,3 +83,61 @@ export function pageIndexForItem(pages: PageRange[], itemIndex: number): number 
 	}
 	return pages.length > 0 ? pages.length - 1 : 0;
 }
+
+/** A reading unit: a sub-section (`wrapper` is its <section>), or the intro
+ *  blocks before the first sub-section (`wrapper` null). */
+export interface ContentUnit {
+	wrapper: HTMLElement | null;
+	children: HTMLElement[];
+}
+
+/**
+ * A sub-section's pageable blocks. A nested <section> is looked through, so its
+ * heading and paragraphs page individually; as one block it overflowed the page.
+ * The nested <section> element itself is never hidden, only its blocks.
+ */
+function sectionBlocks(section: HTMLElement): HTMLElement[] {
+	return (Array.from(section.children) as HTMLElement[]).flatMap((el) =>
+		el.tagName === 'SECTION' ? sectionBlocks(el) : [el]
+	);
+}
+
+/**
+ * Split a module's blocks into units at its <section> boundaries.
+ *
+ * efni's renderer puts the module body in <main>, after a <header> with the
+ * title (`article.cnx-module > header + main`). The blocks to paginate are
+ * <main>'s children, so <main> is looked through rather than treated as one
+ * block, which made a whole section a single page. Markup without <main>
+ * (the shape this was first written against) still works.
+ */
+export function buildUnits(root: HTMLElement): ContentUnit[] {
+	const result: ContentUnit[] = [];
+	let intro: HTMLElement[] = [];
+	const blocks = (Array.from(root.children) as HTMLElement[]).flatMap((el) =>
+		el.tagName === 'MAIN' ? (Array.from(el.children) as HTMLElement[]) : [el]
+	);
+
+	for (const child of blocks) {
+		if (child.tagName === 'SECTION') {
+			if (intro.length > 0) {
+				result.push({ wrapper: null, children: intro });
+				intro = [];
+			}
+			result.push({ wrapper: child, children: sectionBlocks(child) });
+		} else {
+			intro.push(child);
+		}
+	}
+	if (intro.length > 0) result.push({ wrapper: null, children: intro });
+	return result;
+}
+
+/**
+ * Index of the block a deep-link target lands on, or -1 if it is not in `items`.
+ * The target can be a block, sit inside one, or (a nested sub-section, which
+ * buildUnits pages block by block) contain blocks: then its first block wins.
+ */
+export function itemIndexForTarget(items: HTMLElement[], target: HTMLElement): number {
+	return items.findIndex((el) => el === target || el.contains(target) || target.contains(el));
+}

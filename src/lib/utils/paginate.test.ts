@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { paginate, pageIndexForItem, type PaginateItem } from './paginate';
+import { paginate, pageIndexForItem, buildUnits, itemIndexForTarget, type PaginateItem } from './paginate';
 
 function block(height: number, opts: Partial<PaginateItem> = {}): PaginateItem {
 	return { height, atomic: false, keepWithNext: false, ...opts };
@@ -81,5 +81,90 @@ describe('pageIndexForItem', () => {
 		expect(pageIndexForItem(pages, 4)).toBe(2);
 		// Out of range clamps to the last page
 		expect(pageIndexForItem(pages, 99)).toBe(2);
+	});
+});
+
+describe('buildUnits', () => {
+	function article(html: string): HTMLElement {
+		const el = document.createElement('article');
+		el.className = 'cnx-module';
+		el.innerHTML = html;
+		return el;
+	}
+	const tags = (els: HTMLElement[]) => els.map((e) => e.tagName.toLowerCase());
+
+	// efni's current markup: the module body sits in <main>, after a <header>
+	// holding the title. Treating <main> as one block made page 2 the whole
+	// section, taller than the screen (measured on 1.1 Efnafræði í samhengi).
+	it('splits the blocks inside <main>, not <main> as one block', () => {
+		const units = buildUnits(
+			article(
+				'<header><h1>T</h1></header><main><p>a</p><p>b</p><figure></figure>' +
+					'<section><h2>S1</h2><p>c</p></section><section><h2>S2</h2><p>d</p></section></main>'
+			)
+		);
+		expect(units.map((u) => tags(u.children))).toEqual([
+			['header', 'p', 'p', 'figure'],
+			['h2', 'p'],
+			['h2', 'p']
+		]);
+	});
+
+	it('makes each sub-section its own unit, with the <section> as wrapper', () => {
+		const units = buildUnits(article('<header></header><main><p>a</p><section><p>b</p></section></main>'));
+		expect(units.map((u) => u.wrapper?.tagName.toLowerCase() ?? null)).toEqual([null, 'section']);
+	});
+
+	// 23 of 251 chemistry pages nest sub-sections (1.4, 3.1, 7.2, the preface…).
+	// A nested <section> taken as one block overflowed the page: 783px in a
+	// 720px window on the preface's "Breytingar í annarri útgáfu".
+	it('pages the blocks of a nested sub-section, not the nested <section> as one block', () => {
+		const units = buildUnits(
+			article(
+				'<header></header><main><section><h2>A</h2><p>a</p>' +
+					'<section><h3>A.1</h3><p>b</p><p>c</p></section>' +
+					'<section><h3>A.2</h3><p>d</p></section></section></main>'
+			)
+		);
+		expect(units.map((u) => tags(u.children))).toEqual([
+			['header'],
+			['h2', 'p', 'h3', 'p', 'p', 'h3', 'p']
+		]);
+	});
+
+	// The June markup had no <main>; the branch was written against it.
+	it('still handles a module whose blocks are direct children', () => {
+		const units = buildUnits(article('<h1>T</h1><p>a</p><section><p>b</p></section>'));
+		expect(units.map((u) => tags(u.children))).toEqual([['h1', 'p'], ['p']]);
+	});
+});
+
+describe('itemIndexForTarget', () => {
+	const root = document.createElement('section');
+	root.innerHTML =
+		'<h2>A</h2><p id="para">a <span id="inner">x</span></p>' +
+		'<section id="nested"><h3>A.1</h3><p>b</p></section>';
+	const items = buildUnits(
+		Object.assign(document.createElement('article'), { innerHTML: root.outerHTML })
+	)[0].children;
+	const article = items[0].closest('article') as HTMLElement;
+	const byId = (id: string) => article.querySelector<HTMLElement>('#' + id)!;
+
+	it('finds a block that is the target', () => {
+		expect(itemIndexForTarget(items, byId('para'))).toBe(1);
+	});
+
+	it('finds the block that contains the target', () => {
+		expect(itemIndexForTarget(items, byId('inner'))).toBe(1);
+	});
+
+	// A link to a nested sub-section's own id: since nested sections are paged
+	// block by block, the target CONTAINS the blocks; land on its first one.
+	it('finds the first block inside a target that contains blocks', () => {
+		expect(itemIndexForTarget(items, byId('nested'))).toBe(2);
+	});
+
+	it('returns -1 for a target outside the unit', () => {
+		expect(itemIndexForTarget(items, document.createElement('div'))).toBe(-1);
 	});
 });

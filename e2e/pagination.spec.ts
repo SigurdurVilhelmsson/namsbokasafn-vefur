@@ -60,6 +60,36 @@ test.describe('Paged reading mode', () => {
 		await expect(label).toHaveText(before ?? '', { timeout: 5000 });
 	});
 
+	// The point of paged mode: no scrolling within a page. Sums the heights of
+	// the content blocks visible on each page (the chrome around the page is
+	// not counted, as the paginator's own budget leaves room for it).
+	test('every page of a section fits the viewport', async ({ page }) => {
+		test.skip(!(await openFirstSection(page)), 'No section content available');
+
+		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
+		await expect(nav).toBeVisible();
+		const next = nav.getByRole('button', { name: 'Næsta síða' });
+
+		for (let i = 0; i < 6; i++) {
+			const { visible, viewport } = await page.evaluate(() => {
+				const root = document.querySelector('article.cnx-module') as HTMLElement;
+				const main = root.querySelector(':scope > main');
+				const blocks = [
+					...Array.from(root.children).filter((el) => el.tagName !== 'MAIN'),
+					...(main ? Array.from(main.children) : [])
+				].flatMap((el) => (el.tagName === 'SECTION' ? Array.from(el.children) : [el]));
+				const visible = blocks
+					.filter((el) => (el as HTMLElement).offsetParent !== null)
+					.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0);
+				return { visible, viewport: window.innerHeight };
+			});
+			expect(visible, `page ${i + 1}: ${Math.round(visible)}px of content in a ${viewport}px window`).toBeLessThanOrEqual(viewport);
+			if (await next.isDisabled()) break;
+			await next.click();
+			await page.waitForTimeout(300);
+		}
+	});
+
 	test('continuous-scroll setting restores the scrolled experience', async ({ page }) => {
 		test.skip(!(await openFirstSection(page)), 'No section content available');
 

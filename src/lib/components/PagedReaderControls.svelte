@@ -2,8 +2,9 @@
   PagedReaderControls - Hybrid viewport-aware pagination (reader plan P0.4)
 
   Outer level: the sub-section boundaries already present in the prerendered
-  HTML (article.cnx-module > section). Inner level: viewport-fitting page
-  splits computed by utils/paginate.ts over measured block heights.
+  HTML (article.cnx-module > main > section; buildUnits in utils/paginate.ts).
+  Inner level: viewport-fitting page splits computed by utils/paginate.ts over
+  measured block heights.
 
   Pages are applied by HIDING out-of-page blocks rather than moving them:
   the DOM the content actions (practiceProblems, glossaryTerms, ...) enhanced
@@ -15,7 +16,13 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import { browser } from '$app/environment';
 	import { settings } from '$lib/stores/settings';
-	import { paginate, pageIndexForItem, type PageRange } from '$lib/utils/paginate';
+	import {
+		paginate,
+		pageIndexForItem,
+		buildUnits as buildContentUnits,
+		itemIndexForTarget,
+		type PageRange
+	} from '$lib/utils/paginate';
 
 	interface Props {
 		/** Wrapper around the rendered content (contains .reading-content) */
@@ -99,28 +106,7 @@
 	}
 
 	function buildUnits(root: HTMLElement): Unit[] {
-		const result: Unit[] = [];
-		let intro: HTMLElement[] = [];
-
-		for (const child of Array.from(root.children) as HTMLElement[]) {
-			if (child.tagName === 'SECTION') {
-				if (intro.length > 0) {
-					result.push({ wrapper: null, children: intro, pages: [] });
-					intro = [];
-				}
-				result.push({
-					wrapper: child,
-					children: Array.from(child.children) as HTMLElement[],
-					pages: []
-				});
-			} else {
-				intro.push(child);
-			}
-		}
-		if (intro.length > 0) {
-			result.push({ wrapper: null, children: intro, pages: [] });
-		}
-		return result;
+		return buildContentUnits(root).map((unit) => ({ ...unit, pages: [] }));
 	}
 
 	function computePages() {
@@ -248,7 +234,7 @@
 			}
 			if (target) {
 				for (let u = 0; u < units.length; u++) {
-					const i = units[u].children.findIndex((el) => el === target || el.contains(target));
+					const i = itemIndexForTarget(units[u].children, target);
 					if (i >= 0) {
 						const p = pageIndexForItem(units[u].pages, i);
 						return flatPages.findIndex((f) => f.unit === u && f.page === p);
