@@ -548,15 +548,15 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 		removeGlosses();
 		if (destroyed) return;
 
-		// Only <dfn class="term"> today. efni also emits data-en on <dt> in the
-		// key-terms rollups; widening THIS selector (never the tooltip loop) is
-		// option (i) of the open cross-repo decision, deliberately not taken here.
-		for (const el of Array.from(node.querySelectorAll('dfn.term[data-en]'))) {
-			const dfnEl = el as HTMLElement;
-			const dataEn = (dfnEl.getAttribute('data-en') || '').replace(/\s+/g, ' ').trim();
+		// <dfn class="term"> in section pages, and the key-terms rollups' <dt>
+		// (ruling (i), 2026-10-03). 🔴 THIS selector only, never the tooltip loop:
+		// a <dt> made a tooltip term would repeat the <dd> printed beneath it.
+		for (const el of Array.from(node.querySelectorAll('dfn.term[data-en], dt[data-en]'))) {
+			const termEl = el as HTMLElement;
+			const dataEn = (termEl.getAttribute('data-en') || '').replace(/\s+/g, ' ').trim();
 			if (!dataEn) continue;
 
-			const text = contentTextOf(dfnEl);
+			const text = contentTextOf(termEl);
 
 			// 🔴 DEDUPE ON THE MARKER, NEVER ON EQUALITY WITH data-en. The inline
 			// gloss is lowercased by efni's inject-side annotator while data-en is
@@ -570,8 +570,8 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 			const span = document.createElement('span');
 			span.className = TERM_EN_CLASS;
 			span.textContent = ` (e. ${dataEn})`;
-			dfnEl.appendChild(span);
-			glossedElements.push(dfnEl);
+			termEl.appendChild(span);
+			glossedElements.push(termEl);
 		}
 	}
 

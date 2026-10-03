@@ -177,6 +177,8 @@ meant the probe was broken.
 3. **Its own removal.** `teardown()` removes classes and attributes, never a child node.
 4. **Dedupe on the marker**, plus skip `EN === IS` ("R (e. R)").
 
+**The gloss also renders on the key-terms `<dt data-en>`** (ruling (i), [USER] 2026-10-03), through the same pass and the same four constraints. 🔴 **Only the gloss selector was widened, never the tooltip loop:** a `<dt>` made a tooltip term gets `role="button"`, the amber underline and a tooltip repeating the `<dd>` printed beneath it — which is why (ii), efni wrapping the `<dt>` in `<dfn class="term">`, lost. A test fails if the tooltip loop ever walks `<dt>`. Replayed over efni main's 21 chemistry key-terms pages (2026-10-03): 48 glosses as published, 747 of 763 with the inline gloss removed (the other 16 are `EN === IS`), 0 doubled, 0 tooltips; 0 and 0 on the previous code.
+
 🔴 **An injected node in the content is never local.** The span reaches three other systems: `bionicReading` would bold it (it is in that action's `SKIP_SELECTORS`); `aria-label` **replaces** content, so the label prefers the element's own `data-en` over the glossary's lowercased `english` or a screen reader announces a different string than the one on screen; and **`textAnchor` anchors highlights by TEXT OFFSET**, so anchoring reads published text only, filtering `.term-en` on **both** sides — `contentText()` produces the offsets and `createRangeAtPosition()` consumes them, and filtering either alone silently desyncs every restore. Style it in `src/app.css`, **not** `static/styles/content.css` — that file is the cross-repo contract for classes efni _emits_.
 
 ## Attribution & Licensing
@@ -562,7 +564,8 @@ would vanish exactly when the build needs it.
 
 - **Organic (`lifraen-efnafraedi`) is retired in the app** (`RETIRED_BOOKS`, `retiredBooks`; see the retirement bullet under Build Scripts): off the allowlist, the catalogue, the landing page, the feedback list, the FAQ and the sitemap; never prerendered; its 3 ch03 redirect rows deleted. **Not deployed, and the server still serves it.**
 - **Deploy order:** (1) [USER] applies the nginx "Withdrawn book" blocks on the server (#234, plus the no-slash exact matches for `/content`, `/print`, `/downloads`) and checks the live 404s and headers; (2) `node scripts/deploy.js` dry run — organic's server files appear as deletions, the three paused books do not; (3) diff the live sitemap against `build/sitemap.xml`: the only delta is organic's 26 URLs (measured locally: 392 → 366, every other book unchanged).
-- **efni has not been told** (scope ruling, organic down, `sync-content.yml` still armed). efni removes organic's translated files only after the site is verified down.
+- **The key-terms `<dt data-en>` gloss is built, not deployed** (ruling (i); see Glossary System). Once deployed, efni's retiring of the inline gloss no longer strips the English from key-terms pages on vefur's side. efni's `generate-glossary.js`/`generate-index.js` gate (2026-09-05 entry) still stands.
+- **efni has not been told** (scope ruling, organic down, `sync-content.yml` still armed, the (i) ruling). efni removes organic's translated files only after the site is verified down.
 
 ### 2026-10-01 — prod still runs the 2026-08-19 build; both allowlisted books are on hold
 
@@ -586,14 +589,14 @@ Measured on 2026-10-01 against `main` = `6a9cf5c` (#234), efni `main` = `25f8b15
 > **ruled** by [USER] on 2026-09-23: organic is to be withdrawn, the three August books stay frozen as-is.
 > The gate is still SHUT (0 `termEnglish` in efni's `generate-glossary.js` and `generate-index.js`);
 > the glossary figure still holds at 853/867, but efni `main`'s index is already down to 763/827
-> `termEn` (chemistry 699/763). The `<dt data-en>` (i)-vs-(ii) call is still open.
+> `termEn` (chemistry 699/763). The `<dt data-en>` (i)-vs-(ii) call was ruled **(i)** on 2026-10-03.
 
 Five merges in one session (#223–#227). `main` = `4752f22` plus #227 pending.
 
 - **The publication hold is enforced by code** (#223) and **frozen against the deploy** (#226). Both are documented under Build Scripts; the durable trap is that #223 _armed_ the deletion #226 defuses — stopping a book being synced is not the same as protecting what is already live.
 - **All three consumers of the inline gloss read `data-en`** (#224), and the **visible span + `showTermEnglish`** (#227) followed. Rules under Glossary System above.
 - **The relay to efni is committed**, not messaged → `docs/handoffs/2026-09-05-data-en-consumer-shipped-for-efni.md` (#225). 🔴 **The gate efni is waiting on is still SHUT**: `tools/generate-glossary.js` and `tools/generate-index.js` both scrape the marker and neither knows `termEnglish` (0 hits each, against a control of 9 in `cnxml-render.js`). A flip today silently empties 853/867 glossary `english` values and 813/827 index `termEn` values. **Do not tell efni it is clear to retire `annotateInlineTerms`.**
-- ⏳ **Still open, and both are [USER]/[LEAD] calls:** full retirement of the withheld books' live URLs (needs nginx work for real 404s — the freeze deliberately stops short), and the `<dt data-en>` (i)-vs-(ii) decision. Evidence favours (i); a comment in `renderGlosses()` marks the one selector that would change.
+- ⏳ **Still open, and both are [USER]/[LEAD] calls:** full retirement of the withheld books' live URLs (needs nginx work for real 404s — the freeze deliberately stops short), and the `<dt data-en>` (i)-vs-(ii) decision. Evidence favours (i); a comment in `renderGlosses()` marks the one selector that would change. _(Ruled (i) 2026-10-03 and built; see Glossary System.)_
 
 **Three method lessons this session, each paid for:**
 
