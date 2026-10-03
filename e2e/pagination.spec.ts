@@ -16,6 +16,10 @@ async function openFirstSection(page: Page): Promise<boolean> {
 	const bookLink = page.getByRole('link', { name: /Efnafræði/i }).first();
 	if (!(await bookLink.isVisible({ timeout: 10000 }).catch(() => false))) return false;
 	await bookLink.click();
+	// A client-side navigation keeps the document, so networkidle can resolve
+	// before it starts; without this wait the chapter-link lookup below ran on
+	// the landing page, found nothing and SKIPPED the test (2 of 3 skipped).
+	await expect(page).toHaveURL(/\/efnafraedi-2e\//);
 	await page.waitForLoadState('networkidle');
 
 	const sectionLink = page.locator('a[href*="/kafli/"]').first();
