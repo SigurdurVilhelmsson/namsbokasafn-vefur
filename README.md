@@ -20,7 +20,7 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 | **Örverufræði** (Microbiology)           | Preview — paused     | 2 chapters (1, 5) |
 | **Eðlisfræði** (Physics)                 | Preview — paused     | 1 chapter (4)     |
 
-Paused books (a ruling of 2026-08-22) stay online as they are but receive no new content. Lífræn efnafræði was withdrawn because OpenStax has not authorised the translation; it stays online until the removal is deployed.
+Paused books (a ruling of 2026-08-22) stay online as they are but receive no new content. Lífræn efnafræði was withdrawn because OpenStax has not authorised the translation; it has been off the site since 2026-10-03, and its address shows a short notice.
 
 ## Demo / Live Version
 
