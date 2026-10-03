@@ -12,6 +12,7 @@
 -->
 <script lang="ts">
 	import { tick } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import { browser } from '$app/environment';
 	import { settings } from '$lib/stores/settings';
 	import { paginate, pageIndexForItem, type PageRange } from '$lib/utils/paginate';
@@ -429,9 +430,7 @@
 {#if ready && !failed && flatPages.length > 0}
 	<nav class="paged-nav" aria-label="Síðuflakk">
 		<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-			</svg>
+			<Icon name="chevron-left" size="sm" />
 			Fyrri
 		</button>
 
@@ -448,9 +447,7 @@
 			aria-label="Næsta síða"
 		>
 			Næsta
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-			</svg>
+			<Icon name="chevron-right" size="sm" />
 		</button>
 	</nav>
 
