@@ -105,6 +105,22 @@ function createContentNode(
 	return container;
 }
 
+/**
+ * Create a key-terms rollup: a <dl> of <dt data-en> / <dd> pairs, the shape
+ * efni's renderer emits in `*-key-terms.html`.
+ */
+function createKeyTermsNode(dtSpecs: Array<{ text: string; dataEn?: string }>): HTMLDivElement {
+	const container = document.createElement('div');
+	const dl = container.appendChild(document.createElement('dl'));
+	for (const spec of dtSpecs) {
+		const dt = dl.appendChild(document.createElement('dt'));
+		dt.textContent = spec.text;
+		if (spec.dataEn) dt.setAttribute('data-en', spec.dataEn);
+		dl.appendChild(document.createElement('dd')).textContent = 'Skilgreining.';
+	}
+	return container;
+}
+
 /** Get all dfn elements from container */
 function getDfnElements(container: HTMLElement): HTMLElement[] {
 	return Array.from(container.querySelectorAll('dfn.term'));
@@ -657,6 +673,71 @@ describe('glossaryTerms action', () => {
 				'Skilgreining: efni (Matter)'
 			);
 			action.destroy();
+		});
+
+		// Ruling (i), 2026-10-03: the key-terms <dt> carries data-en too, and
+		// vefur renders its gloss. Without this, retiring efni's inline gloss
+		// strips the English from every key-terms entry.
+		describe('on a key-terms <dt>', () => {
+			it('renders the gloss from data-en inside the <dt>', async () => {
+				const node = createKeyTermsNode([{ text: 'afrúning', dataEn: 'rounding' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+
+				expect(glossOf(node)).toEqual([' (e. rounding)']);
+				expect(node.querySelector('span.term-en')?.parentElement?.tagName).toBe('DT');
+				action.destroy();
+			});
+
+			// efni main emits both today: `<dt data-en="rounding">afrúning (e. rounding)</dt>`.
+			it('adds no gloss when the <dt> already carries the inline one', async () => {
+				const node = createKeyTermsNode([{ text: 'afrúning (e. rounding)', dataEn: 'rounding' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+
+				expect(glossOf(node)).toEqual([]);
+				action.destroy();
+			});
+
+			// 59 of chemistry's <dt data-en> carry no inline gloss, mostly because the
+			// English is the Icelandic ("gas", "plasma", "kelvin (K)").
+			it('skips a <dt> whose English equals its Icelandic', async () => {
+				const node = createKeyTermsNode([{ text: 'kelvin (K)', dataEn: 'kelvin (K)' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+
+				expect(glossOf(node)).toEqual([]);
+				action.destroy();
+			});
+
+			it('removes the gloss when the setting is turned off', async () => {
+				const node = createKeyTermsNode([{ text: 'afrúning', dataEn: 'rounding' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+				mockShowTermEnglish.set(false);
+				await flush();
+
+				expect(glossOf(node)).toEqual([]);
+				expect(node.querySelector('dt')?.textContent).toBe('afrúning');
+				action.destroy();
+			});
+
+			// 🔴 Option (i) widens the GLOSS pass only. A <dt> made a tooltip term
+			// gets role="button", the amber underline and a tooltip repeating the
+			// <dd> printed right beneath it, which is exactly what made (ii) the
+			// worse option. 'efni' is in the mock glossary, so the tooltip loop
+			// would match it if it ever walked <dt>.
+			it('gets the gloss but never becomes a tooltip term', async () => {
+				const node = createKeyTermsNode([{ text: 'efni', dataEn: 'matter' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+
+				const dt = node.querySelector('dt')!;
+				expect(glossOf(node)).toEqual([' (e. matter)']);
+				expect(dt.classList.contains('glossary-term')).toBe(false);
+				expect(dt.hasAttribute('role')).toBe(false);
+				action.destroy();
+			});
 		});
 	});
 });
