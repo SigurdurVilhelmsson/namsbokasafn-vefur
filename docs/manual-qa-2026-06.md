@@ -216,6 +216,9 @@ equation-heavy section.
 - [ ] Long worked examples and big tables are never split: one taller than
       the page gets a page of its own and scrolls there (9 of 3.1's 29 pages
       at 1280×720). Keep that, split long examples, or raise the page budget?
+- [ ] The same holds for one long list or paragraph: the paginator splits
+      between blocks, never inside one, so the preface's list of 60 reviewers
+      scrolls on a page of its own. Should long lists be split between items?
 - [ ] Should the recall prompt fire per _sub-section_ instead of per
       section (the spec's preference — callback already wired)? Decide
       after reading a few chapters paged.

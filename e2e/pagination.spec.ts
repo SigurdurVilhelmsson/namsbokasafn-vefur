@@ -64,9 +64,12 @@ test.describe('Paged reading mode', () => {
 	// The point of paged mode: no scrolling within a page. Sums the heights of
 	// the content blocks visible on each page (the chrome around the page is
 	// not counted, as the paginator's own budget leaves room for it). The one
-	// designed exception: a page holding a single unsplittable block (a long
-	// worked example, a big table) that is taller than the window. Any other
-	// overflow is the paginator overfilling a page.
+	// designed exception: a page holding a single block taller than the window.
+	// The paginator splits between blocks, never inside one, so a long worked
+	// example, a big table or a long flat list (the preface's 60 reviewers)
+	// keeps a page of its own and scrolls there. The test splits <main> and
+	// nested <section>s itself before counting, so a wrapper the paginator
+	// wrongly took as one block shows up as many blocks and still fails.
 	test('every page of a section fits the viewport', async ({ page }) => {
 		test.skip(!(await openFirstSection(page)), 'No section content available');
 
@@ -92,10 +95,10 @@ test.describe('Paged reading mode', () => {
 					viewport: window.innerHeight
 				};
 			}, ATOMIC_SELECTOR);
-			const ok = visible <= viewport || atomic;
+			const ok = visible <= viewport || count === 1;
 			expect(
 				ok,
-				`page ${i + 1}: ${Math.round(visible)}px of content in ${count} block(s) in a ${viewport}px window`
+				`page ${i + 1}: ${Math.round(visible)}px of content in ${count} block(s) in a ${viewport}px window${atomic ? ' (unsplittable)' : ''}`
 			).toBe(true);
 			if (await next.isDisabled()) break;
 			await next.click();
