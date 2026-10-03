@@ -10,7 +10,10 @@ you go. Each batch is independent.
 - **Batch A–C:** production (namsbokasafn.is) after deploying current `main`,
   or `npm run dev` against main.
 - **Batch D–E:** a build of `feature/reader-v1.1` (all four P0 items merged).
-  These gate the v1.1.0 merge to main.
+  These gate the v1.1.0 merge to main. The branch was refreshed onto `main`
+  on 2026-10-03, so it carries everything since June too. To test:
+  `git switch feature/reader-v1.1 && git pull && npm run build && npm run preview`,
+  then open the local address it prints.
 - **Batch F:** on the Linode server itself.
 - **Batch G:** a build of `feature/reader-v1.2` (all four P1 items merged).
   Gates the v1.2.0 merge, after v1.1.0 ships.
@@ -187,6 +190,11 @@ equation-heavy section.
       page of where you were. Same for window resize.
 - [ ] Bionic reading toggle in paged mode — content rebuilds, pagination
       recovers (MutationObserver heal).
+- [ ] Settings → **Enskt heiti hugtaka** off and on in paged mode (that
+      setting reached `main` after June): pages recompute and nothing spills
+      past the bottom of a page.
+- [ ] Highlight a few words on page 2 or later, then reload: the highlight
+      comes back on the same words.
 - [ ] Settings → Lestrarstilling → "Samfellt skrun": controls disappear,
       the full section scrolls exactly as before, nothing missing. Toggle
       back — pagination returns.
