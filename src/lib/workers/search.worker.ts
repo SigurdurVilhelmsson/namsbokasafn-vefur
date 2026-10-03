@@ -5,6 +5,7 @@
  * Uses Fuse.js for fuzzy search.
  */
 import Fuse from 'fuse.js';
+import { htmlToPlainText } from '$lib/utils/html';
 import type {
 	SearchDocument,
 	RawDocument,
@@ -21,37 +22,6 @@ import type {
 let fuse: Fuse<SearchDocument> | null = null;
 let documents: SearchDocument[] = [];
 let _currentBookSlug = '';
-
-// =============================================================================
-// CONTENT PROCESSING
-// =============================================================================
-
-/**
- * Convert HTML to plain text for searching
- */
-function htmlToPlainText(html: string): string {
-	return (
-		html
-			// Remove script and style blocks entirely
-			.replace(/<script[\s\S]*?<\/script>/gi, '')
-			.replace(/<style[\s\S]*?<\/style>/gi, '')
-			// Remove MathJax/math markup
-			.replace(/<mjx-container[\s\S]*?<\/mjx-container>/gi, '')
-			.replace(/<span class="mathjax[\s\S]*?<\/span>(?=\s*(?:<\/span>)*)/gi, '')
-			// Remove all HTML tags, keeping text content
-			.replace(/<[^>]*>/g, ' ')
-			// Decode common HTML entities
-			.replace(/&amp;/g, '&')
-			.replace(/&lt;/g, '<')
-			.replace(/&gt;/g, '>')
-			.replace(/&quot;/g, '"')
-			.replace(/&#39;/g, "'")
-			.replace(/&nbsp;/g, ' ')
-			// Clean up whitespace
-			.replace(/\s+/g, ' ')
-			.trim()
-	);
-}
 
 // =============================================================================
 // INDEX BUILDING

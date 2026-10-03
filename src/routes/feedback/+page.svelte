@@ -5,6 +5,7 @@
 <script lang="ts">
   import { FEEDBACK_TYPES, type FeedbackType } from '$lib/config';
   import { getAllBooks } from '$lib/types/book';
+  import Icon from '$lib/components/Icon.svelte';
 
   const FEEDBACK_EMAIL = 'namsbokasafn@gmail.com';
 
@@ -80,9 +81,7 @@
   <header class="feedback-header">
     <div class="container">
       <a href="/" class="back-link">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
+        <Icon name="arrow-left" size="sm" />
         Til baka
       </a>
     </div>
@@ -116,11 +115,7 @@
             <!-- Error message -->
             {#if submitError}
               <div class="error-message">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
+                <Icon name="circle-alert" size="sm" />
                 {submitError}
               </div>
             {/if}
@@ -138,27 +133,7 @@
                       bind:group={selectedType}
                     />
                     <span class="type-icon">
-                      {#if feedbackType.value === 'translation_error'}
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6" />
-                        </svg>
-                      {:else if feedbackType.value === 'technical_issue'}
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                          <line x1="12" y1="9" x2="12" y2="13" />
-                          <line x1="12" y1="17" x2="12.01" y2="17" />
-                        </svg>
-                      {:else if feedbackType.value === 'improvement'}
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M9 18V5l12-2v13" />
-                          <circle cx="6" cy="18" r="3" />
-                          <circle cx="18" cy="16" r="3" />
-                        </svg>
-                      {:else}
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                        </svg>
-                      {/if}
+                      <Icon name={feedbackType.icon} size="lg" />
                     </span>
                     <span class="type-label">{feedbackType.label}</span>
                     <span class="type-sublabel">{feedbackType.labelEn}</span>
@@ -219,10 +194,7 @@
             <!-- Submit -->
             <div class="form-actions">
               <button type="submit" class="btn-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <line x1="22" y1="2" x2="11" y2="13" />
-                  <polygon points="22 2 15 22 11 13 2 9 22 2" />
-                </svg>
+                <Icon name="send" size="md" />
                 Senda endurgjöf
               </button>
             </div>
@@ -232,11 +204,7 @@
         <!-- Help Link -->
         <div class="help-link">
           <a href="/for-teachers">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
+            <Icon name="circle-help" size="sm" />
             Leiðbeiningar fyrir kennara
           </a>
         </div>
@@ -284,11 +252,6 @@
 
   .back-link:hover {
     color: var(--text-primary);
-  }
-
-  .back-link svg {
-    width: 1rem;
-    height: 1rem;
   }
 
   /* Content */
@@ -415,12 +378,6 @@
     color: #fca5a5;
   }
 
-  .error-message svg {
-    width: 1rem;
-    height: 1rem;
-    flex-shrink: 0;
-  }
-
   /* Form groups */
   .form-group {
     margin-bottom: 1.25rem;
@@ -529,11 +486,6 @@
     color: var(--accent-color);
   }
 
-  .type-icon svg {
-    width: 1.5rem;
-    height: 1.5rem;
-  }
-
   .type-label {
     font-size: 0.875rem;
     font-weight: 500;
@@ -576,11 +528,6 @@
     background: var(--accent-hover, #b37a1c);
   }
 
-  .btn-primary svg {
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
   /* Help link */
   .help-link {
     margin-top: 1.5rem;
@@ -598,11 +545,6 @@
 
   .help-link a:hover {
     color: var(--accent-color);
-  }
-
-  .help-link svg {
-    width: 1rem;
-    height: 1rem;
   }
 
   /* Footer */

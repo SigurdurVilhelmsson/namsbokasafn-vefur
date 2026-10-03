@@ -435,4 +435,16 @@ describe('quiz store', () => {
 			expect(get(quizStore).sessions).toEqual([]);
 		});
 	});
+
+	describe('practice problem source', () => {
+		it('defaults a viewed problem to source "inline"', () => {
+			quizStore.markPracticeProblemViewed('b/01/1-1#a1', 'b', '01', '1-1', 'Q?', 'A.');
+			expect(get(quizStore).practiceProblemProgress['b/01/1-1#a1'].source).toBe('inline');
+		});
+
+		it('records an explicit source', () => {
+			quizStore.markPracticeProblemViewed('b/01/1-1#a2', 'b', '01', '1-1', 'Q?', 'A.', 'bank');
+			expect(get(quizStore).practiceProblemProgress['b/01/1-1#a2'].source).toBe('bank');
+		});
+	});
 });

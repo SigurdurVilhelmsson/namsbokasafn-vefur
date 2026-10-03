@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { flashcardStore } from '$lib/stores/flashcard';
 	import type { Flashcard, FlashcardDeck } from '$lib/types/flashcard';
@@ -152,9 +153,7 @@
 				id="flashcard-modal-title"
 				class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100"
 			>
-				<svg class="w-5 h-5 text-[var(--accent-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-				</svg>
+				<Icon name="sparkles" class="text-[var(--accent-color)]" />
 				Búa til minniskort
 			</h2>
 			<button
@@ -162,9 +161,7 @@
 				class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-600 dark:hover:text-gray-200"
 				aria-label="Loka"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-				</svg>
+				<Icon name="x" />
 			</button>
 		</div>
 
@@ -245,14 +242,10 @@
 					class="mt-2 flex items-center gap-1 text-sm text-[var(--accent-color)] hover:underline"
 				>
 					{#if showNewDeckInput}
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
-						</svg>
+						<Icon name="arrow-left" size="sm" />
 						Velja fyrirliggjandi stokk
 					{:else}
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-						</svg>
+						<Icon name="plus" size="sm" />
 						Búa til nýjan stokk
 					{/if}
 				</button>
@@ -274,9 +267,7 @@
 				disabled={!canSave}
 				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-				</svg>
+				<Icon name="check" size="sm" />
 				Vista minniskort
 			</button>
 		</div>

@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { fade, scale } from 'svelte/transition';
@@ -226,9 +227,7 @@
 					class="-mr-2 rounded-lg p-2 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
 					aria-label="Loka"
 				>
-					<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-					</svg>
+					<Icon name="x" />
 				</button>
 			</div>
 
@@ -238,19 +237,7 @@
 					<!-- Search input -->
 					<div class="relative">
 						<label for="search-input" class="sr-only">Leita að efni</label>
-						<svg
-							class="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[var(--text-secondary)]"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-							/>
-						</svg>
+						<Icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]" />
 						<input
 							id="search-input"
 							bind:this={inputRef}
@@ -274,9 +261,7 @@
 								aria-label="Síur"
 								title="Síur"
 							>
-								<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-								</svg>
+								<Icon name="funnel" />
 							</button>
 						</div>
 					</div>
@@ -291,9 +276,7 @@
 										onclick={clearFilters}
 										class="flex items-center gap-1 rounded px-2 py-1 font-sans text-xs text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10"
 									>
-										<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-										</svg>
+										<Icon name="x" size="sm" />
 										Hreinsa
 									</button>
 								{/if}
@@ -335,9 +318,7 @@
 									Sláðu inn að minnsta kosti 2 stafi til að leita
 								</p>
 								<p class="flex items-center justify-center gap-1 text-xs text-[var(--text-secondary)]">
-									<svg class="h-3 w-3 text-[var(--accent-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-									</svg>
+									<Icon name="sparkles" size="sm" class="text-[var(--accent-color)]" />
 									Styður óbeina leit (fuzzy search)
 								</p>
 							</div>
@@ -347,9 +328,7 @@
 								<div class="rounded-lg border border-[var(--border-color)] bg-[var(--bg-primary)] p-3">
 									<div class="mb-2 flex items-center justify-between">
 										<div class="flex items-center gap-2 text-sm font-medium text-[var(--text-secondary)]">
-											<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-											</svg>
+											<Icon name="clock" size="sm" />
 											Nýlegar leitir
 										</div>
 										<button
@@ -357,9 +336,7 @@
 											class="flex items-center gap-1 rounded px-2 py-1 font-sans text-xs text-[var(--text-secondary)] hover:bg-[var(--bg-secondary)] hover:text-[var(--text-primary)]"
 											title="Hreinsa sögu"
 										>
-											<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-											</svg>
+											<Icon name="trash-2" size="sm" />
 											Hreinsa
 										</button>
 									</div>
@@ -380,9 +357,7 @@
 													class="rounded p-1 text-[var(--text-secondary)] opacity-0 transition-opacity hover:text-[var(--text-primary)] group-hover:opacity-100"
 													title="Fjarlægja"
 												>
-													<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-													</svg>
+													<Icon name="x" size="sm" />
 												</button>
 											</div>
 										{/each}
@@ -431,9 +406,7 @@
 									>
 										<div class="mb-1 flex items-center justify-between">
 											<div class="flex items-center gap-2">
-												<svg class="h-4 w-4 text-[var(--accent-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-												</svg>
+												<Icon name="file-text" size="sm" class="text-[var(--accent-color)]" />
 												<span class="font-sans text-sm font-semibold">
 													{result.sectionNumber} {result.sectionTitle}
 												</span>

@@ -18,7 +18,7 @@
 
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'fs';
 import { resolve, dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -59,7 +59,7 @@ function calculateReadingTimeHtml(content) {
 /**
  * Parse metadata from HTML page-data JSON
  */
-function parseHtmlPageData(content) {
+export function parseHtmlPageData(content) {
 	const match = content.match(/<script[^>]*id="page-data"[^>]*>([\s\S]*?)<\/script>/);
 	if (!match) return null;
 
@@ -95,6 +95,33 @@ function processBook(bookSlug) {
 	let sectionsProcessed = 0;
 	let sectionsSkipped = 0;
 
+	// Process front matter (chapters/00/ — preface etc.) so it gets metadata too.
+	for (const section of toc.frontMatter || []) {
+		const sectionFilePath = join(bookDir, 'chapters', '00', section.file);
+		if (!existsSync(sectionFilePath)) {
+			console.warn(`    Warning: Front-matter file not found: ${section.file}`);
+			sectionsSkipped++;
+			continue;
+		}
+		try {
+			const fileContent = readFileSync(sectionFilePath, 'utf-8');
+			const pageData = parseHtmlPageData(fileContent);
+			const readingTime = calculateReadingTimeHtml(fileContent);
+			section.metadata = {
+				title: pageData?.title || section.title,
+				section: String(pageData?.section || section.number),
+				chapter: pageData?.chapter || 0,
+				readingTime,
+				difficulty: undefined,
+				objectives: pageData?.objectives || []
+			};
+			sectionsProcessed++;
+		} catch (error) {
+			console.warn(`    Warning: Failed to process ${section.file}: ${error.message}`);
+			sectionsSkipped++;
+		}
+	}
+
 	// Process each chapter and section
 	for (const chapter of toc.chapters || []) {
 		const chapterFolder = getChapterFolder(chapter);
@@ -127,7 +154,7 @@ function processBook(bookSlug) {
 					chapter: pageData?.chapter || chapter.number,
 					readingTime,
 					difficulty: undefined,
-					objectives: []
+					objectives: pageData?.objectives || []
 				};
 
 				sectionsProcessed++;
@@ -164,4 +191,6 @@ function main() {
 	console.log('\nContent processing complete!');
 }
 
-main();
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+	main();
+}

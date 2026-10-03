@@ -6,15 +6,20 @@
  * Only semantic <dfn> tags are processed — no text-matching is performed
  * to avoid false-positive highlights on common Icelandic words.
  *
- * Term matching uses three tiers:
+ * Term matching uses four tiers:
  * 1. data-term attribute (from pipeline, highest confidence)
- * 2. Icelandic text exact match (current behavior)
- * 3. English fallback from "(e. ...)" suffix
+ * 2. Icelandic text exact match
+ * 3. English from the pipeline's data-en attribute
+ * 4. English scraped from an inline "(e. ...)" suffix
+ *
+ * Tiers 3 and 4 are the same lookup over two sources of the same fact. efni is
+ * migrating from the inline gloss to data-en per chapter, so a real corpus
+ * carries both; tier 4 must stay until no published page relies on it.
  */
 
 import { browser } from '$app/environment';
 import { glossaryStore } from '$lib/stores/glossary';
-import { glossaryHighlighting } from '$lib/stores/settings';
+import { glossaryHighlighting, showTermEnglish } from '$lib/stores/settings';
 import { get } from 'svelte/store';
 import type { GlossaryTerm } from '$lib/types/content';
 import { escapeHtml } from '$lib/utils/html';
@@ -238,6 +243,64 @@ function stripEnglishSuffix(text: string): string {
 }
 
 /**
+ * Look an English term up in the glossary's English index, widening the query
+ * the same way for every caller: exact, then with inner parentheticals stripped,
+ * then singularized (both forms).
+ *
+ * Shared by the two English tiers — the `data-en` attribute and the inline
+ * "(e. …)" gloss scraped from display text — so a term that resolves from one
+ * source resolves identically from the other. `english` must already be
+ * lowercased: `englishMap`'s keys are.
+ */
+function lookupEnglish(
+	englishMap: Map<string, GlossaryTerm>,
+	english: string
+): GlossaryTerm | undefined {
+	if (!english) return undefined;
+
+	let match = englishMap.get(english);
+	if (match) return match;
+
+	// Try stripping inner parentheticals, e.g. "alpha particles (α particles)"
+	const stripped = stripInnerParenthetical(english);
+	if (stripped !== english) {
+		match = englishMap.get(stripped);
+		if (match) return match;
+		for (const sg of singularize(stripped)) {
+			match = englishMap.get(sg.toLowerCase());
+			if (match) return match;
+		}
+	}
+
+	for (const sg of singularize(english)) {
+		match = englishMap.get(sg.toLowerCase());
+		if (match) return match;
+	}
+
+	return undefined;
+}
+
+/** Class on the English gloss span this action injects. */
+const TERM_EN_CLASS = 'term-en';
+
+/**
+ * An element's own text, excluding any English gloss THIS action injected.
+ *
+ * Everything that reasons about a term's text — the matcher's tiers, the
+ * marker dedupe — must see the published content, not our own decoration.
+ * Without this the injected " (e. …)" would read as an inline gloss and the
+ * pass would stop being idempotent.
+ */
+function contentTextOf(el: HTMLElement): string {
+	if (!el.querySelector(`span.${TERM_EN_CLASS}`)) return (el.textContent || '').trim();
+	const clone = el.cloneNode(true) as HTMLElement;
+	for (const span of Array.from(clone.querySelectorAll(`span.${TERM_EN_CLASS}`))) {
+		span.remove();
+	}
+	return (clone.textContent || '').trim();
+}
+
+/**
  * Svelte action: scans content for <dfn class="term"> elements and adds tooltips
  */
 export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) {
@@ -319,12 +382,13 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 			for (const dfn of dfnElements) {
 				if (destroyed) return;
 				const dfnEl = dfn as HTMLElement;
-				const fullText = (dfnEl.textContent || '').trim();
+				const fullText = contentTextOf(dfnEl);
 
-				// Three-tier matching:
+				// Four-tier matching:
 				// 1. data-term attribute (highest confidence, from pipeline)
 				// 2. Icelandic text exact match
-				// 3. English fallback from "(e. ...)" suffix
+				// 3. English from the data-en attribute
+				// 4. English scraped from an inline "(e. ...)" suffix
 				let glossaryTerm: GlossaryTerm | undefined;
 
 				// Tier 1: data-term attribute
@@ -340,34 +404,29 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 					glossaryTerm = termMap.get(normalized);
 				}
 
-				// Tier 3: English fallback (with singularization and parenthetical stripping)
+				// Tier 3: English from the pipeline's data-en attribute.
+				//
+				// Placed AFTER the Icelandic tier on purpose: englishMap is not a
+				// clean key space (a few English headwords are shared by two
+				// Icelandic terms, resolved first-wins by descending term length),
+				// so letting data-en run earlier could override a match that is
+				// correct today. Here it can only add matches, never change one.
+				//
+				// ⚠️ data-en is CASE-PRESERVING; englishMap's keys are lowercased.
+				if (!glossaryTerm) {
+					const dataEn = (dfnEl.getAttribute('data-en') || '').replace(/\s+/g, ' ').trim();
+					glossaryTerm = lookupEnglish(englishMap, dataEn.toLowerCase());
+				}
+
+				// Tier 4: English scraped from the inline "(e. ...)" gloss.
+				//
+				// This tier is load-bearing today and is the reason tier 3 exists:
+				// once efni retires the inline gloss (spec §4.7), every element
+				// resolving only here loses its tooltip, not merely its gloss text.
 				if (!glossaryTerm) {
 					const english = extractEnglish(fullText);
 					if (english) {
-						const enLower = english.toLowerCase();
-						glossaryTerm = englishMap.get(enLower);
-
-						// Try stripping inner parentheticals
-						if (!glossaryTerm) {
-							const stripped = stripInnerParenthetical(enLower);
-							if (stripped !== enLower) {
-								glossaryTerm = englishMap.get(stripped);
-								if (!glossaryTerm) {
-									for (const sg of singularize(stripped)) {
-										glossaryTerm = englishMap.get(sg.toLowerCase());
-										if (glossaryTerm) break;
-									}
-								}
-							}
-						}
-
-						// Try singularizing
-						if (!glossaryTerm) {
-							for (const sg of singularize(enLower)) {
-								glossaryTerm = englishMap.get(sg.toLowerCase());
-								if (glossaryTerm) break;
-							}
-						}
+						glossaryTerm = lookupEnglish(englishMap, english.toLowerCase());
 					}
 				}
 
@@ -377,10 +436,18 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 				dfnEl.dataset.glossaryMatch = glossaryTerm.term;
 				dfnEl.setAttribute('role', 'button');
 				dfnEl.setAttribute('tabindex', '0');
+				// An aria-label REPLACES the element's content for assistive tech, so
+				// the injected gloss span is not announced on a matched term. Prefer
+				// the element's own data-en over the glossary's `english` here: the
+				// glossary value is systematically lowercased, so without this a
+				// screen-reader user hears a different string than the one on screen.
+				const ariaEnglish =
+					(dfnEl.getAttribute('data-en') || '').replace(/\s+/g, ' ').trim() ||
+					glossaryTerm.english ||
+					'';
 				dfnEl.setAttribute(
 					'aria-label',
-					`Skilgreining: ${glossaryTerm.term}` +
-						(glossaryTerm.english ? ` (${glossaryTerm.english})` : '')
+					`Skilgreining: ${glossaryTerm.term}` + (ariaEnglish ? ` (${ariaEnglish})` : '')
 				);
 
 				processedDfnElements.push(dfnEl);
@@ -451,6 +518,63 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 		isProcessed = false;
 	}
 
+	// --- English gloss pass -------------------------------------------------
+	//
+	// 🔴 DELIBERATELY OUTSIDE init(). init() is reached only from the
+	// glossaryHighlighting subscription and from an observer gated on it, and it
+	// returns early when the book ships no glossary (`!state.terms.length`).
+	// A gloss placed in there would vanish for any reader who turns glossary
+	// highlighting off, and would never appear at all in lifraen-efnafraedi or
+	// orverufraedi — which publish 358 <dfn class="term"> between them and no
+	// glossary.json. This pass owns its own setting, its own tracking and its
+	// own removal.
+	let glossedElements: HTMLElement[] = [];
+
+	/** Remove every injected gloss, and heal the text nodes the removal splits. */
+	function removeGlosses() {
+		// Sweep the live node rather than only the tracked list: a client-side
+		// navigation can replace innerHTML, detaching elements we still hold.
+		for (const span of Array.from(node.querySelectorAll(`span.${TERM_EN_CLASS}`))) {
+			const parent = span.parentElement;
+			span.remove();
+			parent?.normalize();
+		}
+		glossedElements = [];
+	}
+
+	function renderGlosses() {
+		// Idempotent by construction: clear first, so a re-run cannot stack spans
+		// and contentTextOf() never sees a previous run's output.
+		removeGlosses();
+		if (destroyed) return;
+
+		// <dfn class="term"> in section pages, and the key-terms rollups' <dt>
+		// (ruling (i), 2026-10-03). 🔴 THIS selector only, never the tooltip loop:
+		// a <dt> made a tooltip term would repeat the <dd> printed beneath it.
+		for (const el of Array.from(node.querySelectorAll('dfn.term[data-en], dt[data-en]'))) {
+			const termEl = el as HTMLElement;
+			const dataEn = (termEl.getAttribute('data-en') || '').replace(/\s+/g, ' ').trim();
+			if (!dataEn) continue;
+
+			const text = contentTextOf(termEl);
+
+			// 🔴 DEDUPE ON THE MARKER, NEVER ON EQUALITY WITH data-en. The inline
+			// gloss is lowercased by efni's inject-side annotator while data-en is
+			// case-preserving, so on a page carrying both, an equality test never
+			// matches and the gloss renders twice.
+			if (stripEnglishSuffix(text) !== text) continue;
+
+			// "R (e. R)" helps nobody. efni's own annotator skips this case.
+			if (dataEn.toLowerCase() === text.toLowerCase()) continue;
+
+			const span = document.createElement('span');
+			span.className = TERM_EN_CLASS;
+			span.textContent = ` (e. ${dataEn})`;
+			termEl.appendChild(span);
+			glossedElements.push(termEl);
+		}
+	}
+
 	// Keep tooltip visible when mouse enters it, and set up tap-outside-to-dismiss
 	function setupTooltipHover() {
 		if (tooltipHoverSetUp) return;
@@ -483,13 +607,18 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 	// replaces innerHTML but doesn't remount the action)
 	let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 	const observer = new MutationObserver(() => {
-		if (destroyed || !get(glossaryHighlighting)) return;
+		if (destroyed) return;
 		if (debounceTimer) clearTimeout(debounceTimer);
 		debounceTimer = setTimeout(() => {
 			debounceTimer = null;
-			if (destroyed || !get(glossaryHighlighting)) return;
-			teardown();
-			init();
+			if (destroyed) return;
+			// The two halves are independent: new content must get its glosses even
+			// when glossary highlighting is off.
+			if (get(glossaryHighlighting)) {
+				teardown();
+				init();
+			}
+			if (get(showTermEnglish)) renderGlosses();
 		}, 50);
 	});
 	observer.observe(node, { childList: true });
@@ -503,13 +632,26 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 		}
 	});
 
+	// Its own subscription — see the gloss pass note above for why this is not
+	// folded into the one above.
+	const unsubscribeGloss = showTermEnglish.subscribe((enabled) => {
+		if (destroyed) return;
+		if (enabled) {
+			renderGlosses();
+		} else {
+			removeGlosses();
+		}
+	});
+
 	return {
 		destroy() {
 			destroyed = true;
 			if (debounceTimer) clearTimeout(debounceTimer);
 			observer.disconnect();
 			unsubscribe();
+			unsubscribeGloss();
 			teardown();
+			removeGlosses();
 		}
 	};
 }

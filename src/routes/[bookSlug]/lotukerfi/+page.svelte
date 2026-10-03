@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
+	import Icon from '$lib/components/Icon.svelte';
 	import PeriodicTable from '$lib/components/PeriodicTable.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -22,9 +23,7 @@
 	<div class="mb-6">
 		<div class="flex items-center gap-3 mb-2">
 			<div class="pt-icon-wrap">
-				<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-				</svg>
+				<Icon name="layout-grid" size="lg" />
 			</div>
 			<h1 class="pt-heading">
 				Lotukerfið
@@ -38,9 +37,7 @@
 	<!-- Info banner -->
 	<div class="pt-info-banner">
 		<div class="flex gap-3">
-			<svg class="w-5 h-5 flex-shrink-0 mt-0.5" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-			</svg>
+			<Icon name="info" class="flex-shrink-0 mt-0.5" />
 			<div class="text-sm">
 				<p class="pt-info-title">Leiðbeiningar</p>
 				<ul class="pt-info-list">

@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import type { PageData } from './$types';
 	import type { TableOfContents, Chapter, Section } from '$lib/types/content';
 	import { reader, bookmarks } from '$lib/stores/reader';
@@ -196,9 +197,7 @@
 				href="/{data.bookSlug}"
 				class="btn-accent mt-6"
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-				</svg>
+				<Icon name="book-open" />
 				Fara í efnisyfirlit
 			</a>
 		</div>
@@ -229,13 +228,7 @@
 							>
 								<!-- Bookmark icon -->
 								<div class="flex-shrink-0">
-									<svg
-										class="w-5 h-5 text-amber-500"
-										fill="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-									</svg>
+									<Icon name="bookmark" class="text-amber-500" />
 								</div>
 
 								<!-- Content -->
@@ -259,9 +252,7 @@
 										class="p-2 rounded-lg text-gray-400 hover:text-[var(--accent-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
 										aria-label="Fara í kafla"
 									>
-										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-										</svg>
+										<Icon name="arrow-right" />
 									</a>
 
 									<!-- Remove bookmark -->
@@ -270,9 +261,7 @@
 										class="p-2 rounded-lg text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
 										aria-label="Eyða bókamerki"
 									>
-										<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-										</svg>
+										<Icon name="trash-2" />
 									</button>
 								</div>
 							</div>

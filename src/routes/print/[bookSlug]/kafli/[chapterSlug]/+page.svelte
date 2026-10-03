@@ -5,8 +5,13 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { format } from 'date-fns';
+	import { is } from 'date-fns/locale';
 
 	let { data }: { data: PageData } = $props();
+
+	// PDF build date (Icelandic via date-fns; Intl fails under Node small-ICU).
+	const buildDate = format(new Date(), 'd. MMMM yyyy', { locale: is });
 </script>
 
 <svelte:head>
@@ -19,7 +24,10 @@
 	<p class="cover-chapter-number">{data.chapter.number}</p>
 	<h1 class="cover-title">{data.chapter.title}</h1>
 	<p class="cover-book-title">{data.bookSubtitle}</p>
-	<p class="cover-meta">namsbokasafn.is</p>
+	<p class="cover-meta">
+		Útgáfudagur PDF-skjals: {buildDate}<br />
+		namsbokasafn.is
+	</p>
 </section>
 
 <!--
@@ -33,3 +41,7 @@
 	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html block.content}
 {/each}
+
+<!-- The attribution colophon is NOT rendered inline here: generate-pdfs.js
+     appends a dedicated colophon page (/print/<slug>/colophon) to the standalone
+     chapter PDF only, so it never repeats through the merged full book. -->

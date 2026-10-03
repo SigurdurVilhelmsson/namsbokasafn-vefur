@@ -31,7 +31,7 @@ Create `static/content/{bookSlug}/toc.json`:
     "originalUrl": "https://openstax.org/details/books/biology-2e",
     "license": "CC BY 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
-    "translator": "Translator Name",
+    "translator": "Erlendur (Miðeind)",
     "translationYear": 2025,
     "modifications": "Translated to Icelandic"
   },

@@ -21,19 +21,19 @@ export const faqItems: FaqItem[] = [
 		id: 'okeypis',
 		question: 'Er þetta ókeypis?',
 		answer:
-			'Já, allt efni er gjaldfrjálst. Bækurnar eru gefnar út undir <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 4.0 (CC BY 4.0)</a> leyfi, sem þýðir að þú mátt nota, afrita, aðlaga og dreifa efninu að vild, svo framarlega sem þú tilgreinir hvaðan efnið kemur.'
+			'Já, allt efni er gjaldfrjálst. Bækurnar eru gefnar út undir opnum Creative Commons leyfum — flestar undir <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>, en ein (Eðlisfræði) undir <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>. Þú mátt nota, afrita og aðlaga efnið svo framarlega sem þú tilgreinir hvaðan það kemur. Fyrir CC BY-NC-SA bókina er þó óheimilt að nota efnið í ágóðaskyni og afleitt efni skal bera sama leyfi. Sjá leyfissíðu hverrar bókar.'
 	},
 	{
 		id: 'kennsla',
 		question: 'Má ég nota þetta í kennslunni minni?',
 		answer:
-			'Auðvitað! Þú getur notað efnið beint í kennslu, aðlagað það að þínum þörfum, búið til verkefni út frá því, eða notað það sem viðbótarefni. CC BY 4.0 leyfið tryggir að kennarar hafi fullan ráðstöfunarrétt yfir efninu.'
+			'Auðvitað! Þú getur notað efnið beint í kennslu, aðlagað það að þínum þörfum, búið til verkefni út frá því, eða notað það sem viðbótarefni. Opnu Creative Commons leyfin tryggja að kennarar hafi víðtækan rétt til að nota og aðlaga efnið. Athugaðu að ein bók (Eðlisfræði) er undir CC BY-NC-SA 4.0, sem heimilar ekki notkun í ágóðaskyni og krefst sama leyfis á afleiddu efni — sjá leyfissíðu hverrar bókar.'
 	},
 	{
 		id: 'thyding',
 		question: 'Hvernig er efnið þýtt?',
 		answer:
-			'Við notum blöndu af gervigreindarþýðingu (Miðeind/Erlendur) og yfirlestri sérfræðinga. Vélþýðing gefur góðan grunn sem yfirlesari með sérþekkingu á efninu fer yfir og lagar. Þetta tryggir bæði hröð afköst og gæði, sérstaklega hvað varðar faghugtök í raungreinum.'
+			'Flestar þýðingar eru blanda af gervigreindarþýðingu (Miðeind/Erlendur) og yfirlestri sérfræðinga. Vélþýðing gefur góðan grunn sem yfirlesari með sérþekkingu á efninu fer yfir og lagar. Þetta tryggir bæði hröð afköst og gæði, sérstaklega hvað varðar faghugtök í raungreinum. Í einhverjum tilfellum hafa kennarar þó lagt til eigin frumþýðingar á efni frá OpenStax — þá er textinn handþýddur frá grunni fremur en vélþýddur.'
 	},
 	{
 		id: 'forskodun',
@@ -57,12 +57,12 @@ export const faqItems: FaqItem[] = [
 		id: 'hvers-vegna-openstax',
 		question: 'Hvers vegna OpenStax?',
 		answer:
-			'OpenStax gefur út ritrýndar námsbækur fyrir framhalds- og háskóla, sem eru opnar og ókeypis. Þær eru notaðar af milljónum nemenda um allan heim. CC BY 4.0 leyfið gerir okkur kleift að þýða og aðlaga efnið löglega og án kostnaðar. Þetta er sama leið og OpenStax Polska hefur farið með góðum árangri.'
+			'OpenStax gefur út ritrýndar námsbækur fyrir framhalds- og háskóla, sem eru opnar og ókeypis. Þær eru notaðar af milljónum nemenda um allan heim. Opin Creative Commons leyfi gera okkur kleift að þýða og aðlaga efnið löglega og án kostnaðar. Þetta er sama leið og OpenStax Polska hefur farið með góðum árangri.'
 	},
 	{
 		id: 'tengt-openstax',
 		question: 'Er Námsbókasafn tengt OpenStax?',
 		answer:
-			'Námsbókasafn er sjálfstætt verkefni og ekki formlega tengt OpenStax eða Rice University. Við byggjum á opnu efni þeirra samkvæmt CC BY 4.0 leyfi og höfum verið í samskiptum við OpenStax sem hefur lýst yfir stuðningi við verkefnið.'
+			'Námsbókasafn er sjálfstætt verkefni og ekki formlega tengt OpenStax eða Rice University. Við byggjum á opnu efni þeirra samkvæmt opnum Creative Commons leyfum og höfum verið í samskiptum við OpenStax sem hefur lýst yfir stuðningi við verkefnið.'
 	}
 ];

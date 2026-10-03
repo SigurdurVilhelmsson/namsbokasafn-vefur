@@ -234,7 +234,7 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 		if (isExercisePage && chapterNumber) {
 			// On exercises page - add "See answer" links to odd-numbered exercises
 			// Answer keys are now at /svarlykill/[chapter] route
-			const exercises = node.querySelectorAll<HTMLElement>('.practice-problem-container, .eoc-exercise');
+			const exercises = node.querySelectorAll<HTMLElement>('.eoc-exercise');
 
 			exercises.forEach((exercise) => {
 				// Get exercise ID and number
@@ -242,18 +242,36 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 				const exerciseNum = exercise.dataset.exerciseNumber;
 				if (!exerciseId) return;
 
-				// Only odd-numbered exercises have answers in OpenStax
-				// Exercise numbers are now in format "1.1", "9.105" (chapter.exerciseNum)
-				// Extract just the exercise number after the decimal point
-				const numStr = exerciseNum || '0';
-				const num = numStr.includes('.')
-					? parseInt(numStr.split('.')[1], 10)
-					: parseInt(numStr, 10);
-				if (num > 0 && num % 2 === 0) return; // Skip even numbers
+				// Emit a "Sjá svar" link iff this exercise actually has an answer.
+				// Ground truth comes from efni's renderer (data-has-answer, set from
+				// the source <solution> — the same predicate the answer-key generator
+				// uses). The old "odd number ⇒ has answer" parity heuristic is wrong
+				// where cnxml-render numbers exercises continuously across subsections
+				// (efnafraedi-2e ch12–17): answered exercises drift onto even numbers,
+				// giving both dead links (odd, no answer) and unreachable answers
+				// (even, has answer). See namsbokasafn-efni handoff
+				// docs/handoffs/2026-07-01-exercise-answer-has-answer-signal.md.
+				const hasAnswer = exercise.dataset.hasAnswer; // 'true' | 'false' | undefined
+				if (hasAnswer !== undefined) {
+					if (hasAnswer !== 'true') return;
+				} else {
+					// Fallback for pages rendered before the efni change (no
+					// data-has-answer yet): legacy parity heuristic. efnafraedi-2e now
+					// carries the attribute on every exercise, but the paused books are
+					// not re-synced and two of them still lack it (as of 2026-10-01:
+					// edlisfraedi-2e 0 of 141, orverufraedi 0 of 80). Drop only once
+					// every live book carries it. Number format is
+					// "1.1" / "9.105" (chapter.exerciseNum) — use the part after ".".
+					const numStr = exerciseNum || '0';
+					const num = numStr.includes('.')
+						? parseInt(numStr.split('.')[1], 10)
+						: parseInt(numStr, 10);
+					if (num > 0 && num % 2 === 0) return;
+				}
 
-				// For eoc-exercise, make the number itself a link (OpenStax style)
+				// Make the number itself a link (OpenStax style)
 				// Link to the new answer key route: /svarlykill/[chapter]#[exerciseId]
-				if (exercise.classList.contains('eoc-exercise') && exerciseNum) {
+				if (exerciseNum) {
 					const url = `/${bookSlug}/svarlykill/${chapterNumber}#${exerciseId}`;
 					const numberLink = createNumberLink(
 						exerciseNum,
@@ -267,25 +285,6 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 					// Prepend the number link to the exercise
 					exercise.insertBefore(numberLink, exercise.firstChild);
 					links.push(numberLink);
-				} else {
-					// For practice-problem-container, use button in footer
-					const button = createLinkButton(
-						'Svar',
-						'Fara í svar við þessari æfingu',
-						() => {
-							const url = `/${bookSlug}/svarlykill/${chapterNumber}#${exerciseId}`;
-							goto(url);
-						}
-					);
-
-					let footer = exercise.querySelector('.practice-problem-footer');
-					if (!footer) {
-						footer = document.createElement('div');
-						footer.className = 'practice-problem-footer';
-						exercise.appendChild(footer);
-					}
-					footer.appendChild(button);
-					buttons.push(button);
 				}
 			});
 		}

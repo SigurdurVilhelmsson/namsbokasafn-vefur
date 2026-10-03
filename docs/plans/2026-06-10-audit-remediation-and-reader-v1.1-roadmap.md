@@ -1,7 +1,24 @@
 # Roadmap — June 2026: audit remediation → production, then Reader v1.1
 
-**Date:** 2026-06-10
+**Date:** 2026-06-10 (status updated 2026-10-01)
 **Context:** Follows the full codebase review in `docs/code-review-2026-06.md` (PR #108) and the reader development plan in `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`.
+
+## Status summary (2026-10-01)
+
+| Track                     | State                                                                                                                                                                                                                                                                                                                  |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Phase 1 (audit → main)    | **Complete** — all items below merged (#115 pipeline, #116 SRS, #117 Icelandic, #118 delivery, plus #126 CI gate, #130 audit-1.3 fix, #131 P2.4)                                                                                                                                                                       |
+| Deferred audit items      | M4 fixed in #151 (2026-06-19); M2 and M6 had already been fixed in 88243f1 (#115). M8, M12, the focus-trap extraction and most §4 cleanups are still open — per-finding status at the top of `docs/code-review-2026-06.md`                                                                                             |
+| Reader v1.1 / plan P0     | Code complete on `feature/reader-v1.1` (#119–#122), **not merged**: last commit 2026-06-10, 257 commits behind `main`, conflicts with it in the section page, and its head has no CI result. QA batches D–E and the 3 judgment calls not run                                                                           |
+| Reader v1.2 / plan P1     | Code complete on `feature/reader-v1.2` (#124, #125, #127, #128), **not merged**: 253 commits behind `main`, conflicts in `AnalyticsTabs.svelte` and the section page; its head's only CI run (2026-07-25) failed within 3 s. QA batch G not run                                                                        |
+| Production deploy         | Manual (`deploy.yml` has never completed a deploy). Live: a 2026-08-19 build of `main`; QA batch F's header and redirect checks pass, but `frame-src` (#191) and the organic withdrawal (#234) are not applied on the server, and the 22 merges to `main` since that build (2026-08-19 to 2026-09-24) are not deployed |
+| Releases                  | None yet — `package.json` is still 1.0.0 and there are no tags. Plan: v1.1.0 after D–E verdicts; v1.2.0 after G, following v1.1.0                                                                                                                                                                                      |
+| Reader plan P2.1–P2.3     | Not started (P2.4 done in #131; the P2.1 position label exists only inside P0.4 on the unmerged v1.1 branch; scroll-bar replacement open)                                                                                                                                                                              |
+| PDF redesign              | Core merged in #182 (2026-07-02); Task 3.3, Phase 4.2/4.3 and Phase 5 open; no PDF is served on namsbokasafn.is yet (see the plan's status line)                                                                                                                                                                       |
+| Reader plan P3 (AI tutor) | Deferred pending classroom feedback on P0/P1                                                                                                                                                                                                                                                                           |
+
+Manual verification lives in `docs/manual-qa-2026-06.md`. The sections below
+are the original plan, kept for the record.
 
 ## Phase 1 — Finish audit remediation, ship to production
 
@@ -16,7 +33,7 @@
 | #112 | Reactivity sweep: planner toggles, duplicate modal saves, frozen `$derived`-over-`get()` views; CLAUDE.md pitfalls note    |
 | #113 | Glossary book switching; analytics session no longer persisted/adopted cross-tab, 30-min duration cap                      |
 
-### Remaining before the production push
+### Remaining before the production push (all complete as of 2026-06-11 — see status summary)
 
 1. **Wire up the practice-tracking pipeline** (audit 1.4 + M1–M4, M6).
    Decision: **wire up, not delete** — the reader plan's P1.1 calibration tab and
@@ -25,6 +42,14 @@
    store; add `bookSlug` to `PracticeProblem`/objectives chapter queries
    _before_ real data accumulates; fix the stats key migration corruption,
    answer dedupe by question id, and section-mastery aggregation.
+   **Update (2026-06-19):** the wiring + M1/M3 fixes shipped (PR #115), but this item
+   assumed `.practice-problem-container` content would supply the data — the CNXML
+   decision removed that source, so the pipeline stayed empty. The data source has been
+   re-established via the Example "Kannaðu þekkingu þína" reveal (inline self-assessment):
+   see `docs/plans/2026-06-19-rec7-practice-self-assessment.md`. The dead
+   `.practice-problem-container` writer is being removed there. (M4 was fixed in #151 the
+   same day; M2 had already been fixed in 88243f1 (#115) — the Phase-2 quiz bank must still
+   set `questionId`, because dedupe falls back to the option id without it.)
 2. **SRS ease-factor cap** — add the documented 2.5 upper clamp in
    `utils/srs.ts` (CLAUDE.md and standard SM-2 both specify 1.3–2.5); update
    the test that codified the unbounded behavior.
@@ -55,11 +80,10 @@ changes in the same maintenance window.
 
 ## Phase 2 — Reader v1.1 (screen-vs-paper plan)
 
-Implements `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`, none of
-which has shipped as of 2026-06-10 (verified: the `lineWidth` setting
-infrastructure exists but defaults to `medium`/52rem; everything else —
-free-recall prompt, predict-first ratings, pagination, calibration tab,
-typography corrections — is unimplemented).
+Implements `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`. (At the
+time of writing nothing had shipped; as of 2026-06-11, P0 is complete on
+`feature/reader-v1.1` and P1 on `feature/reader-v1.2` — see the status
+summary above.)
 
 **Branch strategy:** long-lived integration branch `feature/reader-v1.1`,
 created from main after Phase 1 merges. Individual P0 items land on it as
@@ -81,6 +105,24 @@ the practice-pipeline data wired up in Phase 1.
 **Audit↔plan interactions already accounted for:**
 
 - The practice pipeline is wired up (Phase 1) because P1.1/P2.2 need its data.
+  **(2026-06-19)** Its data source is the inline self-assessment on the Example reveal
+  (`source:'inline'` in `practiceProblemProgress`), per
+  `docs/plans/2026-06-19-rec7-practice-self-assessment.md`. Coordination when these branches merge:
+  **P0.3** (predict-first) — upgrade the inline rating to the same predict-first pattern, don't
+  build a parallel one; **P1.1** (Kvörðun / CalibrationTab) — include `source:'inline'` attempts
+  in the prediction-vs-outcome matrix, not just flashcards; **P2.2** — draws on the same inline data.
 - The completion celebration gets no cleanup investment — P0.2 replaces it.
 - Section-page lifecycle fixes (PR #110) are the foundation P0.4's
   read-detection rewire builds on.
+
+## Related plans (parked, pick up when convenient)
+
+- **PDF output redesign** — `docs/plans/2026-07-01-pdf-redesign-plan.md`. Full
+  design spec (typography, margins, colour, binding) + phased implementation for
+  a _designed_, interactive (bookmarks / clickable TOC / cross-refs / glossary /
+  exercise↔answer links) and print/bind-friendly (spiral, 4-hole) PDF, with
+  complete CC-BY / CC-BY-NC-SA attribution on both full-book and per-chapter
+  artifacts. Benchmarked against the OpenStax `Chemistry2e-WEB.pdf` reference
+  (gitignored in repo root). Core merged in #182 on 2026-07-02 (Phases 0–1, Phase 2
+  core, Phase 3 except Task 3.3, Task 4.1); Task 3.3, Phase 4.2/4.3 and Phase 5 remain,
+  and no PDF is served on namsbokasafn.is yet — see the plan's own status line.

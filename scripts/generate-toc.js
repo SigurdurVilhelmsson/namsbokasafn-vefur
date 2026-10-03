@@ -19,7 +19,8 @@
 
 import { existsSync, readdirSync, readFileSync, writeFileSync, statSync } from 'fs';
 import { resolve, dirname, basename, extname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { isAggregationFile, chapterFullyFaithful, resolveChapterDuplicates } from './lib/overlay.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -255,6 +256,28 @@ function loadChapterMetadata(efniPath, bookSlug, chapterNum) {
 	}
 }
 
+// A module is "reviewed" when a human-reviewed `faithful` version is what the
+// sync actually serves. Reading modules: reviewed iff a faithful file exists.
+// Chapter aggregation pages (summary/key-terms/exercises/answer-key): the sync
+// only takes faithful's rollup when the whole chapter is faithful (otherwise it
+// keeps the complete mt-preview rollup), so they count as reviewed only then.
+// This mirrors scripts/lib/overlay.js so the banner matches the served file.
+// If efni / faithful isn't present, nothing is reviewed (banner shows — safe).
+function isReviewedModule(efniPath, bookSlug, chapterDir, contentFile) {
+	const publication = resolve(efniPath, 'books', bookSlug, '05-publication');
+	const faithfulChapters = resolve(publication, 'faithful', 'chapters');
+	const mtChapters = resolve(publication, 'mt-preview', 'chapters');
+
+	if (!existsSync(resolve(faithfulChapters, chapterDir, contentFile))) {
+		return false;
+	}
+	if (!isAggregationFile(contentFile)) {
+		return true;
+	}
+	// Aggregation page: only reviewed when the whole chapter is faithful.
+	return chapterFullyFaithful(faithfulChapters, mtChapters, chapterDir);
+}
+
 // Load existing toc.json for book metadata
 function loadExistingToc(bookPath) {
 	const tocPath = resolve(bookPath, 'toc.json');
@@ -270,8 +293,96 @@ function loadExistingToc(bookPath) {
 	}
 }
 
+// Duplicates no reviewed version can adjudicate, collected across the whole run
+// so they get a summary at the end instead of scrolling past.
+export const unresolvedDuplicates = [];
+
+// The HTML pages in a directory that should become TOC entries.
+//
+// A reviewed title correction renames the rendered file, so the overlay can
+// leave both the old and the new name on disk — the same module published
+// twice. sync-content.js prunes those, but this script also runs standalone and
+// against destinations synced by older versions, so it applies the same verdict
+// itself. Where no reviewed version can choose a winner, both are kept and
+// reported: that is a content defect to fix in namsbokasafn-efni.
+export function usablePages(dir, bookSlug, dirName, options) {
+	const faithfulDir = resolve(
+		options.efniPath,
+		'books',
+		bookSlug,
+		'05-publication',
+		'faithful',
+		'chapters',
+		dirName
+	);
+	const { superseded, conflicts } = resolveChapterDuplicates(dir, faithfulDir);
+
+	for (const file of superseded) {
+		console.log(`    Skipping superseded page (reviewed rename): chapters/${dirName}/${file}`);
+	}
+	for (const { identity, files } of conflicts) {
+		unresolvedDuplicates.push({ bookSlug, dirName, identity, files });
+		console.warn(
+			`    ⚠️  Duplicate module in chapters/${dirName} (${identity}): ${files.join(', ')} — kept both.`
+		);
+	}
+
+	const dropped = new Set(superseded);
+	return readdirSync(dir).filter((f) => f.endsWith('.html') && !dropped.has(f));
+}
+
+// Scan front-matter directory (chapters/00/) and generate front-matter entries.
+// Front matter (e.g. the preface / formáli) is rendered before Chapter 1 and is
+// NOT a numbered chapter — it lives in toc.frontMatter, not toc.chapters.
+// Book-agnostic: any book with a chapters/00/ directory gets front matter.
+function scanFrontMatter(bookPath, bookSlug, options) {
+	const dir = resolve(bookPath, 'chapters', '00');
+	if (!existsSync(dir)) {
+		return [];
+	}
+
+	const files = usablePages(dir, bookSlug, '00', options).sort();
+
+	const entries = [];
+
+	for (const file of files) {
+		const content = readFileSync(resolve(dir, file), 'utf-8');
+		const frontmatter = parseHtmlMetadata(content);
+		const sectionType = getSectionType(file);
+
+		let title = frontmatter.title;
+		if (!title) {
+			// Fallback: derive from filename (e.g. "0-1-formali" -> "Formali")
+			title = getBasenameWithoutExt(file)
+				.replace(/^\d+-\d+-/, '')
+				.replace(/^\d+-/, '')
+				.replace(/-/g, ' ');
+			title = title.charAt(0).toUpperCase() + title.slice(1);
+		}
+
+		// Number is intentionally blank: front matter is unnumbered, like OpenStax
+		// front matter. The sidebar shows only the title ("Formáli").
+		const entry = {
+			number: '',
+			title,
+			file
+		};
+		if (sectionType) {
+			entry.type = sectionType;
+		}
+		// Only stamp reviewed modules; absence means machine-translated preview.
+		if (isReviewedModule(options.efniPath, bookSlug, '00', file)) {
+			entry.reviewed = true;
+		}
+
+		entries.push(entry);
+	}
+
+	return entries;
+}
+
 // Scan appendix directory and generate appendix entries
-function scanAppendices(bookPath) {
+function scanAppendices(bookPath, bookSlug, options) {
 	// Check for appendices in multiple possible locations
 	const possibleDirs = [
 		resolve(bookPath, 'chapters', 'appendix'),
@@ -291,9 +402,7 @@ function scanAppendices(bookPath) {
 		return [];
 	}
 
-	const appendixFiles = readdirSync(appendixDir)
-		.filter((f) => f.endsWith('.html'))
-		.sort();
+	const appendixFiles = usablePages(appendixDir, bookSlug, basename(appendixDir), options).sort();
 
 	const appendices = [];
 
@@ -403,11 +512,11 @@ function generateToc(bookSlug, options) {
 	}
 
 	// Find chapter directories (01, 02, etc.)
-	// Exclude 99 as it's used for appendices
+	// Exclude 99 (appendices) and 00 (front matter — handled by scanFrontMatter)
 	const chapterDirs = readdirSync(chaptersDir)
 		.filter((name) => {
 			const fullPath = resolve(chaptersDir, name);
-			return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name) && name !== '99';
+			return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name) && name !== '99' && name !== '00';
 		})
 		.sort();
 
@@ -421,7 +530,7 @@ function generateToc(bookSlug, options) {
 		const chapterMeta = loadChapterMetadata(options.efniPath, bookSlug, chapterNum);
 
 		// Find all HTML content files in chapter
-		const contentFiles = readdirSync(chapterPath).filter((f) => f.endsWith('.html'));
+		const contentFiles = usablePages(chapterPath, bookSlug, chapterDir, options);
 
 		const sections = [];
 
@@ -454,7 +563,8 @@ function generateToc(bookSlug, options) {
 				number: sectionNum, // May be null, will be assigned after sorting
 				title,
 				file: contentFile,
-				type: sectionType
+				type: sectionType,
+				reviewed: isReviewedModule(options.efniPath, bookSlug, chapterDir, contentFile)
 			};
 
 			sections.push(section);
@@ -489,6 +599,10 @@ function generateToc(bookSlug, options) {
 			};
 			if (s.type) {
 				entry.type = s.type;
+			}
+			// Only stamp reviewed modules; absence means machine-translated preview.
+			if (s.reviewed) {
+				entry.reviewed = true;
 			}
 			return entry;
 		});
@@ -525,8 +639,15 @@ function generateToc(bookSlug, options) {
 		console.log(`    Chapter ${chapterNum}: ${chapterTitle} (${finalSections.length} sections)`);
 	}
 
+	// Scan for front matter (chapters/00/ — preface etc., rendered before Chapter 1)
+	const frontMatter = scanFrontMatter(bookPath, bookSlug, options);
+	if (frontMatter.length > 0) {
+		toc.frontMatter = frontMatter;
+		console.log(`  Found ${frontMatter.length} front-matter section(s)`);
+	}
+
 	// Scan for appendices
-	const appendices = scanAppendices(bookPath);
+	const appendices = scanAppendices(bookPath, bookSlug, options);
 	if (appendices.length > 0) {
 		toc.appendices = appendices;
 		console.log(`  Found ${appendices.length} appendix/appendices`);
@@ -561,6 +682,18 @@ function generateToc(bookSlug, options) {
 			file: 'index.json'
 		};
 		console.log('  Found index');
+	}
+
+	// Check if glossary.json exists and add glossary entry. Books without one
+	// (0 <glossary> in source until efni's D5 lands) get no glossary entry, so
+	// the reader gates the Orðasafn link + route on its absence.
+	const glossaryPath = resolve(bookPath, 'glossary.json');
+	if (existsSync(glossaryPath)) {
+		toc.glossary = {
+			title: 'Orðasafn',
+			file: 'glossary.json'
+		};
+		console.log('  Found glossary');
 	}
 
 	return toc;
@@ -647,8 +780,23 @@ function main() {
 		success++;
 	}
 
+	if (unresolvedDuplicates.length > 0) {
+		console.warn(
+			`\n⚠️  ${unresolvedDuplicates.length} unresolved duplicate module(s) — one module, two published pages:`
+		);
+		for (const d of unresolvedDuplicates) {
+			console.warn(`   ${d.bookSlug} chapters/${d.dirName} (${d.identity}): ${d.files.join(', ')}`);
+		}
+		console.warn(
+			'   Vefur cannot choose between them. Fix at the source in namsbokasafn-efni: prune the stale render.'
+		);
+	}
+
 	console.log(`\nComplete: ${success} succeeded, ${failed} failed`);
 	process.exit(failed > 0 ? 1 : 0);
 }
 
-main();
+// Only run as a CLI — importing this module (tests) must not start a run.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+	main();
+}

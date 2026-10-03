@@ -1,5 +1,7 @@
 # Architecture Documentation
 
+> ⚠️ **Partly out of date (status 2026-10-01).** Content is pre-rendered HTML, rendered by `src/lib/components/ContentRenderer.svelte`. The Markdown files, `MarkdownRenderer.svelte`, `markdown.ts` and `BookCard.svelte` named below no longer exist, and the version numbers in the stack table are old — current pins are in `package.json`. For current versions and structure see the root `README.md` and `CLAUDE.md`.
+
 ## System Overview
 
 Námsbókasafn is a static site built with SvelteKit and TypeScript. It serves as an interactive reader for Icelandic translations of OpenStax educational textbooks.
@@ -113,7 +115,7 @@ src/
 │   │   ├── annotation.ts  # Highlights & notes
 │   │   └── ...
 │   ├── actions/           # Svelte actions
-│   │   ├── equations.ts   # KaTeX rendering
+│   │   ├── equations.ts   # MathJax equation handling
 │   │   ├── practiceProblems.ts
 │   │   ├── crossReferences.ts
 │   │   └── figureViewer.ts

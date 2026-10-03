@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-22
 **Branch of origin:** `claude/evaluate-reader-research-aCOVa`
-**Status:** Plan only as of 2026-06-10 — no items implemented (the `lineWidth` setting infrastructure has since landed, but the default remains `medium`). Implementation tracked in `2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md` (Phase 2, branch `feature/reader-v1.1`).
+**Status (2026-10-01):** P0 implemented on `feature/reader-v1.1` (P0.1–P0.4) and P1 on `feature/reader-v1.2` (P1.1–P1.4) — **neither merged nor released**: both branches are more than 250 commits behind `main` and conflict with it, neither head has a real CI result, and QA batches D, E and G have not been run. P2.4 done; P2.1's position label exists only inside P0.4 on the unmerged branch (scroll-bar replacement open); P2.2/P2.3 not started; P2.5's vefur-side audit not started. On P2.5's efni side, math now has an accessible name: all 192 math-bearing chemistry pages in the synced, live content carry assistive MathML — emitted as `<math class="assistive-mathml">`, so acceptance criterion 4's `mjx-assistive-mml` string counts 0 even though the criterion is met. Icelandic figure alt text exists in efni (all but one of the 1,148 chemistry `mt-preview` alts) but not yet on the live site (0 of 1,148). P3 deferred pending classroom feedback. Releases gated on `docs/manual-qa-2026-06.md`. Tracking: `2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md`.
 **Source research:** "Why screens lose to paper — and how to build a reader that closes the gap" (Claude-generated literature review, April 2026), drawing on Delgado et al. 2018, Clinton 2019, Salmerón et al. 2024, Dunlosky et al. 2013, Ackerman & Lauterman 2012, Roediger & Karpicke 2006, and others.
 
 ## Executive summary
@@ -60,12 +60,13 @@ Full audit lives in conversation history; the structural findings are:
 
 ### P2 — Polish
 
-| #    | Item                                                            | Sessions |
-| ---- | --------------------------------------------------------------- | -------- |
-| P2.1 | Bounded progress label ("Hluti N af M") replaces 2px scroll bar | 0.5      |
-| P2.2 | Spaced-review surfacing in study planner                        | 1.5      |
-| P2.3 | Recall-review tab in `/bokamerki`                               | 1        |
-| P2.4 | `CLAUDE.md` note: optimize for expository, not narrative        | 0        |
+| #    | Item                                                            | Sessions     |
+| ---- | --------------------------------------------------------------- | ------------ |
+| P2.1 | Bounded progress label ("Hluti N af M") replaces 2px scroll bar | 0.5          |
+| P2.2 | Spaced-review surfacing in study planner                        | 1.5          |
+| P2.3 | Recall-review tab in `/bokamerki`                               | 1            |
+| P2.4 | `CLAUDE.md` note: optimize for expository, not narrative        | 0            |
+| P2.5 | Accessibility audit & remediation (detailed spec below)         | ~2–3 (vefur) |
 
 ### P3 — Larger bets, evaluate after P0–P1
 
@@ -282,13 +283,65 @@ Recommended order: **P0.1 → P0.3 → P0.2 (scaffold against scrolled mode) →
 
 ---
 
+## P2.5 detailed spec — accessibility audit & remediation
+
+### Why this exists
+
+The original plan treated accessibility as a side-effect of P0.4 (pagination aria-live/focus) and P1.4 (typography). It is not a named workstream. A 2026-06-25 review (prompted by an external platform report and the OpenStax accessibility guidance it cited) audited the live rendered content and found a mix of "already good," "silently broken," and "wrong language." This item makes a11y explicit and splits it cleanly across the two repos.
+
+### Audit findings (verified 2026-06-25 against synced content)
+
+| Concern                                    | Measured state                                                                                                                                                                                                                  | Verdict           |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| Figure alt text — coverage                 | 1581 `<img>`, **100%** have a non-empty `alt`, median length 372 chars (substantive, not label-only)                                                                                                                            | **Good**          |
+| Figure alt text — language                 | **~100% English.** Only 3 / 1581 contain any Icelandic. The alt text is OpenStax's original English, passed through untranslated.                                                                                               | **Broken (efni)** |
+| Math — accessible name                     | MathJax **SVG** output (`jax="SVG"`), `role="img" focusable="false"`, but **no `aria-label`, no `<title>`, no assistive MathML** (0 occurrences of `mjx-assistive-mml` / `<math>`). Screen readers announce nothing meaningful. | **Broken (efni)** |
+| Long descriptions                          | 0 `aria-describedby` / `longdesc`. Mitigated by long alt text; matters only for the few genuinely complex multi-panel diagrams.                                                                                                 | **Minor**         |
+| Contrast / accent / colour-only signalling | Per design system (amber accent, semantic-only blue, AA targets)                                                                                                                                                                | **Good**          |
+
+The headline: the report's generic "add alt text / add MathML" advice does not match our situation. Alt text is **present and descriptive but in the wrong language**, and math is **rendered but nameless to AT**. Both root causes are in the efni pipeline, not the reader.
+
+### Scope split
+
+**vefur-side (this repo, ~2–3 sessions):**
+
+- WCAG 2.1 AA pass over the app shell: keyboard nav, visible focus, focus order, landmark/heading structure, skip-to-content, modal focus traps (the audit's deferred focus-trap extraction lands here).
+- Reading-order verification over the rendered section structure (headings → notes → examples → checkpoints → self-checks), **especially under P0.4 paginated mode** — P0.4 already specs aria-live page announcements and focus moves; this validates them with a real screen reader (NVDA + VoiceOver), not just by spec.
+- Confirm injected interactive UI in `ContentRenderer` (glossary tooltips, figure lightbox, highlight/annotate) is keyboard-operable and announced, not mouse-only.
+- Verify the P0.4 continuous-scroll toggle is discoverable and labelled for AT users who prefer it.
+
+**efni-side (sister repo — coordinate, record learnings in efni's memory/CLAUDE.md):**
+
+- **Translate figure alt text to Icelandic.** Route the `alt` attribute through the same translation/review flow as body text; today the pipeline translates body but not alt. This is the substantive content gap — a blind Icelandic student currently hears English figure descriptions in an otherwise-Icelandic book.
+- **Give math an accessible name** — see the MathML decision below.
+- Author separate long descriptions for the handful of complex diagrams where the (translated) alt is insufficient.
+
+### MathML decision (concrete form of the report's "use MathML")
+
+The report's "render math as MathML" is right in spirit but must not be read as "replace SVG display with MathML rendering" — native browser MathML support is still uneven and would regress visual quality. The correct, well-supported pattern is **SVG for display + hidden MathML for assistive tech**, which is exactly MathJax's built-in **assistive-MathML** mode (`options.enableAssistiveMml` / menu `assistiveMml`). It inserts a visually-hidden `<mjx-assistive-mml>` block of real MathML next to each SVG, so MathML-capable AT (VoiceOver, NVDA, JAWS, Orca) can read and navigate the expression while sighted users still get the SVG.
+
+- **Source already has the MathML.** OpenStax CNXML carries MathML upstream, so emitting assistive MathML in `cnxml-render.js` costs little — it's a config flag, not a re-authoring effort.
+- **Math notation is language-neutral**, so unlike alt text this needs no translation pass — a comparatively cheap, high-value fix.
+- **Fallback if assistive MathML is rejected** (e.g. DOM-weight concerns on equation-dense pages): at minimum add an `aria-label` to each `mjx-container` from the source TeX/CNXML. Cheaper DOM, but a flat string with no sub-expression navigation. Prefer assistive MathML.
+
+This is an efni pipeline change. Per the cross-repo workflow in `CLAUDE.md`, the math + alt-translation work should be done from a session launched in `namsbokasafn-efni`, with the rendering/pipeline learnings recorded there.
+
+### Acceptance criteria
+
+1. App shell passes an automated AA check (axe/Lighthouse) with no critical violations, and a manual keyboard-only pass reaches every interactive control with visible focus.
+2. Under paginated mode, a screen reader announces page changes and lands focus correctly on Next/Prev; reading order matches visual order.
+3. (efni) Figure alt text on a reviewed chapter is Icelandic, verified by the same language check used in this audit (Icelandic-character / common-word ratio, not 0%).
+4. (efni) Math expressions carry an accessible name — assistive MathML present (`mjx-assistive-mml` non-zero) or, as fallback, `aria-label` on every `mjx-container`.
+
+---
+
 ## Effort summary
 
-| Tier | Items                | Sessions | Calendar (evenings)    |
-| ---- | -------------------- | -------- | ---------------------- |
-| P0   | 4 items              | ~8       | ~2 weeks               |
-| P1   | 4 items              | ~6       | ~1.5 weeks             |
-| P2   | 3 items + 1 doc note | ~3       | ~0.5 week              |
-| P3   | AI tutor (deferred)  | 8–12     | 2–3 weeks when started |
+| Tier | Items                | Sessions | Calendar (evenings)                 |
+| ---- | -------------------- | -------- | ----------------------------------- |
+| P0   | 4 items              | ~8       | ~2 weeks                            |
+| P1   | 4 items              | ~6       | ~1.5 weeks                          |
+| P2   | 4 items + 1 doc note | ~5–6     | ~1 week (vefur; efni a11y separate) |
+| P3   | AI tutor (deferred)  | 8–12     | 2–3 weeks when started              |
 
 After P0 ships, the defensible claim is: every documented driver of the screen-inferiority effect — required scrolling, excess line length, unprompted completion, uncalibrated self-monitoring — has been directly designed against. That is the specification the literature implies.

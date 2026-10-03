@@ -29,6 +29,7 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		let tocPages: {
 			chapters: Array<{ number: number; page: number }>;
 			appendicesPage: number | null;
+			glossaryPage: number | null;
 		} | null = null;
 		try {
 			const res = await fetch(`/downloads/${bookSlug}/toc-pages.json`);

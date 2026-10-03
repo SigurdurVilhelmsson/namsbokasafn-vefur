@@ -5,9 +5,13 @@
 <script lang="ts">
   import { settings } from '$lib/stores/settings';
   import { onMount, onDestroy } from 'svelte';
+  import Icon from '$lib/components/Icon.svelte';
+  import BookCover from '$lib/components/BookCover.svelte';
+  import LicenceBadge from '$lib/components/LicenceBadge.svelte';
   import type { PageData } from './$types';
   import type { CatalogueEntry, SubjectGroup } from '$lib/data/openstax-catalogue';
   import { faqItems } from '$lib/data/faq';
+  import { roster, rosterNote } from '$lib/data/about';
 
   let { data }: { data: PageData } = $props();
   let translationBooks = $derived(data.translationBooks);
@@ -20,7 +24,6 @@
     'efnafraedi-2e': 'chemistry',
     'liffraedi-2e': 'biology',
     'orverufraedi': 'biology',
-    'lifraen-efnafraedi': 'chemistry',
     'edlisfraedi-2e': 'physics'
   };
 
@@ -155,13 +158,8 @@
         onclick={() => settings.toggleTheme()}
         aria-label="Skipta um þema"
       >
-        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="5" />
-          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-        </svg>
-        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-        </svg>
+        <span class="sun-icon"><Icon name="sun" size="sm" /></span>
+        <span class="moon-icon"><Icon name="moon" size="sm" /></span>
       </button>
     </div>
   </header>
@@ -175,6 +173,11 @@
       </h1>
       <p class="hero-sub anim-item" style="--anim-delay: 200ms">
         Þýddar OpenStax námsbækur með innbyggðum námsverkfærum — gjaldfrjálst og opið öllum.
+      </p>
+      <!-- Alternative tagline the editor may swap in later:
+           "Þýtt með íslenskri vélþýðingu (Erlendur) og ritstýrt af kennurum með fagþekkingu." -->
+      <p class="hero-credit anim-item" style="--anim-delay: 250ms">
+        Vélþýtt og yfirlesið af starfandi raungreinakennurum.
       </p>
       <div class="hero-actions anim-item" style="--anim-delay: 300ms">
         <a href="#kennslubaekur" class="btn-primary" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('kennslubaekur'); }}>
@@ -205,77 +208,29 @@
           style="--subject-color: var(--subject-{subject}, #6b7280); --card-delay: {index * 100}ms"
         >
           <a href="/{book.slug}" class="book-link">
-            <div class="book-card-top">
-              <span
-                class="book-status"
-                class:status-available={book.status === 'available'}
-                class:status-in-progress={book.status === 'in-progress'}
-              >
-                {book.status === 'available' ? 'Í boði' : 'Í vinnslu'}
-              </span>
-            </div>
-            <h3 class="book-title">{book.title}</h3>
-            <p class="book-source">
-              Byggt á {book.source.title}
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="external-icon">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                <polyline points="15 3 21 3 21 9" />
-                <line x1="10" y1="14" x2="21" y2="3" />
-              </svg>
-            </p>
-
-            {#if book.stats}
-              <div class="book-progress">
+            <BookCover {book} {subject} />
+            <div class="book-caption">
+              <h3 class="book-name">{book.title}</h3>
+              {#if book.stats}
                 <div class="progress-track">
                   <div class="progress-fill" style="width: {percentage}%"></div>
                 </div>
-                <span class="progress-label">
-                  {book.stats.translatedChapters} / {book.stats.totalChapters} kaflar — {percentage}%
+              {/if}
+              <div class="caption-row">
+                <span class="caption-meta">
+                  {#if book.stats}{book.stats.translatedChapters}/{book.stats.totalChapters} kaflar{/if}
+                </span>
+                <span
+                  class="book-status"
+                  class:status-available={book.status === 'available'}
+                  class:status-in-progress={book.status === 'in-progress'}
+                >
+                  {book.status === 'available' ? 'Í boði' : 'Í vinnslu'}
                 </span>
               </div>
-            {/if}
-
-            {#if book.features}
-              <div class="book-tools">
-                {#if book.features.flashcards}
-                  <span class="tool-icon" title="Minniskort">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="2" y="4" width="20" height="16" rx="2" />
-                      <path d="M12 8v8M8 12h8" />
-                    </svg>
-                  </span>
-                {/if}
-                {#if book.features.glossary}
-                  <span class="tool-icon" title="Orðasafn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-                      <path d="M8 7h8M8 11h6" />
-                    </svg>
-                  </span>
-                {/if}
-                {#if book.features.exercises}
-                  <span class="tool-icon" title="Æfingarverkefni">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M9 11l3 3L22 4" />
-                      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                    </svg>
-                  </span>
-                {/if}
-                {#if book.features.periodicTable}
-                  <span class="tool-icon" title="Lotukerfið">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="7" height="7" rx="1" />
-                      <rect x="14" y="3" width="7" height="7" rx="1" />
-                      <rect x="3" y="14" width="7" height="7" rx="1" />
-                      <rect x="14" y="14" width="7" height="7" rx="1" />
-                    </svg>
-                  </span>
-                {/if}
+              <div class="caption-row caption-licence">
+                <LicenceBadge code={book.attribution.derivativeLicence} />
               </div>
-            {/if}
-
-            <div class="book-cta">
-              <span>Opna bók →</span>
             </div>
           </a>
         </article>
@@ -297,26 +252,16 @@
             style="--subject-color: var(--subject-{subject}, #6b7280); --card-delay: {index * 100}ms"
           >
             <a href="/{book.slug}" class="book-link">
-              <div class="book-card-top">
-                <span class="book-status status-preview">Forskoðun</span>
-              </div>
-              <h3 class="book-title">{book.title}</h3>
-              <p class="book-source">
-                Byggt á {book.source.title}
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="external-icon">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <polyline points="15 3 21 3 21 9" />
-                  <line x1="10" y1="14" x2="21" y2="3" />
-                </svg>
-              </p>
-
-              <div class="book-preview-info">
-                <span class="preview-label">{book.stats?.translatedChapters ?? 1} kafli í forskoðun</span>
-                <span class="preview-note">Vélþýðing — leitum að ritstjóra</span>
-              </div>
-
-              <div class="book-cta">
-                <span>Opna bók →</span>
+              <BookCover {book} {subject} />
+              <div class="book-caption">
+                <h3 class="book-name">{book.title}</h3>
+                <div class="caption-row">
+                  <span class="caption-meta">{book.stats?.translatedChapters ?? 1} kafli í forskoðun</span>
+                  <span class="book-status status-preview">Forskoðun</span>
+                </div>
+                <div class="caption-row caption-licence">
+                  <LicenceBadge code={book.attribution.derivativeLicence} />
+                </div>
               </div>
             </a>
           </article>
@@ -329,9 +274,9 @@
       <p>
         Þýðingarnar okkar byggjast á opnum kennslubókum frá
         <a href="https://openstax.org" target="_blank" rel="noopener noreferrer">OpenStax</a>,
-        gefnar út af Rice University undir
-        <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>
-        leyfi. Hér fyrir neðan eru allar námsbækur OpenStax.
+        gefnar út af Rice University undir Creative Commons leyfum. Leyfið er mismunandi eftir
+        bók — sjá leyfismerki hverrar bókar hér að ofan og leyfissíðu hennar. Hér fyrir neðan eru
+        allar námsbækur OpenStax.
         Hafðu samband á
         <a href="mailto:sigurdur@namsbokasafn.is">sigurdur@namsbokasafn.is</a>
         ef þú vilt leggja verkefninu lið.
@@ -352,9 +297,7 @@
           <summary class="subject-accordion-header">
             <span class="subject-accordion-title">{group.label}</span>
             <span class="subject-accordion-count">{entries.length} {entries.length === 1 ? 'bók' : 'bækur'}</span>
-            <svg class="subject-accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 9l-7 7-7-7" />
-            </svg>
+            <span class="subject-accordion-chevron"><Icon name="chevron-down" size="md" /></span>
           </summary>
 
           <div class="compact-grid">
@@ -371,11 +314,7 @@
                     class="compact-link"
                   >
                     OpenStax
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="compact-external-icon">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                      <polyline points="15 3 21 3 21 9" />
-                      <line x1="10" y1="14" x2="21" y2="3" />
-                    </svg>
+                    <Icon name="external-link" size="sm" class="compact-external-icon" />
                   </a>
                 </div>
               </article>
@@ -397,11 +336,7 @@
       <!-- Minniskort -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
-            <rect x="2" y="4" width="20" height="16" rx="2" />
-            <rect x="5" y="7" width="14" height="10" rx="1" opacity="0.4" />
-            <path d="M12 8v8M8 12h8" />
-          </svg>
+          <Icon name="credit-card" size="md" style="color: var(--accent-color)" />
         </div>
         <h3>Minniskort</h3>
         <p>Endurtekningarkerfi sem aðlagar sig að þér</p>
@@ -410,10 +345,7 @@
       <!-- Orðasafn -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2">
-            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-            <path d="M8 7h8M8 11h6" />
-          </svg>
+          <Icon name="book-open" size="md" style="color: var(--accent-color)" />
         </div>
         <h3>Orðasafn</h3>
         <p>Smelltu á hugtök til að sjá skilgreiningar</p>
@@ -422,10 +354,7 @@
       <!-- Próf -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--subject-math) 12%, transparent)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--subject-math)" stroke-width="2">
-            <path d="M9 11l3 3L22 4" />
-            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-          </svg>
+          <Icon name="clipboard-check" size="md" style="color: var(--subject-math)" />
         </div>
         <h3>Próf</h3>
         <p>Aðlöguð verkefni til að prófa þekkingu</p>
@@ -434,11 +363,7 @@
       <!-- Framvinda -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--subject-biology) 12%, transparent)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="var(--subject-biology)" stroke-width="2">
-            <rect x="3" y="12" width="4" height="9" rx="1" />
-            <rect x="10" y="8" width="4" height="13" rx="1" />
-            <rect x="17" y="4" width="4" height="17" rx="1" />
-          </svg>
+          <Icon name="chart-column" size="md" style="color: var(--subject-biology)" />
         </div>
         <h3>Framvinda</h3>
         <p>Fylgstu með hvar þú ert í bókinni</p>
@@ -450,30 +375,46 @@
   <section id="um" class="about-section">
     <div class="about-grid">
       <div class="about-card">
-        <h3>Um Námsbókasafn</h3>
+        <h3>Um verkefnið</h3>
         <p>
-          Námsbókasafn er safn íslenskra þýðinga á opnum námsbókum.
-          Verkefnið miðar að því að gera hágæða námsefni aðgengilegt
-          öllum íslenskum nemendum og kennurum, gjaldfrjálst og á móðurmálinu.
+          Námsbókasafn er sjálfstætt verkefni unnið af starfandi
+          framhaldsskólakennurum. Markmiðið er að gera hágæða raungreinaefni
+          aðgengilegt öllum íslenskum nemendum, gjaldfrjálst og á móðurmálinu.
+        </p>
+        <p>
+          Efnið er þýtt með aðstoð gervigreindar og yfirlesið af kennurum með
+          sérþekkingu á viðkomandi grein. Verkefnið hófst í efnafræði og nær nú
+          einnig til líffræði og fleiri raungreina.
         </p>
       </div>
       <div class="about-card">
         <h3>OpenStax og Rice University</h3>
         <p>
           Þýðingarnar byggjast á opnum kennslubókum frá OpenStax,
-          gefnar út af Rice University undir
-          <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>
-          leyfi. Námsbókasafn er sjálfstætt verkefni og ekki tengt OpenStax.
+          gefnar út af Rice University undir Creative Commons leyfum. Leyfið er mismunandi eftir
+          bók (CC BY 4.0 eða CC BY-NC-SA 4.0) — sjá leyfissíðu hverrar bókar. Námsbókasafn er
+          sjálfstætt verkefni og ekki tengt OpenStax.
         </p>
         <a href="https://openstax.org" target="_blank" rel="noopener noreferrer" class="about-link">
           Heimsækja OpenStax
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-            <polyline points="15 3 21 3 21 9" />
-            <line x1="10" y1="14" x2="21" y2="3" />
-          </svg>
+          <Icon name="external-link" size="sm" />
         </a>
       </div>
+    </div>
+
+    <!-- Project roster -->
+    <div class="roster-card">
+      <h3>Aðstandendur</h3>
+      <ul class="roster-list">
+        {#each roster as member (member.name)}
+          <li class="roster-item">
+            <span class="roster-name">{member.name}</span>
+            <span class="roster-detail">{member.detail}</span>
+            <a class="roster-email" href="mailto:{member.email}">{member.email}</a>
+          </li>
+        {/each}
+      </ul>
+      <p class="roster-note">{rosterNote}</p>
     </div>
   </section>
 
@@ -488,9 +429,7 @@
         <details class="faq-item">
           <summary class="faq-question">
             <span>{item.question}</span>
-            <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M19 9l-7 7-7-7" />
-            </svg>
+            <span class="faq-chevron"><Icon name="chevron-down" size="md" /></span>
           </summary>
           <div class="faq-answer">
             {@html item.answer}
@@ -506,8 +445,10 @@
       © {new Date().getFullYear()} Námsbókasafn ·
       Efni byggt á
       <a href="https://openstax.org" target="_blank" rel="noopener noreferrer">OpenStax</a>
-      ·
-      <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>
+      · Leyfi er mismunandi eftir bók
+      (<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>
+      eða
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>) — sjá leyfissíðu hverrar bókar
     </p>
   </footer>
 </div>
@@ -687,11 +628,11 @@
     transform: rotate(15deg);
   }
 
-  .theme-toggle svg {
-    width: 1.125rem;
-    height: 1.125rem;
-    color: var(--text-secondary);
+  .theme-toggle .sun-icon,
+  .theme-toggle .moon-icon {
     position: absolute;
+    display: inline-flex;
+    color: var(--text-secondary);
     transition: opacity 0.2s, transform 0.3s;
   }
 
@@ -761,6 +702,18 @@
 
   @media (max-width: 1023px) {
     .hero-sub { margin-left: auto; margin-right: auto; }
+  }
+
+  .hero-credit {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    margin: -1.25rem 0 2rem;
+    max-width: 36rem;
+  }
+
+  @media (max-width: 1023px) {
+    .hero-credit { margin-left: auto; margin-right: auto; }
   }
 
   .hero-actions {
@@ -848,12 +801,8 @@
     max-width: 72rem;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  @media (min-width: 640px) {
-    .book-grid { grid-template-columns: repeat(2, 1fr); }
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.75rem 1.4rem;
   }
 
   /* ====================================
@@ -868,27 +817,51 @@
   .book-link {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
-    padding: 1.5rem;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-    border-left: 3px solid var(--subject-color);
-    border-radius: var(--radius-lg);
+    gap: 0.7rem;
     text-decoration: none;
     color: inherit;
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-    height: 100%;
   }
 
-  .book-card.clickable .book-link:hover {
-    border-color: var(--subject-color);
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+  .book-card.clickable .book-link:hover :global(.book-cover) {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-xl);
   }
 
-  .book-card-top {
+  .book-card :global(.book-cover) {
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .book-caption {
     display: flex;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .book-name {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .caption-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .caption-licence {
+    margin-top: 0.4rem;
+    justify-content: flex-start;
+  }
+
+  .caption-meta {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
   }
 
   .book-status {
@@ -925,33 +898,6 @@
     color: #93c5fd;
   }
 
-  .book-title {
-    font-family: "Bricolage Grotesque", system-ui, sans-serif;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin: 0;
-  }
-
-  .book-source {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    font-size: 0.8125rem;
-    color: var(--text-secondary);
-    margin: 0;
-  }
-
-  .external-icon {
-    width: 0.75rem;
-    height: 0.75rem;
-    flex-shrink: 0;
-  }
-
-  .book-progress {
-    margin-top: 0.25rem;
-  }
-
   .progress-track {
     height: 5px;
     background: var(--border-color);
@@ -964,70 +910,6 @@
     background: var(--subject-color);
     border-radius: 3px;
     transition: width 0.5s ease;
-  }
-
-  .progress-label {
-    display: block;
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-    margin-top: 0.375rem;
-  }
-
-  .book-tools {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .tool-icon {
-    width: 1.5rem;
-    height: 1.5rem;
-    color: var(--text-tertiary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .tool-icon svg {
-    width: 100%;
-    height: 100%;
-  }
-
-  .book-cta {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--subject-color);
-    margin-top: auto;
-    padding-top: 0.5rem;
-  }
-
-  /* ====================================
-     PREVIEW INFO
-     ==================================== */
-  .book-preview-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    margin-top: 0.25rem;
-  }
-
-  .preview-label {
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: #1e40af;
-  }
-
-  :global(.dark) .preview-label {
-    color: #93c5fd;
-  }
-
-  .preview-note {
-    font-size: 0.75rem;
-    color: var(--text-tertiary);
-    font-style: italic;
   }
 
   /* ====================================
@@ -1114,8 +996,7 @@
   }
 
   .subject-accordion-chevron {
-    width: 1.25rem;
-    height: 1.25rem;
+    display: inline-flex;
     flex-shrink: 0;
     color: var(--text-tertiary);
     transition: transform 0.2s, color 0.2s;
@@ -1199,12 +1080,6 @@
     color: var(--accent-color);
   }
 
-  .compact-external-icon {
-    width: 0.6875rem;
-    height: 0.6875rem;
-    flex-shrink: 0;
-  }
-
   /* ====================================
      STUDY TOOLS SECTION
      ==================================== */
@@ -1246,11 +1121,6 @@
     justify-content: center;
     margin: 0 auto 1rem;
     transition: transform 0.2s;
-  }
-
-  .tool-card-icon svg {
-    width: 1.25rem;
-    height: 1.25rem;
   }
 
   @media (min-width: 1024px) {
@@ -1321,6 +1191,10 @@
     margin: 0;
   }
 
+  .about-card p + p {
+    margin-top: 0.75rem;
+  }
+
   .about-card a {
     color: var(--accent-color);
     text-decoration: none;
@@ -1346,9 +1220,69 @@
     gap: 0.625rem;
   }
 
-  .about-link svg {
-    width: 1rem;
-    height: 1rem;
+  /* ====================================
+     PROJECT ROSTER
+     ==================================== */
+  .roster-card {
+    max-width: 56rem;
+    margin: 1.5rem auto 0;
+    padding: 2rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-lg);
+  }
+
+  .roster-card h3 {
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 1rem;
+  }
+
+  .roster-list {
+    list-style: none;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .roster-item {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  .roster-name {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .roster-name::after {
+    content: " — ";
+    color: var(--text-tertiary);
+  }
+
+  .roster-email {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.875rem;
+    color: var(--accent-color);
+    text-decoration: none;
+  }
+
+  .roster-email:hover {
+    text-decoration: underline;
+  }
+
+  .roster-note {
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
   }
 
   /* ====================================
@@ -1407,8 +1341,7 @@
   }
 
   .faq-chevron {
-    width: 1.25rem;
-    height: 1.25rem;
+    display: inline-flex;
     flex-shrink: 0;
     color: var(--text-tertiary);
     transition: transform 0.2s, color 0.2s;
@@ -1476,7 +1409,7 @@
       opacity: 1 !important;
     }
 
-    .book-link,
+    .book-card :global(.book-cover),
     .btn-primary,
     .tool-card-icon,
     .theme-toggle,

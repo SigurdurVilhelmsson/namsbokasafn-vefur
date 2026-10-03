@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import type { UnreadSection } from '$lib/utils/studySession';
+	import Icon from '$lib/components/Icon.svelte';
 	import { reader } from '$lib/stores/reader';
 
 	interface Props {
@@ -52,9 +53,7 @@
 						<div class="flex items-center gap-2 mb-1">
 							<span class="rdp-badge" class:rdp-badge--done={isDone}>
 								{#if isDone}
-									<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-									</svg>
+									<Icon name="check" size="sm" />
 								{:else}
 									{section.sectionNumber || (i + 1)}
 								{/if}
@@ -78,9 +77,7 @@
 								rel="noopener"
 							>
 								Lesa
-								<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-								</svg>
+								<Icon name="external-link" size="sm" />
 							</a>
 							<button
 								onclick={() => markDone(i)}
@@ -99,9 +96,7 @@
 	<div class="mt-6 flex justify-end">
 		<button onclick={finish} class="rdp-finish-btn">
 			{markedDone.size === sections.length ? 'Áfram' : 'Halda áfram'}
-			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-			</svg>
+			<Icon name="chevron-right" size="sm" />
 		</button>
 	</div>
 </div>

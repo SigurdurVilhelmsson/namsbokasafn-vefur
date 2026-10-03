@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import { onDestroy } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { analyticsStore } from '$lib/stores/analytics';
 
@@ -138,9 +139,7 @@
 					class="close-btn"
 					aria-label="Minnka tímamæli"
 				>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-					</svg>
+					<Icon name="chevron-down" size="sm" />
 				</button>
 			</div>
 

@@ -13,11 +13,17 @@ import type { GlossaryTerm } from '$lib/types/content';
 // Mock glossaryHighlighting as a writable so tests can toggle it
 const mockGlossaryHighlighting = writable(true);
 
+const mockShowTermEnglish = writable(true);
+
+// ⚠️ Full module replacement: the action imports showTermEnglish too, and an
+// unmocked third export breaks every test in this file, not just the new ones.
 vi.mock('$lib/stores/settings', () => ({
 	settings: writable({
-		glossaryHighlighting: true
+		glossaryHighlighting: true,
+		showTermEnglish: true
 	}),
-	glossaryHighlighting: mockGlossaryHighlighting
+	glossaryHighlighting: mockGlossaryHighlighting,
+	showTermEnglish: mockShowTermEnglish
 }));
 
 // Mock glossary terms for testing
@@ -80,7 +86,9 @@ vi.mock('$lib/utils/html', () => ({
 // --- Helpers ---
 
 /** Create a container with dfn.term elements */
-function createContentNode(dfnSpecs: Array<{ text: string; dataTerm?: string }>): HTMLDivElement {
+function createContentNode(
+	dfnSpecs: Array<{ text: string; dataTerm?: string; dataEn?: string }>
+): HTMLDivElement {
 	const container = document.createElement('div');
 	for (const spec of dfnSpecs) {
 		const dfn = document.createElement('dfn');
@@ -89,7 +97,26 @@ function createContentNode(dfnSpecs: Array<{ text: string; dataTerm?: string }>)
 		if (spec.dataTerm) {
 			dfn.setAttribute('data-term', spec.dataTerm);
 		}
+		if (spec.dataEn) {
+			dfn.setAttribute('data-en', spec.dataEn);
+		}
 		container.appendChild(document.createElement('p')).appendChild(dfn);
+	}
+	return container;
+}
+
+/**
+ * Create a key-terms rollup: a <dl> of <dt data-en> / <dd> pairs, the shape
+ * efni's renderer emits in `*-key-terms.html`.
+ */
+function createKeyTermsNode(dtSpecs: Array<{ text: string; dataEn?: string }>): HTMLDivElement {
+	const container = document.createElement('div');
+	const dl = container.appendChild(document.createElement('dl'));
+	for (const spec of dtSpecs) {
+		const dt = dl.appendChild(document.createElement('dt'));
+		dt.textContent = spec.text;
+		if (spec.dataEn) dt.setAttribute('data-en', spec.dataEn);
+		dl.appendChild(document.createElement('dd')).textContent = 'Skilgreining.';
 	}
 	return container;
 }
@@ -120,10 +147,11 @@ describe('glossaryTerms action', () => {
 
 		// Reset to enabled
 		mockGlossaryHighlighting.set(true);
+		mockShowTermEnglish.set(true);
 		mockLoadFn?.mockClear();
 	});
 
-	describe('three-tier term matching', () => {
+	describe('four-tier term matching', () => {
 		it('should match via data-term attribute (tier 1)', async () => {
 			const node = createContentNode([
 				{ text: 'tilgátuna', dataTerm: 'tilgáta' } // inflected form, but data-term has base
@@ -433,6 +461,283 @@ describe('glossaryTerms action', () => {
 
 			// Should remove: mouseenter, mouseleave, focus, blur, click = 5 listeners
 			expect(removeEventListenerSpy).toHaveBeenCalledTimes(5);
+		});
+	});
+
+	// Tier 3. efni is migrating English from an inline "(e. …)" gloss to a
+	// data-en attribute, per chapter. Until vefur reads the attribute, every dfn
+	// whose ONLY route to the glossary is that gloss loses its TOOLTIP when efni
+	// retires it (spec §4.7) — not merely its gloss text.
+	describe('data-en term matching (tier 3)', () => {
+		it('matches from data-en with no inline gloss present', async () => {
+			const node = createContentNode([{ text: 'efnisins', dataEn: 'matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			const dfn = getDfnElements(node)[0];
+			expect(dfn.classList.contains('glossary-term')).toBe(true);
+			expect(dfn.dataset.glossaryMatch).toBe('efni');
+
+			action.destroy();
+		});
+
+		// Control: identical element minus the attribute. If this also matched,
+		// the assertion above would be proving nothing.
+		it('does not match the same element without data-en', async () => {
+			const node = createContentNode([{ text: 'efnisins' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			const dfn = getDfnElements(node)[0];
+			expect(dfn.classList.contains('glossary-term')).toBe(false);
+
+			action.destroy();
+		});
+
+		// data-en is case-preserving; englishMap's keys are lowercased.
+		it('matches a capitalised data-en value', async () => {
+			const node = createContentNode([{ text: 'efnisins', dataEn: 'Matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(getDfnElements(node)[0].dataset.glossaryMatch).toBe('efni');
+
+			action.destroy();
+		});
+
+		it('applies the same widening as the inline tier (plural)', async () => {
+			const node = createContentNode([{ text: 'sameindirnar', dataEn: 'molecules' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(getDfnElements(node)[0].dataset.glossaryMatch).toBe('sameind');
+
+			action.destroy();
+		});
+
+		// Ordering matters: englishMap is not a clean key space, so data-en must
+		// never override an Icelandic match that is correct today.
+		it('lets the Icelandic tier win when both would resolve', async () => {
+			const node = createContentNode([{ text: 'sameind', dataEn: 'matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(getDfnElements(node)[0].dataset.glossaryMatch).toBe('sameind');
+
+			action.destroy();
+		});
+
+		it('still matches an inline gloss, so a mixed corpus resolves either way', async () => {
+			const node = createContentNode([
+				{ text: 'efni (e. matter)' },
+				{ text: 'sameindin', dataEn: 'molecule' }
+			]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			const dfns = getDfnElements(node);
+			expect(dfns[0].dataset.glossaryMatch).toBe('efni');
+			expect(dfns[1].dataset.glossaryMatch).toBe('sameind');
+
+			action.destroy();
+		});
+	});
+
+	// The visible half of efni's contract: a real <span class="term-en">, not a
+	// CSS ::after — generated content is not selectable or copyable, and a
+	// student may legitimately want to copy the English term.
+	describe('English gloss span', () => {
+		const glossOf = (node: HTMLElement) =>
+			Array.from(node.querySelectorAll('span.term-en')).map((s) => s.textContent);
+
+		it('renders the gloss from data-en', async () => {
+			const node = createContentNode([{ text: 'efni', dataEn: 'matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(glossOf(node)).toEqual([' (e. matter)']);
+			action.destroy();
+		});
+
+		// Control: without the attribute there is nothing to render. Guards the
+		// assertions above from passing vacuously.
+		it('renders nothing without data-en', async () => {
+			const node = createContentNode([{ text: 'efni' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(glossOf(node)).toEqual([]);
+			action.destroy();
+		});
+
+		// 🔴 Dedupe on the MARKER. An equality test against data-en never matches
+		// (the inline gloss is lowercased, data-en is case-preserving), so this is
+		// the case that renders the gloss twice if the check is written wrong.
+		it('adds no gloss when the text already carries an inline one', async () => {
+			const node = createContentNode([
+				{ text: 'Avogadrosartala (e. avogadro number)', dataEn: 'Avogadro number' }
+			]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(glossOf(node)).toEqual([]);
+			action.destroy();
+		});
+
+		it('skips a term whose English equals its Icelandic', async () => {
+			const node = createContentNode([{ text: 'R', dataEn: 'R' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(glossOf(node)).toEqual([]);
+			action.destroy();
+		});
+
+		// 🔴 init() returns before the dfn loop when the book ships no glossary,
+		// and orverufraedi does exactly that (organic did too, until its
+		// withdrawal). A gloss appended inside that loop would never render.
+		it('renders even when the glossary is empty', async () => {
+			const node = createContentNode([{ text: 'alkylhalid', dataEn: 'alkyl halide' }]);
+			const action = glossaryTerms(node, { bookSlug: 'orverufraedi' });
+			await flush();
+
+			expect(glossOf(node)).toEqual([' (e. alkyl halide)']);
+			action.destroy();
+		});
+
+		// 🔴 init() is reachable only from the glossaryHighlighting subscription,
+		// so a gloss placed inside it would vanish here.
+		it('survives glossary highlighting being turned off', async () => {
+			const node = createContentNode([{ text: 'efni', dataEn: 'matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			mockGlossaryHighlighting.set(false);
+			await flush();
+
+			expect(glossOf(node)).toEqual([' (e. matter)']);
+			action.destroy();
+		});
+
+		it('toggles off and restores the text exactly', async () => {
+			const node = createContentNode([{ text: 'efni', dataEn: 'matter' }]);
+			const before = node.textContent;
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+			expect(node.textContent).not.toBe(before);
+
+			mockShowTermEnglish.set(false);
+			await flush();
+
+			expect(glossOf(node)).toEqual([]);
+			expect(node.textContent).toBe(before);
+			action.destroy();
+		});
+
+		// teardown() removes classes and attributes, never a child node — the
+		// gloss needs its own removal or destroy() leaves it behind.
+		it('removes the gloss on destroy', async () => {
+			const node = createContentNode([{ text: 'efni', dataEn: 'matter' }]);
+			const before = node.textContent;
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			action.destroy();
+
+			expect(glossOf(node)).toEqual([]);
+			expect(node.textContent).toBe(before);
+		});
+
+		it('is idempotent — a re-render cannot stack spans', async () => {
+			const node = createContentNode([{ text: 'efni', dataEn: 'matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			mockShowTermEnglish.set(false);
+			await flush();
+			mockShowTermEnglish.set(true);
+			await flush();
+
+			expect(glossOf(node)).toEqual([' (e. matter)']);
+			action.destroy();
+		});
+
+		// The announced and the visible English must be the same string: the
+		// glossary's `english` is systematically lowercased, data-en is not.
+		it('announces the data-en casing, not the glossary one', async () => {
+			const node = createContentNode([{ text: 'efnisins', dataEn: 'Matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			expect(getDfnElements(node)[0].getAttribute('aria-label')).toBe(
+				'Skilgreining: efni (Matter)'
+			);
+			action.destroy();
+		});
+
+		// Ruling (i), 2026-10-03: the key-terms <dt> carries data-en too, and
+		// vefur renders its gloss. Without this, retiring efni's inline gloss
+		// strips the English from every key-terms entry.
+		describe('on a key-terms <dt>', () => {
+			it('renders the gloss from data-en inside the <dt>', async () => {
+				const node = createKeyTermsNode([{ text: 'afrúning', dataEn: 'rounding' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+
+				expect(glossOf(node)).toEqual([' (e. rounding)']);
+				expect(node.querySelector('span.term-en')?.parentElement?.tagName).toBe('DT');
+				action.destroy();
+			});
+
+			// efni main emits both today: `<dt data-en="rounding">afrúning (e. rounding)</dt>`.
+			it('adds no gloss when the <dt> already carries the inline one', async () => {
+				const node = createKeyTermsNode([{ text: 'afrúning (e. rounding)', dataEn: 'rounding' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+
+				expect(glossOf(node)).toEqual([]);
+				action.destroy();
+			});
+
+			// 59 of chemistry's <dt data-en> carry no inline gloss, mostly because the
+			// English is the Icelandic ("gas", "plasma", "kelvin (K)").
+			it('skips a <dt> whose English equals its Icelandic', async () => {
+				const node = createKeyTermsNode([{ text: 'kelvin (K)', dataEn: 'kelvin (K)' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+
+				expect(glossOf(node)).toEqual([]);
+				action.destroy();
+			});
+
+			it('removes the gloss when the setting is turned off', async () => {
+				const node = createKeyTermsNode([{ text: 'afrúning', dataEn: 'rounding' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+				mockShowTermEnglish.set(false);
+				await flush();
+
+				expect(glossOf(node)).toEqual([]);
+				expect(node.querySelector('dt')?.textContent).toBe('afrúning');
+				action.destroy();
+			});
+
+			// 🔴 Option (i) widens the GLOSS pass only. A <dt> made a tooltip term
+			// gets role="button", the amber underline and a tooltip repeating the
+			// <dd> printed right beneath it, which is exactly what made (ii) the
+			// worse option. 'efni' is in the mock glossary, so the tooltip loop
+			// would match it if it ever walked <dt>.
+			it('gets the gloss but never becomes a tooltip term', async () => {
+				const node = createKeyTermsNode([{ text: 'efni', dataEn: 'matter' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+
+				const dt = node.querySelector('dt')!;
+				expect(glossOf(node)).toEqual([' (e. matter)']);
+				expect(dt.classList.contains('glossary-term')).toBe(false);
+				expect(dt.hasAttribute('role')).toBe(false);
+				action.destroy();
+			});
 		});
 	});
 });

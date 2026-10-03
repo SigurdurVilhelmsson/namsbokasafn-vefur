@@ -3,11 +3,13 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
+	import Icon from '$lib/components/Icon.svelte';
 	import type { Section } from '$lib/types/content';
 	import { reader } from '$lib/stores';
 	import { isSectionRead, calcChapterProgress } from '$lib/stores/reader';
 	import { getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
+	import BookAttribution from '$lib/components/BookAttribution.svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -136,20 +138,7 @@
 						<!-- Read indicator -->
 						<div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
 							{#if sectionRead}
-								<svg
-									class="w-5 h-5 text-emerald-500 dark:text-emerald-400"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-									aria-hidden="true"
-								>
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M5 13l4 4L19 7"
-									/>
-								</svg>
+								<Icon name="check" class="text-emerald-500 dark:text-emerald-400" />
 							{:else}
 								<div class="w-3 h-3 rounded-full border-2 border-gray-300 dark:border-gray-600"></div>
 							{/if}
@@ -174,20 +163,7 @@
 						{/if}
 
 						<!-- Arrow -->
-						<svg
-							class="flex-shrink-0 w-5 h-5 text-gray-400 group-hover:text-[var(--accent-color)] transition-colors"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							aria-hidden="true"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 5l7 7-7 7"
-							/>
-						</svg>
+						<Icon name="chevron-right" class="flex-shrink-0 text-gray-400 group-hover:text-[var(--accent-color)] transition-colors" />
 					</a>
 				{/each}
 			</div>
@@ -199,9 +175,7 @@
 				href="/{data.bookSlug}"
 				class="inline-flex items-center gap-2 text-[var(--accent-color)] hover:text-[var(--accent-hover)] transition-colors"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-				</svg>
+				<Icon name="chevron-left" size="sm" />
 				Til baka á forsíðu
 			</a>
 
@@ -212,11 +186,12 @@
 					class="btn-accent"
 				>
 					{firstUnread ? 'Halda áfram' : 'Byrja að lesa'}
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
+					<Icon name="chevron-right" size="sm" />
 				</a>
 			{/if}
 		</div>
+
+		<!-- Per-page attribution: required on every chapter view (CC/OpenStax). -->
+		<BookAttribution attribution={data.book?.attribution} bookSlug={data.bookSlug} />
 	</div>
 </div>

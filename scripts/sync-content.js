@@ -6,39 +6,78 @@
  * to the web application's static/content directory.
  *
  * Source structure (namsbokasafn-efni):
- *   books/{bookSlug}/05-publication/faithful/   <- preferred source
- *   books/{bookSlug}/05-publication/mt-preview/ <- fallback source
+ *   books/{bookSlug}/05-publication/mt-preview/ <- complete baseline (machine-translated)
+ *   books/{bookSlug}/05-publication/faithful/   <- reviewed overlay (replaces modules as completed)
+ *
+ * mt-preview is mirrored first (with --delete); faithful is then copied on top
+ * WITHOUT --delete, so a partial reviewed translation never wipes baseline
+ * chapters. generate-toc.js marks each module `reviewed: true` when a faithful
+ * version exists, which drives the machine-translation banner in the reader.
  *
  * Destination structure (namsbokasafn-vefur):
  *   static/content/{bookSlug}/
  *
+ * Only the books on the publication allowlist (scripts/lib/published-books.js)
+ * are synced. A bare run is therefore safe: it publishes the permitted books and
+ * names the ones it skipped. Naming a withheld book is an error rather than a
+ * silent skip — see --allow-withheld.
+ *
  * Usage:
- *   node scripts/sync-content.js                    # Sync all books
+ *   node scripts/sync-content.js                    # Sync every permitted book
  *   node scripts/sync-content.js efnafraedi-2e        # Sync specific book
  *   node scripts/sync-content.js --dry-run          # Preview changes
  *   node scripts/sync-content.js --source ../path   # Custom source path
  *
  * Options:
- *   --dry-run, -n     Preview changes without syncing
- *   --source, -s      Path to content repo (default: ../namsbokasafn-efni)
- *   --validate, -v    Run content validation after sync
- *   --help, -h        Show this help message
+ *   --dry-run, -n         Preview changes without syncing
+ *   --source, -s          Path to content repo (default: ../namsbokasafn-efni)
+ *   --validate, -v        Run content validation after sync
+ *   --allow-withheld      Sync a book the publication ruling holds back
+ *   --help, -h            Show this help message
  */
 
 import { execFileSync, execSync, spawnSync } from 'child_process';
-import { existsSync, readdirSync, statSync, rmSync, cpSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { existsSync, readdirSync, statSync, rmSync, cpSync, mkdirSync } from 'fs';
+import { resolve, dirname, relative, sep } from 'path';
+import { fileURLToPath, pathToFileURL } from 'url';
+import {
+	chapterFullyFaithful,
+	faithfulFileWins,
+	faithfulRollupsComplete,
+	resolveChapterDuplicates,
+	resetIdentityCache,
+	ROLLUPS_COMPLETE_MARKER
+} from './lib/overlay.js';
+import {
+	RETIREMENT_REFERENCE,
+	RULING_REFERENCE,
+	isRetired,
+	publishableBooks,
+	withheldBooks
+} from './lib/published-books.js';
+import { EDITOR_ARTIFACT_PATTERNS } from './lib/editor-artifacts.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
 const destDir = resolve(projectRoot, 'static', 'content');
 
+// Argv for the generate-toc.js child process. Forwarding --efni-path keeps
+// the TOC's `reviewed` flags computed against the SAME source tree this sync
+// run just copied content from — without it, generate-toc.js falls back to
+// its own default (../namsbokasafn-efni), which silently disagrees with a
+// sync invoked with a custom --source.
+export function tocRegenArgs(bookSlug, sourceDir) {
+	return ['scripts/generate-toc.js', bookSlug, '--efni-path', sourceDir];
+}
+
 // Default source: sibling directory
 const DEFAULT_SOURCE = resolve(projectRoot, '..', 'namsbokasafn-efni');
 
-// Publication variants in priority order
-const PUBLICATION_VARIANTS = ['faithful', 'mt-preview'];
+// Running total of unresolved duplicate-module conflicts (see
+// pruneSupersededFiles) across every book synced in this run. Read by main()
+// to print an end-of-run summary — the per-book ⚠️ warning alone is easy to
+// miss in a long CI log. Reset at the start of each sync run.
+let unresolvedConflicts = 0;
 
 // Parse command line arguments
 function parseArgs(args) {
@@ -47,6 +86,7 @@ function parseArgs(args) {
 		validate: false,
 		source: DEFAULT_SOURCE,
 		books: [],
+		allowWithheld: false,
 		help: false
 	};
 
@@ -61,6 +101,8 @@ function parseArgs(args) {
 			options.validate = true;
 		} else if (arg === '--source' || arg === '-s') {
 			options.source = resolve(args[++i] || DEFAULT_SOURCE);
+		} else if (arg === '--allow-withheld') {
+			options.allowWithheld = true;
 		} else if (!arg.startsWith('-')) {
 			options.books.push(arg);
 		}
@@ -77,25 +119,32 @@ Usage:
   node scripts/sync-content.js [options] [book...]
 
 Examples:
-  node scripts/sync-content.js                    Sync all books
+  node scripts/sync-content.js                    Sync every permitted book
   node scripts/sync-content.js efnafraedi-2e        Sync specific book
   node scripts/sync-content.js -n                 Preview changes (dry-run)
   node scripts/sync-content.js -v                 Sync and validate
   node scripts/sync-content.js -s ../my-content   Custom source path
 
 Options:
-  --dry-run, -n     Preview changes without syncing
-  --source, -s      Path to content repo (default: ../namsbokasafn-efni)
-  --validate, -v    Run content validation after sync
-  --help, -h        Show this help message
+  --dry-run, -n         Preview changes without syncing
+  --source, -s          Path to content repo (default: ../namsbokasafn-efni)
+  --validate, -v        Run content validation after sync
+  --allow-withheld      Sync a book the publication ruling holds back
+  --help, -h            Show this help message
+
+Publication allowlist:
+  Only the books in scripts/lib/published-books.js are synced; everything else
+  in the source tree is skipped and named. This governs what is SYNCED, not what
+  is already deployed — a withheld book keeps whatever is already published.
 
 Source structure:
-  The script looks for publication content in:
-    books/{bookSlug}/05-publication/faithful/   (preferred)
-    books/{bookSlug}/05-publication/mt-preview/ (fallback)
+  The script merges two publication variants:
+    books/{bookSlug}/05-publication/mt-preview/ (complete baseline)
+    books/{bookSlug}/05-publication/faithful/   (reviewed overlay, copied on top)
 
   Each publication directory must contain a chapters/ directory.
-  toc.json is auto-generated after sync based on actual content.
+  toc.json is auto-generated after sync based on actual content; modules with a
+  faithful version are marked reviewed (no machine-translation banner).
 `);
 }
 
@@ -109,33 +158,111 @@ function hasRsync() {
 	}
 }
 
-// Get the publication source path for a book (faithful preferred, mt-preview fallback)
-function getPublicationPath(sourceDir, bookSlug) {
-	const bookDir = resolve(sourceDir, 'books', bookSlug, '05-publication');
+// Check that a variant directory has a chapters/ dir with numbered chapter
+// subdirectories (01/, 02/, …). Returns its absolute path, or null.
+function variantWithChapters(bookDir, variant) {
+	const variantPath = resolve(bookDir, variant);
+	const chaptersPath = resolve(variantPath, 'chapters');
 
-	for (const variant of PUBLICATION_VARIANTS) {
-		const variantPath = resolve(bookDir, variant);
-		const chaptersPath = resolve(variantPath, 'chapters');
-
-		// Check that variant has a chapters directory with actual chapter subdirectories
-		if (existsSync(variantPath) && existsSync(chaptersPath) && statSync(chaptersPath).isDirectory()) {
-			// Check for numbered chapter directories (01/, 02/, etc.)
-			const chapterDirs = readdirSync(chaptersPath).filter((name) => {
-				const fullPath = resolve(chaptersPath, name);
-				return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name);
-			});
-
-			if (chapterDirs.length > 0) {
-				return { path: variantPath, variant };
-			}
+	if (existsSync(variantPath) && existsSync(chaptersPath) && statSync(chaptersPath).isDirectory()) {
+		const chapterDirs = readdirSync(chaptersPath).filter((name) => {
+			const fullPath = resolve(chaptersPath, name);
+			return statSync(fullPath).isDirectory() && /^\d{2}$/.test(name);
+		});
+		if (chapterDirs.length > 0) {
+			return variantPath;
 		}
 	}
 
 	return null;
 }
 
-// Get list of books in source directory
-function getSourceBooks(sourceDir) {
+// Resolve the publication layers for a book.
+//
+// The complete machine-translated `mt-preview` is the BASELINE; the
+// human-reviewed `faithful` is an OVERLAY that replaces individual modules as
+// they are completed. The sync mirrors the baseline (with --delete) and then
+// copies the overlay on top WITHOUT --delete, so a partial `faithful` can
+// never wipe chapters that only exist in `mt-preview`.
+//
+// Falls back gracefully: a book with only one variant uses that variant as the
+// baseline (no overlay). Returns null if neither variant has chapters.
+function getPublicationLayers(sourceDir, bookSlug) {
+	const bookDir = resolve(sourceDir, 'books', bookSlug, '05-publication');
+
+	const mtPath = variantWithChapters(bookDir, 'mt-preview');
+	const faithfulPath = variantWithChapters(bookDir, 'faithful');
+
+	if (mtPath && faithfulPath) {
+		return {
+			baseline: { path: mtPath, variant: 'mt-preview' },
+			overlay: { path: faithfulPath, variant: 'faithful' }
+		};
+	}
+	if (mtPath) {
+		return { baseline: { path: mtPath, variant: 'mt-preview' }, overlay: null };
+	}
+	if (faithfulPath) {
+		return { baseline: { path: faithfulPath, variant: 'faithful' }, overlay: null };
+	}
+
+	return null;
+}
+
+/**
+ * Decide which books this run syncs, applying the publication allowlist.
+ *
+ * Pure and exported so the policy is testable without running the sync — the
+ * script itself refuses to run as root, and the decision is the part worth
+ * pinning anyway.
+ *
+ * Returns `{ books, skipped, overridden }`, or `{ error, ... }` for a condition
+ * main() must turn into a non-zero exit:
+ *   - `not-found`  a named book is not in the source tree (`invalid`)
+ *   - `withheld`   a named book is held back by the ruling (`refused`)
+ *   - `empty`      nothing is left to sync
+ */
+export function selectBooks({ availableBooks, requested = [], allowWithheld = false }) {
+	const named = requested.length > 0;
+	const candidates = named ? requested : availableBooks;
+
+	const invalid = candidates.filter((b) => !availableBooks.includes(b));
+	if (invalid.length > 0) {
+		return { error: 'not-found', invalid, books: [], skipped: [], overridden: [] };
+	}
+
+	// The override is deliberately blunt: it publishes exactly what was asked
+	// for, and says so. It exists for the day the hold lifts.
+	if (allowWithheld) {
+		return { books: candidates, skipped: [], overridden: withheldBooks(candidates) };
+	}
+
+	// A book NAMED on the command line and held back is an error, not a silent
+	// skip: someone typed that slug on purpose and needs to be told why nothing
+	// happened. A book reached only by a bare run is skipped and reported, which
+	// is what makes a bare run safe.
+	if (named) {
+		const refused = withheldBooks(candidates);
+		if (refused.length > 0) {
+			return { error: 'withheld', refused, books: [], skipped: [], overridden: [] };
+		}
+		return { books: candidates, skipped: [], overridden: [] };
+	}
+
+	const books = publishableBooks(candidates);
+	if (books.length === 0) {
+		return { error: 'empty', books: [], skipped: withheldBooks(candidates), overridden: [] };
+	}
+	return { books, skipped: withheldBooks(candidates), overridden: [] };
+}
+
+// Get list of books in source directory.
+//
+// Exported because the deploy's freeze list is the complement of the
+// publication allowlist over THIS set plus KNOWN_BOOKS — see
+// scripts/deploy-excludes.js. The KNOWN_BOOKS half keeps a frozen book
+// protected even when the tree a deploy reads lacks it.
+export function getSourceBooks(sourceDir) {
 	const booksDir = resolve(sourceDir, 'books');
 
 	if (!existsSync(booksDir)) {
@@ -147,57 +274,86 @@ function getSourceBooks(sourceDir) {
 		if (!statSync(path).isDirectory()) {
 			return false;
 		}
-		// A valid book has a publication variant with toc.json
-		return getPublicationPath(sourceDir, name) !== null;
+		// A valid book has at least one publication variant with chapters
+		return getPublicationLayers(sourceDir, name) !== null;
 	});
 }
 
-// Sync a single book using rsync
+// Editor/working artifacts that must never reach published content. The list is
+// shared with the deploy (scripts/lib/editor-artifacts.js) so the two cannot drift.
+const SYNC_EXCLUDES = EDITOR_ARTIFACT_PATTERNS.flatMap((pattern) => ['--exclude', pattern]);
+
+// Sync a single book using rsync: mirror the baseline, then overlay reviewed
+// modules on top (without --delete) so a partial overlay can't remove baseline
+// chapters.
 function syncBook(sourceDir, bookSlug, dryRun) {
-	const publication = getPublicationPath(sourceDir, bookSlug);
+	const layers = getPublicationLayers(sourceDir, bookSlug);
 	const bookDest = resolve(destDir, bookSlug);
 
-	if (!publication) {
+	if (!layers) {
 		console.error(`  Error: No publication found for: ${bookSlug}`);
 		return false;
 	}
 
-	console.log(`  Syncing ${bookSlug} (${publication.variant})...`);
+	const label = layers.overlay
+		? `${layers.baseline.variant} + ${layers.overlay.variant} overlay`
+		: layers.baseline.variant;
+	console.log(`  Syncing ${bookSlug} (${label})...`);
 
-	// Build rsync command
-	const rsyncArgs = [
-		'-av', // Archive mode, verbose
-		'--delete', // Remove files in dest that don't exist in source
-		'--exclude', '.DS_Store',
-		'--exclude', '*.bak',
-		'--exclude', '*~'
-	];
+	// 1. Baseline — mirror with --delete so dest matches the complete source.
+	//
+	// --delete-excluded is NOT optional. Plain --delete *protects* files that
+	// match an --exclude: rsync reads the pattern as "this file is none of my
+	// business", so anything already in the destination is left alone forever.
+	// Editor artifacts that landed here before SYNC_EXCLUDES existed therefore
+	// survived every subsequent sync, got copied into build/, and were served
+	// publicly — 9,638 files / 879 MB on efnafraedi-2e alone, found 2026-08-19.
+	// With --delete-excluded the exclude list means "never here", which is what
+	// the SYNC_EXCLUDES comment already claims.
+	const baseArgs = ['-av', '--delete', '--delete-excluded', ...SYNC_EXCLUDES];
+	if (dryRun) baseArgs.push('--dry-run');
+	// Source must end with / to sync contents, not the directory itself
+	baseArgs.push(`${layers.baseline.path}/`, `${bookDest}/`);
 
-	if (dryRun) {
-		rsyncArgs.push('--dry-run');
+	let result = spawnSync('rsync', baseArgs, { stdio: 'inherit', encoding: 'utf-8' });
+	if (result.status !== 0) {
+		console.error(`  Error syncing ${bookSlug} (baseline)`);
+		return false;
 	}
 
-	// Source must end with / to sync contents, not the directory itself
-	rsyncArgs.push(`${publication.path}/`);
-	rsyncArgs.push(`${bookDest}/`);
+	// 2. Overlay reviewed modules on top of the baseline (no deletion), gating
+	// chapter-level aggregation pages so a partial faithful chapter can't
+	// replace the complete mt-preview rollup. (cpSync, not rsync, so the
+	// per-file gating logic lives in one place for both sync paths.)
+	if (layers.overlay && !dryRun) {
+		overlayFaithful(layers.overlay.path, layers.baseline.path, bookDest);
+	}
 
-	const result = spawnSync('rsync', rsyncArgs, {
-		stdio: 'inherit',
-		encoding: 'utf-8'
-	});
-
-	if (result.status !== 0) {
-		console.error(`  Error syncing ${bookSlug}`);
-		return false;
+	// 3. Drop baseline pages the overlay republished under a new filename, and
+	// report duplicates it cannot adjudicate. Runs before toc regeneration so
+	// the TOC is always generated from a pruned destination.
+	//
+	// Wrapped in try/catch (mirroring syncBookFallback's own try/catch below)
+	// so a filesystem error here (permissions, full disk, a concurrent edit)
+	// fails only this book. Without it, an uncaught throw here would escape
+	// syncBook entirely — main()'s loop has no enclosing try either — killing
+	// the whole process and leaving every remaining book unsynced.
+	if (!dryRun) {
+		try {
+			unresolvedConflicts += pruneSupersededFiles(bookDest, layers.overlay?.path ?? null, bookSlug);
+		} catch (error) {
+			console.error(`  Error pruning superseded pages for ${bookSlug}: ${error.message}`);
+			return false;
+		}
 	}
 
 	// Regenerate toc.json based on actual content
 	if (!dryRun) {
 		console.log(`  Regenerating toc.json...`);
 		try {
-			// execFileSync (not execSync) so the slug is passed as an argument,
-			// never interpreted by a shell
-			execFileSync('node', ['scripts/generate-toc.js', bookSlug], {
+			// execFileSync (not execSync) so the slug and source path are passed
+			// as arguments, never interpreted by a shell
+			execFileSync('node', tocRegenArgs(bookSlug, sourceDir), {
 				cwd: projectRoot,
 				stdio: 'inherit'
 			});
@@ -209,24 +365,171 @@ function syncBook(sourceDir, bookSlug, dryRun) {
 	return true;
 }
 
-// Fallback sync using cp (if rsync not available)
+// True if a path is an editor/working artifact that must not be published.
+function isExcludedArtifact(path) {
+	const name = path.split('/').pop() || '';
+	return (
+		name === '.DS_Store' ||
+		name.endsWith('.bak') ||
+		name.endsWith('~') ||
+		name.endsWith('.orig') ||
+		name.includes('.backup.') ||
+		name.includes('.pre-fix-')
+	);
+}
+
+// Overlay the faithful tree on top of the already-synced baseline in bookDest.
+// Reading modules replace their mt-preview counterparts per-file; chapter
+// aggregation pages (summary/key-terms/exercises/answer-key) are only taken
+// from faithful when the WHOLE chapter is faithful, so a partial review can't
+// clobber the complete mt-preview rollup. Book-level rollups (glossary.json,
+// index.json) likewise only overlay when every chapter is faithful.
+function overlayFaithful(faithfulPath, mtPath, bookDest) {
+	const faithfulChapters = resolve(faithfulPath, 'chapters');
+	const mtChapters = resolve(mtPath, 'chapters');
+
+	// Precompute per-chapter completeness once.
+	const chapterComplete = new Map();
+	if (existsSync(faithfulChapters)) {
+		for (const ch of readdirSync(faithfulChapters)) {
+			const chPath = resolve(faithfulChapters, ch);
+			if (statSync(chPath).isDirectory() && /^\d{2}$/.test(ch)) {
+				chapterComplete.set(ch, chapterFullyFaithful(faithfulChapters, mtChapters, ch));
+			}
+		}
+	}
+
+	// The book is fully faithful only if every mt-preview chapter is complete.
+	const bookComplete =
+		existsSync(mtChapters) &&
+		readdirSync(mtChapters)
+			.filter((d) => /^\d{2}$/.test(d) && statSync(resolve(mtChapters, d)).isDirectory())
+			.every((ch) => chapterComplete.get(ch) === true);
+
+	// When efni signals its faithful rollups are built complete (faithful +
+	// MT fallback), serve them regardless of per-chapter review state.
+	const rollupsComplete = faithfulRollupsComplete(faithfulPath);
+
+	cpSync(faithfulPath, bookDest, {
+		recursive: true,
+		force: true,
+		filter: (src) => {
+			if (statSync(src).isDirectory()) return true;
+			if (isExcludedArtifact(src)) return false;
+
+			const rel = relative(faithfulPath, src).split(sep).join('/');
+
+			// The completeness marker is metadata — never publish it.
+			if (rel === ROLLUPS_COMPLETE_MARKER) return false;
+
+			// Chapter aggregation pages: overlay when the chapter is fully
+			// faithful, or when efni signals complete rollups.
+			const m = rel.match(/^chapters\/(\d{2})\/([^/]+\.html)$/);
+			if (m) {
+				const [, ch, file] = m;
+				const aggregationAllowed = rollupsComplete || chapterComplete.get(ch) !== false;
+				return faithfulFileWins(file, aggregationAllowed);
+			}
+
+			// Book-level rollups: overlay when the whole book is faithful, or
+			// when efni signals complete rollups.
+			if ((rel === 'glossary.json' || rel === 'index.json') && !(bookComplete || rollupsComplete)) {
+				return false;
+			}
+
+			return true;
+		}
+	});
+}
+
+/**
+ * Remove baseline pages that the faithful overlay republished under a new
+ * filename, and report duplicates the overlay cannot adjudicate.
+ *
+ * A section's filename is derived from its title, so a review that corrects a
+ * title renames the rendered file. The overlay is copied WITHOUT --delete (so a
+ * partial review can never wipe baseline chapters), which means a rename ADDS
+ * the new name instead of replacing the old one — and the module gets published
+ * twice, once under the corrected title and once under the stale one.
+ *
+ * Runs whether or not the book has an overlay: a stale render left behind in
+ * mt-preview produces the same duplicate with no faithful file in sight. That
+ * case is a CONTENT defect, not a vefur one — vefur has no basis to choose
+ * between two translations, so it warns and keeps both.
+ *
+ * @param bookDest      static/content/<book>
+ * @param faithfulPath  the faithful publication dir (holding chapters/), or null
+ * @param bookSlug      for the warning message
+ * @returns {number}    unresolved conflicts reported
+ */
+export function pruneSupersededFiles(bookDest, faithfulPath, bookSlug) {
+	const chaptersDest = resolve(bookDest, 'chapters');
+	if (!existsSync(chaptersDest)) return 0;
+
+	let conflictCount = 0;
+	let removed = 0;
+
+	// Every direct subdirectory holds pages: numbered chapters, front matter
+	// (00) and the appendix dir (appendices/). Images live one level deeper,
+	// inside a chapter dir.
+	for (const dirName of readdirSync(chaptersDest).sort()) {
+		const dir = resolve(chaptersDest, dirName);
+		if (!statSync(dir).isDirectory()) continue;
+
+		const faithfulDir = faithfulPath ? resolve(faithfulPath, 'chapters', dirName) : null;
+		const { superseded, conflicts } = resolveChapterDuplicates(dir, faithfulDir);
+
+		for (const file of superseded) {
+			// force: true so a file that vanished between readdirSync and here
+			// (e.g. removed by a concurrent run) no-ops instead of throwing —
+			// leaving the try/catch at each call site to catch failures that
+			// actually deserve a failed book (permissions, full disk, etc.).
+			rmSync(resolve(dir, file), { force: true });
+			removed++;
+			console.log(`    Removed superseded page (reviewed rename): chapters/${dirName}/${file}`);
+		}
+
+		for (const { identity, files } of conflicts) {
+			conflictCount++;
+			console.warn(
+				`\n  ⚠️  DUPLICATE MODULE — ${bookSlug} chapters/${dirName} (${identity})\n` +
+					files.map((f) => `        ${f}`).join('\n') +
+					`\n      One module, two published pages, and no reviewed version to choose between them.` +
+					`\n      Both were kept. Fix at the source in namsbokasafn-efni: prune the stale render.\n`
+			);
+		}
+	}
+
+	// The index memo predates these deletions.
+	if (removed > 0) resetIdentityCache();
+
+	return conflictCount;
+}
+
+// Fallback sync using cp (if rsync not available). Mirrors the rsync path:
+// copy the baseline, then overlay reviewed modules on top.
 function syncBookFallback(sourceDir, bookSlug, dryRun) {
-	const publication = getPublicationPath(sourceDir, bookSlug);
+	const layers = getPublicationLayers(sourceDir, bookSlug);
 	const bookDest = resolve(destDir, bookSlug);
 
-	if (!publication) {
+	if (!layers) {
 		console.error(`  Error: No publication found for: ${bookSlug}`);
 		return false;
 	}
 
+	const label = layers.overlay
+		? `${layers.baseline.variant} + ${layers.overlay.variant} overlay`
+		: layers.baseline.variant;
+
 	if (dryRun) {
-		console.log(`  [DRY-RUN] Would sync ${bookSlug} (${publication.variant}):`);
-		console.log(`    From: ${publication.path}`);
-		console.log(`    To:   ${bookDest}`);
+		console.log(`  [DRY-RUN] Would sync ${bookSlug} (${label}):`);
+		console.log(`    Baseline: ${layers.baseline.path}`);
+		if (layers.overlay) console.log(`    Overlay:  ${layers.overlay.path}`);
+		console.log(`    To:       ${bookDest}`);
 		return true;
 	}
 
-	console.log(`  Syncing ${bookSlug} (${publication.variant})...`);
+	console.log(`  Syncing ${bookSlug} (${label})...`);
 
 	try {
 		// Safety: verify bookDest is inside the expected destination directory
@@ -237,20 +540,30 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 			return false;
 		}
 
-		// Remove existing destination
+		const copyOpts = { recursive: true, force: true, filter: (src) => !isExcludedArtifact(src) };
+
+		// Remove existing destination, then copy the baseline fresh
 		if (existsSync(bookDest)) {
 			rmSync(bookDest, { recursive: true, force: true });
 		}
+		cpSync(layers.baseline.path, bookDest, copyOpts);
 
-		// Copy source to destination
-		cpSync(publication.path, bookDest, { recursive: true });
+		// Overlay reviewed modules on top, gating chapter aggregation pages
+		if (layers.overlay) {
+			overlayFaithful(layers.overlay.path, layers.baseline.path, bookDest);
+		}
+
+		// Drop baseline pages the overlay republished under a new filename.
+		// Already inside this function's own try/catch, so a throw here is
+		// reported as a failed sync for this book without killing the process.
+		unresolvedConflicts += pruneSupersededFiles(bookDest, layers.overlay?.path ?? null, bookSlug);
 
 		// Regenerate toc.json based on actual content
 		console.log(`  Regenerating toc.json...`);
 		try {
-			// execFileSync (not execSync) so the slug is passed as an argument,
-			// never interpreted by a shell
-			execFileSync('node', ['scripts/generate-toc.js', bookSlug], {
+			// execFileSync (not execSync) so the slug and source path are passed
+			// as arguments, never interpreted by a shell
+			execFileSync('node', tocRegenArgs(bookSlug, sourceDir), {
 				cwd: projectRoot,
 				stdio: 'inherit'
 			});
@@ -264,6 +577,33 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 		console.error(`  Error syncing ${bookSlug}: ${error.message}`);
 		return false;
 	}
+}
+
+/**
+ * Sync the public-facing licence/provenance summary from efni so the colophon
+ * page (/[book]/leyfi) and BookAttribution can link to a served copy. Single
+ * source of truth lives in efni docs/provenance/provenance.md; the destination
+ * (static/provenance/) is gitignored, like static/content.
+ */
+function syncProvenance(sourceDir, dryRun) {
+	const src = resolve(sourceDir, 'docs', 'provenance', 'provenance.md');
+	const destProvenanceDir = resolve(projectRoot, 'static', 'provenance');
+	const dest = resolve(destProvenanceDir, 'provenance.md');
+
+	if (!existsSync(src)) {
+		console.warn(`\nWarning: provenance summary not found at ${src} — colophon link will 404.`);
+		return;
+	}
+
+	if (dryRun) {
+		console.log(`\n[DRY-RUN] Would sync provenance summary:\n    ${src}\n    To: ${dest}`);
+		return;
+	}
+
+	console.log('\nSyncing provenance summary...');
+	mkdirSync(destProvenanceDir, { recursive: true });
+	cpSync(src, dest);
+	console.log(`  Done: ${dest}`);
 }
 
 function main() {
@@ -314,18 +654,59 @@ function main() {
 
 	if (availableBooks.length === 0) {
 		console.error('No valid books found in source directory.');
-		console.error('Expected structure: books/{bookSlug}/05-publication/{faithful|mt-preview}/toc.json');
+		console.error('Expected structure: books/{bookSlug}/05-publication/{mt-preview|faithful}/chapters/');
 		process.exit(1);
 	}
 
-	let booksToSync = options.books.length > 0 ? options.books : availableBooks;
+	const selection = selectBooks({
+		availableBooks,
+		requested: options.books,
+		allowWithheld: options.allowWithheld
+	});
 
-	// Validate requested books exist
-	const invalidBooks = booksToSync.filter((b) => !availableBooks.includes(b));
-	if (invalidBooks.length > 0) {
-		console.error(`Error: Books not found in source: ${invalidBooks.join(', ')}`);
+	if (selection.error === 'not-found') {
+		console.error(`Error: Books not found in source: ${selection.invalid.join(', ')}`);
 		console.error(`Available books: ${availableBooks.join(', ')}`);
 		process.exit(1);
+	}
+
+	if (selection.error === 'withheld') {
+		console.error(
+			`Error: these books are held back from publication: ${selection.refused.join(', ')}`
+		);
+		console.error(`Ruling: ${RULING_REFERENCE}`);
+		const retired = selection.refused.filter(isRetired);
+		if (retired.length > 0) {
+			console.error(`Retired, i.e. taken off the site: ${retired.join(', ')}`);
+			console.error(`  ${RETIREMENT_REFERENCE}`);
+			console.error('  --allow-withheld will not serve it again: see RETIRED_BOOKS.');
+		}
+		console.error('Pass --allow-withheld to override, once the hold is lifted.');
+		process.exit(1);
+	}
+
+	if (selection.error === 'empty') {
+		console.error('No books to sync: every book in the source is held back from publication.');
+		console.error(`Ruling: ${RULING_REFERENCE}`);
+		process.exit(1);
+	}
+
+	const booksToSync = selection.books;
+
+	if (selection.skipped.length > 0) {
+		console.log(`Held back from publication: ${selection.skipped.join(', ')}`);
+		console.log(`  ${RULING_REFERENCE}`);
+		const retired = selection.skipped.filter(isRetired);
+		if (retired.length > 0) console.log(`  Retired: ${retired.join(', ')} — ${RETIREMENT_REFERENCE}`);
+		console.log('');
+	}
+
+	// Loud when the allowlist is being overridden — this is the line a reviewer
+	// looks for in a log that published something it should not have.
+	if (selection.overridden.length > 0) {
+		console.log(
+			`⚠️  --allow-withheld: publishing held-back books: ${selection.overridden.join(', ')}\n`
+		);
 	}
 
 	console.log(`Books to sync: ${booksToSync.join(', ')}\n`);
@@ -336,9 +717,19 @@ function main() {
 		console.log('Note: rsync not found, using cp fallback (less efficient)\n');
 	}
 
+	// Ensure the destination root exists. static/content/ is gitignored, so on a
+	// fresh clone it does not exist — and rsync cannot create
+	// static/content/<book> when its parent is missing. Without this, every book
+	// fails with "mkdir ... No such file or directory" and the documented setup
+	// path (clone → npm install → sync-content) does not work at all.
+	if (!options.dryRun) {
+		mkdirSync(destDir, { recursive: true });
+	}
+
 	// Sync each book
 	let success = 0;
 	let failed = 0;
+	unresolvedConflicts = 0;
 
 	for (const bookSlug of booksToSync) {
 		const result = useRsync
@@ -352,7 +743,17 @@ function main() {
 		}
 	}
 
-	// Clean up stale content directories no longer present in source
+	// Clean up stale content directories no longer present in source.
+	//
+	// 🔴 KEYED ON `availableBooks` (the SOURCE tree), NEVER ON `booksToSync`, and
+	// that is what makes the publication allowlist a FREEZE rather than a
+	// DELETE. Filtering this by the allowlist would sweep every held-back book
+	// out of static/content/ on the next run — retiring live pages as a side
+	// effect of a rule that only meant "stop publishing new ones". Retiring
+	// deployed pages is a separate decision; it is not this sweep's job.
+	//
+	// The sweep still does its own job: a directory for a book that has left the
+	// source tree entirely is removed as before.
 	if (existsSync(destDir)) {
 		const existingContentDirs = readdirSync(destDir).filter((name) => {
 			const fullPath = resolve(destDir, name);
@@ -375,6 +776,20 @@ function main() {
 	}
 
 	console.log(`\nSync complete: ${success} succeeded, ${failed} failed`);
+
+	// Surface unresolved duplicate-module conflicts at the end of the run too —
+	// the per-book ⚠️  DUPLICATE MODULE warning above is easy to miss in a long
+	// CI log. Not a sync failure: a duplicate is a content defect to fix at the
+	// source in namsbokasafn-efni, not something vefur can adjudicate, so this
+	// does not affect the exit code.
+	if (unresolvedConflicts > 0) {
+		console.warn(
+			`\n⚠️  ${unresolvedConflicts} unresolved duplicate module${unresolvedConflicts === 1 ? '' : 's'} — see the DUPLICATE MODULE warning(s) above. Fix at the source in namsbokasafn-efni.`
+		);
+	}
+
+	// Sync the public-facing provenance summary (independent of per-book results).
+	syncProvenance(options.source, options.dryRun);
 
 	// Run validation if requested
 	if (options.validate && !options.dryRun && failed === 0) {
@@ -407,4 +822,7 @@ function main() {
 	process.exit(failed > 0 ? 1 : 0);
 }
 
-main();
+// Only run as a CLI — importing this module (tests) must not start a sync.
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+	main();
+}

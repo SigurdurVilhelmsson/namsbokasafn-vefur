@@ -3,10 +3,12 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import type { PageData } from './$types';
 	import type { TableOfContents } from '$lib/types/content';
 	import { objectivesStore, type ConfidenceLevel } from '$lib/stores/objectives';
 	import { loadTableOfContents, findChapterBySlug, findSectionBySlug } from '$lib/utils/contentLoader';
+	import { countBookObjectives, coverage } from '$lib/utils/objectivesProgress';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -88,12 +90,9 @@
 		return chapter ? `${chapter.number}. ${chapter.title}` : chapterSlug;
 	}
 
-	// Calculate progress percentage
-	let progressPercent = $derived.by(() => {
-		const total = bookObjectives.length;
-		const completed = completedCount;
-		return total > 0 ? Math.round((completed / total) * 100) : 0;
-	});
+	// Coverage bar: assessed objectives vs real book total
+	let totalObjectives = $derived(toc ? countBookObjectives(toc) : 0);
+	let coverageResult = $derived(coverage(completedCount, totalObjectives));
 
 	// Count by confidence level
 	let confidenceCounts = $derived.by(() => {
@@ -165,19 +164,19 @@
 					Engin námsmarkmið skráð enn. Farðu í kafla til að sjá og merkja námsmarkmið.
 				</p>
 			{:else}
-				<!-- Progress bar -->
+				<!-- Coverage bar (assessed of all objectives in the book) -->
+				{#if totalObjectives > 0}
 				<div class="mb-4">
 					<div class="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-1">
-						<span>Kláruð markmið</span>
-						<span>{progressPercent}%</span>
+						<span>Metin markmið</span>
+						<span>{Math.min(coverageResult.completed, coverageResult.total)}/{coverageResult.total}</span>
 					</div>
 					<div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-						<div
-							class="h-full bg-green-500 rounded-full transition-all duration-300"
-							style="width: {progressPercent}%"
-						></div>
+						<div class="h-full bg-green-500 rounded-full transition-all duration-300"
+							style="width: {Math.min(coverageResult.percentage, 100)}%"></div>
 					</div>
 				</div>
+				{/if}
 
 				<!-- Confidence distribution -->
 				<div class="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
@@ -200,9 +199,7 @@
 		{#if lowConfidenceObjectives.length > 0}
 			<div class="mb-8 p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
 				<h2 class="text-lg font-semibold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2">
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-					</svg>
+					<Icon name="triangle-alert" />
 					Þarfnast endurskoðunar
 				</h2>
 				<p class="text-sm text-amber-800 dark:text-amber-200 mb-4">
@@ -248,9 +245,7 @@
 					href="/{data.bookSlug}"
 					class="btn-accent"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-					</svg>
+					<Icon name="book-open" />
 					Fara í efnisyfirlit
 				</a>
 			</div>
@@ -276,9 +271,7 @@
 											aria-label={obj.isCompleted ? 'Afmerkja sem ókláruð' : 'Merkja sem kláruð'}
 										>
 											{#if obj.isCompleted}
-												<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-												</svg>
+												<Icon name="check" size="sm" />
 											{/if}
 										</button>
 

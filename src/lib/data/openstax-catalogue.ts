@@ -53,16 +53,9 @@ const catalogue: CatalogueEntry[] = [
 		openstaxUrl: 'https://openstax.org/details/books/chemistry-atoms-first-2e',
 		status: 'not-started'
 	},
-	{
-		slug: 'organic-chemistry',
-		title: 'Organic Chemistry',
-		description: 'Structure, reactions, mechanisms, and spectroscopy of carbon compounds.',
-		chapterCount: 30,
-		subject: 'chemistry',
-		openstaxUrl: 'https://openstax.org/details/books/organic-chemistry',
-		status: 'preview',
-		bookSlug: 'lifraen-efnafraedi'
-	},
+	// Organic Chemistry is deliberately absent, not overlooked: withdrawn
+	// 2026-09-23, and OpenStax has said it cannot authorise a translation, so
+	// it is not listed even as a Tier 2 title (see retiredBooks in book.ts).
 
 	// ── Biology ────────────────────────────────────────────────
 	{

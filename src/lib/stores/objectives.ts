@@ -135,6 +135,7 @@ function createObjectivesStore() {
 			const isCompleted = state.completedObjectives[key]?.isCompleted ?? false;
 
 			if (isCompleted) {
+				// Un-marking deletes the whole entry, including any confidence rating — one entry per objective by design (re-mark + re-rate to restore).
 				update((s) => {
 					const { [key]: _removed, ...rest } = s.completedObjectives;
 					return { completedObjectives: rest };
@@ -181,25 +182,25 @@ function createObjectivesStore() {
 			return calculateProgressFromCounts(completed, totalObjectives);
 		},
 
-		getChapterObjectivesProgress: (bookSlug: string, chapterSlug: string): ProgressResult => {
+		getChapterObjectivesProgress: (
+			bookSlug: string,
+			chapterSlug: string,
+			totalObjectives: number
+		): ProgressResult => {
 			const { completedObjectives } = get({ subscribe });
-			// Filter by key prefix: stored values carry only chapter/section
-			// slugs, and v2 chapter slugs ("01") are shared across books
 			const prefix = `${bookSlug}/${chapterSlug}/`;
-			const chapterObjectives = Object.entries(completedObjectives)
-				.filter(([key]) => key.startsWith(prefix))
-				.map(([, value]) => value);
-			const completed = chapterObjectives.filter((obj) => obj.isCompleted).length;
-
-			return calculateProgressFromCounts(completed, chapterObjectives.length);
+			const completed = Object.keys(completedObjectives).filter(
+				(key) => key.startsWith(prefix) && completedObjectives[key].isCompleted
+			).length;
+			return calculateProgressFromCounts(completed, totalObjectives);
 		},
 
-		getOverallObjectivesProgress: (): ProgressResult => {
+		getOverallObjectivesProgress: (totalObjectives: number): ProgressResult => {
 			const { completedObjectives } = get({ subscribe });
-			const allObjectives = Object.values(completedObjectives);
-			const completed = allObjectives.filter((obj) => obj.isCompleted).length;
-
-			return calculateProgressFromCounts(completed, allObjectives.length);
+			const completed = Object.values(completedObjectives).filter(
+				(obj) => obj.isCompleted
+			).length;
+			return calculateProgressFromCounts(completed, totalObjectives);
 		},
 
 		getSectionObjectives: (
@@ -233,6 +234,36 @@ function createObjectivesStore() {
 							...existing,
 							confidence,
 							assessedAt: getCurrentTimestamp()
+						}
+					}
+				};
+			});
+		},
+
+		rateObjective: (
+			bookSlug: string,
+			chapterSlug: string,
+			sectionSlug: string,
+			objectiveIndex: number,
+			objectiveText: string,
+			confidence: ConfidenceLevel
+		) => {
+			const key = createObjectiveKey(bookSlug, chapterSlug, sectionSlug, objectiveIndex);
+			update((state) => {
+				const existing = state.completedObjectives[key];
+				const now = getCurrentTimestamp();
+				return {
+					completedObjectives: {
+						...state.completedObjectives,
+						[key]: {
+							chapterSlug,
+							sectionSlug,
+							objectiveIndex,
+							objectiveText,
+							isCompleted: true,
+							completedAt: existing?.completedAt ?? now,
+							confidence,
+							assessedAt: now
 						}
 					}
 				};

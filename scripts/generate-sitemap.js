@@ -5,38 +5,17 @@
  *
  * Reads the table of contents for each book and generates a sitemap
  * with all known routes. Run after syncing content or adding new routes.
+ * The URL list comes from scripts/lib/sitemap.js, which leaves out retired
+ * books.
  *
  * Usage: node scripts/generate-sitemap.js
  */
 
-import { readFileSync, writeFileSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { writeFileSync } from 'fs';
+import { BASE_URL, sitemapUrls } from './lib/sitemap.js';
 
-const BASE_URL = 'https://namsbokasafn.is';
 const CONTENT_DIR = 'static/content';
 const OUTPUT_FILE = 'static/sitemap.xml';
-
-/** Static pages that don't depend on content */
-const STATIC_PAGES = [
-  '/',
-  '/feedback',
-  '/for-teachers'
-];
-
-/** Per-book tool pages (relative to /{bookSlug}) */
-const BOOK_PAGES = [
-  '',           // book home
-  '/ordabok',
-  '/minniskort',
-  '/lotukerfi',
-  '/prof',
-  '/greining',
-  '/markmid',
-  '/bokamerki',
-  '/atridiordasskra',
-  '/nam',
-  '/yfirlit'
-];
 
 /**
  * Priority mapping for different page types
@@ -60,53 +39,14 @@ function getChangeFreq(url) {
 }
 
 function generateSitemap() {
-  const urls = [];
   const today = new Date().toISOString().split('T')[0];
 
-  // Add static pages
-  for (const page of STATIC_PAGES) {
-    urls.push(`${BASE_URL}${page}`);
-  }
-
-  // Find all books with toc.json
-  let books;
+  let urls;
   try {
-    books = readdirSync(CONTENT_DIR, { withFileTypes: true })
-      .filter(d => d.isDirectory())
-      .map(d => d.name);
+    urls = sitemapUrls(CONTENT_DIR);
   } catch {
     console.error(`Content directory not found: ${CONTENT_DIR}`);
     process.exit(1);
-  }
-
-  for (const bookSlug of books) {
-    const tocPath = join(CONTENT_DIR, bookSlug, 'toc.json');
-    let toc;
-    try {
-      toc = JSON.parse(readFileSync(tocPath, 'utf-8'));
-    } catch {
-      console.warn(`Skipping ${bookSlug}: no toc.json found`);
-      continue;
-    }
-
-    // Add book-level pages
-    for (const page of BOOK_PAGES) {
-      urls.push(`${BASE_URL}/${bookSlug}${page}`);
-    }
-
-    // Add chapter and section pages
-    for (const chapter of toc.chapters || []) {
-      const chapterSlug = String(chapter.number).padStart(2, '0');
-      urls.push(`${BASE_URL}/${bookSlug}/kafli/${chapterSlug}`);
-
-      for (const section of chapter.sections || []) {
-        const sectionSlug = section.file.replace('.html', '');
-        urls.push(`${BASE_URL}/${bookSlug}/kafli/${chapterSlug}/${sectionSlug}`);
-      }
-
-      // Answer key page
-      urls.push(`${BASE_URL}/${bookSlug}/svarlykill/${chapter.number}`);
-    }
   }
 
   // Build XML

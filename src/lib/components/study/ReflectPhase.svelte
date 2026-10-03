@@ -31,12 +31,13 @@
 	function rate(level: ConfidenceLevel) {
 		if (!currentObjective) return;
 
-		objectivesStore.setObjectiveConfidence(
+		objectivesStore.rateObjective(
 			bookSlug,
 			currentObjective.chapterSlug,
 			currentObjective.sectionSlug,
 			currentObjective.objectiveIndex,
-			level
+			currentObjective.objectiveText,
+			level,
 		);
 		completedCount++;
 

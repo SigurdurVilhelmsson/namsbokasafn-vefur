@@ -8,14 +8,19 @@ Iceland's small language community means that high-quality science textbooks in 
 
 The reader is a static SvelteKit site with no backend — all user state (progress, bookmarks, flashcard history) lives in localStorage. Content is pre-rendered HTML produced by a translation pipeline in the sister repository [namsbokasafn-efni](https://github.com/SigurdurVilhelmsson/namsbokasafn-efni).
 
-This is an active open educational resource (OER) project. The code is MIT-licensed and the translated content is CC BY 4.0. If you're working on similar textbook translation projects for other languages, this codebase is designed to be forked and adapted.
+This is an active open educational resource (OER) project. The code is MIT-licensed; the translated content carries a per-book Creative Commons licence — CC BY 4.0 or CC BY-NC-SA 4.0, depending on the book (see [License](#license)). If you're working on similar textbook translation projects for other languages, this codebase is designed to be forked and adapted.
 
 ### Available books
 
-| Book                         | Status    | Progress         |
-| ---------------------------- | --------- | ---------------- |
-| **Efnafræði** (Chemistry 2e) | Available | 4 of 21 chapters |
-| **Líffræði** (Biology 2e)    | Planned   | —                |
+| Book                                     | Status               | Progress          |
+| ---------------------------------------- | -------------------- | ----------------- |
+| **Efnafræði** (Chemistry 2e)             | Available            | 21 of 21 chapters |
+| **Líffræði** (Biology 2e)                | Preview — paused     | 2 chapters (3, 5) |
+| **Lífræn efnafræði** (Organic Chemistry) | Withdrawn 2026-09-23 | 1 chapter (3)     |
+| **Örverufræði** (Microbiology)           | Preview — paused     | 2 chapters (1, 5) |
+| **Eðlisfræði** (Physics)                 | Preview — paused     | 1 chapter (4)     |
+
+Paused books (a ruling of 2026-08-22) stay online as they are but receive no new content. Lífræn efnafræði was withdrawn because OpenStax has not authorised the translation; it has been off the site since 2026-10-03, and its address shows a short notice.
 
 ## Demo / Live Version
 
@@ -23,14 +28,14 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 
 ## Tech Stack
 
-- **Runtime:** Node.js >= 20 (see `.nvmrc`)
-- **Framework:** SvelteKit 2 + Svelte 5, TypeScript 5.7
-- **Build:** Vite 7, `@sveltejs/adapter-static` → outputs to `build/`
+- **Runtime:** Node.js >= 22.22.2 (see `.nvmrc`)
+- **Framework:** SvelteKit 2 + Svelte 5, TypeScript 6
+- **Build:** Vite 8, `@sveltejs/adapter-static` → outputs to `build/`
 - **Styling:** Tailwind CSS 4 + PostCSS
 - **Math:** MathJax (pre-rendered SVG in content HTML)
 - **Search:** Fuse.js (client-side full-text search)
 - **PWA:** `@vite-pwa/sveltekit` with Workbox (offline-first)
-- **Testing:** Vitest (173+ unit tests) + Playwright (E2E)
+- **Testing:** Vitest (370+ unit tests) + Playwright (E2E)
 - **CI:** GitHub Actions (lint, test, build, security audit)
 - **Linting:** ESLint + Prettier + svelte-check, Husky pre-commit hooks
 
@@ -39,17 +44,18 @@ This is an active open educational resource (OER) project. The code is MIT-licen
 - **Textbook reader** — Clean reading layout for long study sessions, light/dark theme, adjustable font size
 - **Flashcards (SRS)** — Spaced repetition using the SM-2 algorithm (`src/lib/utils/srs.ts`)
 - **Glossary** — Per-book terminology lookup with Icelandic alphabetical sorting
-- **Reading progress** — Chapter completion tracking, bookmarks
+- **Reading progress** — Per-section read detection, completion tracking, bookmarks, continue-where-you-left-off
+- **Guided study sessions** — Planner with review/reading/practice/reflect phases (`/nam`), study analytics (`/greining`), learning objectives with confidence ratings
 - **Search** — Full-text search across all content (Ctrl/Cmd+K)
 - **Periodic table** — Interactive 118-element table with detailed info
-- **Quizzes** — Chapter-based practice questions
+- **Adaptive practice** — In-text practice problems with self-assessment feed an adaptive quiz (`/prof`) and spaced review, with per-problem mastery tracking
 - **Annotations** — Text highlights and notes with export
 - **PWA** — Works offline after first visit, installable as an app
 - **Responsive** — Designed for phones, tablets, and desktops
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) >= 20 (use `nvm use` — `.nvmrc` is included)
+- [Node.js](https://nodejs.org/) >= 22.22.2 (use `nvm use` — `.nvmrc` is included)
 - npm
 
 ## Setup
@@ -112,21 +118,23 @@ The production site is a static build served by nginx on a Linode Ubuntu server.
 
 ### Deploy
 
-Deployment is handled by GitHub Actions CI. On push to `main`:
+CI (GitHub Actions) gates every push and PR — on `main` and the
+`feature/**` integration branches it checks out both repos, syncs content,
+and runs lint, type-check, unit tests, the production build, and Playwright
+E2E. **CI does not deploy.**
 
-1. Checks out both this repo and `namsbokasafn-efni`
-2. Syncs content
-3. Runs lint, type-check, and unit tests
-4. Builds with content validation
-5. Runs Playwright E2E tests
-6. Deploys static output to the server
-
-For manual deployment:
+Deployment is manual, from a machine with SSH access to the server, with
+`scripts/deploy.js`. It is a dry run unless `--apply` is given. (The GitHub
+Deploy workflow was retired on 2026-10-03: it never completed a deploy.)
 
 ```bash
 npm run build
-rsync -avz --delete build/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/
+node scripts/deploy.js --target siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/          # dry run
+node scripts/deploy.js --target siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/ --apply  # deploy
 ```
+
+Don't replace it with a hand-written rsync: the script's rules keep the paused
+books and the hashed assets their pages load (see the deployment guide).
 
 See [docs/guides/deployment.md](docs/guides/deployment.md) for the full deployment guide including nginx configuration, SSL setup, and maintenance procedures.
 
@@ -222,18 +230,62 @@ Contributions are welcome — whether you're fixing a bug, improving the reader,
 ### Dual license
 
 1. **Application code** — [MIT License](LICENSE)
-2. **Educational content** (`static/content/`) — [CC BY 4.0](CONTENT-LICENSE.md)
+2. **Educational content** (`static/content/`) — a **per-book** Creative Commons licence, not one blanket licence: Efnafræði, Líffræði and Örverufræði are CC BY 4.0, while **Lífræn efnafræði and Eðlisfræði are CC BY-NC-SA 4.0** (no commercial use, ShareAlike required). The authoritative per-book values live in the sister repo, `namsbokasafn-efni/books/<slug>/book-config.json`; content is synced in at build time and is not tracked here.
+3. **Bundled fonts** (`static/fonts/`) — third-party, not the MIT grant above: Bricolage Grotesque, Literata, JetBrains Mono and OpenDyslexic under [SIL OFL-1.1](static/fonts/OFL.txt). Details: [static/fonts/LICENSES.md](static/fonts/LICENSES.md).
 
 ### Content attribution
 
 The textbook content is an Icelandic translation of open textbooks from [OpenStax](https://openstax.org/).
 
-**Chemistry 2e** — Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson
-Translated by Sigurdur E. Vilhelmsson. Licensed under CC BY 4.0.
+**Credit follows the method, not the job title** — the same rule the reader
+already enforces in code (`src/lib/data/bookCredits.ts`). For most books the
+first draft is machine translation (Erlendur, Miðeind) which people then edit,
+so the machine is credited as the translator and the people are credited for
+**ritstjórn** and **yfirlestur**. Chapters marked _forskoðun_ are raw machine
+translation with no reviewer claim. Biology follows the same method: on 2026-07-25
+it moved to machine translation first (its editor's own chapter-3 translation is
+kept in the sister repo as a reference), and its published chapters are raw
+machine translation, credited that way.
+
+| Hlutverk                         |                                           |
+| -------------------------------- | ----------------------------------------- |
+| Verkefnastjóri og ritstjórn      | Sigurður Einar Vilhelmsson                |
+| Yfirlestur og málfar í efnafræði | Guðrún Ingibjörg Stefánsdóttir            |
+| Þýðing og yfirlestur í líffræði  | Þórhallur Halldórsson                     |
+| Vélþýðing                        | Erlendur ([Miðeind](https://mideind.is/)) |
+
+**Chemistry 2e** — Paul Flowers, Klaus Theopold, Richard Langley, William R. Robinson.
+Icelandic edition: machine translation with human editorial review. CC BY 4.0.
 
 ## Status
 
-Actively maintained. The reader is stable and in use. New chapters are added as translations are completed in the sister repo.
+Actively maintained. The reader is stable and in use. New content is now added only to the chemistry book, as translations are completed in the sister repo; the other four books are paused or withdrawn (see [Available books](#available-books)).
+
+### Reader development (as of June 2026)
+
+_Status 2026-10-01: neither release branch below has been merged or released — `package.json` is still at 1.0.0 and the repository has no release tags._
+
+A full codebase audit and remediation landed on `main` in June 2026 — see
+[`docs/code-review-2026-06.md`](docs/code-review-2026-06.md) for the findings
+and [`docs/plans/2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md`](docs/plans/2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md)
+for the roadmap and what shipped.
+
+Two release branches implement the research-driven reader plan
+([`docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`](docs/plans/2026-04-22-screen-vs-paper-reader-plan.md)),
+each gated on the manual QA in [`docs/manual-qa-2026-06.md`](docs/manual-qa-2026-06.md):
+
+- **`feature/reader-v1.1`** (→ v1.1.0): narrow default measure,
+  predict-first flashcard ratings, free-recall prompts on section
+  completion, and hybrid viewport-aware pagination with a
+  continuous-scroll fallback.
+- **`feature/reader-v1.2`** (→ v1.2.0, after v1.1.0): confidence-calibration
+  analytics tab, pre-questions on section load, one-tap cloze cards from
+  highlights, and typography corrections (Atkinson Hyperlegible, OS
+  color-scheme default).
+
+Planned next: spaced-review surfacing in the study planner, a recall-review
+tab, and a bounded progress label (reader plan P2); a Socratic AI tutor is
+deferred pending classroom feedback (P3).
 
 ## Related Projects
 

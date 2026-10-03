@@ -19,7 +19,7 @@ Thank you for your interest in contributing to Námsbókasafn! This guide will h
 
 ### Prerequisites
 
-- **Node.js** 18.0 or higher
+- **Node.js** 22.22.2 or higher (`.nvmrc` pins 22, so `nvm use` picks it up)
 - **npm** 9.0 or higher
 - **Git**
 - A code editor (VS Code recommended)
@@ -67,9 +67,8 @@ The application will be available at `http://localhost:5173`.
 | `npm run build`         | Build production bundle           |
 | `npm run preview`       | Preview production build locally  |
 | `npm run lint`          | Run ESLint (fails on warnings)    |
-| `npm run lint:fix`      | Auto-fix ESLint issues            |
 | `npm run format`        | Format code with Prettier         |
-| `npm run type-check`    | TypeScript type checking          |
+| `npm run check`         | SvelteKit sync + TypeScript check |
 | `npm run test`          | Run unit tests                    |
 | `npm run test:watch`    | Run tests in watch mode           |
 | `npm run test:coverage` | Generate coverage report          |
@@ -84,31 +83,30 @@ No environment variables are required for development. The application uses stat
 
 ```
 src/
-├── App.tsx              # Root component with routing
-├── main.tsx             # Entry point
-├── config/              # Configuration files
-│   └── books.ts         # Book registry
-├── components/
-│   ├── catalog/         # Landing page components
-│   ├── layout/          # Page structure (Header, Sidebar)
-│   ├── reader/          # Content display components
-│   └── ui/              # Reusable UI components
-├── hooks/               # Custom React hooks
-├── stores/              # Zustand state stores
-├── types/               # TypeScript type definitions
-├── utils/               # Utility functions
-└── styles/              # Global CSS
+├── routes/              # SvelteKit file-based routing
+│   ├── +page.svelte     # Book catalog (landing page)
+│   └── [bookSlug]/      # Per-book routes (kafli/, ordabok/, minniskort/, prof/, …)
+├── lib/
+│   ├── components/      # Svelte components (layout/, study/, analytics/, …)
+│   ├── stores/          # Svelte stores with localStorage persistence
+│   ├── actions/         # Svelte actions (DOM work on rendered content)
+│   ├── data/            # Static data (licences, credits, section redirects, …)
+│   ├── types/           # TypeScript types, incl. the book registry (book.ts)
+│   ├── utils/           # Utilities (SRS algorithm, content loading, …)
+│   └── workers/         # Web worker for the search index
+├── app.css              # Global styles and theme tokens
+└── app.html             # HTML shell
 ```
 
 ### Key Files
 
-| File                         | Purpose                     |
-| ---------------------------- | --------------------------- |
-| `src/config/books.ts`        | Book configuration registry |
-| `src/App.tsx`                | Route definitions           |
-| `src/stores/*.ts`            | State management            |
-| `src/utils/srs.ts`           | Spaced repetition algorithm |
-| `src/utils/contentLoader.ts` | Content loading utilities   |
+| File                             | Purpose                        |
+| -------------------------------- | ------------------------------ |
+| `src/lib/types/book.ts`          | Book configuration registry    |
+| `src/routes/`                    | Route definitions (file-based) |
+| `src/lib/stores/*.ts`            | State management               |
+| `src/lib/utils/srs.ts`           | Spaced repetition algorithm    |
+| `src/lib/utils/contentLoader.ts` | Content loading utilities      |
 
 ---
 
@@ -166,39 +164,16 @@ function calculateScore(answers: Answer[]): number {
 const RATINGS = ["again", "hard", "good", "easy"] as const;
 ```
 
-### React Guidelines
+### Svelte Guidelines
 
-```tsx
-// Prefer function components with explicit return types
-export default function MyComponent({ title }: Props): JSX.Element {
-  return <div>{title}</div>;
-}
+The app is Svelte 5 with runes; there are no `.tsx`/`.jsx` files in `src/`.
 
-// Use hooks at the top of components
-function MyComponent() {
-  const [state, setState] = useState(false);
-  const { theme } = useSettingsStore();
+- Reactivity: `$state`, `$derived` and `$effect`; component inputs via `$props()`.
+- Events: callback props such as `onClose`, not `createEventDispatcher`.
+- Children: `{@render children()}`, not `<slot />`.
+- Store values: `$store` auto-subscription.
 
-  // Then effects
-  useEffect(() => {
-    // ...
-  }, []);
-
-  // Then handlers
-  const handleClick = () => {
-    setState(true);
-  };
-
-  // Then render
-  return <button onClick={handleClick}>Click</button>;
-}
-
-// Memoize expensive computations
-const sortedItems = useMemo(
-  () => items.sort((a, b) => a.name.localeCompare(b.name)),
-  [items],
-);
-```
+The root `CLAUDE.md` (Key Patterns) lists the reactivity pitfalls that have caused real bugs here.
 
 ### Tailwind CSS Guidelines
 
@@ -238,48 +213,28 @@ npm run test:watch
 # Generate coverage report
 npm run test:coverage
 
-# Visual test runner
-npm run test:ui
+# E2E tests (Playwright)
+npm run test:e2e
 ```
 
 ### Writing Tests
 
-```typescript
-// src/components/ui/Button.test.tsx
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import Button from './Button';
-
-describe('Button', () => {
-  it('renders children correctly', () => {
-    render(<Button>Click me</Button>);
-    expect(screen.getByText('Click me')).toBeInTheDocument();
-  });
-
-  it('calls onClick when clicked', () => {
-    const handleClick = vi.fn();
-    render(<Button onClick={handleClick}>Click me</Button>);
-
-    fireEvent.click(screen.getByRole('button'));
-    expect(handleClick).toHaveBeenCalledTimes(1);
-  });
-
-  it('applies variant classes', () => {
-    render(<Button variant="primary">Primary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-primary');
-  });
-});
-```
+Unit tests are co-located `*.test.ts` files (`*.test.js` under `scripts/`), run by
+Vitest in a `jsdom` environment (`vitest.config.ts`). No component-rendering library
+such as `@testing-library/*` is installed, so model new tests on existing ones — for
+example `src/lib/utils/srs.test.ts` (pure logic) or
+`src/lib/actions/glossaryTerms.test.ts` (a Svelte action run against DOM fixtures).
 
 ### Test File Naming
 
-- Unit tests: `ComponentName.test.tsx` (co-located with component)
-- Integration tests: `src/test/integration/*.test.ts`
-- E2E tests: `e2e/*.spec.ts` (if using Playwright)
+- Unit tests: `name.test.ts` (`name.test.js` under `scripts/`), co-located with the module they test
+- E2E tests: `e2e/*.spec.ts` (Playwright)
 
 ---
 
 ## Adding New Content
+
+> ⚠️ **Out of date (status 2026-10-01).** This section describes the earlier Markdown workflow (`src/config/books.ts`, `.md` sections with frontmatter). Today a book is registered in `src/lib/types/book.ts`, and its chapters are pre-rendered HTML produced by [namsbokasafn-efni](https://github.com/SigurdurVilhelmsson/namsbokasafn-efni) and copied into `static/content/` by `scripts/sync-content.js`, which also regenerates `toc.json`. Which books may be synced is set by the allowlist in `scripts/lib/published-books.js`.
 
 ### Adding a New Book
 
@@ -294,7 +249,7 @@ describe('Button', () => {
   description: 'Description...',
   subject: 'raunvisindi',
   coverImage: '/covers/new-book.svg',
-  translator: 'Translator Name',
+  translator: 'Erlendur (Miðeind)',
   status: 'available',
   source: {
     title: 'Original Title',
@@ -341,7 +296,7 @@ static/content/new-book/
     "license": "CC BY 4.0",
     "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
     "originalUrl": "https://openstax.org/...",
-    "translator": "Translator Name",
+    "translator": "Erlendur (Miðeind)",
     "translationYear": 2024,
     "modifications": "Translated to Icelandic with adaptations."
   },
@@ -396,7 +351,7 @@ Math equation: $E = mc^2$
 ![Image caption](images/figure-1.png)
 ```
 
-See [Content Format](../reference/content-format.md) for full formatting reference.
+The Markdown format above is archived in [content-format-legacy.md](../archive/content-format-legacy.md); see the note at the top of this section for how content arrives today.
 
 ---
 
@@ -421,7 +376,7 @@ See [Content Format](../reference/content-format.md) for full formatting referen
 
    ```bash
    npm run lint
-   npm run type-check
+   npm run check
    npm run test
    npm run build
    ```
@@ -451,7 +406,7 @@ See [Content Format](../reference/content-format.md) for full formatting referen
 
 ### After Merge
 
-Your changes will be automatically deployed via GitHub Actions.
+Merging does not deploy: CI (GitHub Actions) only runs checks. Deployment is a separate step taken by the maintainer — see [Deployment](deployment.md).
 
 ---
 

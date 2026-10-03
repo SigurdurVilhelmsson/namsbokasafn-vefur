@@ -200,4 +200,90 @@ describe('textAnchor utilities', () => {
 			expect(result.endOffset).toBe(16);
 		});
 	});
+
+	// 🔴 Highlights are anchored by text offset, and the glossaryTerms action
+	// injects <span class="term-en"> under a setting the reader can toggle.
+	// Anchoring must therefore read the PUBLISHED text only — otherwise the same
+	// highlight anchors differently with the gloss on and off, and one saved
+	// before a chapter gained data-en can silently restore over the wrong
+	// occurrence.
+	describe('injected .term-en spans are invisible to anchoring', () => {
+		const GLOSSED =
+			'<p>Fyrst <dfn class="term">efni<span class="term-en"> (e. matter)</span></dfn> og svo meira efni her.</p>';
+		const PLAIN = '<p>Fyrst <dfn class="term">efni</dfn> og svo meira efni her.</p>';
+
+		// Discriminating: fails before the fix — range.toString() yields
+		// "efni (e. matter)".
+		it('excludes the gloss from the serialized exact text', () => {
+			container.innerHTML = GLOSSED;
+			const range = document.createRange();
+			range.selectNodeContents(container.querySelector('dfn')!);
+
+			expect(serializeRange(range, container).exact).toBe('efni');
+		});
+
+		// Discriminating: fails before the fix — the prefix would carry
+		// "(e. matter)" and so would not match the same highlight saved against
+		// content that had no gloss yet.
+		it('excludes the gloss from the surrounding context', () => {
+			container.innerHTML = GLOSSED;
+			const tail = container.querySelector('p')!.lastChild as Text;
+			const at = tail.data.indexOf('meira');
+
+			const range = document.createRange();
+			range.setStart(tail, at);
+			range.setEnd(tail, at + 'meira efni'.length);
+
+			const { prefix, exact } = serializeRange(range, container);
+			expect(exact).toBe('meira efni');
+			expect(prefix).not.toContain('(e.');
+			expect(prefix).toBe('Fyrst efni og svo ');
+		});
+
+		// Not discriminating today — both sides are consistent before the fix and
+		// after it. This pins the INVARIANT that they stay consistent: contentText
+		// produces the offsets and createRangeAtPosition consumes them, so
+		// filtering one without the other silently desyncs every restore.
+		it('maps offsets back through the same filter it measured with', () => {
+			container.innerHTML = GLOSSED;
+			const stored = {
+				version: 2 as const,
+				exact: 'meira efni',
+				prefix: 'Fyrst efni og svo ',
+				suffix: ' her.',
+				anchorId: null,
+				offsetFromAnchor: 0
+			};
+
+			expect(deserializeRange(stored, container)?.toString()).toBe('meira efni');
+		});
+
+		// Control: ordinary inline markup must still be walked. A filter that
+		// rejected too much would break this.
+		it('still reads text inside other inline elements', () => {
+			container.innerHTML = '<p>Hello <em>brave</em> world.</p>';
+			const stored = {
+				version: 2 as const,
+				exact: 'brave world',
+				prefix: 'Hello ',
+				suffix: '.',
+				anchorId: null,
+				offsetFromAnchor: 0
+			};
+
+			expect(deserializeRange(stored, container)?.toString()).toBe('brave world');
+		});
+
+		// Control on the round trip: a highlight saved against plain content still
+		// restores once the gloss appears.
+		it('restores a highlight saved before the gloss existed', () => {
+			container.innerHTML = PLAIN;
+			const saveRange = document.createRange();
+			saveRange.selectNodeContents(container.querySelector('dfn')!);
+			const stored = serializeRange(saveRange, container);
+
+			container.innerHTML = GLOSSED;
+			expect(deserializeRange(stored, container)?.toString()).toBe('efni');
+		});
+	});
 });

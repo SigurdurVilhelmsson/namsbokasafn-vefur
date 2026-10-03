@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
+	import Icon from '$lib/components/Icon.svelte';
 	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 	import { getAppendixPath } from '$lib/utils/contentLoader';
 
@@ -77,9 +78,7 @@
 				class="flex-1 group p-4 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-[var(--accent-subtle)] hover:bg-[var(--accent-light)] transition-colors"
 			>
 				<div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1">
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-					</svg>
+					<Icon name="chevron-left" size="sm" />
 					<span>Fyrri viðauki</span>
 				</div>
 				<div class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-color)]">
@@ -97,9 +96,7 @@
 			>
 				<div class="flex items-center justify-end gap-2 text-sm text-gray-500 dark:text-gray-400 mb-1">
 					<span>Næsti viðauki</span>
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
+					<Icon name="chevron-right" size="sm" />
 				</div>
 				<div class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-color)]">
 					Viðauki {data.nextAppendix.letter}: {data.nextAppendix.title}
@@ -118,9 +115,7 @@
 			<span class="font-medium text-gray-700 dark:text-gray-300">
 				Allir viðaukar ({data.allAppendices.length})
 			</span>
-			<svg class="w-5 h-5 text-gray-500 transform group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-			</svg>
+			<Icon name="chevron-down" class="text-gray-500 transform group-open:rotate-180 transition-transform" />
 		</summary>
 		<ul class="mt-2 divide-y divide-gray-200 dark:divide-gray-700 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
 			{#each data.allAppendices as appendixItem (appendixItem.letter)}

@@ -35,6 +35,7 @@ export interface Section {
   file: string;
   type?: SectionType;  // Special section type for rendering/navigation
   metadata?: SectionMetadata;
+  reviewed?: boolean;  // True when a human-reviewed (faithful) version exists; absent/false = machine-translated preview (shows the MT banner)
 }
 
 // Chapter in a book
@@ -79,11 +80,20 @@ export interface TableOfContents {
   title: string;
   attribution?: SourceAttribution;
   source?: SourceAttribution;
+  // Front matter (e.g. the preface / formáli), rendered before Chapter 1.
+  // Lives in the chapters/00/ directory; unnumbered, not part of `chapters`.
+  frontMatter?: Section[];
   chapters: Chapter[];
   // Appendices (A-M for Chemistry 2e)
   appendices?: Appendix[];
   // Answer key entries (per-chapter, OpenStax style)
   answerKey?: AnswerKeyEntry[];
+  // Book-wide alphabetical subject index (Atriðisorðaskrá) — present only when the
+  // book ships an index.json (set by generate-toc.js). Gates the sidebar link + route.
+  index?: { title: string; file: string };
+  // Book glossary (Orðasafn) — present only when the book ships a glossary.json
+  // (set by generate-toc.js). Gates the sidebar link + route.
+  glossary?: { title: string; file: string };
   // Precomputed cross-reference index (from build-time processing)
   references?: { [key: string]: PrecomputedReference };
 }

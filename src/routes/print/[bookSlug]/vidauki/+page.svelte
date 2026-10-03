@@ -4,8 +4,13 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { format } from 'date-fns';
+	import { is } from 'date-fns/locale';
 
 	let { data }: { data: PageData } = $props();
+
+	// PDF build date (Icelandic via date-fns; Intl fails under Node small-ICU).
+	const buildDate = format(new Date(), 'd. MMMM yyyy', { locale: is });
 </script>
 
 <svelte:head>
@@ -17,7 +22,10 @@
 	<p class="cover-eyebrow">{data.bookTitle}</p>
 	<h1 class="cover-title">Viðaukar</h1>
 	<p class="cover-book-title">{data.bookSubtitle}</p>
-	<p class="cover-meta">namsbokasafn.is</p>
+	<p class="cover-meta">
+		Útgáfudagur PDF-skjals: {buildDate}<br />
+		namsbokasafn.is
+	</p>
 </section>
 
 <!--
@@ -34,3 +42,6 @@
 		{@html block.content}
 	</div>
 {/each}
+
+<!-- No inline colophon: the appendices only appear inside the full book, whose
+     front matter carries the single authoritative colophon. -->

@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import type { NavigationContext } from '$lib/types/content';
+	import Icon from '$lib/components/Icon.svelte';
 	import { getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
 
 	interface Props {
@@ -60,14 +61,7 @@
 					Kafli {current.chapter.number} › {current.section.number}
 					{current.section.title}
 				</span>
-				<svg
-					class="breadcrumb-chevron {dropdownOpen ? 'open' : ''}"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-				</svg>
+				<span class="breadcrumb-chevron {dropdownOpen ? 'open' : ''}"><Icon name="chevron-down" size="sm" /></span>
 			</button>
 
 			<!-- Dropdown list -->
@@ -88,9 +82,7 @@
 							class="breadcrumb-option {isCurrent ? 'current' : ''}"
 						>
 							{#if isCurrent}
-								<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-								</svg>
+								<Icon name="check" size="sm" class="flex-shrink-0" />
 							{:else}
 								<span class="w-4"></span>
 							{/if}
@@ -117,14 +109,7 @@
 							{next.section.number} {next.section.title}
 						</span>
 					</div>
-					<svg
-						class="nav-btn-arrow"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
+					<span class="nav-btn-arrow"><Icon name="chevron-right" /></span>
 				</a>
 			{/if}
 
@@ -134,14 +119,7 @@
 					data-sveltekit-preload-data="hover"
 					class="nav-btn nav-btn-prev"
 				>
-					<svg
-						class="nav-btn-arrow"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-					</svg>
+					<span class="nav-btn-arrow"><Icon name="chevron-left" /></span>
 					<div class="nav-btn-text">
 						<span class="nav-btn-label">Fyrri kafli</span>
 						<span class="nav-btn-title">
@@ -202,8 +180,7 @@
 	}
 
 	.breadcrumb-chevron {
-		width: 1rem;
-		height: 1rem;
+		display: inline-flex;
 		flex-shrink: 0;
 		transition: transform 0.2s;
 	}
@@ -384,8 +361,7 @@
 	}
 
 	.nav-btn-arrow {
-		width: 1.25rem;
-		height: 1.25rem;
+		display: inline-flex;
 		flex-shrink: 0;
 		transition: color 0.15s;
 	}

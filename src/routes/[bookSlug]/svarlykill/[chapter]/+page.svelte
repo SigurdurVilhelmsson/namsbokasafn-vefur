@@ -4,6 +4,7 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
+	import Icon from '$lib/components/Icon.svelte';
 	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 
 	let { data }: { data: PageData } = $props();
@@ -51,9 +52,7 @@
 				href="/{data.bookSlug}/kafli/{chapterSlug}/{data.chapterNumber}-exercises"
 				class="inline-flex items-center gap-2 text-sm text-[var(--accent-color)] hover:underline"
 			>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-				</svg>
+				<Icon name="arrow-left" size="sm" />
 				Til baka í æfingar
 			</a>
 		</div>
@@ -79,9 +78,7 @@
 					href="/{data.bookSlug}/svarlykill/{data.navigation.previous.chapter}"
 					class="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
 				>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-					</svg>
+					<Icon name="chevron-left" />
 					<span class="hidden sm:inline">{data.navigation.previous.title}</span>
 					<span class="sm:hidden">Kafli {data.navigation.previous.chapter}</span>
 				</a>
@@ -96,9 +93,7 @@
 				>
 					<span class="hidden sm:inline">{data.navigation.next.title}</span>
 					<span class="sm:hidden">Kafli {data.navigation.next.chapter}</span>
-					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
+					<Icon name="chevron-right" />
 				</a>
 			{:else}
 				<div></div>

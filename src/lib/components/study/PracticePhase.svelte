@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import type { PracticeProblem } from '$lib/stores/quiz';
+	import Icon from '$lib/components/Icon.svelte';
 	import { quizStore } from '$lib/stores/quiz';
 
 	interface Props {
@@ -64,9 +65,7 @@
 		<div class="pp-card">
 			<div class="mb-4">
 				<h4 class="pp-problem-label">
-					<svg class="w-4 h-4" style="color: var(--accent-color);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-					</svg>
+					<Icon name="sparkles" size="sm" style="color: var(--accent-color);" />
 					Dæmi {currentIndex + 1}
 				</h4>
 				<div class="prose prose-sm max-w-none dark:prose-invert" style="color: var(--text-primary);">
@@ -80,9 +79,7 @@
 					class="pp-show-answer-btn"
 				>
 					Sýna svar
-					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-					</svg>
+					<Icon name="chevron-right" size="sm" />
 				</button>
 			{:else}
 				<div class="space-y-4">
@@ -100,18 +97,14 @@
 								onclick={() => handleAnswer(true)}
 								class="pp-assess-btn pp-assess-btn--correct"
 							>
-								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-								</svg>
+								<Icon name="circle-check" />
 								Rétt
 							</button>
 							<button
 								onclick={() => handleAnswer(false)}
 								class="pp-assess-btn pp-assess-btn--wrong"
 							>
-								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-								</svg>
+								<Icon name="circle-x" />
 								Rangt
 							</button>
 						</div>

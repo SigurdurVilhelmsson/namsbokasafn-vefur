@@ -42,6 +42,13 @@
     --radius-xl: 1rem;
     --radius-full: 9999px;
 
+    /* Icon sizing scale (icon-guidance-2026-06.md §2 — that spec was never
+       committed here; see docs/design/icon-handback-2026-06.md).
+       stroke-width stays 2 at every size; only the box scales. */
+    --icon-sm: 1rem; /* 16px — inline in text, chips, dense lists */
+    --icon-md: 1.25rem; /* 20px — buttons, header actions, kickers (default) */
+    --icon-lg: 1.5rem; /* 24px — content-block icons, feature tiles, touch targets */
+
     /* Light theme colors */
     --bg-primary: #f7f4ef;
     --bg-secondary: #ffffff;
@@ -128,6 +135,15 @@
     background-color: var(--bg-primary);
     color: var(--text-primary);
     font-family: "Literata", Georgia, serif;
+  }
+
+  /* Offset in-page anchor jumps so the target clears the sticky 56px header
+     (search/settings banner) instead of landing flush against the viewport
+     top, hidden beneath it. Applies site-wide to every #anchor scroll —
+     footnote back-refs, cross-references, section jumps, headings. The window
+     is the scroll container (no overflow wrapper), so this lives on <html>. */
+  html {
+    scroll-padding-top: 5rem;
   }
 }
 
@@ -1086,6 +1102,22 @@
   opacity: 1;
 }
 
+/* Wide display equations shouldn't scroll inside the narrow prose measure while
+   there's empty page beside it. On desktop, let the equation grow beyond the
+   reading column (centered on it) into the side whitespace, up to a bounded
+   width; only equations wider than that still scroll (via .equation-content).
+   Gated at 1280px: below that the sidebar leaves too little room, so a wide
+   equation would clip past the viewport — fall back to in-column scroll there. */
+@media (min-width: 1280px) {
+  .reading-content .equation-wrapper {
+    width: fit-content;
+    max-width: min(58rem, calc(100vw - 6rem));
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
 .equation-copy-btn,
 .equation-zoom-btn {
   padding: 0.25rem 0.5rem;
@@ -1212,10 +1244,30 @@
   outline: none;
 }
 
-/* Figure caption ID (for cross-reference anchors) */
-.figure-caption-id {
-  scroll-margin-top: 5rem;
+/* English gloss injected by the glossaryTerms action from efni's data-en.
+ *
+ * A real element, not a ::after — generated content is not selectable, not
+ * copyable, and is announced inconsistently. In a textbook a student may
+ * legitimately want to copy the English term.
+ *
+ * Lives here rather than in static/styles/content.css: that file is the
+ * cross-repo contract for classes efni EMITS, and this one is ours.
+ *
+ * --text-secondary, not --text-tertiary: measured against --bg-primary,
+ * tertiary is 2.90:1 light / 3.13:1 dark and fails WCAG AA at this size,
+ * while secondary is 5.45:1 / 6.07:1 and passes.
+ */
+.term-en {
+  color: var(--text-secondary);
+  font-style: italic;
+  font-size: 0.9em;
+  /* Never inherit the term's dotted underline — the gloss is not the term. */
+  border-bottom: none;
 }
+
+/* Figure caption anchor offset is now handled globally by
+   `html { scroll-padding-top }` (see @layer base). A per-target
+   scroll-margin-top here would stack with that padding and double the offset. */
 
 /* ========================================== */
 /* FIGURE CAPTIONS                           */
@@ -1239,7 +1291,7 @@ mjx-container[jax="SVG"][display="true"] {
 }
 
 mjx-container[jax="SVG"] {
-  font-size: 1.15em;
+  font-size: 1.05em;
 }
 
 /* Override Tailwind Preflight which sets all SVGs to display:block —
@@ -1469,7 +1521,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   font-style: italic;
   line-height: 1.5;
   color: var(--text-secondary);
-  text-align: center;
+  text-align: left;
 }
 
 .dark .reading-content figcaption {
@@ -1488,7 +1540,7 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   display: block;
   font-size: 0.875rem;
   color: var(--text-secondary);
-  text-align: center;
+  text-align: left;
   margin-top: 0.75rem;
 }
 
@@ -1572,9 +1624,13 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
     white-space: nowrap;
   }
 
-  /* Equation actions always visible on touch */
+  /* Touch has no hover: show controls as a bar below the equation instead of
+     the desktop corner overlay, so they never occlude the math itself. */
   .equation-wrapper .equation-actions {
+    position: static;
     opacity: 1;
+    justify-content: center;
+    margin-top: 0.25rem;
   }
 
   /* Figure lightbox toolbar */
@@ -1751,6 +1807,10 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   .tts-controls,
   .focus-mode-nav,
   .offline-indicator,
+  /* Live PhET/YouTube iframe — a dead box on paper. print.css does the same for
+     the PDF routes; this covers a reader pressing Ctrl+P on a section page.
+     The .embed-fallback link stays and prints its URL via the rule below. */
+  .embed-responsive,
   .poc-banner {
     display: none !important;
   }
@@ -2100,14 +2160,14 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   figcaption {
     font-size: 10pt;
     font-style: italic;
-    text-align: center;
+    text-align: left;
     margin-top: 6pt;
   }
 
   .figure-caption {
     font-size: 10pt;
     font-style: italic;
-    text-align: center;
+    text-align: left;
   }
 
   /* ----------------------------------------
@@ -2228,6 +2288,15 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   .glossary-term {
     border-bottom: none !important;
     cursor: default;
+  }
+
+  /* The gloss is CONTENT, so it stays on paper — unlike the tooltip, which is
+   * interactive and hidden below. Only this print surface sees it: the /print/*
+   * PDF routes render bare {@html} without mounting the action, so no span is
+   * ever injected there. */
+  .term-en {
+    color: inherit;
+    font-style: italic;
   }
 
   .glossary-tooltip {

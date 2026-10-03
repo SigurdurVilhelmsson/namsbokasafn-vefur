@@ -6,6 +6,14 @@
 
 Severity legend: **High** = user-visible feature breakage or meaningful security exposure. **Medium** = real bug or risk, narrower impact or latent. **Low** = quality, dead code, drift risk, minor correctness.
 
+> **Status (2026-10-01):** re-checked against `main` (6a9cf5c). Every commit named here is on `main`.
+>
+> - **Fixed:** 1.1 + 1.2 in 6ace6e8 (#110) · 1.3 in 5751035 (#130) · 1.4, M1, M2, M3 and M6 in 88243f1 (#115), with the data source itself supplied later by rec7 (#150) · 1.5 + 1.6 in f8c12c7 (#113) · 1.7–1.9 in 0a5bf9e (#112) · 2.1 + 2.2 in 8137965 (#109) · M4 in 9267a7d (#151) · M15 and the three §4 grammar nits in 183f45d (#117) · the §4 SRS upper clamp in ba16b84 (#116) · §4 `scripts/place`, removed in #213.
+> - **Fixed in `nginx-config-example.conf` and applied on the server:** 1.10, 2.3 and the §4 old-slug 301 ordering, in fe29715 (#118). Checked live on 2026-10-01: `/_app/immutable/` assets send `public, immutable`; `/styles/content.css` sends `public, must-revalidate` with a one-day `Expires`; the CSP carries `object-src 'none'`, `base-uri 'self'` and `frame-ancestors 'none'`; a `/content/efnafraedi/…` image URL answers 301 to its `efnafraedi-2e` path.
+> - **Partly fixed:** M5 — analytics keeps each tab's own `currentSession` (f8c12c7, #113), but `flashcard.ts` and `quiz.ts` still sync their session state across tabs wholesale. M18 — the book home builds a per-book description (#168); the chapter page and the section page still hardcode "Efnafræði kennslubók".
+> - **Still open:** 2.4 (the sweep now sits near `scripts/sync-content.js:735`, and there is still no `--prune` flag), M7–M14, M16, M17, M19–M22, and most of §4. Two corrections to the text below: M10's "no cancel path" was overstated — clicking the overlay or the edit button cancels (both since 435b62a), though Escape is still saved as the new binding; and the §4 focus trap is now copied four times, because KeyboardShortcutsModal has no trap at all.
+> - **§4 doc drift:** CLAUDE.md now says TypeScript 6 / Vite 8. `.github/workflows/deploy.yml` exists but has never completed a deploy; production deploys are manual.
+
 ---
 
 ## 1. High — broken features

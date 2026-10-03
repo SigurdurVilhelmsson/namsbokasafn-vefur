@@ -22,7 +22,8 @@ const config = {
 
     prerender: {
       handleHttpError: 'warn', // Content may have broken internal links — warn instead of failing
-      handleMissingId: 'warn' // A handful of cross-chapter anchor refs (e.g. "viðauka A") aren't resolvable yet — needs a book-wide id map in the CNXML renderer (tracked in namsbokasafn-efni)
+      handleMissingId: 'warn', // A handful of cross-chapter anchor refs (e.g. "viðauka A") aren't resolvable yet — needs a book-wide id map in the CNXML renderer (tracked in namsbokasafn-efni)
+      handleUnseenRoutes: 'warn' // Some prerenderable routes (e.g. /vidauki) yield no entries when a book has no non-interactive appendix yet; skip them instead of failing the build (they still work via the SPA fallback)
     },
 
     // Path aliases (same as current React setup)

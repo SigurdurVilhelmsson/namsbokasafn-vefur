@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Icon from '$lib/components/Icon.svelte';
 	import { fade, scale } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import { settings, type ShortcutAction } from '$lib/stores/settings';
@@ -176,19 +177,7 @@
 				class="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4"
 			>
 				<div class="flex items-center gap-3">
-					<svg
-						class="h-6 w-6 text-[var(--accent-color)]"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<rect x="2" y="4" width="20" height="16" rx="2" stroke-width="2" />
-						<path
-							d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M6 16h12"
-							stroke-width="2"
-							stroke-linecap="round"
-						/>
-					</svg>
+					<Icon name="keyboard" size="lg" class="text-[var(--accent-color)]" />
 					<h2
 						id="shortcuts-modal-title"
 						class="font-sans text-lg font-semibold text-[var(--text-primary)]"
@@ -203,14 +192,7 @@
 							class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
 							title="Endurstilla allt"
 						>
-							<svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-								/>
-							</svg>
+							<Icon name="refresh-cw" size="sm" />
 							<span class="hidden sm:inline">Endurstilla</span>
 						</button>
 					{/if}
@@ -219,14 +201,7 @@
 						class="rounded-lg p-2 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-primary)] hover:text-[var(--text-primary)]"
 						aria-label="Loka"
 					>
-						<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
+						<Icon name="x" />
 					</button>
 				</div>
 			</div>
@@ -261,19 +236,7 @@
 													class="rounded p-1 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--accent-color)]"
 													title="Endurstilla ({formatShortcutKey(shortcut.defaultKey)})"
 												>
-													<svg
-														class="h-3.5 w-3.5"
-														fill="none"
-														stroke="currentColor"
-														viewBox="0 0 24 24"
-													>
-														<path
-															stroke-linecap="round"
-															stroke-linejoin="round"
-															stroke-width="2"
-															d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-														/>
-													</svg>
+													<Icon name="refresh-cw" size="sm" />
 												</button>
 											{/if}
 
@@ -295,14 +258,7 @@
 											>
 												<span>{formatShortcutKey(displayKey)}</span>
 												{#if isEditing && pendingKey}
-													<svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-														<path
-															stroke-linecap="round"
-															stroke-linejoin="round"
-															stroke-width="2"
-															d="M5 13l4 4L19 7"
-														/>
-													</svg>
+													<Icon name="check" size="sm" />
 												{/if}
 											</button>
 										</div>
