@@ -7,6 +7,28 @@
  * (PagedReaderControls); keeping this pure makes the break logic testable.
  */
 
+/** Blocks never split across pages: one taller than a page gets a page of its
+ *  own and scrolls there (figures, tables, display equations, note/example boxes). */
+export const ATOMIC_SELECTOR = [
+	'figure',
+	'table',
+	'pre',
+	'.equation',
+	'.math-display',
+	'mjx-container[display]',
+	'.note',
+	'.example',
+	'.exercise',
+	'.checkpoint',
+	'.learning-objectives',
+	'.chapter-outline',
+	'.practice-problem-container',
+	'.practice-problem'
+].join(', ');
+
+/** Headings, kept on the same page as the block after them. */
+export const KEEP_WITH_NEXT_SELECTOR = 'h2, h3, h4';
+
 export interface PaginateItem {
 	/** Measured block height in px (margins included by the measurer) */
 	height: number;

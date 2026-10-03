@@ -6,6 +6,7 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
+import { ATOMIC_SELECTOR } from '../src/lib/utils/paginate';
 
 /** Click through landing → book → first section. Returns false when the
  *  synced content needed for the journey isn't present. */
@@ -62,7 +63,10 @@ test.describe('Paged reading mode', () => {
 
 	// The point of paged mode: no scrolling within a page. Sums the heights of
 	// the content blocks visible on each page (the chrome around the page is
-	// not counted, as the paginator's own budget leaves room for it).
+	// not counted, as the paginator's own budget leaves room for it). The one
+	// designed exception: a page holding a single unsplittable block (a long
+	// worked example, a big table) that is taller than the window. Any other
+	// overflow is the paginator overfilling a page.
 	test('every page of a section fits the viewport', async ({ page }) => {
 		test.skip(!(await openFirstSection(page)), 'No section content available');
 
@@ -70,20 +74,29 @@ test.describe('Paged reading mode', () => {
 		await expect(nav).toBeVisible();
 		const next = nav.getByRole('button', { name: 'Næsta síða' });
 
-		for (let i = 0; i < 6; i++) {
-			const { visible, viewport } = await page.evaluate(() => {
+		for (let i = 0; i < 40; i++) {
+			const { visible, count, atomic, viewport } = await page.evaluate((atomicSelector) => {
 				const root = document.querySelector('article.cnx-module') as HTMLElement;
 				const main = root.querySelector(':scope > main');
+				const flat = (el: Element): Element[] =>
+					el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
 				const blocks = [
 					...Array.from(root.children).filter((el) => el.tagName !== 'MAIN'),
 					...(main ? Array.from(main.children) : [])
-				].flatMap((el) => (el.tagName === 'SECTION' ? Array.from(el.children) : [el]));
-				const visible = blocks
-					.filter((el) => (el as HTMLElement).offsetParent !== null)
-					.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0);
-				return { visible, viewport: window.innerHeight };
-			});
-			expect(visible, `page ${i + 1}: ${Math.round(visible)}px of content in a ${viewport}px window`).toBeLessThanOrEqual(viewport);
+				].flatMap(flat);
+				const shown = blocks.filter((el) => (el as HTMLElement).offsetParent !== null);
+				return {
+					visible: shown.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0),
+					count: shown.length,
+					atomic: shown.length === 1 && shown[0].matches(atomicSelector),
+					viewport: window.innerHeight
+				};
+			}, ATOMIC_SELECTOR);
+			const ok = visible <= viewport || atomic;
+			expect(
+				ok,
+				`page ${i + 1}: ${Math.round(visible)}px of content in ${count} block(s) in a ${viewport}px window`
+			).toBe(true);
 			if (await next.isDisabled()) break;
 			await next.click();
 			await page.waitForTimeout(300);

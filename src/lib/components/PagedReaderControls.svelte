@@ -21,6 +21,8 @@
 		pageIndexForItem,
 		buildUnits as buildContentUnits,
 		itemIndexForTarget,
+		ATOMIC_SELECTOR,
+		KEEP_WITH_NEXT_SELECTOR,
 		type PageRange
 	} from '$lib/utils/paginate';
 
@@ -56,24 +58,6 @@
 	let recomputeTimer: ReturnType<typeof setTimeout> | undefined;
 	let observer: MutationObserver | undefined;
 
-	const ATOMIC_SELECTOR = [
-		'figure',
-		'table',
-		'pre',
-		'.equation',
-		'.math-display',
-		'mjx-container[display]',
-		'.note',
-		'.example',
-		'.exercise',
-		'.checkpoint',
-		'.learning-objectives',
-		'.chapter-outline',
-		'.practice-problem-container',
-		'.practice-problem'
-	].join(', ');
-
-	const KEEP_WITH_NEXT_SELECTOR = 'h2, h3, h4';
 
 	function availableHeight(): number {
 		// Reading height: viewport minus header/breadcrumb chrome above the
