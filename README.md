@@ -123,14 +123,9 @@ CI (GitHub Actions) gates every push and PR — on `main` and the
 and runs lint, type-check, unit tests, the production build, and Playwright
 E2E. **CI does not deploy.**
 
-Deployment runs via the separate **Deploy workflow** (`deploy.yml`):
-triggered manually from the Actions tab or by pushing a release tag
-(`v*.*.*`), it re-verifies the commit, syncs content from an explicit efni
-commit and rsyncs the build to the server over a directory-restricted SSH
-key. One-time setup and the security model are documented in
-[docs/guides/deployment.md](docs/guides/deployment.md).
-Manual fallback from a machine with server access — the same
-`scripts/deploy.js` the workflow runs, a dry run unless `--apply` is given:
+Deployment is manual, from a machine with SSH access to the server, with
+`scripts/deploy.js`. It is a dry run unless `--apply` is given. (The GitHub
+Deploy workflow was retired on 2026-10-03: it never completed a deploy.)
 
 ```bash
 npm run build
