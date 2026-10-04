@@ -89,14 +89,6 @@
 		);
 	}
 
-	/** Reading height of the first page on arrival, before any scroll: the
-	 *  content starts below the learning objectives. Page 1 shrinks to what is
-	 *  visible there rather than the page scrolling past the objectives. */
-	function firstPageHeight(first: HTMLElement): number {
-		const top = first.getBoundingClientRect().top + window.scrollY;
-		const visible = window.innerHeight - top - gapBelow - BOTTOM_CLEARANCE;
-		return Math.min(availableHeight(), Math.max(0, visible));
-	}
 
 	function contentRoot(): HTMLElement | null {
 		if (!container) return null;
@@ -132,14 +124,13 @@
 			gapAbove = Math.max(0, first.getBoundingClientRect().top - container.getBoundingClientRect().top);
 		}
 		const viewportH = availableHeight();
-		const firstH = first ? firstPageHeight(first) : viewportH;
-		for (const [u, unit] of units.entries()) {
+		for (const unit of units) {
 			const items = unit.children.map((el) => ({
 				height: measure(el),
 				atomic: el.matches(ATOMIC_SELECTOR),
 				keepWithNext: el.matches(KEEP_WITH_NEXT_SELECTOR)
 			}));
-			unit.pages = paginate(items, viewportH, u === 0 ? firstH : viewportH);
+			unit.pages = paginate(items, viewportH);
 			if (unit.pages.length === 0) {
 				unit.pages = [{ start: 0, end: unit.children.length }];
 			}
@@ -224,10 +215,17 @@
 		if (completedUnits.has(unitIndex)) return;
 		completedUnits.add(unitIndex);
 		onsubsectioncomplete?.(unitIndex);
-		if (completedUnits.size === units.length && !completionFired) {
-			completionFired = true;
-			oncomplete?.();
-		}
+	}
+
+	/** Advancing past the last page finishes the section, as reaching the end
+	 *  does in scrolled mode, even when the reader skipped sub-sections (came in
+	 *  by a link to a later one). It used to need every sub-section paged
+	 *  through, which left that reader a "Næsta" that did nothing and no
+	 *  recall prompt (Siggi, 2026-10-04). */
+	function completeSection() {
+		if (completionFired) return;
+		completionFired = true;
+		oncomplete?.();
 	}
 
 	function next() {
@@ -241,6 +239,8 @@
 		}
 		if (current < flatPages.length - 1) {
 			showPage(current + 1);
+		} else {
+			completeSection();
 		}
 	}
 
@@ -424,7 +424,11 @@
 
 			const fromHash = resolveHash(window.location.hash);
 			target = elementForHash(window.location.hash);
-			showPage(fromHash ?? 0, { scroll: fromHash !== null, keepHash: target !== null });
+			// Scroll to the content on arrival too, past the learning objectives
+			// above it, so page 1 gets a whole page (Siggi, 2026-10-04). Sizing
+			// page 1 to the room under the objectives left 5.3 at 1280x720 with
+			// the title alone and its controls below the fold.
+			showPage(fromHash ?? 0, { keepHash: target !== null });
 			await tick();
 			calibrate();
 

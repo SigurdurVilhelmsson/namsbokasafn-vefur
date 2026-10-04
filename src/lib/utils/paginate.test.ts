@@ -94,23 +94,6 @@ describe('paginate', () => {
 		]);
 	});
 
-	it('gives the first page its own, smaller budget', () => {
-		// Chrome above the content on arrival (learning objectives) leaves less room
-		const pages = paginate([block(100), block(100), block(100)], 768, 150);
-		expect(pages).toEqual([
-			{ start: 0, end: 1 },
-			{ start: 1, end: 3 }
-		]);
-	});
-
-	it('still puts one block on a first page too small for it', () => {
-		const pages = paginate([block(200), block(100)], 768, 50);
-		expect(pages).toEqual([
-			{ start: 0, end: 1 },
-			{ start: 1, end: 2 }
-		]);
-	});
-
 	it('handles an empty item list', () => {
 		expect(paginate([], 768)).toEqual([]);
 	});

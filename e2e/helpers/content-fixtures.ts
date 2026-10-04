@@ -117,3 +117,24 @@ export function sectionsContaining(marker: string, limit: number): string[] {
 		.slice(0, limit)
 		.map((f) => f.url);
 }
+
+/**
+ * Reader URL of the first synced chapter rollup of the given kind
+ * ("1-summary.html" → `/<book>/kafli/01/1-summary/`), or null if none.
+ */
+export function rollupSection(kind: 'summary' | 'exercises' | 'key-terms'): string | null {
+	for (const slug of syncedBooks()) {
+		const chaptersDir = join(CONTENT_DIR, slug, 'chapters');
+		if (!existsSync(chaptersDir)) continue;
+		const chapters = readdirSync(chaptersDir)
+			.filter((c) => /^\d+$/.test(c) && c !== '00')
+			.sort();
+		for (const chapter of chapters) {
+			const file = readdirSync(join(chaptersDir, chapter)).find((f) =>
+				new RegExp(`^\\d+-${kind}\\.html$`).test(f)
+			);
+			if (file) return `/${slug}/kafli/${chapter}/${file.slice(0, -5)}/`;
+		}
+	}
+	return null;
+}

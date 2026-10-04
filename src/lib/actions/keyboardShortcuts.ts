@@ -4,7 +4,6 @@
  */
 
 import { goto } from '$app/navigation';
-import { get } from 'svelte/store';
 import { settings, DEFAULT_SHORTCUTS, type ShortcutAction } from '$lib/stores/settings';
 
 // =============================================================================
@@ -150,12 +149,11 @@ export function keyBelongsElsewhere(event: KeyboardEvent): boolean {
 const PAGE_TURN_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', ' ']);
 
 function navigatePrevNext(direction: 'prev' | 'next', key: string): boolean {
-	// In paged mode a section page turns pages with these keys; leave them to
-	// it. Keyed on the setting, not on the rendered page controls: those appear
-	// only once images and fonts are in, and in that gap → skipped a section.
-	// A shortcut rebound to another key still works.
-	const onSection = document.querySelector('[data-nav]') !== null;
-	if (onSection && get(settings).readingMode === 'paged' && PAGE_TURN_KEYS.has(key)) return false;
+	// A paged section turns pages with these keys; leave them to it. Keyed on
+	// the section page's mark, present from mount, not on the page controls:
+	// those render only once images and fonts are in, and in that gap → skipped
+	// a section. A shortcut rebound to another key still works.
+	if (document.querySelector('[data-paged-section]') && PAGE_TURN_KEYS.has(key)) return false;
 	const link = document.querySelector<HTMLElement>(`[data-nav="${direction}"]`);
 	if (!link || link.hasAttribute('disabled')) return false;
 	link.click();

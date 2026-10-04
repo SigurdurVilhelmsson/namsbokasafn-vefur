@@ -47,25 +47,18 @@ export interface PageRange {
 }
 
 /**
- * Split `items` into pages of at most `viewportH` px. The first page gets
- * `firstPageH` instead: on arrival the content starts lower, below chrome
- * (learning objectives) that later pages scroll past.
+ * Split `items` into pages of at most `viewportH` px.
  *
  * Headings (keepWithNext) never end a page and are never left alone on one.
  * When a heading plus the block after it overruns a page, they share it and
  * the page overruns by the heading: one extra page turn for a lone heading
  * was the worse trade (QA E4).
  */
-export function paginate(
-	items: PaginateItem[],
-	viewportH: number,
-	firstPageH: number = viewportH
-): PageRange[] {
+export function paginate(items: PaginateItem[], viewportH: number): PageRange[] {
 	const pages: PageRange[] = [];
 	let start = 0;
 	let pageH = 0;
 
-	const budget = () => (pages.length === 0 ? firstPageH : viewportH);
 	const flush = (end: number) => {
 		if (end > start) {
 			pages.push({ start, end });
@@ -99,7 +92,7 @@ export function paginate(
 
 		// First item on a page always goes on it, even if oversized
 		// (non-atomic text blocks taller than the viewport are rare)
-		if (pageH === 0 || pageH + item.height <= budget()) {
+		if (pageH === 0 || pageH + item.height <= viewportH) {
 			pageH += item.height;
 			i++;
 			continue;

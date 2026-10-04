@@ -7,7 +7,7 @@
 
 import { test, expect, type Page } from '@playwright/test';
 import { ATOMIC_SELECTOR } from '../src/lib/utils/paginate';
-import { sectionsContaining } from './helpers/content-fixtures';
+import { sectionsContaining, rollupSection } from './helpers/content-fixtures';
 
 /** Click through landing → book → first section. Returns false when the
  *  synced content needed for the journey isn't present. */
@@ -173,9 +173,6 @@ test.describe('Paged reading mode', () => {
 				bottom: el.getBoundingClientRect().bottom,
 				height: window.innerHeight
 			}));
-			// A long learning-objectives box can leave room for nothing but the
-			// title; page 1 then holds the title alone (scrolling past the
-			// objectives on arrival is a design call this test does not make)
 			if (await allowedOverrun(page)) continue;
 			expect(bottom, `${url}: controls end at ${Math.round(bottom)}px`).toBeLessThanOrEqual(height);
 		}
@@ -395,6 +392,85 @@ test.describe('Paged reading mode', () => {
 		await nav.getByRole('button', { name: 'Fyrri síða' }).focus();
 		await page.keyboard.press('Space');
 		await expect(label).toHaveText(first);
+	});
+
+	test('arrival scrolls past the learning objectives to the content', async ({ page }) => {
+		// Siggi, 2026-10-04: page 1 gets a full page rather than the room left
+		// under the objectives, which on 5.3 at 1280x720 was the title alone
+		const urls = sectionsContaining('<p', 3);
+		test.skip(urls.length === 0, 'No section content available');
+
+		for (const url of urls) {
+			await page.goto(url);
+			await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toBeVisible({
+				timeout: 15000
+			});
+			await page.waitForTimeout(500);
+			// Page 1 may still be the title alone, when the first paragraph is
+			// too long to share a page with it; that is the split, not the scroll
+			const top = await page.evaluate(
+				() => document.querySelector('article.cnx-module')!.getBoundingClientRect().top
+			);
+			expect(top, `${url}: content starts at ${Math.round(top)}px`).toBeLessThan(250);
+		}
+	});
+
+	for (const kind of ['summary', 'exercises', 'key-terms'] as const) {
+		test(`a chapter ${kind} page scrolls instead of paging`, async ({ page }) => {
+			// Siggi, 2026-10-04: rollups are reference lists; paged, chapter 1's
+			// exercises were one 23,120px page
+			const url = rollupSection(kind);
+			test.skip(!url, `No synced ${kind} page`);
+
+			await page.goto(url!);
+			await expect(page.locator('.reading-content').first()).toBeVisible({ timeout: 15000 });
+			await page.evaluate(() => document.fonts.ready);
+			await page.waitForTimeout(1500);
+			await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toHaveCount(0);
+			await expect(page.locator('.reading-content [hidden]')).toHaveCount(0);
+
+			// And ← / → are section keys again there
+			const nextHref = await page.locator('a.nav-btn-next').getAttribute('href');
+			test.skip(!nextHref, 'Last page of the book');
+			await page.locator('body').click({ position: { x: 5, y: 5 } });
+			await page.keyboard.press('ArrowRight');
+			await expect(page).toHaveURL(
+				(u) => u.pathname.replace(/\/$/, '') === nextHref!.replace(/\/$/, '')
+			);
+		});
+	}
+
+	test('Næsta on the last page finishes the section, even after skipping parts', async ({
+		page
+	}) => {
+		// Siggi, 2026-10-04: as in scrolled mode, reaching the end completes the
+		// section. A reader who came in by a link to a later part used to get a
+		// "Næsta" that did nothing, and never saw the recall prompt.
+		const urls = sectionsContaining('<section', 5);
+		test.skip(urls.length === 0, 'No section with sub-sections');
+		test.setTimeout(240000);
+
+		await page.goto(urls[0]);
+		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
+		await expect(nav).toBeVisible({ timeout: 15000 });
+		const label = nav.locator('.paged-nav-label');
+		const units = Number((await label.textContent())!.match(/Hluti \d+ af (\d+)/)![1]);
+		test.skip(units < 2, 'Section has one part');
+
+		// Arrive by a link to the last part, skipping every part before it
+		await page.evaluate((u) => (location.hash = `#sub-${u - 1}`), units);
+		await expect(label).toHaveText(new RegExp(`^Hluti ${units} af ${units}`));
+		const next = nav.getByRole('button', { name: 'Næsta síða' });
+
+		for (let i = 0; i < 200; i++) {
+			const text = (await label.textContent())!.trim();
+			const m = text.match(/Hluti (\d+) af (\d+) · Síða (\d+) af (\d+)/)!;
+			if (m[1] === m[2] && m[3] === m[4]) break;
+			await next.click();
+			await expect(label).not.toHaveText(text);
+		}
+		await next.click();
+		await expect(page.getByRole('region', { name: 'Upprifjun' })).toBeVisible();
 	});
 });
 

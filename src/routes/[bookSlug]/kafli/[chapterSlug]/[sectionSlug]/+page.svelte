@@ -31,6 +31,14 @@
 	let showRecallPrompt = $state(false);
 	// Bound to the content wrapper inside {#key}; paged mode operates on it
 	let contentWrapper: HTMLElement | undefined = $state();
+
+	// Chapter rollups (key terms, key equations, summary, exercises) always
+	// scroll: they are reference lists, and paged each was one page, up to
+	// 23,120px tall (Siggi, 2026-10-04). The type comes from toc.json.
+	const ROLLUP_TYPES = new Set(['glossary', 'equations', 'summary', 'exercises', 'answer-key']);
+	let paged = $derived(
+		$readingMode === 'paged' && !ROLLUP_TYPES.has(data.navigation.current.section.type ?? '')
+	);
 	let showContinuePrompt = $state(false);
 	let savedPosition: { scrollY: number; percentage: number } | null = $state(null);
 	let continuePromptTimeout: ReturnType<typeof setTimeout>;
@@ -408,7 +416,9 @@
 	     navigation: highlight restoration, equation/figure enhancement, lazy
 	     images and read detection all run their mount-time setup per section. -->
 	{#key sectionKey}
-		<div bind:this={contentWrapper}>
+		<!-- data-paged-section: present from mount, before the page controls
+		     render, so the ←/→ section shortcut steps aside for the pager -->
+		<div bind:this={contentWrapper} data-paged-section={paged || undefined}>
 			<TextHighlighter
 				bookSlug={data.bookSlug}
 				chapterSlug={data.chapterSlug}
@@ -426,7 +436,7 @@
 			</TextHighlighter>
 		</div>
 
-		{#if $readingMode === 'paged'}
+		{#if paged}
 			<!-- Paged mode: completion comes from advancing past the last
 			     page, not from scroll position -->
 			<PagedReaderControls container={contentWrapper} oncomplete={markAsRead} />
@@ -438,7 +448,7 @@
 		<div
 			use:readDetection={{
 				onRead: markAsRead,
-				enabled: !isRead && $readingMode !== 'paged',
+				enabled: !isRead && !paged,
 				minVisibleTime: 1500
 			}}
 			class="h-4"
