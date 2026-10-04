@@ -56,6 +56,13 @@ import {
 	withheldBooks
 } from './lib/published-books.js';
 import { EDITOR_ARTIFACT_PATTERNS } from './lib/editor-artifacts.js';
+import {
+	SYNC_STAMP_FILE,
+	buildSyncStamp,
+	readEfniState,
+	readVefurCommit,
+	writeSyncStamp
+} from './lib/sync-stamp.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -360,6 +367,7 @@ function syncBook(sourceDir, bookSlug, dryRun) {
 		} catch (error) {
 			console.error(`  Warning: Failed to regenerate toc.json: ${error.message}`);
 		}
+		stampBook(sourceDir, bookSlug, layers, bookDest);
 	}
 
 	return true;
@@ -570,12 +578,43 @@ function syncBookFallback(sourceDir, bookSlug, dryRun) {
 		} catch (error) {
 			console.error(`  Warning: Failed to regenerate toc.json: ${error.message}`);
 		}
+		stampBook(sourceDir, bookSlug, layers, bookDest);
 
 		console.log(`    Done.`);
 		return true;
 	} catch (error) {
 		console.error(`  Error syncing ${bookSlug}: ${error.message}`);
 		return false;
+	}
+}
+
+/**
+ * Record which efni commit this book's content came from, in
+ * static/content/<book>/sync-stamp.json (see scripts/lib/sync-stamp.js). It is
+ * published with the content, so the live site can say which efni commit it
+ * serves. Written last, after rsync --delete has mirrored the baseline (the
+ * stamp is not in the source, so an earlier write would be deleted). A failure
+ * warns and never fails the sync.
+ */
+function stampBook(sourceDir, bookSlug, layers, bookDest) {
+	try {
+		const stamp = buildSyncStamp({
+			book: bookSlug,
+			layers: [layers.baseline.variant, ...(layers.overlay ? [layers.overlay.variant] : [])],
+			efni: readEfniState(sourceDir, bookSlug),
+			vefurCommit: readVefurCommit(projectRoot),
+			now: new Date()
+		});
+		writeSyncStamp(bookDest, stamp);
+		const { commit, branch, onOriginMain, dirty } = stamp.efni;
+		console.log(
+			`  Stamped ${SYNC_STAMP_FILE}: efni ${commit ? commit.slice(0, 9) : 'unknown commit'}` +
+				(branch ? ` (${branch})` : '') +
+				(onOriginMain === false ? ' — ⚠️  NOT on efni origin/main' : '') +
+				(dirty ? ' — ⚠️  its 05-publication holds files not in that commit' : '')
+		);
+	} catch (error) {
+		console.warn(`  Warning: could not write ${SYNC_STAMP_FILE}: ${error.message}`);
 	}
 }
 

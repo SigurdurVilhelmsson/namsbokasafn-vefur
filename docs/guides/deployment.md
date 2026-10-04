@@ -27,6 +27,14 @@ The 2026-10-03 deploy followed these steps; keep to them.
    file under `build/content/<book>/` (editor backups excluded) with the server's
    copy. The sitemap cannot see content changes: on 2026-10-03 two local files
    were older than the live ones and would have rolled back a fix.
+   Start with the sync stamp: `curl -fsS https://namsbokasafn.is/content/<book>/sync-stamp.json`
+   (`-f`, so a missing stamp is an error, not nginx's 404 page) against
+   `build/content/<book>/sync-stamp.json`. A different efni `commit`, or `dirty: true`
+   on either side, means different content, so stop and find out why. The stamp does
+   not replace the checksum: files edited by hand after a sync keep the same stamp.
+   Content synced by a `sync-content.js` that predates the stamp has none, and nor
+   does a withheld book while it is frozen; a missing stamp on either side shows up in
+   the checksum.
 6. **Deploy** with `--apply`, then check `/_app/version.json` and the pages
    you changed.
 
