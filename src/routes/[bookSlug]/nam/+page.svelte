@@ -133,10 +133,11 @@
 <svelte:head>
 	<title>Námslota | {data.book?.title ?? 'Bók'}</title>
 	<meta property="og:title" content="Námslota | {data.book?.title ?? 'Bók'}" />
+	<meta name="description" content="Skipulögð námslota fyrir {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:description" content="Skipulögð námslota fyrir {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
-	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/nam" />
-	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/nam" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/nam/" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/nam/" />
 </svelte:head>
 
 <div class="max-w-2xl mx-auto">

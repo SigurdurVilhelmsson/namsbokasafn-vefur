@@ -34,13 +34,21 @@ describe('sitemapUrls', () => {
 	});
 
 	it('lists a published book', () => {
-		expect(sitemapUrls(root)).toContain(`${BASE}/efnafraedi-2e/kafli/03/3-1-inngangur`);
+		expect(sitemapUrls(root)).toContain(`${BASE}/efnafraedi-2e/kafli/03/3-1-inngangur/`);
 	});
 
 	// The three books paused on 2026-08-22 are out of scope for the 2026-09-23
 	// ruling: they stay live, and a build from a checkout that has them lists them.
 	it('still lists a paused book', () => {
-		expect(sitemapUrls(root)).toContain(`${BASE}/liffraedi-2e/kafli/03/3-1-inngangur`);
+		expect(sitemapUrls(root)).toContain(`${BASE}/liffraedi-2e/kafli/03/3-1-inngangur/`);
+	});
+
+	// trailingSlash is 'always': a URL without the slash answers 301 on the live
+	// site, so listing it sends crawlers through a redirect for every page
+	it('lists every URL with its trailing slash', () => {
+		const urls = sitemapUrls(root);
+		expect(urls.length).toBeGreaterThan(10);
+		expect(urls.filter((url) => !url.endsWith('/'))).toEqual([]);
 	});
 
 	it('skips a directory with no toc.json', () => {

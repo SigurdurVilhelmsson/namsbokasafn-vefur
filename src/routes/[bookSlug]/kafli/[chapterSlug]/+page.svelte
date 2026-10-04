@@ -67,11 +67,11 @@
 	<title>Kafli {data.chapter.number}: {data.chapter.title} | {data.book?.title ?? data.bookSlug}</title>
 	<meta name="description" content="Kafli {data.chapter.number}: {data.chapter.title}. Efnafræði kennslubók á íslensku." />
 	<meta name="robots" content="index, follow" />
-	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/kafli/{chapterPath}" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/kafli/{chapterPath}/" />
 	<meta property="og:title" content="Kafli {data.chapter.number}: {data.chapter.title} | {data.book?.title ?? data.bookSlug}" />
 	<meta property="og:description" content="{data.chapter.title} – kafli {data.chapter.number} í {data.book?.title ?? data.bookSlug}" />
 	<meta property="og:type" content="article" />
-	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/kafli/{chapterPath}" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/kafli/{chapterPath}/" />
 </svelte:head>
 
 <div class="chapter-view min-h-[80vh] p-6">

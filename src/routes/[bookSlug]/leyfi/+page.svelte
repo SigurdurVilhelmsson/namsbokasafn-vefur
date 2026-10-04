@@ -44,8 +44,19 @@
 
 <svelte:head>
 	<title>Leyfi og heimildir — {data.book?.title ?? 'Bók'} | Námsbókasafn</title>
+	<meta
+		name="description"
+		content="Leyfi og fullar heimildir fyrir {data.book?.title ?? 'bókina'}: íslensk þýðing á opnu námsefni frá OpenStax."
+	/>
 	<meta name="robots" content="index, follow" />
-	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/leyfi" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/leyfi/" />
+	<meta property="og:title" content="Leyfi og heimildir — {data.book?.title ?? 'Bók'} | Námsbókasafn" />
+	<meta
+		property="og:description"
+		content="Leyfi og fullar heimildir fyrir {data.book?.title ?? 'bókina'}: íslensk þýðing á opnu námsefni frá OpenStax."
+	/>
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/leyfi/" />
 </svelte:head>
 
 <div class="colophon">

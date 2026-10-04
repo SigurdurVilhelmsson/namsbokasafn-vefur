@@ -12,10 +12,11 @@
 <svelte:head>
 	<title>Lotukerfið | {data.book?.title ?? 'Efnafræði'}</title>
 	<meta property="og:title" content="Lotukerfið | {data.book?.title ?? 'Efnafræði'}" />
+	<meta name="description" content="Gagnvirkt lotukerfi frumefnanna" />
 	<meta property="og:description" content="Gagnvirkt lotukerfi frumefnanna" />
 	<meta property="og:type" content="website" />
-	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/lotukerfi" />
-	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/lotukerfi" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/lotukerfi/" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/lotukerfi/" />
 </svelte:head>
 
 <div class="max-w-7xl mx-auto">

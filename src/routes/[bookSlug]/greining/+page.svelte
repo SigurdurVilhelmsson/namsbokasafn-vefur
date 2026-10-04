@@ -194,10 +194,11 @@
 <svelte:head>
 	<title>Námsgreining | {data.book?.title ?? 'Bók'}</title>
 	<meta property="og:title" content="Námsgreining | {data.book?.title ?? 'Bók'}" />
+	<meta name="description" content="Námsgreining og framvinduyfirlit fyrir {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:description" content="Námsgreining og framvinduyfirlit fyrir {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
-	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/greining" />
-	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/greining" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/greining/" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/greining/" />
 </svelte:head>
 
 <div class="max-w-4xl mx-auto">

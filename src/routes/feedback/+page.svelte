@@ -72,8 +72,8 @@
   <meta property="og:title" content="Endurgjöf - Námsbókasafn" />
   <meta property="og:description" content="Sendu okkur endurgjöf um Námsbókasafn - villur, tillögur eða athugasemdir." />
   <meta property="og:type" content="website" />
-  <link rel="canonical" href="https://namsbokasafn.is/feedback" />
-  <meta property="og:url" content="https://namsbokasafn.is/feedback" />
+  <link rel="canonical" href="https://namsbokasafn.is/feedback/" />
+  <meta property="og:url" content="https://namsbokasafn.is/feedback/" />
 </svelte:head>
 
 <div class="feedback-page">

@@ -28,7 +28,8 @@
 </script>
 
 <svelte:head>
-	<meta name="description" content="Námsbókasafn - Opnar kennslubækur á íslensku" />
+	<!-- No site-wide description: every page sets its own, and a default here
+	     made 339 of 360 pages carry two (search engines pick one arbitrarily) -->
 	<meta name="theme-color" content="#c78c20" />
 	<meta property="og:site_name" content="Námsbókasafn" />
 	<meta property="og:locale" content="is_IS" />
