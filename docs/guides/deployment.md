@@ -22,7 +22,10 @@ The 2026-10-03 deploy followed these steps; keep to them.
    then compare file counts and checksums with the live copy.
 3. **Dry run** `scripts/deploy.js` (below) and read every deleted path.
 4. **Diff the sitemaps**: `curl -s https://namsbokasafn.is/sitemap.xml` against
-   `build/sitemap.xml`. Any URL that disappears must be expected.
+   `build/sitemap.xml`. Any URL that disappears must be expected. The sitemap lists
+   every URL with its trailing slash since 2026-10-04 (it lacked them before), so the
+   first deploy after that shows every URL changed: compare with the slashes stripped,
+   e.g. `grep -o '<loc>[^<]*' | sed 's#/$##' | sort` on both sides.
 5. **Without a sync, checksum the content too.** Compare `sha256sum` of every
    file under `build/content/<book>/` (editor backups excluded) with the server's
    copy. The sitemap cannot see content changes: on 2026-10-03 two local files

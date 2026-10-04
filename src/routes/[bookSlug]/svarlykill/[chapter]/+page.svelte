@@ -17,11 +17,11 @@
 	<title>Svarlykill - {data.chapterTitle} | Námsbókasafn</title>
 	<meta name="description" content="Svarlykill fyrir kafla {data.chapterNumber}: {data.chapterTitle}" />
 	<meta name="robots" content="index, follow" />
-	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/svarlykill/{data.chapterNumber}" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/svarlykill/{data.chapterNumber}/" />
 	<meta property="og:title" content="Svarlykill - {data.chapterTitle} | Námsbókasafn" />
 	<meta property="og:description" content="Svarlykill fyrir kafla {data.chapterNumber}: {data.chapterTitle}" />
 	<meta property="og:type" content="article" />
-	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/svarlykill/{data.chapterNumber}" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/svarlykill/{data.chapterNumber}/" />
 </svelte:head>
 
 <article class="max-w-4xl mx-auto px-1 sm:px-0">

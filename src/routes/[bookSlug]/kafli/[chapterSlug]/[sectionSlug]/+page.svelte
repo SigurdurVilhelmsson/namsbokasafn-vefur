@@ -211,11 +211,11 @@
 	<title>{data.section.section} {data.section.title} | Námsbókasafn</title>
 	<meta name="description" content="{data.section.section} {data.section.title} – Efnafræði kennslubók á íslensku" />
 	<meta name="robots" content="index, follow" />
-	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/kafli/{data.chapterSlug}/{data.sectionSlug}" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/kafli/{data.chapterSlug}/{data.sectionSlug}/" />
 	<meta property="og:title" content="{data.section.section} {data.section.title} | Námsbókasafn" />
 	<meta property="og:description" content="{data.section.section} {data.section.title} – Efnafræði kennslubók á íslensku" />
 	<meta property="og:type" content="article" />
-	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/kafli/{data.chapterSlug}/{data.sectionSlug}" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/kafli/{data.chapterSlug}/{data.sectionSlug}/" />
 </svelte:head>
 
 <article class="max-w-4xl mx-auto px-1 sm:px-0">

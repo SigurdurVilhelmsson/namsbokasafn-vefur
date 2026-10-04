@@ -19,10 +19,11 @@
 <svelte:head>
 	<title>Aðlögunarpróf | Námsbókasafn</title>
 	<meta property="og:title" content="Aðlögunarpróf | Námsbókasafn" />
+	<meta name="description" content="Próf og æfingar til að meta skilning á námsefni" />
 	<meta property="og:description" content="Próf og æfingar til að meta skilning á námsefni" />
 	<meta property="og:type" content="website" />
-	<link rel="canonical" href="https://namsbokasafn.is/{bookSlug}/prof" />
-	<meta property="og:url" content="https://namsbokasafn.is/{bookSlug}/prof" />
+	<link rel="canonical" href="https://namsbokasafn.is/{bookSlug}/prof/" />
+	<meta property="og:url" content="https://namsbokasafn.is/{bookSlug}/prof/" />
 </svelte:head>
 
 <div class="quiz-page min-h-[80vh] p-6">

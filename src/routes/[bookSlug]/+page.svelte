@@ -69,11 +69,11 @@
 	<title>{data.book?.title ?? 'Bók'} | Námsbókasafn</title>
 	<meta name="description" content={metaDescription} />
 	<meta name="robots" content="index, follow" />
-	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}" />
+	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/" />
 	<meta property="og:title" content="{data.book?.title ?? 'Bók'} | Námsbókasafn" />
 	<meta property="og:description" content={metaDescription} />
 	<meta property="og:type" content="website" />
-	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}" />
+	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/" />
 </svelte:head>
 
 <div class="book-home">

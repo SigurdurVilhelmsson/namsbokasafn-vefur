@@ -73,5 +73,7 @@ export function sitemapUrls(contentDir) {
 		}
 	}
 
-	return urls;
+	// trailingSlash is 'always' (src/routes/+layout.ts): the canonical URL ends
+	// in '/', and the live site answers 301 to the URL without it
+	return urls.map((url) => (url.endsWith('/') ? url : `${url}/`));
 }
