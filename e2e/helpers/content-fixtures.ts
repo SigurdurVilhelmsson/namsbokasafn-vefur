@@ -132,3 +132,13 @@ export function glossaryTerms(slug: string): GlossaryTerm[] {
 	const data = JSON.parse(readFileSync(file, 'utf-8')) as { terms?: GlossaryTerm[] };
 	return data.terms ?? [];
 }
+
+/** First synced book whose toc.json lists front matter (chapters/00), or null. */
+export function bookWithFrontMatter(): string | null {
+	return (
+		syncedBooks().find((slug) => {
+			const toc = readToc(slug) as { frontMatter?: unknown[] } | null;
+			return (toc?.frontMatter?.length ?? 0) > 0;
+		}) ?? null
+	);
+}
