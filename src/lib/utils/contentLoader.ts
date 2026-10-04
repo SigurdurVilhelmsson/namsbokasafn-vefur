@@ -8,6 +8,7 @@
 
 import type { TableOfContents, SectionContent, SectionMetadata, Appendix, Chapter } from '$lib/types/content';
 import { browser } from '$app/environment';
+import { migrateRenamedSections } from '$lib/stores/sectionRenameMigration';
 
 /**
  * Custom error for content loading failures
@@ -51,7 +52,11 @@ export async function loadTableOfContents(
 				isOffline
 			);
 		}
-		return await response.json();
+		const toc: TableOfContents = await response.json();
+		// Carry the reader's saved state across renamed sections before anything
+		// renders from this table of contents (browser only; idempotent)
+		migrateRenamedSections(bookSlug, toc);
+		return toc;
 	} catch (e) {
 		if (e instanceof ContentLoadError) throw e;
 		const isOffline = checkOffline();

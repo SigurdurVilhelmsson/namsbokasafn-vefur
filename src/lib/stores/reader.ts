@@ -4,6 +4,7 @@
  */
 
 import { writable, derived, get } from 'svelte/store';
+import { type SectionRename, renameInReader } from '$lib/utils/sectionRenames';
 import { browser } from '$app/environment';
 import {
 	createSectionKey,
@@ -108,6 +109,12 @@ function createReaderStore() {
 
 	return {
 		subscribe,
+		/** Carry saved state across renamed sections (lib/utils/sectionRenames.ts). Saves only on change. */
+		renameSections: (renames: SectionRename[]) => {
+			const state = get({ subscribe });
+			const next = renameInReader(state, renames);
+			if (next !== state) set(next);
+		},
 
 		// Mark as read
 		markAsRead: (bookSlug: string, chapterSlug: string, sectionSlug: string) => {
