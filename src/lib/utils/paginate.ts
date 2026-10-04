@@ -46,11 +46,26 @@ export interface PageRange {
 	end: number;
 }
 
-export function paginate(items: PaginateItem[], viewportH: number): PageRange[] {
+/**
+ * Split `items` into pages of at most `viewportH` px. The first page gets
+ * `firstPageH` instead: on arrival the content starts lower, below chrome
+ * (learning objectives) that later pages scroll past.
+ *
+ * Headings (keepWithNext) never end a page and are never left alone on one.
+ * When a heading plus the block after it overruns a page, they share it and
+ * the page overruns by the heading: one extra page turn for a lone heading
+ * was the worse trade (QA E4).
+ */
+export function paginate(
+	items: PaginateItem[],
+	viewportH: number,
+	firstPageH: number = viewportH
+): PageRange[] {
 	const pages: PageRange[] = [];
 	let start = 0;
 	let pageH = 0;
 
+	const budget = () => (pages.length === 0 ? firstPageH : viewportH);
 	const flush = (end: number) => {
 		if (end > start) {
 			pages.push({ start, end });
@@ -58,24 +73,33 @@ export function paginate(items: PaginateItem[], viewportH: number): PageRange[] 
 			pageH = 0;
 		}
 	};
+	/** Start of the run of headings directly before `i` on the current page */
+	const headingsBefore = (i: number) => {
+		let s = i;
+		while (s > start && items[s - 1].keepWithNext) s--;
+		return s;
+	};
 
 	let i = 0;
 	while (i < items.length) {
 		const item = items[i];
 
 		// Unavoidable overflow: an atomic block taller than the page gets a
-		// page of its own (it scrolls internally in the renderer)
+		// page of its own (it scrolls internally in the renderer), together
+		// with the headings that introduce it
 		if (item.atomic && item.height > viewportH) {
-			flush(i);
-			pages.push({ start: i, end: i + 1 });
+			const s = headingsBefore(i);
+			flush(s);
+			pages.push({ start: s, end: i + 1 });
 			start = i + 1;
+			pageH = 0;
 			i++;
 			continue;
 		}
 
 		// First item on a page always goes on it, even if oversized
 		// (non-atomic text blocks taller than the viewport are rare)
-		if (pageH === 0 || pageH + item.height <= viewportH) {
+		if (pageH === 0 || pageH + item.height <= budget()) {
 			pageH += item.height;
 			i++;
 			continue;
@@ -83,13 +107,13 @@ export function paginate(items: PaginateItem[], viewportH: number): PageRange[] 
 
 		// Item doesn't fit: break before it, pulling trailing keep-with-next
 		// items (headings) over to the new page so they aren't stranded
-		let breakAt = i;
-		while (breakAt > start && items[breakAt - 1].keepWithNext) {
-			breakAt--;
-		}
+		const breakAt = headingsBefore(i);
 		if (breakAt === start) {
-			// Page would be empty — accept the stranded heading
-			breakAt = i;
+			// The page holds only headings: keep them with this block and let
+			// the page overrun, then start the next page after it
+			flush(i + 1);
+			i++;
+			continue;
 		}
 		flush(breakAt);
 	}

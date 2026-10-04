@@ -54,10 +54,44 @@ describe('paginate', () => {
 		]);
 	});
 
-	it('accepts a stranded heading rather than emit an empty page', () => {
-		// A lone heading followed by an oversized paragraph: heading cannot
-		// be pulled forward without emptying its page
+	it('keeps a heading with a block that fits alone but not with it', () => {
+		// 7.2 at 1280x720 (QA E4): h2 63 + p 455 overran a 460 budget, and the
+		// heading was left alone on a page. It now overruns by its own height.
+		const pages = paginate([block(63, { keepWithNext: true }), block(455), block(100)], 460);
+		expect(pages).toEqual([
+			{ start: 0, end: 2 },
+			{ start: 2, end: 3 }
+		]);
+	});
+
+	it('keeps a heading with an oversized paragraph', () => {
 		const pages = paginate([block(60, { keepWithNext: true }), block(900)], 768);
+		expect(pages).toEqual([{ start: 0, end: 2 }]);
+	});
+
+	it('keeps a heading with an oversized atomic block', () => {
+		const pages = paginate(
+			[block(200), block(60, { keepWithNext: true }), block(900, { atomic: true }), block(200)],
+			768
+		);
+		expect(pages).toEqual([
+			{ start: 0, end: 1 },
+			{ start: 1, end: 3 },
+			{ start: 3, end: 4 }
+		]);
+	});
+
+	it('gives the first page its own, smaller budget', () => {
+		// Chrome above the content on arrival (learning objectives) leaves less room
+		const pages = paginate([block(100), block(100), block(100)], 768, 150);
+		expect(pages).toEqual([
+			{ start: 0, end: 1 },
+			{ start: 1, end: 3 }
+		]);
+	});
+
+	it('still puts one block on a first page too small for it', () => {
+		const pages = paginate([block(200), block(100)], 768, 50);
 		expect(pages).toEqual([
 			{ start: 0, end: 1 },
 			{ start: 1, end: 2 }

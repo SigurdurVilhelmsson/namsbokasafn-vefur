@@ -121,6 +121,8 @@ function isTyping(): boolean {
  * key keeps its default on pages without section navigation.
  */
 function navigatePrevNext(direction: 'prev' | 'next'): boolean {
+	// Paged reading mode turns pages with the same keys; leave them to it.
+	if (document.querySelector('[data-paged-reader]')) return false;
 	const link = document.querySelector<HTMLElement>(`[data-nav="${direction}"]`);
 	if (!link || link.hasAttribute('disabled')) return false;
 	link.click();

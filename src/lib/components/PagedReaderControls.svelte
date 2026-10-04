@@ -57,12 +57,50 @@
 	let cleanups: (() => void)[] = [];
 	let recomputeTimer: ReturnType<typeof setTimeout> | undefined;
 	let observer: MutationObserver | undefined;
+	let navEl: HTMLElement | undefined = $state();
 
+	/** Where scrollToContentTop() puts the top of the container */
+	const SCROLL_OFFSET = 96;
+	/** Room kept free under the page controls. Below lg the bottom corners hold
+	 *  the tools button and the timer pill, which covered "Næsta" (QA E18). */
+	const BOTTOM_CLEARANCE_DESKTOP = 16;
+	const BOTTOM_CLEARANCE_PHONE = 80;
+	/** How long to wait for images before the first split (QA E2/E8/E9) */
+	const IMAGE_WAIT_MS = 1500;
 
+	/** Chrome measured from the layout: between the container top and the first
+	 *  block, and between the last block and the bottom of the page controls.
+	 *  Until the controls exist the gap below is an estimate, corrected by
+	 *  calibrate() once they render. */
+	let gapAbove = 0;
+	let gapBelow = 150;
+
+	/** The deep-link / cross-reference target the reader was sent to. While set,
+	 *  a re-split keeps its page on screen; any page turn clears it. */
+	let target: HTMLElement | null = null;
+
+	function bottomClearance(): number {
+		return window.matchMedia('(min-width: 1024px)').matches
+			? BOTTOM_CLEARANCE_DESKTOP
+			: BOTTOM_CLEARANCE_PHONE;
+	}
+
+	/** Reading height of a page, scrolled to the content top. It used to be the
+	 *  viewport minus a fixed 260px; the real chrome is larger (QA E1). */
 	function availableHeight(): number {
-		// Reading height: viewport minus header/breadcrumb chrome above the
-		// content and the pagination controls below it
-		return Math.max(320, window.innerHeight - 260);
+		return Math.max(
+			240,
+			window.innerHeight - SCROLL_OFFSET - gapAbove - gapBelow - bottomClearance()
+		);
+	}
+
+	/** Reading height of the first page on arrival, before any scroll: the
+	 *  content starts below the learning objectives. Page 1 shrinks to what is
+	 *  visible there rather than the page scrolling past the objectives. */
+	function firstPageHeight(first: HTMLElement): number {
+		const top = first.getBoundingClientRect().top + window.scrollY;
+		const visible = window.innerHeight - top - gapBelow - bottomClearance();
+		return Math.min(availableHeight(), Math.max(0, visible));
 	}
 
 	function contentRoot(): HTMLElement | null {
@@ -94,14 +132,19 @@
 	}
 
 	function computePages() {
+		const first = units[0]?.children[0];
+		if (container && first) {
+			gapAbove = Math.max(0, first.getBoundingClientRect().top - container.getBoundingClientRect().top);
+		}
 		const viewportH = availableHeight();
-		for (const unit of units) {
+		const firstH = first ? firstPageHeight(first) : viewportH;
+		for (const [u, unit] of units.entries()) {
 			const items = unit.children.map((el) => ({
 				height: measure(el),
 				atomic: el.matches(ATOMIC_SELECTOR),
 				keepWithNext: el.matches(KEEP_WITH_NEXT_SELECTOR)
 			}));
-			unit.pages = paginate(items, viewportH);
+			unit.pages = paginate(items, viewportH, u === 0 ? firstH : viewportH);
 			if (unit.pages.length === 0) {
 				unit.pages = [{ start: 0, end: unit.children.length }];
 			}
@@ -160,14 +203,24 @@
 		}
 	}
 
-	function announce() {
-		announcement = `Síða ${current + 1} af ${flatPages.length}`;
+	function positionLabel(): string {
+		const f = flatPages[current];
+		if (!f) return '';
+		return `Hluti ${f.unit + 1} af ${units.length} · Síða ${f.page + 1} af ${units[f.unit]?.pages.length ?? 1}`;
 	}
 
-	function showPage(index: number, { scroll = true } = {}) {
+	/** Announce what the label shows; it used to count flat pages over the
+	 *  whole section while the label counted per sub-section (QA E19). */
+	function announce() {
+		announcement = positionLabel();
+	}
+
+	/** `keepHash` leaves an element deep link (#CNX_…) in the URL, so a reload
+	 *  or a re-split can find the target again (QA E8). */
+	function showPage(index: number, { scroll = true, keepHash = false } = {}) {
 		current = Math.max(0, Math.min(index, flatPages.length - 1));
 		applyVisibility();
-		updateHash();
+		if (!keepHash) updateHash();
 		announce();
 		if (scroll) scrollToContentTop();
 	}
@@ -185,6 +238,7 @@
 	function next() {
 		const flat = flatPages[current];
 		if (!flat) return;
+		target = null;
 		const unit = units[flat.unit];
 		// Advancing past a sub-section's last page marks it read
 		if (flat.page === unit.pages.length - 1) {
@@ -196,6 +250,7 @@
 	}
 
 	function prev() {
+		target = null;
 		if (current > 0) showPage(current - 1);
 	}
 
@@ -208,25 +263,30 @@
 			return idx >= 0 ? idx : null;
 		}
 		// Element deep link (cross-references, figure/equation anchors)
-		if (hash.length > 1) {
-			const root = contentRoot();
-			let target: HTMLElement | null = null;
-			try {
-				target = root?.querySelector<HTMLElement>(`#${CSS.escape(hash.slice(1))}`) ?? null;
-			} catch {
-				return null;
-			}
-			if (target) {
-				for (let u = 0; u < units.length; u++) {
-					const i = itemIndexForTarget(units[u].children, target);
-					if (i >= 0) {
-						const p = pageIndexForItem(units[u].pages, i);
-						return flatPages.findIndex((f) => f.unit === u && f.page === p);
-					}
-				}
+		const el = elementForHash(hash);
+		return el ? pageForElement(el) : null;
+	}
+
+	function pageForElement(el: HTMLElement): number | null {
+		for (let u = 0; u < units.length; u++) {
+			const i = itemIndexForTarget(units[u].children, el);
+			if (i >= 0) {
+				const p = pageIndexForItem(units[u].pages, i);
+				const idx = flatPages.findIndex((f) => f.unit === u && f.page === p);
+				return idx >= 0 ? idx : null;
 			}
 		}
 		return null;
+	}
+
+	/** The element an element deep link points at, or null for #sub-… and none */
+	function elementForHash(hash: string): HTMLElement | null {
+		if (hash.length <= 1 || /^#sub-\d+/.test(hash)) return null;
+		try {
+			return contentRoot()?.querySelector<HTMLElement>(`#${CSS.escape(hash.slice(1))}`) ?? null;
+		} catch {
+			return null;
+		}
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
@@ -259,9 +319,11 @@
 	}
 
 	function handleHashChange() {
-		const idx = resolveHash(window.location.hash);
+		const hash = window.location.hash;
+		const idx = resolveHash(hash);
+		target = elementForHash(hash);
 		if (idx !== null && idx !== current) {
-			showPage(idx);
+			showPage(idx, { keepHash: target !== null });
 		}
 	}
 
@@ -284,13 +346,16 @@
 			units = buildUnits(root);
 			computePages();
 
-			let idx = 0;
-			if (anchor && anchor.unit < units.length) {
+			// A deep-link target outranks the page's first block: a late image
+			// can push the target onto the next page, which used to hide it
+			// ~100ms after landing (QA E8)
+			let idx: number | null = target?.isConnected ? pageForElement(target) : null;
+			if (idx === null && anchor && anchor.unit < units.length) {
 				const p = pageIndexForItem(units[anchor.unit].pages, anchor.item);
 				const found = flatPages.findIndex((f) => f.unit === anchor.unit && f.page === p);
-				idx = found >= 0 ? found : 0;
+				idx = found >= 0 ? found : null;
 			}
-			showPage(idx, { scroll: false });
+			showPage(idx ?? 0, { scroll: false, keepHash: target !== null });
 		} catch (e) {
 			console.warn('Paged mode recompute failed; falling back to scrolling:', e);
 			fail();
@@ -301,6 +366,30 @@
 		failed = true;
 		ready = false;
 		restoreAll();
+	}
+
+	async function loadImages(root: HTMLElement) {
+		const images = Array.from(root.querySelectorAll('img'));
+		for (const img of images) img.loading = 'eager';
+		const settled = Promise.all(
+			images.filter((img) => !img.complete).map((img) => img.decode().catch(() => undefined))
+		);
+		await Promise.race([settled, new Promise((r) => setTimeout(r, IMAGE_WAIT_MS))]);
+	}
+
+	/** Measure the real gap between the last block and the bottom of the page
+	 *  controls, now that they exist, and re-split if the estimate was off. */
+	function calibrate() {
+		if (!navEl || !ready) return;
+		const shown = flatPages[current] && units[flatPages[current].unit];
+		const range = shown && shown.pages[flatPages[current].page];
+		const last = range && shown.children[range.end - 1];
+		if (!last) return;
+		const measured = navEl.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom;
+		if (measured > 0 && Math.abs(measured - gapBelow) > 8) {
+			gapBelow = measured;
+			recompute();
+		}
 	}
 
 	async function init(el: HTMLElement) {
@@ -317,6 +406,13 @@
 				return;
 			}
 
+			// Content images are lazy and carry no dimensions, so one not yet
+			// loaded measures ~0px; and a lazy image on a hidden page never
+			// loads until that page is shown. Load them all now, wait briefly
+			// for them, and let any straggler re-split through its load event.
+			await loadImages(root);
+			if (failed || container !== el) return;
+
 			units = buildUnits(root);
 			computePages();
 			if (flatPages.length === 0) {
@@ -326,7 +422,10 @@
 			ready = true;
 
 			const fromHash = resolveHash(window.location.hash);
-			showPage(fromHash ?? 0, { scroll: fromHash !== null });
+			target = elementForHash(window.location.hash);
+			showPage(fromHash ?? 0, { scroll: fromHash !== null, keepHash: target !== null });
+			await tick();
+			calibrate();
 
 			// Late-loading images change heights — recompute around them
 			const onAssetLoad = () => scheduleRecompute();
@@ -398,7 +497,8 @@
 </script>
 
 {#if ready && !failed && flatPages.length > 0}
-	<nav class="paged-nav" aria-label="Síðuflakk">
+	<!-- data-paged-reader: the global ←/→ section shortcut steps aside for it -->
+	<nav class="paged-nav" aria-label="Síðuflakk" data-paged-reader bind:this={navEl}>
 		<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
 			<Icon name="chevron-left" size="sm" />
 			Fyrri
@@ -421,8 +521,12 @@
 		</button>
 	</nav>
 
-	<div class="sr-only" aria-live="polite">{announcement}</div>
 {/if}
+<!-- Outside the {#if}: a live region inserted together with its text is not
+     reliably announced -->
+<div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
+	{ready && !failed ? announcement : ''}
+</div>
 
 <style>
 	.paged-nav {
@@ -461,7 +565,8 @@
 
 	.paged-nav-label {
 		font-size: 0.8125rem;
-		color: var(--text-tertiary);
+		/* Not --text-tertiary: 2.90:1 on --bg-primary fails AA (QA E18) */
+		color: var(--text-secondary);
 		text-align: center;
 	}
 
