@@ -84,3 +84,36 @@ export function bookWith(capability: Capability): string | null {
 export function bookWithout(capability: Capability): string | null {
 	return syncedBooks().find((slug) => readToc(slug)?.[capability] == null) ?? null;
 }
+
+/**
+ * Reader URLs of the section pages whose published HTML contains `marker` most
+ * often, across every synced book (editor artifacts such as `*.html.backup.*`
+ * are skipped): the pages most likely to exercise markup a
+ * test is about, picked from the content rather than from a hardcoded slug (a
+ * title correction renames the file, and with it the URL). Ties break on the
+ * URL, so the choice is deterministic.
+ */
+export function sectionsContaining(marker: string, limit: number): string[] {
+	const found: { url: string; count: number }[] = [];
+	for (const slug of syncedBooks()) {
+		const chaptersDir = join(CONTENT_DIR, slug, 'chapters');
+		if (!existsSync(chaptersDir)) continue;
+		for (const chapter of readdirSync(chaptersDir, { withFileTypes: true })) {
+			// Numbered chapters only: front matter (00) and appendices route elsewhere.
+			if (!chapter.isDirectory() || !/^\d+$/.test(chapter.name) || chapter.name === '00') continue;
+			for (const file of readdirSync(join(chaptersDir, chapter.name))) {
+				// Module sections only ("1-4-maelingar.html"): rollups route elsewhere.
+				if (!/^\d+-\d+-.+\.html$/.test(file)) continue;
+				const html = readFileSync(join(chaptersDir, chapter.name, file), 'utf-8');
+				const count = html.split(marker).length - 1;
+				if (count > 0) {
+					found.push({ url: `/${slug}/kafli/${chapter.name}/${file.slice(0, -5)}/`, count });
+				}
+			}
+		}
+	}
+	return found
+		.sort((a, b) => b.count - a.count || a.url.localeCompare(b.url))
+		.slice(0, limit)
+		.map((f) => f.url);
+}

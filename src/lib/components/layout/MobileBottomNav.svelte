@@ -5,7 +5,7 @@
   Hidden on desktop (1024px+ breakpoint).
 -->
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount, onDestroy, untrack } from 'svelte';
 	import { page } from '$app/stores';
 	import Icon from '$lib/components/Icon.svelte';
 
@@ -16,7 +16,10 @@
 	let { bookSlug = '', hasPeriodicTable = false }: Props = $props();
 
 	let expanded = $state(false);
-	let inactivityTimer = $state<ReturnType<typeof setTimeout> | null>(null);
+	// Plain, not $state: the route-change effect below calls close(), which reads
+	// this. As $state it made the timer a dependency of that effect, so opening
+	// the menu (which arms the timer) re-ran the effect and closed it at once.
+	let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
 
 	/** Toggle FAB expanded/collapsed state */
 	function toggle() {
@@ -59,7 +62,7 @@
 	/** Close on route change */
 	$effect(() => {
 		void $page.url.pathname;
-		close();
+		untrack(close);
 	});
 
 	onMount(() => {
@@ -181,6 +184,16 @@
 		flex-direction: column;
 		align-items: flex-end;
 		gap: 8px;
+		/* The collapsed menu items are invisible but keep their layout space, so
+		   this box stays ~48x256 above the button. Only the button, the open
+		   menu and the backdrop take taps; the rest falls through to the page,
+		   which it used to swallow without showing anything there. */
+		pointer-events: none;
+	}
+
+	.fab-button,
+	.fab-backdrop {
+		pointer-events: auto;
 	}
 
 	/* Hide on desktop (1024px+) */

@@ -1300,6 +1300,23 @@ mjx-container[jax="SVG"]:not([display="true"]) svg {
   display: inline;
 }
 
+/* Give efni's screen-reader MathML copy a containing block.
+ *
+ * Each equation carries a visually-hidden <math class="assistive-mathml"> beside
+ * its SVG, styled inline as position:absolute. With no positioned ancestor it is
+ * placed against the page itself, so it escapes every overflow container (a
+ * scrolling table, a scrolling display equation) and sets the page's width:
+ * section 5.3 measured 795px wide at a 375px phone, and under mobile emulation
+ * the layout viewport grew to match. Its parent is .math-inline,
+ * .mathjax-display or, 67 times in chemistry, a bare table cell. clip-path and
+ * contain on the <math> itself were measured and do not help.
+ */
+.math-inline,
+.mathjax-display,
+td:has(> math.assistive-mathml) {
+  position: relative;
+}
+
 /* ========================================== */
 /* TABLES                                    */
 /* ========================================== */

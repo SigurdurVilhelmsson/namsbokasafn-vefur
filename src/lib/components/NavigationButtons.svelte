@@ -102,6 +102,7 @@
 					href="/{bookSlug}/kafli/{getChapterPath(next.chapter)}/{getSectionPath(next.section)}"
 					data-sveltekit-preload-data="hover"
 					class="nav-btn nav-btn-next"
+					data-nav="next"
 				>
 					<div class="nav-btn-text">
 						<span class="nav-btn-label">Næsti kafli</span>
@@ -118,6 +119,7 @@
 					href="/{bookSlug}/kafli/{getChapterPath(previous.chapter)}/{getSectionPath(previous.section)}"
 					data-sveltekit-preload-data="hover"
 					class="nav-btn nav-btn-prev"
+					data-nav="prev"
 				>
 					<span class="nav-btn-arrow"><Icon name="chevron-left" /></span>
 					<div class="nav-btn-text">
