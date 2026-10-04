@@ -183,14 +183,12 @@ test.describe('Section Page Accessibility', () => {
 
 		const bookLink = page.getByRole('link', { name: /Efnafræði/i }).first();
 		await bookLink.click();
-		await page.waitForLoadState('networkidle');
-		await page.waitForTimeout(2000);
+		// A client-side navigation: wait for the book page itself, or the
+		// link lookup below runs on the landing page
+		await expect(page).toHaveURL(/\/efnafraedi-2e\//);
 
 		const sectionLink = page.locator('a[href*="/kafli/"]').first();
-		if (!(await sectionLink.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
+		await expect(sectionLink).toBeVisible({ timeout: 10000 });
 
 		await sectionLink.click();
 		await page.waitForLoadState('networkidle');
@@ -206,14 +204,12 @@ test.describe('Section Page Accessibility', () => {
 
 		const bookLink = page.getByRole('link', { name: /Efnafræði/i }).first();
 		await bookLink.click();
-		await page.waitForLoadState('networkidle');
-		await page.waitForTimeout(2000);
+		// A client-side navigation: wait for the book page itself, or the
+		// link lookup below runs on the landing page
+		await expect(page).toHaveURL(/\/efnafraedi-2e\//);
 
 		const sectionLink = page.locator('a[href*="/kafli/"]').first();
-		if (!(await sectionLink.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
+		await expect(sectionLink).toBeVisible({ timeout: 10000 });
 
 		await sectionLink.click();
 		await page.waitForLoadState('networkidle');
