@@ -116,8 +116,7 @@ src/
 │   │   └── ...
 │   ├── actions/           # Svelte actions
 │   │   ├── equations.ts   # MathJax equation handling
-│   │   ├── practiceProblems.ts
-│   │   ├── crossReferences.ts
+│   │   ├── practiceReveal.ts
 │   │   └── figureViewer.ts
 │   ├── types/
 │   │   ├── book.ts
