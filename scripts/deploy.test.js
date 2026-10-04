@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { spawnSync } from 'child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, symlinkSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, symlinkSync, utimesSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -105,6 +105,18 @@ describe('rsyncArgs', () => {
 		expect(args).toContain('--delete');
 		expect(args).not.toContain('--delete-excluded');
 	});
+
+	// nginx's ETag is mtime + size. With -t, every deploy stamped every file with
+	// the build time, so every ETag changed though the bytes had not.
+	it('compares files by checksum, not by size and mtime', () => {
+		expect(rsyncArgs({ ...base, apply: true })).toContain('--checksum');
+	});
+
+	// rsync applies options in order: `--no-times -a` turns -t back on.
+	it('turns times off AFTER -a, which implies them', () => {
+		const args = rsyncArgs({ ...base, apply: true });
+		expect(args.indexOf('--no-times')).toBeGreaterThan(args.indexOf('-az'));
+	});
 });
 
 describe('summarizeItemized', () => {
@@ -129,11 +141,17 @@ describe('summarizeItemized', () => {
 // ---------------------------------------------------------------------------
 // Against a real rsync. A server copy holding the previous build, a frozen book
 // and its PDFs is updated from a new build, and the result is inspected file by
-// file. Fixture files get DIFFERENT sizes on each side: rsync's size+mtime quick
-// check would otherwise skip a transfer and prove nothing.
+// file. Fixture files get DIFFERENT sizes on each side: the deploy compares
+// checksums, but the control arms run a plain `rsync -a`, whose size+mtime quick
+// check would skip a same-size transfer and prove nothing.
 
 const SOURCE_BOOKS = ['edlisfraedi-2e', 'efnafraedi-2e', 'liffraedi-2e', 'lifraen-efnafraedi', 'orverufraedi'];
 const hasRsync = spawnSync('rsync', ['--version']).status === 0;
+
+const UNCHANGED_FIGURE = 'content/efnafraedi-2e/chapters/01/images/media/fig.svg';
+const SAME_SIZE_PAGE = 'content/efnafraedi-2e/chapters/01/1-1-intro.html';
+const LAST_DEPLOY = new Date('2026-08-19T14:36:47Z');
+const mtimeOnServer = (root, rel) => statSync(join(root, 'server', rel)).mtimeMs;
 
 function write(root, rel, content) {
 	const path = join(root, rel);
@@ -182,6 +200,17 @@ function makeFixture() {
 	write(root, 'build/content/lifraen-efnafraedi/toc.json', 'n'.repeat(556));
 	write(root, 'build/efnafraedi-2e/kafli/01/index.html', 'n'.repeat(777));
 	write(root, 'build/efnafraedi-2e/kafli/01/index.html.backup.2026-03-29T10-57-57', 'n'.repeat(999));
+	// A figure the new build did not change: same bytes, but the build stamped
+	// its copy with the build time, as every build does.
+	write(root, `server/${UNCHANGED_FIGURE}`, 'f'.repeat(900));
+	utimesSync(join(root, 'server', UNCHANGED_FIGURE), LAST_DEPLOY, LAST_DEPLOY);
+	write(root, `build/${UNCHANGED_FIGURE}`, 'f'.repeat(900));
+	// A page whose bytes changed while its size and mtime did not: rsync's
+	// quick check cannot tell the two copies apart.
+	write(root, `server/${SAME_SIZE_PAGE}`, 'o'.repeat(880));
+	write(root, `build/${SAME_SIZE_PAGE}`, 'n'.repeat(880));
+	utimesSync(join(root, 'server', SAME_SIZE_PAGE), LAST_DEPLOY, LAST_DEPLOY);
+	utimesSync(join(root, 'build', SAME_SIZE_PAGE), LAST_DEPLOY, LAST_DEPLOY);
 	return root;
 }
 
@@ -307,6 +336,52 @@ describe.skipIf(!hasRsync && !process.env.CI)('deploy against a real rsync', () 
 		expect(onServer(root, 'stale/index.html')).toBe(true);
 		expect(onServer(root, '_app/immutable/chunks/new.js')).toBe(false);
 		expect(result.deleted).toContain('stale/index.html');
+	});
+
+	// 🔴 nginx's ETag and Last-Modified come from the mtime. A file the build did
+	// not change must keep its server mtime, or every deploy turns each reader's
+	// revalidation of it into a full 200 instead of a 304.
+	it('leaves an unchanged file, and its mtime, alone on the server', () => {
+		const result = run(true);
+		expect(result.transferred).not.toContain(UNCHANGED_FIGURE);
+		expect(mtimeOnServer(root, UNCHANGED_FIGURE)).toBe(LAST_DEPLOY.getTime());
+	});
+
+	// Control: the same fixture through -a's own times. The mtime moves, so the
+	// test above can fail.
+	it('control: rsync -a moves the mtime of an unchanged file', () => {
+		const res = spawnSync('rsync', ['-a', join(root, 'build') + '/', join(root, 'server') + '/']);
+		expect(res.status).toBe(0);
+		expect(mtimeOnServer(root, UNCHANGED_FIGURE)).not.toBe(LAST_DEPLOY.getTime());
+	});
+
+	// A changed file must get a NEW mtime, so its ETag changes and readers fetch it.
+	it('sends a changed file and gives it a new mtime', () => {
+		run(true);
+		expect(statSync(join(root, 'server/efnafraedi-2e/kafli/01/index.html')).size).toBe(777);
+		expect(mtimeOnServer(root, 'efnafraedi-2e/kafli/01/index.html')).toBeGreaterThan(LAST_DEPLOY.getTime());
+	});
+
+	it('sends a changed file even when its size and mtime match the server copy', () => {
+		run(true);
+		expect(readFileSync(join(root, 'server', SAME_SIZE_PAGE), 'utf8')).toBe('n'.repeat(880));
+		expect(mtimeOnServer(root, SAME_SIZE_PAGE)).toBeGreaterThan(LAST_DEPLOY.getTime());
+	});
+
+	// Control: the quick check skips it, so the test above can fail.
+	it('control: rsync -a skips a changed file whose size and mtime match', () => {
+		const res = spawnSync('rsync', ['-a', join(root, 'build') + '/', join(root, 'server') + '/']);
+		expect(res.status).toBe(0);
+		expect(readFileSync(join(root, 'server', SAME_SIZE_PAGE), 'utf8')).toBe('o'.repeat(880));
+	});
+
+	// The dry run's count is what the operator reads: once deployed, the same
+	// build must report nothing to send or delete.
+	it('reports nothing to do when the server already holds the build', () => {
+		expect(run(true).transferred.length).toBeGreaterThan(0);
+		const again = run(false);
+		expect(again.transferred).toEqual([]);
+		expect(again.deleted).toEqual([]);
 	});
 
 	// An empty or missing efni checkout means --source points at the wrong

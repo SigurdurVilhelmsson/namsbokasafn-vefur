@@ -99,10 +99,25 @@ every run:
   book, `downloads/` or `_app/immutable/`, which the rules above leave as they
   are.
 
+It sends a file only when its **bytes** differ from the server's copy
+(`--checksum`), and never copies modification times (`--no-times`). nginx
+builds each file's ETag and `Last-Modified` from its mtime, and every build
+stamps every file with the build time, so before this the server's copy of
+every file got a new mtime on every deploy (2,908 files "sent" on 2026-10-04,
+none of them changed in content) and each reader's next revalidation was a full
+download instead of a 304. Now an unchanged file keeps its mtime, and its ETag.
+So **the dry run's transfer count is a real diff**: a deploy with no content
+change sends nothing under `content/` (measured 2026-10-04: 314 files, all of
+them prerendered pages, `_app/` files and `sw.js`, whose bytes change on every
+build because SvelteKit's version is a timestamp). After such a deploy,
+`curl -sI` an unchanged figure: `last-modified` must not have moved. It still
+does not say which side is newer: step 5's checksum stays.
+
 ⚠️ Do not deploy with a hand-written rsync. The rules only work when passed
 with `--filter='merge FILE'` (an `--exclude-from` file silently ignores the `P`
 rule, and the old assets are deleted), and `--delete-excluded` would delete
-exactly what the excludes keep.
+exactly what the excludes keep. A plain `-a` would also bring back the ETag
+churn above.
 
 ### Refreshing the PDFs
 

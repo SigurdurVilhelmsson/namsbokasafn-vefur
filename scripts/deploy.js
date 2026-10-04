@@ -16,6 +16,8 @@
  * - Editor artifacts: never sent, even though a build copies them from
  *   static/content into build/; copies already on the server outside a frozen
  *   book are deleted.
+ * - Unchanged files keep their ETag: only files whose bytes changed are sent,
+ *   so the transfer count is a real diff (see rsyncArgs).
  *
  * The rules travel as `--filter='merge FILE'`. Never put them in an
  * `--exclude-from` file (it reads the `P` rule as an exclude that matches
@@ -76,9 +78,20 @@ export function parseArgs(argv, env) {
 	return options;
 }
 
-/** The rsync arguments for one deploy run. Pure, so the flags can be pinned by tests. */
+/**
+ * The rsync arguments for one deploy run. Pure, so the flags can be pinned by tests.
+ *
+ * `--checksum --no-times`: a file is sent only when its BYTES differ, and the
+ * server's mtime moves only when one is sent. nginx builds ETag and
+ * Last-Modified from the mtime, and every build stamps every file with the
+ * build time, so with `-t` each deploy changed every ETag and a reader's next
+ * revalidation of each figure and page was a full 200 instead of a 304.
+ * `--checksum` alone is not enough: with `-t` still on, rsync skips an
+ * identical file but still copies its new mtime across. `--no-times` must come
+ * AFTER `-a`, which turns `-t` back on (rsync applies options in order).
+ */
 export function rsyncArgs({ buildDir, target, filterFile, apply }) {
-	const args = ['-az', '--delete', `--filter=merge ${filterFile}`, '--itemize-changes'];
+	const args = ['-az', '--no-times', '--checksum', '--delete', `--filter=merge ${filterFile}`, '--itemize-changes'];
 	if (!apply) args.push('--dry-run');
 	// The trailing slash copies the CONTENTS of the build directory.
 	args.push(buildDir.endsWith('/') ? buildDir : `${buildDir}/`, target);
