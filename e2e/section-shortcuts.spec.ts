@@ -71,4 +71,49 @@ test.describe('Section shortcuts', () => {
 		);
 		expect(prevented).toBe(false);
 	});
+
+	// Each of these changed section once the shortcut came alive (QA re-check
+	// 2026-10-04): the key belonged to something else on the page.
+	async function openSection(page: Page): Promise<string> {
+		const urls = sectionsContaining('<p', 50).filter((u) => !/\/\d+-0-[^/]*\/$/.test(u));
+		test.skip(urls.length === 0, 'No synced section');
+		await scrolledMode(page);
+		await page.goto(urls[0]);
+		await expect(page.locator('a.nav-btn-next')).toBeAttached({ timeout: 15000 });
+		await page.locator('body').click({ position: { x: 5, y: 5 } });
+		return new URL(page.url()).pathname;
+	}
+
+	test('Shift+→ extends a selection instead of changing section', async ({ page }) => {
+		const path = await openSection(page);
+		await page.keyboard.press('Shift+ArrowRight');
+		await page.waitForTimeout(800);
+		expect(new URL(page.url()).pathname).toBe(path);
+	});
+
+	test('→ stays with an open dialog', async ({ page }) => {
+		const path = await openSection(page);
+		await page.getByRole('button', { name: 'Stillingar' }).click();
+		await expect(page.getByRole('dialog')).toBeVisible();
+		await page.keyboard.press('ArrowRight');
+		await page.waitForTimeout(800);
+		expect(new URL(page.url()).pathname).toBe(path);
+	});
+
+	test('→ scrolls a focused wide box instead of changing section', async ({ page }) => {
+		const path = await openSection(page);
+		await page.evaluate(() => {
+			const box = document.createElement('div');
+			box.id = 'wide-box';
+			box.tabIndex = 0;
+			box.style.cssText = 'overflow-x:auto;width:200px';
+			box.innerHTML = '<div style="width:2000px;height:20px"></div>';
+			document.querySelector('.reading-content')!.prepend(box);
+			box.focus();
+		});
+		await page.keyboard.press('ArrowRight');
+		await page.waitForTimeout(800);
+		expect(new URL(page.url()).pathname).toBe(path);
+	});
 });
+
