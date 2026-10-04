@@ -75,16 +75,6 @@ export {
 	type ConfidenceLevel
 } from './objectives';
 
-// Reference
-export {
-	referenceStore,
-	parseReferenceString,
-	getReferenceUrl,
-	type ReferenceType,
-	type ReferenceItem,
-	type ReferenceIndex
-} from './reference';
-
 // Offline
 export {
 	offline,

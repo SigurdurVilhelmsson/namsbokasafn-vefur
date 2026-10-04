@@ -51,7 +51,6 @@ npm run format           # Prettier formatting
 - `glossary.ts`: Glossary state and term lookup
 - `objectives.ts`: Learning objectives tracking
 - `offline.ts`: PWA offline state
-- `reference.ts`: Reference/citation management
 - `recall.ts`: Free-recall entries written after completing a section (reader v1.1 branch)
 
 ### Content Loading
@@ -224,7 +223,6 @@ The catalogue carries **two content licences**: most titles are CC BY 4.0, but C
 
 - `src/lib/actions/equations.ts`: Equation rendering
 - `src/lib/actions/practiceReveal.ts`: Example-answer reveal toggle and practice self-assessment (feeds `quizStore`; replaced `practiceProblems.ts` in #150)
-- `src/lib/actions/crossReferences.ts`: Internal link handling
 - `src/lib/actions/figureViewer.ts`: Image lightbox with zoom, pan, keyboard nav, and touch gestures (pinch-to-zoom, double-tap)
 - `src/lib/actions/glossaryTerms.ts`: Semantic glossary term tooltips (dfn elements only)
 - `src/lib/actions/answerLinks.ts`: Bidirectional exercise↔answer key navigation

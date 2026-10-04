@@ -4,7 +4,6 @@
 <script lang="ts">
 	import { equations } from '$lib/actions/equations';
 	import { figureViewer } from '$lib/actions/figureViewer';
-	import { crossReferences } from '$lib/actions/crossReferences';
 	import { answerLinks } from '$lib/actions/answerLinks';
 	import { bionicReadingAction } from '$lib/actions/bionicReading';
 	import { glossaryTerms } from '$lib/actions/glossaryTerms';
@@ -61,7 +60,6 @@
 		class:hide-static-objectives={hideStaticObjectives}
 		use:equations
 		use:figureViewer
-		use:crossReferences={{ bookSlug, chapterSlug, sectionSlug, chapterNumber, content }}
 		use:answerLinks={{ bookSlug, chapterSlug, sectionSlug, sectionType, chapterNumber }}
 		use:glossaryTerms={{ bookSlug }}
 		use:bionicReadingAction={content}

@@ -6,7 +6,6 @@
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
 	import { settings, fontSize, fontFamily, lineHeight, lineWidth } from '$lib/stores';
-	import { referenceStore } from '$lib/stores/reference';
 	import Header from '$lib/components/layout/Header.svelte';
 	import Sidebar from '$lib/components/layout/Sidebar.svelte';
 	import FocusModeNav from '$lib/components/layout/FocusModeNav.svelte';
@@ -33,13 +32,6 @@
 	let focusMode = $state(false);
 	let showShortcutsModal = $state(false);
 	let headerComponent = $state<Header>();
-
-	// Load precomputed references when data changes
-	$effect(() => {
-		if (data.references) {
-			referenceStore.loadPrecomputedIndex(data.references);
-		}
-	});
 
 	function toggleFocusMode() {
 		focusMode = !focusMode;
