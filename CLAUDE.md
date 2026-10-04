@@ -597,7 +597,20 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-10-04 (late) — deploys stop changing unchanged files' ETags (#263)
+
+Measured on 2026-10-04 against `main` = `0919282` plus #263, and the live site.
+
+- **#263: `deploy.js` runs rsync with `--checksum --no-times`** (rules under Deployment). ⏳ **Not deployed**: prod still runs build `1791149163717`; the other merges since (#261, #262) changed only docs and tests. 🔑 **The next deploy closes worklist `sync-etag-churn`:** `curl -sI` an unchanged figure (e.g. `/content/efnafraedi-2e/chapters/05/images/media/CNX_Chem_05_01_SolTherm1_IS.svg`, `last-modified` 21:26:53 today) before and after `--apply`; it must not move. Expect that dry run to list only prerendered pages, `_app/` files and `sw.js` (314 for a rebuild of the same commit).
+- **Scope:** `content/` and unchanged static files only. Prerendered pages still change bytes every build (SvelteKit's version is a timestamp). A `kit.version.name` derived from the git commit would make a content-only redeploy byte-stable; not decided, not on the worklist.
+- **Reviewed by a 4-lens workflow** (rsync semantics against the server's own 3.2.7, HTTP caching in a real browser, mutation testing, docs). No blocker. It caught a new test that **could not fail**: the fixture wrote the build in the same wall-clock second as the deploy, and rsync's quick check compares whole seconds, so dropping `--checksum` passed. ⚠️ **A real-rsync fixture needs fixed, distinct mtimes** (`utimesSync`), not "written just now".
+- **Leads for other sessions, unconfirmed:** `Skeleton.svelte:85` prerenders `width: {Math.random()}%`, a candidate for the catalogue `hydration_mismatch` (noted on `bl-catalogue-hydration`); live figures carry two `Cache-Control` headers (`max-age=86400` and `public, must-revalidate`), harmless as measured.
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+
 ### 2026-10-04 (evening) — service-worker cache and offline download live (#260)
+
+> ⚠️ **Superseded on one point — read the (late) entry above first.** `main` now carries #263, which is
+> not deployed. Everything else here still stands.
 
 Measured on 2026-10-04 against `main` = `99e13b4` (#260) and the live site.
 
