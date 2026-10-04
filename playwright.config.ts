@@ -6,7 +6,9 @@ export default defineConfig({
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
 	workers: process.env.CI ? 1 : undefined,
-	reporter: 'html',
+	// CI also prints every test, so a skipped one is named in the job log: a
+	// skip count alone hid that the flashcard and glossary tests never ran.
+	reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'html',
 	// Increase timeouts for slower environments (WSL, CI)
 	timeout: 60000, // 60s per test
 	expect: {
