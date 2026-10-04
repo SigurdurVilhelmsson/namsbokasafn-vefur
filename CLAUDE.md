@@ -566,7 +566,24 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-10-04 — eleven PRs merged and deployed; reader v1.1 pushed
+
+Measured on 2026-10-04 against `main` = `03e3b32` (#256), efni `main` = `08014ad4b` and the live site.
+
+- **Prod runs build `1791112632269`** (deployed ~11:20 UTC from `main` `03e3b32` by `scripts/deploy.js`, no content sync): 2,910 files sent, 0 deleted, and all 2,480 chemistry content files byte-identical to the server beforehand. The previous build is backed up on the server (`~/backups/namsbokasafn-build-2026-10-04-v1791030534964`, checksums verified). Verified live: version, the four redirect stubs, one description per page, the slash-terminated sitemap, organic 404, 0 missing assets on 5 pages (frozen physics and biology included), and the phone tools menu and Settings in a real browser.
+- **What went live (#246–#256):** the phone fixes (the tools menu that never opened, Settings hidden below 1024px, assistive-MathML page overflow, the tools menu swallowing taps, the timer pill over the tools button) and a working ←/→ section shortcut (#246); quick wins (#248); flashcard and glossary e2e coverage (#249: those 11 tests had skipped on every run, and CI skips fell 39 → 28); the sync stamp (#250, #252; see Build Scripts); the 403 fix for `/kafli/`, `/kafli/00/`, `/svarlykill/` and `/vidauki/` (#251); SEO (#253); the "Svar:" fallback removal (#254); appendix letters up to Z and the dead cross-reference preview removed (#255); `--prune` (#256).
+- ⚠️ **The next deploy's sitemap diff is normal again** (both sides now carry the trailing slash), but **no book has a sync stamp until its next sync**, so the stamp comparison in the deploy guide starts working only then.
+- **Reader v1.1** (`feature/reader-v1.1` at `dde768e`, pushed, CI green): all nine automated-QA paging failures fixed, plus [USER]'s rulings of 2026-10-04: scroll past the learning objectives on arrival, chapter rollups always scroll, and "Næsta" on the last page finishes the section even when sub-sections were skipped. Next: [USER]'s human QA (real phone, real screen reader) and the remaining judgment calls. ⚠️ When `main` is next merged in, the rewritten flashcard flip test (#249) expects tap-to-flip; v1.1's predict-first cards need it adapted.
+- 🔴 **Chemistry's two EXISTING redirect rows point at retired targets in efni `main`:** `10-5-fastur-efnishamur` is now `10-5-fast-efni`, and `20-3-aldehyd-keton-karboxylsyrur-og-estrar` is now `20-3-aldehyd-ketonar-karboxylsyrur-og-esterar`. CI shows it (their 8 redirect tests skip there). The at-sync redirect recompute must re-point both rows, not only add new ones.
+- **efni was told** (`docs/handoffs/2026-10-04-assistive-mathml-and-image-dimensions-for-efni.md`, plus messages to the live efni session): the assistive-MathML style has no containing block, and content images carry no width/height, which is why reader v1.1 eager-loads images.
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+- **npm audit, 2026-10-04:** production tree and full tree both 0 (control: 1 critical).
+
 ### 2026-10-03 — organic is off the live site; main deployed; efni told
+
+> ⚠️ **Superseded on the operational points — read the 2026-10-04 entry above first.** Prod now runs
+> the 2026-10-04 build. The chemistry hold and the "do not run `sync-content.js`" rule still stand.
+> The rest of this entry is accurate for its date.
 
 Measured on 2026-10-03 against `main` = `ebea9d0` (#243), efni `main` = `0c2f06d01` and the live site.
 
