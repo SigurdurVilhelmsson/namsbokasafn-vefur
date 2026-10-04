@@ -2,15 +2,14 @@
 /**
  * Process content at build time
  *
- * This script enriches toc.json with:
- * 1. Parsed frontmatter from markdown files (using gray-matter)
- * 2. Cross-reference index with precomputed deterministic numbering
+ * Enriches each book's toc.json with per-section metadata read from the
+ * pre-rendered HTML: title, section and chapter numbers and learning
+ * objectives (from the page-data block), and an estimated reading time.
+ * Front matter (chapters/00) is included.
  *
- * Benefits:
- * - Proper YAML parsing (handles quoted strings, nested objects, etc.)
- * - Build-time processing (no runtime parsing overhead)
- * - Metadata available immediately from toc.json
- * - Deterministic cross-reference numbering (equations, figures, tables)
+ * Done at build time so the reader gets this from toc.json without fetching
+ * or parsing every page. (It no longer parses Markdown or builds a
+ * cross-reference index: both went with the Markdown pipeline.)
  *
  * Usage: node scripts/process-content.js
  * Run after sync-content.js

@@ -62,18 +62,6 @@ export interface AnswerKeyEntry {
   file: string;    // e.g., "answer-key/1.html" or "01/1-answer-key.html"
 }
 
-// Precomputed reference for deterministic numbering
-export interface PrecomputedReference {
-  type: 'sec' | 'eq' | 'fig' | 'tbl' | 'def';
-  id: string;
-  number: string;
-  label: string;
-  title?: string;
-  preview?: string;
-  chapterSlug: string;
-  sectionSlug: string;
-  anchor: string;
-}
 
 // Table of contents for a book
 export interface TableOfContents {
@@ -94,8 +82,6 @@ export interface TableOfContents {
   // Book glossary (Orðasafn) — present only when the book ships a glossary.json
   // (set by generate-toc.js). Gates the sidebar link + route.
   glossary?: { title: string; file: string };
-  // Precomputed cross-reference index (from build-time processing)
-  references?: { [key: string]: PrecomputedReference };
 }
 
 // Difficulty levels for content
