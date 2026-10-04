@@ -40,18 +40,18 @@ A hard load of a frozen book's page runs the **old** `offline.ts` (the frozen pa
 ## Trade-offs to know before diagnosing a deploy
 
 - 🔴 **One stale view.** With `StaleWhileRevalidate`, the first view of a figure cached in the last 7 days shows the **old** bytes after a content deploy; the second view is fresh. Opening yesterday's section right after the chemistry sync and seeing the old figure is expected, not a failed deploy. Readers also get nothing new until they accept the service-worker update prompt.
-- **Request chatter.** With `cache: 'no-cache'`, every figure view fires a background conditional request — a 304 normally, a full 200 after a deploy because of the ETag churn. Dropping `no-cache` on the image route would trade that for a worst case of 24 h + one view.
+- **Request chatter.** With `cache: 'no-cache'`, every figure view fires a background conditional request — a 304 normally, a full 200 after a deploy because of the ETag churn (for figures, no longer: see ETag churn below). Dropping `no-cache` on the image route would trade that for a worst case of 24 h + one view.
 - Each figure over 1 MiB is never stored by the service worker while browsing: 60 in chemistry as deployed (83.7 MB), **163 on efni `main` (799 MB)**. The browser's HTTP cache still holds it, and a downloaded book still holds it.
 - **Download size:** chemistry is 345 MB as deployed but **~1 GB on efni `main`** (single SVGs up to 66 MB) until efni's recompose rasterises the heavy tail. The estimate now shows that honestly; it is a reason to land efni's recompose before, or with, the chemistry sync.
 
 - **Stalled network, downloaded book.** A figure fetch whose response headers take over 4 s is aborted and the downloaded copy shown — only for figures with a downloaded copy. Live time-to-first-byte for the largest chemistry SVG (3.1 MB, 990 KB gzipped) measured **0.15–0.25 s**, the same as a 60 KB one (nginx's gzip streams), so 4 s has about 25× headroom. On a link whose first byte ALWAYS takes over 4 s, a downloaded book's figures stay at their downloaded version (the aborted response never refreshes the browsing cache) until "Uppfæra".
-- **ETag churn costs a full re-download per deploy.** With `cache: 'no-cache'`, every page and figure a reader views after a deploy is fetched again in full (200, not 304), because the deploy changes every ETag. The `sync-etag-churn` worklist task removes that.
+- **ETag churn costs a full re-download per deploy.** With `cache: 'no-cache'`, every page and figure a reader views after a deploy is fetched again in full (200, not 304), because the deploy changes every ETag. The `sync-etag-churn` worklist task removes that. _Since `fix/deploy-etag-churn`: true only for prerendered pages, whose bytes change on every build; figures and other `content/` files keep their ETag._
 
 ## Out of scope (named, on the worklist)
 
 - **Offline cold start.** `navigateFallback: null` plus `globIgnores: ['**/prerendered/**']` precaches no HTML page, so a hard load of a section URL offline fails whatever is downloaded. A downloaded book is readable offline from an open tab (client-side navigation).
 - **First visit.** A tab no service worker controls yet can download (the active worker is checked), but cannot read offline until the page is opened again; the button says so.
-- **ETag churn.** A post-build step that restores `build/content/**` mtimes from `static/content/**` would make unchanged files answer 304 across deploys. Detector: `curl -sI` one figure before and after a deploy with no content change; `last-modified` must not move.
+- **ETag churn.** A post-build step that restores `build/content/**` mtimes from `static/content/**` would make unchanged files answer 304 across deploys. Detector: `curl -sI` one figure before and after a deploy with no content change; `last-modified` must not move. _Done another way (`fix/deploy-etag-churn`): `deploy.js` runs rsync with `--checksum --no-times`, which covers every file, not only `content/`, and needs no one-off deploy to realign mtimes._
 
 ## Tests
 
