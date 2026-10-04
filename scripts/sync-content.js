@@ -33,6 +33,7 @@
  *   --source, -s          Path to content repo (default: ../namsbokasafn-efni)
  *   --validate, -v        Run content validation after sync
  *   --allow-withheld      Sync a book the publication ruling holds back
+ *   --prune               Delete static/content folders of books no longer in the source
  *   --help, -h            Show this help message
  */
 
@@ -94,6 +95,7 @@ function parseArgs(args) {
 		source: DEFAULT_SOURCE,
 		books: [],
 		allowWithheld: false,
+		prune: false,
 		help: false
 	};
 
@@ -110,6 +112,8 @@ function parseArgs(args) {
 			options.source = resolve(args[++i] || DEFAULT_SOURCE);
 		} else if (arg === '--allow-withheld') {
 			options.allowWithheld = true;
+		} else if (arg === '--prune') {
+			options.prune = true;
 		} else if (!arg.startsWith('-')) {
 			options.books.push(arg);
 		}
@@ -137,6 +141,8 @@ Options:
   --source, -s          Path to content repo (default: ../namsbokasafn-efni)
   --validate, -v        Run content validation after sync
   --allow-withheld      Sync a book the publication ruling holds back
+  --prune               Delete static/content folders of books no longer in the
+                        source tree (only when every book synced; listed otherwise)
   --help, -h            Show this help message
 
 Publication allowlist:
@@ -645,6 +651,27 @@ function syncProvenance(sourceDir, dryRun) {
 	console.log(`  Done: ${dest}`);
 }
 
+/**
+ * Which static/content folders are stale (their book is no longer in the
+ * SOURCE tree), and which of them this run may delete.
+ *
+ * Pure and exported so the policy is pinned by tests. Deletion needs --prune
+ * and a run in which every book synced. It used to be unconditional, so a
+ * --source pointed at a partial checkout deleted every other book's content
+ * on any sync, even a one-book sync or a failed one (code review 2026-06 §2.4).
+ *
+ * 🔴 Keyed on `availableBooks` (the source tree), never on the books this run
+ * syncs: that is what keeps the publication allowlist a freeze rather than a
+ * deletion of held-back books.
+ *
+ * @param {{existing: string[], availableBooks: string[], prune: boolean, failed: number}} p
+ * @returns {{stale: string[], remove: string[]}}
+ */
+export function staleContentDirs({ existing, availableBooks, prune, failed }) {
+	const stale = existing.filter((dir) => !availableBooks.includes(dir));
+	return { stale, remove: prune && failed === 0 ? stale : [] };
+}
+
 function main() {
 	if (process.getuid?.() === 0) {
 		console.error('Error: Do not run this script as root (sudo).');
@@ -782,33 +809,38 @@ function main() {
 		}
 	}
 
-	// Clean up stale content directories no longer present in source.
-	//
-	// 🔴 KEYED ON `availableBooks` (the SOURCE tree), NEVER ON `booksToSync`, and
-	// that is what makes the publication allowlist a FREEZE rather than a
-	// DELETE. Filtering this by the allowlist would sweep every held-back book
-	// out of static/content/ on the next run — retiring live pages as a side
-	// effect of a rule that only meant "stop publishing new ones". Retiring
-	// deployed pages is a separate decision; it is not this sweep's job.
-	//
-	// The sweep still does its own job: a directory for a book that has left the
-	// source tree entirely is removed as before.
+	// Stale content directories: books no longer in the source tree. Listed on
+	// every run; deleted only with --prune, and only when every book synced
+	// (see staleContentDirs). 🔴 Keyed on `availableBooks` (the SOURCE tree),
+	// never on `booksToSync`: filtering by the allowlist would sweep every
+	// held-back book out of static/content/ and turn the freeze into a deletion.
 	if (existsSync(destDir)) {
-		const existingContentDirs = readdirSync(destDir).filter((name) => {
-			const fullPath = resolve(destDir, name);
-			return statSync(fullPath).isDirectory();
+		const existing = readdirSync(destDir).filter((name) =>
+			statSync(resolve(destDir, name)).isDirectory()
+		);
+		const { stale, remove } = staleContentDirs({
+			existing,
+			availableBooks,
+			prune: options.prune,
+			failed
 		});
 
-		const staleDirs = existingContentDirs.filter((dir) => !availableBooks.includes(dir));
-
-		if (staleDirs.length > 0) {
-			console.log('\nCleaning up stale content directories...');
-			for (const stale of staleDirs) {
+		if (stale.length > 0 && remove.length === 0) {
+			console.log(`\nNot in the source tree, kept: ${stale.join(', ')}`);
+			console.log(
+				options.prune
+					? '  Not pruned: a book failed to sync, so the run proves nothing about what is stale.'
+					: '  Pass --prune to delete them (after checking --source is the full efni checkout).'
+			);
+		}
+		if (remove.length > 0) {
+			console.log('\nPruning stale content directories (--prune)...');
+			for (const dir of remove) {
 				if (options.dryRun) {
-					console.log(`  [DRY-RUN] Would remove stale content: ${stale}/`);
+					console.log(`  [DRY-RUN] Would remove stale content: ${dir}/`);
 				} else {
-					console.log(`  Removing stale content: ${stale}/`);
-					rmSync(resolve(destDir, stale), { recursive: true, force: true });
+					console.log(`  Removing stale content: ${dir}/`);
+					rmSync(resolve(destDir, dir), { recursive: true, force: true });
 				}
 			}
 		}

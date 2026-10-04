@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, chmodSync } from 'fs';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
-import { pruneSupersededFiles, selectBooks, tocRegenArgs } from './sync-content.js';
+import { pruneSupersededFiles, selectBooks, staleContentDirs, tocRegenArgs } from './sync-content.js';
 import { resetIdentityCache } from './lib/overlay.js';
 
 let root;
@@ -206,3 +206,40 @@ describe('selectBooks', () => {
 		expect(availableBooks).toEqual(SOURCE);
 	});
 });
+
+describe('staleContentDirs', () => {
+	const existing = ['efnafraedi-2e', 'liffraedi-2e', 'old-book'];
+	const availableBooks = ['efnafraedi-2e', 'liffraedi-2e'];
+
+	it('names the folders whose book is no longer in the source tree', () => {
+		expect(staleContentDirs({ existing, availableBooks, prune: false, failed: 0 }).stale).toEqual([
+			'old-book'
+		]);
+	});
+
+	// 2026-10-04: pruning was unconditional, so --source pointed at a partial
+	// checkout deleted every other book's content on any sync
+	it('removes nothing without --prune', () => {
+		expect(staleContentDirs({ existing, availableBooks, prune: false, failed: 0 }).remove).toEqual(
+			[]
+		);
+	});
+
+	it('removes the stale folders with --prune', () => {
+		expect(staleContentDirs({ existing, availableBooks, prune: true, failed: 0 }).remove).toEqual([
+			'old-book'
+		]);
+	});
+
+	it('removes nothing when a book failed, even with --prune', () => {
+		expect(staleContentDirs({ existing, availableBooks, prune: true, failed: 1 }).remove).toEqual([]);
+	});
+
+	// The freeze: keyed on the SOURCE tree, never on the books being synced, so
+	// a withheld book that is still in the source is never stale
+	it('never names a book that is in the source tree, synced or not', () => {
+		const r = staleContentDirs({ existing, availableBooks, prune: true, failed: 0 });
+		expect(r.stale).not.toContain('liffraedi-2e');
+	});
+});
+
