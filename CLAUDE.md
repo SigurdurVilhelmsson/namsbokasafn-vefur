@@ -563,14 +563,32 @@ would vanish exactly when the build needs it.
 - The commented `return 301` blocks in `nginx-config-example.conf` are an optional SEO upgrade over
   the stub, **never load-bearing**, and must not be applied until the old page is gone from the
   deployed tree (`return 301` runs before `try_files` and has no on-disk guard).
+- **A reader's saved state follows the rename** (#258). Read marks, bookmarks, highlights, ticked
+  objectives, practice attempts and reading times are all keyed by section slug, so without this they
+  stay under the old slug and vanish from the renamed page. `src/lib/utils/sectionRenames.ts` is the
+  pure core; `migrateRenamedSections()` (`src/lib/stores/sectionRenameMigration.ts`) applies it to the
+  five stores, each through its own `renameSections()`, and `loadTableOfContents` calls it on every
+  table-of-contents load in the browser.
+  - 🔴 **Only ACTIVE rows move anything** — the same `exactSectionExists` gate the route uses. An
+    inert row's old page is still the live one, so moving its data would empty the page the reader is
+    on. That is why it runs on a TOC load and not when the stores boot.
+  - Each transform is idempotent and returns the **same object** when nothing matched, so a store
+    saves only when something moved. A **new store keyed by section** must get a `renameSections()`
+    and a line in `migrateRenamedSections()`, or its data is silently left behind.
+  - A page that snapshots store data on mount must load the TOC **before** it mounts: `/prof` has a
+    browser-only `+page.ts` load for exactly this, because on a hard load the migration otherwise
+    landed after the quiz had snapshotted, and answers were dropped. Don't move the TOC fetch into a
+    layout load: that inlines the TOC into every prerendered page again (#255 removed it).
 
 ## Current Development Status
 
-### 2026-10-04 — eleven PRs merged and deployed; reader v1.1 pushed
+### 2026-10-04 — #246–#258 merged and deployed; reader v1.1 pushed
 
-Measured on 2026-10-04 against `main` = `03e3b32` (#256), efni `main` = `08014ad4b` and the live site.
+Measured on 2026-10-04 against `main` = `9dacdca` (#258), efni `main` = `08014ad4b` and the live site.
 
-- **Prod runs build `1791112632269`** (deployed ~11:20 UTC from `main` `03e3b32` by `scripts/deploy.js`, no content sync): 2,910 files sent, 0 deleted, and all 2,480 chemistry content files byte-identical to the server beforehand. The previous build is backed up on the server (`~/backups/namsbokasafn-build-2026-10-04-v1791030534964`, checksums verified). Verified live: version, the four redirect stubs, one description per page, the slash-terminated sitemap, organic 404, 0 missing assets on 5 pages (frozen physics and biology included), and the phone tools menu and Settings in a real browser.
+- **Prod runs build `1791122020354`** (deployed ~13:55 UTC from `main` `9dacdca` by `scripts/deploy.js`, no content sync): 2,906 files sent, 0 deleted; sitemap 366 = 366 URLs and all 2,480 chemistry content files byte-identical to the server beforehand. Nothing on `main` is undeployed. The previous build is backed up on the server (`~/backups/namsbokasafn-build-2026-10-04-v1791112632269`, checksums verified). Verified live: version, `/kafli/00/` 200, organic 404, 0 missing assets (frozen physics included), `/prof` with no page errors, and — in a real browser — a read mark and bookmark seeded under the old §10.5 slug moved to the renamed one.
+- **The first deploy that day** (build `1791112632269`, ~11:20 UTC from `03e3b32`, #246–#256) is backed up at `~/backups/namsbokasafn-build-2026-10-04-v1791030534964`. Verified live then: the four redirect stubs, one description per page, the slash-terminated sitemap, 0 missing assets on 5 pages (frozen physics and biology included), and the phone tools menu and Settings in a real browser.
+- **Saved reader state follows a renamed section** (#258; rules under "A rename retires a reader URL"). Its 3 e2e tests skip in CI (CI skips 28 → 31): CI's chemistry has no active row (see the redirect bullet below) and CI never syncs physics.
 - **What went live (#246–#256):** the phone fixes (the tools menu that never opened, Settings hidden below 1024px, assistive-MathML page overflow, the tools menu swallowing taps, the timer pill over the tools button) and a working ←/→ section shortcut (#246); quick wins (#248); flashcard and glossary e2e coverage (#249: those 11 tests had skipped on every run, and CI skips fell 39 → 28); the sync stamp (#250, #252; see Build Scripts); the 403 fix for `/kafli/`, `/kafli/00/`, `/svarlykill/` and `/vidauki/` (#251); SEO (#253); the "Svar:" fallback removal (#254); appendix letters up to Z and the dead cross-reference preview removed (#255); `--prune` (#256).
 - ⚠️ **The next deploy's sitemap diff is normal again** (both sides now carry the trailing slash), but **no book has a sync stamp until its next sync**, so the stamp comparison in the deploy guide starts working only then.
 - **Reader v1.1** (`feature/reader-v1.1` at `dde768e`, pushed, CI green): all nine automated-QA paging failures fixed, plus [USER]'s rulings of 2026-10-04: scroll past the learning objectives on arrival, chapter rollups always scroll, and "Næsta" on the last page finishes the section even when sub-sections were skipped. Next: [USER]'s human QA (real phone, real screen reader) and the remaining judgment calls. ⚠️ When `main` is next merged in, the rewritten flashcard flip test (#249) expects tap-to-flip; v1.1's predict-first cards need it adapted.
