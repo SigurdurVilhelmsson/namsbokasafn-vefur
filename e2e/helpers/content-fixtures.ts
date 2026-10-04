@@ -117,3 +117,13 @@ export function sectionsContaining(marker: string, limit: number): string[] {
 		.slice(0, limit)
 		.map((f) => f.url);
 }
+
+/** First synced book whose toc.json lists front matter (chapters/00), or null. */
+export function bookWithFrontMatter(): string | null {
+	return (
+		syncedBooks().find((slug) => {
+			const toc = readToc(slug) as { frontMatter?: unknown[] } | null;
+			return (toc?.frontMatter?.length ?? 0) > 0;
+		}) ?? null
+	);
+}
