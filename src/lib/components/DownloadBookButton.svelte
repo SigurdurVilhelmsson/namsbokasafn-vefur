@@ -9,9 +9,11 @@
 		offline,
 		currentDownload,
 		downloadBook,
-		estimateBookSize,
+		verifyBook,
+		loadOfflineToc,
 		formatBytes
 	} from '$lib/stores/offline';
+	import type { OfflineStatus } from '$lib/utils/offlineSync';
 
 	interface Props {
 		bookSlug: string;
@@ -23,10 +25,12 @@
 	let isEstimating = $state(false);
 	let showConfirmDelete = $state(false);
 	let failedFileCount = $state(0);
+	// What is really stored, from the book's offline cache (not just localStorage)
+	let status = $state<OfflineStatus>('none');
+	let missingFiles = $state(0);
 
 	// Derive from offline store
 	let downloadState = $derived($offline.books[bookSlug] ?? null);
-	let isDownloaded = $derived(downloadState?.downloaded ?? false);
 
 	// Get current download progress
 	let progress = $derived($currentDownload);
@@ -41,20 +45,26 @@
 			: 0
 	);
 
-	onMount(async () => {
-		if (!browser || isDownloaded) return;
-
-		// Estimate size on mount
+	/** Re-read the served size and version, and what the device holds. */
+	async function refresh() {
 		isEstimating = true;
 		try {
-			estimatedSize = await estimateBookSize(bookSlug);
+			const toc = await loadOfflineToc(bookSlug);
+			estimatedSize = toc?.offline?.bytes ?? 0;
+			const result = await verifyBook(bookSlug, toc?.offline?.version ?? null);
+			status = result.status;
+			missingFiles = result.missing;
 		} finally {
 			isEstimating = false;
 		}
+	}
+
+	onMount(() => {
+		if (browser) refresh();
 	});
 
 	async function handleDownload() {
-		if (isDownloading || isDownloaded) return;
+		if (isDownloading) return;
 
 		failedFileCount = 0;
 		const result = await downloadBook(bookSlug);
@@ -66,11 +76,13 @@
 		if (!result.success) {
 			console.error('Download failed:', result.error);
 		}
+		await refresh();
 	}
 
 	async function handleDelete() {
 		showConfirmDelete = false;
 		await offline.removeBook(bookSlug);
+		await refresh();
 	}
 
 	function dismissProgress() {
@@ -80,15 +92,37 @@
 </script>
 
 <div class="download-book">
-	{#if isDownloaded && !isDownloading}
-		<!-- Downloaded state -->
-		<div class="flex items-center gap-3">
-			<div
-				class="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-2 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-			>
-				<Icon name="check" />
-				<span class="text-sm font-medium">Sótt ({formatBytes(downloadState?.sizeBytes ?? 0)})</span>
-			</div>
+	{#if (status === 'complete' || status === 'outdated' || status === 'incomplete') && !isDownloading && !downloadComplete}
+		<!-- Something is stored: complete, a newer version is out, or files are missing -->
+		<div class="flex flex-wrap items-center gap-3">
+			{#if status === 'complete'}
+				<div
+					class="flex items-center gap-2 rounded-lg bg-emerald-50 px-4 py-2 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+				>
+					<Icon name="check" />
+					<span class="text-sm font-medium">Sótt ({formatBytes(downloadState?.sizeBytes ?? 0)})</span>
+				</div>
+			{:else}
+				<div
+					class="flex items-center gap-2 rounded-lg bg-amber-50 px-4 py-2 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+				>
+					<Icon name="triangle-alert" />
+					<span class="text-sm font-medium">
+						{#if status === 'outdated'}
+							Ný útgáfa bókarinnar er komin.
+						{:else}
+							Niðurhal ófullgert — {missingFiles === 1 ? '1 skrá vantar' : `${missingFiles} skrár vantar`}.
+						{/if}
+					</span>
+				</div>
+				<button
+					onclick={handleDownload}
+					class="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2"
+				>
+					<Icon name={status === 'outdated' ? 'refresh-cw' : 'download'} />
+					<span>{status === 'outdated' ? 'Uppfæra' : 'Ljúka niðurhali'}</span>
+				</button>
+			{/if}
 
 			{#if !showConfirmDelete}
 				<button
@@ -136,7 +170,8 @@
 			</div>
 
 			<div class="mt-1 text-right text-xs text-gray-500 dark:text-gray-300">
-				{formatBytes(progress?.downloadedBytes ?? 0)}
+				{formatBytes(progress?.downloadedBytes ?? 0)}{#if progress?.totalBytes}
+					/ {formatBytes(progress.totalBytes)}{/if}
 			</div>
 		</div>
 	{:else if downloadComplete}
@@ -196,11 +231,17 @@
 			{#if isEstimating}
 				<span>Reikna stærð...</span>
 			{:else}
-				<span>Sækja fyrir ónettengda notkun</span>
+				<span>{status === 'legacy' ? 'Sækja aftur' : 'Sækja fyrir ónettengda notkun'}</span>
 				{#if estimatedSize > 0}
 					<span class="opacity-80">(~{formatBytes(estimatedSize)})</span>
 				{/if}
 			{/if}
 		</button>
+		{#if status === 'legacy'}
+			<!-- The pre-2026-10 download kept only some of the figures while saying "Sótt" -->
+			<p class="mt-2 text-sm text-amber-700 dark:text-amber-400">
+				Fyrra niðurhal var ófullkomið. Sæktu bókina aftur til að lesa hana alla án nettengingar.
+			</p>
+		{/if}
 	{/if}
 </div>

@@ -81,7 +81,8 @@ export {
 	currentDownload,
 	downloadedBooks,
 	downloadBook,
-	estimateBookSize,
+	verifyBook,
+	loadOfflineToc,
 	formatBytes,
 	type BookDownloadState,
 	type DownloadProgress
