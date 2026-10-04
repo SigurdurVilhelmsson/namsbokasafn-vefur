@@ -6,6 +6,7 @@
  */
 
 import { writable, derived, get } from 'svelte/store';
+import { type SectionRename, renameInAnnotations } from '$lib/utils/sectionRenames';
 import { browser } from '$app/environment';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isArray } from '$lib/utils/storeValidation';
@@ -104,6 +105,12 @@ function createAnnotationStore() {
 
 	return {
 		subscribe,
+		/** Carry highlights across renamed sections (lib/utils/sectionRenames.ts). Saves only on change. */
+		renameSections: (renames: SectionRename[]) => {
+			const state = get({ subscribe });
+			const annotations = renameInAnnotations(state.annotations, renames);
+			if (annotations !== state.annotations) set({ ...state, annotations });
+		},
 
 		// Add a new annotation
 		addAnnotation: (

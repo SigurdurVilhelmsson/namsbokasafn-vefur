@@ -4,6 +4,7 @@
  */
 
 import { writable, derived, get } from 'svelte/store';
+import { type SectionRename, renameInObjectives } from '$lib/utils/sectionRenames';
 import { browser } from '$app/environment';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isObject } from '$lib/utils/storeValidation';
@@ -86,6 +87,12 @@ function createObjectivesStore() {
 
 	return {
 		subscribe,
+		/** Carry ticks and ratings across renamed sections (lib/utils/sectionRenames.ts). Saves only on change. */
+		renameSections: (renames: SectionRename[]) => {
+			const state = get({ subscribe });
+			const completedObjectives = renameInObjectives(state.completedObjectives, renames);
+			if (completedObjectives !== state.completedObjectives) set({ ...state, completedObjectives });
+		},
 
 		markObjectiveComplete: (
 			bookSlug: string,

@@ -4,6 +4,7 @@
  */
 
 import { writable, derived, get } from 'svelte/store';
+import { type SectionRename, renameInAnalytics } from '$lib/utils/sectionRenames';
 import { browser } from '$app/environment';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isArray, isObject, isNumber, isNullOrString } from '$lib/utils/storeValidation';
@@ -275,6 +276,12 @@ function createAnalyticsStore() {
 
 	return {
 		subscribe,
+		/** Carry reading times across renamed sections (lib/utils/sectionRenames.ts). Saves only on change. */
+		renameSections: (renames: SectionRename[]) => {
+			const state = get({ subscribe });
+			const next = renameInAnalytics(state, renames);
+			if (next !== state) set(next);
+		},
 
 		// Session management
 		startReadingSession: (bookSlug: string, chapterSlug: string, sectionSlug: string) => {

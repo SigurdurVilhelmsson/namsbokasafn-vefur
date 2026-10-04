@@ -4,6 +4,7 @@
  */
 
 import { writable, derived, get } from 'svelte/store';
+import { type SectionRename, renameInPracticeProblems } from '$lib/utils/sectionRenames';
 import { browser } from '$app/environment';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isArray, isObject, isNumber, isBoolean } from '$lib/utils/storeValidation';
@@ -183,6 +184,12 @@ function createQuizStore() {
 
 	return {
 		subscribe,
+		/** Carry practice attempts across renamed sections (lib/utils/sectionRenames.ts). Saves only on change. */
+		renameSections: (renames: SectionRename[]) => {
+			const state = get({ subscribe });
+			const practiceProblemProgress = renameInPracticeProblems(state.practiceProblemProgress, renames);
+			if (practiceProblemProgress !== state.practiceProblemProgress) set({ ...state, practiceProblemProgress });
+		},
 
 		// Start a new quiz session
 		startQuizSession: (
