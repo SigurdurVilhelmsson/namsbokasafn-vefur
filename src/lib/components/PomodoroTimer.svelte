@@ -114,7 +114,13 @@
 	let isLongBreak = $derived(phase === 'break' && secondsLeft > BREAK_SECONDS);
 </script>
 
-<div class="fixed bottom-6 right-6 z-40" role="region" aria-label="Einbeitingartímamælir">
+<!-- Bottom-left below lg: the bottom-right corner belongs to the mobile tools
+     button (MobileBottomNav), which this pill used to sit on top of. -->
+<div
+	class="fixed bottom-6 left-6 z-40 lg:left-auto lg:right-6"
+	role="region"
+	aria-label="Einbeitingartímamælir"
+>
 	{#if !expanded}
 		<!-- Collapsed pill -->
 		<button

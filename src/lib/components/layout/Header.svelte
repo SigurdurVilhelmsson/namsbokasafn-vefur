@@ -384,16 +384,10 @@
 		line-height: 1;
 	}
 
-	/* Settings button — hidden on mobile to save space */
-	.settings-btn {
-		display: none;
-	}
-
-	@media (min-width: 1024px) {
-		.settings-btn {
-			display: inline-flex;
-		}
-	}
+	/* Settings stays visible at every width: the modal opens only from here,
+	   and it holds text size, OpenDyslexic and line width. Hiding it below
+	   1024px (Feb 2026) left phones and tablets with no way in. At 320px the
+	   mobile title keeps 80px. */
 
 	/* ====================================
 	   THEME TOGGLE
