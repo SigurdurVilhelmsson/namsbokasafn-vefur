@@ -284,54 +284,117 @@ test.describe('Paged reading mode', () => {
 		await expect(page.getByRole('status').filter({ hasText: 'Hluti' })).toHaveText(label);
 	});
 
-	test('the page buttons take taps on a phone', async ({ browser }) => {
-		const urls = sectionsContaining('<p', 3);
-		test.skip(urls.length === 0, 'No section content available');
-		test.setTimeout(300000);
+	for (const device of [
+		{ name: 'a phone', viewport: { width: 375, height: 667 }, touch: true },
+		{ name: 'a desktop', viewport: { width: 1280, height: 720 }, touch: false }
+	]) {
+		test(`the page buttons take taps on ${device.name}`, async ({ browser }) => {
+			const urls = sectionsContaining('<p', 3);
+			test.skip(urls.length === 0, 'No section content available');
+			test.setTimeout(300000);
 
-		const context = await browser.newContext({
-			viewport: { width: 375, height: 667 },
-			isMobile: true,
-			hasTouch: true
-		});
-		const page = await context.newPage();
-		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
-		const next = nav.getByRole('button', { name: 'Næsta síða' });
-		const blocked: string[] = [];
+			const context = await browser.newContext({
+				viewport: device.viewport,
+				isMobile: device.touch,
+				hasTouch: device.touch
+			});
+			const page = await context.newPage();
+			const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
+			const next = nav.getByRole('button', { name: 'Næsta síða' });
+			const blocked: string[] = [];
 
-		for (const url of urls) {
-			await page.goto(url);
-			await expect(nav).toBeVisible({ timeout: 15000 });
-			for (let i = 0; i < 40; i++) {
-				await page.waitForTimeout(300);
-				const r = await nav.evaluate((navEl) => {
-					const covered = (b: Element) => {
-						const box = b.getBoundingClientRect();
-						const y = box.top + box.height / 2;
-						return [box.left + 6, box.left + box.width / 2, box.right - 6].some(
-							(x) => !b.contains(document.elementFromPoint(x, y))
-						);
-					};
-					const box = navEl.getBoundingClientRect();
-					const [prev, nxt] = navEl.querySelectorAll('button');
-					return {
-						// The tools button's top edge: 16px margin + 48px button
-						clear: box.bottom <= window.innerHeight - 64,
-						label: navEl.querySelector('.paged-nav-label')?.textContent?.trim(),
-						prev: covered(prev),
-						next: covered(nxt)
-					};
-				});
-				// An allowed overrun scrolls, so its controls can land anywhere,
-				// under the corner buttons too; every other page must keep them clear
-				if ((!r.clear || r.prev || r.next) && !(await allowedOverrun(page))) {
-					blocked.push(`${url} ${r.label} clear=${r.clear} prev=${r.prev} next=${r.next}`);
+			for (const url of urls) {
+				await page.goto(url);
+				await expect(nav).toBeVisible({ timeout: 15000 });
+				for (let i = 0; i < 40; i++) {
+					await page.waitForTimeout(300);
+					const r = await nav.evaluate((navEl) => {
+						const covered = (b: Element) => {
+							const box = b.getBoundingClientRect();
+							const y = box.top + box.height / 2;
+							return [box.left + 6, box.left + box.width / 2, box.right - 6].some(
+								(x) => !b.contains(document.elementFromPoint(x, y))
+							);
+						};
+						const box = navEl.getBoundingClientRect();
+						const [prev, nxt] = navEl.querySelectorAll('button');
+						return {
+							// The tools button's top edge: 16px margin + 48px button
+							clear: box.bottom <= window.innerHeight - 64,
+							label: navEl.querySelector('.paged-nav-label')?.textContent?.trim(),
+							prev: covered(prev),
+							next: covered(nxt)
+						};
+					});
+					// An allowed overrun scrolls, so its controls can land anywhere,
+					// under the corner buttons too; every other page must keep them clear
+					if ((!r.clear || r.prev || r.next) && !(await allowedOverrun(page))) {
+						blocked.push(`${url} ${r.label} clear=${r.clear} prev=${r.prev} next=${r.next}`);
+					}
+					if (await next.isDisabled()) break;
+					await next.evaluate((b: HTMLButtonElement) => b.click());
 				}
-				if (await next.isDisabled()) break;
-				await next.evaluate((b: HTMLButtonElement) => b.click());
 			}
-		}
-		expect(blocked).toEqual([]);
-		await context.close();
+			expect(blocked).toEqual([]);
+			await context.close();
+		});
+	}
+
+	test('→ on arrival never changes section before the pages are ready', async ({ page }) => {
+		const urls = sectionsContaining('<img', 1);
+		test.skip(urls.length === 0, 'No section with images');
+
+		// Slow images keep the paginator waiting, which is when → used to fall
+		// through to the section shortcut and skip a whole section unseen
+		await page.route(/\.(png|jpe?g|svg|gif|webp)$/, async (route) => {
+			await new Promise((r) => setTimeout(r, 3000));
+			await route.continue();
+		});
+		await page.goto(urls[0]);
+		await expect(page.locator('.reading-content').first()).toBeVisible({ timeout: 15000 });
+		const path = new URL(page.url()).pathname;
+		await page.locator('body').click({ position: { x: 5, y: 5 } });
+		await page.keyboard.press('ArrowRight');
+		await page.waitForTimeout(1500);
+		expect(new URL(page.url()).pathname).toBe(path);
+	});
+
+	test('a section shortcut rebound off the arrows still works in paged mode', async ({ page }) => {
+		const urls = sectionsContaining('<p', 50).filter((u) => !/\/\d+-0-[^/]*\/$/.test(u));
+		test.skip(urls.length === 0, 'No section content available');
+
+		await page.addInitScript(() => {
+			const key = 'namsbokasafn:settings';
+			const stored = JSON.parse(localStorage.getItem(key) || '{}');
+			localStorage.setItem(
+				key,
+				JSON.stringify({ ...stored, shortcutPreferences: { nextSection: 'w' } })
+			);
+		});
+		await page.goto(urls[0]);
+		await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toBeVisible({
+			timeout: 15000
+		});
+		const nextHref = (await page.locator('a.nav-btn-next').getAttribute('href'))!;
+		await page.locator('body').click({ position: { x: 5, y: 5 } });
+		await page.keyboard.press('w');
+		await expect(page).toHaveURL((u) => u.pathname.replace(/\/$/, '') === nextHref.replace(/\/$/, ''));
+	});
+
+	test('Space on a focused Fyrri goes back, not forward', async ({ page }) => {
+		const urls = sectionsContaining('<p', 1);
+		test.skip(urls.length === 0, 'No section content available');
+
+		await page.goto(urls[0]);
+		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
+		await expect(nav).toBeVisible({ timeout: 15000 });
+		const label = nav.locator('.paged-nav-label');
+		const first = (await label.textContent())!.trim();
+		await nav.getByRole('button', { name: 'Næsta síða' }).click();
+		await expect(label).not.toHaveText(first);
+		await nav.getByRole('button', { name: 'Fyrri síða' }).focus();
+		await page.keyboard.press('Space');
+		await expect(label).toHaveText(first);
 	});
 });
+

@@ -81,6 +81,19 @@ describe('paginate', () => {
 		]);
 	});
 
+	it('counts headings carried to a new page against its budget', () => {
+		// p300 | h60 p200: the next p190 would make 450 on a 400 page
+		const pages = paginate(
+			[block(300), block(60, { keepWithNext: true }), block(200), block(190)],
+			400
+		);
+		expect(pages).toEqual([
+			{ start: 0, end: 1 },
+			{ start: 1, end: 3 },
+			{ start: 3, end: 4 }
+		]);
+	});
+
 	it('gives the first page its own, smaller budget', () => {
 		// Chrome above the content on arrival (learning objectives) leaves less room
 		const pages = paginate([block(100), block(100), block(100)], 768, 150);

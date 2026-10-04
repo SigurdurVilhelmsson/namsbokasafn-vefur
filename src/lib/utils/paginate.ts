@@ -116,6 +116,8 @@ export function paginate(
 			continue;
 		}
 		flush(breakAt);
+		// The carried headings now open this page and count against it
+		for (let h = breakAt; h < i; h++) pageH += items[h].height;
 	}
 
 	flush(items.length);

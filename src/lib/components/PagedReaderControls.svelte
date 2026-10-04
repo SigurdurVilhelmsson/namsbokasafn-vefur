@@ -16,6 +16,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import { browser } from '$app/environment';
 	import { settings } from '$lib/stores/settings';
+	import { keyBelongsElsewhere } from '$lib/actions/keyboardShortcuts';
 	import {
 		paginate,
 		pageIndexForItem,
@@ -61,10 +62,10 @@
 
 	/** Where scrollToContentTop() puts the top of the container */
 	const SCROLL_OFFSET = 96;
-	/** Room kept free under the page controls. Below lg the bottom corners hold
-	 *  the tools button and the timer pill, which covered "Næsta" (QA E18). */
-	const BOTTOM_CLEARANCE_DESKTOP = 16;
-	const BOTTOM_CLEARANCE_PHONE = 80;
+	/** Room kept free under the page controls for what floats in the bottom
+	 *  corners and centre: the tools button and timer pill on phones, the timer
+	 *  pill on desktop, the focus-mode bar. Each covered "Næsta" (QA E18). */
+	const BOTTOM_CLEARANCE = 76;
 	/** How long to wait for images before the first split (QA E2/E8/E9) */
 	const IMAGE_WAIT_MS = 1500;
 
@@ -79,18 +80,12 @@
 	 *  a re-split keeps its page on screen; any page turn clears it. */
 	let target: HTMLElement | null = null;
 
-	function bottomClearance(): number {
-		return window.matchMedia('(min-width: 1024px)').matches
-			? BOTTOM_CLEARANCE_DESKTOP
-			: BOTTOM_CLEARANCE_PHONE;
-	}
-
 	/** Reading height of a page, scrolled to the content top. It used to be the
 	 *  viewport minus a fixed 260px; the real chrome is larger (QA E1). */
 	function availableHeight(): number {
 		return Math.max(
 			240,
-			window.innerHeight - SCROLL_OFFSET - gapAbove - gapBelow - bottomClearance()
+			window.innerHeight - SCROLL_OFFSET - gapAbove - gapBelow - BOTTOM_CLEARANCE
 		);
 	}
 
@@ -99,7 +94,7 @@
 	 *  visible there rather than the page scrolling past the objectives. */
 	function firstPageHeight(first: HTMLElement): number {
 		const top = first.getBoundingClientRect().top + window.scrollY;
-		const visible = window.innerHeight - top - gapBelow - bottomClearance();
+		const visible = window.innerHeight - top - gapBelow - BOTTOM_CLEARANCE;
 		return Math.min(availableHeight(), Math.max(0, visible));
 	}
 
@@ -290,8 +285,12 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
-		if (event.defaultPrevented || isTyping()) return;
+		if (event.defaultPrevented || isTyping() || keyBelongsElsewhere(event)) return;
 		if (event.ctrlKey || event.metaKey || event.altKey) return;
+		// Space presses a focused control (Fyrri, "Sýna svar", a glossary term)
+		if (event.key === ' ' && document.activeElement?.closest('button, a[href], summary, [role="button"]')) {
+			return;
+		}
 
 		if (event.key === 'ArrowRight' || event.key === 'PageDown' || (event.key === ' ' && !event.shiftKey)) {
 			event.preventDefault();
@@ -349,7 +348,9 @@
 			// A deep-link target outranks the page's first block: a late image
 			// can push the target onto the next page, which used to hide it
 			// ~100ms after landing (QA E8)
-			let idx: number | null = target?.isConnected ? pageForElement(target) : null;
+			// Content rebuilt under us (bionic reading): the old target is gone
+			if (target && !target.isConnected) target = null;
+			let idx: number | null = target ? pageForElement(target) : null;
 			if (idx === null && anchor && anchor.unit < units.length) {
 				const p = pageIndexForItem(units[anchor.unit].pages, anchor.item);
 				const found = flatPages.findIndex((f) => f.unit === anchor.unit && f.page === p);
@@ -432,7 +433,20 @@
 			root.addEventListener('load', onAssetLoad, true);
 			cleanups.push(() => root.removeEventListener('load', onAssetLoad, true));
 
-			const onResize = () => scheduleRecompute();
+			// On a touch screen the URL bar showing or hiding changes only the
+			// height, by well under 120px; re-splitting for it would move the
+			// page count mid-read. Width changes and real height changes re-split.
+			const touch = window.matchMedia('(pointer: coarse)').matches;
+			let lastW = window.innerWidth;
+			let lastH = window.innerHeight;
+			const onResize = () => {
+				const w = window.innerWidth;
+				const h = window.innerHeight;
+				if (touch && w === lastW && Math.abs(h - lastH) < 120) return;
+				lastW = w;
+				lastH = h;
+				scheduleRecompute();
+			};
 			window.addEventListener('resize', onResize);
 			cleanups.push(() => window.removeEventListener('resize', onResize));
 
