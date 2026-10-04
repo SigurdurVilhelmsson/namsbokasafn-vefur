@@ -27,6 +27,11 @@ The 2026-10-03 deploy followed these steps; keep to them.
    file under `build/content/<book>/` (editor backups excluded) with the server's
    copy. The sitemap cannot see content changes: on 2026-10-03 two local files
    were older than the live ones and would have rolled back a fix.
+   Start with the sync stamp: `curl -s https://namsbokasafn.is/content/<book>/sync-stamp.json`
+   against `build/content/<book>/sync-stamp.json`. A different efni `commit` means
+   different content, so stop and find out why. The stamp does not replace the checksum:
+   files edited by hand after a sync keep the same stamp. Books synced before
+   2026-10-04 have no stamp until their next sync.
 6. **Deploy** with `--apply`, then check `/_app/version.json` and the pages
    you changed.
 
