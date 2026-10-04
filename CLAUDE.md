@@ -595,7 +595,24 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-10-04 (evening) — service-worker cache and offline download live (#260)
+
+Measured on 2026-10-04 against `main` = `99e13b4` (#260) and the live site.
+
+- **Prod runs build `1791149163717`** (deployed ~21:28 UTC from `main` `99e13b4` by `scripts/deploy.js`, no content sync): 2,908 files sent, 1 deleted — the old workbox runtime `workbox-049f39f7.js`, replaced by `workbox-1f0b60bb.js` (the new worker uses StaleWhileRevalidate). Gates: sitemap 366 = 366; chemistry content 2,479 files byte-identical, and only the two expected differences (`toc.json`, by its new `offline` key alone, and the new `offline-manifest.json`). The previous build is backed up at `~/backups/namsbokasafn-build-2026-10-04-v1791122020354` (3,477 files, checksums identical). Nothing on `main` is undeployed.
+- **What went live (#260):** figures are StaleWhileRevalidate (fresh from the SECOND view after a content deploy) instead of CacheFirst for 30 days; "download for offline" keeps the whole book (it kept 200 of chemistry's 1,147 figures while saying "Sótt") in `offline-book:<slug>`, shows the real size (~329.2 MB for chemistry) and refuses to run under an older service worker. Rules under "Service worker caching and offline download"; plan in `docs/plans/2026-10-04-sw-cache-and-offline-download.md`.
+- **Verified live, in a real browser:** the new `sw.js` and `/sw-offline-book.js` (JavaScript); the active worker answers the capability check; chemistry shows "(~329.2 MB)"; frozen physics, reached client-side so the new code runs, downloads 64/64 files through the TOC fallback, reads every one offline (control: a never-downloaded chemistry figure fails offline), and "Eyða" empties its cache; 0 missing `_app` assets on frozen physics, biology, microbiology and chemistry; organic 404.
+- **CI:** the whole-book download test (`e2e/offline-download.spec.ts`) passed on efni `main`'s chemistry in 32 s; the e2e job took 6m03s (tests 3.9 min). CI e2e skips stay at 31.
+- ⏳ **[USER]'s QA:** a real iPad — download chemistry, flight mode, read from the open tab, and again after a week; and on a device still on the old worker, tap "Sækja" before accepting the update prompt and expect the refusal message.
+- ⚠️ **Unexplained, not caused by #260 as far as measured:** the catalogue `/` logs one Svelte `hydration_mismatch` in the console (0 on the chemistry and physics book homes). #260 did not touch that page; it was not checked against the previous build.
+- **Worklist follow-ups:** `sync-etag-churn` (every deploy changes every ETag, so revalidation after a deploy re-downloads each viewed file once) and `bl-offline-cold-start` (a downloaded book reads offline only from an open tab).
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.** When it lifts, chemistry's offline download becomes ~1 GB until efni's recompose rasterises the heavy figures.
+- **npm audit, 2026-10-04 (evening):** production tree and full tree both 0 (control: 1 critical).
+
 ### 2026-10-04 — #246–#258 merged and deployed; reader v1.1 pushed
+
+> ⚠️ **Superseded on the operational points — read the evening entry above first.** Prod now runs
+> build `1791149163717` (#260). The chemistry hold and the rest of this entry still stand.
 
 Measured on 2026-10-04 against `main` = `9dacdca` (#258), efni `main` = `08014ad4b` and the live site.
 
