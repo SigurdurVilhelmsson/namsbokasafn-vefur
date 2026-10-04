@@ -116,18 +116,15 @@ function isTyping(): boolean {
 }
 
 /**
- * Navigate to previous/next section by clicking nav buttons
+ * Navigate to previous/next section by clicking the section nav link
+ * (`data-nav` on NavigationButtons). Returns false when there is none, so the
+ * key keeps its default on pages without section navigation.
  */
-function navigatePrevNext(direction: 'prev' | 'next'): void {
-	const selector =
-		direction === 'prev'
-			? 'a[aria-label="Fyrri kafli"], button[aria-label="Fyrri kafli"]'
-			: 'a[aria-label="Næsti kafli"], button[aria-label="Næsti kafli"]';
-
-	const button = document.querySelector(selector) as HTMLElement;
-	if (button && !button.hasAttribute('disabled')) {
-		button.click();
-	}
+function navigatePrevNext(direction: 'prev' | 'next'): boolean {
+	const link = document.querySelector<HTMLElement>(`[data-nav="${direction}"]`);
+	if (!link || link.hasAttribute('disabled')) return false;
+	link.click();
+	return true;
 }
 
 /**
@@ -241,7 +238,8 @@ export function keyboardShortcuts(node: HTMLElement, options: KeyboardShortcutsO
 	let sequenceTimeout: ReturnType<typeof setTimeout> | null = null;
 	let currentOptions = options;
 
-	function getHandlers(): Record<ShortcutAction, () => void> {
+	/** A handler returns false when it did nothing, so the key keeps its default. */
+	function getHandlers(): Record<ShortcutAction, () => void | boolean> {
 		const { bookSlug, onToggleFocusMode, onOpenSearch, onOpenShortcuts, onCloseModal } =
 			currentOptions;
 
@@ -300,8 +298,7 @@ export function keyboardShortcuts(node: HTMLElement, options: KeyboardShortcutsO
 		const matchingShortcut = shortcuts.find((s) => s.key === sequenceStr);
 
 		if (matchingShortcut) {
-			event.preventDefault();
-			handlers[matchingShortcut.action]();
+			if (handlers[matchingShortcut.action]() !== false) event.preventDefault();
 			keySequence = [];
 			if (sequenceTimeout) clearTimeout(sequenceTimeout);
 			return;
@@ -310,8 +307,7 @@ export function keyboardShortcuts(node: HTMLElement, options: KeyboardShortcutsO
 		// Check for single-key shortcuts (but not if we're in a sequence)
 		const singleKeyShortcut = shortcuts.find((s) => s.key === effectiveKey);
 		if (singleKeyShortcut && !newSequence.some((k) => k === 'g')) {
-			event.preventDefault();
-			handlers[singleKeyShortcut.action]();
+			if (handlers[singleKeyShortcut.action]() !== false) event.preventDefault();
 			keySequence = [];
 			if (sequenceTimeout) clearTimeout(sequenceTimeout);
 			return;
