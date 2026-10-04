@@ -18,6 +18,7 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, statSync } from 'fs';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
+import { buildOfflineManifest } from './lib/offline-manifest.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
@@ -164,10 +165,29 @@ function processBook(bookSlug) {
 		}
 	}
 
+	// Offline manifest: what "download for offline" fetches, and its real size.
+	const manifest = buildOfflineManifest(join(projectRoot, 'static'), bookSlug);
+	if (manifest.missing.length > 0) {
+		console.warn(`    Warning: ${manifest.missing.length} <img> target(s) missing on disk`);
+	}
+	for (const tag of manifest.unparsed) {
+		console.warn(`    Warning: <img> with no readable src, not in the offline download: ${tag}`);
+	}
+	writeFileSync(
+		join(bookDir, 'offline-manifest.json'),
+		JSON.stringify({ version: manifest.version, bytes: manifest.bytes, files: manifest.files }) + '\n',
+		'utf-8'
+	);
+	// Disk bytes: what the device stores (nginx gzips HTML/SVG on the wire).
+	toc.offline = { version: manifest.version, files: manifest.files.length, bytes: manifest.bytes };
+
 	// Write enriched toc.json
 	writeFileSync(tocPath, JSON.stringify(toc, null, 2) + '\n', 'utf-8');
 
 	console.log(`    Processed: ${sectionsProcessed} sections, Skipped: ${sectionsSkipped}`);
+	console.log(
+		`    Offline: ${manifest.files.length} files, ${(manifest.bytes / 1e6).toFixed(1)} MB (version ${manifest.version})`
+	);
 }
 
 function main() {

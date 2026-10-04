@@ -2,6 +2,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
+import { runtimeCaching } from './src/lib/sw/runtimeCaching';
 
 export default defineConfig({
 	plugins: [
@@ -25,41 +26,11 @@ export default defineConfig({
 				// prerendered/** warns "no files matched" in SPA mode — expected, harmless.
 				globIgnores: ['server/**', '**/prerendered/**', '**/content/**'],
 
-				// Runtime caching for content
-				runtimeCaching: [
-					{
-						// Cache book content (HTML, markdown, JSON) — NetworkFirst
-						// so deploys are picked up immediately when online
-						urlPattern: /^.*\/content\/.*\.(html|md|json)$/,
-						handler: 'NetworkFirst',
-						options: {
-							cacheName: 'book-content',
-							expiration: {
-								maxEntries: 500,
-								maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-							},
-							cacheableResponse: {
-								statuses: [0, 200]
-							},
-							networkTimeoutSeconds: 3
-						}
-					},
-					{
-						// Cache images
-						urlPattern: /^.*\/content\/.*\.(png|jpg|jpeg|gif|svg|webp)$/,
-						handler: 'CacheFirst',
-						options: {
-							cacheName: 'book-images',
-							expiration: {
-								maxEntries: 200,
-								maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
-							},
-							cacheableResponse: {
-								statuses: [0, 200]
-							}
-						}
-					}
-				],
+				// Runtime caching for book content: routes, limits and the downloaded-book
+				// fallback live in src/lib/sw/runtimeCaching.ts (read its header first).
+				runtimeCaching,
+				// Answers the page's "do you serve downloaded books?" check (see that file).
+				importScripts: ['/sw-offline-book.js'],
 
 				// Don't fallback on document based (non-cached) requests
 				navigateFallback: null

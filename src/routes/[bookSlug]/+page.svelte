@@ -86,7 +86,8 @@
 			Veldu kafla til að byrja að lesa
 		</p>
 		<div class="book-home-actions">
-			<DownloadBookButton bookSlug={data.bookSlug} />
+			<!-- keyed: the page component is reused when only the slug changes -->
+			{#key data.bookSlug}<DownloadBookButton bookSlug={data.bookSlug} />{/key}
 			<PdfDownloadButton
 				manifest={data.pdfManifest}
 				bookSlug={data.bookSlug}

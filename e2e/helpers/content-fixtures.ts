@@ -19,7 +19,7 @@
  * is invoked from.
  */
 
-import { readdirSync, readFileSync, existsSync } from 'node:fs';
+import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { isRetired } from '../../scripts/lib/published-books.js';
@@ -141,4 +141,72 @@ export function bookWithFrontMatter(): string | null {
 			return (toc?.frontMatter?.length ?? 0) > 0;
 		}) ?? null
 	);
+}
+
+/** Every file a downloaded book must serve offline, derived from the synced content. */
+export interface OfflineFileSet {
+	/** Reader-visible URLs (`/content/...`) of every page under chapters/ plus glossary/index. */
+	pages: string[];
+	/** URLs of every local image those pages reference, de-duplicated. */
+	images: string[];
+	/** An image file of the book that no page references, or null (a control: never downloaded). */
+	unreferencedImage: string | null;
+	/** Sum of the disk bytes of pages + images. */
+	bytes: number;
+}
+
+function walkFiles(dir: string): string[] {
+	if (!existsSync(dir)) return [];
+	return readdirSync(dir, { withFileTypes: true }).flatMap((e) =>
+		e.isDirectory() ? walkFiles(join(dir, e.name)) : [join(dir, e.name)]
+	);
+}
+
+const IMAGE_EXT = /\.(png|jpg|jpeg|gif|svg|webp)$/;
+
+/**
+ * The offline file set of `slug`, computed independently of the app's own manifest
+ * builder so a test using it runs (and fails) against code that has no manifest.
+ */
+export function offlineFileSet(slug: string): OfflineFileSet {
+	const staticDir = join(CONTENT_DIR, '..');
+	const bookDir = join(CONTENT_DIR, slug);
+	const toUrl = (abs: string) => '/' + abs.slice(staticDir.length + 1).split('\\').join('/');
+	const htmlFiles = walkFiles(join(bookDir, 'chapters')).filter((f) => f.endsWith('.html'));
+	const jsonFiles = ['glossary.json', 'index.json']
+		.map((f) => join(bookDir, f))
+		.filter((f) => existsSync(f));
+	const images = new Set<string>();
+	for (const file of htmlFiles) {
+		for (const [, src] of readFileSync(file, 'utf-8').matchAll(/<img\b[^>]*?\ssrc=["']([^"']+)["']/g)) {
+			if (/^(?:[a-z]+:|\/\/)/i.test(src)) continue;
+			const abs = src.startsWith('/') ? join(staticDir, src) : join(dirname(file), src);
+			if (existsSync(abs)) images.add(abs);
+		}
+	}
+	const referenced = new Set([...images].map(toUrl));
+	const unreferenced =
+		walkFiles(join(bookDir, 'chapters'))
+			.filter((f) => IMAGE_EXT.test(f))
+			.map(toUrl)
+			.sort()
+			.find((u) => !referenced.has(u)) ?? null;
+	const pageFiles = [...htmlFiles, ...jsonFiles];
+	const bytes = [...pageFiles, ...images].reduce((sum, f) => sum + statSync(f).size, 0);
+	return {
+		pages: pageFiles.map(toUrl).sort(),
+		images: [...referenced].sort(),
+		unreferencedImage: unreferenced,
+		bytes
+	};
+}
+
+/** The synced book with the most referenced images, with its count, or null. */
+export function bookWithMostImages(): { slug: string; count: number } | null {
+	let best: { slug: string; count: number } | null = null;
+	for (const slug of syncedBooks()) {
+		const count = offlineFileSet(slug).images.length;
+		if (!best || count > best.count) best = { slug, count };
+	}
+	return best;
 }

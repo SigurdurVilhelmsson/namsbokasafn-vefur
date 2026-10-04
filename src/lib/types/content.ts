@@ -82,6 +82,10 @@ export interface TableOfContents {
   // Book glossary (Orðasafn) — present only when the book ships a glossary.json
   // (set by generate-toc.js). Gates the sidebar link + route.
   glossary?: { title: string; file: string };
+  // Offline download summary (set by process-content.js from offline-manifest.json):
+  // `bytes` are DISK bytes of every file a reader can open offline. Absent on a book
+  // whose live toc.json predates it (the frozen books on the server).
+  offline?: { version: string; files: number; bytes: number };
 }
 
 // Difficulty levels for content

@@ -4,11 +4,35 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, sym
 import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { deploy, parseArgs, rsyncArgs, summarizeItemized } from './deploy.js';
+import { deploy, missingServiceWorkerImports, parseArgs, rsyncArgs, summarizeItemized } from './deploy.js';
 import { deployExcludes, deployFilterRules } from './deploy-excludes.js';
 
 // A string, not new URL(): the jsdom test environment replaces the global URL class.
 const DEPLOY_SCRIPT = join(dirname(fileURLToPath(import.meta.url)), 'deploy.js');
+
+describe('missingServiceWorkerImports', () => {
+	let dir;
+	beforeEach(() => {
+		dir = mkdtempSync(join(tmpdir(), 'sw-imports-'));
+	});
+	afterEach(() => rmSync(dir, { recursive: true, force: true }));
+
+	it('names a file the service worker imports but the build lacks', () => {
+		writeFileSync(join(dir, 'sw.js'), 'define([],(function(){importScripts("/sw-offline-book.js");}));');
+		expect(missingServiceWorkerImports(dir)).toEqual(['/sw-offline-book.js']);
+	});
+
+	it('is satisfied when the imported file is in the build', () => {
+		writeFileSync(join(dir, 'sw.js'), 'importScripts("/sw-offline-book.js");');
+		writeFileSync(join(dir, 'sw-offline-book.js'), '');
+		expect(missingServiceWorkerImports(dir)).toEqual([]);
+	});
+
+	it('ignores a variable importScripts (the workbox loader)', () => {
+		writeFileSync(join(dir, 'sw.js'), 'importScripts(l);');
+		expect(missingServiceWorkerImports(dir)).toEqual([]);
+	});
+});
 
 describe('parseArgs', () => {
 	// 🔴 A deploy that runs for real by default turns a mistyped or exploratory
