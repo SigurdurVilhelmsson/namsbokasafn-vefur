@@ -116,6 +116,31 @@ function isTyping(): boolean {
 }
 
 /**
+ * True when a key belongs to something on the page rather than to a global
+ * shortcut: an open dialog (the figure lightbox included), a text selection
+ * being extended with Shift+arrow, or a focused box that scrolls sideways
+ * (a wide table, a long equation). Exported for the paged reader, whose page
+ * turns use the same keys.
+ */
+export function keyBelongsElsewhere(event: KeyboardEvent): boolean {
+	const dialogOpen = Array.from(document.querySelectorAll('[aria-modal="true"]')).some(
+		(el) => el.getClientRects().length > 0
+	);
+	if (dialogOpen) return true;
+
+	const arrow = event.key === 'ArrowLeft' || event.key === 'ArrowRight';
+	if (!arrow) return false;
+	if (event.shiftKey) return true;
+	for (let el = document.activeElement; el && el !== document.body; el = el.parentElement) {
+		const overflowX = getComputedStyle(el).overflowX;
+		if ((overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
  * Navigate to previous/next section by clicking the section nav link
  * (`data-nav` on NavigationButtons). Returns false when there is none, so the
  * key keeps its default on pages without section navigation.
@@ -239,13 +264,13 @@ export function keyboardShortcuts(node: HTMLElement, options: KeyboardShortcutsO
 	let currentOptions = options;
 
 	/** A handler returns false when it did nothing, so the key keeps its default. */
-	function getHandlers(): Record<ShortcutAction, () => void | boolean> {
+	function getHandlers(event: KeyboardEvent): Record<ShortcutAction, () => void | boolean> {
 		const { bookSlug, onToggleFocusMode, onOpenSearch, onOpenShortcuts, onCloseModal } =
 			currentOptions;
 
 		return {
-			prevSection: () => navigatePrevNext('prev'),
-			nextSection: () => navigatePrevNext('next'),
+			prevSection: () => !keyBelongsElsewhere(event) && navigatePrevNext('prev'),
+			nextSection: () => !keyBelongsElsewhere(event) && navigatePrevNext('next'),
 			goHome: () => {
 				if (bookSlug) goto(`/${bookSlug}`);
 			},
@@ -288,7 +313,7 @@ export function keyboardShortcuts(node: HTMLElement, options: KeyboardShortcutsO
 
 		// Get current shortcuts and handlers
 		const shortcuts = getShortcuts();
-		const handlers = getHandlers();
+		const handlers = getHandlers(event);
 
 		// Update key sequence
 		const newSequence = [...keySequence, effectiveKey];
