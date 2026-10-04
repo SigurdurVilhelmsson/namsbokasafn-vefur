@@ -24,11 +24,11 @@ Two facts constrain every fix:
 1. **`src/lib/sw/runtimeCaching.ts`** owns both routes and two small plugins; `vite.config.ts` imports it.
    - Images: **`StaleWhileRevalidate`**, `fetchOptions: { cache: 'no-cache' }`, cache `book-images` (name kept — see below), `maxEntries: 100`, `maxAgeSeconds: 7 d`, `purgeOnQuotaError`, plus a **size gate** (`cacheWillUpdate`): only a 200, never `text/html` (nginx's `/200.html` SPA fallback answers a missing figure with 200), at most 1 MiB decoded. Ceiling: 100 MiB.
    - Pages/JSON: `NetworkFirst` as before, now with `cache: 'no-cache'`, `ignoreVary`, `purgeOnQuotaError`, statuses `[200]`.
-   - Both routes end with an **offline fallback** (`cachedResponseWillBeUsed`, placed after `ExpirationPlugin`): when the browsing cache misses or has expired, serve the copy in `offline-book:<slug>`.
+   - **Offline fallback** to the copy in `offline-book:<slug>`: on pages, `cachedResponseWillBeUsed` after `ExpirationPlugin` (NetworkFirst reads the cache only when the network failed); on figures, **`handlerDidError`** only — cache miss plus network failure. _(Changed after review: `cachedResponseWillBeUsed` on the StaleWhileRevalidate route counts as a cache hit, so an online reader with a downloaded book was served the downloaded copy instead of a re-rendered figure — forever for one over the size gate. Measured, then pinned by an e2e test with a control.)_
    - ⚠️ Every function in that file is serialized into `build/sw.js` by `fn.toString()`: arrow functions only, literals inline, no outer identifiers. Unit tests rebuild each function from its source text and call it, and an e2e test reads the emitted `sw.js`.
 2. **Downloaded books** live in **`offline-book:<slug>`**, one cache per book, no `ExpirationPlugin`, written only by page code. The download fetches `<url>?nb-offline=1`, which no `$`-anchored route matches, so it never passes through the browsing caches.
 3. **`offline-manifest.json`** per book, written by `process-content.js` (`scripts/lib/offline-manifest.js`): every `.html` under `chapters/` (front matter, appendices and answer keys included), `glossary.json`, `index.json`, and every local `<img src>` they reference, each with disk bytes and a 16-hex sha256. `toc.offline = { version, files, bytes }` carries the summary, so the estimate is real disk bytes.
-4. **`offline.ts`**: one sync routine for first download, resume and update (fetches only files that are new or whose hash changed, deletes removed ones), a held-state record written **last** into the book's cache, a size check of each body against the manifest, and a final check that `toc.offline.version` still equals the manifest's version (a deploy mid-download marks the book incomplete, never complete). `navigator.storage.persist()` and a quota check run first.
+4. **`offline.ts`**: before anything, ask the ACTIVE service worker whether it serves downloaded books (`static/sw-offline-book.js` answers a message; an older worker does not, and a download made under it would say "Sótt" yet never open offline). One download at a time per tab, a Web Lock across tabs. One sync routine for first download, resume and update (fetches only files that are new or whose hash changed, deletes removed ones), a held-state record written **last** into the book's cache, a size check of each body against the manifest, and a final check that the `toc.json` fetched LAST still has the manifest's version (a deploy that lands mid-download leaves the book incomplete, never complete, and the next run fetches the new manifest). `navigator.storage.persist()` and a quota check run first.
    - **Frozen books** (physics, biology, microbiology) keep a live `toc.json` with no `offline` field, because the deploy freezes them. They fall back to a runtime file list (`getBookContentUrls`, now including front matter, appendices and answer keys, plus the `<img>` walk) with no size shown.
    - **Legacy records** (`version: '1.0'`, written by the old code) are never shown as "Sótt": they become "Fyrra niðurhal var ófullkomið — sæktu bókina aftur".
 5. **`DownloadBookButton.svelte`** states: not downloaded (with the real size), downloading, complete ("Sótt"), outdated ("Ný útgáfa — Uppfæra"), incomplete ("N skrár vantar — Ljúka niðurhali"), legacy.
@@ -41,7 +41,8 @@ A hard load of a frozen book's page runs the **old** `offline.ts` (the frozen pa
 
 - 🔴 **One stale view.** With `StaleWhileRevalidate`, the first view of a figure cached in the last 7 days shows the **old** bytes after a content deploy; the second view is fresh. Opening yesterday's section right after the chemistry sync and seeing the old figure is expected, not a failed deploy. Readers also get nothing new until they accept the service-worker update prompt.
 - **Request chatter.** With `cache: 'no-cache'`, every figure view fires a background conditional request — a 304 normally, a full 200 after a deploy because of the ETag churn. Dropping `no-cache` on the image route would trade that for a worst case of 24 h + one view.
-- Each figure over 1 MiB (60 in chemistry, 83.7 MB together) is never stored by the service worker while browsing. The browser's HTTP cache still holds it, and a downloaded book still holds it.
+- Each figure over 1 MiB is never stored by the service worker while browsing: 60 in chemistry as deployed (83.7 MB), **163 on efni `main` (799 MB)**. The browser's HTTP cache still holds it, and a downloaded book still holds it.
+- **Download size:** chemistry is 345 MB as deployed but **~1 GB on efni `main`** (single SVGs up to 66 MB) until efni's recompose rasterises the heavy tail. The estimate now shows that honestly; it is a reason to land efni's recompose before, or with, the chemistry sync.
 
 ## Out of scope (named, on the worklist)
 
@@ -51,8 +52,8 @@ A hard load of a frozen book's page runs the **old** `offline.ts` (the frozen pa
 ## Tests
 
 - Vitest: the serialized plugins (rebuilt from source text), the routes' bypass, the manifest builder, `planSync`/`deriveStatus`, the store migration.
-- Playwright against the production build (`e2e/offline.spec.ts`), each run red on `main` first:
-  freshness (route swap), size gate, full download survives offline (fixture derived at run time, skipped with ≤ 200 figures), real estimate, legacy record not "Sótt", emitted `sw.js`.
+- Playwright against the production build (`e2e/offline.spec.ts`, `e2e/offline-download.spec.ts`), each run red on `main` first:
+  freshness (route swap), size gate, full download survives offline (fixture derived at run time, skipped with ≤ 200 figures; its own file, no retries, no trace — ~1 GB on CI), real estimate, legacy record not "Sótt", emitted `sw.js`; after review, "online, the network copy beats a downloaded one", whose control (the old plugin restored) fails with the 14-byte stand-in served instead of the 1,684,336-byte figure.
 
 ## Manual QA for [USER]
 

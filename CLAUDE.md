@@ -158,6 +158,18 @@ cannot see a URL assembled at runtime. A Playwright probe over four pages record
 for them against a control of 10 real font requests; a zero with no control would only have
 meant the probe was broken.
 
+### Service worker caching and offline download
+
+Routes, limits and plugins live in `src/lib/sw/runtimeCaching.ts`; `vite.config.ts` only imports them. Plan and measurements: `docs/plans/2026-10-04-sw-cache-and-offline-download.md`.
+
+- ⚠️ **Every function in that file runs in the service worker as its SOURCE TEXT** (workbox-build serializes with `fn.toString()`): arrow functions only (method shorthand becomes a SyntaxError), and no identifier from outside the body (a closure becomes a ReferenceError). The unit test rebuilds each function from its text and calls it; e2e reads the emitted `sw.js`.
+- **Figures:** `StaleWhileRevalidate` with `cache: 'no-cache'`, 100 entries / 7 days, and a 1 MiB size gate (decoded bytes; it also rejects nginx's 200 `text/html` SPA shell). 🔴 **A figure re-rendered under the same name shows its old bytes on the FIRST view after a content deploy and the new ones from the second** — expected, not a failed deploy. Before 2026-10 the rule was CacheFirst for 30 days.
+- **A downloaded book** lives in `offline-book:<slug>`, which nothing expires. The download fetches `<url>?nb-offline=1`, which no `$`-anchored route matches, so it never passes through the capped browsing caches (the old download did, and kept 200 of chemistry's 1,147 figures while saying "Sótt"). 🔴 **On the figure route the downloaded copy is served only from `handlerDidError` (cache miss + network failure), never `cachedResponseWillBeUsed`**: StaleWhileRevalidate treats whatever that hook returns as a cache hit, so an ONLINE reader with a downloaded book would never see a re-rendered figure (measured in review). The page route uses `cachedResponseWillBeUsed` after `ExpirationPlugin`, which NetworkFirst reaches only when the network failed. Pinned by unit and e2e tests.
+- **The page asks the ACTIVE worker before downloading** (`static/sw-offline-book.js`, imported by the generated worker): an older worker never reads `offline-book:*`, so a download made under it would say "Sótt" and still not open offline.
+- **`process-content.js` writes `static/content/<book>/offline-manifest.json`** (every page under `chapters/` plus glossary/index and each referenced `<img>`, with disk size and hash) and `toc.offline`. So **`deleting offline-manifest.json` in sync output is expected**, like `deleting toc.json`: the next build writes it again. It warns about any `<img>` with no readable `src`. Frozen books' live `toc.json` has no `offline`, so the reader falls back to a list built from the TOC.
+- Size: chemistry is 345 MB as deployed today (2026-10-04) but **~1 GB on efni `main`** (163 figures over 1 MiB, up to 66 MB each) until efni's recompose rasterises the heavy tail. CI's whole-book download test (`e2e/offline-download.spec.ts`) runs on efni `main`, with no retries and no trace.
+- Out of scope, still open: a **cold start offline** fails (`navigateFallback: null`, no page precached; a downloaded book reads offline from an open tab), and **every deploy changes every ETag** (the build resets mtimes), so a revalidation after a deploy is a full 200, not a 304.
+
 ### Glossary System
 
 `src/lib/actions/glossaryTerms.ts` uses **semantic-only** term detection — it only processes `<dfn class="term">` elements from the CNXML pipeline. A previous text-matching pass was removed to avoid false positives on common Icelandic words like "efni".

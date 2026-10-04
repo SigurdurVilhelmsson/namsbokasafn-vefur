@@ -38,8 +38,18 @@ The 2026-10-03 deploy followed these steps; keep to them.
    Content synced by a `sync-content.js` that predates the stamp has none, and nor
    does a withheld book while it is frozen; a missing stamp on either side shows up in
    the checksum.
+   **The first deploy after the offline-download change** (`fix/sw-cache-offline-download`)
+   shows every published book's `toc.json` changed and `offline-manifest.json` new.
+   Both are written by `process-content.js`, not by a sync. Check that `toc.json`
+   differs only by its new `offline` key:
+   `curl -fsS https://namsbokasafn.is/content/<book>/toc.json -o /tmp/live-toc.json`, then
+   `node -e "const f=(p)=>{const t=JSON.parse(require('fs').readFileSync(p,'utf8'));delete t.offline;return JSON.stringify(t)};console.log(f(process.argv[1])===f(process.argv[2])?'same apart from offline':'DIFFERENT')" build/content/<book>/toc.json /tmp/live-toc.json`.
 6. **Deploy** with `--apply`, then check `/_app/version.json` and the pages
    you changed.
+   A reader gets a new service worker only after accepting the update prompt, and a
+   figure re-rendered under the same name shows its OLD bytes on the first view after
+   that (StaleWhileRevalidate), the new ones from the second. Seeing the old figure
+   once right after a content deploy is expected, not a failed deploy.
 
 ## Running the deploy
 
