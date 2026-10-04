@@ -117,10 +117,43 @@ test.describe('Figure cache while browsing', () => {
 		expect(await sizeVia()).toBe('DOWNLOADED-OLD'.length);
 	});
 
+	test('a downloaded figure is served on a stalled network instead of hanging', async ({
+		page,
+		context
+	}) => {
+		const slug = syncedBooks()[0];
+		const [downloaded, notDownloaded] = offlineFileSet(slug).images;
+		test.skip(!notDownloaded, `${slug} needs two figures`);
+		// The connection opens but nothing ever arrives (a bus, a weak rural link).
+		await context.route(/\/content\/.*\.(png|jpg|jpeg|gif|svg|webp)$/, () => {});
+		await openControlled(page, `/${slug}/`);
+		await page.evaluate(
+			async ([url, name]) => (await caches.open(name)).put(url, new Response('DOWNLOADED-COPY')),
+			[downloaded, `offline-book:${slug}`]
+		);
+		const bodyWithin = (u: string, ms: number) =>
+			page.evaluate(
+				async ([url, limit]) =>
+					Promise.race([
+						fetch(url as string).then((r) => r.text(), () => 'failed'),
+						new Promise((r) => setTimeout(() => r('still waiting'), limit as number))
+					]),
+				[u, ms] as const
+			);
+
+		expect(await bodyWithin(downloaded, 8_000)).toBe('DOWNLOADED-COPY');
+		// Control: with no downloaded copy nothing is cut short, so the stall shows.
+		expect(await bodyWithin(notDownloaded, 6_000)).toBe('still waiting');
+	});
+
 	test('the emitted service worker revalidates figures and falls back to downloaded books', async ({
 		request
 	}) => {
 		const sw = await (await request.get('/sw.js')).text();
+		// The worker imports its capability answer; a failed import would leave it with no routes.
+		expect(sw).toContain('importScripts("/sw-offline-book.js")');
+		const caps = await request.get('/sw-offline-book.js');
+		expect(caps.headers()['content-type']).toContain('javascript');
 		const start = sw.search(/png\|jpg/);
 		expect(start).toBeGreaterThan(-1);
 		const imageRoute = sw.slice(start, sw.indexOf('registerRoute', start + 1) >>> 0);

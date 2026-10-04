@@ -133,6 +133,38 @@ describe('figure fallback (serialized)', () => {
 	});
 });
 
+describe('stalled-network timeout (serialized)', () => {
+	const willFetch = rebuilt(offlineImageFallbackPlugin.requestWillFetch);
+	const didSucceed = rebuilt(offlineImageFallbackPlugin.fetchDidSucceed);
+	beforeEach(() => vi.useFakeTimers());
+	afterEach(() => {
+		vi.useRealTimers();
+		vi.unstubAllGlobals();
+	});
+
+	it('leaves the request alone when the book is not downloaded', async () => {
+		vi.stubGlobal('caches', { match: vi.fn().mockResolvedValue(undefined) });
+		const request = new Request(FIGURE);
+		expect(await willFetch({ request, state: {} })).toBe(request);
+	});
+
+	it('aborts a downloaded figure whose headers do not arrive within 4 s', async () => {
+		vi.stubGlobal('caches', { match: vi.fn().mockResolvedValue(response('downloaded')) });
+		const sent = await willFetch({ request: new Request(FIGURE), state: {} });
+		vi.advanceTimersByTime(4000);
+		expect(sent.signal.aborted).toBe(true);
+	});
+
+	it('never aborts once the headers have arrived', async () => {
+		vi.stubGlobal('caches', { match: vi.fn().mockResolvedValue(response('downloaded')) });
+		const state = {};
+		const sent = await willFetch({ request: new Request(FIGURE), state });
+		await didSucceed({ response: response('fresh'), state });
+		vi.advanceTimersByTime(60_000);
+		expect(sent.signal.aborted).toBe(false);
+	});
+});
+
 describe('literals repeated inside serialized functions', () => {
 	it('the size gate uses BROWSE_IMAGE_MAX_BYTES', () => {
 		expect(sizeGatePlugin.cacheWillUpdate.toString()).toContain(String(BROWSE_IMAGE_MAX_BYTES));

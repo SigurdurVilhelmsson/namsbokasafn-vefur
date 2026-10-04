@@ -96,14 +96,44 @@ export const offlineFallbackPlugin = {
 };
 
 /**
- * Figures — `handlerDidError`: only when StaleWhileRevalidate has neither a
- * browsing-cache entry nor a network response (offline), serve the downloaded copy.
- * Not `cachedResponseWillBeUsed`: StaleWhileRevalidate treats whatever that returns
- * as a cache hit, so an ONLINE reader who had downloaded the book would be served
- * the downloaded copy on every browsing-cache miss — forever, for a figure over the
- * size gate — and never see a re-rendered figure (review of 2026-10-04, measured).
+ * Figures and a downloaded book. Two jobs, one plugin:
+ *
+ * - `handlerDidError`: only when StaleWhileRevalidate has neither a browsing-cache
+ *   entry nor a network response, serve the downloaded copy. Not
+ *   `cachedResponseWillBeUsed`: StaleWhileRevalidate treats whatever that returns as
+ *   a cache hit, so an ONLINE reader who had downloaded the book would be served the
+ *   downloaded copy on every browsing-cache miss — forever, for a figure over the
+ *   size gate — and never see a re-rendered figure (review of 2026-10-04, measured).
+ * - `requestWillFetch` / `fetchDidSucceed` / `fetchDidFail`: StaleWhileRevalidate has
+ *   no network timeout, so on a stalled connection (open, but nothing arrives) a
+ *   figure of a downloaded book would hang instead of falling back. When a
+ *   downloaded copy exists, the request is aborted if no response HEADERS arrive
+ *   within 4 s (pages fall back after 3 s, NetworkFirst's networkTimeoutSeconds).
+ *   The timer is cleared as soon as headers arrive, so a large figure that is
+ *   genuinely downloading is never cut off. Without a downloaded copy nothing is
+ *   aborted. `state` is workbox's per-request plugin state.
  */
 export const offlineImageFallbackPlugin = {
+	requestWillFetch: async ({ request, state }: { request: Request; state?: { timer?: number } }) => {
+		const match = /^\/content\/([^/]+)\//.exec(new URL(request.url).pathname);
+		if (!match || !state) return request;
+		const copy = await caches.match(request.url, {
+			cacheName: 'offline-book:' + match[1],
+			ignoreSearch: true,
+			ignoreVary: true
+		});
+		if (!copy) return request;
+		const controller = new AbortController();
+		state.timer = setTimeout(() => controller.abort(), 4000) as unknown as number;
+		return new Request(request, { signal: controller.signal });
+	},
+	fetchDidSucceed: async ({ response, state }: { response: Response; state?: { timer?: number } }) => {
+		clearTimeout(state?.timer);
+		return response;
+	},
+	fetchDidFail: async ({ state }: { state?: { timer?: number } }) => {
+		clearTimeout(state?.timer);
+	},
 	handlerDidError: async ({ request }: { request: Request }) => {
 		const match = /^\/content\/([^/]+)\//.exec(new URL(request.url).pathname);
 		if (!match) return undefined;

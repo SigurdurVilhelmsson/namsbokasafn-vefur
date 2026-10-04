@@ -58,6 +58,24 @@ describe('buildOfflineManifest', () => {
 		expect(buildOfflineManifest(staticDir, 'bok').unparsed).toHaveLength(1);
 	});
 
+	it('reports an <img> with a srcset', () => {
+		put('content/bok/chapters/02/2-1-b.html', '<p><img src="images/media/a.png" srcset="b.png 2x"></p>');
+		expect(buildOfflineManifest(staticDir, 'bok').unparsed).toHaveLength(1);
+	});
+
+	it('reports a <picture> <source>', () => {
+		put('content/bok/chapters/02/2-1-b.html', '<picture><source srcset="b.webp"><img src="images/media/a.png"></picture>');
+		expect(buildOfflineManifest(staticDir, 'bok').unparsed).toHaveLength(1);
+	});
+
+	it('reads src, never data-src', () => {
+		put('content/bok/chapters/01/images/media/real.png', 'real');
+		put('content/bok/chapters/02/2-1-b.html', '<p><img src="../01/images/media/real.png" data-src="lazy.png"></p>');
+		expect(buildOfflineManifest(staticDir, 'bok').files.map((f) => f.p)).toContain(
+			'/content/bok/chapters/01/images/media/real.png'
+		);
+	});
+
 	it('reports nothing unparsed for ordinary figures', () => {
 		expect(buildOfflineManifest(staticDir, 'bok').unparsed).toEqual([]);
 	});

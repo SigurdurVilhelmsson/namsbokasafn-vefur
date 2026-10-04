@@ -6,6 +6,7 @@ import {
 	offline,
 	currentDownload,
 	workerServesOfflineBooks,
+	readerMessage,
 	type BookDownloadState
 } from './offline';
 import type { TableOfContents } from '$lib/types/content';
@@ -121,5 +122,21 @@ describe('workerServesOfflineBooks', () => {
 		const { serviceWorker: _omit, ...rest } = navigator as Navigator & { serviceWorker?: unknown };
 		vi.stubGlobal('navigator', rest);
 		expect(await workerServesOfflineBooks()).toBe(false);
+	});
+});
+
+describe('readerMessage', () => {
+	it('turns a network failure into Icelandic', () => {
+		expect(readerMessage(new TypeError('Failed to fetch'))).toBe(
+			'Engin nettenging. Athugaðu tenginguna og reyndu aftur.'
+		);
+	});
+
+	it('turns a full disk into Icelandic', () => {
+		expect(readerMessage(new DOMException('full', 'QuotaExceededError'))).toBe('Ekki nóg geymslupláss á tækinu.');
+	});
+
+	it('never shows an unexpected English message', () => {
+		expect(readerMessage(new Error('size mismatch'))).toBe('Villa við niðurhal');
 	});
 });

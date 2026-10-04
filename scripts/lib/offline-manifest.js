@@ -22,7 +22,8 @@ import { createHash } from 'node:crypto';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
-const IMG_SRC = /<img[^>]+src=["']([^"']+)["']/g;
+// `\s` before `src`, so `data-src="..."` is never read as the src.
+const IMG_SRC = /<img\b[^>]*?\ssrc=["']([^"']+)["']/g;
 const IMG_TAG = /<img\b[^>]*>/gi;
 
 function walk(dir) {
@@ -56,10 +57,14 @@ export function buildOfflineManifest(staticDir, bookSlug) {
 	for (const page of pages) {
 		const html = readFileSync(page, 'utf-8');
 		for (const [tag] of html.matchAll(IMG_TAG)) {
-			// An explicit empty src (a video placeholder in physics) is deliberate, not a figure.
-			if (!/\ssrc=["'][^"']*["']/.test(tag)) {
+			// An explicit empty src (a video placeholder in physics) is deliberate, not a
+			// figure. A srcset lets the browser pick a file the download never stored.
+			if (!/\ssrc=["'][^"']*["']/.test(tag) || /\ssrcset=/i.test(tag)) {
 				unparsed.push(`${relative(staticDir, page)}: ${tag.slice(0, 80)}`);
 			}
+		}
+		for (const [tag] of html.matchAll(/<source\b[^>]*>/gi)) {
+			unparsed.push(`${relative(staticDir, page)}: ${tag.slice(0, 80)}`);
 		}
 		for (const [, src] of html.matchAll(IMG_SRC)) {
 			if (/^(?:[a-z]+:|\/\/)/i.test(src)) continue; // external or data: — not ours to store

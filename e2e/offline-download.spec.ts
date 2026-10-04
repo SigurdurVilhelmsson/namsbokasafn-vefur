@@ -28,16 +28,18 @@ test('a downloaded book serves every page and figure offline', async ({ page, co
 
 	await openControlled(page, `/${slug}/`);
 	await page.getByRole('button', { name: /Sækja fyrir ónettengda notkun/ }).click();
-	// Ends either way: the record gets a downloadedAt, or an error is shown.
+	// Ends either way: the record gets a downloadedAt, or an error is shown (every error
+	// state offers "Reyna aftur"). Stop at the first, so a failure is quick and named.
 	const record = () =>
 		page.evaluate((s) => JSON.parse(localStorage.getItem('namsbokasafn:offline') || '{}').books?.[s] ?? null, slug);
+	const retry = page.getByRole('button', { name: 'Reyna aftur' });
 	await expect
-		.poll(
-			async () =>
-				(await record())?.downloadedAt ? 'finished' : (await page.getByText(/Villa|Engin nettenging|Ekki nóg/).count()) ? 'error' : null,
-			{ timeout: 14 * 60_000, intervals: [2_000] }
-		)
-		.toBe('finished');
+		.poll(async () => ((await record())?.downloadedAt || (await retry.count()) > 0 ? 'ended' : null), {
+			timeout: 14 * 60_000,
+			intervals: [2_000]
+		})
+		.toBe('ended');
+	expect(await retry.count(), await page.locator('.download-book').innerText()).toBe(0);
 	expect(await record()).toMatchObject({ downloaded: true, missing: 0 });
 
 	await context.setOffline(true);

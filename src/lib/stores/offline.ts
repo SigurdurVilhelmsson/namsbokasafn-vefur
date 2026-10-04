@@ -358,7 +358,7 @@ export function extractImageUrls(content: string, basePath: string): string[] {
 	let match;
 
 	// HTML image syntax: <img src="url">
-	const htmlImageRegex = /<img[^>]+src=["']([^"']+)["']/g;
+	const htmlImageRegex = /<img\b[^>]*?\ssrc=["']([^"']+)["']/g;
 	while ((match = htmlImageRegex.exec(content)) !== null) {
 		urls.push(match[1]);
 	}
@@ -484,7 +484,7 @@ export async function verifyBook(
 class DownloadError extends Error {}
 
 /** What the reader is shown for a failure; the raw error goes to the console. */
-function readerMessage(e: unknown): string {
+export function readerMessage(e: unknown): string {
 	if (e instanceof DownloadError) return e.message;
 	if ((browser && !navigator.onLine) || e instanceof TypeError) {
 		return 'Engin nettenging. Athugaðu tenginguna og reyndu aftur.';
@@ -570,8 +570,10 @@ export function downloadBook(bookSlug: string): Promise<DownloadResult> {
 
 async function runDownload(bookSlug: string): Promise<DownloadResult> {
 	if (!(await workerServesOfflineBooks())) {
+		// The update prompt is on screen only when a new worker is waiting.
+		const waiting = (await navigator.serviceWorker?.getRegistration())?.waiting;
 		throw new DownloadError(
-			navigator.serviceWorker?.controller
+			waiting
 				? 'Ný útgáfa af forritinu er tilbúin. Veldu „Uppfæra núna“ og sæktu bókina svo.'
 				: 'Ónettengdur lestur er ekki tilbúinn enn. Opnaðu síðuna aftur og reyndu svo.'
 		);
@@ -676,6 +678,13 @@ async function runDownload(bookSlug: string): Promise<DownloadResult> {
 		sizeBytes,
 		missing: failed
 	});
+	if (!consistent) {
+		// Not a plain finish: the book changed (or its toc.json failed) under the
+		// download, and without a matching toc.json it cannot open offline.
+		const error = 'Bókin var uppfærð á meðan hún var sótt. Veldu „Reyna aftur“ til að ljúka niðurhalinu.';
+		offline.setError(bookSlug, error);
+		return { success: false, error, sizeBytes, failedCount: failed > 0 ? failed : undefined };
+	}
 	offline.finishDownload(bookSlug);
 
 	return { success: complete, sizeBytes, failedCount: failed > 0 ? failed : undefined };

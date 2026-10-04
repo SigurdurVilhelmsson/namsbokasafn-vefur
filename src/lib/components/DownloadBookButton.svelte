@@ -24,7 +24,6 @@
 	let estimatedSize = $state(0);
 	let isEstimating = $state(false);
 	let showConfirmDelete = $state(false);
-	let failedFileCount = $state(0);
 	// What is really stored, from the book's offline cache (not just localStorage)
 	let status = $state<OfflineStatus>('none');
 	let missingFiles = $state(0);
@@ -46,6 +45,8 @@
 	let otherBookBusy = $derived(!!progress && progress.bookSlug !== bookSlug && isBusy);
 	let downloadError = $derived(progress?.bookSlug === bookSlug ? progress?.error : null);
 	let downloadComplete = $derived(progress?.bookSlug === bookSlug && progress?.status === 'complete');
+	// From the store, so a button remounted mid-download still reports failures
+	let failedFileCount = $derived(progress?.bookSlug === bookSlug ? progress.failedFiles : 0);
 
 	// Calculate progress percentage
 	let progressPercent = $derived(
@@ -54,18 +55,23 @@
 			: 0
 	);
 
+	// Overlapping refreshes (a remount just as a download ends): only the latest may write.
+	let refreshSeq = 0;
+
 	/** Re-read the served size and version, and what the device holds. */
 	async function refresh() {
+		const seq = ++refreshSeq;
 		isEstimating = true;
 		try {
 			const toc = await loadOfflineToc(bookSlug);
-			estimatedSize = toc?.offline?.bytes ?? 0;
 			const result = await verifyBook(bookSlug, toc?.offline?.version ?? null);
+			if (seq !== refreshSeq) return;
+			estimatedSize = toc?.offline?.bytes ?? 0;
 			status = result.status;
 			missingFiles = result.missing;
 			uncontrolled = !navigator.serviceWorker?.controller;
 		} finally {
-			isEstimating = false;
+			if (seq === refreshSeq) isEstimating = false;
 		}
 	}
 
@@ -83,15 +89,19 @@
 		if (ended && browser) untrack(() => refresh());
 	});
 
+	// ...and when another tab changes this book's record (it finished or removed the
+	// download while this tab waited on the lock).
+	let lastRecord: string | null | undefined;
+	$effect(() => {
+		const record = JSON.stringify(downloadState);
+		if (lastRecord !== undefined && record !== lastRecord && browser) untrack(() => refresh());
+		lastRecord = record;
+	});
+
 	async function handleDownload() {
 		if (isDownloading) return;
 
-		failedFileCount = 0;
-		const result = await downloadBook(bookSlug);
-
-		if (result.failedCount) {
-			failedFileCount = result.failedCount;
-		}
+		await downloadBook(bookSlug);
 	}
 
 	async function handleDelete() {
@@ -101,7 +111,6 @@
 	}
 
 	function dismissProgress() {
-		failedFileCount = 0;
 		offline.clearProgress();
 	}
 </script>
@@ -201,7 +210,7 @@
 		</div>
 	{:else if downloadComplete}
 		<!-- Just completed -->
-		<div class="flex items-center gap-3">
+		<div class="flex flex-wrap items-center gap-3">
 			<div
 				class="flex items-center gap-2 rounded-lg px-4 py-2 {failedFileCount > 0
 					? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
@@ -222,6 +231,11 @@
 			>
 				Loka
 			</button>
+			{#if uncontrolled}
+				<p class="w-full text-sm text-amber-700 dark:text-amber-400">
+					Opnaðu síðuna aftur einu sinni svo bókin opnist án nettengingar.
+				</p>
+			{/if}
 		</div>
 	{:else if downloadError}
 		<!-- Error state -->

@@ -178,7 +178,7 @@ export function offlineFileSet(slug: string): OfflineFileSet {
 		.filter((f) => existsSync(f));
 	const images = new Set<string>();
 	for (const file of htmlFiles) {
-		for (const [, src] of readFileSync(file, 'utf-8').matchAll(/<img[^>]+src=["']([^"']+)["']/g)) {
+		for (const [, src] of readFileSync(file, 'utf-8').matchAll(/<img\b[^>]*?\ssrc=["']([^"']+)["']/g)) {
 			if (/^(?:[a-z]+:|\/\/)/i.test(src)) continue;
 			const abs = src.startsWith('/') ? join(staticDir, src) : join(dirname(file), src);
 			if (existsSync(abs)) images.add(abs);

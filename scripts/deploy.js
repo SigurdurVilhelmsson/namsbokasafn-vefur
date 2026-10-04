@@ -110,11 +110,32 @@ function buildVersion(buildDir) {
 }
 
 /**
+ * Files the build's service worker imports (`importScripts("/x.js")`) that the
+ * build does not contain. Such a worker still installs, but the failed import
+ * leaves it with no routes and no precache: offline reading silently stops.
+ * @returns {string[]} the missing paths; [] when there is no sw.js
+ */
+export function missingServiceWorkerImports(buildDir) {
+	const swFile = join(buildDir, 'sw.js');
+	if (!existsSync(swFile)) return [];
+	const sw = readFileSync(swFile, 'utf8');
+	const imports = [...sw.matchAll(/importScripts\(\s*["'](\/[^"']+)["']\s*\)/g)].map((m) => m[1]);
+	return imports.filter((path) => !existsSync(join(buildDir, path)));
+}
+
+/**
  * Run one deploy. Throws before rsync runs if a precondition fails.
  * @returns {{ status: number, deleted: string[], transferred: string[] }}
  */
 export function deploy({ source, build, target, apply, log = console.log }) {
 	const version = buildVersion(build);
+	const missingImports = missingServiceWorkerImports(build);
+	if (missingImports.length > 0) {
+		throw new Error(
+			`The build's sw.js imports ${missingImports.join(', ')}, which the build does not contain: ` +
+				'that service worker would install with no routes, and offline reading would stop.'
+		);
+	}
 	// The freeze covers withheld books only. A published book with no content in
 	// the build (synced from an efni commit that predates it, say) would be
 	// deleted from the server — taking it down must be a decision, not this.
