@@ -597,11 +597,12 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
-### 2026-10-04 (late) — deploys stop changing unchanged files' ETags (#263)
+### 2026-10-04 (late) — deploys stop changing unchanged files' ETags (#263), deployed
 
-Measured on 2026-10-04 against `main` = `0919282` plus #263, and the live site.
+Measured on 2026-10-04 against `main` = `1f14e6d` (#263) and the live site.
 
-- **#263: `deploy.js` runs rsync with `--checksum --no-times`** (rules under Deployment). ⏳ **Not deployed**: prod still runs build `1791149163717`; the other merges since (#261, #262) changed only docs and tests. 🔑 **The next deploy closes worklist `sync-etag-churn`:** `curl -sI` an unchanged figure (e.g. `/content/efnafraedi-2e/chapters/05/images/media/CNX_Chem_05_01_SolTherm1_IS.svg`, `last-modified` 21:26:53 today) before and after `--apply`; it must not move. Expect that dry run to list only prerendered pages, `_app/` files and `sw.js` (314 for a rebuild of the same commit).
+- **#263: `deploy.js` runs rsync with `--checksum --no-times`** (rules under Deployment). **Prod runs build `1791155794060`** (deployed ~23:21 UTC from `main` `1f14e6d` by `scripts/deploy.js`, no content sync): 314 files sent, 0 deleted; gates: sitemap 366 = 366, all 2,481 chemistry content files byte-identical to the server beforehand. Backup: `~/backups/namsbokasafn-build-2026-10-04-v1791149163717` (3,499 files, checksums identical). Nothing on `main` is undeployed.
+- **Verified live:** 4 unchanged files (a figure, a chapter page, `glossary.json`, `fonts/OFL.txt`) kept their exact ETag and `Last-Modified` across the deploy, and a conditional GET of the figure answers 304; a changed page (`/efnafraedi-2e/`) got a new `Last-Modified`; 0 missing `_app` assets on the catalogue, chemistry and the three frozen books; organic 404. Worklist `sync-etag-churn` is done. ⚠️ When comparing content checksums with the server, sort both lists with `LC_ALL=C`: the two machines collate differently, and an unsorted diff looked like ~2,000 mismatches when all 2,481 files matched.
 - **Scope:** `content/` and unchanged static files only. Prerendered pages still change bytes every build (SvelteKit's version is a timestamp). A `kit.version.name` derived from the git commit would make a content-only redeploy byte-stable; not decided, not on the worklist.
 - **Reviewed by a 4-lens workflow** (rsync semantics against the server's own 3.2.7, HTTP caching in a real browser, mutation testing, docs). No blocker. It caught a new test that **could not fail**: the fixture wrote the build in the same wall-clock second as the deploy, and rsync's quick check compares whole seconds, so dropping `--checksum` passed. ⚠️ **A real-rsync fixture needs fixed, distinct mtimes** (`utimesSync`), not "written just now".
 - **Leads for other sessions, unconfirmed:** `Skeleton.svelte:85` prerenders `width: {Math.random()}%`, a candidate for the catalogue `hydration_mismatch` (noted on `bl-catalogue-hydration`); live figures carry two `Cache-Control` headers (`max-age=86400` and `public, must-revalidate`), harmless as measured.
@@ -609,8 +610,8 @@ Measured on 2026-10-04 against `main` = `0919282` plus #263, and the live site.
 
 ### 2026-10-04 (evening) — service-worker cache and offline download live (#260)
 
-> ⚠️ **Superseded on one point — read the (late) entry above first.** `main` now carries #263, which is
-> not deployed. Everything else here still stands.
+> ⚠️ **Superseded on the operational points — read the (late) entry above first.** Prod now runs build
+> `1791155794060` (#263). Everything else here still stands.
 
 Measured on 2026-10-04 against `main` = `99e13b4` (#260) and the live site.
 
@@ -620,7 +621,7 @@ Measured on 2026-10-04 against `main` = `99e13b4` (#260) and the live site.
 - **CI:** the whole-book download test (`e2e/offline-download.spec.ts`) passed on efni `main`'s chemistry in 32 s; the e2e job took 6m03s (tests 3.9 min). CI e2e skips stay at 31.
 - ⏳ **[USER]'s QA:** a real iPad — download chemistry, flight mode, read from the open tab, and again after a week; and on a device still on the old worker, tap "Sækja" before accepting the update prompt and expect the refusal message.
 - ⚠️ **Unexplained, not caused by #260 as far as measured:** the catalogue `/` logs one Svelte `hydration_mismatch` in the console (0 on the chemistry and physics book homes). #260 did not touch that page; it was not checked against the previous build.
-- **Worklist follow-ups:** `sync-etag-churn` (every deploy changes every ETag, so revalidation after a deploy re-downloads each viewed file once; fixed for `content/` and unchanged static files by `fix/deploy-etag-churn`, effective from the next deploy; prerendered pages still change every build, see Deployment) and `bl-offline-cold-start` (a downloaded book reads offline only from an open tab).
+- **Worklist follow-ups:** `sync-etag-churn` (every deploy changes every ETag, so revalidation after a deploy re-downloads each viewed file once; fixed for `content/` and unchanged static files by #263, deployed 2026-10-04 23:21 UTC; prerendered pages still change every build, see Deployment) and `bl-offline-cold-start` (a downloaded book reads offline only from an open tab).
 - **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.** When it lifts, chemistry's offline download becomes ~1 GB until efni's recompose rasterises the heavy figures.
 - **npm audit, 2026-10-04 (evening):** production tree and full tree both 0 (control: 1 critical).
 
