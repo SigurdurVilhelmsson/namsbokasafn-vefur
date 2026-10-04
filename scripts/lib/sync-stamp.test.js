@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { execFileSync } from 'child_process';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from 'fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, utimesSync } from 'fs';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
 import { SYNC_STAMP_FILE, buildSyncStamp, readEfniState, writeSyncStamp } from './sync-stamp.js';
@@ -75,6 +75,61 @@ describe('readEfniState', () => {
 		const nested = resolve(repo, 'copy-of-efni');
 		mkdirSync(nested);
 		expect(readEfniState(nested, 'efnafraedi-2e').commit).toBeNull();
+	});
+
+	it('counts an untracked page even when git config hides untracked files', () => {
+		const { repo, page } = efniRepo();
+		git(repo, 'config', 'status.showUntrackedFiles', 'no');
+		writeFileSync(resolve(page, '1-2-new.html'), '<p>new</p>');
+		expect(readEfniState(repo, 'efnafraedi-2e').dirty).toBe(true);
+	});
+
+	it('counts a git-ignored file the sync would copy', () => {
+		const { repo, page } = efniRepo();
+		writeFileSync(resolve(repo, '.gitignore'), '*.tmp\n*.bak\n');
+		git(repo, 'add', '.gitignore');
+		git(repo, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '-m', 'ignore');
+		writeFileSync(resolve(page, 'draft.html.tmp'), 'x');
+		expect(readEfniState(repo, 'efnafraedi-2e').dirty).toBe(true);
+	});
+
+	it('does not count an editor artifact the sync excludes', () => {
+		const { repo, page } = efniRepo();
+		writeFileSync(resolve(repo, '.gitignore'), '*.bak\n');
+		git(repo, 'add', '.gitignore');
+		git(repo, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '-m', 'ignore');
+		writeFileSync(resolve(page, '1-1-a.html.bak'), 'old');
+		writeFileSync(resolve(page, '1-1-a.html.backup.2026-10-04T10-00-00'), 'old');
+		expect(readEfniState(repo, 'efnafraedi-2e').dirty).toBe(false);
+	});
+
+	it('does not write the checkout index (another session may hold it)', () => {
+		const { repo, page } = efniRepo();
+		const index = resolve(repo, '.git', 'index');
+		// A tracked file with a newer mtime makes git status refresh and rewrite
+		// the index; the control shows that a plain git status does write it
+		const stale = () => {
+			const t = new Date(Date.now() + 5000);
+			utimesSync(resolve(page, '1-1-a.html'), t, t);
+		};
+		stale();
+		const before = readFileSync(index);
+		readEfniState(repo, 'efnafraedi-2e');
+		expect(readFileSync(index).equals(before)).toBe(true);
+
+		git(repo, 'status', '--porcelain');
+		expect(readFileSync(index).equals(before)).toBe(false);
+	});
+
+	it('says unknown, not "off main", in a shallow clone missing the linking history', () => {
+		const { repo } = efniRepo();
+		const clone = resolve(root, 'shallow');
+		git(root, 'clone', '-q', '--depth', '1', `file://${repo}`, clone);
+		expect(readEfniState(clone, 'efnafraedi-2e').onOriginMain).toBe(true);
+
+		git(repo, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-q', '--allow-empty', '-m', 'next');
+		git(clone, 'fetch', '-q', '--depth', '1', 'origin', '+refs/heads/main:refs/remotes/origin/main');
+		expect(readEfniState(clone, 'efnafraedi-2e').onOriginMain).toBeNull();
 	});
 
 	it('returns nulls, not a throw, when the source is not a git checkout', () => {

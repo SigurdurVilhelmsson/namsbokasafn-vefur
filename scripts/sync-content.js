@@ -611,7 +611,7 @@ function stampBook(sourceDir, bookSlug, layers, bookDest) {
 			`  Stamped ${SYNC_STAMP_FILE}: efni ${commit ? commit.slice(0, 9) : 'unknown commit'}` +
 				(branch ? ` (${branch})` : '') +
 				(onOriginMain === false ? ' — ⚠️  NOT on efni origin/main' : '') +
-				(dirty ? ' — ⚠️  uncommitted changes in its 05-publication' : '')
+				(dirty ? ' — ⚠️  its 05-publication holds files not in that commit' : '')
 		);
 	} catch (error) {
 		console.warn(`  Warning: could not write ${SYNC_STAMP_FILE}: ${error.message}`);
