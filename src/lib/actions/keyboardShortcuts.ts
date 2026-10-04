@@ -116,18 +116,40 @@ function isTyping(): boolean {
 }
 
 /**
- * Navigate to previous/next section by clicking nav buttons
+ * True when a key belongs to something on the page rather than to a global
+ * shortcut: an open dialog (the figure lightbox included), a text selection
+ * being extended with Shift+arrow, or a focused box that scrolls sideways
+ * (a wide table, a long equation). Exported for the paged reader, whose page
+ * turns use the same keys.
  */
-function navigatePrevNext(direction: 'prev' | 'next'): void {
-	const selector =
-		direction === 'prev'
-			? 'a[aria-label="Fyrri kafli"], button[aria-label="Fyrri kafli"]'
-			: 'a[aria-label="Næsti kafli"], button[aria-label="Næsti kafli"]';
+export function keyBelongsElsewhere(event: KeyboardEvent): boolean {
+	const dialogOpen = Array.from(document.querySelectorAll('[aria-modal="true"]')).some(
+		(el) => el.getClientRects().length > 0
+	);
+	if (dialogOpen) return true;
 
-	const button = document.querySelector(selector) as HTMLElement;
-	if (button && !button.hasAttribute('disabled')) {
-		button.click();
+	const arrow = event.key === 'ArrowLeft' || event.key === 'ArrowRight';
+	if (!arrow) return false;
+	if (event.shiftKey) return true;
+	for (let el = document.activeElement; el && el !== document.body; el = el.parentElement) {
+		const overflowX = getComputedStyle(el).overflowX;
+		if ((overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {
+			return true;
+		}
 	}
+	return false;
+}
+
+/**
+ * Navigate to previous/next section by clicking the section nav link
+ * (`data-nav` on NavigationButtons). Returns false when there is none, so the
+ * key keeps its default on pages without section navigation.
+ */
+function navigatePrevNext(direction: 'prev' | 'next'): boolean {
+	const link = document.querySelector<HTMLElement>(`[data-nav="${direction}"]`);
+	if (!link || link.hasAttribute('disabled')) return false;
+	link.click();
+	return true;
 }
 
 /**
@@ -241,13 +263,14 @@ export function keyboardShortcuts(node: HTMLElement, options: KeyboardShortcutsO
 	let sequenceTimeout: ReturnType<typeof setTimeout> | null = null;
 	let currentOptions = options;
 
-	function getHandlers(): Record<ShortcutAction, () => void> {
+	/** A handler returns false when it did nothing, so the key keeps its default. */
+	function getHandlers(event: KeyboardEvent): Record<ShortcutAction, () => void | boolean> {
 		const { bookSlug, onToggleFocusMode, onOpenSearch, onOpenShortcuts, onCloseModal } =
 			currentOptions;
 
 		return {
-			prevSection: () => navigatePrevNext('prev'),
-			nextSection: () => navigatePrevNext('next'),
+			prevSection: () => !keyBelongsElsewhere(event) && navigatePrevNext('prev'),
+			nextSection: () => !keyBelongsElsewhere(event) && navigatePrevNext('next'),
 			goHome: () => {
 				if (bookSlug) goto(`/${bookSlug}`);
 			},
@@ -290,7 +313,7 @@ export function keyboardShortcuts(node: HTMLElement, options: KeyboardShortcutsO
 
 		// Get current shortcuts and handlers
 		const shortcuts = getShortcuts();
-		const handlers = getHandlers();
+		const handlers = getHandlers(event);
 
 		// Update key sequence
 		const newSequence = [...keySequence, effectiveKey];
@@ -300,8 +323,7 @@ export function keyboardShortcuts(node: HTMLElement, options: KeyboardShortcutsO
 		const matchingShortcut = shortcuts.find((s) => s.key === sequenceStr);
 
 		if (matchingShortcut) {
-			event.preventDefault();
-			handlers[matchingShortcut.action]();
+			if (handlers[matchingShortcut.action]() !== false) event.preventDefault();
 			keySequence = [];
 			if (sequenceTimeout) clearTimeout(sequenceTimeout);
 			return;
@@ -310,8 +332,7 @@ export function keyboardShortcuts(node: HTMLElement, options: KeyboardShortcutsO
 		// Check for single-key shortcuts (but not if we're in a sequence)
 		const singleKeyShortcut = shortcuts.find((s) => s.key === effectiveKey);
 		if (singleKeyShortcut && !newSequence.some((k) => k === 'g')) {
-			event.preventDefault();
-			handlers[singleKeyShortcut.action]();
+			if (handlers[singleKeyShortcut.action]() !== false) event.preventDefault();
 			keySequence = [];
 			if (sequenceTimeout) clearTimeout(sequenceTimeout);
 			return;
