@@ -37,31 +37,43 @@ export const OFFLINE_CACHE_PREFIX = 'offline-book:';
 /** A figure larger than this is never kept in the browsing cache (decoded bytes). */
 export const BROWSE_IMAGE_MAX_BYTES = 1048576;
 
+/**
+ * Message the page posts to the active service worker to ask whether it serves
+ * downloaded books (static/sw-offline-book.js answers; an older worker does not).
+ */
+export const OFFLINE_CAPS_MESSAGE = 'NB_OFFLINE_BOOK_CAPS';
+
 /** The downloaded-book cache of `bookSlug`. */
 export const offlineCacheName = (bookSlug: string): string => `${OFFLINE_CACHE_PREFIX}${bookSlug}`;
 
 /**
  * `cacheWillUpdate`: keep a figure only if it is a real 200 image of at most
  * 1 MiB. nginx answers a missing figure with the SPA shell (`/200.html`, status 200,
- * text/html), and gzips SVG with no Content-Length, so the body is measured.
+ * text/html), and gzips SVG with no Content-Length, so the body is measured. A
+ * figure re-rendered to more than 1 MiB also drops its older, smaller entry, which
+ * StaleWhileRevalidate would otherwise keep serving until it expired.
  */
 export const sizeGatePlugin = {
-	cacheWillUpdate: async ({ response }: { response: Response }) => {
+	cacheWillUpdate: async ({ request, response }: { request: Request; response: Response }) => {
 		if (!response || response.status !== 200) return null;
 		if ((response.headers.get('content-type') || '').includes('text/html')) return null;
 		const declared = Number(response.headers.get('content-length'));
-		if (declared > 0 && !response.headers.get('content-encoding')) {
-			return declared > 1048576 ? null : response;
-		}
-		const size = (await response.clone().blob()).size;
-		return size > 1048576 ? null : response;
+		const size =
+			declared > 0 && !response.headers.get('content-encoding')
+				? declared
+				: (await response.clone().blob()).size;
+		if (size <= 1048576) return response;
+		await (await caches.open('book-images')).delete(request, { ignoreVary: true });
+		return null;
 	}
 };
 
 /**
- * `cachedResponseWillBeUsed`: when the browsing cache misses, or its entry has
- * expired (ExpirationPlugin, which must run BEFORE this, returns null), serve the
- * copy from the book's downloaded cache.
+ * Pages and JSON — `cachedResponseWillBeUsed`: when NetworkFirst falls back to the
+ * cache (network failed or timed out) and the browsing cache misses, or its entry
+ * has expired (ExpirationPlugin, which must run BEFORE this, returns null), serve
+ * the copy from the book's downloaded cache. NetworkFirst only reads the cache after
+ * the network failed, so an online reader still gets the network copy.
  */
 export const offlineFallbackPlugin = {
 	cachedResponseWillBeUsed: async ({
@@ -80,6 +92,27 @@ export const offlineFallbackPlugin = {
 			ignoreVary: true
 		});
 		return hit || null;
+	}
+};
+
+/**
+ * Figures — `handlerDidError`: only when StaleWhileRevalidate has neither a
+ * browsing-cache entry nor a network response (offline), serve the downloaded copy.
+ * Not `cachedResponseWillBeUsed`: StaleWhileRevalidate treats whatever that returns
+ * as a cache hit, so an ONLINE reader who had downloaded the book would be served
+ * the downloaded copy on every browsing-cache miss — forever, for a figure over the
+ * size gate — and never see a re-rendered figure (review of 2026-10-04, measured).
+ */
+export const offlineImageFallbackPlugin = {
+	handlerDidError: async ({ request }: { request: Request }) => {
+		const match = /^\/content\/([^/]+)\//.exec(new URL(request.url).pathname);
+		if (!match) return undefined;
+		const hit = await caches.match(request.url, {
+			cacheName: 'offline-book:' + match[1],
+			ignoreSearch: true,
+			ignoreVary: true
+		});
+		return hit || undefined;
 	}
 };
 
@@ -118,7 +151,7 @@ export const runtimeCaching = [
 			fetchOptions: { cache: 'no-cache' as RequestCache },
 			matchOptions: { ignoreVary: true },
 			expiration: { maxEntries: 100, maxAgeSeconds: 7 * DAY, purgeOnQuotaError: true },
-			plugins: [sizeGatePlugin, offlineFallbackPlugin]
+			plugins: [sizeGatePlugin, offlineImageFallbackPlugin]
 		}
 	}
 ];

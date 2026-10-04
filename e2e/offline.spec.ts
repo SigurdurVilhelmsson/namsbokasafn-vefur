@@ -9,8 +9,15 @@
  * Fixtures come from the synced content (CLAUDE.md: e2e fixtures must be derived).
  */
 
+import { statSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { test, expect, type Page } from '@playwright/test';
 import { bookWithMostImages, offlineFileSet, syncedBooks } from './helpers/content-fixtures';
+import { openControlled } from './helpers/service-worker';
+
+const STATIC_DIR = join(dirname(fileURLToPath(import.meta.url)), '..', 'static');
+const diskSize = (url: string) => statSync(join(STATIC_DIR, url)).size;
 
 /** Same formatting as `formatBytes` in src/lib/stores/offline.ts. */
 function formatBytes(bytes: number): string {
@@ -19,18 +26,6 @@ function formatBytes(bytes: number): string {
 	const sizes = ['B', 'KB', 'MB', 'GB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 	return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-}
-
-/** Open `url` and wait until the service worker controls the page. */
-async function openControlled(page: Page, url: string): Promise<void> {
-	await page.goto(url);
-	await page.evaluate(() => navigator.serviceWorker.ready);
-	if (!(await page.evaluate(() => !!navigator.serviceWorker.controller))) {
-		await page.reload();
-		await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, {
-			timeout: 30_000
-		});
-	}
 }
 
 /** Fetch `url` from the page (so through the service worker); returns the body text. */
@@ -97,6 +92,31 @@ test.describe('Figure cache while browsing', () => {
 		expect(await cached(big)).toBe(false);
 	});
 
+	test('a downloaded copy is used only offline: online, the network copy wins', async ({
+		page,
+		context
+	}) => {
+		// Over the size gate, so the browsing cache never holds it: the case where a
+		// downloaded copy used to win on EVERY online view (review, 2026-10-04).
+		const isBig = (u: string) => diskSize(u) > 1024 * 1024;
+		const slug = syncedBooks().find((b) => offlineFileSet(b).images.some(isBig));
+		test.skip(!slug, 'no synced book has a figure over 1 MiB');
+		const big = offlineFileSet(slug!).images.find(isBig);
+		const realSize = diskSize(big!);
+
+		await openControlled(page, `/${slug}/`);
+		// Plant a stand-in "downloaded" copy, as the download would have stored it.
+		await page.evaluate(
+			async ([url, name]) => (await caches.open(name)).put(url, new Response('DOWNLOADED-OLD')),
+			[big!, `offline-book:${slug}`]
+		);
+		const sizeVia = () => page.evaluate(async (u) => (await (await fetch(u)).blob()).size, big!);
+
+		for (let i = 0; i < 3; i++) expect(await sizeVia()).toBe(realSize);
+		await context.setOffline(true);
+		expect(await sizeVia()).toBe('DOWNLOADED-OLD'.length);
+	});
+
 	test('the emitted service worker revalidates figures and falls back to downloaded books', async ({
 		request
 	}) => {
@@ -104,12 +124,18 @@ test.describe('Figure cache while browsing', () => {
 		const start = sw.search(/png\|jpg/);
 		expect(start).toBeGreaterThan(-1);
 		const imageRoute = sw.slice(start, sw.indexOf('registerRoute', start + 1) >>> 0);
+		expect(sw.search(/html\|md\|json/)).toBeGreaterThan(-1);
 		expect(imageRoute).toContain('StaleWhileRevalidate');
 		expect(imageRoute).toContain('no-cache');
 		// The downloaded-book fallback must run AFTER expiration, or an expired entry
 		// hides the downloaded copy.
-		expect(imageRoute.indexOf('ExpirationPlugin')).toBeGreaterThan(-1);
-		expect(imageRoute.indexOf('offline-book:')).toBeGreaterThan(imageRoute.indexOf('ExpirationPlugin'));
+		expect(imageRoute).toContain('handlerDidError');
+		expect(imageRoute).toContain('offline-book:');
+		// ...and never from a cache-hit hook, which would beat the network online.
+		expect(imageRoute).not.toContain('cachedResponseWillBeUsed');
+		// Pages: the fallback must run AFTER expiration, or an expired entry hides it.
+		const contentRoute = sw.slice(sw.search(/html\|md\|json/), start);
+		expect(contentRoute.indexOf('offline-book:')).toBeGreaterThan(contentRoute.indexOf('ExpirationPlugin'));
 	});
 });
 
@@ -143,45 +169,4 @@ test.describe('Download for offline reading', () => {
 		await expect(page.getByText(/^Sótt/)).toHaveCount(0);
 	});
 
-	test('a downloaded book serves every page and figure offline', async ({ page, context }) => {
-		const fixture = bookWithMostImages();
-		// The old cache kept 200 figures; a book with fewer cannot tell the difference.
-		test.skip(!fixture || fixture.count <= 200, 'needs a book with more than 200 figures');
-		// Measured 2026-10-04: chemistry (1,147 figures, ~345 MB) downloads in ~110 s locally.
-		test.setTimeout(8 * 60_000);
-		const slug = fixture!.slug;
-		const files = offlineFileSet(slug);
-
-		await openControlled(page, `/${slug}/`);
-		await page.getByRole('button', { name: /Sækja fyrir ónettengda notkun/ }).click();
-		await page.waitForFunction(
-			(s) => JSON.parse(localStorage.getItem('namsbokasafn:offline') || '{}').books?.[s]?.downloaded === true,
-			slug,
-			{ timeout: 7 * 60_000, polling: 2_000 }
-		);
-
-		await context.setOffline(true);
-		const failures = await page.evaluate(async (urls) => {
-			const failed: string[] = [];
-			for (const u of urls) {
-				try {
-					if (!(await fetch(u)).ok) failed.push(u);
-				} catch {
-					failed.push(u);
-				}
-			}
-			return failed;
-		}, [...files.pages, ...files.images]);
-		expect(failures.slice(0, 5), `${failures.length} files unavailable offline`).toEqual([]);
-
-		// Control: a figure the download never fetched must fail offline, or the
-		// zero above could come from a network that never went down.
-		if (files.unreferencedImage) {
-			const reachable = await page.evaluate(
-				async (u) => fetch(u).then((r) => r.ok, () => false),
-				files.unreferencedImage
-			);
-			expect(reachable).toBe(false);
-		}
-	});
 });

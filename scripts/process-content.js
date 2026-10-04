@@ -170,6 +170,9 @@ function processBook(bookSlug) {
 	if (manifest.missing.length > 0) {
 		console.warn(`    Warning: ${manifest.missing.length} <img> target(s) missing on disk`);
 	}
+	for (const tag of manifest.unparsed) {
+		console.warn(`    Warning: <img> with no readable src, not in the offline download: ${tag}`);
+	}
 	writeFileSync(
 		join(bookDir, 'offline-manifest.json'),
 		JSON.stringify({ version: manifest.version, bytes: manifest.bytes, files: manifest.files }) + '\n',

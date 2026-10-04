@@ -29,6 +29,8 @@ export default defineConfig({
 				// Runtime caching for book content: routes, limits and the downloaded-book
 				// fallback live in src/lib/sw/runtimeCaching.ts (read its header first).
 				runtimeCaching,
+				// Answers the page's "do you serve downloaded books?" check (see that file).
+				importScripts: ['/sw-offline-book.js'],
 
 				// Don't fallback on document based (non-cached) requests
 				navigateFallback: null

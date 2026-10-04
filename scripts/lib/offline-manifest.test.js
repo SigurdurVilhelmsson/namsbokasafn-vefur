@@ -53,6 +53,15 @@ describe('buildOfflineManifest', () => {
 		expect(buildOfflineManifest(staticDir, 'bok').missing).toEqual(['../01/images/media/gone.png']);
 	});
 
+	it('reports an <img> tag whose src it cannot read', () => {
+		put('content/bok/chapters/02/2-1-b.html', '<p><img data-src="lazy.png" srcset="a.png 1x"></p>');
+		expect(buildOfflineManifest(staticDir, 'bok').unparsed).toHaveLength(1);
+	});
+
+	it('reports nothing unparsed for ordinary figures', () => {
+		expect(buildOfflineManifest(staticDir, 'bok').unparsed).toEqual([]);
+	});
+
 	it('totals the disk bytes of the listed files', () => {
 		const m = buildOfflineManifest(staticDir, 'bok');
 		expect(m.bytes).toBe(m.files.reduce((sum, f) => sum + f.b, 0));

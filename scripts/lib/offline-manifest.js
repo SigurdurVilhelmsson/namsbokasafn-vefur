@@ -23,6 +23,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
 const IMG_SRC = /<img[^>]+src=["']([^"']+)["']/g;
+const IMG_TAG = /<img\b[^>]*>/gi;
 
 function walk(dir) {
 	if (!existsSync(dir)) return [];
@@ -37,9 +38,12 @@ const shortHash = (data) => createHash('sha256').update(data).digest('hex').slic
  * @param {string} staticDir  the directory served at `/` (holds `content/`)
  * @param {string} bookSlug
  * @returns {{ version: string, bytes: number,
- *   files: { p: string, b: number, h: string }[], missing: string[] }}
+ *   files: { p: string, b: number, h: string }[], missing: string[], unparsed: string[] }}
  *   `p` is the URL path, `b` disk bytes, `h` a 16-hex sha256 prefix; `missing` lists
- *   `<img>` targets that do not exist on disk (reported, not downloaded).
+ *   `<img>` targets that do not exist on disk (reported, not downloaded);
+ *   `unparsed` lists `<img>` tags with no src this parser can read (srcset only,
+ *   unquoted src...), so a markup change upstream cannot silently drop figures
+ *   from the download.
  */
 export function buildOfflineManifest(staticDir, bookSlug) {
 	const bookDir = join(staticDir, 'content', bookSlug);
@@ -48,8 +52,16 @@ export function buildOfflineManifest(staticDir, bookSlug) {
 
 	const images = new Set();
 	const missing = [];
+	const unparsed = [];
 	for (const page of pages) {
-		for (const [, src] of readFileSync(page, 'utf-8').matchAll(IMG_SRC)) {
+		const html = readFileSync(page, 'utf-8');
+		for (const [tag] of html.matchAll(IMG_TAG)) {
+			// An explicit empty src (a video placeholder in physics) is deliberate, not a figure.
+			if (!/\ssrc=["'][^"']*["']/.test(tag)) {
+				unparsed.push(`${relative(staticDir, page)}: ${tag.slice(0, 80)}`);
+			}
+		}
+		for (const [, src] of html.matchAll(IMG_SRC)) {
 			if (/^(?:[a-z]+:|\/\/)/i.test(src)) continue; // external or data: — not ours to store
 			const abs = src.startsWith('/') ? join(staticDir, src) : join(dirname(page), src);
 			if (existsSync(abs)) images.add(abs);
@@ -72,6 +84,7 @@ export function buildOfflineManifest(staticDir, bookSlug) {
 		version: shortHash(files.map((f) => `${f.p} ${f.h}`).join('\n')).slice(0, 12),
 		bytes: files.reduce((sum, f) => sum + f.b, 0),
 		files,
-		missing
+		missing,
+		unparsed
 	};
 }

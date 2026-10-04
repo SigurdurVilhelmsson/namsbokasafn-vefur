@@ -26,6 +26,7 @@ import {
 	BROWSE_IMAGE_CACHE,
 	CONTENT_CACHE,
 	OFFLINE_BYPASS_QUERY,
+	OFFLINE_CAPS_MESSAGE,
 	offlineCacheName
 } from '$lib/sw/runtimeCaching';
 import {
@@ -138,7 +139,9 @@ function createOfflineStore() {
 			try {
 				_externalUpdate = true;
 				const state = validateStoreData(JSON.parse(newValue), defaultState, offlineValidators);
-				set({ ...state, books: migrateLegacyBooks(state.books) });
+				// Only `books` is shared: this tab's download progress is never persisted,
+				// so another tab's write must not reset it.
+				update((s) => ({ ...s, books: migrateLegacyBooks(state.books) }));
 			} catch { /* ignore */ }
 			finally { _externalUpdate = false; }
 		});
@@ -180,6 +183,24 @@ function createOfflineStore() {
 			}),
 
 		/**
+		 * Mark a download as starting (before its file list is known)
+		 */
+		beginDownload: (bookSlug: string) =>
+			update((s) => ({
+				...s,
+				currentDownload: {
+					bookSlug,
+					status: 'estimating',
+					totalFiles: 0,
+					downloadedFiles: 0,
+					failedFiles: 0,
+					totalBytes: 0,
+					downloadedBytes: 0,
+					error: null
+				}
+			})),
+
+		/**
 		 * Start download progress tracking
 		 */
 		startDownload: (bookSlug: string, totalFiles: number, totalBytes = 0) =>
@@ -200,9 +221,14 @@ function createOfflineStore() {
 		/**
 		 * Update download progress
 		 */
-		updateProgress: (downloadedFiles: number, downloadedBytes: number, failedFiles?: number) =>
+		updateProgress: (
+			bookSlug: string,
+			downloadedFiles: number,
+			downloadedBytes: number,
+			failedFiles?: number
+		) =>
 			update((s) => {
-				if (!s.currentDownload) return s;
+				if (s.currentDownload?.bookSlug !== bookSlug) return s;
 				return {
 					...s,
 					currentDownload: {
@@ -215,30 +241,39 @@ function createOfflineStore() {
 			}),
 
 		/**
-		 * Mark the current download as finished
+		 * Mark a book's download as finished
 		 */
-		finishDownload: () =>
-			update((s) => ({
-				...s,
-				currentDownload: s.currentDownload
-					? { ...s.currentDownload, status: 'complete' as const }
-					: null
-			})),
+		finishDownload: (bookSlug: string) =>
+			update((s) =>
+				s.currentDownload?.bookSlug === bookSlug
+					? { ...s, currentDownload: { ...s.currentDownload, status: 'complete' as const } }
+					: s
+			),
 
 		/**
-		 * Set download error
+		 * Report a book's download as failed. Replaces another book's finished
+		 * progress, never another book's running download.
 		 */
-		setError: (error: string) =>
-			update((s) => ({
-				...s,
-				currentDownload: s.currentDownload
-					? {
-							...s.currentDownload,
-							status: 'error',
-							error
-						}
-					: null
-			})),
+		setError: (bookSlug: string, error: string) =>
+			update((s) => {
+				const current = s.currentDownload;
+				const busy = current?.status === 'downloading' || current?.status === 'estimating';
+				if (current && current.bookSlug !== bookSlug && busy) return s;
+				return {
+					...s,
+					currentDownload: {
+						bookSlug,
+						totalFiles: 0,
+						downloadedFiles: 0,
+						failedFiles: 0,
+						totalBytes: 0,
+						downloadedBytes: 0,
+						...(current?.bookSlug === bookSlug ? current : {}),
+						status: 'error',
+						error
+					}
+				};
+			}),
 
 		/**
 		 * Clear current download progress
@@ -445,119 +480,205 @@ export async function verifyBook(
 	return result;
 }
 
+/** A failure whose message is written for the reader (Icelandic). */
+class DownloadError extends Error {}
+
+/** What the reader is shown for a failure; the raw error goes to the console. */
+function readerMessage(e: unknown): string {
+	if (e instanceof DownloadError) return e.message;
+	if ((browser && !navigator.onLine) || e instanceof TypeError) {
+		return 'Engin nettenging. Athugaðu tenginguna og reyndu aftur.';
+	}
+	if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+		return 'Ekki nóg geymslupláss á tækinu.';
+	}
+	return 'Villa við niðurhal';
+}
+
+/**
+ * Whether the ACTIVE service worker serves downloaded books. A worker from before
+ * offline-book:<slug> existed (the reader has not accepted the update prompt yet)
+ * would never read the download, so the book would say "Sótt" and still not open
+ * offline. Asks static/sw-offline-book.js over a message channel; silence = no.
+ */
+export async function workerServesOfflineBooks(): Promise<boolean> {
+	if (!('serviceWorker' in navigator)) return false;
+	const timeout = <T>(ms: number, value: T) => new Promise<T>((r) => setTimeout(() => r(value), ms));
+	const registration = await Promise.race([navigator.serviceWorker.ready, timeout(5000, null)]);
+	const worker = registration?.active;
+	if (!worker) return false;
+	return Promise.race([
+		new Promise<boolean>((resolve) => {
+			const channel = new MessageChannel();
+			channel.port1.onmessage = (event) => resolve(event.data?.offlineBook === 1);
+			worker.postMessage({ type: OFFLINE_CAPS_MESSAGE }, [channel.port2]);
+		}),
+		timeout(2000, false)
+	]);
+}
+
+type DownloadResult = { success: boolean; error?: string; sizeBytes: number; failedCount?: number };
+
+/** The download running in this tab, if any: one at a time, whatever the book. */
+let activeDownload: { bookSlug: string; promise: Promise<DownloadResult> } | null = null;
+
 /**
  * Download a book for offline use — or finish an interrupted download, or bring a
  * downloaded book up to date. Only files that are not already stored with the
  * current hash are fetched; files the book no longer has are deleted.
+ *
+ * One download runs at a time: a second call for the same book joins the running
+ * one (a double tap must not fetch the book twice), and another tab downloading the
+ * same book holds a Web Lock this call does not wait for.
  */
-export async function downloadBook(
-	bookSlug: string
-): Promise<{ success: boolean; error?: string; sizeBytes: number; failedCount?: number }> {
+export function downloadBook(bookSlug: string): Promise<DownloadResult> {
 	if (!browser) {
-		return { success: false, error: 'Not in browser', sizeBytes: 0 };
+		return Promise.resolve({ success: false, error: 'Not in browser', sizeBytes: 0 });
+	}
+	if (activeDownload) {
+		if (activeDownload.bookSlug === bookSlug) return activeDownload.promise;
+		return Promise.resolve({ success: false, error: 'Önnur bók er í niðurhali', sizeBytes: 0 });
 	}
 
-	try {
-		const tocResponse = await fetchDirect(`/content/${bookSlug}/toc.json`);
-		if (!tocResponse.ok) {
-			throw new Error('Gat ekki hlaðið efnisyfirliti');
+	offline.beginDownload(bookSlug);
+	const run = async (): Promise<DownloadResult> => {
+		try {
+			return await runDownload(bookSlug);
+		} catch (e) {
+			console.error('Offline download failed:', e);
+			const error = readerMessage(e);
+			offline.setError(bookSlug, error);
+			return { success: false, error, sizeBytes: 0 };
 		}
-		const toc: TableOfContents = await tocResponse.clone().json();
-		const manifest = await loadManifest(bookSlug, toc);
+	};
+	const locks = navigator.locks;
+	const promise = (
+		locks
+			? locks.request(offlineCacheName(bookSlug), { ifAvailable: true }, (lock) => {
+					if (lock) return run();
+					const error = 'Bókin er þegar sótt í öðrum glugga.';
+					offline.setError(bookSlug, error);
+					return { success: false, error, sizeBytes: 0 };
+				})
+			: run()
+	).finally(() => {
+		activeDownload = null;
+	});
+	activeDownload = { bookSlug, promise };
+	return promise;
+}
 
-		// Ask the browser not to evict the download under storage pressure.
-		await navigator.storage?.persist?.().catch(() => false);
+async function runDownload(bookSlug: string): Promise<DownloadResult> {
+	if (!(await workerServesOfflineBooks())) {
+		throw new DownloadError(
+			navigator.serviceWorker?.controller
+				? 'Ný útgáfa af forritinu er tilbúin. Veldu „Uppfæra núna“ og sæktu bókina svo.'
+				: 'Ónettengdur lestur er ekki tilbúinn enn. Opnaðu síðuna aftur og reyndu svo.'
+		);
+	}
 
-		const cache = await caches.open(offlineCacheName(bookSlug));
-		const held = await readHeld(cache, bookSlug);
-		const { toFetch, toDelete, bytes } = planSync(bookSlug, manifest, held, await cachedPaths(cache));
+	const tocPath = `/content/${bookSlug}/toc.json`;
+	const tocResponse = await fetchDirect(tocPath);
+	if (!tocResponse.ok) throw new DownloadError('Gat ekki hlaðið efnisyfirliti');
+	const toc: TableOfContents = await tocResponse.clone().json();
+	const manifest = await loadManifest(bookSlug, toc);
 
-		const estimate = await navigator.storage?.estimate?.().catch(() => undefined);
-		if (estimate?.quota && estimate.quota - (estimate.usage ?? 0) < bytes) {
-			throw new Error(
-				`Ekki nóg geymslupláss á tækinu: þarf ${formatBytes(bytes)}, laust ${formatBytes(
-					estimate.quota - (estimate.usage ?? 0)
-				)}`
-			);
-		}
+	// Ask the browser not to evict the download under storage pressure.
+	await navigator.storage?.persist?.().catch(() => false);
 
-		// Start from the files kept unchanged; each verified fetch adds its own.
-		const fetching = new Set(toFetch);
-		const files: Record<string, string> = {};
-		for (const f of manifest.files) {
-			if (!fetching.has(f)) files[f.p] = f.h;
-		}
-		const writeHeld = (complete: boolean) =>
-			cache.put(
-				heldStateKey(bookSlug),
-				new Response(
-					JSON.stringify({
-						version: manifest.version,
-						complete,
-						total: manifest.files.length,
-						files
-					} satisfies HeldState),
-					{ headers: { 'content-type': 'application/json' } }
-				)
-			);
+	const cache = await caches.open(offlineCacheName(bookSlug));
+	const held = await readHeld(cache, bookSlug);
+	const { toFetch, toDelete, bytes } = planSync(bookSlug, manifest, held, await cachedPaths(cache));
 
-		offline.startDownload(bookSlug, toFetch.length, bytes);
-		let done = 0;
-		let failed = 0;
-		let fetchedBytes = 0;
+	const estimate = await navigator.storage?.estimate?.().catch(() => undefined);
+	if (estimate?.quota && estimate.quota - (estimate.usage ?? 0) < bytes) {
+		throw new DownloadError(
+			`Ekki nóg geymslupláss á tækinu: þarf ${formatBytes(bytes)}, laust ${formatBytes(
+				estimate.quota - (estimate.usage ?? 0)
+			)}.`
+		);
+	}
 
-		await pool(toFetch, DOWNLOAD_CONCURRENCY, async (f: ManifestFile) => {
-			try {
-				const res = await fetchDirect(f.p);
-				if (!res.ok) throw new Error(`HTTP ${res.status}`);
-				const isPage = /\.(html|json)$/.test(f.p);
-				// nginx answers a missing figure with the SPA shell (200, text/html).
-				if (!isPage && (res.headers.get('content-type') ?? '').includes('text/html')) {
-					throw new Error('not an image');
-				}
-				const size = (await res.clone().blob()).size;
-				// A size other than the manifest's means a deploy changed the file mid-download.
-				if (f.b > 0 && size !== f.b) throw new Error('size mismatch');
-				await cache.put(f.p, res);
-				files[f.p] = f.h;
-				fetchedBytes += size;
-			} catch (e) {
-				console.warn(`Offline download: ${f.p}:`, e);
-				failed++;
+	// Start from the files kept unchanged; each verified fetch adds its own.
+	const fetching = new Set(toFetch);
+	const files: Record<string, string> = {};
+	for (const f of manifest.files) {
+		if (!fetching.has(f)) files[f.p] = f.h;
+	}
+	const writeHeld = (complete: boolean) =>
+		cache.put(
+			heldStateKey(bookSlug),
+			new Response(
+				JSON.stringify({
+					version: manifest.version,
+					complete,
+					total: manifest.files.length,
+					files
+				} satisfies HeldState),
+				{ headers: { 'content-type': 'application/json' } }
+			)
+		);
+
+	offline.startDownload(bookSlug, toFetch.length, bytes);
+	let done = 0;
+	let failed = 0;
+	let fetchedBytes = 0;
+
+	await pool(toFetch, DOWNLOAD_CONCURRENCY, async (f: ManifestFile) => {
+		try {
+			const res = await fetchDirect(f.p);
+			if (!res.ok) throw new Error(`HTTP ${res.status}`);
+			const isPage = /\.(html|json)$/.test(f.p);
+			// nginx answers a missing figure with the SPA shell (200, text/html).
+			if (!isPage && (res.headers.get('content-type') ?? '').includes('text/html')) {
+				throw new Error('not an image');
 			}
-			done++;
-			offline.updateProgress(done, fetchedBytes, failed);
-			if (done % FLUSH_EVERY === 0) await writeHeld(false);
-		});
+			const size = (await res.clone().blob()).size;
+			// A size other than the manifest's means a deploy changed the file mid-download.
+			if (f.b > 0 && size !== f.b) throw new Error('size mismatch');
+			await cache.put(f.p, res);
+			files[f.p] = f.h;
+			fetchedBytes += size;
+		} catch (e) {
+			console.warn(`Offline download: ${f.p}:`, e);
+			failed++;
+		}
+		done++;
+		offline.updateProgress(bookSlug, done, fetchedBytes, failed);
+		if (done % FLUSH_EVERY === 0) await writeHeld(false);
+	});
 
-		await Promise.all(toDelete.map((p) => cache.delete(p)));
-		// The toc.json the download started from: it matches the files fetched. If a
-		// deploy landed meanwhile, a changed file failed its size check above, and the
-		// next check reports the book outdated ("Uppfæra") or the files missing.
-		await cache.put(`/content/${bookSlug}/toc.json`, tocResponse);
-		const complete = failed === 0;
-		await writeHeld(complete);
+	await Promise.all(toDelete.map((p) => cache.delete(p)));
 
-		const previous = offline.getBookState(bookSlug);
-		// A browser-built list has no sizes: count what was fetched, on top of a resume.
-		const sizeBytes =
-			manifest.version !== null ? manifest.bytes : (held ? (previous?.sizeBytes ?? 0) : 0) + fetchedBytes;
-		offline.setBook(bookSlug, {
-			downloaded: complete,
-			downloadedAt: new Date().toISOString(),
-			version: manifest.version,
-			sizeBytes,
-			missing: failed
-		});
-		offline.finishDownload();
+	// toc.json LAST, and only if it still describes the files just stored: a deploy
+	// that landed at any point since the manifest was read changes its version, and
+	// the book is then left incomplete so the next run fetches the new manifest.
+	// (A browser-built list has no version to compare: frozen books.)
+	const endToc = await fetchDirect(tocPath);
+	const endVersion = endToc.ok
+		? ((await endToc.clone().json()) as TableOfContents).offline?.version ?? null
+		: undefined;
+	const consistent = endToc.ok && (manifest.version === null || endVersion === manifest.version);
+	if (consistent) await cache.put(tocPath, endToc);
+	const complete = failed === 0 && consistent;
+	await writeHeld(complete);
 
-		return { success: complete, sizeBytes, failedCount: failed > 0 ? failed : undefined };
-	} catch (e) {
-		const error = e instanceof Error ? e.message : 'Villa við niðurhal';
-		if (!get(offline).currentDownload) offline.startDownload(bookSlug, 0);
-		offline.setError(error);
-		return { success: false, error, sizeBytes: 0 };
+	// A browser-built list has no sizes: measure what is stored, whatever ran before.
+	let sizeBytes = manifest.bytes;
+	if (manifest.version === null) {
+		sizeBytes = 0;
+		for (const f of manifest.files) sizeBytes += (await (await cache.match(f.p))?.blob())?.size ?? 0;
 	}
+	offline.setBook(bookSlug, {
+		downloaded: complete,
+		downloadedAt: new Date().toISOString(),
+		version: manifest.version,
+		sizeBytes,
+		missing: failed
+	});
+	offline.finishDownload(bookSlug);
+
+	return { success: complete, sizeBytes, failedCount: failed > 0 ? failed : undefined };
 }
 
 /**
