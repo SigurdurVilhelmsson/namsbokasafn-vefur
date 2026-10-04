@@ -8,9 +8,9 @@
  * button before it. The worked Example solution (a `.para-title`, not a note)
  * and other note types (link-to-learning, etc.) are left untouched and visible.
  *
- * Transition fallback: content not yet re-rendered with the marker is still
- * matched heuristically as a `.note-default` aside headed "Svar:". Once all
- * content carries the marker, the fallback (and `isAnswerNote`) can be removed.
+ * A transition fallback once also matched a `.note-default` aside headed
+ * "Svar:". It was removed on 2026-10-04, when 0 answers in any book relied
+ * on it (vefur's static/content and efni main 08014ad4b; 292 carry the marker).
  *
  * Vefur-only: the hidden class and toggle button are reader presentation, not
  * pipeline output — styles are injected here rather than added to the
@@ -39,13 +39,6 @@ function questionText(answer: HTMLElement): string {
 		el = el.previousElementSibling;
 	}
 	return parts.join(' ');
-}
-
-/** A check-your-knowledge answer is a `.note-default` aside headed "Svar:". */
-function isAnswerNote(aside: Element): boolean {
-	if (!aside.classList.contains('note-default')) return false;
-	const heading = aside.querySelector('h4');
-	return !!heading && /^\s*svar/i.test(heading.textContent || '');
 }
 
 function setToggleLabel(button: HTMLButtonElement, expanded: boolean): void {
@@ -231,15 +224,9 @@ export function practiceReveal(node: HTMLElement, opts: PracticeRevealOptions = 
 		// deterministically re-derives the same `practice-answer-N` fallback ids
 		// rather than incrementing into a new series each visit.
 		state.id = 0;
-		// Preferred: the explicit marker emitted by the CNXML renderer (path a).
+		// The explicit marker emitted by the CNXML renderer
 		node.querySelectorAll('aside.check-knowledge-answer').forEach((aside) => {
 			processAnswer(aside as HTMLElement, state, opts);
-		});
-		// Fallback for content not yet re-rendered with the marker: a default
-		// note headed "Svar:" inside a worked example. The PROCESSED_ATTR guard
-		// keeps an element matched by both selectors from being processed twice.
-		node.querySelectorAll('aside.note-default').forEach((aside) => {
-			if (isAnswerNote(aside)) processAnswer(aside as HTMLElement, state, opts);
 		});
 	}
 
