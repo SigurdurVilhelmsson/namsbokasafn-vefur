@@ -3,7 +3,7 @@
  * Learning) answer inside Example blocks behind a "Sýna svar" toggle.
  *
  * The answer is rendered by the CNXML pipeline as an `<aside class="note
- * note-default">` whose heading is "Svar:", sitting after the practice
+ * note-default check-knowledge-answer">`, sitting after the practice
  * question. The worked Example solution (a `.para-title`, not a note) and
  * other note types (link-to-learning, etc.) must stay untouched and visible.
  */
@@ -22,7 +22,7 @@ function makeContainer(): HTMLElement {
 		'  <p id="solution">Reiknuð lausn dæmisins.</p>' +
 		'  <p class="para-title"><strong>Kannaðu þekkingu þína</strong></p>' +
 		'  <p id="question">(a) Hvert er rúmmálið?</p>' +
-		'  <aside class="note note-default"><h4>Svar:</h4><p>(a) 0,599 cm³</p></aside>' +
+		'  <aside class="note note-default check-knowledge-answer"><h4>Svar:</h4><p>(a) 0,599 cm³</p></aside>' +
 		'</aside>' +
 		'<aside class="note note-chemistry link-to-learning">' +
 		'  <p class="note-type">Tengill til náms</p><p>Annars konar glósa.</p>' +
@@ -91,13 +91,19 @@ describe('practiceReveal action', () => {
 		el.remove();
 	});
 
-	it('processes an answer matched by BOTH marker and heuristic only once', () => {
-		const el = makeContainer(); // note-default + "Svar:" heading
-		el.querySelector('aside.note-default')!.classList.add('check-knowledge-answer');
+	// The "Svar:"-heading fallback was removed 2026-10-04: 0 answers in any
+	// book relied on it (vefur's static/content and efni main 08014ad4b; 292
+	// answers carry the marker). An unmarked note is now just a note.
+	it('leaves an unmarked note headed "Svar:" alone', () => {
+		const el = makeContainer();
+		el.querySelector('aside.check-knowledge-answer')!.classList.remove('check-knowledge-answer');
 
 		practiceReveal(el);
 
-		expect(el.querySelectorAll('button.practice-answer-toggle').length).toBe(1);
+		expect(el.querySelectorAll('button.practice-answer-toggle').length).toBe(0);
+		expect(el.querySelector('aside.note-default')!.classList.contains('practice-answer--hidden')).toBe(
+			false
+		);
 		el.remove();
 	});
 
@@ -179,7 +185,7 @@ describe('practiceReveal action', () => {
 		const el = document.createElement('div');
 		// No id on the answer aside — falls through to the auto-id fallback.
 		const noIdHTML =
-			'<aside class="note note-default"><h4>Svar:</h4><p>Svarið.</p></aside>';
+			'<aside class="note note-default check-knowledge-answer"><h4>Svar:</h4><p>Svarið.</p></aside>';
 		el.innerHTML = noIdHTML;
 		document.body.appendChild(el);
 
