@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { resolve } from 'path';
-import { usablePages, unresolvedDuplicates } from './generate-toc.js';
+import { appendixLetter, usablePages, unresolvedDuplicates } from './generate-toc.js';
 import { resetIdentityCache } from './lib/overlay.js';
 
 let root;
@@ -102,5 +102,31 @@ describe('usablePages', () => {
 		writeFileSync(resolve(dest, 'toc.json'), '{}');
 
 		expect(usablePages(dest, 'liffraedi-2e', '03', options)).toEqual(['3-3-lipid.html']);
+	});
+});
+
+describe('appendixLetter', () => {
+	it('reads the numbered form efni renders: appendices-N- is the Nth letter', () => {
+		expect(appendixLetter('appendices-1-lotukerfid')).toBe('A');
+		expect(appendixLetter('appendices-13-standard-electrode-potentials')).toBe('M');
+	});
+
+	// The cap was 13 (A-M), Chemistry 2e's count: a 14th appendix in any book
+	// was dropped from the TOC with only a warning
+	it('reads appendices past M, up to Z', () => {
+		expect(appendixLetter('appendices-14-x')).toBe('N');
+		expect(appendixLetter('appendices-26-x')).toBe('Z');
+		expect(appendixLetter('99-14-x')).toBe('N');
+		expect(appendixLetter('N-extra-tables')).toBe('N');
+	});
+
+	it('reads a letter prefix in either case', () => {
+		expect(appendixLetter('a-periodic-table')).toBe('A');
+	});
+
+	it('returns null for anything else', () => {
+		expect(appendixLetter('appendices-0-x')).toBeNull();
+		expect(appendixLetter('appendices-27-x')).toBeNull();
+		expect(appendixLetter('1-1-chapter-section')).toBeNull();
 	});
 });

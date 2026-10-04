@@ -381,6 +381,28 @@ function scanFrontMatter(bookPath, bookSlug, options) {
 	return entries;
 }
 
+/**
+ * The appendix letter a file name encodes, or null: "A-periodic-table",
+ * "99-1-…" or "appendices-1-…" (efni's form), with N = 1..26 for A..Z.
+ *
+ * The cap was 13 (A-M), Chemistry 2e's count, so a 14th appendix in any book
+ * was dropped from the TOC with only a warning. OpenStax books run past M.
+ *
+ * @param {string} name - file name without its extension
+ * @returns {string|null}
+ */
+export function appendixLetter(name) {
+	const letterMatch = name.match(/^([A-Z])-/i);
+	if (letterMatch) return letterMatch[1].toUpperCase();
+
+	const numberMatch = name.match(/^(?:99|appendices)-(\d+)-/);
+	if (numberMatch) {
+		const num = parseInt(numberMatch[1], 10);
+		if (num >= 1 && num <= 26) return String.fromCharCode(64 + num); // 65 is 'A'
+	}
+	return null;
+}
+
 // Scan appendix directory and generate appendix entries
 function scanAppendices(bookPath, bookSlug, options) {
 	// Check for appendices in multiple possible locations
@@ -411,33 +433,7 @@ function scanAppendices(bookPath, bookSlug, options) {
 		const content = readFileSync(filePath, 'utf-8');
 		const frontmatter = parseHtmlMetadata(content);
 
-		let letter = null;
-
-		// Try to extract letter from filename (e.g., "A-periodic-table.html" -> "A")
-		const letterMatch = getBasenameWithoutExt(file).match(/^([A-M])-/i);
-		if (letterMatch) {
-			letter = letterMatch[1].toUpperCase();
-		} else {
-			// Try to extract from "99-N-" format (e.g., "99-1-" -> "A", "99-2-" -> "B")
-			const numberMatch = getBasenameWithoutExt(file).match(/^99-(\d+)-/);
-			if (numberMatch) {
-				const num = parseInt(numberMatch[1], 10);
-				// Convert 1→A, 2→B, ..., 13→M
-				if (num >= 1 && num <= 13) {
-					letter = String.fromCharCode(64 + num); // 65 is 'A'
-				}
-			} else {
-				// Try to extract from "appendices-N-" format (e.g., "appendices-1-" -> "A")
-				const appendixMatch = getBasenameWithoutExt(file).match(/^appendices-(\d+)-/);
-				if (appendixMatch) {
-					const num = parseInt(appendixMatch[1], 10);
-					// Convert 1→A, 2→B, ..., 13→M
-					if (num >= 1 && num <= 13) {
-						letter = String.fromCharCode(64 + num); // 65 is 'A'
-					}
-				}
-			}
-		}
+		const letter = appendixLetter(getBasenameWithoutExt(file));
 
 		if (!letter) {
 			console.warn(`    Warning: Could not extract appendix letter from: ${file}`);
