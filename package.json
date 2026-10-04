@@ -25,7 +25,7 @@
     "clean": "rm -rf build .svelte-kit static/content",
     "sync-content": "node scripts/sync-content.js",
     "docs:generate": "node scripts/generate-component-inventory.js",
-    "prepare": "husky"
+    "prepare": "husky && svelte-kit sync"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

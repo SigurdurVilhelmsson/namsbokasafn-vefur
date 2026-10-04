@@ -449,14 +449,10 @@
 .reading-content h4 {
   font-family: "Bricolage Grotesque", system-ui, sans-serif;
   font-weight: 700;
-  color: #111827;
-}
-
-.dark .reading-content h1,
-.dark .reading-content h2,
-.dark .reading-content h3,
-.dark .reading-content h4 {
-  color: #f1f5f9;
+  /* Design F2 (docs/design/design-coordination-2026-06.md): the reading
+     surface uses the warm --text-primary, not cool slate. The token flips
+     for dark mode itself. */
+  color: var(--text-primary);
 }
 
 .reading-content h1 {
@@ -481,12 +477,8 @@
 .reading-content p {
   font-size: var(--font-size-base);
   line-height: 1.75;
-  color: #374151;
+  color: var(--text-primary);
   margin-bottom: 1.5rem;
-}
-
-.dark .reading-content p {
-  color: #cbd5e1;
 }
 
 .reading-content ul {
@@ -503,11 +495,7 @@
 
 .reading-content li {
   margin-bottom: 0.5rem;
-  color: #374151;
-}
-
-.dark .reading-content li {
-  color: #cbd5e1;
+  color: var(--text-primary);
 }
 
 .reading-content strong {
