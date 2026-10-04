@@ -117,3 +117,18 @@ export function sectionsContaining(marker: string, limit: number): string[] {
 		.slice(0, limit)
 		.map((f) => f.url);
 }
+
+/** A glossary entry as published in `static/content/<book>/glossary.json`. */
+export interface GlossaryTerm {
+	term: string;
+	definition: string;
+	english?: string;
+}
+
+/** The synced glossary of `slug`, or [] when the book has none. */
+export function glossaryTerms(slug: string): GlossaryTerm[] {
+	const file = join(CONTENT_DIR, slug, 'glossary.json');
+	if (!existsSync(file)) return [];
+	const data = JSON.parse(readFileSync(file, 'utf-8')) as { terms?: GlossaryTerm[] };
+	return data.terms ?? [];
+}

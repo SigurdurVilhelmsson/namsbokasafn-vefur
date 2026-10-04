@@ -1,204 +1,117 @@
 /**
- * Flashcard Study Session Tests
- * Tests: deck display, card flipping, rating, session progression
+ * Flashcard page (/:book/minniskort): deck list, study session, rating.
  *
- * Note: These tests require book content with glossary terms.
- * Tests use conditional checks for content-dependent assertions.
+ * A fresh profile has no cards (a reader makes them by selecting text in a
+ * section), so the tests seed one small deck through the store's localStorage
+ * key. Until 2026-10-04 every test here skipped: they reached the page by
+ * clicking through the landing page, lost a client-side navigation race, and
+ * called a bare test.skip(). Past that, they looked for a "Byrja námsæfingu"
+ * button the page no longer has, and would have skipped on it.
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+import { syncedBooks } from './helpers/content-fixtures';
 
-/** Navigate to the flashcards page via the landing page */
-async function navigateToFlashcards(page: import('@playwright/test').Page) {
-	await page.goto('/');
-	await page.waitForLoadState('networkidle');
+const STORAGE_KEY = 'namsbokasafn:flashcards';
+const CARDS = [
+	{ id: 'e2e-1', front: 'Hvað er mól?', back: 'Magn efnis' },
+	{ id: 'e2e-2', front: 'Hvað er atóm?', back: 'Minnsta eining frumefnis' }
+];
 
-	const bookLink = page.getByRole('link', { name: /Efnafræði/i }).first();
-	await expect(bookLink).toBeVisible({ timeout: 10000 });
-	await bookLink.click();
-	await page.waitForLoadState('networkidle');
-
-	const flashcardsLink = page.locator('a[href*="minniskort"]').first();
-	if (!(await flashcardsLink.isVisible({ timeout: 5000 }).catch(() => false))) {
-		return false;
+async function openFlashcards(page: Page, { seed }: { seed: boolean }) {
+	if (seed) {
+		await page.addInitScript(
+			({ key, cards }) => {
+				// Only on the first load: a reload must see what the app saved
+				if (localStorage.getItem(key)) return;
+				const created = new Date().toISOString();
+				localStorage.setItem(
+					key,
+					JSON.stringify({
+						decks: [
+							{
+								id: 'e2e-deck',
+								name: 'Prófunarstokkur',
+								created,
+								cards: cards.map((c) => ({ ...c, created }))
+							}
+						]
+					})
+				);
+			},
+			{ key: STORAGE_KEY, cards: CARDS }
+		);
 	}
-	await flashcardsLink.click();
-	await page.waitForLoadState('networkidle');
-	await expect(page).toHaveURL(/minniskort/);
-	return true;
+	await page.goto(`/${syncedBooks()[0]}/minniskort/`);
+	await expect(page.getByRole('heading', { name: 'Minniskort', level: 1 })).toBeVisible({
+		timeout: 15000
+	});
+}
+
+/** The question card of the running session, and which seeded card it shows */
+async function currentCard(page: Page) {
+	const question = page.getByRole('button', { name: /^Spurning/ });
+	await expect(question).toBeVisible();
+	const text = (await question.textContent()) ?? '';
+	const card = CARDS.find((c) => text.includes(c.front));
+	expect(card, `question "${text}" is one of the seeded cards`).toBeTruthy();
+	return { question, card: card! };
 }
 
 test.describe('Flashcard Page', () => {
-	test('should load flashcards page', async ({ page }) => {
-		const navigated = await navigateToFlashcards(page);
-		if (!navigated) {
-			test.skip();
-			return;
-		}
-
-		// Page should have loaded successfully
-		await page.waitForTimeout(2000);
-
-		// Should show either a start button or card stats
-		const mainContent = page.locator('main');
-		await expect(mainContent).toBeVisible({ timeout: 10000 });
+	test('says there are no cards yet in a fresh profile', async ({ page }) => {
+		await openFlashcards(page, { seed: false });
+		await expect(page.getByText('Engin minniskort enn')).toBeVisible();
 	});
 
-	test('should display deck statistics', async ({ page }) => {
-		const navigated = await navigateToFlashcards(page);
-		if (!navigated) {
-			test.skip();
-			return;
-		}
+	test('lists a deck with its card count', async ({ page }) => {
+		await openFlashcards(page, { seed: true });
+		await expect(page.getByText('Prófunarstokkur')).toBeVisible();
+		await expect(page.getByText(`${CARDS.length} kort`)).toBeVisible();
+	});
 
-		await page.waitForTimeout(2000);
+	test('Æfa starts a session on a card of the deck', async ({ page }) => {
+		await openFlashcards(page, { seed: true });
+		await page.getByRole('button', { name: 'Æfa' }).click();
+		await currentCard(page);
+	});
 
-		// Look for statistics display (new/due/total counts)
-		const pageText = await page.locator('main').textContent();
-		if (pageText) {
-			// The page should show some content - either stats or a message
-			expect(pageText.length).toBeGreaterThan(10);
+	test('flipping a card shows its answer and the four ratings', async ({ page }) => {
+		await openFlashcards(page, { seed: true });
+		await page.getByRole('button', { name: 'Æfa' }).click();
+		const { question, card } = await currentCard(page);
+		await question.click();
+
+		await expect(page.getByRole('button', { name: /^Svar/ })).toContainText(card.back);
+		for (const rating of ['Aftur', 'Erfitt', 'Gott', 'Auðvelt']) {
+			await expect(page.getByRole('button', { name: new RegExp(`^${rating}`) })).toBeVisible();
 		}
 	});
 
-	test('should start study session when clicking start button', async ({ page }) => {
-		const navigated = await navigateToFlashcards(page);
-		if (!navigated) {
-			test.skip();
-			return;
-		}
+	test('rating a card moves on and is saved across a reload', async ({ page }) => {
+		await openFlashcards(page, { seed: true });
+		await page.getByRole('button', { name: 'Æfa' }).click();
+		const { question, card } = await currentCard(page);
+		await question.click();
+		await page.getByRole('button', { name: /^Gott/ }).click();
 
-		await page.waitForTimeout(2000);
+		// The other card comes up next
+		const next = page.getByRole('button', { name: /^Spurning/ });
+		await expect(next).not.toContainText(card.front);
 
-		// Look for start study button
-		const startButton = page.getByText('Byrja námsæfingu');
-		if (!(await startButton.isVisible({ timeout: 5000 }).catch(() => false))) {
-			// No start button - might have no cards or already in session
-			test.skip();
-			return;
-		}
+		const saved = await page.evaluate((key) => {
+			const state = JSON.parse(localStorage.getItem(key) ?? '{}');
+			return Object.keys(state.studyRecords ?? {});
+		}, STORAGE_KEY);
+		expect(saved).toContain(card.id);
 
-		await startButton.click();
-		await page.waitForTimeout(1000);
-
-		// After starting, should see a card or progress indicator
-		// Card shows "Spurning" (Question) label
-		const questionLabel = page.getByText('Spurning');
-		const progressBar = page.locator('div.h-2.rounded-full');
-
-		const hasCard = await questionLabel.isVisible({ timeout: 5000 }).catch(() => false);
-		const hasProgress = await progressBar.isVisible({ timeout: 2000 }).catch(() => false);
-
-		// Either a card or progress should be visible
-		expect(hasCard || hasProgress).toBe(true);
-	});
-
-	test('should flip card to show answer', async ({ page }) => {
-		const navigated = await navigateToFlashcards(page);
-		if (!navigated) {
-			test.skip();
-			return;
-		}
-
-		await page.waitForTimeout(2000);
-
-		const startButton = page.getByText('Byrja námsæfingu');
-		if (!(await startButton.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
-
-		await startButton.click();
-		await page.waitForTimeout(1000);
-
-		// Click the card to flip it
-		const card = page.locator('button.w-full.min-h-\\[300px\\]');
-		if (!(await card.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
-
-		await card.click();
-		await page.waitForTimeout(500);
-
-		// After flipping, should show "Svar" (Answer) label and rating buttons
-		const answerLabel = page.getByText('Svar');
-		const hasAnswer = await answerLabel.isVisible({ timeout: 3000 }).catch(() => false);
-
-		if (hasAnswer) {
-			// Rating buttons should now be visible
-			const againButton = page.getByText('Aftur');
-			const goodButton = page.getByText('Gott');
-			expect(
-				await againButton.isVisible({ timeout: 3000 }).catch(() => false) ||
-					await goodButton.isVisible({ timeout: 3000 }).catch(() => false)
-			).toBe(true);
-		}
-	});
-
-	test('should rate card and advance to next', async ({ page }) => {
-		const navigated = await navigateToFlashcards(page);
-		if (!navigated) {
-			test.skip();
-			return;
-		}
-
-		await page.waitForTimeout(2000);
-
-		const startButton = page.getByText('Byrja námsæfingu');
-		if (!(await startButton.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
-
-		await startButton.click();
-		await page.waitForTimeout(1000);
-
-		// Flip the card
-		const card = page.locator('button.w-full.min-h-\\[300px\\]');
-		if (!(await card.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
-
-		await card.click();
-		await page.waitForTimeout(500);
-
-		// Click "Gott" (Good) rating
-		const goodButton = page.getByText('Gott');
-		if (!(await goodButton.isVisible({ timeout: 3000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
-
-		await goodButton.click();
-		await page.waitForTimeout(1000);
-
-		// Should advance (either to next card or completion)
-		// Verify the session progressed by checking localStorage
-		const flashcardData = await page.evaluate(() =>
-			localStorage.getItem('namsbokasafn:flashcards')
-		);
-		expect(flashcardData).toBeTruthy();
-	});
-
-	test('should persist flashcard data in localStorage', async ({ page }) => {
-		const navigated = await navigateToFlashcards(page);
-		if (!navigated) {
-			test.skip();
-			return;
-		}
-
-		await page.waitForTimeout(2000);
-
-		// Flashcard store should persist to localStorage
-		const flashcardData = await page.evaluate(() =>
-			localStorage.getItem('namsbokasafn:flashcards')
-		);
-
-		if (flashcardData) {
-			const parsed = JSON.parse(flashcardData);
-			expect(parsed).toHaveProperty('decks');
-		}
+		// A reload resumes the session on the next card
+		await page.reload();
+		await expect(page.getByText(`Kort 2 af ${CARDS.length}`)).toBeVisible({ timeout: 15000 });
+		const afterReload = await page.evaluate((key) => {
+			const state = JSON.parse(localStorage.getItem(key) ?? '{}');
+			return Object.keys(state.studyRecords ?? {});
+		}, STORAGE_KEY);
+		expect(afterReload).toContain(card.id);
 	});
 });

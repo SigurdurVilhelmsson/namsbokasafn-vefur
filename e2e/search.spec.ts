@@ -3,7 +3,9 @@
  * Tests: opening/closing, search input, results display, keyboard navigation
  *
  * Note: Search functionality requires content to be indexed.
- * Tests verify the search UI infrastructure is functional.
+ * Tests verify the search UI infrastructure is functional. A dialog that does
+ * not open is a failure: until 2026-10-04 it was a bare test.skip(), so a
+ * broken "/" shortcut would have read as five skipped tests.
  */
 
 import { test, expect } from '@playwright/test';
@@ -31,13 +33,8 @@ test.describe('Search Modal', () => {
 
 		// Search modal should be visible
 		const searchModal = page.locator('div[role="dialog"][aria-modal="true"]');
-		const isVisible = await searchModal.isVisible({ timeout: 5000 }).catch(() => false);
-
-		if (isVisible) {
-			// Search input should be focused
-			const searchInput = page.locator('input#search-input');
-			await expect(searchInput).toBeVisible();
-		}
+		await expect(searchModal).toBeVisible({ timeout: 5000 });
+		await expect(page.locator('input#search-input')).toBeFocused();
 	});
 
 	test('should close search modal with Escape', async ({ page }) => {
@@ -49,10 +46,7 @@ test.describe('Search Modal', () => {
 		await page.waitForTimeout(500);
 
 		const searchModal = page.locator('div[role="dialog"][aria-modal="true"]');
-		if (!(await searchModal.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
+		await expect(searchModal).toBeVisible({ timeout: 5000 });
 
 		// Press Escape to close
 		await page.keyboard.press('Escape');
@@ -70,10 +64,7 @@ test.describe('Search Modal', () => {
 		await page.waitForTimeout(500);
 
 		const searchModal = page.locator('div[role="dialog"][aria-modal="true"]');
-		if (!(await searchModal.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
+		await expect(searchModal).toBeVisible({ timeout: 5000 });
 
 		// Check ARIA attributes
 		await expect(searchModal).toHaveAttribute('aria-modal', 'true');
@@ -95,10 +86,7 @@ test.describe('Search Modal', () => {
 		await page.waitForTimeout(500);
 
 		const searchModal = page.locator('div[role="dialog"][aria-modal="true"]');
-		if (!(await searchModal.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
+		await expect(searchModal).toBeVisible({ timeout: 5000 });
 
 		const searchInput = page.locator('input#search-input');
 		await searchInput.fill('efnafræði');
@@ -116,10 +104,7 @@ test.describe('Search Modal', () => {
 		await page.waitForTimeout(500);
 
 		const searchModal = page.locator('div[role="dialog"][aria-modal="true"]');
-		if (!(await searchModal.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
+		await expect(searchModal).toBeVisible({ timeout: 5000 });
 
 		// Filter button should be visible
 		const filterButton = page.locator('button[aria-label="Síur"]');
@@ -145,10 +130,7 @@ test.describe('Search Modal', () => {
 		await page.waitForTimeout(500);
 
 		const searchModal = page.locator('div[role="dialog"][aria-modal="true"]');
-		if (!(await searchModal.isVisible({ timeout: 5000 }).catch(() => false))) {
-			test.skip();
-			return;
-		}
+		await expect(searchModal).toBeVisible({ timeout: 5000 });
 
 		// Click close button
 		const closeButton = page.locator('button[aria-label="Loka"]');
