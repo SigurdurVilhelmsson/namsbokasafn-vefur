@@ -100,18 +100,25 @@ every run:
   are.
 
 It sends a file only when its **bytes** differ from the server's copy
-(`--checksum`), and never copies modification times (`--no-times`). nginx
-builds each file's ETag and `Last-Modified` from its mtime, and every build
-stamps every file with the build time, so before this the server's copy of
-every file got a new mtime on every deploy (2,908 files "sent" on 2026-10-04,
-none of them changed in content) and each reader's next revalidation was a full
-download instead of a 304. Now an unchanged file keeps its mtime, and its ETag.
+(`--checksum`), and never copies modification times (`--no-times`); the two
+only work together. nginx builds each file's ETag and `Last-Modified` from its
+mtime, and every build stamps every file with the build time, so before this
+every deploy gave every file on the server a new mtime and a new ETag. Of the
+2,908 files the old flags send for a fresh build of the 2026-10-04 commit, only
+314 differ in bytes, and none of them is under `content/`. Now an unchanged
+file keeps its mtime and its ETag, so a reader's next revalidation of it is a
+304 instead of a full download, as long as the browser's HTTP cache still holds
+it. **Prerendered pages are not covered:** their bytes change on every build
+(they reference the new hashed `_app/` bundles, because SvelteKit's version is
+a timestamp), so a page still downloads in full once after each deploy.
+
 So **the dry run's transfer count is a real diff**: a deploy with no content
-change sends nothing under `content/` (measured 2026-10-04: 314 files, all of
-them prerendered pages, `_app/` files and `sw.js`, whose bytes change on every
-build because SvelteKit's version is a timestamp). After such a deploy,
-`curl -sI` an unchanged figure: `last-modified` must not have moved. It still
-does not say which side is newer: step 5's checksum stays.
+change sends nothing under `content/`, only prerendered pages, `_app/` files
+and `sw.js` (314 files on 2026-10-04). The script warns if an unchanged file
+would still get a new mtime, which would mean the flags have drifted. After
+such a deploy, `curl -sI` an unchanged figure: `last-modified` must not have
+moved. The count still does not say which side is newer: step 5's checksum
+stays.
 
 ⚠️ Do not deploy with a hand-written rsync. The rules only work when passed
 with `--filter='merge FILE'` (an `--exclude-from` file silently ignores the `P`
@@ -126,10 +133,10 @@ set `PDF_CHROMIUM_PATH` to use a system browser):
 
 ```bash
 npm run build:full       # pdfs + build
-rsync -avz build/downloads/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/downloads/
+rsync -az --no-times --checksum build/downloads/ siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/downloads/
 ```
 
-Both deploy paths go through `scripts/deploy.js`, which excludes `downloads/`
+Every deploy goes through `scripts/deploy.js`, which excludes `downloads/`
 and therefore never touches `/downloads/` — PDF refreshes are always this
 manual step.
 

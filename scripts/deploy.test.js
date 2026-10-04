@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { spawnSync } from 'child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, symlinkSync, utimesSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, symlinkSync, utimesSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
@@ -115,6 +115,7 @@ describe('rsyncArgs', () => {
 	// rsync applies options in order: `--no-times -a` turns -t back on.
 	it('turns times off AFTER -a, which implies them', () => {
 		const args = rsyncArgs({ ...base, apply: true });
+		expect(args).toContain('-az');
 		expect(args.indexOf('--no-times')).toBeGreaterThan(args.indexOf('-az'));
 	});
 });
@@ -129,12 +130,22 @@ describe('summarizeItemized', () => {
 			'cd+++++++++ _app/immutable/assets/',
 			'<f+++++++++ index.html',
 			'.d..t...... ./',
+			'.f...p..... content/efnafraedi-2e/toc.json',
 			''
 		].join('\n');
 		expect(summarizeItemized(output)).toEqual({
 			deleted: ['stale/index.html', 'stale/'],
-			transferred: ['_app/immutable/chunks/new.js', 'efnafraedi-2e/kafli/01/index.html', 'index.html']
+			transferred: ['_app/immutable/chunks/new.js', 'efnafraedi-2e/kafli/01/index.html', 'index.html'],
+			retimed: []
 		});
+	});
+
+	// What `-a --checksum` does to an unchanged file: not sent, but its mtime,
+	// and so its ETag, still changes. A dry run that counted transfers alone
+	// would call that deploy clean.
+	it('lists files that keep their bytes but get a new mtime', () => {
+		const output = ['.f..t...... content/efnafraedi-2e/fig.svg', '>f..T...... index.html', ''].join('\n');
+		expect(summarizeItemized(output).retimed).toEqual(['content/efnafraedi-2e/fig.svg']);
 	});
 });
 
@@ -151,6 +162,11 @@ const hasRsync = spawnSync('rsync', ['--version']).status === 0;
 const UNCHANGED_FIGURE = 'content/efnafraedi-2e/chapters/01/images/media/fig.svg';
 const SAME_SIZE_PAGE = 'content/efnafraedi-2e/chapters/01/1-1-intro.html';
 const LAST_DEPLOY = new Date('2026-08-19T14:36:47Z');
+// Every build stamps every file with the build time. A fixed one, unlike the
+// time the fixture is written: rsync's quick check compares whole seconds, so a
+// build written in the same second as the deploy would look unchanged to a
+// deploy that compared mtimes instead of checksums.
+const BUILD_TIME = new Date('2026-10-01T00:00:00Z');
 const mtimeOnServer = (root, rel) => statSync(join(root, 'server', rel)).mtimeMs;
 
 function write(root, rel, content) {
@@ -200,15 +216,19 @@ function makeFixture() {
 	write(root, 'build/content/lifraen-efnafraedi/toc.json', 'n'.repeat(556));
 	write(root, 'build/efnafraedi-2e/kafli/01/index.html', 'n'.repeat(777));
 	write(root, 'build/efnafraedi-2e/kafli/01/index.html.backup.2026-03-29T10-57-57', 'n'.repeat(999));
-	// A figure the new build did not change: same bytes, but the build stamped
-	// its copy with the build time, as every build does.
+	// The new build's copies of the figure and page described below.
+	write(root, `build/${UNCHANGED_FIGURE}`, 'f'.repeat(900));
+	write(root, `build/${SAME_SIZE_PAGE}`, 'n'.repeat(880));
+	// The build stamps every file it writes with the build time.
+	for (const rel of readdirSync(join(root, 'build'), { recursive: true })) {
+		utimesSync(join(root, 'build', rel), BUILD_TIME, BUILD_TIME);
+	}
+	// A figure the new build did not change: same bytes, an older mtime.
 	write(root, `server/${UNCHANGED_FIGURE}`, 'f'.repeat(900));
 	utimesSync(join(root, 'server', UNCHANGED_FIGURE), LAST_DEPLOY, LAST_DEPLOY);
-	write(root, `build/${UNCHANGED_FIGURE}`, 'f'.repeat(900));
 	// A page whose bytes changed while its size and mtime did not: rsync's
 	// quick check cannot tell the two copies apart.
 	write(root, `server/${SAME_SIZE_PAGE}`, 'o'.repeat(880));
-	write(root, `build/${SAME_SIZE_PAGE}`, 'n'.repeat(880));
 	utimesSync(join(root, 'server', SAME_SIZE_PAGE), LAST_DEPLOY, LAST_DEPLOY);
 	utimesSync(join(root, 'build', SAME_SIZE_PAGE), LAST_DEPLOY, LAST_DEPLOY);
 	return root;
@@ -344,15 +364,19 @@ describe.skipIf(!hasRsync && !process.env.CI)('deploy against a real rsync', () 
 	it('leaves an unchanged file, and its mtime, alone on the server', () => {
 		const result = run(true);
 		expect(result.transferred).not.toContain(UNCHANGED_FIGURE);
+		expect(result.retimed).toEqual([]);
 		expect(mtimeOnServer(root, UNCHANGED_FIGURE)).toBe(LAST_DEPLOY.getTime());
 	});
 
-	// Control: the same fixture through -a's own times. The mtime moves, so the
-	// test above can fail.
-	it('control: rsync -a moves the mtime of an unchanged file', () => {
-		const res = spawnSync('rsync', ['-a', join(root, 'build') + '/', join(root, 'server') + '/']);
+	// Control: --checksum with -a's own times. The file is not sent, yet its
+	// mtime moves, so the test above can fail and --checksum alone is no fix.
+	it('control: rsync -a --checksum skips an unchanged file but still moves its mtime', () => {
+		const res = spawnSync('rsync', ['-a', '--checksum', '--itemize-changes', join(root, 'build') + '/', join(root, 'server') + '/'], {
+			encoding: 'utf-8'
+		});
 		expect(res.status).toBe(0);
-		expect(mtimeOnServer(root, UNCHANGED_FIGURE)).not.toBe(LAST_DEPLOY.getTime());
+		expect(summarizeItemized(res.stdout).retimed).toContain(UNCHANGED_FIGURE);
+		expect(mtimeOnServer(root, UNCHANGED_FIGURE)).toBe(BUILD_TIME.getTime());
 	});
 
 	// A changed file must get a NEW mtime, so its ETag changes and readers fetch it.

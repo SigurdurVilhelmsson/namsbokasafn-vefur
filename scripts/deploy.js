@@ -86,9 +86,11 @@ export function parseArgs(argv, env) {
  * Last-Modified from the mtime, and every build stamps every file with the
  * build time, so with `-t` each deploy changed every ETag and a reader's next
  * revalidation of each figure and page was a full 200 instead of a 304.
- * `--checksum` alone is not enough: with `-t` still on, rsync skips an
- * identical file but still copies its new mtime across. `--no-times` must come
- * AFTER `-a`, which turns `-t` back on (rsync applies options in order).
+ * The two only work as a pair. `--checksum` alone is not enough: with `-t`
+ * still on, rsync skips an identical file but still copies its new mtime
+ * across. `--no-times` alone is worse than `-a`: rsync treats a missing `-t` as
+ * `--ignore-times` and sends every file. `--no-times` must also come AFTER `-a`,
+ * which turns `-t` back on (rsync applies options in order).
  */
 export function rsyncArgs({ buildDir, target, filterFile, apply }) {
 	const args = ['-az', '--no-times', '--checksum', '--delete', `--filter=merge ${filterFile}`, '--itemize-changes'];
@@ -99,17 +101,21 @@ export function rsyncArgs({ buildDir, target, filterFile, apply }) {
 }
 
 /**
- * Split rsync --itemize-changes output into deletions and file transfers.
- * Directory lines (`cd…`, `.d…`) are neither.
+ * Split rsync --itemize-changes output into deletions, file transfers, and
+ * files that are not sent but get a new mtime (`.f..t…`: a new ETag for the
+ * same bytes, which rsyncArgs exists to prevent). Directory, symlink and other
+ * attribute-only lines are none of these.
  */
 export function summarizeItemized(output) {
 	const deleted = [];
 	const transferred = [];
+	const retimed = [];
 	for (const line of output.split('\n')) {
 		if (line.startsWith('*deleting')) deleted.push(line.slice('*deleting'.length).trim());
 		else if (/^[<>]f/.test(line)) transferred.push(line.slice(12));
+		else if (/^\.f..[tT]/.test(line)) retimed.push(line.slice(12));
 	}
-	return { deleted, transferred };
+	return { deleted, transferred, retimed };
 }
 
 function buildVersion(buildDir) {
@@ -200,6 +206,12 @@ export function deploy({ source, build, target, apply, log = console.log }) {
 		const verb = apply ? '' : 'would be ';
 		log(`${summary.transferred.length} files ${verb}transferred, ${summary.deleted.length} ${verb}deleted.`);
 		for (const path of summary.deleted) log(`  deleted: ${path}`);
+		if (summary.retimed.length > 0) {
+			log(
+				`⚠️ ${summary.retimed.length} unchanged files ${verb}given a new mtime, so a new ETag: ` +
+					'are the rsync flags still --checksum --no-times, in that order after -az?'
+			);
+		}
 		if (result.status !== 0) log(`rsync exited with status ${result.status}.`);
 		return { status: result.status ?? 1, ...summary };
 	} finally {
