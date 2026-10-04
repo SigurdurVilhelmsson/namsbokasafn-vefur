@@ -95,6 +95,7 @@ npm run format           # Prettier formatting
   - Never wrap a store method that reads via `get({ subscribe })` in `$derived` — it registers no dependencies and computes exactly once. Read the store (`$storeName`) inside the derived so it recomputes.
   - Never mutate a property on a `$derived` object — reassign the whole object (writable derived).
   - Per-section page logic must not live in `onMount`: SvelteKit reuses the page component when only params change. Use `afterNavigate` with a key guard and/or `{#key}`.
+  - A function called from `$effect` makes every `$state` it READS a dependency of that effect, however deep the call. `MobileBottomNav`'s close-on-route effect called `close()`, which read the auto-close timer's `$state`; opening the menu armed the timer, re-ran the effect and closed the menu in the same tick, so the phone tools menu never opened (Feb–Oct 2026, fixed `d6ce301`). Call such helpers through `untrack()`, and keep bookkeeping like timer handles out of `$state`.
 - Math rendering: MathJax (pre-rendered SVG in HTML content)
 - Path alias: `$lib/` resolves to `src/lib/`
 
