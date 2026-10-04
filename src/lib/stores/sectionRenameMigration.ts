@@ -17,16 +17,27 @@ import { quizStore } from './quiz';
 
 export function migrateRenamedSections(bookSlug: string, toc: TableOfContents): void {
 	if (!browser) return;
+	let renames;
 	try {
-		const renames = resolveActiveRenames(bookSlug, toc);
-		if (renames.length === 0) return;
-		reader.renameSections(renames);
-		annotationStore.renameSections(renames);
-		analyticsStore.renameSections(renames);
-		objectivesStore.renameSections(renames);
-		quizStore.renameSections(renames);
+		renames = resolveActiveRenames(bookSlug, toc);
 	} catch (e) {
-		// Never let a migration problem stop the book from loading
 		console.warn('Section rename migration failed:', e);
+		return;
+	}
+	if (renames.length === 0) return;
+	// One store at a time, so bad data in one cannot stop the others migrating,
+	// and a migration problem never stops the book from loading
+	for (const [name, store] of [
+		['reader', reader],
+		['annotations', annotationStore],
+		['analytics', analyticsStore],
+		['objectives', objectivesStore],
+		['quiz', quizStore]
+	] as const) {
+		try {
+			store.renameSections(renames);
+		} catch (e) {
+			console.warn(`Section rename migration failed for ${name}:`, e);
+		}
 	}
 }

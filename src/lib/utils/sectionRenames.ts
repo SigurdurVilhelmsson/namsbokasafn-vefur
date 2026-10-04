@@ -31,9 +31,11 @@ export interface SectionRename {
 }
 
 /**
- * The renames to apply for one book: every redirect row whose FINAL target
- * (following chains A→B→C) is published. Row-by-row checking would strand A
- * once B is itself renamed, which is exactly what a second title correction does.
+ * The renames to apply for one book. Each row follows its chain (A→B→C) and
+ * targets the LAST PUBLISHED hop: C once C is out, B while only B is. That
+ * matches the route, which redirects one hop at a time and only to a published
+ * target. Row-by-row checking alone would strand A once B is itself renamed,
+ * which is exactly what a second title correction does.
  */
 export function resolveActiveRenames(
 	bookSlug: string,
@@ -48,6 +50,7 @@ export function resolveActiveRenames(
 	for (const row of forBook) {
 		let toChapter = row.toChapter;
 		let toSlug = row.toSlug;
+		let target = exactSectionExists(toc, toChapter, toSlug) ? { toChapter, toSlug } : null;
 		const seen = new Set([`${row.fromChapter}/${row.fromSlug}`]);
 		for (let hop = next(toChapter, toSlug); hop; hop = next(toChapter, toSlug)) {
 			const key = `${hop.fromChapter}/${hop.fromSlug}`;
@@ -55,10 +58,11 @@ export function resolveActiveRenames(
 			seen.add(key);
 			toChapter = hop.toChapter;
 			toSlug = hop.toSlug;
+			if (exactSectionExists(toc, toChapter, toSlug)) target = { toChapter, toSlug };
 		}
-		if (toChapter === row.fromChapter && toSlug === row.fromSlug) continue;
-		if (!exactSectionExists(toc, toChapter, toSlug)) continue;
-		renames.push({ bookSlug, fromChapter: row.fromChapter, fromSlug: row.fromSlug, toChapter, toSlug });
+		if (!target) continue;
+		if (target.toChapter === row.fromChapter && target.toSlug === row.fromSlug) continue;
+		renames.push({ bookSlug, fromChapter: row.fromChapter, fromSlug: row.fromSlug, ...target });
 	}
 	return renames;
 }
@@ -71,7 +75,8 @@ const later = (a?: unknown, b?: unknown) =>
 
 /**
  * Move `record[from]` to `record[to]`, merging when both exist. Returns the
- * same record when `from` is absent.
+ * same record when `from` is absent. Persisted records are not validated, so a
+ * side that is not an object is treated as absent rather than merged.
  */
 function moveKey<T>(
 	record: Record<string, T>,
@@ -83,7 +88,8 @@ function moveKey<T>(
 	const next = { ...record };
 	const old = next[from];
 	delete next[from];
-	next[to] = to in record ? merge(old, record[to]) : old;
+	const cur = record[to];
+	next[to] = !(to in record) || !isObj(cur) ? old : !isObj(old) ? cur : merge(old, cur);
 	return next;
 }
 
@@ -156,6 +162,7 @@ interface AnnotationLike {
 export function renameInAnnotations<A extends AnnotationLike>(list: A[], renames: SectionRename[]): A[] {
 	let changed = false;
 	const next = list.map((a) => {
+		if (!isObj(a)) return a;
 		const r = renames.find(
 			(r) => a.bookSlug === r.bookSlug && a.chapterSlug === r.fromChapter && a.sectionSlug === r.fromSlug
 		);
@@ -205,18 +212,21 @@ export function renameInAnalytics<S extends AnalyticsLike>(state: S, renames: Se
 			};
 		});
 
-		const matches = (d?: { bookSlug?: string; chapterSlug?: string; sectionSlug?: string }) =>
-			!!d && d.bookSlug === r.bookSlug && d.chapterSlug === r.fromChapter && d.sectionSlug === r.fromSlug;
-		if (activityLog.some((e) => matches(e.details))) {
+		const matches = (d?: { bookSlug?: string; chapterSlug?: string; sectionSlug?: string } | null) =>
+			isObj(d) && d.bookSlug === r.bookSlug && d.chapterSlug === r.fromChapter && d.sectionSlug === r.fromSlug;
+		const entryMatches = (e: { details?: unknown } | null) => isObj(e) && matches(e.details as never);
+		const sessionMatches = (s: AnalyticsLike['sessions'][number] | null) =>
+			isObj(s) && (s.sectionKey === from || matches(s));
+		if (activityLog.some(entryMatches)) {
 			activityLog = activityLog.map((e) =>
-				matches(e.details)
+				entryMatches(e)
 					? { ...e, details: { ...e.details, chapterSlug: r.toChapter, sectionSlug: r.toSlug } }
 					: e
 			);
 		}
-		if (sessions.some((s) => s.sectionKey === from || matches(s))) {
+		if (sessions.some(sessionMatches)) {
 			sessions = sessions.map((s) =>
-				s.sectionKey === from || matches(s)
+				sessionMatches(s)
 					? { ...s, sectionKey: to, chapterSlug: r.toChapter, sectionSlug: r.toSlug }
 					: s
 			);
@@ -273,7 +283,9 @@ export function renameInObjectives<O extends ObjectiveLike>(
 					assessedAt: rated.assessedAt
 				} as O;
 			});
-			next = { ...next, [to]: { ...next[to], chapterSlug: r.toChapter, sectionSlug: r.toSlug } };
+			if (isObj(next[to])) {
+				next = { ...next, [to]: { ...next[to], chapterSlug: r.toChapter, sectionSlug: r.toSlug } };
+			}
 		}
 	}
 	return next;
@@ -315,10 +327,12 @@ export function renameInPracticeProblems<P extends ProblemLike>(
 				isCompleted: old.isCompleted || cur.isCompleted,
 				lastAttempted: later(old.lastAttempted, cur.lastAttempted) as string | undefined
 			}));
-			next = {
-				...next,
-				[to]: { ...next[to], id: to, chapterSlug: r.toChapter, sectionSlug: r.toSlug }
-			};
+			if (isObj(next[to])) {
+				next = {
+					...next,
+					[to]: { ...next[to], id: to, chapterSlug: r.toChapter, sectionSlug: r.toSlug }
+				};
+			}
 		}
 	}
 	return next;

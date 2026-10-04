@@ -43,6 +43,15 @@ describe('resolveActiveRenames', () => {
 		expect(renames.map((r) => `${r.fromSlug}->${r.toSlug}`).sort()).toEqual(['a->c', 'b->c']);
 	});
 
+	// The route redirects one hop (A→B when B is published), so the migration
+	// must stop at the last PUBLISHED hop, not skip A because C is not out yet
+	it('stops at the last published hop of a chain', () => {
+		const rows = [row('a', 'b'), row('b', 'c')];
+		expect(resolveActiveRenames(B, toc(['b']), rows)).toEqual([
+			{ bookSlug: B, fromChapter: '10', fromSlug: 'a', toChapter: '10', toSlug: 'b' }
+		]);
+	});
+
 	it('survives a cycle', () => {
 		const rows = [row('a', 'b'), row('b', 'a')];
 		expect(resolveActiveRenames(B, toc(['a', 'b']), rows)).toEqual([]);
@@ -223,3 +232,31 @@ describe('renameInPracticeProblems', () => {
 		expect(renameInPracticeProblems(out, R)).toBe(out);
 	});
 });
+
+// One malformed persisted entry must not throw: before, it aborted the
+// migration of every store after it, on every table-of-contents load
+describe('malformed persisted entries', () => {
+	it('skips null highlights and still moves the good ones', () => {
+		const good = { id: '1', bookSlug: B, chapterSlug: '10', sectionSlug: 'old' };
+		const out = renameInAnnotations([null, good] as never, R);
+		expect(out[0]).toBeNull();
+		expect(out[1]).toMatchObject({ sectionSlug: 'new' });
+	});
+
+	it('keeps the good side when one side of a merge is not a record', () => {
+		const p = { id: `${NEW}#a`, chapterSlug: '10', sectionSlug: 'new', isCompleted: false, attempts: 2, successfulAttempts: 1 };
+		const out = renameInPracticeProblems({ [`${OLD}#a`]: null, [`${NEW}#a`]: p } as never, R);
+		expect(out[`${NEW}#a`]).toMatchObject({ attempts: 2, id: `${NEW}#a` });
+		const objs = renameInObjectives(
+			{ [`${OLD}/0`]: null, [`${NEW}/0`]: { chapterSlug: '10', sectionSlug: 'new', objectiveIndex: 0, objectiveText: 't', isCompleted: true } } as never,
+			R
+		);
+		expect(objs[`${NEW}/0`]).toMatchObject({ isCompleted: true, sectionSlug: 'new' });
+		const times = renameInAnalytics(
+			{ sectionReadingTimes: { [OLD]: null, [NEW]: { totalSeconds: 5, sessionCount: 1, lastRead: 'x', averageSessionSeconds: 5 } } as never, activityLog: [null] as never, sessions: [null] as never },
+			R
+		);
+		expect(times.sectionReadingTimes[NEW]).toMatchObject({ totalSeconds: 5 });
+	});
+});
+

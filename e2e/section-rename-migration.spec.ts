@@ -115,3 +115,56 @@ test('an inert rename moves nothing: its old page is still the live one', async 
 	expect(reader.progress[oldKey]?.read).toBe(true);
 	expect(reader.bookmarks).toContain(oldKey);
 });
+
+// /prof snapshots its practice problems when it mounts. On a hard load the
+// migration used to land after that, so an answer was recorded against the
+// old id, found no record, and was silently dropped (review of 6832f48).
+test('an answer on /prof after a hard load is recorded under the renamed section', async ({
+	page
+}) => {
+	test.skip(!active, 'no redirect row has a published target in this content sync');
+	const r = active!;
+	const oldKey = `${r.bookSlug}/${r.fromChapter}/${r.fromSlug}#e2e-ans`;
+	const newKey = `${r.bookSlug}/${r.toChapter}/${r.toSlug}#e2e-ans`;
+
+	await page.addInitScript(
+		({ oldKey, r }) => {
+			if (sessionStorage.getItem('seeded')) return;
+			sessionStorage.setItem('seeded', '1');
+			localStorage.setItem(
+				'namsbokasafn:quiz',
+				JSON.stringify({
+					practiceProblemProgress: {
+						[oldKey]: {
+							id: oldKey,
+							content: 'Hvað er mól?',
+							answer: 'Magn efnis',
+							bookSlug: r.bookSlug,
+							chapterSlug: r.fromChapter,
+							sectionSlug: r.fromSlug,
+							source: 'inline',
+							isCompleted: false,
+							attempts: 1,
+							successfulAttempts: 0,
+							lastAttempted: '2026-08-01T00:00:00.000Z'
+						}
+					}
+				})
+			);
+		},
+		{ oldKey, r }
+	);
+
+	await page.goto(`/${r.bookSlug}/prof/`);
+	await page.getByRole('button', { name: /Sýna svar/ }).click();
+	await page.getByRole('button', { name: /Rétt/ }).click();
+
+	await expect
+		.poll(() =>
+			page.evaluate(
+				(k) => JSON.parse(localStorage.getItem('namsbokasafn:quiz')!).practiceProblemProgress[k],
+				newKey
+			)
+		)
+		.toMatchObject({ id: newKey, attempts: 2, successfulAttempts: 1 });
+});
