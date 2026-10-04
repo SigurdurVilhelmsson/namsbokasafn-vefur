@@ -1,7 +1,13 @@
 # Two markup facts vefur now works around (vefur → efni)
 
 **Written:** 2026-10-04 · **vefur:** branch `fix/phone-reader-overlays` (`d6ce301`, `e177e39`) and
-`feature/reader-v1.1` (`484e5a3`, `c661046`) · **measured against efni `main` `85b656948`**
+`feature/reader-v1.1` (`484e5a3`, `c661046`) · **measured against efni `main` `08014ad4b`**
+
+> **Corrected 2026-10-04.** This note first cited `85b656948`, which is not efni `main`: it was an
+> unpushed local commit on the branch the efni checkout had out (`content/c140-c49-recompose-pass`).
+> The efni session caught it. The counts were re-measured at `08014ad4b` straight from git's object
+> store (`git show 08014ad4b:<file>` over the 251 chemistry `mt-preview` files), and all four match.
+> `05-publication/` does not differ between the two commits.
 
 > Measured on 2026-10-04 with the commands shown. Re-derive before relying on a number. Nothing here
 > asks for a re-render now: both are worked around in vefur, and neither is urgent. This note is so
