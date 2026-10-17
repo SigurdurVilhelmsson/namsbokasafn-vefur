@@ -343,6 +343,18 @@ article.cnx-module table caption .table-label {
   color: #c78c20;
 }
 
+/* "Vélþýtt" figure badge (src/app.css draws it): kept in the PDF on purpose.
+   The watermark below marks unreviewed SECTIONS; a figure with unapproved text
+   inside a reviewed section carries only this badge. Grey outline and no fill,
+   like the caption, so it survives a black-and-white copy. The article.cnx-module
+   prefix outranks app.css's `.dark` variant should dark mode ever reach a PDF. */
+article.cnx-module figure[data-figure-review]::before {
+  background: none;
+  border-color: #6b6b6b;
+  color: #444;
+  font-size: 7.5pt;
+}
+
 /* Table caption matches the figure caption (serif italic, left, below table). */
 article.cnx-module table caption {
   caption-side: bottom;

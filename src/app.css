@@ -1538,6 +1538,44 @@ td:has(> math.assistive-mathml) {
   font-weight: 700;
 }
 
+/* "Vélþýtt" badge on a figure whose Icelandic text is not yet approved.
+   efni's renderer sets data-figure-review="mt-preview" or "flagged" on the
+   <figure>, and nothing once the figure is approved. Both states get the same
+   word: a reader needs to know the text in the picture is not final, not why.
+   A ::before, not an injected element: generated text is not in the DOM, so
+   textAnchor's highlight offsets and bionicReading never see it. (The search
+   index is built from the published HTML, which no stylesheet changes.)
+   Screen readers do read it out. Not scoped to .reading-content, so it also
+   draws on the /print routes (print.css restyles it there). The lightbox
+   builds its caption from the figcaption text, so the badge does not follow a
+   figure into it.
+   Kept in print on purpose: see the @media print block below and print.css.
+   Fill and accent colours are PreviewBanner's (the section-level notice); the
+   light-mode text is a darker amber for contrast: 6.8:1, and 7.4:1 in dark. */
+figure[data-figure-review]::before {
+  content: "Vélþýtt";
+  display: block;
+  width: fit-content;
+  margin: 0 auto 0.5rem;
+  padding: 0.125rem 0.625rem;
+  border: 1px solid #d97706;
+  border-radius: 9999px;
+  background: #fffbeb;
+  color: #92400e;
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+
+.dark figure[data-figure-review]::before {
+  border-color: #e8a838;
+  background: #2a2418;
+  color: #e8a838;
+}
+
 /* Style for italic caption paragraphs (when not wrapped in figure)
    Only target em elements that contain a strong element (figure label like "Mynd X.X")
    This prevents single-character italic variables like *q* from being styled as captions */
@@ -2141,6 +2179,16 @@ td:has(> math.assistive-mathml) {
     font-style: italic;
     text-align: left;
     margin-top: 6pt;
+  }
+
+  /* The "Vélþýtt" figure badge stays in print on purpose: PreviewBanner is
+     hidden here and this surface has no MT watermark, so the badge is the only
+     mark on a printout that a figure's text is machine-translated. The reset
+     above prints it black on white; the black border keeps it a label
+     (!important, or the .dark rule would win when printing in dark mode). */
+  figure[data-figure-review]::before {
+    border-color: #000 !important;
+    font-size: 8pt;
   }
 
   .figure-caption {
