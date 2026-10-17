@@ -12,7 +12,7 @@
 | Reader v1.1 / plan P0     | Code complete on `feature/reader-v1.1` (#119–#122), **not merged**: last commit 2026-06-10, 257 commits behind `main`, conflicts with it in the section page, and its head has no CI result. QA batches D–E and the 3 judgment calls not run                                                                           |
 | Reader v1.2 / plan P1     | Code complete on `feature/reader-v1.2` (#124, #125, #127, #128), **not merged**: 253 commits behind `main`, conflicts in `AnalyticsTabs.svelte` and the section page; its head's only CI run (2026-07-25) failed within 3 s. QA batch G not run                                                                        |
 | Production deploy         | Manual (`deploy.yml` has never completed a deploy). Live: a 2026-08-19 build of `main`; QA batch F's header and redirect checks pass, but `frame-src` (#191) and the organic withdrawal (#234) are not applied on the server, and the 22 merges to `main` since that build (2026-08-19 to 2026-09-24) are not deployed |
-| Releases                  | None yet — `package.json` is still 1.0.0 and there are no tags. Plan: v1.1.0 after D–E verdicts; v1.2.0 after G, following v1.1.0                                                                                                                                                                                      |
+| Releases                  | None yet — `package.json` is still 1.0.0. The only tag, `reader-v1.1-port-source` (2026-10-16), marks v1.1's head `dde768e` and is not a release. Plan: v1.1.0 after D–E verdicts; v1.2.0 after G, following v1.1.0                                                                                                    |
 | Reader plan P2.1–P2.3     | Not started (P2.4 done in #131; the P2.1 position label exists only inside P0.4 on the unmerged v1.1 branch; scroll-bar replacement open)                                                                                                                                                                              |
 | PDF redesign              | Core merged in #182 (2026-07-02); Task 3.3, Phase 4.2/4.3 and Phase 5 open; no PDF is served on namsbokasafn.is yet (see the plan's status line)                                                                                                                                                                       |
 | Reader plan P3 (AI tutor) | Deferred pending classroom feedback on P0/P1                                                                                                                                                                                                                                                                           |
@@ -101,6 +101,15 @@ When P0 is complete: merge `feature/reader-v1.1` → main, bump version
 1.0.0 → 1.1.0, add CHANGELOG entry. P1 items (calibration tab, pre-questions,
 highlight→cloze, typography) follow the same pattern toward 1.2.0, drawing on
 the practice-pipeline data wired up in Phase 1.
+
+**Branch rule (2026-10-16; [CODE-04] in the reader-branch review,
+`docs/plans/2026-10-15-reader-v1.1-v1.2-review-register.md`):** never merge
+`feature/reader-v1.2` into `main` or `main` into `feature/reader-v1.2`, and take
+no P0 file from v1.2. v1.2 carries a June copy of P0 that v1.1 has since
+superseded, and that copy is broken against today's markup. The tag
+`reader-v1.1-port-source` marks v1.1's head, `dde768e`, as the source for
+bringing v1.1 to `main`. Whether that happens by a merge or by porting is still
+[USER]'s call.
 
 **Audit↔plan interactions already accounted for:**
 
