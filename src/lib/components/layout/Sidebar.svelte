@@ -73,6 +73,20 @@
 		settings.setSidebarOpen(false);
 	}
 
+	// A closed phone sidebar is visibility:hidden (CSS below), so focus left inside it
+	// would be lost: hand it back to the header's menu button, whichever way it closed
+	// (the close button, the overlay, the header toggle or the shortcut). Plain
+	// variables, not $state: the effect must depend on $sidebarOpen alone.
+	let asideEl: HTMLElement | undefined;
+	let wasOpen: boolean | undefined;
+	$effect(() => {
+		const open = $sidebarOpen;
+		const closed = wasOpen === true && !open;
+		wasOpen = open;
+		if (!closed || !asideEl?.contains(document.activeElement)) return;
+		document.querySelector<HTMLElement>('.sidebar-toggle')?.focus({ preventScroll: true });
+	});
+
 	// Track which chapters have their review sections expanded
 	let reviewExpandedChapters: Set<number> = $state(new Set());
 
@@ -110,10 +124,7 @@
 ></div>
 
 <!-- Sidebar -->
-<aside
-	aria-hidden={!$sidebarOpen ? 'true' : undefined}
-	class="sidebar {$sidebarOpen ? 'sidebar--open' : ''}"
->
+<aside class="sidebar {$sidebarOpen ? 'sidebar--open' : ''}" bind:this={asideEl}>
 	<div class="flex h-full flex-col">
 		<!-- Sidebar header -->
 		<div class="sidebar-header">
@@ -512,11 +523,21 @@
 		overflow-y: auto;
 		overflow-x: hidden;
 		transform: translateX(-100%);
-		transition: transform 0.3s ease-out;
+		/* Closed below 1024 px: out of the Tab order and the accessibility tree
+		   (UI-06). visibility waits for the 0.3 s slide-out, and returns at once
+		   on open (.sidebar--open). */
+		visibility: hidden;
+		transition:
+			transform 0.3s ease-out,
+			visibility 0s linear 0.3s;
 	}
 
 	.sidebar--open {
 		transform: translateX(0);
+		visibility: visible;
+		transition:
+			transform 0.3s ease-out,
+			visibility 0s linear 0s;
 		box-shadow: var(--shadow-xl);
 	}
 
@@ -526,6 +547,7 @@
 			z-index: 30;
 			height: calc(100vh - 56px);
 			transform: translateX(0);
+			visibility: visible;
 			box-shadow: none;
 			border-right: 1px solid var(--border-color);
 		}
