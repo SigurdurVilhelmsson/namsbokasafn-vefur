@@ -29,9 +29,11 @@ it. Nothing is edited in the lane. It only pulls `main`.
 - **Its `.env.production`:** copied from the main checkout, so builds from the
   lane send the page-view event until decision D03's step (S3.3) removes it in
   code.
-- **No sync runs in the lane.** Publishing new content is a separate, planned
-  step, and the chemistry sync is on hold (see `CLAUDE.md`, Current Development
-  Status).
+- **No sync runs in the lane.** A deploy from the lane publishes no new content,
+  and a sync run in another checkout never reaches it (`sync-content.js` writes
+  to its own checkout's `static/content`). Publishing new content has no written
+  procedure yet: write one before the chemistry hold lifts (see `CLAUDE.md`,
+  Current Development Status).
 
 It was made like this (the two rsync calls only read from the server):
 
@@ -92,8 +94,12 @@ deploy.
    list='find . -type f ! -name .DS_Store ! -name "*.bak" ! -name "*~" ! -name "*.backup.*" ! -name "*.pre-fix-*" ! -name "*.orig" -print0 | LC_ALL=C sort -z | xargs -0 sha256sum'
    ssh siggi@kvenno.app "cd /var/www/namsbokasafn-vefur/build/content/$book && $list" > $out/live-$book.sha256
    (cd build/content/$book && eval "$list") > $out/lane-$book.sha256
-   diff $out/live-$book.sha256 $out/lane-$book.sha256 && echo "all $(wc -l < $out/live-$book.sha256) files match"
+   if [ -s $out/live-$book.sha256 ] && diff $out/live-$book.sha256 $out/lane-$book.sha256; then echo "all $(wc -l < $out/live-$book.sha256) files match"; else echo "STOP: the lists differ or are empty"; fi
    ```
+
+   Only `all N files match` passes, with N the book's file count (2,481 for
+   chemistry on 2026-10-23). `STOP`, any line from `diff`, or a `cd:` or
+   `syntax error` line stops the deploy.
 
    Do not compare the frozen books. The deploy never sends them, and the build
    adds an `offline` key to each one's `toc.json` and writes an
@@ -102,20 +108,45 @@ deploy.
 4. **Dry run, and read it:**
 
    ```bash
-   node scripts/deploy.js --target siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/
+   node scripts/deploy.js --target siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/ && echo "dry run complete"
    ```
 
-   Read every deleted path. A code-only train deletes nothing; a renamed
-   section would show up here as a deleted page. Then compare the sitemap's URL
-   count with the live one:
+   A dry run that reached the server ends with its summary line,
+   `N files would be transferred, M would be deleted.`, and then
+   `dry run complete`. Every build sends its prerendered pages and `_app/`
+   files again, so N is never 0 (318 on 2026-10-23). If `dry run complete` is
+   missing, or an `ssh:` or `rsync` error line or `rsync exited with status`
+   appears, the dry run did not finish and its deletion count means nothing:
+   stop, fix the cause and run it again.
+
+   Then read every deleted path. A code-only train deletes only files that a
+   merged PR removed from the build, and each one must be traced to its PR. Two
+   kinds have happened: 63 KaTeX font files (2026-10-03, #214), and the
+   service worker's runtime, which gets a new name whenever its code changes
+   (`workbox-049f39f7.js` replaced by `workbox-1f0b60bb.js` on 2026-10-04,
+   #260). A deleted page under a book, or any path under `content/`, stops the
+   deploy: a renamed section shows up here as a deleted page.
+
+   Then compare the sitemap's URLs with the live ones. Any URL that appears or
+   disappears must be expected; a count alone would miss a URL that changes
+   form (#253 changed 365 of 366 and the count stayed 366):
 
    ```bash
-   curl -fsS https://namsbokasafn.is/sitemap.xml | grep -o '<loc>' | wc -l
-   grep -o '<loc>' build/sitemap.xml | wc -l
+   diff <(curl -fsS https://namsbokasafn.is/sitemap.xml | grep -o '<loc>[^<]*' | LC_ALL=C sort) <(grep -o '<loc>[^<]*' build/sitemap.xml | LC_ALL=C sort) && echo "same $(grep -o '<loc>' build/sitemap.xml | wc -l) URLs"
    ```
 
-5. **Back up the live build** on the server, as in step 2 of "Before you
-   deploy" below.
+   Expect `same N URLs`, with N the live count (366 on 2026-10-23).
+
+5. **Back up the live build** on the server, then check the copy. The script
+   runs on the server and writes only into `~/backups` there:
+
+   ```bash
+   ssh siggi@kvenno.app 'bash -s' < scripts/backup-live-build.sh
+   ```
+
+   Only `the backup matches the live build: <folder>` passes. The folder's name
+   holds the date and the version of the live build it copies. To roll back,
+   copy that folder over `/var/www/namsbokasafn-vefur/build` with one rsync.
 
 6. **Deploy:** the same `deploy.js` command with `--apply`.
 
@@ -126,26 +157,32 @@ deploy.
    ```bash
    curl -fsS https://namsbokasafn.is/_app/version.json; echo; cat build/_app/version.json; echo
    site=https://namsbokasafn.is
+   shell=$(curl -fsS "$site/200.html") || echo "STOP: /200.html did not load"
    for page in / /efnafraedi-2e/ /efnafraedi-2e/kafli/01/1-1-efnafraedi-i-samhengi/ /edlisfraedi-2e/ /liffraedi-2e/ /orverufraedi/; do
-     bad=0
-     for a in $(curl -fsS "$site$page" | grep -oE "/_app/immutable/[^\"' )]+" | sort -u); do
+     if ! html=$(curl -fsS "$site$page"); then echo "$page: STOP, the page did not load"; continue; fi
+     if [ "$html" = "$shell" ]; then echo "$page: STOP, only the app shell answered, so the page is gone"; continue; fi
+     n=0; bad=0
+     for a in $(printf '%s\n' "$html" | grep -oE "/_app/immutable/[^\"' )]+" | sort -u); do
+       n=$((n + 1))
        [ "$(curl -s -o /dev/null -w '%{http_code}' "$site$a")" = 200 ] || { bad=$((bad + 1)); echo "  missing: $a"; }
      done
-     echo "$page: $bad missing"
+     echo "$page: $n files checked, $bad missing"
    done
    curl -s -o /dev/null -w 'organic: %{http_code} (must be 404)\n' "$site/lifraen-efnafraedi/"
    ```
 
-   On 2026-10-23, before any deploy from the lane, this gave 0 missing on all
-   six pages (26 to 41 files each) and 404 for organic. A made-up
-   `/_app/immutable/` path also answers 404, so a missing file does show. The
-   check sees only the files each page's HTML names, not the ones the app loads
-   later.
+   Each page must print `N files checked, 0 missing` with N above 20. On
+   2026-10-23, before any deploy from the lane, the six pages checked 26 to 41
+   files each, 0 missing, and organic answered 404. The controls work: a
+   made-up `/_app/immutable/` path answers 404, and a page that does not exist
+   prints the `STOP` line for the app shell. The check sees only the files each
+   page's HTML names, not the ones the app loads later.
 
 ## Before you deploy
 
 The 2026-10-03 deploy followed these steps; keep to them. For a train, the
-lane checklist above puts them in order.
+lane checklist above puts them in order, with a runnable command for each
+(step 2's backup is its step 5).
 
 1. **Build** with `npm run build`. Sync content first only if you mean to
    publish new content (`node scripts/sync-content.js --source ../namsbokasafn-efni <book>`,

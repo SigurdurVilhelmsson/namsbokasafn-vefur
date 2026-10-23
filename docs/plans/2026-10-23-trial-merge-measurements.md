@@ -162,7 +162,7 @@ No test skips here that runs in CI. So every test CI runs on main ran here on th
   - the two gating "shows" tests
   - `seo-head.spec.ts` 3
   - `book-index-redirects.spec.ts` 3 (all but `/kafli/00/`)
-  - `offline.spec.ts` 4 (:49, :74, :124, :189)
+  - `offline.spec.ts` 4 (:45, :70, :120, :188)
 
   Two pagination tests did too, the summary and key-terms rollups (the exercises one used chemistry). In CI all of these run on efni `main`'s chemistry. Main passes there and here, so a failure that only CI shows would need v1.1's code to meet something in that chemistry that the content each test used here lacks. That cannot be ruled out from here. S8.4 judges the port by CI, as CODE-03 asks.
 
@@ -184,7 +184,13 @@ No test skips here that runs in CI. So every test CI runs on main ran here on th
 
   Through `localhost`, the control, the same steps stored the entry and showed 'Vistað'. `c8d71bb` makes `generateId()` fall back to `crypto.getRandomValues()`, which works without a secure context. On the patched build the network-address run stored the entry, showed 'Vistað' and threw no error, and the 863 unit tests still pass. The live site is served over HTTPS, so its readers never meet this. Main has the same `generateId()`, so any local preview opened on a phone would hit it.
 
-- **Still missing over plain `http://`:** the service worker and offline storage. Offline download does not work on the phone, and the book home logs `caches is not defined` from the download button. S0.4's checks (selecting text, swiping in a table, Space, the screen reader, the cards and the recall prompt) do not need them.
+- **Still missing over plain `http://`:** everything else that needs a secure context: the service worker, offline storage, the clipboard and the share sheet.
+  - Offline download does not work on the phone, and the book home logs `caches is not defined` from the download button.
+  - 'Deila' on a section opens no share sheet and silently does nothing: its clipboard fallback throws, and the error goes only to the console.
+  - The copy buttons under a display equation say 'Villa við afritun'.
+
+  The clipboard and share-sheet behaviour follows from the code and the browsers' rules, and was not measured on a phone. The live site is served over HTTPS and has none of it, so record no verdict on these. S0.4's checks (selecting text, swiping in a table, Space, the screen reader, the cards and the recall prompt) do not need them.
+
 - **Content:** the ② preview, so judge mechanics only, as S0.4 says.
 - **No page-view event.** The worktree has no `.env.production` (it is gitignored), so `VITE_API_URL` is empty and `trackEvent` returns at once. The bundle has 0 occurrences of the editorial server's host name. Control: the main checkout's last production build (2026-10-17), made with `.env.production`, has 1.
 - **Serve it** from the merged worktree:
