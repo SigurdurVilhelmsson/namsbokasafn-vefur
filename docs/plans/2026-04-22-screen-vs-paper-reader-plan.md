@@ -11,7 +11,7 @@ The screen-inferiority effect (Hedges' g ≈ −0.21 to −0.25 in favor of pape
 
 Audit of this reader against that literature shows the learning-science scaffolding is in place (SM-2, four-rating reviews, study-session phases, learning objectives, read-detection, analytics) but the four highest-evidence interventions are missing or implemented in ways that work against the research:
 
-1. The whole section renders as one scrollable page (worst case in Salmerón et al. 2024)
+1. The whole section renders as one scrollable page (worst case in Salmerón et al. 2024) _(See [Evidence corrections (2026-10)](#evidence-corrections-2026-10).)_
 2. Default measure (~97 chars/line) exceeds the 50–75 char band
 3. Section completion shows a celebration animation with no retrieval prompt
 4. Flashcard confidence is asked after the answer reveals, not before
@@ -42,21 +42,21 @@ Full audit lives in conversation history; the structural findings are:
 
 ### P0 — Closes the highest-evidence gaps
 
-| #    | Item                                                                  | Sessions | Research basis                                 |
-| ---- | --------------------------------------------------------------------- | -------- | ---------------------------------------------- |
-| P0.1 | Tighten default measure to 38rem (~71 chars)                          | 1        | Baymard / NN-G / Bringhurst 50–75 char band    |
-| P0.2 | Replace section-completion celebration with free-recall prompt        | 1        | Roediger & Karpicke 2006; Dunlosky 2013        |
-| P0.3 | Predict-first flashcard rating (2-point pre-prediction)               | 1        | Ackerman & Lauterman 2012; Clinton 2019        |
-| P0.4 | Hybrid viewport-aware pagination (Option C — see detailed spec below) | 5        | Salmerón et al. 2024 (g 0.35–0.48 → 0.03–0.12) |
+| #    | Item                                                                  | Sessions | Research basis                                                                                       |
+| ---- | --------------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| P0.1 | Tighten default measure to 38rem (~71 chars)                          | 1        | Baymard / NN-G / Bringhurst 50–75 char band ([2026-10 correction](#evidence-corrections-2026-10))    |
+| P0.2 | Replace section-completion celebration with free-recall prompt        | 1        | Roediger & Karpicke 2006; Dunlosky 2013                                                              |
+| P0.3 | Predict-first flashcard rating (2-point pre-prediction)               | 1        | Ackerman & Lauterman 2012; Clinton 2019                                                              |
+| P0.4 | Hybrid viewport-aware pagination (Option C — see detailed spec below) | 5        | Salmerón et al. 2024 (g 0.35–0.48 → 0.03–0.12) ([2026-10 correction](#evidence-corrections-2026-10)) |
 
 ### P1 — Closes the metacognitive loop
 
-| #    | Item                                                                                                                 | Sessions | Research basis                                    |
-| ---- | -------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------- |
-| P1.1 | Calibration tab on `/greining` (confidence vs. actual perf)                                                          | 2        | Ackerman; Clinton                                 |
-| P1.2 | Pre-question on section load                                                                                         | 1        | Pre-questions branch of testing-effect literature |
-| P1.3 | Highlight → cloze card in one tap                                                                                    | 2        | Dunlosky 2013 (couple highlights to active use)   |
-| P1.4 | Typography corrections: relabel OpenDyslexic, add Atkinson Hyperlegible Next, `prefers-color-scheme` only when unset | 1        | Rello & Baeza-Yates 2013; Wery & Diliberto 2017   |
+| #    | Item                                                                                                                 | Sessions | Research basis                                                                                        |
+| ---- | -------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------- |
+| P1.1 | Calibration tab on `/greining` (confidence vs. actual perf)                                                          | 2        | Ackerman; Clinton                                                                                     |
+| P1.2 | Pre-question on section load                                                                                         | 1        | Pre-questions branch of testing-effect literature                                                     |
+| P1.3 | Highlight → cloze card in one tap                                                                                    | 2        | Dunlosky 2013 (couple highlights to active use)                                                       |
+| P1.4 | Typography corrections: relabel OpenDyslexic, add Atkinson Hyperlegible Next, `prefers-color-scheme` only when unset | 1        | Rello & Baeza-Yates 2013; Wery & Diliberto 2017 ([2026-10 correction](#evidence-corrections-2026-10)) |
 
 ### P2 — Polish
 
@@ -87,7 +87,7 @@ This is the only item in P0 that crosses architectural boundaries. Every other i
 
 ### Why hybrid (not pure sub-section, not pure viewport)
 
-- **Pure sub-section chunking (Option A):** Cosmetic. Long sub-sections still scroll. Doesn't move the Salmerón effect-size needle.
+- **Pure sub-section chunking (Option A):** Cosmetic. Long sub-sections still scroll. Doesn't move the Salmerón effect-size needle. _(See [Evidence corrections (2026-10)](#evidence-corrections-2026-10).)_
 - **Pure viewport pagination (Option B):** Correct but over-engineered. Requires a full pagination engine for content the source already segments.
 - **Hybrid (Option C):** Use the source's natural sub-section breaks as the outer pagination level. Within each sub-section, run a layout-time splitter that creates inner pages only when needed. Most sub-sections are 1–3 inner pages; many short ones stay as a single page.
 
@@ -162,7 +162,7 @@ walk children in order:
 
 - Each inner page is rendered as a fixed-height container `overflow: hidden`, holding the slice of the sub-section's children.
 - Page transition: instant by default; honor `prefers-reduced-motion`. Behind a setting, allow a 150ms cross-fade.
-- Outer scroll is locked to the body when paginated mode is active. Tall atomic blocks (rare; e.g. a wide figure) get internal scroll within their page only.
+- Outer scroll is locked to the body when paginated mode is active. Tall atomic blocks (rare; e.g. a wide figure) get internal scroll within their page only. _(See [Evidence corrections (2026-10)](#evidence-corrections-2026-10).)_
 
 ### Navigation
 
@@ -267,7 +267,7 @@ Pagination changes the contract:
 
 ### Acceptance criteria
 
-1. On a chemistry chapter at default settings (16px, 38rem, viewport 1024×768), no required vertical scrolling within any inner page.
+1. On a chemistry chapter at default settings (16px, 38rem, viewport 1024×768), no required vertical scrolling within any inner page. _(See [Evidence corrections (2026-10)](#evidence-corrections-2026-10).)_
 2. Page recompute on font-size change preserves the user's current first-visible-node within ±1 page.
 3. Deep-link `#sub-3-p-2` lands directly on that page after hydration.
 4. Continuous-scroll toggle restores byte-identical reading experience to today's implementation.
@@ -344,4 +344,26 @@ This is an efni pipeline change. Per the cross-repo workflow in `CLAUDE.md`, the
 | P2   | 4 items + 1 doc note | ~5–6     | ~1 week (vefur; efni a11y separate) |
 | P3   | AI tutor (deferred)  | 8–12     | 2–3 weeks when started              |
 
-After P0 ships, the defensible claim is: every documented driver of the screen-inferiority effect — required scrolling, excess line length, unprompted completion, uncalibrated self-monitoring — has been directly designed against. That is the specification the literature implies.
+After P0 ships, the defensible claim is: every documented driver of the screen-inferiority effect — required scrolling, excess line length, unprompted completion, uncalibrated self-monitoring — has been directly designed against. That is the specification the literature implies. _(See [Evidence corrections (2026-10)](#evidence-corrections-2026-10).)_
+
+---
+
+## Evidence corrections (2026-10)
+
+_Added 2026-10-17 from the reader v1.1/v1.2 review (`docs/plans/2026-10-15-reader-v1.1-v1.2-review.md`, findings register [PED-26], plan step S0.2). The text above stays as written in April; each line these corrections touch carries a pointer here._
+
+**P0.4 (pagination) rests on a hypothesis, not on a measured effect.**
+
+- "g 0.35–0.48 → 0.03–0.12" is not from Salmerón et al. 2024. The numbers are from Clinton-Lisell & Litzinger 2026 (doi 10.1007/s10639-025-13843-8): paper beat screens by g = 0.35–0.48 in the studies where scrolling was needed, and by 0.03–0.12 (not significant) where it was not. That is an untested between-study contrast: two subsets of studies, never compared with each other directly, and confounded with device and text length. Most of the readers were college students, and the authors say their findings may be limited to them.
+- Salmerón et al. 2024 found no significant paging/scrolling difference in a between-study moderator test (paging k = 19, g = −0.109; scrolling k = 5, g = −0.149; p = .867), with phone studies excluded. It names no "worst case" and no effect-size "needle".
+- On phones, Joshi, Casiez & Vogel 2025 found no difference between paging and scrolling (100 adult crowdworkers reading narrative stories).
+- "Every documented driver … has been directly designed against" overstates the evidence. In Delgado et al. 2018 the need to scroll, device, text length and educational level were not significant moderators; time limits, text genre and publication year were. No screen-versus-paper meta-analysis tested line length or "unprompted completion". Of the four drivers listed, only over-confidence is documented.
+- The same claim ("the highest-evidence intervention") sits in a comment in reader v1.1's `src/lib/stores/settings.ts:73-74`. It is corrected when that code is ported to `main`; `main` does not carry it.
+
+**P0.1 (the 38rem measure) rests on convention and comfort.** The 50–75 character band comes from Baymard's qualitative e-commerce testing (Bringhurst gives 45–75 for print; no NN/g article with a band was found). None of it is comprehension evidence. WCAG 1.4.8 (AAA) asks only for a way to get 80 characters per line or fewer.
+
+**Tall blocks are not rare.** All 8 worked examples in §3.1 are taller than the 427 px page budget at 1280×800 (869–1,636 px), measured on efni's ② preview content. Book-wide, about 252 of 289 worked examples are at least as long as the shortest of those: an estimate, not a measurement. So acceptance criterion 1 (no required scrolling within any page at 1024×768) is expected to fail, but that is inferred from 800 px-high measurements; it was never measured at 1024×768. It is restated once [USER] chooses how oversized blocks are paged: kept whole, split, or given a larger page budget (which is open call 1).
+
+**P1.4 (typography).** Reader v1.2 ships the original Atkinson Hyperlegible, version 1.006, not Atkinson Hyperlegible Next. Rello & Baeza-Yates 2013 and Wery & Diliberto 2017 test neither Atkinson nor display polarity. For fonts, see Azzarello et al. 2026 (a meta-analysis of dyslexia fonts); for polarity, Piepenbrock et al. 2013 and 2014 and Dobres et al. 2017 (a legibility advantage for dark text on a light background), while Legge et al. 1985 found reading rate unaffected.
+
+The review's citation audit (report, Appendix B.1) also rates the bases given for P0.2, P0.3 and P1.1–P1.3 as partly supported or overstated. Those corrections are recorded there, not here.
