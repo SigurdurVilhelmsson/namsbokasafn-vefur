@@ -10,9 +10,142 @@ Deploy workflow (`deploy.yml`) was **retired on 2026-10-03**. It never completed
 a deploy (0 successful runs of 313; no deploy key or secrets were ever set up),
 and every run would have re-synced every allowlisted book with no dry-run stop.
 
+## The deploy lane: where every train runs
+
+Since 2026-10-23 (plan step S0.5 of the reader review) every deploy of new
+code runs from a **deploy lane**: a second clone of `main`, kept only for
+deploying, whose `static/content/` is a copy of the live server's. Never deploy
+from the main working checkout: its content is whatever was last synced there
+for other work (on 2026-10-23, efni's ② preview), and a deploy would publish
+it. Nothing is edited in the lane. It only pulls `main`.
+
+- **Where:** `~/dev/repos/namsbokasafn-vefur-deploy`, beside the efni
+  checkout, so `scripts/deploy.js` finds `../namsbokasafn-efni` with no
+  `--source`.
+- **Its content:** the four live books (`efnafraedi-2e` and the three frozen
+  books) and `provenance/`, copied from the server's
+  `/var/www/namsbokasafn-vefur/build/`. It is the server's content, so a deploy
+  from the lane sends no content.
+- **Its `.env.production`:** copied from the main checkout, so builds from the
+  lane send the page-view event until decision D03's step (S3.3) removes it in
+  code.
+- **No sync runs in the lane.** Publishing new content is a separate, planned
+  step, and the chemistry sync is on hold (see `CLAUDE.md`, Current Development
+  Status).
+
+It was made like this (the two rsync calls only read from the server):
+
+```bash
+git clone git@github.com:SigurdurVilhelmsson/namsbokasafn-vefur ~/dev/repos/namsbokasafn-vefur-deploy
+cd ~/dev/repos/namsbokasafn-vefur-deploy
+npm ci
+rsync -a siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/content/ static/content/
+rsync -a siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/provenance/ static/provenance/
+cp ../namsbokasafn-vefur/.env.production .
+```
+
+Measured on 2026-10-23, building `main` at `62ea95e` in the lane:
+
+- All 2,481 chemistry files in `build/content/efnafraedi-2e/` have the
+  server's sha256.
+- The dry run would send 318 files and delete none. They are prerendered pages,
+  `_app/` files, `sw.js`, `sitemap.xml` and #272's `styles/print.css`, and none
+  is under `content/`.
+- The sitemap has the live site's 366 URLs and differs only in `<lastmod>`.
+
+As a control, the main checkout's chemistry (the ② preview) differed from the
+server in 1,894 lines of the same checksum comparison.
+
+### The checklist for a train
+
+Run every step in the lane. Any difference you cannot explain stops the
+deploy.
+
+1. **Update and build:**
+
+   ```bash
+   cd ~/dev/repos/namsbokasafn-vefur-deploy
+   git pull --ff-only
+   npm ci
+   npm run build
+   ```
+
+2. **Compare the sync stamps** of each published book (`PUBLISHED_BOOKS` in
+   `scripts/lib/published-books.js`; today `efnafraedi-2e` alone):
+
+   ```bash
+   curl -fsS https://namsbokasafn.is/content/efnafraedi-2e/sync-stamp.json
+   cat build/content/efnafraedi-2e/sync-stamp.json
+   ```
+
+   On 2026-10-23 neither side has one (curl reports a 404 and the file is
+   missing), so go straight to the checksums. Once both have one, a different
+   efni `commit`, or `dirty: true` on either side, is a stop.
+
+3. **Compare the published book's checksums** with the server's: every file
+   except editor backups, with both lists sorted the same way. `LC_ALL=C`
+   matters, because the server and this machine sort differently.
+
+   ```bash
+   book=efnafraedi-2e
+   out=~/.cache/deploy-check && mkdir -p $out
+   list='find . -type f ! -name .DS_Store ! -name "*.bak" ! -name "*~" ! -name "*.backup.*" ! -name "*.pre-fix-*" ! -name "*.orig" -print0 | LC_ALL=C sort -z | xargs -0 sha256sum'
+   ssh siggi@kvenno.app "cd /var/www/namsbokasafn-vefur/build/content/$book && $list" > $out/live-$book.sha256
+   (cd build/content/$book && eval "$list") > $out/lane-$book.sha256
+   diff $out/live-$book.sha256 $out/lane-$book.sha256 && echo "all $(wc -l < $out/live-$book.sha256) files match"
+   ```
+
+   Do not compare the frozen books. The deploy never sends them, and the build
+   adds an `offline` key to each one's `toc.json` and writes an
+   `offline-manifest.json` beside it, so they differ from the server by design.
+
+4. **Dry run, and read it:**
+
+   ```bash
+   node scripts/deploy.js --target siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/
+   ```
+
+   Read every deleted path. A code-only train deletes nothing; a renamed
+   section would show up here as a deleted page. Then compare the sitemap's URL
+   count with the live one:
+
+   ```bash
+   curl -fsS https://namsbokasafn.is/sitemap.xml | grep -o '<loc>' | wc -l
+   grep -o '<loc>' build/sitemap.xml | wc -l
+   ```
+
+5. **Back up the live build** on the server, as in step 2 of "Before you
+   deploy" below.
+
+6. **Deploy:** the same `deploy.js` command with `--apply`.
+
+7. **Check the live site.** The version must equal the lane's build, every
+   `/_app/immutable/` file that chemistry's and the frozen books' pages name
+   must load, and organic must still answer 404:
+
+   ```bash
+   curl -fsS https://namsbokasafn.is/_app/version.json; echo; cat build/_app/version.json; echo
+   site=https://namsbokasafn.is
+   for page in / /efnafraedi-2e/ /efnafraedi-2e/kafli/01/1-1-efnafraedi-i-samhengi/ /edlisfraedi-2e/ /liffraedi-2e/ /orverufraedi/; do
+     bad=0
+     for a in $(curl -fsS "$site$page" | grep -oE "/_app/immutable/[^\"' )]+" | sort -u); do
+       [ "$(curl -s -o /dev/null -w '%{http_code}' "$site$a")" = 200 ] || { bad=$((bad + 1)); echo "  missing: $a"; }
+     done
+     echo "$page: $bad missing"
+   done
+   curl -s -o /dev/null -w 'organic: %{http_code} (must be 404)\n' "$site/lifraen-efnafraedi/"
+   ```
+
+   On 2026-10-23, before any deploy from the lane, this gave 0 missing on all
+   six pages (26 to 41 files each) and 404 for organic. A made-up
+   `/_app/immutable/` path also answers 404, so a missing file does show. The
+   check sees only the files each page's HTML names, not the ones the app loads
+   later.
+
 ## Before you deploy
 
-The 2026-10-03 deploy followed these steps; keep to them.
+The 2026-10-03 deploy followed these steps; keep to them. For a train, the
+lane checklist above puts them in order.
 
 1. **Build** with `npm run build`. Sync content first only if you mean to
    publish new content (`node scripts/sync-content.js --source ../namsbokasafn-efni <book>`,
