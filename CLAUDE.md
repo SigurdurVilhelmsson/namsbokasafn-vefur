@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Námsbókasafn (Textbook Library) is an interactive web-based reader for Icelandic translations of OpenStax educational textbooks. It's a SvelteKit static site with integrated study tools (flashcards with SM-2 spaced repetition, glossary, progress tracking).
 
-**Design principle:** optimize for _expository_ reading (studying textbooks), not narrative reading. Features that interrupt flow — pre-questions, recall prompts, predict-first ratings, pagination — are deliberate learning interventions backed by the testing-effect literature (see `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`); don't "streamline" them away as friction.
+**Design principle:** optimize for _expository_ reading (studying textbooks), not narrative reading. Features that interrupt flow — pre-questions, recall prompts, predict-first ratings, pagination — are deliberate learning interventions (see `docs/plans/2026-04-22-screen-vs-paper-reader-plan.md`, with its 2026-10 evidence corrections). Keep them, and make them skippable, faded and measured: how one is delivered may change, whether it exists may not, so don't "streamline" one away as friction.
 
 ## Notes for Code Reviewers
 
@@ -609,7 +609,7 @@ Measured on 2026-10-23 against `main` = `0cdeab0` (#273) and the live site.
 - **Three rulings change work here before their steps run:**
   - **D03: a production build still sends a page-view event to efni's editorial server** (`trackPageView` in `src/lib/utils/api.ts`, called from `src/routes/[bookSlug]/+layout.svelte`, sent by `sendBeacon` to `VITE_API_URL` + `/api/analytics/event`). This file did not mention it before. S3.3 removes it in code, never by leaving out `.env.production`, and adds a data rule to this file; until that deploy the event is live. GoatCounter stays; it sets no cookies.
   - **D20: new and changed Icelandic UI strings merge marked 'proposed'**, and [USER] checks them in one batch before the train that ships them. The first batch is due before train 1 (S1.3, the week of 2 November 2026).
-  - **KEEP-01: the design principle at the top of this file is to be reworded** (keep the interventions; make them skippable, faded and measured). The wording waits on [USER]'s approval, so the sentence is unchanged.
+  - **KEEP-01: the design principle at the top of this file is reworded** (keep the interventions; make them skippable, faded and measured), in [USER]'s approved wording of 2026-10-23. It no longer says the interventions are "backed by the testing-effect literature": the citation audit found that true of answered retrieval only.
 - **Next, by the plan:** S0.3 (a throwaway trial merge of main into v1.1, measured and never pushed; it needs no ruling) and S0.5 (the deploy lane). S0.4 is [USER]'s real-phone and screen-reader QA on S0.3's build. Then M1, the accessibility quick wins; train 1 is about 6 November 2026.
 - **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
 
