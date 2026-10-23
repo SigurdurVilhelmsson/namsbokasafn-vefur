@@ -597,7 +597,25 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-10-23 — reader review: S0.1 and S0.2 done; #272 merged but not deployed
+
+Measured on 2026-10-23 against `main` = `0cdeab0` (#273) and the live site.
+
+- **Prod still runs build `1791155794060`** (#263), but `main` is no longer fully deployed: **#272, a "Vélþýtt" badge on figures with unapproved text** (`src/app.css`, `static/styles/print.css` and an e2e spec), merged on 2026-10-17 and is not live. #270, #271 and #273 are docs only.
+- 🔴 **Don't deploy from the main working checkout on this machine.** Its `static/content/efnafraedi-2e` is efni's ② preview (`content/c2-whole-book-reinject` at `48dbbb7a2`, synced on 2026-10-09 for [USER]'s terminology review), not the live content. The reader plan's S0.5 builds a separate deploy lane whose content mirrors the server; the content-checksum check under Deployment would show the difference.
+- **The reader v1.1/v1.2 review is the plan for both reader branches** (#270): the report, a 72-step plan (M0–M14) with tick boxes, and a 110-issue register, in `docs/plans/2026-10-15-reader-v1.1-v1.2-review{,-plan,-register}.md`. The plan follows the report's recommended route, strategy C: v1.1 is not merged. It stays frozen at `dde768e` (tag `reader-v1.1-port-source`) as the porting source, and each piece moves to `main` as a small PR, shipped on code-only trains (one deploy carrying the PRs merged since the last). The pager lands dark, so no reader's mode changes until [USER] rules, and M11 tags v1.1.0 on `main` instead of at a branch merge. The roadmap's branch rule (#271, [CODE-04]): never merge v1.2 into main or main into v1.2, and take no P0 file from v1.2. So the June roadmap's "when the release branches merge" (Earlier, below) no longer describes the route.
+- **S0.1** (#271): efni has the content requests H1–H6 in `docs/handoffs/2026-10-16-reader-branches-requests-for-efni.md`, logged in its register as §C201.
+- **S0.2: the first decision records, in `docs/decisions/`** (a new folder). 28 dated files from [USER]'s decision session of 2026-10-23: 16 rulings (D01–D10, D18–D20, KEEP-01, and calls 1 and 2, which [USER] ruled early) and 12 deferrals, each naming its decision session (S9.0, S10.2 or S12.0). Calls 3 and 4 are still open. The briefs are in `docs/plans/2026-10-20-reader-decision-briefs.md`, and the April reader plan, which the design principle above cites, has a dated evidence erratum. 🔴 **Never edit a decision file:** a change is a new dated file that names the one it replaces. Before a plan step starts, its "Decide first" must be on file here.
+- **Three rulings change work here before their steps run:**
+  - **D03: a production build still sends a page-view event to efni's editorial server** (`trackPageView` in `src/lib/utils/api.ts`, called from `src/routes/[bookSlug]/+layout.svelte`, sent by `sendBeacon` to `VITE_API_URL` + `/api/analytics/event`). This file did not mention it before. S3.3 removes it in code, never by leaving out `.env.production`, and adds a data rule to this file; until that deploy the event is live. GoatCounter stays; it sets no cookies.
+  - **D20: new and changed Icelandic UI strings merge marked 'proposed'**, and [USER] checks them in one batch before the train that ships them. The first batch is due before train 1 (S1.3, the week of 2 November 2026).
+  - **KEEP-01: the design principle at the top of this file is to be reworded** (keep the interventions; make them skippable, faded and measured). The wording waits on [USER]'s approval, so the sentence is unchanged.
+- **Next, by the plan:** S0.3 (a throwaway trial merge of main into v1.1, measured and never pushed; it needs no ruling) and S0.5 (the deploy lane). S0.4 is [USER]'s real-phone and screen-reader QA on S0.3's build. Then M1, the accessibility quick wins; train 1 is about 6 November 2026.
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+
 ### 2026-10-04 (late) — deploys stop changing unchanged files' ETags (#263), deployed
+
+> ⚠️ **Superseded on one operational point — read the 2026-10-23 entry above first.** `main` now holds a merged change that is not deployed (#272). Prod still runs build `1791155794060`, and the rest of this entry stands.
 
 Measured on 2026-10-04 against `main` = `1f14e6d` (#263) and the live site.
 
