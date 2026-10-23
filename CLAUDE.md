@@ -597,7 +597,7 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
-### 2026-10-23 — reader review: S0.1 and S0.2 done; #272 merged but not deployed
+### 2026-10-23 — reader review: S0.1, S0.2 and S0.3 done; #272 merged but not deployed
 
 Measured on 2026-10-23 against `main` = `0cdeab0` (#273) and the live site.
 
@@ -610,7 +610,8 @@ Measured on 2026-10-23 against `main` = `0cdeab0` (#273) and the live site.
   - **D03: a production build still sends a page-view event to efni's editorial server** (`trackPageView` in `src/lib/utils/api.ts`, called from `src/routes/[bookSlug]/+layout.svelte`, sent by `sendBeacon` to `VITE_API_URL` + `/api/analytics/event`). This file did not mention it before. S3.3 removes it in code, never by leaving out `.env.production`, and adds a data rule to this file; until that deploy the event is live. GoatCounter stays; it sets no cookies.
   - **D20: new and changed Icelandic UI strings merge marked 'proposed'**, and [USER] checks them in one batch before the train that ships them. The first batch is due before train 1 (S1.3, the week of 2 November 2026).
   - **KEEP-01: the design principle at the top of this file is reworded** (keep the interventions; make them skippable, faded and measured), in [USER]'s approved wording of 2026-10-23. It no longer says the interventions are "backed by the testing-effect literature": the citation audit found that true of answered retrieval only.
-- **Next, by the plan:** S0.3 (a throwaway trial merge of main into v1.1, measured and never pushed; it needs no ruling) and S0.5 (the deploy lane). S0.4 is [USER]'s real-phone and screen-reader QA on S0.3's build. Then M1, the accessibility quick wins; train 1 is about 6 November 2026.
+- **S0.3, the trial merge, is measured** (`docs/plans/2026-10-23-trial-merge-measurements.md`). Merging main `62ea95e` into v1.1 `dde768e` gives one textual conflict; svelte-check is 0/0 and 863 unit tests pass; under the paged default only #249's 3 flashcard tests fail (CODE-01), and the e2e skip set equals main's on the same content. The merge is a local commit on no branch, never pushed. Its build waits for S0.4 in the worktree `~/.cache/reader-review/s03/merge/`: keep the three S0.3 worktrees until S0.4 is done, and note that a phone reaches WSL here only through a port forward (the note has the commands).
+- **Next, by the plan:** S0.5 (the deploy lane), and S0.4, [USER]'s real-phone and screen-reader QA on S0.3's build. Then M1, the accessibility quick wins; train 1 is about 6 November 2026.
 - **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
 
 ### 2026-10-04 (late) — deploys stop changing unchanged files' ETags (#263), deployed
