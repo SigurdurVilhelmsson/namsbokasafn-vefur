@@ -21,3 +21,6 @@ node_modules/
 # is that they say what they said at the time, and buries a one-line link fix in a
 # 100-line diff. (Same spirit as the append-only rule for decision files.)
 docs/archive/
+
+# Written by e2e/helpers/axe.ts (A11Y_UPDATE_BASELINE); keep its own formatting.
+e2e/a11y-baseline.json

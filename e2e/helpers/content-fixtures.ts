@@ -22,7 +22,7 @@
 import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { isRetired } from '../../scripts/lib/published-books.js';
+import { PUBLISHED_BOOKS, isRetired } from '../../scripts/lib/published-books.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CONTENT_DIR = join(HERE, '..', '..', 'static', 'content');
@@ -33,6 +33,7 @@ export type Capability = 'index' | 'glossary';
 interface Toc {
 	index?: unknown;
 	glossary?: unknown;
+	chapters?: { number: number; sections?: { file?: string }[] }[];
 }
 
 function readToc(slug: string): Toc | null {
@@ -209,4 +210,23 @@ export function bookWithMostImages(): { slug: string; count: number } | null {
 		if (!best || count > best.count) best = { slug, count };
 	}
 	return best;
+}
+
+/**
+ * The first book on the publication allowlist that is synced here, or null. CI syncs only
+ * published books, so this is the same book in CI and in a checkout that also holds the
+ * frozen ones, unlike `syncedBooks()[0]`, which sorts them all.
+ */
+export function publishedBook(): string | null {
+	const synced = new Set(syncedBooks());
+	return PUBLISHED_BOOKS.find((slug: string) => synced.has(slug)) ?? null;
+}
+
+/** Reader URL of the first module section ("1-1-…", not the "1-0-" introduction) of the book's first numbered chapter, or null. */
+export function firstModuleSection(slug: string): string | null {
+	for (const chapter of readToc(slug)?.chapters ?? []) {
+		const file = chapter.sections?.map((s) => s.file).find((f) => f && /^\d+-[1-9]\d*-.+\.html$/.test(f));
+		if (file) return `/${slug}/kafli/${String(chapter.number).padStart(2, '0')}/${file.slice(0, -5)}/`;
+	}
+	return null;
 }
