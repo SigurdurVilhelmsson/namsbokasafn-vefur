@@ -73,16 +73,24 @@
 		settings.setSidebarOpen(false);
 	}
 
-	// A closed phone sidebar is visibility:hidden (CSS below), so focus left inside it
-	// would be lost: hand it back to the header's menu button, whichever way it closed
-	// (the close button, the overlay, the header toggle or the shortcut). Plain
+	// On a phone the sidebar is a drawer (UI-06): opening it moves focus to its close
+	// button, and closing it with focus inside hands focus back to the header's menu
+	// button, whichever way it closed (the close button, the overlay, the header toggle
+	// or the shortcut), because a closed drawer is visibility:hidden (CSS below). On a
+	// desktop the close button is display:none, so focusing it does nothing. Plain
 	// variables, not $state: the effect must depend on $sidebarOpen alone.
 	let asideEl: HTMLElement | undefined;
+	let closeButton: HTMLButtonElement | undefined;
 	let wasOpen: boolean | undefined;
 	$effect(() => {
 		const open = $sidebarOpen;
+		const opened = wasOpen === false && open;
 		const closed = wasOpen === true && !open;
 		wasOpen = open;
+		if (opened) {
+			closeButton?.focus({ preventScroll: true });
+			return;
+		}
 		if (!closed || !asideEl?.contains(document.activeElement)) return;
 		document.querySelector<HTMLElement>('.sidebar-toggle')?.focus({ preventScroll: true });
 	});
@@ -131,6 +139,7 @@
 			<h2 class="sidebar-title">Efnisyfirlit</h2>
 			<button
 				onclick={closeSidebar}
+				bind:this={closeButton}
 				class="sidebar-close"
 				aria-label="Loka valmynd"
 			>

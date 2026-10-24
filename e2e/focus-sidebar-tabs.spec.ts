@@ -93,7 +93,7 @@ test.describe('The closed phone sidebar is out of the Tab order (UI-06)', () => 
 		expect(stops.filter((s) => !s.onScreen).map((s) => s.name)).toEqual([]);
 	});
 
-	test('opening the sidebar makes it reachable, and closing it from inside returns focus to the menu button', async ({
+	test('opening the sidebar moves focus to its close button, and closing it returns focus to the menu button', async ({
 		page
 	}) => {
 		test.skip(!SECTION, 'no published book is synced');
@@ -102,7 +102,6 @@ test.describe('The closed phone sidebar is out of the Tab order (UI-06)', () => 
 		await clickInPlace(page, toggle);
 		const close = page.getByRole('button', { name: 'Loka valmynd', exact: true });
 		await expect(page.locator('aside.sidebar')).toHaveCSS('visibility', 'visible');
-		await close.focus();
 		await expect(close).toBeFocused();
 		await page.keyboard.press('Enter');
 		await expect(toggle).toBeFocused();
@@ -132,8 +131,36 @@ test.describe('The /greining tabs on a phone (UI-15)', () => {
 		for (const label of LABELS) {
 			await expect(page.getByRole('tab', { name: label, exact: true })).toBeVisible();
 		}
-		await expect(page.locator('[role="tab"][tabindex="0"]')).toHaveCount(1);
-		await expect(page.locator('[role="tab"][tabindex="0"]')).toHaveAttribute('aria-selected', 'true');
+		// The browser's own tabIndex, not the attribute: a tab with no tabindex attribute is
+		// still in the Tab order.
+		const inTabOrder = await page
+			.locator('[role="tab"]')
+			.evaluateAll((tabs) => tabs.filter((t) => (t as HTMLElement).tabIndex >= 0).map((t) => t.getAttribute('aria-selected')));
+		expect(inTabOrder, 'only the selected tab is in the Tab order').toEqual(['true']);
+	});
+
+	test('Tab from the selected tab goes to its panel', async ({ page }) => {
+		test.skip(!BOOK, 'no published book is synced');
+		await page.goto(`/${BOOK}/greining/`);
+		await page.waitForLoadState('networkidle');
+		await page.getByRole('tab', { name: 'Yfirlit', exact: true }).focus();
+		await page.keyboard.press('Tab');
+		await expect(page.locator('#tabpanel-yfirlit')).toBeFocused();
+	});
+
+	test('Alt and an arrow key leave the selection to the browser', async ({ page }) => {
+		test.skip(!BOOK, 'no published book is synced');
+		await page.goto(`/${BOOK}/greining/`);
+		await page.waitForLoadState('networkidle');
+		const first = page.getByRole('tab', { name: 'Yfirlit', exact: true });
+		await first.focus();
+		const prevented = await first.evaluate((el) => {
+			const event = new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, bubbles: true, cancelable: true });
+			el.dispatchEvent(event);
+			return event.defaultPrevented;
+		});
+		expect(prevented, 'Alt+→ is not cancelled').toBe(false);
+		await expect(first).toHaveAttribute('aria-selected', 'true');
 	});
 
 	test('the arrow keys, Home and End move the selection, wrapping at the ends', async ({ page }) => {

@@ -25,6 +25,8 @@
 	// The APG tabs pattern: ← and → move and select (wrapping), Home and End go to the
 	// ends, and only the selected tab is in the Tab order.
 	function handleKeydown(event: KeyboardEvent) {
+		// Leave modified keys to the browser: Alt/Cmd+← → are Back and Forward.
+		if (event.altKey || event.ctrlKey || event.metaKey) return;
 		const current = tabs.findIndex((t) => t.id === activeTab);
 		const last = tabs.length - 1;
 		const next =
