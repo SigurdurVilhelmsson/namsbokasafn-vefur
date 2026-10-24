@@ -39,7 +39,6 @@
 		{
 			value: 'opendyslexic',
 			label: 'OpenDyslexic',
-			// D20: proposed wording (PED-27), checked in the batch before the train that ships it.
 			description: 'Hannað fyrir lesblinda. Rannsóknir sýna ekki að það bæti lestur, en veldu það ef það hentar þér'
 		}
 	];
@@ -370,7 +369,6 @@
 					<div>
 						<div class="flex items-center justify-between">
 							<div>
-								<!-- D20: proposed wording (PED-27), checked in the batch before the train that ships it. -->
 								<label id="bionic-reading-label" for="bionic-reading-toggle" class="text-sm font-medium text-[var(--text-primary)]">
 									Feitletra upphaf orða
 								</label>
