@@ -102,6 +102,7 @@ npm run format           # Prettier formatting
 
 - **Icelandic**: All UI text, aria-labels, error messages shown to users
 - **English**: Code, comments, variable names, technical documentation
+- **New or changed UI strings merge marked `D20: proposed`** in a comment beside them (decision D20, `docs/decisions/2026-10-23-reader-d20-*.md`). [USER] checks them as one batch before the train that ships them, then the markers go. `git grep -n 'D20: proposed' -- src` lists the batch.
 
 Example:
 

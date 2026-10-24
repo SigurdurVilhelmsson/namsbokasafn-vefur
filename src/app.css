@@ -64,6 +64,9 @@
     --accent-decorative: #c78c20;
     --header-banner: #c78c20;
     --header-banner-text: #ffffff;
+    /* Decision D01's ring colour: bronze, 5.75:1 on white. Native radios use it now
+       (accent-color); plan step S2.2 (UI-07) puts it on every focus ring. */
+    --focus-ring: #8a5d0e;
 
     /* Shadows (warm-tinted) */
     --shadow-sm: 0 1px 2px rgba(27, 40, 56, 0.06);
@@ -107,6 +110,7 @@
     --accent-decorative: #e8a838;
     --header-banner: #e8a838;
     --header-banner-text: #16161c;
+    --focus-ring: #e8a838;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
