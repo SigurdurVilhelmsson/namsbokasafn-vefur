@@ -110,6 +110,8 @@
     --accent-decorative: #e8a838;
     --header-banner: #e8a838;
     --header-banner-text: #16161c;
+    /* Dark ring: today's dark accent, kept (confirmed 2026-10-24). D01 ruled only the
+       light ring; this one already passes 3:1 (tokens.test.ts). */
     --focus-ring: #e8a838;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
