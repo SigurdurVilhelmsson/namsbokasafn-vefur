@@ -608,7 +608,22 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-10-24 — M1's code merged (#276–#279); none of it deployed
+
+Measured on 2026-10-24 against `main` = `1e6a178` (#279) and the live site.
+
+- **Merged in this order on 2026-10-24:** #276 (S0.3's note, the deploy-lane checklist in `docs/guides/deployment.md` and `scripts/backup-live-build.sh`), #277 (S1.1, the accessibility ratchet), #278 (S1.2: Settings and search close without moving the page, the closed phone sidebar is out of the Tab order, and the `/greining` tabs have names and arrow keys) and #279 (S1.3's code: a readable "Merkja kafla sem lesinn" button, named groups and pressed states in Settings, the `--focus-ring` token and three reworded labels). CI passed on all four merge commits; the last e2e run had 134 passed, 31 skipped and 0 failed.
+- **Prod still runs build `1791155794060`** (#263). #272, #278 and #279 change what readers see and are not live; #277 adds only tests and test tooling, and #276 is docs and a script.
+- **The three reworded labels are marked by two `D20: proposed` comments** (`git grep -n 'D20: proposed' -- src`). Step 2 of the lane's checklist stops a train until [USER] has checked them and a PR has removed the markers.
+- **The deploy lane is still at `62ea95e`**; the checklist's first step pulls `main`.
+- 🔑 **A stacked PR does not retarget itself here.** GitHub moves a PR to `main` only when its base branch is deleted, and this repo keeps merged branches, so merging the next PR of a stack while its base is the merged branch lands it on that branch, not on `main`. Point it at `main` first with `gh api -X PATCH repos/<owner>/<repo>/pulls/<N> -f base=main` (`gh pr edit` fails here with a classic-Projects GraphQL error), wait until `gh pr view <N> --json mergeable` reads `MERGEABLE`, then merge. CI runs only for PRs into `main` or `feature/**`, so a stacked PR's checks come from `gh workflow run ci.yml --ref <branch>`.
+- **npm audit, 2026-10-24:** production tree 0; full tree 11 (3 high: `vite`, `undici`, `source-map-js`; 4 moderate: `vitest`, two `@vitest/*` packages and `fast-uri`; 4 low: `serialize-javascript`, and `@sveltejs/kit` below 3.0.0 with the two packages flagged through it). None came from these merges: the lockfile gained only `@axe-core/playwright` and `axe-core`. `main`'s last CI run before them (2026-10-23) counted 5; the rest were published since. SvelteKit's two advisories do not apply here (one needs `use:enhance` form actions, the other `setHeaders` with an untrusted `cache-control` on a prerendered page, and `src/` has neither), and their fix is SvelteKit 3: Dependabot's #281 carries it, with `adapter-static` 4, and fails CI. Every other package has a fix inside its current major. #280 moves `@axe-core/playwright` to 4.14.0 on its own, as #277 set up, because a new axe can change the ratchet's baseline.
+- **Next, by the plan:** [USER] checks the three labels and confirms the dark `--focus-ring` (`#e8a838`, today's dark accent: D01 set only the light ring, and its evidence says the dark one already passes), then S0.4 (real-phone and screen-reader QA on S0.3's build), then train 1 (about 6 November 2026), then M2.
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+
 ### 2026-10-23 — reader review: S0.1, S0.2, S0.3 and S0.5 done; #272 merged but not deployed
+
+> ⚠️ **Superseded on the operational points — read the 2026-10-24 entry above first.** #276–#279 have merged since (`main` = `1e6a178`) and none is deployed, so #272 is no longer the only change waiting for a train. The rest of this entry stands.
 
 Measured on 2026-10-23 against `main` = `62ea95e` (#275) and the live site.
 
