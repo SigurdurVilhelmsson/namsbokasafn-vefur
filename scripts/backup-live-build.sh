@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Back up the live build on the server and check the copy (deploy checklist, step 5,
+# Back up the live build on the server and check the copy (deploy checklist, step 6,
 # docs/guides/deployment.md). Run it from the deploy lane; it runs on the server:
 #
 #   ssh siggi@kvenno.app 'bash -s' < scripts/backup-live-build.sh

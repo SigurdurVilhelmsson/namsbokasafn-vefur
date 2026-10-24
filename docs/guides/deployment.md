@@ -126,7 +126,8 @@ deploy.
    A dry run that reached the server ends with its summary line,
    `N files would be transferred, M would be deleted.`, and then
    `dry run complete`. Every build sends its prerendered pages and `_app/`
-   files again, so N is never 0 (318 on 2026-10-23). If `dry run complete` is
+   files again, so N is never 0 (318 on 2026-10-23, 320 for train 1 on
+   2026-10-24). If `dry run complete` is
    missing, or an `ssh:` or `rsync` error line or `rsync exited with status`
    appears, the dry run did not finish and its deletion count means nothing:
    stop, fix the cause and run it again.
@@ -158,7 +159,16 @@ deploy.
 
    Only `the backup matches the live build: <folder>` passes. The folder's name
    holds the date and the version of the live build it copies. To roll back,
-   copy that folder over `/var/www/namsbokasafn-vefur/build` with one rsync.
+   copy that folder over `/var/www/namsbokasafn-vefur/build` with one rsync,
+   run on the server. Keep the trailing slash on the folder, or the backup lands
+   inside `build/`, and add `-n` first to see what it would copy:
+
+   ```bash
+   ssh siggi@kvenno.app 'rsync -a ~/backups/<folder>/ /var/www/namsbokasafn-vefur/build/'
+   ```
+
+   Files the train added (new hashed `_app/` files) stay behind, unused. After
+   train 1 the `-n` run would have copied back 304 files and deleted none.
 
 7. **Deploy:** the same `deploy.js` command with `--apply`.
 
