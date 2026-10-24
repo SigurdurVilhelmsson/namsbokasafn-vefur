@@ -40,6 +40,27 @@ updates:
       #   npm view svelte-check peerDependencies.typescript
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      # SvelteKit 3, and adapter-static 4 (which peers kit ^3), cannot install
+      # here yet. Every @vite-pwa/sveltekit release up to 1.1.0, the latest on
+      # 2026-10-24, peers @sveltejs/kit "^1.3.1 || ^2.0.1", so `npm ci` fails
+      # with ERESOLVE (PR #281), and the rest of the development group is
+      # blocked with it. Don't force it with --legacy-peer-deps: upstream
+      # reports that kit 3 with @vite-pwa/sveltekit 1.1.0 builds green but
+      # emits no service worker (vite-pwa/sveltekit#111, closed unmerged on
+      # 2026-10-09; support is planned, with no date).
+      #
+      # REMOVE THESE TWO IGNORES once a @vite-pwa/sveltekit release admits
+      # kit 3. Check with:
+      #   npm view @vite-pwa/sveltekit@latest peerDependencies
+      # Then migrate by hand (npx sv migrate sveltekit-3), and in the same PR
+      # delete the `cookie` override: it exists for kit 2's cookie ^0.6.0, and
+      # kit 3 declares ^2.0.1, which the override would hold at 0.7.2. Until
+      # then the full-tree audit keeps kit's two low advisories, which are
+      # fixed only in 3.0.0.
+      - dependency-name: "@sveltejs/kit"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@sveltejs/adapter-static"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
     open-pull-requests-limit: 10
