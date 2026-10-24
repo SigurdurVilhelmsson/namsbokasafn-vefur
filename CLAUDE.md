@@ -140,6 +140,16 @@ The site uses CSS custom properties for theming. The accent color is **amber/gol
 
 When adding new interactive UI, use `var(--accent-color)`, `var(--accent-hover)`, `var(--accent-light)`, `var(--accent-subtle)` — never hardcoded blue hex for branding elements. Tailwind arbitrary values work: `bg-[var(--accent-color)]`.
 
+### Accessibility ratchet
+
+Three tests keep today's accessibility failures from growing (plan step S1.1, register UI-24):
+
+- **`e2e/accessibility.spec.ts`, "Accessibility ratchet"**: axe-core's WCAG 2.1 A/AA rules on five surfaces (catalogue, book home, a section, the Settings dialog, `/greining`) at 390 and 1280 px in both themes, with the book text (`.reading-content`) left out. A failing element that is not in `e2e/a11y-baseline.json` fails the test. Elements are keyed by rule, selector and tag, with positions, attribute values and Svelte's hashed classes removed (`e2e/helpers/axe.ts`). Also: exactly one visible `h1` per page, and no text field named only by its placeholder.
+- **`src/lib/styles/tokens.test.ts`**: WCAG contrast of the colour tokens in `src/app.css`, with today's failures listed and ratcheted.
+- **`src/lib/styles/accentText.test.ts`**: white text on the accent fill, counted per file (14 class strings, 22 CSS rules on 2026-10-23).
+
+🔑 **When a fix lands, shrink the baselines in the same PR.** A fixed axe entry only warns: a `console.warn` line, plus a `::warning` in GitHub's log (`A11Y_STRICT=1` makes it fail). The two vitest ratchets fail until their counts or `KNOWN_FAILURES` are lowered. ⚠️ axe picks its selectors from class and attribute counts over the whole page, so an unrelated change can re-key an unchanged failure: the scan then fails on a "new" entry and names the entry it most likely replaced ("maybe re-keyed, was: …"). Rewrite the baseline and say so in the PR. Rewrite the axe baseline with `CI=1 A11Y_UPDATE_BASELINE=1 npx playwright test e2e/accessibility.spec.ts -g "Accessibility ratchet" --workers=1` (or `=merge` to add to it), and read the diff: an entry may only disappear, never appear, unless the PR says why. The baseline was the same with every book synced and with chemistry alone (2026-10-23).
+
 ### Fonts
 
 All fonts are **self-hosted** in `static/fonts/` — no external CDN dependencies:
