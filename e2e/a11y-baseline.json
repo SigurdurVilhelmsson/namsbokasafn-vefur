@@ -91,12 +91,10 @@
 			"color-contrast | .text-red-600 | button"
 		],
 		"section 1280 dark": [
-			"color-contrast | .px-6 | button",
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | kbd in header | kbd.kbd-hint"
 		],
 		"section 1280 light": [
-			"color-contrast | .px-6 | button",
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-title | span",
 			"color-contrast | .sm\\:text-sm > | span",
@@ -105,31 +103,29 @@
 		],
 		"section 390 dark": [
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-label | span",
-			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span",
-			"color-contrast | .px-6 | button"
+			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span"
 		],
 		"section 390 light": [
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-label | span",
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span",
-			"color-contrast | .px-6 | button",
 			"color-contrast | .sm\\:text-sm > | span",
 			"color-contrast | a in aside | a"
 		],
 		"settings 1280 dark": [
-			"color-contrast | div > .grid.grid-cols-3.sm\\:flex > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
+			"color-contrast | div > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
 		],
 		"settings 1280 light": [
 			"color-contrast | .text-\\[var\\(--accent-color\\)\\].text-sm.font-medium | span",
 			"color-contrast | button in div[role=dialog] | button.font-semibold.text-[var(--accent-color)].text-xs.transition-colors",
-			"color-contrast | div > .grid.grid-cols-3.sm\\:flex > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
+			"color-contrast | div > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
 		],
 		"settings 390 dark": [
-			"color-contrast | div > .grid.grid-cols-3.sm\\:flex > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
+			"color-contrast | div > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
 		],
 		"settings 390 light": [
 			"color-contrast | .text-\\[var\\(--accent-color\\)\\].text-sm.font-medium | span",
 			"color-contrast | button in div[role=dialog] | button.font-semibold.text-[var(--accent-color)].text-xs.transition-colors",
-			"color-contrast | div > .grid.grid-cols-3.sm\\:flex > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
+			"color-contrast | div > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
 		]
 	}
 }

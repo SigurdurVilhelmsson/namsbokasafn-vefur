@@ -57,6 +57,8 @@ interface Pair {
 	bg: string;
 	min: number;
 	use: string;
+	/** Only in these themes (default: both). */
+	themes?: string[];
 }
 
 const PAIRS: Pair[] = [
@@ -69,7 +71,11 @@ const PAIRS: Pair[] = [
 	{ fg: '#ffffff', bg: '--accent-color', min: 4.5, use: 'white on the accent fill' },
 	{ fg: '#ffffff', bg: '--accent-hover', min: 4.5, use: 'white on the accent hover' },
 	// The global *:focus-visible ring is var(--accent-color); it must stand out from the page.
-	...['--bg-primary', '--bg-secondary'].map((bg) => ({ fg: '--accent-color', bg, min: 3, use: 'focus ring' }))
+	...['--bg-primary', '--bg-secondary'].map((bg) => ({ fg: '--accent-color', bg, min: 3, use: 'focus ring' })),
+	// --focus-ring (D01): the radios' accent colour now, the focus ring from plan step S2.2.
+	...['--bg-primary', '--bg-secondary'].map((bg) => ({ fg: '--focus-ring', bg, min: 3, use: 'ring and radios' })),
+	// A light-theme radio has a white face (dark mode paints it dark).
+	{ fg: '--focus-ring', bg: '#ffffff', min: 3, use: 'radio on its white face', themes: ['light'] }
 ];
 
 const key = (theme: string, p: Pair) => `${theme}: ${p.fg} on ${p.bg} (min ${p.min})`;
@@ -117,8 +123,10 @@ describe('contrastRatio', () => {
 	});
 });
 
+const pairsFor = (theme: string) => PAIRS.filter((p) => !p.themes || p.themes.includes(theme));
+
 describe.each(Object.keys(THEMES))('%s theme tokens', (theme) => {
-	it.each(PAIRS.map((p) => [key(theme, p), p] as const))('%s', (name, pair) => {
+	it.each(pairsFor(theme).map((p) => [key(theme, p), p] as const))('%s', (name, pair) => {
 		const tokens = THEMES[theme];
 		const ratio = contrastRatio(resolve(tokens, pair.fg), resolve(tokens, pair.bg));
 		const known = KNOWN_FAILURES[name];
@@ -133,7 +141,7 @@ describe.each(Object.keys(THEMES))('%s theme tokens', (theme) => {
 
 describe('KNOWN_FAILURES', () => {
 	it('lists only pairs this test checks', () => {
-		const checked = new Set(Object.keys(THEMES).flatMap((t) => PAIRS.map((p) => key(t, p))));
+		const checked = new Set(Object.keys(THEMES).flatMap((t) => pairsFor(t).map((p) => key(t, p))));
 		expect(Object.keys(KNOWN_FAILURES).filter((k) => !checked.has(k))).toEqual([]);
 	});
 });

@@ -218,10 +218,41 @@ test.describe('Settings groups say which option is selected (UI-03)', () => {
 		}
 	}
 
-	test('the Leturgerð radios take the accent colour, not the browser default', async ({ page }) => {
+	test('the Leturgerð radios take the ring colour (--focus-ring), not the browser default', async ({ page }) => {
 		test.skip(!SECTION, 'no published book is synced');
 		const dialog = await openSettings(page);
 		const radio = dialog.getByRole('group', { name: 'Leturgerð', exact: true }).getByRole('radio').first();
-		expect(await radio.evaluate((el) => getComputedStyle(el).accentColor)).not.toBe('auto');
+		const { accent, token } = await radio.evaluate((el) => {
+			// Resolve --focus-ring beside the radio, then remove the probe.
+			const probe = document.createElement('span');
+			probe.style.color = 'var(--focus-ring)';
+			el.parentElement!.append(probe);
+			const token = getComputedStyle(probe).color;
+			probe.remove();
+			return { accent: getComputedStyle(el).accentColor, token };
+		});
+		expect(accent, 'not the browser default').not.toBe('auto');
+		expect(accent, 'var(--focus-ring)').toBe(token);
 	});
+
+	// The switches are named by their visible labels (WCAG 2.5.3) and described by their
+	// help lines, so PED-27's disclaimer under the bionic switch is heard too.
+	for (const [name, description] of [
+		['Orðasafnsmerkingar', 'Undirstrika hugtök úr orðasafni í texta'],
+		['Enskt heiti hugtaka', /^Sýna enska heitið á eftir hugtaki/],
+		['Feitletra upphaf orða', 'Útlitsstilling. Ekki hefur verið sýnt að hún bæti lestur']
+	] as const) {
+		test(`the '${name}' switch is named by its label and described by its help line`, async ({ page }) => {
+			test.skip(!SECTION, 'no published book is synced');
+			const dialog = await openSettings(page);
+			const sw = dialog.getByRole('switch', { name, exact: true });
+			await expect(sw).toBeVisible();
+			await expect(sw).toHaveAccessibleDescription(description);
+			const checked = await sw.getAttribute('aria-checked');
+			await sw.click();
+			await expect(sw, 'the name stays the same when the switch flips').toHaveAccessibleName(name);
+			await expect(sw).toHaveAttribute('aria-checked', checked === 'true' ? 'false' : 'true');
+			await sw.click();
+		});
+	}
 });

@@ -249,7 +249,7 @@
 										name="font"
 										checked={$fontFamily === family.value}
 										onchange={() => settings.setFontFamily(family.value)}
-										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-color)] accent-[var(--accent-color)] focus:ring-[var(--accent-color)]"
+										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-color)] accent-[var(--focus-ring)] focus:ring-[var(--accent-color)]"
 									/>
 									<div>
 										<span class="text-[var(--text-primary)] font-medium {family.value === 'serif' ? 'font-serif' : family.value === 'opendyslexic' ? 'font-opendyslexic' : 'font-sans'}">
@@ -308,10 +308,10 @@
 					<div>
 						<div class="flex items-center justify-between">
 							<div>
-								<label for="glossary-highlighting-toggle" class="text-sm font-medium text-[var(--text-primary)]">
+								<label id="glossary-highlighting-label" for="glossary-highlighting-toggle" class="text-sm font-medium text-[var(--text-primary)]">
 									Orðasafnsmerkingar
 								</label>
-								<p class="text-xs text-[var(--text-secondary)] mt-0.5">
+								<p id="glossary-highlighting-help" class="text-xs text-[var(--text-secondary)] mt-0.5">
 									Undirstrika hugtök úr orðasafni í texta
 								</p>
 							</div>
@@ -319,7 +319,8 @@
 								id="glossary-highlighting-toggle"
 								role="switch"
 								aria-checked={$glossaryHighlighting}
-								aria-label={$glossaryHighlighting ? 'Slökkva á orðasafnsmerkingum' : 'Kveikja á orðasafnsmerkingum'}
+								aria-labelledby="glossary-highlighting-label"
+								aria-describedby="glossary-highlighting-help"
 								onclick={() => settings.toggleGlossaryHighlighting()}
 								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$glossaryHighlighting
 									? 'bg-[var(--accent-color)]'
@@ -338,10 +339,10 @@
 					<div>
 						<div class="flex items-center justify-between">
 							<div>
-								<label for="show-term-english-toggle" class="text-sm font-medium text-[var(--text-primary)]">
+								<label id="show-term-english-label" for="show-term-english-toggle" class="text-sm font-medium text-[var(--text-primary)]">
 									Enskt heiti hugtaka
 								</label>
-								<p class="text-xs text-[var(--text-secondary)] mt-0.5">
+								<p id="show-term-english-help" class="text-xs text-[var(--text-secondary)] mt-0.5">
 									Sýna enska heitið á eftir hugtaki, t.d. „formúlumassa (e. formula mass)“
 								</p>
 							</div>
@@ -349,9 +350,8 @@
 								id="show-term-english-toggle"
 								role="switch"
 								aria-checked={$showTermEnglish}
-								aria-label={$showTermEnglish
-									? 'Fela enskt heiti hugtaka'
-									: 'Sýna enskt heiti hugtaka'}
+								aria-labelledby="show-term-english-label"
+								aria-describedby="show-term-english-help"
 								onclick={() => settings.toggleShowTermEnglish()}
 								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$showTermEnglish
 									? 'bg-[var(--accent-color)]'
@@ -374,7 +374,7 @@
 								<label id="bionic-reading-label" for="bionic-reading-toggle" class="text-sm font-medium text-[var(--text-primary)]">
 									Feitletra upphaf orða
 								</label>
-								<p class="text-xs text-[var(--text-secondary)] mt-0.5">
+								<p id="bionic-reading-help" class="text-xs text-[var(--text-secondary)] mt-0.5">
 									Útlitsstilling. Ekki hefur verið sýnt að hún bæti lestur
 								</p>
 							</div>
@@ -383,6 +383,7 @@
 								role="switch"
 								aria-checked={$bionicReading}
 								aria-labelledby="bionic-reading-label"
+								aria-describedby="bionic-reading-help"
 								onclick={() => settings.toggleBionicReading()}
 								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$bionicReading
 									? 'bg-[var(--accent-color)]'
