@@ -72,7 +72,19 @@ deploy.
    npm run build
    ```
 
-2. **Compare the sync stamps** of each published book (`PUBLISHED_BOOKS` in
+2. **Check that no UI text waits for its check** (decision D20). New or changed
+   Icelandic strings merge marked `D20: proposed` and are checked as one batch
+   before the train that ships them:
+
+   ```bash
+   git grep -n -A4 'D20: proposed' -- src; s=$?; if [ $s -eq 1 ]; then echo "no proposed strings"; else echo "STOP: strings marked 'D20: proposed' are unchecked, or git grep failed (status $s)"; fi
+   ```
+
+   Only `no proposed strings` passes. On `STOP`, check the listed strings as one
+   batch, land any corrections and the markers' removal as a PR to main, then
+   pull the lane again (never edit the lane).
+
+3. **Compare the sync stamps** of each published book (`PUBLISHED_BOOKS` in
    `scripts/lib/published-books.js`; today `efnafraedi-2e` alone):
 
    ```bash
@@ -84,7 +96,7 @@ deploy.
    missing), so go straight to the checksums. Once both have one, a different
    efni `commit`, or `dirty: true` on either side, is a stop.
 
-3. **Compare the published book's checksums** with the server's: every file
+4. **Compare the published book's checksums** with the server's: every file
    except editor backups, with both lists sorted the same way. `LC_ALL=C`
    matters, because the server and this machine sort differently.
 
@@ -105,7 +117,7 @@ deploy.
    adds an `offline` key to each one's `toc.json` and writes an
    `offline-manifest.json` beside it, so they differ from the server by design.
 
-4. **Dry run, and read it:**
+5. **Dry run, and read it:**
 
    ```bash
    node scripts/deploy.js --target siggi@kvenno.app:/var/www/namsbokasafn-vefur/build/ && echo "dry run complete"
@@ -137,7 +149,7 @@ deploy.
 
    Expect `same N URLs`, with N the live count (366 on 2026-10-23).
 
-5. **Back up the live build** on the server, then check the copy. The script
+6. **Back up the live build** on the server, then check the copy. The script
    runs on the server and writes only into `~/backups` there:
 
    ```bash
@@ -148,9 +160,9 @@ deploy.
    holds the date and the version of the live build it copies. To roll back,
    copy that folder over `/var/www/namsbokasafn-vefur/build` with one rsync.
 
-6. **Deploy:** the same `deploy.js` command with `--apply`.
+7. **Deploy:** the same `deploy.js` command with `--apply`.
 
-7. **Check the live site.** The version must equal the lane's build, every
+8. **Check the live site.** The version must equal the lane's build, every
    `/_app/immutable/` file that chemistry's and the frozen books' pages name
    must load, and organic must still answer 404:
 
@@ -182,7 +194,7 @@ deploy.
 
 The 2026-10-03 deploy followed these steps; keep to them. For a train, the
 lane checklist above puts them in order, with a runnable command for each
-(step 2's backup is its step 5).
+(step 2's backup is its step 6).
 
 1. **Build** with `npm run build`. Sync content first only if you mean to
    publish new content (`node scripts/sync-content.js --source ../namsbokasafn-efni <book>`,
@@ -287,8 +299,8 @@ change sends nothing under `content/`, only prerendered pages, `_app/` files
 and `sw.js` (314 files on 2026-10-04). The script warns if an unchanged file
 would still get a new mtime, which would mean the flags have drifted. After
 such a deploy, `curl -sI` an unchanged figure: `last-modified` must not have
-moved. The count still does not say which side is newer: step 5's checksum
-stays.
+moved. The count still does not say which side is newer: the checksum stays
+(step 5 of "Before you deploy", step 4 of the lane checklist).
 
 ⚠️ Do not deploy with a hand-written rsync. The rules only work when passed
 with `--filter='merge FILE'` (an `--exclude-from` file silently ignores the `P`
