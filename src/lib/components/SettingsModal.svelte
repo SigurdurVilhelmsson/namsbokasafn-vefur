@@ -36,7 +36,12 @@
 	const fontFamilies: { value: FontFamily; label: string; description: string }[] = [
 		{ value: 'serif', label: 'Serif', description: 'Klassískt letur fyrir lestur' },
 		{ value: 'sans', label: 'Sans-serif', description: 'Nútímalegt letur' },
-		{ value: 'opendyslexic', label: 'OpenDyslexic', description: 'Letur hannað fyrir lesblinda' }
+		{
+			value: 'opendyslexic',
+			label: 'OpenDyslexic',
+			// D20: proposed wording (PED-27), checked in the batch before the train that ships it.
+			description: 'Hannað fyrir lesblinda. Rannsóknir sýna ekki að það bæti lestur, en veldu það ef það hentar þér'
+		}
 	];
 
 	const lineHeights: { value: LineHeight; label: string }[] = [
@@ -227,11 +232,11 @@
 						</div>
 					</div>
 
-					<!-- Font Family -->
-					<div>
-						<span class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
+					<!-- Font Family: a fieldset, so the radios have a group name (UI-03) -->
+					<fieldset>
+						<legend class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Leturgerð
-						</span>
+						</legend>
 						<div class="space-y-2">
 							{#each fontFamilies as family (family.value)}
 								<label
@@ -244,7 +249,7 @@
 										name="font"
 										checked={$fontFamily === family.value}
 										onchange={() => settings.setFontFamily(family.value)}
-										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-color)] focus:ring-[var(--accent-color)]"
+										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-color)] accent-[var(--accent-color)] focus:ring-[var(--accent-color)]"
 									/>
 									<div>
 										<span class="text-[var(--text-primary)] font-medium {family.value === 'serif' ? 'font-serif' : family.value === 'opendyslexic' ? 'font-opendyslexic' : 'font-sans'}">
@@ -257,22 +262,23 @@
 								</label>
 							{/each}
 						</div>
-					</div>
+					</fieldset>
 
 					<!-- Line Height -->
 					<div>
-						<span class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
+						<span id="settings-line-height-label" class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Línubil
 						</span>
-						<div class="grid grid-cols-3 gap-2 sm:flex">
+						<div class="grid grid-cols-3 gap-2 sm:flex" role="group" aria-labelledby="settings-line-height-label">
 							{#each lineHeights as height (height.value)}
 								<button
+									aria-pressed={$lineHeight === height.value}
 									onclick={() => settings.setLineHeight(height.value)}
 									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineHeight === height.value
 										? 'bg-[var(--accent-color)] text-white shadow-sm'
 										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
 								>
-									{height.label}
+									{#if $lineHeight === height.value}<Icon name="check" size="sm" class="mr-1 inline-block align-[-2px]" />{/if}{height.label}
 								</button>
 							{/each}
 						</div>
@@ -280,18 +286,19 @@
 
 					<!-- Line Width -->
 					<div>
-						<span class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
+						<span id="settings-line-width-label" class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
 							Línubreidd
 						</span>
-						<div class="grid grid-cols-3 gap-2 sm:flex">
+						<div class="grid grid-cols-3 gap-2 sm:flex" role="group" aria-labelledby="settings-line-width-label">
 							{#each lineWidths as width (width.value)}
 								<button
+									aria-pressed={$lineWidth === width.value}
 									onclick={() => settings.setLineWidth(width.value)}
 									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineWidth === width.value
 										? 'bg-[var(--accent-color)] text-white shadow-sm'
 										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
 								>
-									{width.label}
+									{#if $lineWidth === width.value}<Icon name="check" size="sm" class="mr-1 inline-block align-[-2px]" />{/if}{width.label}
 								</button>
 							{/each}
 						</div>
@@ -363,18 +370,19 @@
 					<div>
 						<div class="flex items-center justify-between">
 							<div>
-								<label for="bionic-reading-toggle" class="text-sm font-medium text-[var(--text-primary)]">
-									Hraðlestur
+								<!-- D20: proposed wording (PED-27), checked in the batch before the train that ships it. -->
+								<label id="bionic-reading-label" for="bionic-reading-toggle" class="text-sm font-medium text-[var(--text-primary)]">
+									Feitletra upphaf orða
 								</label>
 								<p class="text-xs text-[var(--text-secondary)] mt-0.5">
-									Feitletrað upphaf hvers orðs til að auðvelda lestur
+									Útlitsstilling. Ekki hefur verið sýnt að hún bæti lestur
 								</p>
 							</div>
 							<button
 								id="bionic-reading-toggle"
 								role="switch"
 								aria-checked={$bionicReading}
-								aria-label={$bionicReading ? 'Slökkva á hraðlestri' : 'Kveikja á hraðlestri'}
+								aria-labelledby="bionic-reading-label"
 								onclick={() => settings.toggleBionicReading()}
 								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$bionicReading
 									? 'bg-[var(--accent-color)]'

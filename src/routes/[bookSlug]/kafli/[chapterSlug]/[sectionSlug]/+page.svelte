@@ -439,7 +439,7 @@
 		<div class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
 			<button
 				onclick={markAsRead}
-				class="inline-flex items-center gap-2 px-6 py-3 text-lg font-medium rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+				class="inline-flex items-center gap-2 px-6 py-3 text-lg font-medium rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 transition-colors"
 			>
 				<Icon name="check" size="md" />
 				Merkja kafla sem lesinn

@@ -3,7 +3,8 @@
  * Tests: theme toggle, dark mode persistence across page reload, font settings
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+import { firstModuleSection, publishedBook } from './helpers/content-fixtures';
 
 test.describe('Theme Toggle', () => {
 	test('should toggle dark mode on landing page', async ({ page }) => {
@@ -142,5 +143,85 @@ test.describe('Settings Persistence', () => {
 			document.documentElement.classList.contains('dark')
 		);
 		expect(isDark).toBe(false);
+	});
+});
+
+// ---------------------------------------------------------------------------------------
+// Settings groups say which option is selected (plan step S1.3, register UI-03)
+// ---------------------------------------------------------------------------------------
+
+const SECTION = (() => {
+	const book = publishedBook();
+	return book ? firstModuleSection(book) : null;
+})();
+
+const SEGMENTS = {
+	Línubil: { key: 'lineHeight', labels: { normal: 'Venjulegt', relaxed: 'Rýmra', loose: 'Rúmt' } },
+	Línubreidd: { key: 'lineWidth', labels: { narrow: 'Þröngt', medium: 'Miðlungs', wide: 'Breitt' } }
+} as const;
+
+async function openSettings(page: Page) {
+	await page.goto(SECTION!);
+	await page.waitForLoadState('networkidle');
+	await page.getByRole('button', { name: 'Stillingar', exact: true }).filter({ visible: true }).first().click();
+	const dialog = page.getByRole('dialog');
+	await expect(dialog).toBeVisible();
+	return dialog;
+}
+
+async function stored(page: Page, key: string): Promise<string> {
+	return page.evaluate((k) => JSON.parse(localStorage.getItem('namsbokasafn:settings') || '{}')[k], key);
+}
+
+test.describe('Settings groups say which option is selected (UI-03)', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	for (const viewport of [
+		{ width: 390, height: 844 },
+		{ width: 1280, height: 800 }
+	]) {
+		test(`at ${viewport.width} px: Leturgerð, Línubil and Línubreidd are named groups`, async ({ page }) => {
+			test.skip(!SECTION, 'no published book is synced');
+			await page.setViewportSize(viewport);
+			const dialog = await openSettings(page);
+			for (const name of ['Leturgerð', 'Línubil', 'Línubreidd']) {
+				await expect(dialog.getByRole('group', { name, exact: true })).toBeVisible();
+			}
+		});
+
+		for (const [group, { key, labels }] of Object.entries(SEGMENTS)) {
+			test(`at ${viewport.width} px: ${group} marks the stored value, with aria-pressed and a check mark`, async ({
+				page
+			}) => {
+				test.skip(!SECTION, 'no published book is synced');
+				await page.setViewportSize(viewport);
+				const dialog = await openSettings(page);
+				const buttons = dialog.getByRole('group', { name: group, exact: true }).getByRole('button');
+				const label = (value: string) => labels[value as keyof typeof labels];
+
+				const check = async () => {
+					const value = await stored(page, key);
+					for (const [v, text] of Object.entries(labels)) {
+						const button = buttons.filter({ hasText: text });
+						await expect(button, `${text}`).toHaveAttribute('aria-pressed', v === value ? 'true' : 'false');
+						await expect(button.locator('svg'), `${text}'s check mark`).toHaveCount(v === value ? 1 : 0);
+					}
+				};
+
+				await check();
+				const current = await stored(page, key);
+				const target = Object.keys(labels).find((v) => v !== current)!;
+				await buttons.filter({ hasText: label(target) }).click();
+				await expect.poll(() => stored(page, key)).toBe(target);
+				await check();
+			});
+		}
+	}
+
+	test('the Leturgerð radios take the accent colour, not the browser default', async ({ page }) => {
+		test.skip(!SECTION, 'no published book is synced');
+		const dialog = await openSettings(page);
+		const radio = dialog.getByRole('group', { name: 'Leturgerð', exact: true }).getByRole('radio').first();
+		expect(await radio.evaluate((el) => getComputedStyle(el).accentColor)).not.toBe('auto');
 	});
 });
