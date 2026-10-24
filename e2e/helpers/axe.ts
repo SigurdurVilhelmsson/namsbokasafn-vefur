@@ -13,8 +13,14 @@
  * An element is keyed by its rule, axe's selector for it and its own tag and classes, with
  * the parts that change with content or with any CSS edit removed: positions
  * (`:nth-child(3)`), attribute values (`[href$="…"]`) and Svelte's hashed classes
- * (`.svelte-1x2y3z`). So a new failure of the same kind of element in the same place does
- * not show, but a new kind of failure does.
+ * (`.svelte-1x2y3z`). A selector left as a bare tag (`a`) also names the landmark the
+ * element sits in (`in footer`), so it does not stand for every such element on the page.
+ * So a new failure of the same kind of element in the same place does not show, but a new
+ * kind of failure does.
+ *
+ * axe picks its selector from class and attribute counts over the whole document, so an
+ * unrelated change can give an unchanged failure a new selector. The scan then reports it
+ * as new and names the baseline entry it most likely replaced; rewrite the baseline.
  */
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
@@ -70,11 +76,30 @@ export function elementSignature(html: string): string {
  * or a class, and the element's long list of utility classes would re-key the entry on
  * every styling change.
  */
-export function entryKey(rule: string, target: unknown, html: string): string {
-	const selector = normaliseSelector((Array.isArray(target) ? target.flat(3) : [target]).map(String).join(' >>> ')) || '*';
+export function entryKey(rule: string, target: unknown, html: string, landmark = ''): string {
+	let selector = normaliseSelector((Array.isArray(target) ? target.flat(3) : [target]).map(String).join(' >>> ')) || '*';
 	const signature = elementSignature(html);
-	const element = /[#.]/.test(selector) ? signature.split('.')[0] : signature;
+	const bare = !/[#.]/.test(selector);
+	if (bare && landmark) selector = `${selector} in ${landmark}`;
+	const element = bare ? signature : signature.split('.')[0];
 	return `${rule} | ${selector} | ${element}`;
+}
+
+/** The landmark an element sits in, as `tag` or `tag#id` (e.g. `footer`, `aside`), or `body`. */
+async function landmarkOf(page: Page, target: unknown): Promise<string> {
+	const selector = (Array.isArray(target) ? target : [target]).map(String)[0];
+	return page.evaluate((sel) => {
+		let el: Element | null;
+		try {
+			el = document.querySelector(sel);
+		} catch {
+			return '';
+		}
+		const lm = el?.closest('header, nav, main, aside, footer, [role="dialog"], [role="tablist"], form, fieldset');
+		if (!lm) return 'body';
+		const role = lm.getAttribute('role');
+		return lm.tagName.toLowerCase() + (role ? `[role=${role}]` : '') + (lm.id ? `#${lm.id}` : '');
+	}, selector);
 }
 
 export interface ScanOptions {
@@ -86,13 +111,31 @@ export interface ScanOptions {
 	exclude?: string[];
 }
 
-/** Stop CSS transitions and animations, so colours are measured at rest. */
+/**
+ * Hold the page still, so colours are measured at rest. The stylesheet stops CSS
+ * transitions and animations. Svelte's transition:/in:/out: run on element.animate(),
+ * which no stylesheet reaches, so those are finished here; Svelte may start the real one
+ * a frame later, so repeat until a frame passes with nothing left running.
+ */
 export async function settle(page: Page): Promise<void> {
 	await page.addStyleTag({
 		content: '*, *::before, *::after { transition: none !important; animation: none !important; }'
 	});
-	await page.evaluate(() => document.fonts.ready);
-	await page.waitForTimeout(250);
+	await page.evaluate(async () => {
+		await document.fonts.ready;
+		for (let i = 0; i < 20; i++) {
+			await new Promise((r) => requestAnimationFrame(() => r(null)));
+			const running = document.getAnimations().filter((a) => a.playState !== 'finished' && a.playState !== 'idle');
+			if (running.length === 0) return;
+			for (const a of running) {
+				try {
+					a.finish();
+				} catch {
+					a.cancel(); // an infinite animation cannot finish
+				}
+			}
+		}
+	});
 }
 
 export async function scanSurface(page: Page, opts: ScanOptions): Promise<void> {
@@ -104,7 +147,8 @@ export async function scanSurface(page: Page, opts: ScanOptions): Promise<void> 
 	const found = new Map<string, string>();
 	for (const v of results.violations) {
 		for (const node of v.nodes) {
-			const k = entryKey(v.id, node.target, node.html);
+			const bare = !/[#.]/.test(normaliseSelector((Array.isArray(node.target) ? node.target.flat(3) : [node.target]).map(String).join(' >>> ')));
+			const k = entryKey(v.id, node.target, node.html, bare ? await landmarkOf(page, node.target) : '');
 			if (!found.has(k)) found.set(k, `${v.id} (${v.impact}): ${node.html.slice(0, 160)}\n    ${v.helpUrl}`);
 		}
 	}
@@ -134,13 +178,25 @@ export async function scanSurface(page: Page, opts: ScanOptions): Promise<void> 
 	const fixed = (allowed ?? []).filter((k) => !found.has(k));
 
 	if (fixed.length > 0) {
-		test.info().annotations.push({
-			type: 'a11y-baseline',
-			description: `${fixed.length} baseline entr${fixed.length === 1 ? 'y' : 'ies'} no longer fail on "${opts.name}": ${fixed.join('; ')}`
-		});
+		const msg = `${fixed.length} baseline entr${fixed.length === 1 ? 'y' : 'ies'} no longer fail on "${opts.name}": ${fixed.join('; ')}`;
+		test.info().annotations.push({ type: 'a11y-baseline', description: msg });
+		// Annotations reach only the HTML report; print it too, and mark it in GitHub's log.
+		console.warn(`a11y-baseline: ${msg}. Delete them (CLAUDE.md, "Accessibility ratchet").`);
+		if (process.env.GITHUB_ACTIONS) {
+			console.log(`::warning title=a11y-baseline::${msg.replace(/%/g, '%25').replace(/\r/g, '%0D').replace(/\n/g, '%0A')}`);
+		}
 	}
 
-	const detail = added.map((k) => `  ${k}\n    ${found.get(k)}`).join('\n');
+	// An entry that is new while one with the same rule and element went away is most
+	// likely the same failure under a new selector (see the note at the top).
+	const element = (k: string) => [k.split(' | ')[0], k.split(' | ')[2]].join(' | ');
+	const detail = added
+		.map((k) => {
+			const was = fixed.filter((f) => element(f) === element(k));
+			const hint = was.length ? `\n    maybe re-keyed, was: ${was.join(' OR ')}` : '';
+			return `  ${k}\n    ${found.get(k)}${hint}`;
+		})
+		.join('\n');
 	expect(added, `New accessibility failures on "${opts.name}":\n${detail}`).toEqual([]);
 	if (process.env.A11Y_STRICT) {
 		expect(fixed, `Baseline entries that no longer fail on "${opts.name}": delete them`).toEqual([]);

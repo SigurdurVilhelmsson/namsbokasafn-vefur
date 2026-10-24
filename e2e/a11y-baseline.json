@@ -8,32 +8,32 @@
 	],
 	"scans": {
 		"book-home 1280 dark": [
-			"aria-hidden-focus | aside | aside.sidebar",
+			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
 			"color-contrast | .inline-flex > span | span",
 			"color-contrast | .opacity-80 | span",
-			"color-contrast | kbd | kbd.kbd-hint",
+			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span"
 		],
 		"book-home 1280 light": [
-			"aria-hidden-focus | aside | aside.sidebar",
+			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | .book-attribution-colophon | a",
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
 			"color-contrast | .inline-flex > span | span",
 			"color-contrast | .licence-badge | a",
 			"color-contrast | .opacity-80 | span",
-			"color-contrast | kbd | kbd.kbd-hint",
+			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span"
 		],
 		"book-home 390 dark": [
-			"aria-hidden-focus | aside | aside.sidebar",
+			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
 			"color-contrast | .inline-flex > span | span",
 			"color-contrast | .opacity-80 | span"
 		],
 		"book-home 390 light": [
-			"aria-hidden-focus | aside | aside.sidebar",
+			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | .book-attribution-colophon | a",
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
 			"color-contrast | .inline-flex > span | span",
@@ -43,9 +43,9 @@
 		"catalogue 1280 dark": [
 			"color-contrast | .btn-primary | a",
 			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-count | span",
-			"color-contrast | footer > p | p",
-			"link-in-text-block | footer > p > a | a",
-			"link-in-text-block | p > a | a"
+			"color-contrast | footer > p in footer | p",
+			"link-in-text-block | footer > p > a in footer | a",
+			"link-in-text-block | p > a in footer | a"
 		],
 		"catalogue 1280 light": [
 			"color-contrast | .about-link | a",
@@ -54,17 +54,17 @@
 			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-count | span",
 			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span",
 			"color-contrast | a > .book-caption > .caption-licence.caption-row > .licence-badge | a",
-			"color-contrast | a | a.roster-email",
-			"color-contrast | footer > p | p",
-			"link-in-text-block | footer > p > a | a",
-			"link-in-text-block | p > a | a"
+			"color-contrast | a in body | a.roster-email",
+			"color-contrast | footer > p in footer | p",
+			"link-in-text-block | footer > p > a in footer | a",
+			"link-in-text-block | p > a in footer | a"
 		],
 		"catalogue 390 dark": [
 			"color-contrast | .btn-primary | a",
 			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-count | span",
-			"color-contrast | footer > p | p",
-			"link-in-text-block | footer > p > a | a",
-			"link-in-text-block | p > a | a"
+			"color-contrast | footer > p in footer | p",
+			"link-in-text-block | footer > p > a in footer | a",
+			"link-in-text-block | p > a in footer | a"
 		],
 		"catalogue 390 light": [
 			"color-contrast | .about-link | a",
@@ -73,33 +73,33 @@
 			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-count | span",
 			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span",
 			"color-contrast | a > .book-caption > .caption-licence.caption-row > .licence-badge | a",
-			"color-contrast | a | a.roster-email",
-			"color-contrast | footer > p | p",
-			"link-in-text-block | footer > p > a | a",
-			"link-in-text-block | p > a | a"
+			"color-contrast | a in body | a.roster-email",
+			"color-contrast | footer > p in footer | p",
+			"link-in-text-block | footer > p > a in footer | a",
+			"link-in-text-block | p > a in footer | a"
 		],
 		"greining 1280 dark": [
-			"aria-hidden-focus | aside | aside.sidebar",
-			"color-contrast | kbd | kbd.kbd-hint",
+			"aria-hidden-focus | aside in aside | aside.sidebar",
+			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span"
 		],
 		"greining 1280 light": [
-			"aria-hidden-focus | aside | aside.sidebar",
+			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | .text-\\[var\\(--accent-color\\)\\] | span",
 			"color-contrast | .text-red-600 | button",
-			"color-contrast | kbd | kbd.kbd-hint",
+			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span"
 		],
 		"greining 390 dark": [
-			"aria-hidden-focus | aside | aside.sidebar",
+			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"button-name | #tab-lestur | button",
 			"button-name | #tab-markmiđ | button",
 			"button-name | #tab-minniskort | button",
 			"button-name | #tab-yfirlit | button"
 		],
 		"greining 390 light": [
-			"aria-hidden-focus | aside | aside.sidebar",
+			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"button-name | #tab-lestur | button",
 			"button-name | #tab-markmiđ | button",
 			"button-name | #tab-minniskort | button",
@@ -111,7 +111,7 @@
 			"aria-hidden-focus | .sidebar | aside",
 			"color-contrast | .px-6 | button",
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
-			"color-contrast | kbd | kbd.kbd-hint"
+			"color-contrast | kbd in header | kbd.kbd-hint"
 		],
 		"section 1280 light": [
 			"aria-hidden-focus | .sidebar | aside",
@@ -119,8 +119,8 @@
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-title | span",
 			"color-contrast | .sm\\:text-sm > | span",
-			"color-contrast | a | a",
-			"color-contrast | kbd | kbd.kbd-hint"
+			"color-contrast | a in aside | a",
+			"color-contrast | kbd in header | kbd.kbd-hint"
 		],
 		"section 390 dark": [
 			"aria-hidden-focus | .sidebar | aside",
@@ -134,14 +134,14 @@
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span",
 			"color-contrast | .px-6 | button",
 			"color-contrast | .sm\\:text-sm > | span",
-			"color-contrast | a | a"
+			"color-contrast | a in aside | a"
 		],
 		"settings 1280 dark": [
 			"color-contrast | div > .grid.grid-cols-3.sm\\:flex > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
 		],
 		"settings 1280 light": [
 			"color-contrast | .text-\\[var\\(--accent-color\\)\\].text-sm.font-medium | span",
-			"color-contrast | button | button.font-semibold.text-[var(--accent-color)].text-xs.transition-colors",
+			"color-contrast | button in div[role=dialog] | button.font-semibold.text-[var(--accent-color)].text-xs.transition-colors",
 			"color-contrast | div > .grid.grid-cols-3.sm\\:flex > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
 		],
 		"settings 390 dark": [
@@ -149,7 +149,7 @@
 		],
 		"settings 390 light": [
 			"color-contrast | .text-\\[var\\(--accent-color\\)\\].text-sm.font-medium | span",
-			"color-contrast | button | button.font-semibold.text-[var(--accent-color)].text-xs.transition-colors",
+			"color-contrast | button in div[role=dialog] | button.font-semibold.text-[var(--accent-color)].text-xs.transition-colors",
 			"color-contrast | div > .grid.grid-cols-3.sm\\:flex > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
 		]
 	}

@@ -9,6 +9,13 @@ updates:
         dependency-type: "development"
         patterns:
           - "*"
+        # The accessibility ratchet (e2e/a11y-baseline.json) depends on the axe-core
+        # version and on Playwright's Chromium: a new axe rule, or a browser that paints
+        # differently, changes what fails. Each arrives in a PR of its own, so a baseline
+        # change can be traced to it (axe-core 4.14 adds label-content-name-mismatch).
+        exclude-patterns:
+          - "@axe-core/playwright"
+          - "@playwright/test"
       production:
         dependency-type: "production"
         patterns:

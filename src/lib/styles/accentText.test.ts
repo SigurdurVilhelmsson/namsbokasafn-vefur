@@ -126,9 +126,12 @@ describe('white text on the accent fill', () => {
 		expect(countCssRules(FILES)).toEqual(CSS_RULE_BASELINE);
 	});
 
-	it('the baselines hold the counts the review measured: 14 class strings, 22 CSS rules', () => {
-		expect([total(CLASS_STRING_BASELINE), Object.keys(CLASS_STRING_BASELINE).length]).toEqual([14, 10]);
-		expect([total(CSS_RULE_BASELINE), Object.keys(CSS_RULE_BASELINE).length]).toEqual([22, 17]);
+	// Only ever down from the review's counts: lowering a baseline as a fix lands is the point.
+	it("the baselines never exceed the review's counts: 14 class strings in 10 files, 22 CSS rules in 17", () => {
+		expect(total(CLASS_STRING_BASELINE)).toBeLessThanOrEqual(14);
+		expect(Object.keys(CLASS_STRING_BASELINE).length).toBeLessThanOrEqual(10);
+		expect(total(CSS_RULE_BASELINE)).toBeLessThanOrEqual(22);
+		expect(Object.keys(CSS_RULE_BASELINE).length).toBeLessThanOrEqual(17);
 	});
 });
 
