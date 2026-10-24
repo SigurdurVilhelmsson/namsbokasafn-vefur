@@ -73,6 +73,28 @@
 		settings.setSidebarOpen(false);
 	}
 
+	// On a phone the sidebar is a drawer (UI-06): opening it moves focus to its close
+	// button, and closing it with focus inside hands focus back to the header's menu
+	// button, whichever way it closed (the close button, the overlay, the header toggle
+	// or the shortcut), because a closed drawer is visibility:hidden (CSS below). On a
+	// desktop the close button is display:none, so focusing it does nothing. Plain
+	// variables, not $state: the effect must depend on $sidebarOpen alone.
+	let asideEl: HTMLElement | undefined;
+	let closeButton: HTMLButtonElement | undefined;
+	let wasOpen: boolean | undefined;
+	$effect(() => {
+		const open = $sidebarOpen;
+		const opened = wasOpen === false && open;
+		const closed = wasOpen === true && !open;
+		wasOpen = open;
+		if (opened) {
+			closeButton?.focus({ preventScroll: true });
+			return;
+		}
+		if (!closed || !asideEl?.contains(document.activeElement)) return;
+		document.querySelector<HTMLElement>('.sidebar-toggle')?.focus({ preventScroll: true });
+	});
+
 	// Track which chapters have their review sections expanded
 	let reviewExpandedChapters: Set<number> = $state(new Set());
 
@@ -110,16 +132,14 @@
 ></div>
 
 <!-- Sidebar -->
-<aside
-	aria-hidden={!$sidebarOpen ? 'true' : undefined}
-	class="sidebar {$sidebarOpen ? 'sidebar--open' : ''}"
->
+<aside class="sidebar {$sidebarOpen ? 'sidebar--open' : ''}" bind:this={asideEl}>
 	<div class="flex h-full flex-col">
 		<!-- Sidebar header -->
 		<div class="sidebar-header">
 			<h2 class="sidebar-title">Efnisyfirlit</h2>
 			<button
 				onclick={closeSidebar}
+				bind:this={closeButton}
 				class="sidebar-close"
 				aria-label="Loka valmynd"
 			>
@@ -512,11 +532,21 @@
 		overflow-y: auto;
 		overflow-x: hidden;
 		transform: translateX(-100%);
-		transition: transform 0.3s ease-out;
+		/* Closed below 1024 px: out of the Tab order and the accessibility tree
+		   (UI-06). visibility waits for the 0.3 s slide-out, and returns at once
+		   on open (.sidebar--open). */
+		visibility: hidden;
+		transition:
+			transform 0.3s ease-out,
+			visibility 0s linear 0.3s;
 	}
 
 	.sidebar--open {
 		transform: translateX(0);
+		visibility: visible;
+		transition:
+			transform 0.3s ease-out,
+			visibility 0s linear 0s;
 		box-shadow: var(--shadow-xl);
 	}
 
@@ -526,6 +556,7 @@
 			z-index: 30;
 			height: calc(100vh - 56px);
 			transform: translateX(0);
+			visibility: visible;
 			box-shadow: none;
 			border-right: 1px solid var(--border-color);
 		}

@@ -82,7 +82,9 @@ test.describe('Flashcard Page', () => {
 		const { question, card } = await currentCard(page);
 		await question.click();
 
-		await expect(page.getByRole('button', { name: /^Svar/ })).toContainText(card.back);
+		// Scoped to <main>: the sidebar is in the accessibility tree on desktop (S1.2),
+		// and its 'Svarlykill' button also starts with "Svar".
+		await expect(page.getByRole('main').getByRole('button', { name: /^Svar/ })).toContainText(card.back);
 		for (const rating of ['Aftur', 'Erfitt', 'Gott', 'Auðvelt']) {
 			await expect(page.getByRole('button', { name: new RegExp(`^${rating}`) })).toBeVisible();
 		}

@@ -8,7 +8,6 @@
 	],
 	"scans": {
 		"book-home 1280 dark": [
-			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
 			"color-contrast | .inline-flex > span | span",
 			"color-contrast | .opacity-80 | span",
@@ -16,7 +15,6 @@
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span"
 		],
 		"book-home 1280 light": [
-			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | .book-attribution-colophon | a",
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
 			"color-contrast | .inline-flex > span | span",
@@ -27,13 +25,11 @@
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span"
 		],
 		"book-home 390 dark": [
-			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
 			"color-contrast | .inline-flex > span | span",
 			"color-contrast | .opacity-80 | span"
 		],
 		"book-home 390 light": [
-			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | .book-attribution-colophon | a",
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
 			"color-contrast | .inline-flex > span | span",
@@ -79,42 +75,27 @@
 			"link-in-text-block | p > a in footer | a"
 		],
 		"greining 1280 dark": [
-			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span"
 		],
 		"greining 1280 light": [
-			"aria-hidden-focus | aside in aside | aside.sidebar",
 			"color-contrast | .text-\\[var\\(--accent-color\\)\\] | span",
 			"color-contrast | .text-red-600 | button",
 			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span"
 		],
-		"greining 390 dark": [
-			"aria-hidden-focus | aside in aside | aside.sidebar",
-			"button-name | #tab-lestur | button",
-			"button-name | #tab-markmiđ | button",
-			"button-name | #tab-minniskort | button",
-			"button-name | #tab-yfirlit | button"
-		],
+		"greining 390 dark": [],
 		"greining 390 light": [
-			"aria-hidden-focus | aside in aside | aside.sidebar",
-			"button-name | #tab-lestur | button",
-			"button-name | #tab-markmiđ | button",
-			"button-name | #tab-minniskort | button",
-			"button-name | #tab-yfirlit | button",
 			"color-contrast | .text-\\[var\\(--accent-color\\)\\] | span",
 			"color-contrast | .text-red-600 | button"
 		],
 		"section 1280 dark": [
-			"aria-hidden-focus | .sidebar | aside",
 			"color-contrast | .px-6 | button",
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | kbd in header | kbd.kbd-hint"
 		],
 		"section 1280 light": [
-			"aria-hidden-focus | .sidebar | aside",
 			"color-contrast | .px-6 | button",
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-title | span",
@@ -123,13 +104,11 @@
 			"color-contrast | kbd in header | kbd.kbd-hint"
 		],
 		"section 390 dark": [
-			"aria-hidden-focus | .sidebar | aside",
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-label | span",
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span",
 			"color-contrast | .px-6 | button"
 		],
 		"section 390 light": [
-			"aria-hidden-focus | .sidebar | aside",
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-label | span",
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span",
 			"color-contrast | .px-6 | button",

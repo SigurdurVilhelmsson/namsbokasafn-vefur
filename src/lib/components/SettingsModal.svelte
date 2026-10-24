@@ -77,7 +77,9 @@
 
 	function close() {
 		onClose?.();
-		previouslyFocused?.focus();
+		// The opener sits in the sticky header, inside html's scroll-padding-top, so a
+		// plain focus() scrolls the page by ~420 px (UI-11).
+		previouslyFocused?.focus({ preventScroll: true });
 	}
 
 	function handleKeydown(e: KeyboardEvent) {

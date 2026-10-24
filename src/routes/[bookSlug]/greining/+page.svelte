@@ -237,6 +237,7 @@
 		<div
 			id="tabpanel-yfirlit"
 			role="tabpanel"
+			tabindex="0"
 			aria-labelledby="tab-yfirlit"
 			hidden={activeTab !== 'yfirlit'}
 		>
@@ -387,6 +388,7 @@
 		<div
 			id="tabpanel-lestur"
 			role="tabpanel"
+			tabindex="0"
 			aria-labelledby="tab-lestur"
 			hidden={activeTab !== 'lestur'}
 		>
@@ -433,6 +435,7 @@
 		<div
 			id="tabpanel-minniskort"
 			role="tabpanel"
+			tabindex="0"
 			aria-labelledby="tab-minniskort"
 			hidden={activeTab !== 'minniskort'}
 		>
@@ -444,6 +447,7 @@
 		<div
 			id="tabpanel-markmiđ"
 			role="tabpanel"
+			tabindex="0"
 			aria-labelledby="tab-markmiđ"
 			hidden={activeTab !== 'markmiđ'}
 		>
