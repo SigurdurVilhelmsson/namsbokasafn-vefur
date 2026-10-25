@@ -742,7 +742,7 @@
   }
 
   .btn-primary:hover {
-    background: var(--accent-hover);
+    background: var(--accent-fill-hover);
     transform: translateY(-1px);
   }
 

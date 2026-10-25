@@ -205,7 +205,7 @@
 		color: var(--on-accent);
 		font-size: 0.875rem;
 		font-weight: 500;
-		transition: opacity 0.15s;
+		transition: background-color 0.15s;
 	}
-	.rdp-finish-btn:hover { opacity: 0.9; }
+	.rdp-finish-btn:hover { background-color: var(--accent-fill-hover); }
 </style>

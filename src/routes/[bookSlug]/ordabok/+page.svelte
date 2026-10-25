@@ -253,8 +253,7 @@
 		border-color: var(--accent-color);
 	}
 	.glossary-letter-btn--active:hover {
-		background-color: var(--accent-color);
-		opacity: 0.9;
+		background-color: var(--accent-fill-hover);
 	}
 	.glossary-clear-btn {
 		padding: 0 0.75rem;

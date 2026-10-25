@@ -185,7 +185,7 @@
 			<button
 				onclick={handleDismissUpdate}
 				disabled={updating}
-				class="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--accent-hover)] disabled:opacity-50"
+				class="rounded-lg px-4 py-2 text-sm font-medium transition-colors hover:bg-[var(--accent-fill-hover)] disabled:opacity-50"
 				data-testid="pwa-dismiss-button"
 			>
 				Seinna

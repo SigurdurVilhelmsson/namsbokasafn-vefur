@@ -341,10 +341,10 @@
 		border-radius: var(--radius-xl);
 		background-color: var(--accent-color);
 		color: var(--on-accent);
-		transition: opacity 0.15s;
+		transition: background-color 0.15s;
 	}
 	.sp-start-btn:hover:not(:disabled) {
-		opacity: 0.9;
+		background-color: var(--accent-fill-hover);
 	}
 	.sp-start-btn--disabled {
 		background-color: var(--bg-tertiary);

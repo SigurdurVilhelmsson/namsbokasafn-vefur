@@ -354,10 +354,10 @@
 		color: var(--on-accent);
 		font-weight: 500;
 		flex-shrink: 0;
-		transition: opacity 0.15s;
+		transition: background-color 0.15s, opacity 0.15s;
 	}
-	.deck-card-btn:hover {
-		opacity: 0.9;
+	.deck-card-btn:hover:not(:disabled) {
+		background-color: var(--accent-fill-hover);
 	}
 	.deck-card-btn:disabled {
 		opacity: 0.4;
@@ -376,20 +376,20 @@
 		background-color: var(--accent-color);
 		color: var(--on-accent);
 		text-decoration: none;
-		transition: opacity 0.15s;
+		transition: background-color 0.15s;
 	}
 	.flashcard-start-btn:hover {
-		opacity: 0.9;
+		background-color: var(--accent-fill-hover);
 	}
 	.flashcard-primary-btn {
 		padding: 0.5rem 1rem;
 		border-radius: var(--radius-lg);
 		background-color: var(--accent-color);
 		color: var(--on-accent);
-		transition: opacity 0.15s;
+		transition: background-color 0.15s;
 	}
 	.flashcard-primary-btn:hover {
-		opacity: 0.9;
+		background-color: var(--accent-fill-hover);
 	}
 	.flashcard-secondary-btn {
 		padding: 0.5rem 1rem;

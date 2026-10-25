@@ -470,9 +470,9 @@
 		font-size: 0.875rem;
 		font-weight: 500;
 		color: var(--on-accent);
-		transition: opacity 0.15s;
+		transition: background-color 0.15s;
 	}
-	.aq-primary-btn:hover { opacity: 0.9; }
+	.aq-primary-btn:hover { background-color: var(--accent-fill-hover); }
 
 	/* Active quiz header */
 	.aq-header {

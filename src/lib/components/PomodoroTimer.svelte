@@ -334,7 +334,7 @@
 	}
 
 	.btn-primary:hover {
-		opacity: 0.9;
+		background: var(--accent-fill-hover);
 	}
 
 	.btn-secondary {

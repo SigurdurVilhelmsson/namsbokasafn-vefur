@@ -432,7 +432,7 @@
 }
 
 .btn-accent:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-fill-hover);
 }
 
 /* Scroll progress bar */
@@ -1201,7 +1201,7 @@
 }
 
 .equation-zoom-copy-btn:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--accent-fill-hover);
 }
 
 .equation-zoom-close-btn {

@@ -106,7 +106,7 @@
 	}
 
 	.pdf-btn-primary:hover {
-		background: var(--accent-hover, #b07918);
+		background: var(--accent-fill-hover);
 	}
 
 	.pdf-btn-primary:focus-visible {

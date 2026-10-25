@@ -170,7 +170,7 @@
 		background-color: var(--accent-color);
 		color: var(--on-accent);
 		font-weight: 500;
-		transition: opacity 0.15s;
+		transition: background-color 0.15s;
 	}
-	.sc-action-btn:hover { opacity: 0.9; }
+	.sc-action-btn:hover { background-color: var(--accent-fill-hover); }
 </style>

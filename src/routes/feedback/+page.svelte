@@ -525,7 +525,7 @@
   }
 
   .btn-primary:hover:not(:disabled) {
-    background: var(--accent-hover, #b37a1c);
+    background: var(--accent-fill-hover);
   }
 
   /* Help link */

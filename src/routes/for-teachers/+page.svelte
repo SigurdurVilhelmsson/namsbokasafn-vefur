@@ -584,7 +584,7 @@
   }
 
   .feedback-link:hover {
-    background: var(--accent-hover, #b37a1c);
+    background: var(--accent-fill-hover);
   }
 
   /* Contact grid */
