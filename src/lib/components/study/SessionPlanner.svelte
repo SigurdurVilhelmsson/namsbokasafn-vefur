@@ -185,11 +185,11 @@
 							</div>
 
 							<!-- Phase icon -->
-							<Icon name={PHASE_ICONS[phaseId]} style="color: {phase.enabled ? colors.iconColor : 'var(--text-tertiary)'};" />
+							<Icon name={PHASE_ICONS[phaseId]} style="color: {phase.enabled ? colors.iconColor : 'var(--text-disabled)'};" />
 
 							<!-- Phase label -->
 							<div>
-								<span class="font-medium" style="color: {phase.enabled ? 'var(--text-primary)' : 'var(--text-tertiary)'};">
+								<span class="font-medium" style="color: {phase.enabled ? 'var(--text-primary)' : 'var(--text-disabled)'};">
 									{PHASE_LABELS[phaseId]}
 								</span>
 								{#if phase.enabled}
@@ -197,7 +197,7 @@
 										{phase.itemCount} {phase.itemCount === 1 ? 'atriði' : 'atriði'}
 									</span>
 								{:else}
-									<span class="ml-2 text-sm" style="color: var(--text-tertiary);">
+									<span class="ml-2 text-sm" style="color: var(--text-disabled);">
 										Ekkert til
 									</span>
 								{/if}
@@ -340,15 +340,15 @@
 		font-weight: 500;
 		border-radius: var(--radius-xl);
 		background-color: var(--accent-color);
-		color: white;
-		transition: opacity 0.15s;
+		color: var(--on-accent);
+		transition: background-color 0.15s;
 	}
 	.sp-start-btn:hover:not(:disabled) {
-		opacity: 0.9;
+		background-color: var(--accent-fill-hover);
 	}
 	.sp-start-btn--disabled {
 		background-color: var(--bg-tertiary);
-		color: var(--text-tertiary);
+		color: var(--text-disabled);
 		cursor: not-allowed;
 	}
 </style>

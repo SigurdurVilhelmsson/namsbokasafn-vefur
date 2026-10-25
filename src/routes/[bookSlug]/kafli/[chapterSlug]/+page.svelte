@@ -79,7 +79,7 @@
 		<!-- Chapter header -->
 		<div class="mb-8">
 			<div class="flex items-center gap-4 mb-4">
-				<span class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--accent-light)] text-[var(--accent-color)] text-2xl font-bold">
+				<span class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-[var(--accent-light)] text-[var(--accent-strong)] text-2xl font-bold">
 					{data.chapter.number}
 				</span>
 				<div>
@@ -146,7 +146,7 @@
 
 						<!-- Section info -->
 						<div class="flex-1 min-w-0">
-							<h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-color)] transition-colors truncate">
+							<h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-strong)] transition-colors truncate">
 								{#if getDisplayNumber(section)}
 									{getDisplayNumber(section)} {section.title}
 								{:else}
@@ -163,7 +163,7 @@
 						{/if}
 
 						<!-- Arrow -->
-						<Icon name="chevron-right" class="flex-shrink-0 text-gray-400 group-hover:text-[var(--accent-color)] transition-colors" />
+						<Icon name="chevron-right" class="flex-shrink-0 text-gray-400 group-hover:text-[var(--accent-strong)] transition-colors" />
 					</a>
 				{/each}
 			</div>
@@ -173,7 +173,7 @@
 		<div class="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
 			<a
 				href="/{data.bookSlug}"
-				class="inline-flex items-center gap-2 text-[var(--accent-color)] hover:text-[var(--accent-hover)] transition-colors"
+				class="inline-flex items-center gap-2 text-[var(--accent-strong)] hover:underline transition-colors"
 			>
 				<Icon name="chevron-left" size="sm" />
 				Til baka á forsíðu

@@ -337,7 +337,7 @@
       <!-- Minniskort -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
-          <Icon name="credit-card" size="md" style="color: var(--accent-color)" />
+          <Icon name="credit-card" size="md" style="color: var(--accent-strong)" />
         </div>
         <h3>Minniskort</h3>
         <p>Endurtekningarkerfi sem aðlagar sig að þér</p>
@@ -346,7 +346,7 @@
       <!-- Orðasafn -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
-          <Icon name="book-open" size="md" style="color: var(--accent-color)" />
+          <Icon name="book-open" size="md" style="color: var(--accent-strong)" />
         </div>
         <h3>Orðasafn</h3>
         <p>Smelltu á hugtök til að sjá skilgreiningar</p>
@@ -605,8 +605,10 @@
     transition: color 0.15s;
   }
 
+  /* Grey to bronze is a hue change only (1.04:1 in light), so the hover also underlines. */
   .header-nav a:hover {
-    color: var(--accent-color);
+    color: var(--accent-strong);
+    text-decoration: underline;
   }
 
   .theme-toggle {
@@ -708,7 +710,7 @@
   .hero-credit {
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--accent-color);
+    color: var(--accent-strong);
     margin: -1.25rem 0 2rem;
     max-width: 36rem;
   }
@@ -733,7 +735,7 @@
     align-items: center;
     padding: 0.75rem 1.5rem;
     background: var(--accent-color);
-    color: #fff;
+    color: var(--on-accent);
     font-weight: 600;
     font-size: 0.9375rem;
     border-radius: var(--radius-lg);
@@ -742,7 +744,7 @@
   }
 
   .btn-primary:hover {
-    background: var(--accent-hover);
+    background: var(--accent-fill-hover);
     transform: translateY(-1px);
   }
 
@@ -755,7 +757,8 @@
   }
 
   .btn-text:hover {
-    color: var(--accent-color);
+    color: var(--accent-strong);
+    text-decoration: underline;
   }
 
   /* ====================================
@@ -886,7 +889,7 @@
 
   .status-in-progress {
     background: var(--accent-light);
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .status-preview {
@@ -930,14 +933,17 @@
     margin: 0;
   }
 
+  /* A link in running text: bronze is about 1.04:1 against the paragraph, so colour cannot
+     mark it (WCAG 1.4.1). Underlined at rest; the hover thickens the line. */
   .catalogue-intro a {
-    color: var(--accent-color);
-    text-decoration: none;
+    color: var(--accent-strong);
+    text-decoration: underline;
+    text-underline-offset: 2px;
     font-weight: 500;
   }
 
   .catalogue-intro a:hover {
-    text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 
   /* ====================================
@@ -1078,7 +1084,8 @@
   }
 
   .compact-link:hover {
-    color: var(--accent-color);
+    color: var(--accent-strong);
+    text-decoration: underline;
   }
 
   /* ====================================
@@ -1197,7 +1204,7 @@
   }
 
   .about-card a {
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: none;
   }
 
@@ -1212,7 +1219,7 @@
     margin-top: 1rem;
     font-size: 0.9375rem;
     font-weight: 500;
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: none;
     transition: gap 0.2s;
   }
@@ -1269,7 +1276,7 @@
     display: block;
     margin-top: 0.15rem;
     font-size: 0.875rem;
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: none;
   }
 
@@ -1338,7 +1345,7 @@
   }
 
   .faq-question:hover {
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .faq-chevron {
@@ -1350,7 +1357,7 @@
 
   .faq-item[open] .faq-chevron {
     transform: rotate(180deg);
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .faq-answer {
@@ -1360,14 +1367,16 @@
     color: var(--text-secondary);
   }
 
+  /* Running text again: underlined at rest, as .catalogue-intro a. */
   .faq-answer :global(a) {
-    color: var(--accent-color);
-    text-decoration: none;
+    color: var(--accent-strong);
+    text-decoration: underline;
+    text-underline-offset: 2px;
     font-weight: 500;
   }
 
   .faq-answer :global(a:hover) {
-    text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 
   /* ====================================
@@ -1388,14 +1397,17 @@
     line-height: 1.6;
   }
 
+  /* Secondary grey in a tertiary-grey line: since --text-tertiary rose (UI-02) the two
+     are about 1.05:1 apart, so the links are underlined at rest (axe link-in-text-block). */
   .footer a {
     color: var(--text-secondary);
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .footer a:hover {
-    text-decoration: underline;
-    color: var(--accent-color);
+    text-decoration-thickness: 2px;
+    color: var(--accent-strong);
   }
 
   /* ====================================

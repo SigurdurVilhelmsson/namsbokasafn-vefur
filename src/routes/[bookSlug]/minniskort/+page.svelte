@@ -238,7 +238,7 @@
 						>
 							<div class="font-medium">Gott</div>
 							{#if previewIntervals}
-								<div class="text-xs opacity-75">{previewIntervals.good}</div>
+								<div class="text-xs">{previewIntervals.good}</div>
 							{/if}
 						</button>
 						<button
@@ -287,7 +287,7 @@
 		height: 5rem;
 		border-radius: 9999px;
 		background-color: var(--accent-light);
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		margin-bottom: 1.5rem;
 	}
 	.flashcard-icon-circle--success {
@@ -343,7 +343,7 @@
 	}
 
 	.deck-card-stats-due {
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		font-weight: 500;
 	}
 
@@ -351,13 +351,13 @@
 		padding: 0.5rem 1rem;
 		border-radius: var(--radius-lg);
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		font-weight: 500;
 		flex-shrink: 0;
-		transition: opacity 0.15s;
+		transition: background-color 0.15s, opacity 0.15s;
 	}
-	.deck-card-btn:hover {
-		opacity: 0.9;
+	.deck-card-btn:hover:not(:disabled) {
+		background-color: var(--accent-fill-hover);
 	}
 	.deck-card-btn:disabled {
 		opacity: 0.4;
@@ -374,22 +374,22 @@
 		font-weight: 500;
 		border-radius: var(--radius-xl);
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		text-decoration: none;
-		transition: opacity 0.15s;
+		transition: background-color 0.15s;
 	}
 	.flashcard-start-btn:hover {
-		opacity: 0.9;
+		background-color: var(--accent-fill-hover);
 	}
 	.flashcard-primary-btn {
 		padding: 0.5rem 1rem;
 		border-radius: var(--radius-lg);
 		background-color: var(--accent-color);
-		color: white;
-		transition: opacity 0.15s;
+		color: var(--on-accent);
+		transition: background-color 0.15s;
 	}
 	.flashcard-primary-btn:hover {
-		opacity: 0.9;
+		background-color: var(--accent-fill-hover);
 	}
 	.flashcard-secondary-btn {
 		padding: 0.5rem 1rem;
@@ -416,7 +416,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 
 	/* Progress bar */
@@ -507,7 +507,12 @@
 	/* Good - accent */
 	.flashcard-rating--good {
 		background-color: var(--accent-light);
-		color: var(--accent-color);
+		color: var(--accent-strong);
+	}
+	/* A deeper tint, not the shared opacity fade: --accent-strong at 85% drops below 4.5:1 */
+	.flashcard-rating--good:hover {
+		opacity: 1;
+		background-color: var(--accent-subtle);
 	}
 	/* Easy - green */
 	.flashcard-rating--easy {

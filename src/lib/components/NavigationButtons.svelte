@@ -228,7 +228,7 @@
 
 	.breadcrumb-option.current {
 		background: color-mix(in srgb, var(--accent-color) 10%, transparent);
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		font-weight: 500;
 	}
 
@@ -271,17 +271,17 @@
 	/* Next button: primary on mobile, outlined on desktop */
 	.nav-btn-next {
 		background: var(--accent-color);
-		color: #ffffff;
+		color: var(--on-accent);
 		height: 56px;
 		justify-content: space-between;
 	}
 
 	.nav-btn-next .nav-btn-label {
-		color: rgba(255, 255, 255, 0.8);
+		color: var(--on-accent);
 	}
 
 	.nav-btn-next .nav-btn-arrow {
-		color: rgba(255, 255, 255, 0.8);
+		color: var(--on-accent);
 	}
 
 	@media (min-width: 640px) {
@@ -307,7 +307,7 @@
 		}
 
 		.nav-btn-next:hover .nav-btn-arrow {
-			color: var(--accent-color);
+			color: var(--accent-strong);
 		}
 
 		.nav-btn-next .nav-btn-text {
@@ -342,7 +342,7 @@
 		}
 
 		.nav-btn-prev:hover .nav-btn-arrow {
-			color: var(--accent-color);
+			color: var(--accent-strong);
 		}
 	}
 

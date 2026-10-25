@@ -103,7 +103,7 @@
 	}
 	.phase-dot--current {
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		outline: 2px solid color-mix(in srgb, var(--accent-color) 40%, transparent);
 		outline-offset: 2px;
 	}
@@ -118,7 +118,7 @@
 	}
 	.phase-label--current {
 		font-weight: 500;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 	.phase-label--completed {
 		color: #059669;

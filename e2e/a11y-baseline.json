@@ -7,125 +7,37 @@
 		"wcag21aa"
 	],
 	"scans": {
-		"book-home 1280 dark": [
-			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
-			"color-contrast | .inline-flex > span | span",
-			"color-contrast | .opacity-80 | span",
-			"color-contrast | kbd in header | kbd.kbd-hint",
-			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span"
-		],
-		"book-home 1280 light": [
-			"color-contrast | .book-attribution-colophon | a",
-			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
-			"color-contrast | .inline-flex > span | span",
-			"color-contrast | .licence-badge | a",
-			"color-contrast | .opacity-80 | span",
-			"color-contrast | kbd in header | kbd.kbd-hint",
-			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
-			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span"
-		],
-		"book-home 390 dark": [
-			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
-			"color-contrast | .inline-flex > span | span",
-			"color-contrast | .opacity-80 | span"
-		],
-		"book-home 390 light": [
-			"color-contrast | .book-attribution-colophon | a",
-			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
-			"color-contrast | .inline-flex > span | span",
-			"color-contrast | .licence-badge | a",
-			"color-contrast | .opacity-80 | span"
-		],
-		"catalogue 1280 dark": [
-			"color-contrast | .btn-primary | a",
-			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-count | span",
-			"color-contrast | footer > p in footer | p",
-			"link-in-text-block | footer > p > a in footer | a",
-			"link-in-text-block | p > a in footer | a"
-		],
+		"book-home 1280 dark": [],
+		"book-home 1280 light": [],
+		"book-home 390 dark": [],
+		"book-home 390 light": [],
+		"catalogue 1280 dark": [],
 		"catalogue 1280 light": [
-			"color-contrast | .about-link | a",
-			"color-contrast | .btn-primary | a",
-			"color-contrast | .catalogue-intro > p > a | a",
-			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-count | span",
-			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span",
-			"color-contrast | a > .book-caption > .caption-licence.caption-row > .licence-badge | a",
-			"color-contrast | a in body | a.roster-email",
-			"color-contrast | footer > p in footer | p",
-			"link-in-text-block | footer > p > a in footer | a",
-			"link-in-text-block | p > a in footer | a"
+			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span"
 		],
-		"catalogue 390 dark": [
-			"color-contrast | .btn-primary | a",
-			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-count | span",
-			"color-contrast | footer > p in footer | p",
-			"link-in-text-block | footer > p > a in footer | a",
-			"link-in-text-block | p > a in footer | a"
-		],
+		"catalogue 390 dark": [],
 		"catalogue 390 light": [
-			"color-contrast | .about-link | a",
-			"color-contrast | .btn-primary | a",
-			"color-contrast | .catalogue-intro > p > a | a",
-			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-count | span",
-			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span",
-			"color-contrast | a > .book-caption > .caption-licence.caption-row > .licence-badge | a",
-			"color-contrast | a in body | a.roster-email",
-			"color-contrast | footer > p in footer | p",
-			"link-in-text-block | footer > p > a in footer | a",
-			"link-in-text-block | p > a in footer | a"
+			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span"
 		],
-		"greining 1280 dark": [
-			"color-contrast | kbd in header | kbd.kbd-hint",
-			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span"
-		],
+		"greining 1280 dark": [],
 		"greining 1280 light": [
-			"color-contrast | .text-\\[var\\(--accent-color\\)\\] | span",
-			"color-contrast | .text-red-600 | button",
-			"color-contrast | kbd in header | kbd.kbd-hint",
-			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
-			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span"
+			"color-contrast | .text-red-600 | button"
 		],
 		"greining 390 dark": [],
 		"greining 390 light": [
-			"color-contrast | .text-\\[var\\(--accent-color\\)\\] | span",
 			"color-contrast | .text-red-600 | button"
 		],
-		"section 1280 dark": [
-			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
-			"color-contrast | kbd in header | kbd.kbd-hint"
-		],
+		"section 1280 dark": [],
 		"section 1280 light": [
-			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
-			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-title | span",
-			"color-contrast | .sm\\:text-sm > | span",
-			"color-contrast | a in aside | a",
-			"color-contrast | kbd in header | kbd.kbd-hint"
+			"color-contrast | .sm\\:text-sm > | span"
 		],
-		"section 390 dark": [
-			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-label | span",
-			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span"
-		],
+		"section 390 dark": [],
 		"section 390 light": [
-			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-label | span",
-			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span",
-			"color-contrast | .sm\\:text-sm > | span",
-			"color-contrast | a in aside | a"
+			"color-contrast | .sm\\:text-sm > | span"
 		],
-		"settings 1280 dark": [
-			"color-contrast | div > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
-		],
-		"settings 1280 light": [
-			"color-contrast | .text-\\[var\\(--accent-color\\)\\].text-sm.font-medium | span",
-			"color-contrast | button in div[role=dialog] | button.font-semibold.text-[var(--accent-color)].text-xs.transition-colors",
-			"color-contrast | div > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
-		],
-		"settings 390 dark": [
-			"color-contrast | div > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
-		],
-		"settings 390 light": [
-			"color-contrast | .text-\\[var\\(--accent-color\\)\\].text-sm.font-medium | span",
-			"color-contrast | button in div[role=dialog] | button.font-semibold.text-[var(--accent-color)].text-xs.transition-colors",
-			"color-contrast | div > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
-		]
+		"settings 1280 dark": [],
+		"settings 1280 light": [],
+		"settings 390 dark": [],
+		"settings 390 light": []
 	}
 }

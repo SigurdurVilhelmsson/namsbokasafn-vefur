@@ -62,7 +62,7 @@ function injectStyles(): void {
 			padding: 0.4rem 0.85rem;
 			font-size: 0.875rem;
 			font-weight: 500;
-			color: var(--accent-color);
+			color: var(--accent-strong);
 			background: var(--accent-subtle, transparent);
 			border: 1px solid var(--accent-color);
 			border-radius: var(--radius-md, 0.5rem);
@@ -71,7 +71,7 @@ function injectStyles(): void {
 		}
 		.practice-answer-toggle:hover {
 			background: var(--accent-color);
-			color: #fff;
+			color: var(--on-accent);
 		}
 		.practice-answer-toggle:focus-visible {
 			outline: 2px solid var(--accent-color);
@@ -88,7 +88,7 @@ function injectStyles(): void {
 			padding: 0.3rem 0.75rem;
 			font-size: 0.8125rem;
 			font-weight: 500;
-			color: var(--accent-color);
+			color: var(--accent-strong);
 			background: var(--accent-subtle, transparent);
 			border: 1px solid var(--accent-color);
 			border-radius: var(--radius-md, 0.5rem);
@@ -97,7 +97,7 @@ function injectStyles(): void {
 		}
 		.practice-assess-btn:hover {
 			background: var(--accent-color);
-			color: #fff;
+			color: var(--on-accent);
 		}
 		.practice-assess-btn:focus-visible {
 			outline: 2px solid var(--accent-color);

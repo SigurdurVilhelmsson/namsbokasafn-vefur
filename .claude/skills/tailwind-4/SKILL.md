@@ -19,15 +19,19 @@ No `tailwind.config.js` needed. Configuration is in `src/app.css`:
 @layer base {
   :root {
     --bg-primary: #f7f4ef;
-    --accent-color: #c78c20;
-    --accent-hover: #a87518;
+    --accent-color: #c78c20; /* the fill, borders, decoration: never text */
+    --on-accent: #1b2838; /* ink on the fill */
+    --accent-fill-hover: #dd9f2c; /* the fill's hover */
+    --accent-strong: #8a5d0e; /* amber as text or an icon */
     /* ... */
   }
 
   .dark {
     --bg-primary: #16161c;
     --accent-color: #e8a838;
-    --accent-hover: #f0bc5a;
+    --on-accent: #16161c;
+    --accent-fill-hover: #f0bc5a;
+    --accent-strong: #e8a838;
     /* ... */
   }
 }
@@ -88,5 +92,5 @@ See `src/app.css` for the full, current list. Key ones:
 
 - `--bg-primary`, `--bg-secondary`, `--bg-tertiary`
 - `--text-primary`, `--text-secondary`
-- `--accent-color`, `--accent-hover`, `--accent-light`, `--accent-subtle`
+- `--accent-color` (fill), `--on-accent` (ink on it), `--accent-fill-hover`, `--accent-strong` (amber as text), `--accent-light`, `--accent-subtle`. `--accent-hover` is gone (S2.1): never white on the amber, never `--accent-color` as text — see CLAUDE.md, "Accent Color Convention"
 - `--font-size-base`, `--line-height-normal`

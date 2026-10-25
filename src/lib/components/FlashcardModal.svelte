@@ -153,7 +153,7 @@
 				id="flashcard-modal-title"
 				class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100"
 			>
-				<Icon name="sparkles" class="text-[var(--accent-color)]" />
+				<Icon name="sparkles" class="text-[var(--accent-strong)]" />
 				Búa til minniskort
 			</h2>
 			<button
@@ -239,7 +239,7 @@
 
 				<button
 					onclick={toggleNewDeck}
-					class="mt-2 flex items-center gap-1 text-sm text-[var(--accent-color)] hover:underline"
+					class="mt-2 flex items-center gap-1 text-sm text-[var(--accent-strong)] hover:underline"
 				>
 					{#if showNewDeckInput}
 						<Icon name="arrow-left" size="sm" />
@@ -265,7 +265,7 @@
 			<button
 				onclick={handleSave}
 				disabled={!canSave}
-				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors enabled:hover:bg-[var(--accent-fill-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				<Icon name="check" size="sm" />
 				Vista minniskort

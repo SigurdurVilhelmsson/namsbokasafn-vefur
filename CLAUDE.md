@@ -139,15 +139,33 @@ The site uses CSS custom properties for theming. The accent color is **amber/gol
 - **Accent (amber/gold)**: Interactive elements — buttons, links, hover states, focus rings, active tabs, badges, navigation, form controls
 - **Blue (semantic only)**: Info/note content blocks, data visualization (heatmaps, chart legends, rating scales), study phase indicators, periodic table element categories
 
-When adding new interactive UI, use `var(--accent-color)`, `var(--accent-hover)`, `var(--accent-light)`, `var(--accent-subtle)` — never hardcoded blue hex for branding elements. Tailwind arbitrary values work: `bg-[var(--accent-color)]`.
+**Which accent token, by role** (decision D01, plan step S2.1; `src/lib/styles/tokens.test.ts` holds the text, ink and border pairs to WCAG AA, and leaves `--text-disabled` untested on purpose: WCAG exempts disabled controls):
+
+| Role                                           | Token                                          | Light / dark          |
+| ---------------------------------------------- | ---------------------------------------------- | --------------------- |
+| The amber fill, borders, decoration            | `--accent-color`                               | `#c78c20` / `#e8a838` |
+| Text and icons **on** the fill                 | `--on-accent` (ink)                            | `#1b2838` / `#16161c` |
+| The fill's hover, under ink                    | `--accent-fill-hover`                          | `#dd9f2c` / `#f0bc5a` |
+| Amber used **as** text or an icon on a surface | `--accent-strong` (bronze in light)            | `#8a5d0e` / `#e8a838` |
+| Tinted backgrounds                             | `--accent-light`, `--accent-subtle`            |                       |
+| Hints                                          | `--text-tertiary` (4.5:1 on all five surfaces) | `#616772` / `#98938d` |
+| Text of a disabled control only                | `--text-disabled`                              | `#8a919c` / `#6a6560` |
+| Text fields and switch tracks                  | `--border-input` (3:1)                         | `#8f7c5c` / `#7a7670` |
+
+- 🔴 **Never white on the amber, and never `--accent-color` as text.** White is 2.92:1 light / 2.08:1 dark on the fill; `#c78c20` as text is 2.31–2.92:1. `accentText.test.ts` fails on a white-on-accent class string or rule, including `var(--accent-color, #fallback)`, `rgba()` white and CSS injected from `.ts` files.
+- **Never put opacity on text over a fill or on `--accent-strong` text** (80% ink on amber is 3.80:1, 80% bronze 3.55:1). A link whose resting colour is `--accent-strong` takes an underline as its hover cue; a tinted button hovers to `--accent-subtle`.
+- `--accent-hover` (`#a87518` / `#f0bc5a`) was deleted in S2.1: ink on it was 3.71:1, and as text it failed in light. `accentText.test.ts` fails on any `var(--accent-hover)`.
+- The focus ring is plan step S2.2's: `--focus-ring` (D01's bronze) exists, but the global `*:focus-visible` ring is still `--accent-color` until then.
+
+Tailwind arbitrary values work: `bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-fill-hover)]`, `text-[var(--accent-strong)]`. Never hardcoded blue hex for branding elements.
 
 ### Accessibility ratchet
 
 Three tests keep today's accessibility failures from growing (plan step S1.1, register UI-24):
 
 - **`e2e/accessibility.spec.ts`, "Accessibility ratchet"**: axe-core's WCAG 2.1 A/AA rules on five surfaces (catalogue, book home, a section, the Settings dialog, `/greining`) at 390 and 1280 px in both themes, with the book text (`.reading-content`) left out. A failing element that is not in `e2e/a11y-baseline.json` fails the test. Elements are keyed by rule, selector and tag, with positions, attribute values and Svelte's hashed classes removed (`e2e/helpers/axe.ts`). Also: exactly one visible `h1` per page, and no text field named only by its placeholder.
-- **`src/lib/styles/tokens.test.ts`**: WCAG contrast of the colour tokens in `src/app.css`, with today's failures listed and ratcheted.
-- **`src/lib/styles/accentText.test.ts`**: white text on the accent fill, counted per file (14 class strings, 22 CSS rules on 2026-10-23).
+- **`src/lib/styles/tokens.test.ts`**: WCAG contrast of the colour tokens in `src/app.css`, by role (text, amber text, ink on the fill and its hover, input borders, the ring). Since S2.1 only the light focus ring is listed as a known failure (plan step S2.2's).
+- **`src/lib/styles/accentText.test.ts`**: white text on the accent fill, counted per file: 0 since S2.1 (14 class strings and 22 CSS rules on 2026-10-23). It reads `.svelte`, `.css` and non-test `.ts` files, and also keeps amber-as-text, faded ink on the fill and `var(--accent-hover)` at zero.
 
 🔑 **When a fix lands, shrink the baselines in the same PR.** A fixed axe entry only warns: a `console.warn` line, plus a `::warning` in GitHub's log (`A11Y_STRICT=1` makes it fail). The two vitest ratchets fail until their counts or `KNOWN_FAILURES` are lowered. ⚠️ axe picks its selectors from class and attribute counts over the whole page, so an unrelated change can re-key an unchanged failure: the scan then fails on a "new" entry and names the entry it most likely replaced ("maybe re-keyed, was: …"). Rewrite the baseline and say so in the PR. Rewrite the axe baseline with `CI=1 A11Y_UPDATE_BASELINE=1 npx playwright test e2e/accessibility.spec.ts -g "Accessibility ratchet" --workers=1` (or `=merge` to add to it), and read the diff: an entry may only disappear, never appear, unless the PR says why. The baseline was the same with every book synced and with chemistry alone (2026-10-23).
 

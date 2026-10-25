@@ -74,7 +74,7 @@
 		margin-bottom: 1rem;
 	}
 	.quiz-back-link:hover {
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 	.quiz-heading {
 		font-family: "Bricolage Grotesque", system-ui, sans-serif;
@@ -99,7 +99,7 @@
 		gap: 0.5rem;
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		margin-bottom: 0.5rem;
 	}
 	.quiz-help-list {

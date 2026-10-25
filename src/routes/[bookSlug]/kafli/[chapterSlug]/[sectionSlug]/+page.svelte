@@ -229,7 +229,7 @@
 		>
 			<div class="flex items-center gap-3">
 				<div class="flex-shrink-0 w-10 h-10 rounded-full bg-[var(--accent-light)] flex items-center justify-center">
-					<Icon name="book-open" size="md" class="text-[var(--accent-color)]" />
+					<Icon name="book-open" size="md" class="text-[var(--accent-strong)]" />
 				</div>
 				<div>
 					<p class="font-medium text-[var(--text-primary)]">Haltu áfram að lesa</p>
@@ -241,13 +241,13 @@
 			<div class="flex items-center gap-2 w-full sm:w-auto">
 				<button
 					onclick={handleContinueReading}
-					class="flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg bg-[var(--accent-color)] text-white hover:bg-[var(--accent-hover)] transition-colors"
+					class="flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-fill-hover)] transition-colors"
 				>
 					Halda áfram
 				</button>
 				<button
 					onclick={dismissContinuePrompt}
-					class="p-2 text-[var(--accent-color)] hover:bg-[var(--accent-light)] rounded-lg transition-colors"
+					class="p-2 text-[var(--accent-strong)] hover:bg-[var(--accent-subtle)] rounded-lg transition-colors"
 					aria-label="Hunsa"
 					title="Byrja frá byrjun"
 				>
@@ -311,7 +311,7 @@
 				onclick={handleShare}
 				class="p-2 rounded-lg transition-colors {shareSuccess
 					? 'text-green-500 bg-green-50 dark:bg-green-900/20'
-					: 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-color)]'}"
+					: 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-strong)]'}"
 				aria-label={shareSuccess ? 'Hlekkur afritaður' : 'Deila kafla'}
 				title={shareSuccess ? 'Hlekkur afritaður!' : 'Deila'}
 			>
@@ -324,7 +324,7 @@
 			<!-- Annotations button -->
 			<button
 				onclick={() => (showAnnotationSidebar = true)}
-				class="p-2 rounded-lg transition-colors text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-color)]"
+				class="p-2 rounded-lg transition-colors text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-strong)]"
 				aria-label="Opna athugasemdir"
 				title="Athugasemdir"
 			>
@@ -393,7 +393,7 @@
 							{#if completed}
 								<Icon name="check" size="sm" />
 							{:else}
-								<span class="text-xs font-medium text-[var(--accent-color)]">{i + 1}</span>
+								<span class="text-xs font-medium text-[var(--accent-strong)]">{i + 1}</span>
 							{/if}
 						</button>
 						<span class="{completed ? 'line-through opacity-70' : ''}">{objective}</span>

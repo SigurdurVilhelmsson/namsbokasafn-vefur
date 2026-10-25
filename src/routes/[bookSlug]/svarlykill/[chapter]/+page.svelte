@@ -50,7 +50,7 @@
 		<div class="mt-4">
 			<a
 				href="/{data.bookSlug}/kafli/{chapterSlug}/{data.chapterNumber}-exercises"
-				class="inline-flex items-center gap-2 text-sm text-[var(--accent-color)] hover:underline"
+				class="inline-flex items-center gap-2 text-sm text-[var(--accent-strong)] hover:underline"
 			>
 				<Icon name="arrow-left" size="sm" />
 				Til baka í æfingar

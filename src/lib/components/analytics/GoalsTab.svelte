@@ -100,7 +100,7 @@
 		<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Markmið</h2>
 		<button
 			onclick={() => (showAddModal = true)}
-			class="flex items-center gap-2 px-4 py-2 bg-[var(--accent-color)] text-white rounded-lg hover:bg-[var(--accent-hover)] transition-colors"
+			class="flex items-center gap-2 px-4 py-2 bg-[var(--accent-color)] text-[var(--on-accent)] rounded-lg hover:bg-[var(--accent-fill-hover)] transition-colors"
 		>
 			<Icon name="plus" size="sm" />
 			Bæta við markmiði
@@ -116,7 +116,7 @@
 			<p class="text-gray-500 dark:text-gray-400 mb-4">Engin markmið skráð enn</p>
 			<button
 				onclick={() => (showAddModal = true)}
-				class="text-[var(--accent-color)] hover:underline"
+				class="text-[var(--accent-strong)] hover:underline"
 			>
 				Bæta við fyrsta markmiðinu
 			</button>
@@ -285,7 +285,7 @@
 				</button>
 				<button
 					onclick={handleAddGoal}
-					class="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-white hover:bg-[var(--accent-hover)] transition-colors"
+					class="px-4 py-2 rounded-lg bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-fill-hover)] transition-colors"
 				>
 					Bæta við
 				</button>

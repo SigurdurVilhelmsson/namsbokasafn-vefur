@@ -71,7 +71,7 @@ function addStyles() {
 			padding: 0.375rem 0.75rem;
 			font-size: 0.75rem;
 			font-weight: 500;
-			color: var(--accent-color, #c78c20);
+			color: var(--accent-strong, #8a5d0e);
 			background-color: var(--accent-light, rgba(199, 140, 32, 0.1));
 			border: 1px solid var(--accent-subtle, rgba(199, 140, 32, 0.3));
 			border-radius: 0.5rem;
@@ -80,14 +80,15 @@ function addStyles() {
 			margin-top: 0.5rem;
 		}
 
+		/* The text stays --accent-strong; the hover cue is the deeper tint and the border
+		   (--accent-hover as text on --accent-light was below 4.5:1). */
 		.answer-link-btn:hover {
-			background-color: var(--accent-light, rgba(199, 140, 32, 0.15));
+			background-color: var(--accent-subtle, rgba(199, 140, 32, 0.3));
 			border-color: var(--accent-color, #c78c20);
-			color: var(--accent-hover, #b37a1c);
 		}
 
 		.dark .answer-link-btn {
-			color: var(--accent-color, #e8a838);
+			color: var(--accent-strong, #e8a838);
 			background-color: rgba(232, 168, 56, 0.1);
 			border-color: rgba(232, 168, 56, 0.3);
 		}
@@ -133,7 +134,7 @@ function addStyles() {
 			left: 0;
 			top: 0;
 			font-weight: 700;
-			color: var(--accent-color, #c78c20);
+			color: var(--accent-strong, #8a5d0e);
 			min-width: 2.5rem;
 			text-align: right;
 			padding-right: 0.5rem;
@@ -142,8 +143,8 @@ function addStyles() {
 			transition: color 0.15s ease;
 		}
 
+		/* The hover cue is the underline alone; the colour stays --accent-strong. */
 		.exercise-number-link:hover {
-			color: var(--accent-hover, #b37a1c);
 			text-decoration: underline;
 		}
 

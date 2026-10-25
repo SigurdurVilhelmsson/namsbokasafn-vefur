@@ -65,7 +65,7 @@
 		<div class="pp-card">
 			<div class="mb-4">
 				<h4 class="pp-problem-label">
-					<Icon name="sparkles" size="sm" style="color: var(--accent-color);" />
+					<Icon name="sparkles" size="sm" style="color: var(--accent-strong);" />
 					Dæmi {currentIndex + 1}
 				</h4>
 				<div class="prose prose-sm max-w-none dark:prose-invert" style="color: var(--text-primary);">
@@ -173,10 +173,11 @@
 		padding: 0.75rem 1rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: var(--accent-color);
-		transition: opacity 0.15s;
+		color: var(--accent-strong);
+		transition: background-color 0.15s;
 	}
-	.pp-show-answer-btn:hover { opacity: 0.85; }
+	/* A tint, not an opacity fade: faded --accent-strong drops below 4.5:1. */
+	.pp-show-answer-btn:hover { background-color: var(--accent-subtle); }
 	.pp-answer-box {
 		border-radius: var(--radius-lg);
 		border: 1px solid #a7f3d0;

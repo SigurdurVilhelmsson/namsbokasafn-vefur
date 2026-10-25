@@ -166,7 +166,7 @@
 				aria-selected={selectedChapterIndex === null && hasSelected}
 				class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
 					{selectedChapterIndex === null && hasSelected
-						? 'bg-[var(--accent-color)] text-white'
+						? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
 						: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
 				onclick={() => selectChapter(null)}
 			>
@@ -178,7 +178,7 @@
 					aria-selected={selectedChapterIndex === i}
 					class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-colors whitespace-nowrap
 						{selectedChapterIndex === i
-							? 'bg-[var(--accent-color)] text-white'
+							? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
 							: 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}"
 					onclick={() => selectChapter(i)}
 				>
@@ -225,7 +225,7 @@
 					<div>
 						<a
 							href={sectionUrl(group.chapter, group.section)}
-							class="inline-flex items-center gap-1.5 text-sm text-[var(--accent-color)] hover:underline mb-3"
+							class="inline-flex items-center gap-1.5 text-sm text-[var(--accent-strong)] hover:underline mb-3"
 						>
 							<Icon name="arrow-right" size="sm" class="flex-shrink-0" />
 							{sectionBreadcrumb(group.chapter, group.section)}

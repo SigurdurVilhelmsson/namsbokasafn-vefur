@@ -10,6 +10,9 @@
  *   - a pair that is not listed drops below its minimum (a new failure);
  *   - a listed pair gets worse than its recorded ratio;
  *   - a listed pair now passes: delete its entry as the fix lands (plan M2, UI-02).
+ *
+ * --text-disabled has no pair on purpose: WCAG 1.4.3 exempts the text of a disabled control,
+ * and the token keeps the old, fainter tertiary values for that text only.
  */
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -65,12 +68,22 @@ const PAIRS: Pair[] = [
 	...['--text-primary', '--text-secondary', '--text-tertiary'].flatMap((fg) =>
 		SURFACES.map((bg) => ({ fg, bg, min: 4.5, use: 'text on a surface' }))
 	),
-	// Amber used as text: links, 'Vistað', objective numbers, the sidebar's current section.
-	...['--bg-primary', '--bg-secondary'].map((bg) => ({ fg: '--accent-color', bg, min: 4.5, use: 'amber text' })),
-	// White text on the accent fill: .btn-accent, selected segments (see accentText.test.ts).
-	{ fg: '#ffffff', bg: '--accent-color', min: 4.5, use: 'white on the accent fill' },
-	{ fg: '#ffffff', bg: '--accent-hover', min: 4.5, use: 'white on the accent hover' },
-	// The global *:focus-visible ring is var(--accent-color); it must stand out from the page.
+	// Amber used as text or as an icon on a surface: links, 'Vistað', objective numbers, the
+	// sidebar's current section (D01, UI-02). The accent itself is for fills and borders.
+	...SURFACES.map((bg) => ({ fg: '--accent-strong', bg, min: 4.5, use: 'amber text' })),
+	// Text and icons on the accent fill and its hover: .btn-accent, selected segments (see
+	// accentText.test.ts). D01: ink, so the hover turns lighter in light mode.
+	{ fg: '--on-accent', bg: '--accent-color', min: 4.5, use: 'ink on the accent fill' },
+	{ fg: '--on-accent', bg: '--accent-fill-hover', min: 4.5, use: 'ink on the accent hover' },
+	// Text fields and switch tracks: a boundary needs 3:1 (WCAG 1.4.11).
+	...['--bg-primary', '--bg-secondary', '--accent-light'].map((bg) => ({
+		fg: '--border-input',
+		bg,
+		min: 3,
+		use: 'input border'
+	})),
+	// The global *:focus-visible ring is var(--accent-color) until plan step S2.2 moves it to
+	// --focus-ring; it must stand out from the page.
 	...['--bg-primary', '--bg-secondary'].map((bg) => ({ fg: '--accent-color', bg, min: 3, use: 'focus ring' })),
 	// --focus-ring (D01): the radios' accent colour now, the focus ring from plan step S2.2.
 	...['--bg-primary', '--bg-secondary'].map((bg) => ({ fg: '--focus-ring', bg, min: 3, use: 'ring and radios' })),
@@ -80,26 +93,13 @@ const PAIRS: Pair[] = [
 
 const key = (theme: string, p: Pair) => `${theme}: ${p.fg} on ${p.bg} (min ${p.min})`;
 
-/** Measured on main 62ea95e, 2026-10-23. Remove an entry when its pair passes. */
+/**
+ * Measured on main 62ea95e, 2026-10-23. Remove an entry when its pair passes. Plan step S2.1
+ * (D01) fixed every text pair; the light ring is plan step S2.2's.
+ */
 const KNOWN_FAILURES: Record<string, number> = {
-	'light: --text-tertiary on --bg-primary (min 4.5)': 2.9,
-	'light: --text-tertiary on --bg-secondary (min 4.5)': 3.18,
-	'light: --text-tertiary on --bg-tertiary (min 4.5)': 2.65,
-	'light: --text-tertiary on --accent-light (min 4.5)': 2.95,
-	'light: --text-tertiary on --accent-subtle (min 4.5)': 2.52,
-	'light: --accent-color on --bg-primary (min 4.5)': 2.66,
-	'light: --accent-color on --bg-secondary (min 4.5)': 2.92,
-	'light: #ffffff on --accent-color (min 4.5)': 2.92,
-	'light: #ffffff on --accent-hover (min 4.5)': 4.02,
 	'light: --accent-color on --bg-primary (min 3)': 2.66,
-	'light: --accent-color on --bg-secondary (min 3)': 2.92,
-	'dark: --text-tertiary on --bg-primary (min 4.5)': 3.13,
-	'dark: --text-tertiary on --bg-secondary (min 4.5)': 2.87,
-	'dark: --text-tertiary on --bg-tertiary (min 4.5)': 2.6,
-	'dark: --text-tertiary on --accent-light (min 4.5)': 2.67,
-	'dark: --text-tertiary on --accent-subtle (min 4.5)': 2.4,
-	'dark: #ffffff on --accent-color (min 4.5)': 2.08,
-	'dark: #ffffff on --accent-hover (min 4.5)': 1.74
+	'light: --accent-color on --bg-secondary (min 3)': 2.92
 };
 
 const css = readFileSync(APP_CSS, 'utf8');

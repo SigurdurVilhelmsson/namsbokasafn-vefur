@@ -165,7 +165,7 @@
 							<label for="font-size-slider" class="text-sm font-medium text-[var(--text-primary)]">
 								Leturstærð
 							</label>
-							<span class="text-sm text-[var(--accent-color)] font-medium">
+							<span class="text-sm text-[var(--accent-strong)] font-medium">
 								{fontSizes.find(s => s.value === $fontSize)?.label}
 							</span>
 						</div>
@@ -176,7 +176,7 @@
 									<button
 										onclick={() => settings.setFontSize(size.value)}
 										class="text-xs transition-colors {$fontSize === size.value
-											? 'text-[var(--accent-color)] font-semibold'
+											? 'text-[var(--accent-strong)] font-semibold'
 											: 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}"
 										style="font-size: {10 + i * 2}px"
 										aria-label="Stilla leturstærð á {size.label}"
@@ -248,7 +248,7 @@
 										name="font"
 										checked={$fontFamily === family.value}
 										onchange={() => settings.setFontFamily(family.value)}
-										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-color)] accent-[var(--focus-ring)] focus:ring-[var(--accent-color)]"
+										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-strong)] accent-[var(--focus-ring)] focus:ring-[var(--accent-color)]"
 									/>
 									<div>
 										<span class="text-[var(--text-primary)] font-medium {family.value === 'serif' ? 'font-serif' : family.value === 'opendyslexic' ? 'font-opendyslexic' : 'font-sans'}">
@@ -274,7 +274,7 @@
 									aria-pressed={$lineHeight === height.value}
 									onclick={() => settings.setLineHeight(height.value)}
 									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineHeight === height.value
-										? 'bg-[var(--accent-color)] text-white shadow-sm'
+										? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-sm'
 										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
 								>
 									{#if $lineHeight === height.value}<Icon name="check" size="sm" class="mr-1 inline-block align-[-2px]" />{/if}{height.label}
@@ -294,7 +294,7 @@
 									aria-pressed={$lineWidth === width.value}
 									onclick={() => settings.setLineWidth(width.value)}
 									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineWidth === width.value
-										? 'bg-[var(--accent-color)] text-white shadow-sm'
+										? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-sm'
 										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
 								>
 									{#if $lineWidth === width.value}<Icon name="check" size="sm" class="mr-1 inline-block align-[-2px]" />{/if}{width.label}
@@ -326,9 +326,9 @@
 									: 'bg-gray-300 dark:bg-gray-600'}"
 							>
 								<span
-									class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {$glossaryHighlighting
-										? 'translate-x-6'
-										: 'translate-x-1'}"
+									class="inline-block h-4 w-4 transform rounded-full shadow transition-transform {$glossaryHighlighting
+										? 'translate-x-6 bg-[var(--on-accent)]'
+										: 'translate-x-1 bg-white'}"
 								></span>
 							</button>
 						</div>
@@ -357,9 +357,9 @@
 									: 'bg-gray-300 dark:bg-gray-600'}"
 							>
 								<span
-									class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {$showTermEnglish
-										? 'translate-x-6'
-										: 'translate-x-1'}"
+									class="inline-block h-4 w-4 transform rounded-full shadow transition-transform {$showTermEnglish
+										? 'translate-x-6 bg-[var(--on-accent)]'
+										: 'translate-x-1 bg-white'}"
 								></span>
 							</button>
 						</div>
@@ -388,9 +388,9 @@
 									: 'bg-gray-300 dark:bg-gray-600'}"
 							>
 								<span
-									class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {$bionicReading
-										? 'translate-x-6'
-										: 'translate-x-1'}"
+									class="inline-block h-4 w-4 transform rounded-full shadow transition-transform {$bionicReading
+										? 'translate-x-6 bg-[var(--on-accent)]'
+										: 'translate-x-1 bg-white'}"
 								></span>
 							</button>
 						</div>

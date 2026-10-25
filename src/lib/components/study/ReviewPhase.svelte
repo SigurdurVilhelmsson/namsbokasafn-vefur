@@ -142,7 +142,8 @@
 					>
 						<div class="font-medium text-sm">Gott</div>
 						{#if previewIntervals}
-							<div class="text-xs opacity-75">{previewIntervals.good}</div>
+							<!-- No opacity: faded --accent-strong drops below 4.5:1 -->
+							<div class="text-xs">{previewIntervals.good}</div>
 						{/if}
 					</button>
 					<button
@@ -279,7 +280,10 @@
 	:global(.dark) .rp-rating--again { background-color: rgba(127,29,29,0.3); color: #fca5a5; }
 	.rp-rating--hard { background-color: #fff7ed; color: #c2410c; }
 	:global(.dark) .rp-rating--hard { background-color: rgba(124,45,18,0.3); color: #fdba74; }
-	.rp-rating--good { background-color: var(--accent-light); color: var(--accent-color); }
+	.rp-rating--good { background-color: var(--accent-light); color: var(--accent-strong); }
+	/* --accent-strong text must not fade: its hover cue is the deeper tint instead of the
+	   shared opacity (strong on --accent-subtle is 4.55:1). */
+	.rp-rating--good:hover { opacity: 1; background-color: var(--accent-subtle); }
 	.rp-rating--easy { background-color: #ecfdf5; color: #047857; }
 	:global(.dark) .rp-rating--easy { background-color: rgba(6,78,59,0.3); color: #6ee7b7; }
 
@@ -297,7 +301,7 @@
 		font-weight: 500;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		margin-bottom: 0.75rem;
 	}
 	.rp-show-answer-btn {
@@ -312,10 +316,11 @@
 		padding: 0.75rem 1rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: var(--accent-color);
-		transition: opacity 0.15s;
+		color: var(--accent-strong);
+		transition: background-color 0.15s;
 	}
-	.rp-show-answer-btn:hover { opacity: 0.85; }
+	/* A tint, not an opacity fade: faded --accent-strong drops below 4.5:1. */
+	.rp-show-answer-btn:hover { background-color: var(--accent-subtle); }
 	.rp-answer-box {
 		border-radius: var(--radius-lg);
 		border: 1px solid #a7f3d0;

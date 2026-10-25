@@ -312,7 +312,7 @@
   }
 
   .email-fallback a {
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: underline;
   }
 
@@ -483,7 +483,7 @@
   }
 
   .type-option.selected .type-icon {
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .type-label {
@@ -493,7 +493,7 @@
   }
 
   .type-option.selected .type-label {
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .type-sublabel {
@@ -515,7 +515,7 @@
     gap: 0.5rem;
     padding: 0.75rem 2rem;
     background: var(--accent-color);
-    color: white;
+    color: var(--on-accent);
     border: none;
     border-radius: 0.5rem;
     font-size: 1rem;
@@ -525,7 +525,7 @@
   }
 
   .btn-primary:hover:not(:disabled) {
-    background: var(--accent-hover, #b37a1c);
+    background: var(--accent-fill-hover);
   }
 
   /* Help link */
@@ -543,8 +543,10 @@
     font-size: 0.875rem;
   }
 
+  /* Grey to bronze is a hue change only (1.04:1 in light), so the hover also underlines. */
   .help-link a:hover {
-    color: var(--accent-color);
+    color: var(--accent-strong);
+    text-decoration: underline;
   }
 
   /* Footer */

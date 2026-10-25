@@ -267,7 +267,7 @@
 		height: 2.5rem;
 		border-radius: var(--radius-full);
 		background: var(--accent-color);
-		color: #ffffff;
+		color: var(--on-accent);
 		font-weight: 700;
 		font-size: 0.875rem;
 	}
@@ -275,7 +275,7 @@
 	.chapter-progress-label {
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 
 	.chapter-card-title {
@@ -288,7 +288,7 @@
 	}
 
 	.chapter-card:hover .chapter-card-title {
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 
 	.chapter-card-meta {
@@ -383,12 +383,13 @@
 		margin-top: 0.75rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: var(--accent-hover);
+		color: var(--accent-strong);
 		text-decoration: underline;
 		text-underline-offset: 2px;
 	}
 
+	/* Hover thickens the underline: a lighter amber would fall below 4.5:1. */
 	.book-attribution-colophon:hover {
-		color: var(--accent-color);
+		text-decoration-thickness: 2px;
 	}
 </style>

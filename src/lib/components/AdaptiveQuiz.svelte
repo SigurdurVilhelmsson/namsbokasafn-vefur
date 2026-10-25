@@ -221,7 +221,7 @@
 		<!-- Header -->
 		<div class="aq-header">
 			<div class="flex items-center gap-2">
-				<Icon name="lightbulb" style="color: var(--accent-color);" />
+				<Icon name="lightbulb" style="color: var(--accent-strong);" />
 				<span class="text-sm font-semibold" style="color: var(--text-primary);">Aðlögunarpróf</span>
 			</div>
 			<div class="flex items-center gap-3">
@@ -258,7 +258,7 @@
 		<div class="p-6">
 			<div class="mb-4">
 				<h4 class="aq-problem-label">
-					<Icon name="sparkles" size="sm" style="color: var(--accent-color);" />
+					<Icon name="sparkles" size="sm" style="color: var(--accent-strong);" />
 					Dæmi {quizState.currentIndex + 1}
 				</h4>
 				<div class="prose prose-sm max-w-none dark:prose-invert" style="color: var(--text-primary);">
@@ -377,7 +377,7 @@
 	.aq-score-value {
 		font-size: 2.25rem;
 		font-weight: 700;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		margin-bottom: 0.5rem;
 	}
 
@@ -431,7 +431,7 @@
 
 	/* Mastery colors */
 	:global(.aq-mastery--novice) { color: var(--text-tertiary); }
-	:global(.aq-mastery--learning) { color: #d97706; }
+	:global(.aq-mastery--learning) { color: var(--accent-strong); }
 	:global(.dark) :global(.aq-mastery--learning) { color: #fbbf24; }
 	:global(.aq-mastery--practicing) { color: #2563eb; }
 	:global(.dark) :global(.aq-mastery--practicing) { color: #60a5fa; }
@@ -469,10 +469,10 @@
 		padding: 0.5rem 1rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: white;
-		transition: opacity 0.15s;
+		color: var(--on-accent);
+		transition: background-color 0.15s;
 	}
-	.aq-primary-btn:hover { opacity: 0.9; }
+	.aq-primary-btn:hover { background-color: var(--accent-fill-hover); }
 
 	/* Active quiz header */
 	.aq-header {
@@ -529,10 +529,11 @@
 		padding: 0.75rem 1rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: var(--accent-color);
-		transition: opacity 0.15s;
+		color: var(--accent-strong);
+		transition: background-color 0.15s;
 	}
-	.aq-show-answer-btn:hover { opacity: 0.85; }
+	/* A deeper tint, not an opacity fade: --accent-strong at 85% drops below 4.5:1 */
+	.aq-show-answer-btn:hover { background-color: var(--accent-subtle); }
 
 	/* Answer box */
 	.aq-answer-box {

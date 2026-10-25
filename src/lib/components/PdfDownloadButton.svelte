@@ -100,13 +100,13 @@
 		padding: 0.5rem 1rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: white;
+		color: var(--on-accent);
 		background: var(--accent-color, #c78c20);
 		border-radius: 0.5rem;
 	}
 
 	.pdf-btn-primary:hover {
-		background: var(--accent-hover, #b07918);
+		background: var(--accent-fill-hover);
 	}
 
 	.pdf-btn-primary:focus-visible {
@@ -118,7 +118,7 @@
 		padding: 0.4rem 0.75rem;
 		font-size: 0.8rem;
 		font-weight: 500;
-		color: var(--accent-color, #c78c20);
+		color: var(--accent-strong, #8a5d0e);
 		background: var(--accent-light, rgba(199, 140, 32, 0.1));
 		border-radius: 0.4rem;
 	}
@@ -127,8 +127,8 @@
 		background: var(--accent-subtle, rgba(199, 140, 32, 0.18));
 	}
 
+	/* De-emphasised by weight, not opacity: a faded label on the accent fill falls below 4.5:1. */
 	.pdf-btn-size {
-		opacity: 0.8;
 		font-weight: 400;
 	}
 

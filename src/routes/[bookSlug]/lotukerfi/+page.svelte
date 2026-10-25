@@ -97,7 +97,7 @@
 		height: 2.5rem;
 		border-radius: var(--radius-lg);
 		background-color: var(--accent-light);
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 	.pt-heading {
 		font-family: "Bricolage Grotesque", system-ui, sans-serif;
@@ -117,7 +117,7 @@
 	}
 	.pt-info-title {
 		font-weight: 500;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		margin-bottom: 0.25rem;
 	}
 	.pt-info-list {

@@ -236,7 +236,7 @@
 																<circle
 																	cx="10" cy="10" r="8"
 																	fill="none"
-																	stroke="var(--accent-color)"
+																	stroke="var(--accent-strong)"
 																	stroke-width="2"
 																	stroke-dasharray="50.27"
 																	stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)}
@@ -297,7 +297,7 @@
 																		<span class="section-progress-ring">
 																			<svg class="section-ring-svg" viewBox="0 0 20 20">
 																				<circle cx="10" cy="10" r="8" fill="none" stroke="var(--border-color)" stroke-width="2" />
-																				<circle cx="10" cy="10" r="8" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-dasharray="50.27" stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)} stroke-linecap="round" class="section-ring-progress" />
+																				<circle cx="10" cy="10" r="8" fill="none" stroke="var(--accent-strong)" stroke-width="2" stroke-dasharray="50.27" stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)} stroke-linecap="round" class="section-ring-progress" />
 																			</svg>
 																			<span class="section-dot section-dot--current"></span>
 																		</span>
@@ -340,7 +340,7 @@
 															<span class="section-progress-ring">
 																<svg class="section-ring-svg" viewBox="0 0 20 20">
 																	<circle cx="10" cy="10" r="8" fill="none" stroke="var(--border-color)" stroke-width="2" />
-																	<circle cx="10" cy="10" r="8" fill="none" stroke="var(--accent-color)" stroke-width="2" stroke-dasharray="50.27" stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)} stroke-linecap="round" class="section-ring-progress" />
+																	<circle cx="10" cy="10" r="8" fill="none" stroke="var(--accent-strong)" stroke-width="2" stroke-dasharray="50.27" stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)} stroke-linecap="round" class="section-ring-progress" />
 																</svg>
 																<span class="section-dot section-dot--current"></span>
 															</span>
@@ -667,7 +667,7 @@
 		height: 1.5rem;
 		border-radius: var(--radius-full);
 		background: var(--accent-color);
-		color: #fff;
+		color: var(--on-accent);
 		font-size: 0.6875rem;
 		font-weight: 700;
 		flex-shrink: 0;
@@ -739,7 +739,7 @@
 
 	.section-link--current {
 		background: var(--accent-light);
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		border-left-color: var(--accent-color);
 		font-weight: 500;
 	}
@@ -751,7 +751,7 @@
 
 	.section-link--current:hover {
 		background: var(--accent-light);
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 
 	/* ====================================

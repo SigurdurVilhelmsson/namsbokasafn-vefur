@@ -78,7 +78,9 @@ function showTooltip(element: HTMLElement, term: GlossaryTerm, bookSlug: string)
 	const borderColor = styles.getPropertyValue('--border-color').trim();
 	const textColor = styles.getPropertyValue('--text-primary').trim();
 	const secondaryColor = styles.getPropertyValue('--text-secondary').trim();
-	const accentColor = styles.getPropertyValue('--accent-color').trim();
+	// Amber as text on the --bg-secondary card: --accent-strong (5.75:1 light), never the
+	// --accent-color fill (2.92:1).
+	const accentStrong = styles.getPropertyValue('--accent-strong').trim();
 
 	// Build English translation line
 	const englishHtml = term.english
@@ -100,10 +102,10 @@ function showTooltip(element: HTMLElement, term: GlossaryTerm, bookSlug: string)
 	tooltip.innerHTML = `
 		<div style="padding: 12px 14px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);">
 			<div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-				<svg style="width: 14px; height: 14px; color: ${accentColor}; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg style="width: 14px; height: 14px; color: ${accentStrong}; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
 				</svg>
-				<span style="font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: ${accentColor};">Orðasafn</span>
+				<span style="font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: ${accentStrong};">Orðasafn</span>
 			</div>
 			<div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
 				<span style="font-weight: 600; color: ${textColor};">${escapeHtml(term.term)}</span>
@@ -112,7 +114,7 @@ function showTooltip(element: HTMLElement, term: GlossaryTerm, bookSlug: string)
 			<p style="margin-top: 6px; font-size: 13px; line-height: 1.5; color: ${secondaryColor};">${escapeHtml(term.definition)}</p>
 			${relatedHtml}
 			<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid ${borderColor};">
-				<a href="/${bookSlug}/ordabok?search=${encodeURIComponent(term.term)}" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: ${accentColor}; text-decoration: none;">
+				<a href="/${bookSlug}/ordabok?search=${encodeURIComponent(term.term)}" style="display: flex; align-items: center; gap: 4px; font-size: 12px; color: ${accentStrong}; text-decoration: none;">
 					<svg style="width: 12px; height: 12px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
 					</svg>

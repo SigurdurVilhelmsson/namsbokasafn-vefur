@@ -82,13 +82,14 @@
 	}
 
 	.book-attribution a {
-		color: var(--accent-hover);
+		color: var(--accent-strong);
 		text-decoration: underline;
 		text-underline-offset: 2px;
 	}
 
+	/* Hover thickens the underline: a lighter amber would fall below 4.5:1. */
 	.book-attribution a:hover {
-		color: var(--accent-color, #c78c20);
+		text-decoration-thickness: 2px;
 	}
 
 	.book-attribution__notice {
