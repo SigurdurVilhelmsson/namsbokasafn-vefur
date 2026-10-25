@@ -22,6 +22,7 @@ import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isObject } from '$lib/utils/storeValidation';
 import type { TableOfContents } from '$lib/types/content';
 import { getChapterFolder } from '$lib/utils/contentLoader';
+import { pool } from '$lib/utils/pool';
 import {
 	BROWSE_IMAGE_CACHE,
 	CONTENT_CACHE,
@@ -425,15 +426,6 @@ async function loadManifest(bookSlug: string, toc: TableOfContents): Promise<Off
 		bytes: 0,
 		files: [...pages, ...images].map((p) => ({ p: normalizePath(p), b: 0, h: '' }))
 	};
-}
-
-/** Run `task` over `items` with at most `limit` at a time. */
-async function pool<T>(items: T[], limit: number, task: (item: T) => Promise<void>): Promise<void> {
-	let next = 0;
-	const worker = async () => {
-		while (next < items.length) await task(items[next++]);
-	};
-	await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
 }
 
 /**

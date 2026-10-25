@@ -33,7 +33,7 @@ export type Capability = 'index' | 'glossary';
 interface Toc {
 	index?: unknown;
 	glossary?: unknown;
-	chapters?: { number: number; sections?: { file?: string }[] }[];
+	chapters?: { number: number; slug?: string; sections?: { file?: string; title?: string }[] }[];
 }
 
 function readToc(slug: string): Toc | null {
@@ -229,4 +229,29 @@ export function firstModuleSection(slug: string): string | null {
 		if (file) return `/${slug}/kafli/${String(chapter.number).padStart(2, '0')}/${file.slice(0, -5)}/`;
 	}
 	return null;
+}
+
+/** Title of the section `firstModuleSection()` picks, or null. */
+export function firstModuleSectionTitle(slug: string): string | null {
+	for (const chapter of readToc(slug)?.chapters ?? []) {
+		const section = chapter.sections?.find((s) => s.file && /^\d+-[1-9]\d*-.+\.html$/.test(s.file));
+		if (section) return section.title ?? null;
+	}
+	return null;
+}
+
+/**
+ * URL path of every chapter section file, in table-of-contents order: exactly the files the
+ * search index fetches (`searchIndex.ts`, `doBuildIndex`). Front matter and appendices are
+ * not indexed.
+ */
+export function tocSectionUrls(slug: string): string[] {
+	const urls: string[] = [];
+	for (const chapter of readToc(slug)?.chapters ?? []) {
+		const folder = chapter.slug || String(chapter.number).padStart(2, '0');
+		for (const section of chapter.sections ?? []) {
+			urls.push(`/content/${slug}/chapters/${folder}/${section.file}`);
+		}
+	}
+	return urls;
 }
