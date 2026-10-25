@@ -122,7 +122,6 @@
 		<div class="right-actions">
 			<!-- Search button. Its name holds the visible "Ctrl+K" hint (WCAG 2.5.3, Label in Name);
 			     axe passes "Leita, Ctrl+K" but not "Leita (Ctrl+K)" or an aria-hidden hint. -->
-			<!-- D20: proposed wording (the search button's name), checked in the batch before the train that ships it. -->
 			<button
 				onclick={() => (searchOpen = true)}
 				class="header-btn"

@@ -383,8 +383,6 @@
 					<li class="flex items-start gap-3 text-[var(--text-primary)]">
 						<!-- Each name holds the number its button shows (WCAG 2.5.3, Label in Name), which
 						     also tells the buttons apart. -->
-						<!-- D20: proposed wording (both names; "lokið", the owner's word, replaced "klárað",
-						     which had replaced "kláruð"), checked in the batch before the train that ships it. -->
 						<button
 							onclick={() => toggleObjective(i, objective)}
 							class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {completed
