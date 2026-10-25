@@ -381,12 +381,16 @@
 				{#each data.section.objectives as objective, i (i)}
 					{@const completed = completedObjectiveIndices.has(i)}
 					<li class="flex items-start gap-3 text-[var(--text-primary)]">
+						<!-- Each name holds the number its button shows (WCAG 2.5.3, Label in Name), which
+						     also tells the buttons apart. -->
+						<!-- D20: proposed wording (both names; "klárað" was "kláruð", to agree with one
+						     markmið), checked in the batch before the train that ships it. -->
 						<button
 							onclick={() => toggleObjective(i, objective)}
 							class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {completed
 								? 'bg-green-500 border-green-500 text-white'
 								: 'border-[var(--accent-subtle)] hover:border-green-400 dark:hover:border-green-500'}"
-							aria-label={completed ? 'Afmerkja markmið' : 'Merkja markmið sem kláruð'}
+							aria-label={completed ? `Afmerkja markmið ${i + 1}` : `Merkja markmið ${i + 1} sem klárað`}
 						>
 							{#if completed}
 								<Icon name="check" size="sm" />
