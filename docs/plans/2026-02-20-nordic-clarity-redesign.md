@@ -137,7 +137,7 @@ Font loading: `font-display: swap`, variable font files (one per family).
 
 **Buttons:**
 
-- Primary: `--accent-color` bg, `--bg-primary` text, `--radius-md`, hover lift (translateY -1px)
+- Primary: `--accent-color` bg, `--on-accent` text (ink), `--radius-md`, hover `--accent-fill-hover` plus the lift (translateY -1px). _Updated 2026-10-25 (decision D01, register UI-02): this said `--bg-primary` text, which is 2.66:1 on the amber in light; ink is 5.12:1 (8.66:1 dark), and the hover turns lighter, not darker. Amber used as text on a surface is `--accent-strong`; see CLAUDE.md, "Accent Color Convention"._
 - Secondary: transparent, `--border-color` border, `--text-primary` text
 - Ghost: no border, `--text-secondary`, bg appears on hover
 
