@@ -482,7 +482,7 @@
 	}
 	.pte-filter-btn--active {
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 	}
 
 	/* Series labels */

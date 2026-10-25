@@ -733,7 +733,7 @@
     align-items: center;
     padding: 0.75rem 1.5rem;
     background: var(--accent-color);
-    color: #fff;
+    color: var(--on-accent);
     font-weight: 600;
     font-size: 0.9375rem;
     border-radius: var(--radius-lg);

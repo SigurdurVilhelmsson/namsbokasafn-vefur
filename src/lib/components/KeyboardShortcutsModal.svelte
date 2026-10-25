@@ -250,7 +250,7 @@
 													}
 												}}
 												class="inline-flex min-w-[3rem] items-center justify-center gap-1.5 rounded px-2 py-1 font-mono text-sm transition-colors {isEditing
-													? 'bg-[var(--accent-color)] text-white'
+													? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
 													: shortcut.isCustomized
 														? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
 														: 'bg-[var(--bg-primary)] text-[var(--text-secondary)] shadow-sm hover:bg-[var(--border-color)]'}"

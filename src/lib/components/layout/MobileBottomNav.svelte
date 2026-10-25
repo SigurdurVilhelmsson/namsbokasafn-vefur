@@ -275,7 +275,7 @@
 		border-radius: 50%;
 		border: none;
 		background: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		box-shadow: var(--shadow-lg);
 		cursor: pointer;
 		z-index: 41;

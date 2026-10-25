@@ -241,7 +241,7 @@
 			<div class="flex items-center gap-2 w-full sm:w-auto">
 				<button
 					onclick={handleContinueReading}
-					class="flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg bg-[var(--accent-color)] text-white hover:bg-[var(--accent-hover)] transition-colors"
+					class="flex-1 sm:flex-initial px-4 py-2 text-sm font-medium rounded-lg bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-hover)] transition-colors"
 				>
 					Halda áfram
 				</button>

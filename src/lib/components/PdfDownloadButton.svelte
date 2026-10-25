@@ -100,7 +100,7 @@
 		padding: 0.5rem 1rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: white;
+		color: var(--on-accent);
 		background: var(--accent-color, #c78c20);
 		border-radius: 0.5rem;
 	}
@@ -127,8 +127,8 @@
 		background: var(--accent-subtle, rgba(199, 140, 32, 0.18));
 	}
 
+	/* De-emphasised by weight, not opacity: a faded label on the accent fill falls below 4.5:1. */
 	.pdf-btn-size {
-		opacity: 0.8;
 		font-weight: 400;
 	}
 

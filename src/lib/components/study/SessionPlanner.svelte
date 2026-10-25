@@ -340,7 +340,7 @@
 		font-weight: 500;
 		border-radius: var(--radius-xl);
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		transition: opacity 0.15s;
 	}
 	.sp-start-btn:hover:not(:disabled) {

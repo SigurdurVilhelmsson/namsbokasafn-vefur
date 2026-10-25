@@ -168,7 +168,7 @@
 		padding: 0.75rem 1.5rem;
 		border-radius: var(--radius-xl);
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		font-weight: 500;
 		transition: opacity 0.15s;
 	}

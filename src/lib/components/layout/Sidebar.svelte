@@ -667,7 +667,7 @@
 		height: 1.5rem;
 		border-radius: var(--radius-full);
 		background: var(--accent-color);
-		color: #fff;
+		color: var(--on-accent);
 		font-size: 0.6875rem;
 		font-weight: 700;
 		flex-shrink: 0;

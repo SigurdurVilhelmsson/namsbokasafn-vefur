@@ -267,7 +267,7 @@
 		height: 2.5rem;
 		border-radius: var(--radius-full);
 		background: var(--accent-color);
-		color: #ffffff;
+		color: var(--on-accent);
 		font-weight: 700;
 		font-size: 0.875rem;
 	}

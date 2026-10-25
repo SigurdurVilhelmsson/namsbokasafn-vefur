@@ -277,7 +277,7 @@
 	.prompt-banner {
 		padding: 0.5rem 0.75rem;
 		background: var(--accent-color, #c78c20);
-		color: white;
+		color: var(--on-accent);
 		font-size: 0.8125rem;
 		font-weight: 600;
 		text-align: center;
@@ -329,7 +329,7 @@
 
 	.btn-primary {
 		background: var(--accent-color, #c78c20);
-		color: white;
+		color: var(--on-accent);
 		width: 100%;
 	}
 
@@ -378,12 +378,14 @@
 		}
 	}
 
+	/* Pulse the fill, not the opacity: fading the banner would fade its ink text
+	   below 4.5:1 on the amber. Ink stays >= 5.12:1 on both fills. */
 	@keyframes pulse-bg {
 		0%, 100% {
-			opacity: 1;
+			background-color: var(--accent-color);
 		}
 		50% {
-			opacity: 0.8;
+			background-color: var(--accent-fill-hover);
 		}
 	}
 </style>

@@ -371,7 +371,7 @@
 	}
 	.index-toggle-btn--active {
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 	}
 
 	/* Search */
@@ -418,7 +418,7 @@
 	}
 	.index-letter-btn--active {
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		border-color: var(--accent-color);
 	}
 	.index-letter-btn--active:hover {

@@ -351,7 +351,7 @@
 		padding: 0.5rem 1rem;
 		border-radius: var(--radius-lg);
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		font-weight: 500;
 		flex-shrink: 0;
 		transition: opacity 0.15s;
@@ -374,7 +374,7 @@
 		font-weight: 500;
 		border-radius: var(--radius-xl);
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		text-decoration: none;
 		transition: opacity 0.15s;
 	}
@@ -385,7 +385,7 @@
 		padding: 0.5rem 1rem;
 		border-radius: var(--radius-lg);
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		transition: opacity 0.15s;
 	}
 	.flashcard-primary-btn:hover {

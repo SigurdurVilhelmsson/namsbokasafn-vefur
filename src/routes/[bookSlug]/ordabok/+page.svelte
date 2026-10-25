@@ -249,7 +249,7 @@
 	}
 	.glossary-letter-btn--active {
 		background-color: var(--accent-color);
-		color: white;
+		color: var(--on-accent);
 		border-color: var(--accent-color);
 	}
 	.glossary-letter-btn--active:hover {

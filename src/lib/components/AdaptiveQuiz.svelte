@@ -469,7 +469,7 @@
 		padding: 0.5rem 1rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: white;
+		color: var(--on-accent);
 		transition: opacity 0.15s;
 	}
 	.aq-primary-btn:hover { opacity: 0.9; }

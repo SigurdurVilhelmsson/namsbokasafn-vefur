@@ -142,7 +142,7 @@
 				<button
 					onclick={handleDownload}
 					disabled={otherBookBusy}
-					class="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+					class="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 				>
 					<Icon name={status === 'outdated' ? 'refresh-cw' : 'download'} />
 					<span>{status === 'outdated' ? 'Uppfæra' : 'Ljúka niðurhali'}</span>
@@ -264,7 +264,7 @@
 		<button
 			onclick={handleDownload}
 			disabled={isEstimating || otherBookBusy}
-			class="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+			class="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors hover:bg-[var(--accent-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
 		>
 			<Icon name="download" />
 			{#if isEstimating}
@@ -272,7 +272,7 @@
 			{:else}
 				<span>{status === 'legacy' ? 'Sækja aftur' : 'Sækja fyrir ónettengda notkun'}</span>
 				{#if estimatedSize > 0}
-					<span class="opacity-80">(~{formatBytes(estimatedSize)})</span>
+					<span class="font-normal">(~{formatBytes(estimatedSize)})</span>
 				{/if}
 			{/if}
 		</button>

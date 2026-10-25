@@ -144,7 +144,7 @@
 <!-- Update Available Prompt -->
 {#if needRefresh}
 	<div
-		class="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md rounded-lg bg-[var(--accent-color)] p-4 text-white shadow-lg md:left-auto md:right-4"
+		class="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md rounded-lg bg-[var(--accent-color)] p-4 text-[var(--on-accent)] shadow-lg md:left-auto md:right-4"
 		role="alertdialog"
 		aria-labelledby="pwa-update-title"
 		aria-describedby="pwa-update-desc"
@@ -156,7 +156,7 @@
 		</div>
 
 		{#if updateError}
-			<p class="mb-3 text-sm text-red-200" role="alert">{updateError}</p>
+			<p class="mb-3 text-sm font-semibold text-[var(--on-accent)]" role="alert">{updateError}</p>
 		{/if}
 
 		<p id="pwa-update-desc" class="sr-only">
@@ -167,7 +167,7 @@
 			<button
 				onclick={handleUpdate}
 				disabled={updating}
-				class="flex-1 rounded-lg bg-white px-4 py-2 text-sm font-medium text-[var(--accent-color)] transition-colors hover:bg-[var(--accent-light)] disabled:opacity-50 disabled:cursor-not-allowed"
+				class="flex-1 rounded-lg bg-[var(--bg-secondary)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-tertiary)] disabled:opacity-50 disabled:cursor-not-allowed"
 				data-testid="pwa-update-button"
 			>
 				{#if updating}

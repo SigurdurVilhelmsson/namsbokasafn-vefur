@@ -56,7 +56,7 @@
 
         <a href="/efnafraedi-2e" class="book-link group">
           <div class="book-icon chemistry">
-            <Icon name="flask-conical" size="lg" class="text-white" />
+            <Icon name="flask-conical" size="lg" class="text-[var(--on-accent)]" />
           </div>
           <div class="book-info">
             <strong>Efnafræði</strong>
@@ -285,7 +285,7 @@
   /* Header */
   .guide-header {
     background: var(--accent-color);
-    color: white;
+    color: var(--on-accent);
     padding: 2rem 0;
   }
 
@@ -293,14 +293,15 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--on-accent);
     text-decoration: none;
     font-size: 0.875rem;
     margin-bottom: 1rem;
   }
 
+  /* Full ink at rest, so the hover cue is the underline, not a colour change. */
   .back-link:hover {
-    color: white;
+    text-decoration: underline;
   }
 
   .guide-header h1 {
@@ -311,7 +312,7 @@
 
   .subtitle {
     font-size: 1rem;
-    opacity: 0.9;
+    font-weight: 400;
     margin: 0;
   }
 
@@ -574,7 +575,7 @@
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
     background: var(--accent-color);
-    color: white;
+    color: var(--on-accent);
     border-radius: 0.5rem;
     text-decoration: none;
     font-weight: 500;

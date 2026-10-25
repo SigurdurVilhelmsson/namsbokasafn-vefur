@@ -189,7 +189,7 @@
 			</button>
 			<button
 				onclick={handleSave}
-				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-hover)]"
+				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors hover:bg-[var(--accent-hover)]"
 			>
 				<Icon name="download" size="sm" />
 				Vista

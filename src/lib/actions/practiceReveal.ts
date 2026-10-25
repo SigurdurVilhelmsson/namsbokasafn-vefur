@@ -71,7 +71,7 @@ function injectStyles(): void {
 		}
 		.practice-answer-toggle:hover {
 			background: var(--accent-color);
-			color: #fff;
+			color: var(--on-accent);
 		}
 		.practice-answer-toggle:focus-visible {
 			outline: 2px solid var(--accent-color);
@@ -97,7 +97,7 @@ function injectStyles(): void {
 		}
 		.practice-assess-btn:hover {
 			background: var(--accent-color);
-			color: #fff;
+			color: var(--on-accent);
 		}
 		.practice-assess-btn:focus-visible {
 			outline: 2px solid var(--accent-color);

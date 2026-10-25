@@ -515,7 +515,7 @@
     gap: 0.5rem;
     padding: 0.75rem 2rem;
     background: var(--accent-color);
-    color: white;
+    color: var(--on-accent);
     border: none;
     border-radius: 0.5rem;
     font-size: 1rem;
