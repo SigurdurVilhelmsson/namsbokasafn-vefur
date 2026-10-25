@@ -65,9 +65,8 @@
     --border-input: #8f7c5c;
     /* The accent is a fill, a border or a decoration, never text: see --accent-strong. */
     --accent-color: #c78c20;
-    --accent-hover: #a87518;
     /* Decision D01: ink on the amber fill (5.12:1), and a lighter hover under it
-       (6.45:1; ink on --accent-hover would be 3.71:1). */
+       (6.45:1; ink on the old, darker hover #a87518 was 3.71:1, so that token is gone). */
     --on-accent: #1b2838;
     --accent-fill-hover: #dd9f2c;
     /* Amber used as text or as an icon on a surface: bronze, 4.55:1 or more on all five. */
@@ -118,7 +117,6 @@
     --border-color: #2e2e38;
     --border-input: #7a7670;
     --accent-color: #e8a838;
-    --accent-hover: #f0bc5a;
     /* Ink: 8.66:1 on the amber, 10.33:1 on its hover. */
     --on-accent: #16161c;
     --accent-fill-hover: #f0bc5a;

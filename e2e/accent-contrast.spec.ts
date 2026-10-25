@@ -17,6 +17,13 @@ const BOOK = publishedBook();
 const SECTION = BOOK ? firstModuleSection(BOOK) : null;
 const THEMES = ['light', 'dark'] as const;
 
+/** The seeded theme took effect, so a test measures the colours it names. */
+async function expectTheme(page: Page, theme: (typeof THEMES)[number]): Promise<void> {
+	const html = page.locator('html');
+	if (theme === 'dark') await expect(html).toHaveClass(/(^|\s)dark(\s|$)/);
+	else await expect(html).not.toHaveClass(/(^|\s)dark(\s|$)/);
+}
+
 async function seedTheme(page: Page, theme: (typeof THEMES)[number]): Promise<void> {
 	await page.addInitScript((t) => {
 		const key = 'namsbokasafn:settings';
@@ -33,9 +40,15 @@ async function seedTheme(page: Page, theme: (typeof THEMES)[number]): Promise<vo
 /**
  * WCAG 2.x contrast of an element's text colour against the background it is painted on: the
  * element's own background and its ancestors', translucent layers composited over the next one.
+ * It throws if the text or an ancestor is faded with `opacity`: S2.1 forbids fading text over a
+ * fill or in --accent-strong, and a group opacity is not in the colours this function reads.
  */
 async function textContrast(page: Page, selector: string): Promise<number> {
 	return page.locator(selector).first().evaluate((el) => {
+		for (let n: Element | null = el; n; n = n.parentElement) {
+			const opacity = getComputedStyle(n).opacity;
+			if (opacity !== '1') throw new Error(`opacity ${opacity} on ${n.tagName.toLowerCase()}.${n.className}`);
+		}
 		type RGBA = [number, number, number, number];
 		const probe = document.createElement('canvas').getContext('2d')!;
 		// Let the canvas normalise any CSS colour (rgb(), color(srgb …), color-mix() results).
@@ -80,6 +93,7 @@ test.describe('Accent contrast the ratchet cannot see (D01)', () => {
 				test.skip(!SECTION, 'no published book is synced');
 				await seedTheme(page, theme);
 				await page.goto(SECTION!);
+				await expectTheme(page, theme);
 				const number = page.getByRole('button', { name: /^Merkja markmið 1 sem/ }).locator('span');
 				test.skip((await number.count()) === 0, 'this section has no learning objectives');
 				await expect(number).toHaveText('1');
@@ -93,6 +107,7 @@ test.describe('Accent contrast the ratchet cannot see (D01)', () => {
 				await page.goto(SECTION!);
 				// The list opens from a Svelte handler: click only once the page has hydrated.
 				await page.waitForLoadState('networkidle');
+				await expectTheme(page, theme);
 				await page.locator('.breadcrumb-btn').click();
 				await expect(page.getByRole('listbox', { name: 'Undirkaflar' })).toBeVisible();
 				const current = await textContrast(page, '.breadcrumb-option.current .truncate');
@@ -107,6 +122,7 @@ test.describe('Accent contrast the ratchet cannot see (D01)', () => {
 			test('a primary button keeps 4.5:1 under the pointer', async ({ page }) => {
 				await seedTheme(page, theme);
 				await page.goto('/');
+				await expectTheme(page, theme);
 				const button = page.locator('.btn-primary').first();
 				test.skip((await button.count()) === 0, 'the catalogue has no primary button');
 				const rest = await textContrast(page, '.btn-primary');

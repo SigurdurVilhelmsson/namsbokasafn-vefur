@@ -11,23 +11,13 @@
 		"book-home 1280 light": [],
 		"book-home 390 dark": [],
 		"book-home 390 light": [],
-		"catalogue 1280 dark": [
-			"link-in-text-block | footer > p > a in footer | a",
-			"link-in-text-block | p > a in footer | a"
-		],
+		"catalogue 1280 dark": [],
 		"catalogue 1280 light": [
-			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span",
-			"link-in-text-block | footer > p > a in footer | a",
-			"link-in-text-block | p > a in footer | a"
+			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span"
 		],
-		"catalogue 390 dark": [
-			"link-in-text-block | footer > p > a in footer | a",
-			"link-in-text-block | p > a in footer | a"
-		],
+		"catalogue 390 dark": [],
 		"catalogue 390 light": [
-			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span",
-			"link-in-text-block | footer > p > a in footer | a",
-			"link-in-text-block | p > a in footer | a"
+			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span"
 		],
 		"greining 1280 dark": [],
 		"greining 1280 light": [
