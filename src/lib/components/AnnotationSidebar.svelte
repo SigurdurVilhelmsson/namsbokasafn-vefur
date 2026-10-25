@@ -207,7 +207,7 @@
 			<button
 				onclick={handleExport}
 				disabled={stats.total === 0}
-				class="ann-btn-ghost flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm transition-colors disabled:opacity-50"
+				class="ann-btn-ghost flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm transition-colors"
 				title="Flytja út sem Markdown"
 			>
 				<Icon name="download" size="sm" />
@@ -354,6 +354,12 @@
 	.ann-btn-ghost:hover {
 		background: var(--bg-secondary);
 		color: var(--text-secondary);
+	}
+
+	/* Disabled (export with no annotations): the disabled token, not an
+	   opacity fade. After :hover so hovering keeps it. */
+	.ann-btn-ghost:disabled {
+		color: var(--text-disabled);
 	}
 
 	/* Filter button */

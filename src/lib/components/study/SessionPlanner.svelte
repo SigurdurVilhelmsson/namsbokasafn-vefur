@@ -185,11 +185,11 @@
 							</div>
 
 							<!-- Phase icon -->
-							<Icon name={PHASE_ICONS[phaseId]} style="color: {phase.enabled ? colors.iconColor : 'var(--text-tertiary)'};" />
+							<Icon name={PHASE_ICONS[phaseId]} style="color: {phase.enabled ? colors.iconColor : 'var(--text-disabled)'};" />
 
 							<!-- Phase label -->
 							<div>
-								<span class="font-medium" style="color: {phase.enabled ? 'var(--text-primary)' : 'var(--text-tertiary)'};">
+								<span class="font-medium" style="color: {phase.enabled ? 'var(--text-primary)' : 'var(--text-disabled)'};">
 									{PHASE_LABELS[phaseId]}
 								</span>
 								{#if phase.enabled}
@@ -197,7 +197,7 @@
 										{phase.itemCount} {phase.itemCount === 1 ? 'atriði' : 'atriði'}
 									</span>
 								{:else}
-									<span class="ml-2 text-sm" style="color: var(--text-tertiary);">
+									<span class="ml-2 text-sm" style="color: var(--text-disabled);">
 										Ekkert til
 									</span>
 								{/if}
@@ -348,7 +348,7 @@
 	}
 	.sp-start-btn--disabled {
 		background-color: var(--bg-tertiary);
-		color: var(--text-tertiary);
+		color: var(--text-disabled);
 		cursor: not-allowed;
 	}
 </style>
