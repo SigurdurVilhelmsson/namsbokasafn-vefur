@@ -122,13 +122,18 @@
 	aria-label="Einbeitingartímamælir"
 >
 	{#if !expanded}
-		<!-- Collapsed pill -->
+		<!-- Collapsed pill. Named by its content, not an aria-label, so the name holds the
+		     time and phase it shows (WCAG 2.5.3, Label in Name): "Opna tímamæli, 24:13 Vinna".
+		     The name ticks with the clock. Chromium fires no MSAA name-change event for a name
+		     from content, so NVDA in Chrome and Edge does not re-read it every second, as it
+		     would an aria-label; NVDA in Firefox and Narrator may, while the pill has focus.
+		     Keep the time and phase together, after the hidden prefix. -->
 		<button
 			onclick={toggleExpanded}
 			class="pill {pulsing ? 'pulse' : ''}"
-			aria-label="Opna tímamæli"
 			transition:fade={{ duration: 150 }}
 		>
+			<span class="sr-only">Opna tímamæli,</span>
 			<span class="pill-icon" aria-hidden="true">&#9201;</span>
 			<span class="pill-time">{formatTime(secondsLeft)}</span>
 			{#if phase !== 'idle'}
