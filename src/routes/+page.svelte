@@ -605,8 +605,10 @@
     transition: color 0.15s;
   }
 
+  /* Grey to bronze is a hue change only (1.04:1 in light), so the hover also underlines. */
   .header-nav a:hover {
     color: var(--accent-strong);
+    text-decoration: underline;
   }
 
   .theme-toggle {
@@ -756,6 +758,7 @@
 
   .btn-text:hover {
     color: var(--accent-strong);
+    text-decoration: underline;
   }
 
   /* ====================================
@@ -930,14 +933,17 @@
     margin: 0;
   }
 
+  /* A link in running text: bronze is about 1.04:1 against the paragraph, so colour cannot
+     mark it (WCAG 1.4.1). Underlined at rest; the hover thickens the line. */
   .catalogue-intro a {
     color: var(--accent-strong);
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
     font-weight: 500;
   }
 
   .catalogue-intro a:hover {
-    text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 
   /* ====================================
@@ -1079,6 +1085,7 @@
 
   .compact-link:hover {
     color: var(--accent-strong);
+    text-decoration: underline;
   }
 
   /* ====================================
@@ -1360,14 +1367,16 @@
     color: var(--text-secondary);
   }
 
+  /* Running text again: underlined at rest, as .catalogue-intro a. */
   .faq-answer :global(a) {
     color: var(--accent-strong);
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
     font-weight: 500;
   }
 
   .faq-answer :global(a:hover) {
-    text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 
   /* ====================================
@@ -1388,13 +1397,16 @@
     line-height: 1.6;
   }
 
+  /* Secondary grey in a tertiary-grey line: since --text-tertiary rose (UI-02) the two
+     are about 1.05:1 apart, so the links are underlined at rest (axe link-in-text-block). */
   .footer a {
     color: var(--text-secondary);
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .footer a:hover {
-    text-decoration: underline;
+    text-decoration-thickness: 2px;
     color: var(--accent-strong);
   }
 

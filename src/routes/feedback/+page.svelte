@@ -543,8 +543,10 @@
     font-size: 0.875rem;
   }
 
+  /* Grey to bronze is a hue change only (1.04:1 in light), so the hover also underlines. */
   .help-link a:hover {
     color: var(--accent-strong);
+    text-decoration: underline;
   }
 
   /* Footer */

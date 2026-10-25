@@ -265,7 +265,7 @@
 			<button
 				onclick={handleSave}
 				disabled={!canSave}
-				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors hover:bg-[var(--accent-fill-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
+				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors enabled:hover:bg-[var(--accent-fill-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				<Icon name="check" size="sm" />
 				Vista minniskort

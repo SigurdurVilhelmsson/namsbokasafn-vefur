@@ -457,7 +457,9 @@
   }
 
   .book-icon.chemistry {
-    background: linear-gradient(135deg, var(--accent-light, #f5e6b8), var(--accent-color, #c78c20));
+    /* Both ends carry the ink icon: 6.45 -> 5.12:1 in light, 10.33 -> 8.66:1 in dark. From
+       --accent-light the dark end started near black, under the ink icon. */
+    background: linear-gradient(135deg, var(--accent-fill-hover), var(--accent-color));
   }
 
   .book-info {

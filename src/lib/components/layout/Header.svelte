@@ -324,8 +324,10 @@
 		transition: color 0.15s;
 	}
 
+	/* Grey to bronze is a hue change only (1.04:1 in light), so the hover also underlines. */
 	a.breadcrumb-item:hover {
 		color: var(--accent-strong);
+		text-decoration: underline;
 	}
 
 	.breadcrumb-item.current {
