@@ -608,7 +608,23 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-10-25 — Dependabot round merged; merged branches now delete themselves
+
+Measured on 2026-10-25 against `main` = `ae703cc` (#287) and the live site.
+
+- **Merged, each with green CI on its PR and on `main`:** #267 (setup-node 7.1.0) and #268 (upload-artifact 7.0.2), CI only; #266 and #288 (lucide 1.48 → 1.61; all 69 icons we import are drawn identically); #280 (axe-core 4.14.0, with 26 new baseline entries, below); #286 (Dependabot skips SvelteKit 3 and adapter-static 4, below); and #287, the development group's 12 updates.
+- **Not deployed:** `main`'s shipped code now differs from prod (build `1792871972257`) by svelte 5.57.2, vite 8.3.5 and lucide 1.61. Nothing visible changes; it rides train 2.
+- **axe-core 4.14 runs `label-content-name-mismatch` by default** (WCAG 2.5.3 Label in Name, Level A). It finds four elements on the live site whose accessible name does not contain their visible text: the timer pill ("Opna tímamæli", showing "⏱ 25:00"), the header search button ("Leita", showing "Ctrl+K" at 1280 px), the section breadcrumb ("Velja undirkafla", showing "Kafli 1 › 1.1 …") and the five learning-objective buttons (all "Merkja markmið sem kláruð", showing "1" to "5"). #280 records them as 26 baseline entries (86 → 112; none re-keyed or gone). Each fix gets its own PR, which removes its entries.
+- **SvelteKit 3 is skipped for now** (#286, `.github/dependabot.yml`): `@vite-pwa/sveltekit` 1.1.0, the latest release, peers `@sveltejs/kit` `^1.3.1 || ^2.0.1`, so the development group's `npm ci` failed with ERESOLVE (#281, which Dependabot then closed and replaced with #287). The comment beside the ignore says when to lift it and what the migration must also do.
+- **npm audit, 2026-10-25:** production tree 0; full tree 5, down from 11, with 0 high (1 moderate: `fast-uri`; 4 low: kit's two, also flagged through `adapter-static` and `@vite-pwa/sveltekit`, and `serialize-javascript`). Kit's two are fixed only in SvelteKit 3.
+- 🔑 **Merged branches now delete themselves** (`delete_branch_on_merge`, turned on 2026-10-25). By GitHub's documented behaviour, deleting a merged PR's branch points any PR based on it at the merged PR's base, so a stacked PR should retarget to `main` by itself when its parent merges. That replaces the hand retarget in the 2026-10-24 entry's stacked-PR bullet; it has not been seen here yet, so check `gh pr view <N> --json baseRefName` before merging the next stacked PR. CI still runs only for PRs into `main` or `feature/**`, and a retarget starts no run. 23 merged branches were deleted the same day. GitHub keeps `main`, `archive/react-v1`, `feature/reader-v1.1` and `feature/reader-v1.2`, plus open PRs' branches.
+- **Open:** Dependabot #289 (`@playwright/test` 1.64.1), in a PR of its own on purpose: a new Chromium can change the ratchet's baseline.
+- **Next:** the search-box fix (2026-10-24 evening entry), then the four label-in-name fixes and M2.
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+
 ### 2026-10-24 (evening) — train 1 deployed: M1's fixes are live
+
+> ⚠️ **Superseded on one point — read the 2026-10-25 entry above first.** `main` has moved on (the Dependabot round, `ae703cc`), and its shipped code no longer matches prod's, so "nothing on `main` is undeployed" no longer holds. The rest of this entry stands.
 
 Measured on 2026-10-24 against `main` = `e6b203b` (#283) and the live site.
 
