@@ -102,7 +102,6 @@
 		"section 1280 dark": [
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | kbd in header | kbd.kbd-hint",
-			"label-content-name-mismatch | .items-start.gap-3.text-\\[var\\(--text-primary\\)\\] > .flex-shrink-0.w-6.h-6 | button",
 			"label-content-name-mismatch | .pill | button"
 		],
 		"section 1280 light": [
@@ -111,13 +110,11 @@
 			"color-contrast | .sm\\:text-sm > | span",
 			"color-contrast | a in aside | a",
 			"color-contrast | kbd in header | kbd.kbd-hint",
-			"label-content-name-mismatch | .items-start.gap-3.text-\\[var\\(--text-primary\\)\\] > .flex-shrink-0.w-6.h-6 | button",
 			"label-content-name-mismatch | .pill | button"
 		],
 		"section 390 dark": [
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-label | span",
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span",
-			"label-content-name-mismatch | .items-start.gap-3.text-\\[var\\(--text-primary\\)\\] > .flex-shrink-0.w-6.h-6 | button",
 			"label-content-name-mismatch | .pill | button"
 		],
 		"section 390 light": [
@@ -125,7 +122,6 @@
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span",
 			"color-contrast | .sm\\:text-sm > | span",
 			"color-contrast | a in aside | a",
-			"label-content-name-mismatch | .items-start.gap-3.text-\\[var\\(--text-primary\\)\\] > .flex-shrink-0.w-6.h-6 | button",
 			"label-content-name-mismatch | .pill | button"
 		],
 		"settings 1280 dark": [
