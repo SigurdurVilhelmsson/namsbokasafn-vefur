@@ -264,14 +264,15 @@
 								<div class="p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-100 dark:border-gray-600">
 									<div class="flex items-start gap-3">
 										<!-- Checkbox -->
-										<!-- D20: proposed wording ("Merkja sem lokið", the owner's word, was "Merkja sem kláruð";
-										     it matches the section page's buttons), checked in the batch before the train that ships it. -->
+										<!-- D20: proposed wording (both names: "Merkja sem lokið", the owner's word, was "Merkja sem
+										     kláruð", and "Afmerkja sem ólokið" was "Afmerkja sem ókláruð"), checked in the batch before
+										     the train that ships it. -->
 										<button
 											onclick={() => toggleObjective(obj.chapterSlug, obj.sectionSlug, obj.objectiveIndex, obj.objectiveText)}
 											class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {obj.isCompleted
 												? 'bg-green-500 border-green-500 text-white'
 												: 'border-gray-300 dark:border-gray-500 hover:border-green-400'}"
-											aria-label={obj.isCompleted ? 'Afmerkja sem ókláruð' : 'Merkja sem lokið'}
+											aria-label={obj.isCompleted ? 'Afmerkja sem ólokið' : 'Merkja sem lokið'}
 										>
 											{#if obj.isCompleted}
 												<Icon name="check" size="sm" />
@@ -321,9 +322,11 @@
 		<!-- Help text -->
 		<div class="mt-8 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
 			<h3 class="font-medium text-blue-900 dark:text-blue-100 mb-2">Um námsmarkmið</h3>
+			<!-- D20: proposed wording ("merktu viðeigandi markmið sem lokið" was "… sem kláruð"), checked in
+			     the batch before the train that ships it. -->
 			<p class="text-sm text-blue-800 dark:text-blue-200">
 				Námsmarkmið hjálpa þér að fylgjast með hvað þú hefur lært. Þegar þú hefur lesið kafla og skilur efnið,
-				merktu viðeigandi markmið sem kláruð. Notaðu sjálfsvissumatið til að bera kennsl á svæði sem þarfnast meiri athygli.
+				merktu viðeigandi markmið sem lokið. Notaðu sjálfsvissumatið til að bera kennsl á svæði sem þarfnast meiri athygli.
 			</p>
 		</div>
 	{/if}
