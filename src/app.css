@@ -527,12 +527,14 @@
 }
 
 .reading-content a {
-  color: var(--accent-color);
+  color: var(--accent-strong);
   text-decoration: underline;
 }
 
+/* The colour stays bronze on hover (no lighter amber passes as text); the
+   underline thickens instead. */
 .reading-content a:hover {
-  color: var(--accent-hover);
+  text-decoration-thickness: 2px;
 }
 
 /* ========================================== */
@@ -579,12 +581,12 @@
 
 .badge-in-progress {
   background-color: var(--accent-light);
-  color: var(--accent-color);
+  color: var(--accent-strong);
 }
 
 .dark .badge-in-progress {
   background-color: var(--accent-subtle);
-  color: var(--accent-color);
+  color: var(--accent-strong);
 }
 
 /* Learning objectives box */
@@ -598,7 +600,7 @@
 }
 
 .objectives-box h3 {
-  color: var(--accent-color);
+  color: var(--accent-strong);
   font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
@@ -827,11 +829,11 @@
 }
 
 .content-block.learning-objectives .content-block-title {
-  color: var(--accent-color);
+  color: var(--accent-strong);
 }
 
 .content-block.learning-objectives .content-block-icon {
-  color: var(--accent-color);
+  color: var(--accent-strong);
 }
 
 .content-block.learning-objectives ul {
@@ -896,11 +898,11 @@
 }
 
 .content-block.chapter-overview .content-block-title {
-  color: var(--accent-color);
+  color: var(--accent-strong);
 }
 
 .content-block.chapter-overview .content-block-icon {
-  color: var(--accent-color);
+  color: var(--accent-strong);
 }
 
 /* Chemist Portrait block - Gray left border */
@@ -1041,7 +1043,7 @@
 .eoc-exercise[data-has-answer="true"]::after {
   content: " [Svar]";
   font-size: 0.875rem;
-  color: var(--accent-color);
+  color: var(--accent-strong);
   cursor: pointer;
 }
 
@@ -1473,7 +1475,7 @@ td:has(> math.assistive-mathml) {
 
 .figure-lightbox-btn:hover {
   background-color: var(--bg-tertiary);
-  color: var(--accent-color);
+  color: var(--accent-strong);
 }
 
 .figure-lightbox-btn svg {

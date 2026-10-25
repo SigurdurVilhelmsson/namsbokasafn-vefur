@@ -197,7 +197,7 @@
 		display: inline-block;
 		margin-bottom: 1.5rem;
 		font-size: 0.875rem;
-		color: var(--accent-hover);
+		color: var(--accent-strong);
 		text-decoration: none;
 	}
 
@@ -309,7 +309,18 @@
 	}
 
 	.colophon a {
-		color: var(--accent-hover);
+		color: var(--accent-strong);
+	}
+
+	/* Bronze is only 2.6:1 against the body ink in light (the old --accent-hover was 3.71),
+	   too close for colour alone to mark a link in running text (WCAG 1.4.1), so the
+	   colophon's links are underlined. The back link keeps its own hover-only underline. */
+	.colophon a:not(.colophon__back) {
+		text-decoration: underline;
+	}
+
+	.colophon a:not(.colophon__back):hover {
+		text-decoration-thickness: 2px;
 	}
 
 	.colophon__error {

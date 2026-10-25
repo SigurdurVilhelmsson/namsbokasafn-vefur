@@ -303,7 +303,7 @@
 	}
 
 	.brand-link:hover {
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 
 	.breadcrumb-sep {
@@ -325,7 +325,7 @@
 	}
 
 	a.breadcrumb-item:hover {
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 
 	.breadcrumb-item.current {

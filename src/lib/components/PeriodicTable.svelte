@@ -326,7 +326,7 @@
 					<!-- Atomic properties -->
 					<div class="pte-detail-card">
 						<h3 class="pte-detail-title">
-							<Icon name="circle-dot" size="sm" style="color: var(--accent-color);" />
+							<Icon name="circle-dot" size="sm" style="color: var(--accent-strong);" />
 							Eiginleikar
 						</h3>
 						<dl class="pte-detail-list">
@@ -356,7 +356,7 @@
 					<!-- Electronic properties -->
 					<div class="pte-detail-card">
 						<h3 class="pte-detail-title">
-							<Icon name="zap" size="sm" style="color: var(--accent-color);" />
+							<Icon name="zap" size="sm" style="color: var(--accent-strong);" />
 							Rafeindir
 						</h3>
 						<dl class="pte-detail-list">
@@ -380,7 +380,7 @@
 					<!-- Physical properties -->
 					<div class="pte-detail-card">
 						<h3 class="pte-detail-title">
-							<Icon name="chart-column" size="sm" style="color: var(--accent-color);" />
+							<Icon name="chart-column" size="sm" style="color: var(--accent-strong);" />
 							Eðliseiginleikar
 						</h3>
 						<dl class="pte-detail-list">
@@ -408,7 +408,7 @@
 					<!-- Classification -->
 					<div class="pte-detail-card">
 						<h3 class="pte-detail-title">
-							<Icon name="box" size="sm" style="color: var(--accent-color);" />
+							<Icon name="box" size="sm" style="color: var(--accent-strong);" />
 							Flokkun
 						</h3>
 						<dl class="pte-detail-list">

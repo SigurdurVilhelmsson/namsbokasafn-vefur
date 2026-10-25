@@ -123,9 +123,9 @@
 		<!-- Header -->
 		<div class="ann-divider flex items-center justify-between border-b px-4 py-4">
 			<div class="flex items-center gap-2">
-				<Icon name="square-pen" class="text-[var(--accent-color)]" />
+				<Icon name="square-pen" class="text-[var(--accent-strong)]" />
 				<h2 class="ann-title text-lg font-semibold">Athugasemdir</h2>
-				<span class="rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-xs font-medium text-[var(--accent-color)]">
+				<span class="rounded-full bg-[var(--accent-light)] px-2 py-0.5 text-xs font-medium text-[var(--accent-strong)]">
 					{filteredAnnotations.length}
 				</span>
 			</div>
@@ -163,7 +163,7 @@
 								showFilterMenu = false;
 							}}
 							class="ann-dropdown-item w-full px-3 py-2 text-left text-sm {filter === 'all'
-								? 'text-[var(--accent-color)]'
+								? 'text-[var(--accent-strong)]'
 								: ''}"
 						>
 							Allt ({stats.total})
@@ -175,7 +175,7 @@
 									showFilterMenu = false;
 								}}
 								class="ann-dropdown-item w-full px-3 py-2 text-left text-sm {filter === 'current'
-									? 'text-[var(--accent-color)]'
+									? 'text-[var(--accent-strong)]'
 									: ''}"
 							>
 								Þessi kafli
@@ -189,7 +189,7 @@
 									showFilterMenu = false;
 								}}
 								class="ann-dropdown-item flex w-full items-center gap-2 px-3 py-2 text-left text-sm {filter === color
-									? 'text-[var(--accent-color)]'
+									? 'text-[var(--accent-strong)]'
 									: ''}"
 							>
 								<span

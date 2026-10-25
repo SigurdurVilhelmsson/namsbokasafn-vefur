@@ -228,7 +228,7 @@
 
 	.breadcrumb-option.current {
 		background: color-mix(in srgb, var(--accent-color) 10%, transparent);
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		font-weight: 500;
 	}
 
@@ -307,7 +307,7 @@
 		}
 
 		.nav-btn-next:hover .nav-btn-arrow {
-			color: var(--accent-color);
+			color: var(--accent-strong);
 		}
 
 		.nav-btn-next .nav-btn-text {
@@ -342,7 +342,7 @@
 		}
 
 		.nav-btn-prev:hover .nav-btn-arrow {
-			color: var(--accent-color);
+			color: var(--accent-strong);
 		}
 	}
 

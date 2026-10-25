@@ -238,7 +238,7 @@
 						>
 							<div class="font-medium">Gott</div>
 							{#if previewIntervals}
-								<div class="text-xs opacity-75">{previewIntervals.good}</div>
+								<div class="text-xs">{previewIntervals.good}</div>
 							{/if}
 						</button>
 						<button
@@ -287,7 +287,7 @@
 		height: 5rem;
 		border-radius: 9999px;
 		background-color: var(--accent-light);
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		margin-bottom: 1.5rem;
 	}
 	.flashcard-icon-circle--success {
@@ -343,7 +343,7 @@
 	}
 
 	.deck-card-stats-due {
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		font-weight: 500;
 	}
 
@@ -416,7 +416,7 @@
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 
 	/* Progress bar */
@@ -507,7 +507,12 @@
 	/* Good - accent */
 	.flashcard-rating--good {
 		background-color: var(--accent-light);
-		color: var(--accent-color);
+		color: var(--accent-strong);
+	}
+	/* A deeper tint, not the shared opacity fade: --accent-strong at 85% drops below 4.5:1 */
+	.flashcard-rating--good:hover {
+		opacity: 1;
+		background-color: var(--accent-subtle);
 	}
 	/* Easy - green */
 	.flashcard-rating--easy {

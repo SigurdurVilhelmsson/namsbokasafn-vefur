@@ -157,7 +157,7 @@
 		<div class="mb-8 p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
 			<div class="flex items-center justify-between mb-4">
 				<h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Framvinda</h2>
-				<span class="text-2xl font-bold text-[var(--accent-color)]">{completedCount}</span>
+				<span class="text-2xl font-bold text-[var(--accent-strong)]">{completedCount}</span>
 			</div>
 
 			{#if completedCount === 0}
@@ -284,7 +284,7 @@
 											{#if info}
 												<a
 													href="/{data.bookSlug}/kafli/{obj.chapterSlug}/{obj.sectionSlug}"
-													class="text-xs text-[var(--accent-color)] hover:underline mt-1 inline-block"
+													class="text-xs text-[var(--accent-strong)] hover:underline mt-1 inline-block"
 												>
 													{info.sectionNumber} {info.sectionTitle}
 												</a>

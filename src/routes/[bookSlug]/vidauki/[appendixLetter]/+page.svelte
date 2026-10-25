@@ -26,7 +26,7 @@
 	<nav class="mb-6 text-sm text-gray-500 dark:text-gray-400" aria-label="Brauðmylsna">
 		<ol class="flex items-center gap-2">
 			<li>
-				<a href="/{data.bookSlug}" class="hover:text-[var(--accent-color)]">
+				<a href="/{data.bookSlug}" class="hover:text-[var(--accent-strong)]">
 					Efnisyfirlit
 				</a>
 			</li>
@@ -81,7 +81,7 @@
 					<Icon name="chevron-left" size="sm" />
 					<span>Fyrri viðauki</span>
 				</div>
-				<div class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-color)]">
+				<div class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-strong)]">
 					Viðauki {data.previousAppendix.letter}: {data.previousAppendix.title}
 				</div>
 			</a>
@@ -98,7 +98,7 @@
 					<span>Næsti viðauki</span>
 					<Icon name="chevron-right" size="sm" />
 				</div>
-				<div class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-color)]">
+				<div class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-strong)]">
 					Viðauki {data.nextAppendix.letter}: {data.nextAppendix.title}
 				</div>
 			</a>

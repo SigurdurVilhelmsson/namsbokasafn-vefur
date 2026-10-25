@@ -177,7 +177,7 @@
 				class="flex items-center justify-between border-b border-[var(--border-color)] px-6 py-4"
 			>
 				<div class="flex items-center gap-3">
-					<Icon name="keyboard" size="lg" class="text-[var(--accent-color)]" />
+					<Icon name="keyboard" size="lg" class="text-[var(--accent-strong)]" />
 					<h2
 						id="shortcuts-modal-title"
 						class="font-sans text-lg font-semibold text-[var(--text-primary)]"
@@ -233,7 +233,7 @@
 											{#if shortcut.isCustomized && !isEditing}
 												<button
 													onclick={() => handleResetShortcut(shortcut.action)}
-													class="rounded p-1 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--accent-color)]"
+													class="rounded p-1 text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)] hover:text-[var(--accent-strong)]"
 													title="Endurstilla ({formatShortcutKey(shortcut.defaultKey)})"
 												>
 													<Icon name="refresh-cw" size="sm" />
@@ -274,7 +274,7 @@
 			<div class="border-t border-[var(--border-color)] px-6 py-4">
 				<div class="text-center text-sm text-[var(--text-secondary)]">
 					{#if editingAction}
-						<span class="text-[var(--accent-color)]">
+						<span class="text-[var(--accent-strong)]">
 							Ýttu á nýjan lykil til að skipta um flýtilykil
 						</span>
 					{:else}

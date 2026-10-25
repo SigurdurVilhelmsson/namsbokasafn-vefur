@@ -45,7 +45,7 @@
 		border-radius: var(--radius-sm, 0.375rem);
 		border: 1px solid var(--accent-subtle, #e6cfa0);
 		background: var(--accent-subtle, #faf3e3);
-		color: var(--accent-hover, #a8741a);
+		color: var(--accent-strong, #8a5d0e);
 		text-decoration: none;
 		transition:
 			background 0.15s ease,
@@ -78,7 +78,7 @@
 	:global(.dark) .licence-badge {
 		border-color: #5a4413;
 		background: #2a2418;
-		color: var(--accent-color, #e8a838);
+		color: var(--accent-strong, #e8a838);
 	}
 
 	:global(.dark) .licence-badge.restricted {

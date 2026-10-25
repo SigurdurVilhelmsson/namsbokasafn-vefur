@@ -334,11 +334,12 @@
 		padding: 0.25rem 0.5rem;
 		border-radius: 0.25rem;
 		background-color: var(--bg-tertiary);
-		color: var(--accent-color);
-		transition: opacity 0.15s;
+		color: var(--accent-strong);
+		transition: background-color 0.15s;
 	}
+	/* No opacity fade: bronze text at 0.8 drops below 4.5:1, so the hover tints the chip instead. */
 	.glossary-related-tag:hover {
-		opacity: 0.8;
+		background-color: var(--accent-subtle);
 		text-decoration: underline;
 	}
 </style>

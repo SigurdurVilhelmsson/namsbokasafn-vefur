@@ -312,7 +312,7 @@
   }
 
   .email-fallback a {
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: underline;
   }
 
@@ -483,7 +483,7 @@
   }
 
   .type-option.selected .type-icon {
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .type-label {
@@ -493,7 +493,7 @@
   }
 
   .type-option.selected .type-label {
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .type-sublabel {
@@ -544,7 +544,7 @@
   }
 
   .help-link a:hover {
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   /* Footer */

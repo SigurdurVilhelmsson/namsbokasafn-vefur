@@ -248,7 +248,7 @@
 			</div>
 			<button
 				onclick={handleDownload}
-				class="text-sm font-medium text-[var(--accent-color)] hover:text-[var(--accent-hover)]"
+				class="text-sm font-medium text-[var(--accent-strong)] hover:underline"
 			>
 				Reyna aftur
 			</button>

@@ -248,7 +248,7 @@
 						/>
 						<div class="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1">
 							{#if loading}
-								<svg class="h-5 w-5 animate-spin text-[var(--accent-color)]" fill="none" viewBox="0 0 24 24">
+								<svg class="h-5 w-5 animate-spin text-[var(--accent-strong)]" fill="none" viewBox="0 0 24 24">
 									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
 									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
 								</svg>
@@ -256,7 +256,7 @@
 							<button
 								onclick={() => (showFilters = !showFilters)}
 								class="rounded p-1 transition-colors {showFilters || hasActiveFilters
-									? 'bg-[var(--accent-color)]/10 text-[var(--accent-color)]'
+									? 'bg-[var(--accent-color)]/10 text-[var(--accent-strong)]'
 									: 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}"
 								aria-label="Síur"
 								title="Síur"
@@ -274,7 +274,7 @@
 								{#if hasActiveFilters}
 									<button
 										onclick={clearFilters}
-										class="flex items-center gap-1 rounded px-2 py-1 font-sans text-xs text-[var(--accent-color)] hover:bg-[var(--accent-color)]/10"
+										class="flex items-center gap-1 rounded px-2 py-1 font-sans text-xs text-[var(--accent-strong)] hover:bg-[var(--accent-color)]/10"
 									>
 										<Icon name="x" size="sm" />
 										Hreinsa
@@ -318,7 +318,7 @@
 									Sláðu inn að minnsta kosti 2 stafi til að leita
 								</p>
 								<p class="flex items-center justify-center gap-1 text-xs text-[var(--text-secondary)]">
-									<Icon name="sparkles" size="sm" class="text-[var(--accent-color)]" />
+									<Icon name="sparkles" size="sm" class="text-[var(--accent-strong)]" />
 									Styður óbeina leit (fuzzy search)
 								</p>
 							</div>
@@ -406,7 +406,7 @@
 									>
 										<div class="mb-1 flex items-center justify-between">
 											<div class="flex items-center gap-2">
-												<Icon name="file-text" size="sm" class="text-[var(--accent-color)]" />
+												<Icon name="file-text" size="sm" class="text-[var(--accent-strong)]" />
 												<span class="font-sans text-sm font-semibold">
 													{result.sectionNumber} {result.sectionTitle}
 												</span>
@@ -427,7 +427,7 @@
 											</p>
 										{/if}
 										{#if result.matches > 1}
-											<p class="mt-2 text-xs text-[var(--accent-color)]">
+											<p class="mt-2 text-xs text-[var(--accent-strong)]">
 												{result.matches} samsvörun{result.matches !== 1 ? 'ar' : ''}
 											</p>
 										{/if}

@@ -320,7 +320,7 @@
 										style="height: {Math.max(height, 4)}%"
 									></div>
 								</div>
-								<span class="text-xs font-medium {isToday ? 'text-[var(--accent-color)]' : 'text-gray-500 dark:text-gray-400'}">
+								<span class="text-xs font-medium {isToday ? 'text-[var(--accent-strong)]' : 'text-gray-500 dark:text-gray-400'}">
 									{day.label}
 								</span>
 							</div>

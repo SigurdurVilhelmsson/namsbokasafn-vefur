@@ -153,7 +153,7 @@
 				id="flashcard-modal-title"
 				class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100"
 			>
-				<Icon name="sparkles" class="text-[var(--accent-color)]" />
+				<Icon name="sparkles" class="text-[var(--accent-strong)]" />
 				Búa til minniskort
 			</h2>
 			<button
@@ -239,7 +239,7 @@
 
 				<button
 					onclick={toggleNewDeck}
-					class="mt-2 flex items-center gap-1 text-sm text-[var(--accent-color)] hover:underline"
+					class="mt-2 flex items-center gap-1 text-sm text-[var(--accent-strong)] hover:underline"
 				>
 					{#if showNewDeckInput}
 						<Icon name="arrow-left" size="sm" />

@@ -170,7 +170,7 @@
 	.rfp-confidence-btn {
 		padding: 0.75rem;
 		border-radius: var(--radius-lg);
-		transition: opacity 0.15s;
+		transition: opacity 0.15s, background-color 0.15s;
 		text-align: center;
 	}
 	.rfp-confidence-btn:hover { opacity: 0.85; }
@@ -181,10 +181,13 @@
 	.rfp-confidence-btn--2 { background-color: #fff7ed; color: #c2410c; }
 	:global(.dark) .rfp-confidence-btn--2 { background-color: rgba(124,45,18,0.3); color: #fdba74; }
 	/* 3 = amber/accent */
-	.rfp-confidence-btn--3 { background-color: var(--accent-light); color: var(--accent-color); }
+	.rfp-confidence-btn--3 { background-color: var(--accent-light); color: var(--accent-strong); }
 	/* 4 = green */
 	.rfp-confidence-btn--4 { background-color: #ecfdf5; color: #047857; }
 	:global(.dark) .rfp-confidence-btn--4 { background-color: rgba(6,78,59,0.3); color: #6ee7b7; }
 	/* 5 = accent solid */
-	.rfp-confidence-btn--5 { background-color: var(--accent-light); color: var(--accent-color); }
+	.rfp-confidence-btn--5 { background-color: var(--accent-light); color: var(--accent-strong); }
+	/* 3 and 5: a deeper tint, not the shared opacity fade (--accent-strong at 85% drops below 4.5:1) */
+	.rfp-confidence-btn--3:hover,
+	.rfp-confidence-btn--5:hover { opacity: 1; background-color: var(--accent-subtle); }
 </style>

@@ -139,7 +139,7 @@
 		font-size: 0.75rem;
 		font-weight: 500;
 		background-color: var(--accent-light);
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 	.rdp-badge--done {
 		background-color: #059669;
@@ -174,11 +174,13 @@
 		padding: 0.375rem 0.75rem;
 		border-radius: var(--radius-lg);
 		font-size: 0.875rem;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		background-color: var(--accent-light);
-		transition: opacity 0.15s;
+		transition: background-color 0.15s;
 	}
-	.rdp-read-link:hover { opacity: 0.85; }
+	/* Deepen the tint, never fade: an opacity fade drops bronze text below 4.5:1.
+	   --accent-strong on --accent-subtle is 4.55:1 light, 6.64:1 dark. */
+	.rdp-read-link:hover { background-color: var(--accent-subtle); }
 	.rdp-done-btn {
 		display: inline-flex;
 		align-items: center;

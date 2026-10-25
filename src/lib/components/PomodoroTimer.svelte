@@ -300,7 +300,7 @@
 	}
 
 	.break-phase .time {
-		color: var(--accent-color, #c78c20);
+		color: var(--accent-strong, #8a5d0e);
 	}
 
 	.phase-label {

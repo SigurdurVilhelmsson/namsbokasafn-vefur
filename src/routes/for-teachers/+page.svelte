@@ -48,7 +48,7 @@
       <!-- Section: Access -->
       <section class="section" id="access">
         <h2>
-          <Icon name="book" size="md" class="text-[var(--accent-color)]" />
+          <Icon name="book" size="md" class="text-[var(--accent-strong)]" />
           Aðgangur að efni
         </h2>
 
@@ -62,7 +62,7 @@
             <strong>Efnafræði</strong>
             <span>Kaflar 1-4 tiltækir</span>
           </div>
-          <Icon name="chevron-right" size="md" class="text-[var(--text-secondary)] group-hover:text-[var(--accent-color)]" />
+          <Icon name="chevron-right" size="md" class="text-[var(--text-secondary)] group-hover:text-[var(--accent-strong)]" />
         </a>
 
         <div class="highlight-box">
@@ -83,7 +83,7 @@
       <!-- Section: Content Status -->
       <section class="section" id="content-status">
         <h2>
-          <Icon name="clipboard-check" size="md" class="text-[var(--accent-color)]" />
+          <Icon name="clipboard-check" size="md" class="text-[var(--accent-strong)]" />
           Staða efnis
         </h2>
 
@@ -129,7 +129,7 @@
       <!-- Section: Known Issues -->
       <section class="section" id="known-issues">
         <h2>
-          <Icon name="triangle-alert" size="md" class="text-[var(--accent-color)]" />
+          <Icon name="triangle-alert" size="md" class="text-[var(--accent-strong)]" />
           Þekkt vandamál
         </h2>
 
@@ -168,7 +168,7 @@
       <!-- Section: Quality -->
       <section class="section" id="quality">
         <h2>
-          <Icon name="star" size="md" class="text-[var(--accent-color)]" />
+          <Icon name="star" size="md" class="text-[var(--accent-strong)]" />
           Gæði þýðinga
         </h2>
 
@@ -197,7 +197,7 @@
       <!-- Section: Feedback -->
       <section class="section" id="feedback">
         <h2>
-          <Icon name="message-square" size="md" class="text-[var(--accent-color)]" />
+          <Icon name="message-square" size="md" class="text-[var(--accent-strong)]" />
           Tilkynna villur
         </h2>
 
@@ -226,7 +226,7 @@
       <!-- Section: Support -->
       <section class="section" id="support">
         <h2>
-          <Icon name="circle-help" size="md" class="text-[var(--accent-color)]" />
+          <Icon name="circle-help" size="md" class="text-[var(--accent-strong)]" />
           Stuðningur
         </h2>
 
@@ -234,12 +234,12 @@
 
         <div class="contact-grid">
           <div class="contact-card">
-            <Icon name="mail" size="lg" class="text-[var(--accent-color)] mb-2" />
+            <Icon name="mail" size="lg" class="text-[var(--accent-strong)] mb-2" />
             <h4>Tölvupóstur</h4>
             <a href="mailto:namsbokasafn@gmail.com">namsbokasafn@gmail.com</a>
           </div>
           <div class="contact-card">
-            <Icon name="square-pen" size="lg" class="text-[var(--accent-color)] mb-2" />
+            <Icon name="square-pen" size="lg" class="text-[var(--accent-strong)] mb-2" />
             <h4>Endurgjöf</h4>
             <a href="/feedback">Opna eyðublað</a>
           </div>
@@ -350,7 +350,7 @@
   }
 
   .toc a {
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: none;
     font-size: 0.875rem;
   }
@@ -411,8 +411,20 @@
     margin-bottom: 0.5rem;
   }
 
-  .section a {
-    color: var(--accent-color);
+  /*
+   * Prose links only. A bare `.section a` out-specified `.feedback-link` and
+   * `.book-link` (Svelte scopes it to (0,2,1) against their (0,2,0)), so the
+   * "Senda endurgjöf" button's text took the accent colour on its own accent fill.
+   * Underlined at rest: bronze is only 2.6:1 against the body text beside it,
+   * short of the 3:1 a colour-only link needs.
+   */
+  .section p a {
+    color: var(--accent-strong);
+    text-decoration: underline;
+  }
+
+  .section p a:hover {
+    text-decoration-thickness: 2px;
   }
 
   /* Book link */
@@ -509,7 +521,7 @@
     padding: 0.125rem 0.375rem;
     border-radius: 0.25rem;
     font-size: 0.875rem;
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   /* Status table */
@@ -612,7 +624,7 @@
 
   .contact-card a {
     font-size: 0.875rem;
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: none;
   }
 
@@ -634,13 +646,14 @@
     margin: 0 0 0.25rem;
   }
 
+  /* Underlined at rest: bronze is 1.04:1 against the footer's grey text, so colour alone cannot mark the link. */
   .guide-footer a {
-    color: var(--accent-color);
-    text-decoration: none;
+    color: var(--accent-strong);
+    text-decoration: underline;
   }
 
   .guide-footer a:hover {
-    text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 
   /* Responsive */

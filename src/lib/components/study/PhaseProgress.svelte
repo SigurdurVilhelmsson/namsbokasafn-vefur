@@ -118,7 +118,7 @@
 	}
 	.phase-label--current {
 		font-weight: 500;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 	}
 	.phase-label--completed {
 		color: #059669;

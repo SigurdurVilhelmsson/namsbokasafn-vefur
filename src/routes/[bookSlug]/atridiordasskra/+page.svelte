@@ -468,7 +468,7 @@
 		font-family: "Bricolage Grotesque", system-ui, sans-serif;
 		font-size: 1.125rem;
 		font-weight: 700;
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		padding-bottom: 0.375rem;
 		border-bottom: 2px solid var(--accent-color);
 		margin-bottom: 0.5rem;
@@ -512,14 +512,13 @@
 		margin: 0 0.125rem;
 	}
 	.index-ref-link {
-		color: var(--accent-color);
+		color: var(--accent-strong);
 		text-decoration: none;
 		font-weight: 500;
-		transition: opacity 0.15s;
 	}
+	/* Underline is the hover cue: an opacity fade drops --accent-strong below 4.5:1. */
 	.index-ref-link:hover {
 		text-decoration: underline;
-		opacity: 0.8;
 	}
 
 	/* Responsive: stack term and refs on small screens */

@@ -116,7 +116,7 @@
 			<p class="text-gray-500 dark:text-gray-400 mb-4">Engin markmið skráð enn</p>
 			<button
 				onclick={() => (showAddModal = true)}
-				class="text-[var(--accent-color)] hover:underline"
+				class="text-[var(--accent-strong)] hover:underline"
 			>
 				Bæta við fyrsta markmiðinu
 			</button>

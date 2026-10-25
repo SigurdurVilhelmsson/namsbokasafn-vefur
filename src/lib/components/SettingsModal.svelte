@@ -165,7 +165,7 @@
 							<label for="font-size-slider" class="text-sm font-medium text-[var(--text-primary)]">
 								Leturstærð
 							</label>
-							<span class="text-sm text-[var(--accent-color)] font-medium">
+							<span class="text-sm text-[var(--accent-strong)] font-medium">
 								{fontSizes.find(s => s.value === $fontSize)?.label}
 							</span>
 						</div>
@@ -176,7 +176,7 @@
 									<button
 										onclick={() => settings.setFontSize(size.value)}
 										class="text-xs transition-colors {$fontSize === size.value
-											? 'text-[var(--accent-color)] font-semibold'
+											? 'text-[var(--accent-strong)] font-semibold'
 											: 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}"
 										style="font-size: {10 + i * 2}px"
 										aria-label="Stilla leturstærð á {size.label}"
@@ -248,7 +248,7 @@
 										name="font"
 										checked={$fontFamily === family.value}
 										onchange={() => settings.setFontFamily(family.value)}
-										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-color)] accent-[var(--focus-ring)] focus:ring-[var(--accent-color)]"
+										class="h-4 w-4 shrink-0 border-[var(--border-color)] text-[var(--accent-strong)] accent-[var(--focus-ring)] focus:ring-[var(--accent-color)]"
 									/>
 									<div>
 										<span class="text-[var(--text-primary)] font-medium {family.value === 'serif' ? 'font-serif' : family.value === 'opendyslexic' ? 'font-opendyslexic' : 'font-sans'}">

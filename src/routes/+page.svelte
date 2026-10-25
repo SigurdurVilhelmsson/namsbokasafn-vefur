@@ -337,7 +337,7 @@
       <!-- Minniskort -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
-          <Icon name="credit-card" size="md" style="color: var(--accent-color)" />
+          <Icon name="credit-card" size="md" style="color: var(--accent-strong)" />
         </div>
         <h3>Minniskort</h3>
         <p>Endurtekningarkerfi sem aðlagar sig að þér</p>
@@ -346,7 +346,7 @@
       <!-- Orðasafn -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
-          <Icon name="book-open" size="md" style="color: var(--accent-color)" />
+          <Icon name="book-open" size="md" style="color: var(--accent-strong)" />
         </div>
         <h3>Orðasafn</h3>
         <p>Smelltu á hugtök til að sjá skilgreiningar</p>
@@ -606,7 +606,7 @@
   }
 
   .header-nav a:hover {
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .theme-toggle {
@@ -708,7 +708,7 @@
   .hero-credit {
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--accent-color);
+    color: var(--accent-strong);
     margin: -1.25rem 0 2rem;
     max-width: 36rem;
   }
@@ -755,7 +755,7 @@
   }
 
   .btn-text:hover {
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   /* ====================================
@@ -886,7 +886,7 @@
 
   .status-in-progress {
     background: var(--accent-light);
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .status-preview {
@@ -931,7 +931,7 @@
   }
 
   .catalogue-intro a {
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: none;
     font-weight: 500;
   }
@@ -1078,7 +1078,7 @@
   }
 
   .compact-link:hover {
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   /* ====================================
@@ -1197,7 +1197,7 @@
   }
 
   .about-card a {
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: none;
   }
 
@@ -1212,7 +1212,7 @@
     margin-top: 1rem;
     font-size: 0.9375rem;
     font-weight: 500;
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: none;
     transition: gap 0.2s;
   }
@@ -1269,7 +1269,7 @@
     display: block;
     margin-top: 0.15rem;
     font-size: 0.875rem;
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: none;
   }
 
@@ -1338,7 +1338,7 @@
   }
 
   .faq-question:hover {
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .faq-chevron {
@@ -1350,7 +1350,7 @@
 
   .faq-item[open] .faq-chevron {
     transform: rotate(180deg);
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   .faq-answer {
@@ -1361,7 +1361,7 @@
   }
 
   .faq-answer :global(a) {
-    color: var(--accent-color);
+    color: var(--accent-strong);
     text-decoration: none;
     font-weight: 500;
   }
@@ -1395,7 +1395,7 @@
 
   .footer a:hover {
     text-decoration: underline;
-    color: var(--accent-color);
+    color: var(--accent-strong);
   }
 
   /* ====================================

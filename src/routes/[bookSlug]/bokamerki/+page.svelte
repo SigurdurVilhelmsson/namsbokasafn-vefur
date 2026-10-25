@@ -237,7 +237,7 @@
 									href="/{data.bookSlug}/kafli/{bookmark.chapterSlug}/{bookmark.sectionSlug}"
 									class="flex-1 min-w-0"
 								>
-									<h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-color)] transition-colors">
+									<h3 class="font-medium text-gray-900 dark:text-gray-100 group-hover:text-[var(--accent-strong)] transition-colors">
 										{bookmark.section.number} {bookmark.section.title}
 									</h3>
 									<p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
@@ -250,7 +250,7 @@
 									<!-- Go to section -->
 									<a
 										href="/{data.bookSlug}/kafli/{bookmark.chapterSlug}/{bookmark.sectionSlug}"
-										class="p-2 rounded-lg text-gray-400 hover:text-[var(--accent-color)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+										class="p-2 rounded-lg text-gray-400 hover:text-[var(--accent-strong)] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
 										aria-label="Fara í kafla"
 									>
 										<Icon name="arrow-right" />

@@ -225,7 +225,7 @@
 					<div>
 						<a
 							href={sectionUrl(group.chapter, group.section)}
-							class="inline-flex items-center gap-1.5 text-sm text-[var(--accent-color)] hover:underline mb-3"
+							class="inline-flex items-center gap-1.5 text-sm text-[var(--accent-strong)] hover:underline mb-3"
 						>
 							<Icon name="arrow-right" size="sm" class="flex-shrink-0" />
 							{sectionBreadcrumb(group.chapter, group.section)}

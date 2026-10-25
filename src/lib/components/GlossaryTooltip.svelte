@@ -66,7 +66,7 @@
 		<!-- Header -->
 		<div class="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-4 py-3">
 			<div class="flex items-center gap-2">
-				<Icon name="book-open" size="sm" class="text-[var(--accent-color)]" />
+				<Icon name="book-open" size="sm" class="text-[var(--accent-strong)]" />
 				<span class="text-sm font-medium text-gray-500 dark:text-gray-300">Orðasafn</span>
 			</div>
 			<button
@@ -110,7 +110,7 @@
 		<div class="border-t border-gray-200 dark:border-gray-700 px-4 py-3">
 			<a
 				href="/{bookSlug}/ordabok?search={encodeURIComponent(term.term)}"
-				class="flex items-center justify-center gap-2 text-sm text-[var(--accent-color)] hover:underline"
+				class="flex items-center justify-center gap-2 text-sm text-[var(--accent-strong)] hover:underline"
 			>
 				<Icon name="external-link" size="sm" />
 				Opna í orðasafni
