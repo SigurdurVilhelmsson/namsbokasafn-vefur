@@ -626,7 +626,54 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-10-25 (night) — S2.1's accent tokens merged (#304); `main` is not train-ready until S2.3
+
+Measured on 2026-10-25 against `main` = `12a08f2` (#304) and the live site.
+
+- 🔴 **`main` is not train-ready until S2.3.** Plan M2 ships #304 only after [USER]'s visual sign-off (S2.3). The deploy lane's checklist (`docs/guides/deployment.md`) has no step that checks for that sign-off, so this bullet and the work state are the only stop. Run no train from `main`, and don't start the lane's first step (pulling `main`), until [USER] signs off S2.3 or says to deploy anyway; the first train from `main` after the sign-off then carries it. That is train 4 by this file's count, the plan's "train 2" (M2's train). A fix that must ship before then needs [USER]'s call, for example a revert of #304, or a train from a commit before `12a08f2`. Remove this bullet in the entry that records the train that ships #304. #304 changes both themes visibly, site-wide, and light the most:
+  - ink instead of white on every amber fill, in both themes;
+  - bronze instead of amber for amber text and icons, in light;
+  - a hint grey with more contrast, in both themes;
+  - links in running text underlined at rest.
+- **Prod still runs build `1792945782503`** (train 3, `main` `4667e2c`; `/_app/version.json` at 21:28 UTC). Undeployed on `main`: #303 (this file only), #304 and the PR that adds this entry.
+- **#304 is plan step S2.1** (decision D01, register UI-02), merged at 21:20:03 UTC as `12a08f2` (parents `71aee24` and `51da220`; 9 commits, 58 files). `main`'s tree equals the `git merge-tree` simulation made before the merge (control: `71aee24`'s tree differs). The tokens and their rules are in "Accent Color Convention" above, which #304 rewrote. In short:
+  - `--on-accent` (ink) goes on the fill, and `--accent-fill-hover` is the fill's hover.
+  - `--accent-strong` is for amber used as text or an icon: in light, `#c78c20`'s 2.31–2.92:1 becomes 4.55:1 or more on all five surfaces.
+  - `--text-tertiary` is raised to 4.5:1 on all five surfaces, and `--text-disabled` is for disabled controls only.
+  - `--border-input` is defined and tested but not yet applied.
+  - `--accent-hover` is deleted, and the unused `--header-banner-text` became `--on-accent`.
+- **It fixes the evening entry's two light-theme failures:** an objective button's number (2.71 → 5.35:1) and the open breadcrumb list's current entry (2.43 → about 4.8:1). For the breadcrumb, axe and token arithmetic give 2.43 and 4.81. The new spec gives 2.42 and 4.78, because it composites the 10% tint at 8-bit alpha. The ratchet sees neither: axe skips one-character text, and the list is closed during its scans. So the new `e2e/accent-contrast.spec.ts` measures them directly in both themes, together with a primary button at rest and under the pointer, and it fails on measured text whose opacity is below 1. On `main`'s build before #304 it failed with the old ratios (2.71, 2.42 and 2.92 in light; the button's 2.08 in dark). On #304 all 6 tests pass.
+- **The ratchets:** `e2e/a11y-baseline.json` went from 81 entries to 6, with none added; 14 of its 20 scans are now empty (1 before). The six left are light-theme colour contrast outside the accent, each at 390 and 1280 px: the catalogue's subject-accordion titles, a `text-red-600` button on `/greining` and a section's grey-500 reading-time label. `tokens.test.ts` lists only the light focus ring as a known failure (S2.2's). `accentText.test.ts` is at 0, and it also holds amber-as-text, faded ink on the fill and `var(--accent-hover)` at 0.
+- **CI:** green on #304's head `51da220` (run 40228609880). lint-and-test passed 921 unit tests. e2e passed 142, skipped 31 and failed 0 in 8.4 min; the whole-book offline test took 3.5 min. On `main` `12a08f2` (run 40234998178) all three jobs passed: e2e had the same 142 passed, 31 skipped and 0 failed, in 7.4 min, and the offline test took 2.7 min. Locally, the full e2e timed the offline test out at its 15-minute limit under load; run alone, it passed in 10.0 min.
+- **An adversarial review workflow** (five lenses, plus a skeptic per finding) found 14 serious findings. None was refuted and one was downgraded to a nit; each is fixed in #304 or listed in its body. #304 changed no Icelandic string (so no `D20: proposed` markers) and no package file.
+- **For S2.3:** before and after screenshots of the same content, in both themes at 390 and 1280 px, are on the dev machine in `~/.cache/vefur-a11y/s21-shots/{before,after}` (44 each). #304's body lists the design calls to sign off:
+  - decorative icons turn bronze;
+  - Settings' "Miðlungs" and the selected "Aa" use bronze;
+  - the update banner's "Uppfæra núna" becomes a neutral button;
+  - a switch that is on gets an ink knob;
+  - links in running text are underlined at rest;
+  - the adaptive quiz's "Að læra" hue changes;
+  - for-teachers' chemistry tile gets a new gradient;
+  - in dark, amber text and icons are unchanged (`--accent-strong` is the same `#e8a838` there), except four links that rested on `#f0bc5a`. But dark also gets ink instead of white on every amber fill (2.08 → 8.66:1), a lighter hint grey (`#6a6560` → `#98938d`), ink knobs and the underlines, so S2.3 checks dark too.
+- **Deferred, each named in #304:**
+  - `--border-input` on text fields and switch tracks (22 sites, at 1.11–2.56:1 today);
+  - Tailwind grey hints (`text-gray-400/500`), including the selection popup's close icon;
+  - the focus ring and the `--focus-ring` / `--accent-light` pair (S2.2);
+  - the 8 amber text uses in `static/styles/print.css`;
+  - the semantic colours outside the accent.
+- **Expected, not measured: the train that ships #304 will not restyle a hard load of a frozen book.** As with #294 and #296–#299, its pages keep the 2026-08-19 bundles, white on amber included. The ratchet scans only chemistry.
+- **Next, by the plan:** S2.2 (the focus ring), then S2.3 ([USER]'s sign-off) and its train (train 4 here, the plan's "train 2"). For [USER]: the real-phone check of the sidebar's focus order (S1.3's last box), S0.4 before 1 November, and listening to the timer pill on the live site while a phase runs.
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+
 ### 2026-10-25 (evening) — train 3 deployed: the four label-in-name fixes and "lokið" are live
+
+> ⚠️ **Superseded on three points — read the 2026-10-25 (night) entry above first.**
+>
+> - #304 merged after this entry and is not deployed, so "Nothing on `main` is undeployed" no longer holds. 🔴 `main` is not train-ready until S2.3.
+> - The two light-theme contrast failures under "Found on the way" (2.43:1 and 2.71:1) are fixed on `main` by #304 but not live.
+> - The Next bullet's M2 step S2.1 is merged; S2.2 and S2.3 remain.
+>
+> The rest of this entry stands.
 
 Measured on 2026-10-25 against `main` = `4667e2c` (#302) and the live site.
 
