@@ -45,15 +45,13 @@
 	let focusTimeout: ReturnType<typeof setTimeout>;
 	let previouslyFocused = $state<HTMLElement | null>(null);
 
-	// Initialize search on mount
 	onMount(() => {
-		if (bookSlug) {
-			initSearch();
-		}
 		searchHistory = getSearchHistory();
 	});
 
-	// Re-init when bookSlug changes
+	// Build the index when search opens, and again if the book changes while it is open.
+	// Never on mount: Header renders this dialog on every book page, and the build fetches
+	// every section of the book (chemistry: 216 files, 8.8 MB), search opened or not.
 	$effect(() => {
 		if (bookSlug && isOpen) {
 			initSearch();
