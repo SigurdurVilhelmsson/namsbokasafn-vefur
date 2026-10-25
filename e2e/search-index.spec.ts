@@ -54,7 +54,7 @@ async function openSearch(page: Page): Promise<number> {
 	// A click before hydration does nothing, so retry until the dialog is there.
 	await expect(async () => {
 		clickedAt = Date.now();
-		await page.getByRole('button', { name: 'Leita', exact: true }).click();
+		await page.getByRole('button', { name: 'Leita, Ctrl+K', exact: true }).click();
 		await expect(dialog).toBeVisible({ timeout: 1000 });
 	}).toPass({ timeout: 15000 });
 	return clickedAt;
