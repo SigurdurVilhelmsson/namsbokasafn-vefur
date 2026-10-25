@@ -49,13 +49,18 @@
 	<div class="section-nav-inner">
 		<!-- Breadcrumb with dropdown -->
 		<div class="section-nav-breadcrumb" bind:this={dropdownRef}>
+			<!-- Named by its visible text, so the name says which section this is and a
+			     speech-input user can say what they see (WCAG 2.5.3). What it does is the
+			     description: a `hidden` span outside the button. aria-describedby still reads a
+			     hidden span, while an sr-only one would also be a stray line in browse mode,
+			     and inside the button it would join the name. -->
 			<button
 				onclick={(e: MouseEvent) => { e.stopPropagation(); toggleDropdown(); }}
 				onkeydown={handleKeydown}
 				class="breadcrumb-btn"
 				aria-expanded={dropdownOpen}
 				aria-haspopup="listbox"
-				aria-label="Velja undirkafla"
+				aria-describedby="breadcrumb-btn-hint"
 			>
 				<span class="truncate">
 					Kafli {current.chapter.number} › {current.section.number}
@@ -63,6 +68,7 @@
 				</span>
 				<span class="breadcrumb-chevron {dropdownOpen ? 'open' : ''}"><Icon name="chevron-down" size="sm" /></span>
 			</button>
+			<span id="breadcrumb-btn-hint" hidden>Velja undirkafla</span>
 
 			<!-- Dropdown list -->
 			{#if dropdownOpen}
