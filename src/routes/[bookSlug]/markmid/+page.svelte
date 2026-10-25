@@ -265,14 +265,14 @@
 									<div class="flex items-start gap-3">
 										<!-- Checkbox -->
 										<!-- D20: proposed wording (both names: "Merkja sem lokið", the owner's word, was "Merkja sem
-										     kláruð", and "Afmerkja sem ólokið" was "Afmerkja sem ókláruð"), checked in the batch before
+										     kláruð", and "Afmerkja sem lokið" was "Afmerkja sem ókláruð"), checked in the batch before
 										     the train that ships it. -->
 										<button
 											onclick={() => toggleObjective(obj.chapterSlug, obj.sectionSlug, obj.objectiveIndex, obj.objectiveText)}
 											class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {obj.isCompleted
 												? 'bg-green-500 border-green-500 text-white'
 												: 'border-gray-300 dark:border-gray-500 hover:border-green-400'}"
-											aria-label={obj.isCompleted ? 'Afmerkja sem ólokið' : 'Merkja sem lokið'}
+											aria-label={obj.isCompleted ? 'Afmerkja sem lokið' : 'Merkja sem lokið'}
 										>
 											{#if obj.isCompleted}
 												<Icon name="check" size="sm" />
