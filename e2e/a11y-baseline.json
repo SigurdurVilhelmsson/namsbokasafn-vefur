@@ -13,8 +13,7 @@
 			"color-contrast | .opacity-80 | span",
 			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
-			"label-content-name-mismatch | .pill | button",
-			"label-content-name-mismatch | button in header | button.header-btn"
+			"label-content-name-mismatch | .pill | button"
 		],
 		"book-home 1280 light": [
 			"color-contrast | .book-attribution-colophon | a",
@@ -25,8 +24,7 @@
 			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span",
-			"label-content-name-mismatch | .pill | button",
-			"label-content-name-mismatch | button in header | button.header-btn"
+			"label-content-name-mismatch | .pill | button"
 		],
 		"book-home 390 dark": [
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
@@ -83,8 +81,7 @@
 		"greining 1280 dark": [
 			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
-			"label-content-name-mismatch | .pill | button",
-			"label-content-name-mismatch | button in header | button.header-btn"
+			"label-content-name-mismatch | .pill | button"
 		],
 		"greining 1280 light": [
 			"color-contrast | .text-\\[var\\(--accent-color\\)\\] | span",
@@ -92,8 +89,7 @@
 			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span",
-			"label-content-name-mismatch | .pill | button",
-			"label-content-name-mismatch | button in header | button.header-btn"
+			"label-content-name-mismatch | .pill | button"
 		],
 		"greining 390 dark": [
 			"label-content-name-mismatch | .pill | button"
@@ -108,8 +104,7 @@
 			"color-contrast | kbd in header | kbd.kbd-hint",
 			"label-content-name-mismatch | .breadcrumb-btn | button",
 			"label-content-name-mismatch | .items-start.gap-3.text-\\[var\\(--text-primary\\)\\] > .flex-shrink-0.w-6.h-6 | button",
-			"label-content-name-mismatch | .pill | button",
-			"label-content-name-mismatch | button in header | button.header-btn"
+			"label-content-name-mismatch | .pill | button"
 		],
 		"section 1280 light": [
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
@@ -119,8 +114,7 @@
 			"color-contrast | kbd in header | kbd.kbd-hint",
 			"label-content-name-mismatch | .breadcrumb-btn | button",
 			"label-content-name-mismatch | .items-start.gap-3.text-\\[var\\(--text-primary\\)\\] > .flex-shrink-0.w-6.h-6 | button",
-			"label-content-name-mismatch | .pill | button",
-			"label-content-name-mismatch | button in header | button.header-btn"
+			"label-content-name-mismatch | .pill | button"
 		],
 		"section 390 dark": [
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-label | span",

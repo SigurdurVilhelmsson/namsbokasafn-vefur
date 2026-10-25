@@ -33,8 +33,8 @@ test.describe('Closing a dialog keeps the page where it was (UI-11)', () => {
 	const cases = [
 		{ dialog: 'Settings', opener: 'Stillingar', close: 'Loka' },
 		{ dialog: 'Settings', opener: 'Stillingar', close: 'Escape' },
-		{ dialog: 'Search', opener: 'Leita', close: 'Loka' },
-		{ dialog: 'Search', opener: 'Leita', close: 'Escape' }
+		{ dialog: 'Search', opener: 'Leita, Ctrl+K', close: 'Loka' },
+		{ dialog: 'Search', opener: 'Leita, Ctrl+K', close: 'Escape' }
 	];
 	for (const viewport of [PHONE, DESKTOP]) {
 		test.describe(`at ${viewport.width} px`, () => {

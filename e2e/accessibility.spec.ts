@@ -344,7 +344,7 @@ test.describe('Accessibility ratchet (axe, WCAG 2.1 A and AA)', () => {
 		}
 		await page.goto(SECTION!);
 		await page.waitForLoadState('networkidle');
-		await openDialog(page, 'Leita');
+		await openDialog(page, 'Leita, Ctrl+K');
 		for (const f of await fieldsLabelledOnlyByPlaceholder(page, '[role="dialog"]')) unnamed.push(`search: ${f}`);
 		expect(unnamed).toEqual([]);
 	});
