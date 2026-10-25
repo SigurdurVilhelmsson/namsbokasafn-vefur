@@ -12,8 +12,7 @@
 			"color-contrast | .inline-flex > span | span",
 			"color-contrast | .opacity-80 | span",
 			"color-contrast | kbd in header | kbd.kbd-hint",
-			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span"
 		],
 		"book-home 1280 light": [
 			"color-contrast | .book-attribution-colophon | a",
@@ -23,22 +22,19 @@
 			"color-contrast | .opacity-80 | span",
 			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
-			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span"
 		],
 		"book-home 390 dark": [
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
 			"color-contrast | .inline-flex > span | span",
-			"color-contrast | .opacity-80 | span",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | .opacity-80 | span"
 		],
 		"book-home 390 light": [
 			"color-contrast | .book-attribution-colophon | a",
 			"color-contrast | .chapter-card > .chapter-card-header > .chapter-number | span",
 			"color-contrast | .inline-flex > span | span",
 			"color-contrast | .licence-badge | a",
-			"color-contrast | .opacity-80 | span",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | .opacity-80 | span"
 		],
 		"catalogue 1280 dark": [
 			"color-contrast | .btn-primary | a",
@@ -80,49 +76,40 @@
 		],
 		"greining 1280 dark": [
 			"color-contrast | kbd in header | kbd.kbd-hint",
-			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span"
 		],
 		"greining 1280 light": [
 			"color-contrast | .text-\\[var\\(--accent-color\\)\\] | span",
 			"color-contrast | .text-red-600 | button",
 			"color-contrast | kbd in header | kbd.kbd-hint",
 			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-meta | span",
-			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | li > .section-link--current.section-link > .min-w-0.flex-1 > .section-title | span"
 		],
-		"greining 390 dark": [
-			"label-content-name-mismatch | .pill | button"
-		],
+		"greining 390 dark": [],
 		"greining 390 light": [
 			"color-contrast | .text-\\[var\\(--accent-color\\)\\] | span",
-			"color-contrast | .text-red-600 | button",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | .text-red-600 | button"
 		],
 		"section 1280 dark": [
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
-			"color-contrast | kbd in header | kbd.kbd-hint",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | kbd in header | kbd.kbd-hint"
 		],
 		"section 1280 light": [
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-meta | span",
 			"color-contrast | .section-link--current > .min-w-0.flex-1 > .section-title | span",
 			"color-contrast | .sm\\:text-sm > | span",
 			"color-contrast | a in aside | a",
-			"color-contrast | kbd in header | kbd.kbd-hint",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | kbd in header | kbd.kbd-hint"
 		],
 		"section 390 dark": [
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-label | span",
-			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span"
 		],
 		"section 390 light": [
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-label | span",
 			"color-contrast | .nav-btn-next > .nav-btn-text > .nav-btn-title | span",
 			"color-contrast | .sm\\:text-sm > | span",
-			"color-contrast | a in aside | a",
-			"label-content-name-mismatch | .pill | button"
+			"color-contrast | a in aside | a"
 		],
 		"settings 1280 dark": [
 			"color-contrast | div > .text-white.shadow-sm.bg-\\[var\\(--accent-color\\)\\] | button"
