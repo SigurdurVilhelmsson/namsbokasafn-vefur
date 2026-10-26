@@ -15,9 +15,15 @@
  * Vefur-only: the hidden class and toggle button are reader presentation, not
  * pipeline output — styles are injected here rather than added to the
  * cross-repo content.css contract.
+ *
+ * On reveal the problem is stored for practice review (/prof and /nam): its
+ * question (every sibling back to the problem's heading, equations, images and
+ * tables included) and its answer, as text and as trimmed HTML
+ * (utils/practiceSnapshot.ts). Plan step S3.1, register PED-12 and PED-13.
  */
 
 import { quizStore } from '$lib/stores/quiz';
+import { snapshotOf } from '$lib/utils/practiceSnapshot';
 
 const PROCESSED_ATTR = 'data-practice-reveal';
 const STYLE_ID = 'practice-reveal-styles';
@@ -30,16 +36,40 @@ export interface PracticeRevealOptions {
 	content?: string;
 }
 
-/** Walk back over question paragraphs preceding the answer note to build question text. */
-function questionText(answer: HTMLElement): string {
-	const parts: string[] = [];
-	let el = answer.previousElementSibling;
-	while (el && el.tagName === 'P' && !el.classList.contains('para-title')) {
-		parts.unshift((el.textContent || '').trim());
-		el = el.previousElementSibling;
+/**
+ * Where a problem's question starts: its heading (`p.para-title`; the wording varies, so never
+ * match the text), or the end of the previous problem in the same example: its answer, or the
+ * self-assessment row this action put after that answer.
+ */
+const QUESTION_START = 'p.para-title, aside.check-knowledge-answer, .practice-self-assess';
+/** This action's own toggle, which sits before the answer once the answer is processed. */
+const OWN_CONTROL = 'button.practice-answer-toggle';
+
+/**
+ * The question's elements: every sibling between the answer and the start of its problem,
+ * paragraphs, equations, images and tables alike. Before S3.1 the walk took `<p>` siblings
+ * only and stopped at anything else, so 47 of 292 questions were stored empty and 19 cut short
+ * (PED-12).
+ */
+export function questionElements(answer: Element): Element[] {
+	const elements: Element[] = [];
+	for (let el = answer.previousElementSibling; el; el = el.previousElementSibling) {
+		if (el.matches(OWN_CONTROL)) continue;
+		if (el.matches(QUESTION_START)) break;
+		elements.unshift(el);
 	}
-	return parts.join(' ');
+	return elements;
 }
+
+/** The answer's body: everything but its leading `<h4>` ('Svar:'), which the review views print themselves. */
+function answerBody(answer: Element): Node[] {
+	const heading = answer.firstElementChild?.localName === 'h4' ? answer.firstElementChild : null;
+	return [...answer.childNodes].filter((n) => n !== heading);
+}
+
+/** A snapshot's HTML above this size is not kept (the text still is). The largest problem is about 4,000 characters. */
+const MAX_SNAPSHOT_HTML = 16_000;
+const keepHtml = (html: string) => (html && html.length <= MAX_SNAPSHOT_HTML ? html : undefined);
 
 function setToggleLabel(button: HTMLButtonElement, expanded: boolean): void {
 	button.textContent = expanded ? 'Fela svar' : 'Sýna svar';
@@ -163,26 +193,26 @@ function processAnswer(answer: HTMLElement, state: RevealState, opts: PracticeRe
 	assess.append(mkAssessBtn('Rétt hjá mér', true), mkAssessBtn('Þarf að æfa meira', false));
 	answer.after(assess);
 
-	// Capture question text NOW — before insertBefore() makes the button the
-	// answer's immediate previousElementSibling, which would cause the DOM walk
-	// in questionText() to stop at once and return "".
-	const question = questionText(answer);
+	// The question's elements, found now; their snapshot is taken on reveal, from the page as
+	// it is then (bionic reading may have been switched on since; the snapshot unwraps it).
+	const question = questionElements(answer);
 
 	const onClick = () => {
 		const nowHidden = answer.classList.toggle('practice-answer--hidden');
 		assess.hidden = nowHidden;
 		setToggleLabel(button, !nowHidden);
 		if (!nowHidden && trackingId && !registered) {
+			// Once per visit. A record stored on an earlier visit is refreshed, which heals the
+			// empty and cut questions stored before S3.1.
 			registered = true;
-			quizStore.markPracticeProblemViewed(
-				trackingId,
-				bookSlug!,
-				chapterSlug!,
-				sectionSlug!,
-				question,
-				(answer.textContent || '').trim().slice(0, 2000),
-				'inline'
-			);
+			const q = snapshotOf(question);
+			const a = snapshotOf(answerBody(answer));
+			quizStore.recordPracticeProblem(trackingId, bookSlug!, chapterSlug!, sectionSlug!, {
+				content: q.text,
+				answer: a.text,
+				contentHtml: keepHtml(q.html),
+				answerHtml: keepHtml(a.html)
+			});
 		}
 	};
 	button.addEventListener('click', onClick);

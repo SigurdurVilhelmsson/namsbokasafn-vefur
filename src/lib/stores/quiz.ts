@@ -29,8 +29,14 @@ interface MasteryInfo {
 
 export interface PracticeProblem {
 	id: string;
+	/** The question as plain text (labels; the fallback for a record stored before S3.1). */
 	content: string;
+	/** The answer as plain text, without its 'Svar:' heading since S3.1. */
 	answer: string;
+	/** Trimmed HTML of the question (utils/practiceSnapshot.ts), since S3.1. Re-filtered on display. */
+	contentHtml?: string;
+	/** Trimmed HTML of the answer's body, since S3.1. */
+	answerHtml?: string;
 	bookSlug: string;
 	chapterSlug: string;
 	sectionSlug: string;
@@ -358,6 +364,51 @@ function createQuizStore() {
 							successfulAttempts: 0
 						}
 					}
+				};
+			});
+		},
+
+		/**
+		 * Store a revealed problem's snapshot (plan step S3.1). Creates the record, or, when it
+		 * exists, replaces its question and answer and keeps its progress. Before S3.1 a record
+		 * kept its first snapshot for good, so the empty and cut questions the old walk stored
+		 * in students' browsers never healed (PED-12). No write when nothing changed.
+		 */
+		recordPracticeProblem: (
+			id: string,
+			bookSlug: string,
+			chapterSlug: string,
+			sectionSlug: string,
+			snapshot: Pick<PracticeProblem, 'content' | 'answer' | 'contentHtml' | 'answerHtml'>,
+			source: 'inline' | 'bank' = 'inline'
+		) => {
+			update((state) => {
+				const current = state.practiceProblemProgress[id];
+				if (
+					current &&
+					current.content === snapshot.content &&
+					current.answer === snapshot.answer &&
+					current.contentHtml === snapshot.contentHtml &&
+					current.answerHtml === snapshot.answerHtml
+				) {
+					return state;
+				}
+				const record: PracticeProblem = current
+					? { ...current, ...snapshot }
+					: {
+							id,
+							...snapshot,
+							bookSlug,
+							chapterSlug,
+							sectionSlug,
+							source,
+							isCompleted: false,
+							attempts: 0,
+							successfulAttempts: 0
+						};
+				return {
+					...state,
+					practiceProblemProgress: { ...state.practiceProblemProgress, [id]: record }
 				};
 			});
 		},
