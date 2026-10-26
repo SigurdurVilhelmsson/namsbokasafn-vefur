@@ -51,6 +51,11 @@ describe('sitemapUrls', () => {
 		expect(urls.filter((url) => !url.endsWith('/'))).toEqual([]);
 	});
 
+	it('lists the static pages, the privacy page among them', () => {
+		const urls = sitemapUrls(root);
+		for (const page of ['/', '/feedback/', '/for-teachers/', '/personuvernd/']) expect(urls).toContain(`${BASE}${page}`);
+	});
+
 	it('skips a directory with no toc.json', () => {
 		mkdirSync(join(root, 'stjornufraedi'));
 		expect(sitemapUrls(root).filter((url) => url.includes('stjornufraedi'))).toEqual([]);

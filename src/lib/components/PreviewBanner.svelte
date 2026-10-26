@@ -8,9 +8,16 @@
   Provenance comes from the reader (section.reviewed), not the content HTML, so
   the styling is governed by the design system and the banner is excluded from
   print/PDF.
+
+  'Tilkynna villu' opens /feedback with this section's book, chapter and
+  section filled in (plan step S3.3, register PED-15).
 -->
 <script lang="ts">
 	import Icon from '$lib/components/Icon.svelte';
+	import { feedbackHref } from '$lib/utils/feedbackPrefill';
+
+	let { bookSlug, chapterSlug, sectionSlug }: { bookSlug: string; chapterSlug: string; sectionSlug: string } =
+		$props();
 </script>
 
 <aside class="preview-banner" role="note" aria-label="Vélþýtt efni">
@@ -18,6 +25,10 @@
 	<p class="preview-banner__text">
 		<strong>Vélþýtt efni.</strong>
 		Þessi eining hefur ekki enn verið yfirlesin og kann að innihalda þýðingarvillur.
+		<!-- D20: proposed -->
+		<a class="preview-banner__report" href={feedbackHref({ bok: bookSlug, kafli: chapterSlug, hluti: sectionSlug })}
+			>Tilkynna villu</a
+		>
 	</p>
 </aside>
 
@@ -50,6 +61,20 @@
 
 	.preview-banner__text strong {
 		font-weight: 600;
+	}
+
+	/* Bronze on the banner's cream is 5.54:1 in light, amber on its brown 7.40:1 in dark.
+	   Underlined at rest: bronze is 2.60:1 from the text beside it, under axe's 3:1. */
+	.preview-banner__report {
+		color: var(--accent-strong);
+		font-weight: 600;
+		text-decoration: underline;
+		text-underline-offset: 2px;
+		white-space: nowrap;
+	}
+
+	.preview-banner__report:hover {
+		text-decoration-thickness: 2px;
 	}
 
 	:global(.dark) .preview-banner {

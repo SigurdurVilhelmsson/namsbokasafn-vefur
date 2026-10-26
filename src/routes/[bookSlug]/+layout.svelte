@@ -13,21 +13,9 @@
 	import PomodoroTimer from '$lib/components/PomodoroTimer.svelte';
 	import KeyboardShortcutsModal from '$lib/components/KeyboardShortcutsModal.svelte';
 	import { keyboardShortcuts } from '$lib/actions/keyboardShortcuts';
-	import { trackPageView } from '$lib/utils/api';
 	import type { LayoutData } from './$types';
 
 	let { data, children }: { data: LayoutData; children: Snippet } = $props();
-
-	// Track page views when route changes
-	let previousPath = $state('');
-	$effect(() => {
-		const currentPath = $page.url.pathname;
-		if (currentPath !== previousPath) {
-			previousPath = currentPath;
-			const { bookSlug, chapterSlug, sectionSlug } = $page.params;
-			trackPageView(bookSlug, chapterSlug, sectionSlug);
-		}
-	});
 
 	let focusMode = $state(false);
 	let showShortcutsModal = $state(false);

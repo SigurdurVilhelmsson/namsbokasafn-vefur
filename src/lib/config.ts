@@ -1,28 +1,9 @@
 /**
  * Application Configuration
  *
- * Central configuration for API endpoints and other settings.
- * Uses Vite environment variables (VITE_ prefix required for client-side access).
+ * Shared settings. There is no API base URL: the reader sends nothing to the
+ * editorial server (decision D03, plan step S3.3).
  */
-
-import { browser } from '$app/environment';
-
-/**
- * API base URL for the editorial server (ritstjorn.namsbokasafn.is)
- * In development, defaults to localhost:3000
- */
-export const API_BASE_URL = browser
-  ? (import.meta.env.VITE_API_URL as string) || ''
-  : '';
-
-/**
- * Build the full API URL for an endpoint
- */
-export function apiUrl(endpoint: string): string {
-  const base = API_BASE_URL.replace(/\/$/, '');
-  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  return `${base}${path}`;
-}
 
 /**
  * Feedback types available for submission. `icon` is a registry glyph name

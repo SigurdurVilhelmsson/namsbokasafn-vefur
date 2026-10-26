@@ -3,8 +3,10 @@
   Public feedback submission for teachers and students
 -->
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { FEEDBACK_TYPES, type FeedbackType } from '$lib/config';
   import { getAllBooks } from '$lib/types/book';
+  import { readFeedbackPrefill } from '$lib/utils/feedbackPrefill';
   import Icon from '$lib/components/Icon.svelte';
 
   const FEEDBACK_EMAIL = 'namsbokasafn@gmail.com';
@@ -18,9 +20,27 @@
   let userName = $state('');
   let userEmail = $state('');
 
+  // Where 'Til baka' goes: the section the student came from, when the
+  // prefill named one, else the catalogue.
+  let backHref = $state('/');
+
   // UI state
   let submitSuccess = $state(false);
   let submitError = $state('');
+
+  // 'Tilkynna villu' on a machine-translated section links here with the
+  // section's book, chapter and section (S3.3, PED-15). Read in the browser
+  // only, never in a load function, and checked and capped in readFeedbackPrefill.
+  onMount(() => {
+    const prefill = readFeedbackPrefill(window.location.search, getAllBooks().map((b) => b.slug));
+    if (prefill.tegund) selectedType = prefill.tegund;
+    if (prefill.bok) book = prefill.bok;
+    if (prefill.kafli) chapter = prefill.kafli;
+    if (prefill.hluti) section = prefill.hluti;
+    if (prefill.bok && prefill.kafli && prefill.hluti) {
+      backHref = `/${prefill.bok}/kafli/${prefill.kafli}/${prefill.hluti}/`;
+    }
+  });
 
   function handleSubmit() {
     // Validate
@@ -80,7 +100,7 @@
   <!-- Header -->
   <header class="feedback-header">
     <div class="container">
-      <a href="/" class="back-link">
+      <a href={backHref} class="back-link">
         <Icon name="arrow-left" size="sm" />
         Til baka
       </a>
@@ -155,11 +175,11 @@
               </div>
               <div class="form-group">
                 <label class="form-label" for="chapter">Kafli</label>
-                <input type="text" id="chapter" bind:value={chapter} class="form-input" placeholder="t.d. 1 eða 1.2" />
+                <input type="text" id="chapter" bind:value={chapter} class="form-input" placeholder="t.d. 1" /><!-- D20: proposed -->
               </div>
               <div class="form-group">
                 <label class="form-label" for="section">Hluti</label>
-                <input type="text" id="section" bind:value={section} class="form-input" placeholder="t.d. 1-1" />
+                <input type="text" id="section" bind:value={section} class="form-input" placeholder="t.d. 1.2" /><!-- D20: proposed -->
               </div>
             </div>
 
@@ -187,9 +207,16 @@
               <div class="form-group">
                 <label class="form-label" for="userEmail">Netfang (valfrjálst)</label>
                 <input type="email" id="userEmail" bind:value={userEmail} class="form-input" placeholder="netfang@domain.is" />
-                <span class="form-hint">Ef þú vilt fá svar</span>
+                <!-- The note below says we see the sender's address anyway. D20: proposed -->
+                <span class="form-hint">Ef þú vilt svar á annað netfang en það sem þú sendir frá</span>
               </div>
             </div>
+
+            <!-- Said before sending, not only after (PED-15). D20: proposed -->
+            <p class="email-note">
+              <Icon name="mail" size="sm" />
+              <span>Þegar þú smellir á „Senda endurgjöf“ opnast tölvupóstforritið þitt með skilaboðunum. Þau berast okkur aðeins ef þú sendir póstinn, og þá sjáum við netfangið þitt.</span>
+            </p>
 
             <!-- Submit -->
             <div class="form-actions">
@@ -201,11 +228,16 @@
           </form>
         </div>
 
-        <!-- Help Link -->
+        <!-- Help Links -->
         <div class="help-link">
-          <a href="/for-teachers">
+          <a href="/for-teachers/">
             <Icon name="circle-help" size="sm" />
             Leiðbeiningar fyrir kennara
+          </a>
+          <!-- D20: proposed -->
+          <a href="/personuvernd/">
+            <Icon name="shield-check" size="sm" />
+            Gögnin þín og persónuvernd
           </a>
         </div>
       {/if}
@@ -501,6 +533,21 @@
     margin-top: 0.125rem;
   }
 
+  .email-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 1.5rem 0 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+
+  .email-note :global(svg) {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
   /* Submit */
   .form-actions {
     margin-top: 1.5rem;
@@ -527,10 +574,13 @@
     background: var(--accent-fill-hover);
   }
 
-  /* Help link */
+  /* Help links */
   .help-link {
     margin-top: 1.5rem;
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
   }
 
   .help-link a {

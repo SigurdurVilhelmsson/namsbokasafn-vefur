@@ -260,7 +260,7 @@
 	<!-- Machine-translation notice on modules that haven't been human-reviewed.
 	     Replaces the old always-on PilotBanner; driven by per-section provenance. -->
 	{#if !data.navigation.current.section.reviewed}
-		<PreviewBanner />
+		<PreviewBanner bookSlug={data.bookSlug} chapterSlug={data.chapterSlug} sectionSlug={data.sectionSlug} />
 	{/if}
 
 	<!-- Reading progress bar -->

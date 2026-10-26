@@ -479,6 +479,13 @@
 						<span>Námsmarkmið</span>
 					</a>
 
+					<!-- S3.3: the privacy page sends students to Námsgreining for the erase
+					     button, and no page linked it. D20: proposed -->
+					<a href="/{bookSlug}/greining/" class="study-tool-link">
+						<Icon name="chart-column" />
+						<span>Námsgreining</span>
+					</a>
+
 					{#if hasPeriodicTable}
 						<a href="/{bookSlug}/lotukerfi" class="study-tool-link">
 							<Icon name="atom" />
@@ -487,6 +494,27 @@
 					{/if}
 				</div>
 			{/if}
+
+			<!-- About the site (S3.3, PED-15/PED-14): before this, no page in the
+			     reader linked /feedback, /for-teachers or a privacy note. D20: proposed -->
+			<div class="study-tools">
+				<h3 class="study-tools-heading">Um vefinn</h3>
+
+				<a href="/personuvernd/" class="study-tool-link">
+					<Icon name="shield-check" />
+					<span>Gögnin þín og persónuvernd</span>
+				</a>
+
+				<a href="/feedback/" class="study-tool-link">
+					<Icon name="message-square" />
+					<span>Endurgjöf</span>
+				</a>
+
+				<a href="/for-teachers/" class="study-tool-link">
+					<Icon name="circle-help" />
+					<span>Leiðbeiningar fyrir kennara</span>
+				</a>
+			</div>
 		</nav>
 	</div>
 </aside>

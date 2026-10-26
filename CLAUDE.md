@@ -12,6 +12,7 @@ Námsbókasafn (Textbook Library) is an interactive web-based reader for Iceland
 
 - Migrated from React to SvelteKit January 2026 — some patterns may be carry-overs
 - No backend — all user state in localStorage (intentional, not an oversight)
+- **Data rule:** no learning data leave the device unless the student sends them: an export they download, or the feedback form, which opens their own e-mail. Reading progress, flashcards, recall entries, highlights and practice answers stay in the browser. The only data the reader sends to another server is GoatCounter's cookieless page count. A feature that would send anything else needs a new decision first (D03).
 - Content directory is gitignored and synced from sister repo
 - Built iteratively with AI assistance; patterns may be inconsistent across files
 
