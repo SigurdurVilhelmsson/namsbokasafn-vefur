@@ -46,8 +46,8 @@
 		<div class="container">
 			<h1>Gögnin þín og persónuvernd</h1>
 			<p class="lead">
-				Framvinda þín, athugasemdir, minniskort og annað sem þú gerir í Námsbókasafni er geymt í
-				þessum vafra, á þessu tæki, og er ekki sent til okkar. Af tækinu fara aðeins beiðnir um
+				Framvinda þín, athugasemdir, minniskort og annað sem þú gerir í Námsbókasafni eru geymd í
+				þessum vafra, á þessu tæki, og eru ekki send til okkar. Af tækinu fara aðeins beiðnir um
 				síðurnar sjálfar, talning síðuflettinga og endurgjöf ef þú sendir hana. Nánar hér fyrir neðan.
 			</p>
 
@@ -76,17 +76,18 @@
 				<h3>Vefþjónn Námsbókasafns</h3>
 				<p>
 					Síðurnar og efni bókanna eru sótt af vefþjóni Námsbókasafns. Eins og flestir vefþjónar
-					skráir hann hverja slíka beiðni: IP-tölu, tíma, slóð, upplýsingar um vafrann og hvaðan var
-					vísað á síðuna. Skrárnar eru geymdar í allt að 90 daga.
+					skráir hann beiðnir um síðurnar og texta bókanna (ekki myndir): IP-tölu, tíma, slóð,
+					upplýsingar um vafrann og hvaðan var vísað á síðuna. Skrárnar eru geymdar í um 90 daga.
 				</p>
 				<h3>Talning síðuflettinga</h3>
 				<p>
 					Við teljum síðuflettingar með
 					<a href="https://www.goatcounter.com/help/privacy" target="_blank" rel="noopener noreferrer"
 						>GoatCounter</a
-					>, án vafrakaka. Þegar þú opnar síðu sendir vafrinn GoatCounter slóð hennar og titil, breidd
-					skjásins, síðuna sem vísaði þér hingað ef hún er til, og merki um hvort vafrinn virðist
-					sjálfvirkur. Sendingin ber líka, eins og allar beiðnir á netinu, IP-tölu þína og upplýsingar
+					>, án vafrakaka. Þegar síða er hlaðin inn í vafrann (oftast ekki þegar þú smellir á tengil
+					innan vefsins) sendir vafrinn GoatCounter slóð hennar, líka það sem stendur á eftir „?“ í
+					henni, titil hennar, breidd skjásins, síðuna sem vísaði þér hingað ef hún er til, og merki
+					um hvort vafrinn virðist sjálfvirkur. Sendingin ber líka, eins og allar beiðnir á netinu, IP-tölu þína og upplýsingar
 					um vafrann. Samkvæmt persónuverndarstefnu GoatCounter vistar það hvorki IP-töluna né allar
 					upplýsingarnar um vafrann, heldur les úr þeim land, tungumál, vafra og stýrikerfi.
 					IP-töluna geymir það aðeins í vinnsluminni, í allt að 8 klukkustundir, svo að sami gestur sé
@@ -104,17 +105,6 @@
 					lengra nema þú sendir hana.
 				</p>
 				<p>Annað sem þú gerir hér fer ekki af tækinu.</p>
-				<p class="note">
-					<Icon name="info" size="sm" />
-					<span>
-						Undantekning, 26. október 2026: síður í sýnishornunum Eðlisfræði, Líffræði og
-						Örverufræði nota enn eldri útgáfu vefsins þegar þær eru opnaðar beint, til dæmis úr
-						bókamerki eða leitarvél eða með því að endurhlaða síðuna. Sú útgáfa sendir ritstjórnarvef
-						Námsbókasafns heiti bókar, kafla og hluta við hverja síðu sem er opnuð, líka í öðrum
-						bókum ef þú heldur áfram þaðan um tengla, þar til síðan er endurhlaðin. Vefþjónn
-						ritstjórnarvefsins skráir um leið upplýsingar um vafrann.
-					</span>
-				</p>
 			</section>
 
 			<section aria-labelledby="erase">
@@ -123,17 +113,18 @@
 					<li>
 						Í {#if greiningHref}<a href={greiningHref}>Námsgreiningu</a>{:else}Námsgreiningu{/if} er
 						hnappurinn „Eyða öllum gögnum á þessu tæki“. Hann eyðir öllu sem talið er upp hér að ofan,
-						í öllum bókunum, líka niðurhöluðum bókum og afritum af síðum og myndum. Eftir standa forrit
-						vefsins sjálfs og stuttur listi yfir síður og myndir sem voru skoðaðar nýlega.
+						í öllum bókunum, líka niðurhöluðum bókum og afritum vefsins af síðum og myndum. Eftir standa
+						forrit vefsins sjálfs, listi yfir síður og myndir sem vefurinn sótti nýlega, og afrit sem
+						vafrinn geymir sjálfur í skyndiminni sínu.
 					</li>
 					<li>
-						Til að eyða öllu, líka því, skaltu eyða gögnum vefsvæðisins namsbokasafn.is í stillingum
-						vafrans.
+						Til að eyða öllu, líka því, skaltu eyða gögnum vefsvæðisins namsbokasafn.is og skyndiminni
+						vafrans í stillingum hans.
 					</li>
 					<li>
 						Á sameiginlegu tæki, til dæmis í skólanum, er best að nota einkaglugga (huliðsglugga).
-						Þá eyðist allt þegar öllum einkagluggum er lokað. Skrár sem þú flytur út eða sækir verða
-						þó eftir á tækinu.
+						Þá eyðist allt þegar öllum einkagluggum er lokað. Skrár sem þú flytur út eða vistar á
+						tækinu, til dæmis myndir, verða þó eftir.
 					</li>
 					<li>Gögnin fylgja vafranum: þau flytjast ekki á milli tækja eða vafra.</li>
 				</ul>
@@ -249,22 +240,6 @@
 
 	.privacy-content a:hover {
 		text-decoration-thickness: 2px;
-	}
-
-	.note {
-		display: flex;
-		align-items: flex-start;
-		gap: 0.5rem;
-		padding: 0.75rem 1rem;
-		border-radius: 0.5rem;
-		background: var(--bg-secondary);
-		border: 1px solid var(--border-color);
-		font-size: 0.9rem;
-	}
-
-	.note :global(svg) {
-		flex-shrink: 0;
-		margin-top: 0.25rem;
 	}
 
 	.updated {
