@@ -9,6 +9,7 @@
 	import { analyticsStore, streakInfo, todayStats } from '$lib/stores/analytics';
 	import { loadTableOfContents, findSectionBySlug } from '$lib/utils/contentLoader';
 	import { getTodayDateString } from '$lib/utils/storeHelpers';
+	import { clearAllStorage, deleteLocalCaches } from '$lib/utils/storageMigration';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 	import {
 		AnalyticsTabs,
@@ -158,11 +159,29 @@
 		URL.revokeObjectURL(url);
 	}
 
-	// Clear all data with confirmation
+	// Clear this page's statistics: the analytics store (sessions, reading times, daily stats,
+	// streaks, activity, and the goals on the Markmið tab). Learning objectives (/markmid),
+	// flashcards, bookmarks, highlights and reading progress stay (plan step S3.2, PED-14).
 	function handleClearData() {
-		if (confirm('Ertu viss um að þú viljir eyða öllum námsupplýsingum? Þetta er ekki hægt að afturkalla.')) {
+		// D20: proposed wording (S3.2: says what it clears), checked in the batch before the train that ships it.
+		const message =
+			'Eyða lestrartölfræði, lotum, röð daga og markmiðum í Námsgreiningu í þessum vafra? Námsmarkmið, minniskort, bókamerki, yfirstrikanir, athugasemdir og framvinda í bókunum haldast. Þetta er ekki hægt að afturkalla.';
+		if (confirm(message)) {
 			analyticsStore.clearAllData();
 		}
+	}
+
+	// Erase everything this site keeps in this browser: downloaded books and the browsing
+	// caches first, then every namsbokasafn key, then reload at once, before any store can
+	// write its in-memory state back (plan step S3.2, PED-14).
+	async function handleEraseAll() {
+		// D20: proposed wording (S3.2: the erase), checked in the batch before the train that ships it.
+		const message =
+			'Eyða öllu sem Námsbókasafn geymir í þessum vafra: framvindu, bókamerkjum, yfirstrikunum, athugasemdum, minniskortum, námsmarkmiðum, æfingadæmum, tölfræði og stillingum? Niðurhalaðar bækur eyðast líka. Þetta er ekki hægt að afturkalla.';
+		if (!confirm(message)) return;
+		await deleteLocalCaches();
+		clearAllStorage();
+		location.reload();
 	}
 
 	// Handle tab change
@@ -202,22 +221,31 @@
 </svelte:head>
 
 <div class="max-w-4xl mx-auto">
-	<div class="flex items-center justify-between mb-6">
+	<div class="flex flex-wrap items-center justify-between gap-3 mb-6">
 		<h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
 			Námsgreining
 		</h1>
-		<div class="flex gap-2">
+		<div class="flex flex-wrap gap-2">
 			<button
 				onclick={handleExport}
 				class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
 			>
 				Flytja út
 			</button>
+			<!-- red-700, not red-600: 4.5:1 on the light page (the ratchet's old entry for this button). -->
 			<button
 				onclick={handleClearData}
-				class="text-sm px-3 py-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+				class="text-sm px-3 py-1.5 rounded-lg text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
 			>
-				Hreinsa gögn
+				<!-- D20: proposed wording (S3.2: the button says what it clears), checked in the batch before the train that ships it. -->
+				Hreinsa tölfræði
+			</button>
+			<button
+				onclick={handleEraseAll}
+				class="text-sm px-3 py-1.5 rounded-lg text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+			>
+				<!-- D20: proposed wording (S3.2: the erase, the plan's text), checked in the batch before the train that ships it. -->
+				Eyða öllum gögnum á þessu tæki
 			</button>
 		</div>
 	</div>
