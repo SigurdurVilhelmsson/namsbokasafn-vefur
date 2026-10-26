@@ -628,15 +628,41 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
-### 2026-10-25 (night) — S2.1's accent tokens merged (#304); `main` is not train-ready until S2.3
+### 2026-10-26 — train 4 deployed: S2.1's accent tokens (#304) and S2.2's focus ring (#306) are live
 
-Measured on 2026-10-25 against `main` = `12a08f2` (#304) and the live site.
+Measured on 2026-10-26 against `main` = `eab25c7` (#306) and the live site.
 
-- 🔴 **`main` is not train-ready until S2.3.** ✅ _2026-10-26: [USER] signed off S2.3's look (all 12 design calls, no changes), so this stop is lifted; a train still runs only at [USER]'s word._ Plan M2 ships #304 only after [USER]'s visual sign-off (S2.3). The deploy lane's checklist (`docs/guides/deployment.md`) has no step that checks for that sign-off, so this bullet and the work state are the only stop. Run no train from `main`, and don't start the lane's first step (pulling `main`), until [USER] signs off S2.3 or says to deploy anyway; the first train from `main` after the sign-off then carries it. That is train 4 by this file's count, the plan's "train 2" (M2's train). A fix that must ship before then needs [USER]'s call, for example a revert of #304, or a train from a commit before `12a08f2`. Remove this bullet in the entry that records the train that ships #304. #304 changes both themes visibly, site-wide, and light the most:
+- **Prod runs build `1793012580618`**, deployed at 11:15:30 UTC (the server's clock) from `main` `eab25c7` with no content sync, replacing train 3's build `1792945782503`. It is the plan's "train 2" (M2's train); this file's trains 2 and 3 were extra code-only trains. Undeployed on `main`: only the PR that adds this entry. It sent 351 files and deleted none, none under `content/`: 273 chemistry pages, 25 print pages, `200.html`, `index.html`, `sw.js`, `_app/version.json`, `sitemap.xml` and 48 new `/_app/immutable/` files (17 stylesheets, 7 chunks, 2 entry files, 22 page nodes). `sitemap.xml` went because every `<lastmod>` moved to 2026-10-26; its 366 URLs equal the live ones.
+- **[USER] signed off S2.3's look on 2026-10-26** (plan S2.3, chunk 1): all 12 checks on the sign-off page OK (S2.3's own four and #304's eight design calls), with no notes and no token changes; the Settings switches, the update banner and the quiz's "Að læra" hue from their description. That lifted the night entry's stop on #304, and this entry removes that bullet.
+- **What went live**, site-wide in both themes, light the most (tokens and rules in "Accent Color Convention" above):
   - ink instead of white on every amber fill, in both themes;
   - bronze instead of amber for amber text and icons, in light;
   - a hint grey with more contrast, in both themes;
-  - links in running text underlined at rest.
+  - links in running text underlined at rest;
+  - one focus ring, bronze in light and amber in dark, over a solid gap; in-text glossary terms, the three search fields and the feedback form, which showed none, now show it.
+- **#306 is plan step S2.2** (decision D01, register UI-07), merged at 11:01:32 UTC as `eab25c7` (parents `0aad47e` and `14b0d45`; 4 commits, 13 files). `main`'s tree equals the `git merge-tree` simulation made before the merge (control: `0aad47e`'s tree differs). Measured on screen by the new `e2e/focus-ring.spec.ts`, the light ring went from 2.66–2.92:1 against the page and 2.22–2.41:1 against its own halo to 5.75:1 on the gap and 5.24–5.75:1 on the page (dark: 8.66:1 and 7.95–8.66:1). Its pre-merge review (three lenses, a skeptic per finding) returned 9 findings: 4 confirmed, all low; 2 refuted; 3 not verified. One of those three, on periodic-table cells, was a regression of #306; it was measured and fixed before the merge with the confirmed ones (`14b0d45`, details in #306's body).
+- **CI:** on #306's head `14b0d45` (run 40309760126), 934 unit tests; e2e 148 passed, 31 skipped, 0 failed in 8.0 min. The branch's first CI run (40303933513, dispatched on `8573c43` before the PR was opened) failed a Settings check that passed locally: the dialog moves focus to "Loka" 50 ms after it opens, which on the runner landed mid-test, and `442a86e` makes the spec wait for it. On `main` `eab25c7` (run 40311928222) all three jobs passed: 934 unit tests; e2e 148 passed, 31 skipped, 0 failed in 8.5 min; the whole-book offline test took 3.5 min.
+- **The gates, run from the deploy lane by its checklist:** `main`'s CI was green on `eab25c7`; content validation found no issues, and the build had only the warnings trains 1–3 also had (workbox's "glob pattern", Vite's `configLoader` notice and the bundler's 20 `node:fs` "externalized for browser compatibility" notices); no `D20: proposed` strings; no sync stamp on either side; all 2,481 chemistry content files byte-identical to the server; a second dry run just before `--apply` gave the same 351 and 0. The previous build is backed up on the server at `~/backups/namsbokasafn-build-2026-10-26-v1792945782503` (3,599 files, identical to the live build when copied). To roll back: `ssh siggi@kvenno.app 'rsync -a ~/backups/namsbokasafn-build-2026-10-26-v1792945782503/ /var/www/namsbokasafn-vefur/build/'`. Its dry run (`-n`) would copy back 303 files and delete none; the train's 48 new `_app/` files would stay, unused.
+- **Verified live:** the version equals the lane's build; every `/_app/immutable/` file that the catalogue, chemistry's home, §1.1 and the three frozen books' homes name loads (26 to 41 per page, 0 missing; a made-up path answers 404); organic answers 404. In headless Chromium with every request outside namsbokasafn.is blocked: 0 page errors and 0 failed requests to the site on the catalogue, chemistry's home, §1.1, `/greining`, `/lotukerfi`, `/feedback` and frozen physics, at 390 and 1280 px. On `/lotukerfi` an arrow-keyed cell is raised (z-index 10) with the ring on the three sides sampled (top, right and bottom), and the selected category chip shows the ring.
+- **S2.3 chunk 2, the ring on a live glossary term:** §1.1's first term ("efnafræði"), focused from the keyboard at 1280 and 390 px in both themes, draws a solid 2 px `--focus-ring` outline 2 px out over a 2 px `--focus-gap`, and all 187 pixels along its top edge are the ring colour. Light: 5.75:1 on the gap and 5.24:1 on the page. Dark: 8.66:1 on both. The control, run just before `--apply`, found outline `none` and no `--focus-gap`, and all four checks failed. ⚠️ Measure the page colour along the whole edge (the most common colour in that row), not at one pixel: at 1280 px the line of text above sits close to the ring, and a single pixel there landed on a letter.
+- **Measured: train 4 does not restyle a hard load of a frozen book**, as the night entry expected. `/edlisfraedi-2e/` links 8 stylesheets (7 hashed `/_app/immutable/` files and `/styles/content.css`) and none defines `--focus-gap` (chemistry's home: 1 of 8), so its pages keep the 2026-08-19 bundles, white on amber and the old ring included. The ratchet scans only chemistry.
+- **Known, not fixed** (in #306's body): a control whose own rule sets a box-shadow keeps it in the gap band (the timer pill, the phone tools button and its menu links, a flashcard), and the ring still clears 3:1 there. In dark, periodic-table cells keep their pastel fills, so outside the ring they sit at 1.10–1.23:1; the ring is 8.66:1 on its gap.
+- **npm audit, 2026-10-26 (on `eab25c7`):** production tree 0; full tree 3, all low, unchanged: kit's two advisories, also flagged through `adapter-static` and `@vite-pwa/sveltekit`.
+- **Next, by the plan:** M3 (S3.1 the practice review keeps the whole question, S3.2 "Hreinsa gögn", S3.3 the page-view ruling in code, then its train). For [USER]: the real-phone check of the sidebar's focus order (S1.3's last box), S0.4 before 1 November, and listening to the timer pill on the live site while a phase runs.
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+
+### 2026-10-25 (night) — S2.1's accent tokens merged (#304); `main` is not train-ready until S2.3
+
+> ⚠️ **Superseded on three points — read the 2026-10-26 entry above first.**
+>
+> - Train 4 deployed `main` `eab25c7`, so #304 is live and "Prod still runs build `1792945782503`" no longer holds. Its stop bullet ("`main` is not train-ready until S2.3") is removed; the list of visible changes moved to the 2026-10-26 entry.
+> - S2.2 is done and live (#306): the deferred focus-ring item and `tokens.test.ts`'s known failure are gone.
+> - Its Next bullet (S2.2, S2.3 and train 4) is done, and the frozen-book expectation is now measured.
+>
+> The rest of this entry stands.
+
+Measured on 2026-10-25 against `main` = `12a08f2` (#304) and the live site.
+
 - **Prod still runs build `1792945782503`** (train 3, `main` `4667e2c`; `/_app/version.json` at 21:28 UTC). Undeployed on `main`: #303 (this file only), #304 and the PR that adds this entry.
 - **#304 is plan step S2.1** (decision D01, register UI-02), merged at 21:20:03 UTC as `12a08f2` (parents `71aee24` and `51da220`; 9 commits, 58 files). `main`'s tree equals the `git merge-tree` simulation made before the merge (control: `71aee24`'s tree differs). The tokens and their rules are in "Accent Color Convention" above, which #304 rewrote. In short:
   - `--on-accent` (ink) goes on the fill, and `--accent-fill-hover` is the fill's hover.
@@ -671,7 +697,7 @@ Measured on 2026-10-25 against `main` = `12a08f2` (#304) and the live site.
 
 > ⚠️ **Superseded on three points — read the 2026-10-25 (night) entry above first.**
 >
-> - #304 merged after this entry and is not deployed, so "Nothing on `main` is undeployed" no longer holds. 🔴 `main` is not train-ready until S2.3.
+> - #304 merged after this entry and is not deployed, so "Nothing on `main` is undeployed" no longer holds. 🔴 `main` is not train-ready until S2.3. _(Lifted: train 4 shipped #304 on 2026-10-26.)_
 > - The two light-theme contrast failures under "Found on the way" (2.43:1 and 2.71:1) are fixed on `main` by #304 but not live.
 > - The Next bullet's M2 step S2.1 is merged; S2.2 and S2.3 remain.
 >
