@@ -82,11 +82,10 @@ const PAIRS: Pair[] = [
 		min: 3,
 		use: 'input border'
 	})),
-	// The global *:focus-visible ring is var(--accent-color) until plan step S2.2 moves it to
-	// --focus-ring; it must stand out from the page.
-	...['--bg-primary', '--bg-secondary'].map((bg) => ({ fg: '--accent-color', bg, min: 3, use: 'focus ring' })),
-	// --focus-ring (D01): the radios' accent colour now, the focus ring from plan step S2.2.
-	...['--bg-primary', '--bg-secondary'].map((bg) => ({ fg: '--focus-ring', bg, min: 3, use: 'ring and radios' })),
+	// The one *:focus-visible rule (plan step S2.2, D01, UI-07): a --focus-ring outline over a
+	// solid --focus-gap, so the ring needs 3:1 against the gap inside it and against every
+	// surface outside it. Native radios use --focus-ring as their accent colour too.
+	...['--focus-gap', ...SURFACES].map((bg) => ({ fg: '--focus-ring', bg, min: 3, use: 'focus ring and radios' })),
 	// A light-theme radio has a white face (dark mode paints it dark).
 	{ fg: '--focus-ring', bg: '#ffffff', min: 3, use: 'radio on its white face', themes: ['light'] }
 ];
@@ -94,13 +93,11 @@ const PAIRS: Pair[] = [
 const key = (theme: string, p: Pair) => `${theme}: ${p.fg} on ${p.bg} (min ${p.min})`;
 
 /**
- * Measured on main 62ea95e, 2026-10-23. Remove an entry when its pair passes. Plan step S2.1
- * (D01) fixed every text pair; the light ring is plan step S2.2's.
+ * Empty since plan step S2.2. On main 62ea95e (2026-10-23) the light ring, then
+ * --accent-color, was 2.66:1 on --bg-primary and 2.92:1 on --bg-secondary; plan step S2.1
+ * (D01) fixed every text pair. A new entry needs a reason in its PR.
  */
-const KNOWN_FAILURES: Record<string, number> = {
-	'light: --accent-color on --bg-primary (min 3)': 2.66,
-	'light: --accent-color on --bg-secondary (min 3)': 2.92
-};
+const KNOWN_FAILURES: Record<string, number> = {};
 
 const css = readFileSync(APP_CSS, 'utf8');
 const light = tokenBlock(css, ':root');

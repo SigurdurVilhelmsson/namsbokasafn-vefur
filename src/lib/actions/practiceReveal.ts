@@ -73,10 +73,6 @@ function injectStyles(): void {
 			background: var(--accent-color);
 			color: var(--on-accent);
 		}
-		.practice-answer-toggle:focus-visible {
-			outline: 2px solid var(--accent-color);
-			outline-offset: 2px;
-		}
 		.practice-self-assess {
 			display: flex;
 			gap: 0.5rem;
@@ -98,10 +94,6 @@ function injectStyles(): void {
 		.practice-assess-btn:hover {
 			background: var(--accent-color);
 			color: var(--on-accent);
-		}
-		.practice-assess-btn:focus-visible {
-			outline: 2px solid var(--accent-color);
-			outline-offset: 2px;
 		}
 		/* Dim the unchosen button after one has been selected */
 		.practice-self-assess[data-answered] .practice-assess-btn:not(:focus-visible) {

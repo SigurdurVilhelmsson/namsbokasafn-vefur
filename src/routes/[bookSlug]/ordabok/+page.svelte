@@ -226,10 +226,9 @@
 	.glossary-search-input::placeholder {
 		color: var(--text-tertiary);
 	}
+	/* The ring is the global *:focus-visible rule's (app.css). */
 	.glossary-search-input:focus {
-		outline: none;
 		border-color: var(--accent-color);
-		box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 20%, transparent);
 	}
 
 	/* Letter filter */
