@@ -5,6 +5,8 @@
 	import type { PracticeProblem } from '$lib/stores/quiz';
 	import Icon from '$lib/components/Icon.svelte';
 	import { quizStore } from '$lib/stores/quiz';
+	import PracticeSnapshot from '$lib/components/PracticeSnapshot.svelte';
+	import { storedAnswerText } from '$lib/utils/practiceSnapshot';
 
 	interface Props {
 		problems: PracticeProblem[];
@@ -68,8 +70,8 @@
 					<Icon name="sparkles" size="sm" style="color: var(--accent-strong);" />
 					Dæmi {currentIndex + 1}
 				</h4>
-				<div class="prose prose-sm max-w-none dark:prose-invert" style="color: var(--text-primary);">
-					{currentProblem.content}
+				<div style="color: var(--text-primary);">
+					<PracticeSnapshot html={currentProblem.contentHtml} text={currentProblem.content} />
 				</div>
 			</div>
 
@@ -86,7 +88,7 @@
 					<div class="pp-answer-box">
 						<h5 class="pp-answer-title">Svar</h5>
 						<div class="pp-answer-text">
-							{currentProblem.answer}
+							<PracticeSnapshot html={currentProblem.answerHtml} text={storedAnswerText(currentProblem.answer)} />
 						</div>
 					</div>
 

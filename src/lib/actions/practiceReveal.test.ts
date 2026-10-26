@@ -205,3 +205,171 @@ describe('practiceReveal action', () => {
 		el.remove();
 	});
 });
+
+/*
+ * What the action stores for practice review (/prof and /nam), plan step S3.1 (PED-12, PED-13).
+ * Every test runs the real action on markup shaped like efni's (fixtures trimmed from efni main,
+ * 2026-10-26): before S3.1 the question was built from <p> siblings only and the answer from
+ * textContent, so 47 of 292 problems were stored with an empty question, 19 cut short, and
+ * powers of ten read '1022'.
+ */
+describe('practiceReveal stores the whole problem (S3.1)', () => {
+	/** MathJax's hidden assistive copy is hidden only by this inline style. */
+	const AMATH_STYLE =
+		'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;';
+	/** A pre-rendered MathJax span: the SVG (self-contained) and the hidden assistive MathML. */
+	const mjx = (mathml: string, block = false) =>
+		`<span class="${block ? 'mathjax-display' : 'math-inline'}" data-latex="x">` +
+		'<mjx-container aria-hidden="true" class="MathJax" jax="SVG"><svg viewBox="0 0 10 10"><defs><path id="MJX-1-NCM-N-43" d="M0 0"></path></defs>' +
+		'<g><use xlink:href="#MJX-1-NCM-N-43"></use></g></svg></mjx-container>' +
+		`<math class="assistive-mathml" xmlns="http://www.w3.org/1998/Math/MathML"${block ? ' display="block"' : ''} style="${AMATH_STYLE}">${mathml}</math></span>`;
+	const equation = (mathml: string) => `<div class="equation unnumbered">${mjx(mathml, true)}</div>`;
+	const heading = '<p class="para-title"><strong>Kannaðu þekkingu þína</strong></p>';
+	const answer = (id: string, body: string) =>
+		`<aside id="${id}" class="note note-default check-knowledge-answer"><h4>Svar:</h4>${body}</aside>`;
+
+	/** §4.4, Ex 4.13: the question ends in a display equation (div.equation). */
+	const SECTION_4_4 =
+		heading +
+		'<p>Hver er prósentunýtni hvarfs sem framleiðir 12,5 g af gasinu Freon CF<sub>2</sub>Cl<sub>2</sub> úr 32,9 g af CCl<sub>4</sub> og umframmagni af HF?</p>' +
+		equation('<mrow><msub><mrow><mtext>CCl</mtext></mrow><mn>4</mn></msub><mo>+</mo><mn>2</mn><mtext>HF</mtext></mrow>') +
+		answer('fs-a44', '<p>48,3%</p>');
+
+	function mount(inner: string) {
+		localStorage.clear();
+		const el = document.createElement('div');
+		el.innerHTML = `<aside class="example"><p class="example-label">Dæmi</p>${inner}</aside>`;
+		document.body.appendChild(el);
+		const action = practiceReveal(el, { bookSlug: 'b', chapterSlug: '04', sectionSlug: '4-4' });
+		const revealAll = () =>
+			el.querySelectorAll<HTMLButtonElement>('button.practice-answer-toggle').forEach((b) => b.click());
+		const record = (id: string) => get(quizStore).practiceProblemProgress[`b/04/4-4#${id}`];
+		return { el, action, revealAll, record };
+	}
+
+	it('stores a question that ends in a display equation whole, and the answer without its "Svar:" heading (§4.4)', () => {
+		quizStore.reset();
+		const { el, revealAll, record } = mount(SECTION_4_4);
+		revealAll();
+		const r = record('fs-a44');
+		expect(r.content).toContain('prósentunýtni');
+		expect(r.content).toContain('CCl4+2HF');
+		expect(r.answer).toBe('48,3%');
+		expect(r.contentHtml).toContain('CF<sub>2</sub>Cl<sub>2</sub>');
+		expect(r.contentHtml).toMatch(/<math display="block">.*<msub>/);
+		expect(r.answerHtml).toBe('<p>48,3%</p>');
+		el.remove();
+	});
+
+	it('keeps neither the SVG nor any attribute that would hide or style the maths', () => {
+		quizStore.reset();
+		const { el, revealAll, record } = mount(SECTION_4_4);
+		revealAll();
+		const html = record('fs-a44').contentHtml ?? '';
+		expect(html).toContain('<math');
+		expect(html).not.toMatch(/<svg|mjx-container|style=|class=|id=|data-latex/);
+		el.remove();
+	});
+
+	it('gives each of two problems in one example its own question (the shape of Ex 13.9)', () => {
+		quizStore.reset();
+		const { el, revealAll, record } = mount(
+			heading +
+				'<p>Fyrra dæmið.</p>' +
+				equation('<mi>a</mi>') +
+				answer('fs-first', '<p>A</p>') +
+				heading +
+				'<p>Seinna dæmið.</p>' +
+				equation('<mi>b</mi>') +
+				answer('fs-second', '<p>B</p>')
+		);
+		revealAll();
+		expect(record('fs-first').content).toContain('Fyrra');
+		expect(record('fs-first').content).not.toContain('Seinna');
+		expect(record('fs-first').contentHtml).toContain('<mi>a</mi>');
+		expect(record('fs-second').content).toContain('Seinna');
+		expect(record('fs-second').content).not.toContain('Fyrra');
+		expect(record('fs-second').contentHtml).toContain('<mi>b</mi>');
+		el.remove();
+	});
+
+	// No real example has two problems under one heading (all 292 reach a p.para-title), so only
+	// this fixture exercises the stop at the previous answer and the controls injected beside it.
+	it('stops at the previous answer when two problems share one heading', () => {
+		quizStore.reset();
+		const { el, revealAll, record } = mount(
+			heading + '<p>Fyrra.</p>' + answer('fs-1', '<p>A</p>') + '<p>Seinna.</p>' + answer('fs-2', '<p>B</p>')
+		);
+		revealAll();
+		expect(record('fs-2').content).toBe('Seinna.');
+		el.remove();
+	});
+
+	it("leaves out the page's own controls and reading aids: equation buttons, bionic bold, the English gloss", () => {
+		quizStore.reset();
+		// What equations.ts, bionicReading.ts and glossaryTerms.ts have done to the DOM by the time
+		// practiceReveal runs (ContentRenderer applies them first).
+		const { el, revealAll, record } = mount(
+			heading +
+				'<p><b class="bionic-bold">Hv</b>er er <dfn class="term" role="button" tabindex="0">nýtnin<span class="term-en"> (e. yield)</span></dfn>?</p>' +
+				'<div class="equation unnumbered equation-wrapper" tabindex="0"><div class="equation-content">' +
+				mjx('<mi>x</mi>', true) +
+				'</div><div class="equation-actions"><button type="button">LaTeX</button><button type="button">🔗</button><button type="button">⊕</button></div></div>' +
+				answer('fs-a', '<p>A</p>')
+		);
+		revealAll();
+		const r = record('fs-a');
+		expect(r.content).toContain('Hver er nýtnin?');
+		expect(r.content).not.toMatch(/LaTeX|🔗|⊕|yield/);
+		expect(r.contentHtml).not.toMatch(/<button|<b>|<b |bionic|<dfn|yield/);
+		expect(r.contentHtml).toContain('<mi>x</mi>');
+		el.remove();
+	});
+
+	it('keeps a power of ten and a fraction as elements (§3.1 gold atoms, §13.2 Qc)', () => {
+		quizStore.reset();
+		const { el, revealAll, record } = mount(
+			heading +
+				'<p>Hversu mörg Au-atóm eru í þessu magni af gulli?</p>' +
+				answer('fs-gold', `<p>4,586 ${mjx('<mo>×</mo>')} 10<sup>22</sup> Au-atóm</p>`) +
+				heading +
+				'<p>Skrifaðu segð fyrir hvarfkvóta.</p>' +
+				answer('fs-qc', `<p>(a) ${mjx('<mrow><msub><mi>Q</mi><mi>c</mi></msub><mo>=</mo><mfrac><mi>x</mi><mi>y</mi></mfrac></mrow>')}</p>`)
+		);
+		revealAll();
+		const gold = record('fs-gold').answerHtml ?? '';
+		expect(gold).toContain('10<sup>22</sup>');
+		expect(gold).toContain('<math><mo>×</mo></math>');
+		expect(record('fs-qc').answerHtml).toContain('<mfrac><mi>x</mi><mi>y</mi></mfrac>');
+		el.remove();
+	});
+
+	it('keeps an image in the question, with its same-site address and alt text', () => {
+		quizStore.reset();
+		const { el, revealAll, record } = mount(
+			heading +
+				'<p>Hvað sýnir myndin?</p><div class="media-inline"><img src="/content/b/chapters/04/images/media/x.jpg" alt="Mynd af flösku" loading="lazy" style="cursor: zoom-in"></div>' +
+				answer('fs-img', '<p>Flösku.</p>')
+		);
+		revealAll();
+		expect(record('fs-img').contentHtml).toContain('<img src="/content/b/chapters/04/images/media/x.jpg" alt="Mynd af flösku">');
+		el.remove();
+	});
+
+	it('heals a stored copy whose question is empty on the next reveal, and keeps its attempts', () => {
+		quizStore.reset();
+		// What the old walk stored for §4.4 in students' browsers.
+		quizStore.markPracticeProblemViewed('b/04/4-4#fs-a44', 'b', '04', '4-4', '', 'Svar: 48,3%');
+		quizStore.markPracticeProblemAttempt('b/04/4-4#fs-a44', false);
+		quizStore.markPracticeProblemAttempt('b/04/4-4#fs-a44', true);
+		const { el, revealAll, record } = mount(SECTION_4_4);
+		revealAll();
+		const r = record('fs-a44');
+		expect(r.content).toContain('prósentunýtni');
+		expect(r.answer).toBe('48,3%');
+		expect(r.contentHtml).toContain('<math');
+		expect(r.attempts).toBe(2);
+		expect(r.successfulAttempts).toBe(1);
+		el.remove();
+	});
+});

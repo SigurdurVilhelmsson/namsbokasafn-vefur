@@ -174,6 +174,43 @@ describe('quiz store', () => {
 			expect(progress!.attempts).toBe(0);
 		});
 
+		it('recordPracticeProblem creates a record with its snapshot (S3.1)', () => {
+			quizStore.recordPracticeProblem('pp-1', 'efnafraedi-2e', '01', '1-1', {
+				content: 'Hvað?',
+				answer: '42',
+				contentHtml: '<p>Hvað?</p>',
+				answerHtml: '<p>42</p>'
+			});
+			const p = quizStore.getPracticeProblemProgress('pp-1');
+			expect(p).toMatchObject({ content: 'Hvað?', answer: '42', contentHtml: '<p>Hvað?</p>', answerHtml: '<p>42</p>', attempts: 0, source: 'inline' });
+		});
+
+		it('recordPracticeProblem replaces a stored snapshot and keeps the progress (heals pre-S3.1 records)', () => {
+			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', '', 'Svar: 42');
+			quizStore.markPracticeProblemAttempt('pp-1', true);
+			quizStore.markPracticeProblemCompleted('pp-1');
+			quizStore.recordPracticeProblem('pp-1', 'efnafraedi-2e', '01', '1-1', {
+				content: 'Hvað?',
+				answer: '42',
+				contentHtml: '<p>Hvað?</p>',
+				answerHtml: '<p>42</p>'
+			});
+			const p = quizStore.getPracticeProblemProgress('pp-1')!;
+			expect(p.content).toBe('Hvað?');
+			expect(p.answerHtml).toBe('<p>42</p>');
+			expect(p.attempts).toBe(2);
+			expect(p.successfulAttempts).toBe(2);
+			expect(p.isCompleted).toBe(true);
+		});
+
+		it('recordPracticeProblem writes nothing when the snapshot is unchanged', () => {
+			const snap = { content: 'Hvað?', answer: '42', contentHtml: '<p>Hvað?</p>', answerHtml: '<p>42</p>' };
+			quizStore.recordPracticeProblem('pp-1', 'efnafraedi-2e', '01', '1-1', snap);
+			const before = get(quizStore).practiceProblemProgress;
+			quizStore.recordPracticeProblem('pp-1', 'efnafraedi-2e', '01', '1-1', { ...snap });
+			expect(get(quizStore).practiceProblemProgress).toBe(before);
+		});
+
 		it('should not overwrite existing progress on re-view', () => {
 			quizStore.markPracticeProblemViewed('pp-1', 'efnafraedi-2e', '01', '1-1', 'q', 'a');
 			quizStore.markPracticeProblemCompleted('pp-1');

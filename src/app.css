@@ -1259,6 +1259,40 @@
   border-bottom-style: solid;
 }
 
+/* Practice review (/prof, /nam): a stored problem's trimmed HTML (PracticeSnapshot.svelte,
+   plan step S3.1). MathML renders natively; wide maths and tables scroll inside the card. */
+.practice-snapshot {
+  overflow-x: auto;
+}
+
+.practice-snapshot p {
+  margin: 0 0 0.5em;
+}
+
+.practice-snapshot p:last-child {
+  margin-bottom: 0;
+}
+
+.practice-snapshot math[display="block"] {
+  margin: 0.5em 0;
+}
+
+.practice-snapshot table {
+  border-collapse: collapse;
+  margin: 0.5em 0;
+}
+
+.practice-snapshot th,
+.practice-snapshot td {
+  border: 1px solid var(--border-color);
+  padding: 0.25em 0.5em;
+}
+
+.practice-snapshot img {
+  max-width: 100%;
+  height: auto;
+}
+
 /* English gloss injected by the glossaryTerms action from efni's data-en.
  *
  * A real element, not a ::after — generated content is not selectable, not

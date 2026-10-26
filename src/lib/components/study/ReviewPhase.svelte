@@ -8,6 +8,8 @@
 	import type { DifficultyRating } from '$lib/types/flashcard';
 	import { flashcardStore } from '$lib/stores/flashcard';
 	import { quizStore } from '$lib/stores/quiz';
+	import PracticeSnapshot from '$lib/components/PracticeSnapshot.svelte';
+	import { storedAnswerText } from '$lib/utils/practiceSnapshot';
 
 	interface Props {
 		dueFlashcards: DueFlashcard[];
@@ -164,8 +166,8 @@
 			<span class="rp-problem-label">
 				Æfingadæmi
 			</span>
-			<div class="prose prose-sm max-w-none dark:prose-invert mb-4" style="color: var(--text-primary);">
-				{currentItem.problem.content}
+			<div class="mb-4" style="color: var(--text-primary);">
+				<PracticeSnapshot html={currentItem.problem.contentHtml} text={currentItem.problem.content} />
 			</div>
 
 			{#if !isFlipped}
@@ -179,7 +181,7 @@
 				<div class="rp-answer-box">
 					<h5 class="rp-answer-title">Svar</h5>
 					<div class="rp-answer-text">
-						{currentItem.problem.answer}
+						<PracticeSnapshot html={currentItem.problem.answerHtml} text={storedAnswerText(currentItem.problem.answer)} />
 					</div>
 				</div>
 
