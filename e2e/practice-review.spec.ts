@@ -30,6 +30,9 @@ async function revealAnswer(page: Page, url: string, marker: string): Promise<vo
 	await expect(answer).toBeVisible();
 }
 
+/** /prof's question box: the element after the 'Dæmi N' label (markup that predates S3.1, so the test fails on the content, not on a selector). */
+const question = (page: Page) => page.locator('h4.aq-problem-label + div');
+
 test.describe('Practice review keeps the whole problem (S3.1)', () => {
 	test.use({ serviceWorkers: 'block' });
 
@@ -38,9 +41,9 @@ test.describe('Practice review keeps the whole problem (S3.1)', () => {
 		await revealAnswer(page, GOLD!, 'Au-atóm');
 
 		await page.goto(`/${BOOK}/prof/`);
-		await expect(page.locator('.practice-snapshot').first()).toContainText('Au-atóm');
+		await expect(question(page)).toContainText('Au-atóm');
 		await page.getByRole('button', { name: /Sýna svar/ }).click();
-		const answer = page.locator('.aq-answer-text .practice-snapshot');
+		const answer = page.locator('.aq-answer-text');
 		await expect(answer.locator('sup', { hasText: /^22$/ })).toHaveCount(1);
 		// The × between 4,586 and 10 is MathML now, shown by the browser, not a hidden copy.
 		await expect(answer.locator('math')).not.toHaveCount(0);
@@ -53,12 +56,12 @@ test.describe('Practice review keeps the whole problem (S3.1)', () => {
 		await revealAnswer(page, FREON!, 'gasinu Freon');
 
 		await page.goto(`/${BOOK}/prof/`);
-		const question = page.locator('.practice-snapshot').first();
-		await expect(question).toContainText('prósentunýtni');
-		await expect(question.locator('math[display="block"]')).toHaveCount(1);
-		await expect(question.locator('sub')).not.toHaveCount(0);
+		const q = question(page);
+		await expect(q).toContainText('prósentunýtni');
+		await expect(q.locator('math[display="block"]')).toHaveCount(1);
+		await expect(q.locator('sub')).not.toHaveCount(0);
 		// The live page adds 'LaTeX', '🔗' and '⊕' buttons to every equation (equations.ts).
-		await expect(question.locator('button')).toHaveCount(0);
-		await expect(question).not.toContainText('LaTeX');
+		await expect(q.locator('button')).toHaveCount(0);
+		await expect(q).not.toContainText('LaTeX');
 	});
 });
