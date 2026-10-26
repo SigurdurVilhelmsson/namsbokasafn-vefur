@@ -4,23 +4,34 @@
  *
  * `src/app.css` holds the only focus style: a `*:focus-visible` rule that draws a 2 px
  * `--focus-ring` outline over a solid 2 px `--focus-gap`, so the ring's inner neighbour is a
- * known colour on every surface (tokens.test.ts holds both pairs to 3:1). This test fails when:
+ * known colour (tokens.test.ts holds both pairs to 3:1). This test fails when:
  *   - that rule is missing, doubled, changed, or moved into an `@layer` (or any other at-rule).
  *     Unlayered, it beats Tailwind's `focus:outline-none` and `focus:ring-*` utilities, which
  *     live in `@layer utilities`; inside a layer, those utilities would remove or replace it;
  *   - any other rule whose selector targets `:focus` or `:focus-visible` sets an outline or a
  *     box-shadow. `outline: none` there hides the ring (it hid it on in-text glossary terms and
  *     on the three search inputs); an outline of its own is a second ring at another colour
- *     (amber is 2.66-2.92:1 in light); a box-shadow covers the gap.
+ *     (amber is 2.66-2.92:1 in light); a box-shadow covers the gap;
+ *   - a rule that does not target focus sets an outline without `:not(:focus-visible)` in each
+ *     of its selectors. A scoped class (0,2,0) outranks `*:focus-visible` (0,1,0), so an outline
+ *     that marks a state (the selected periodic-table category) replaced the ring whenever that
+ *     control had focus, and a plain `.x { outline: none }` would hide it. Rules inside
+ *     `@media print` are exempt.
  *
  * Read: a .svelte file's <style>, every .css file under src, static/styles/content.css (linked
  * on every page), and the whole text of every non-test .ts file under src, so CSS injected from
  * a template string counts (practiceReveal.ts does that). `:focus-within` and selectors inside
  * `:not(...)` do not count: they style something other than the focused element.
  *
- * Not seen: an inline `style` attribute (PeriodicTable sets outlines that way for state, not
- * focus), and Tailwind classes in markup (`focus:outline-none` is harmless while this rule is
- * unlayered; that is what the first check pins).
+ * Not seen:
+ *   - an inline `style` attribute, which beats every rule here: keep outlines out of markup
+ *     (none is left in src since S2.2);
+ *   - Tailwind classes in markup (`focus:outline-none` is harmless while the ring rule is
+ *     unlayered; that is what the first check pins);
+ *   - a control's own box-shadow in a rule that does not target focus. It outranks the ring
+ *     rule's gap, so the timer pill, the phone tools button and its menu links and a flashcard
+ *     keep their shadow in the band. Flagging every box-shadow would be noise; the ring still
+ *     clears 3:1 there.
  */
 import { describe, expect, it } from 'vitest';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
@@ -75,6 +86,7 @@ export function targetsFocus(selector: string): boolean {
 }
 
 const SETS_RING = /(?:^|[;\s{])(outline(?:-[\w-]+)?|box-shadow)\s*:/;
+const SETS_OUTLINE = /(?:^|[;\s{])outline(?:-[\w-]+)?\s*:/;
 
 /** The global rule, as app.css must write it (whitespace aside). */
 const RING_RULE = {
@@ -90,6 +102,20 @@ export function scopedFocusStyles(files: { path: string; css: string }[]): strin
 	return files.flatMap(({ path, css }) =>
 		cssRules(css)
 			.filter((r) => targetsFocus(r.selector) && SETS_RING.test(r.body) && !isGlobalRing(path, r))
+			.map((r) => `${path}: ${r.selector.split(/\s+/).join(' ')}`)
+	);
+}
+
+/**
+ * Rules that do not target focus but set an outline, with a selector that does not exclude
+ * focus (`:not(:focus-visible)`), as "path: selector". Rules inside `@media print` are exempt.
+ */
+export function unguardedOutlines(files: { path: string; css: string }[]): string[] {
+	return files.flatMap(({ path, css }) =>
+		cssRules(css)
+			.filter((r) => !targetsFocus(r.selector) && SETS_OUTLINE.test(r.body))
+			.filter((r) => !r.ancestors.some((a) => /^@media\b[^{]*\bprint\b/.test(a)))
+			.filter((r) => r.selector.split(',').some((sel) => !sel.includes(':not(:focus-visible)')))
 			.map((r) => `${path}: ${r.selector.split(/\s+/).join(' ')}`)
 	);
 }
@@ -136,6 +162,10 @@ describe('the global focus ring (S2.2, D01)', () => {
 	it('no other :focus or :focus-visible rule sets an outline (none included) or a box-shadow', () => {
 		expect(scopedFocusStyles(FILES), 'leave the ring to *:focus-visible in src/app.css (UI-07)').toEqual([]);
 	});
+
+	it('an outline that marks a state stands down on focus (:not(:focus-visible) on each selector)', () => {
+		expect(unguardedOutlines(FILES), 'add :not(:focus-visible), or the outline replaces the ring (UI-07)').toEqual([]);
+	});
 });
 
 describe('the scanner', () => {
@@ -157,6 +187,18 @@ describe('the scanner', () => {
 			['*:focus-visible', ['@layer base']],
 			['*:focus-visible', []]
 		]);
+	});
+
+	it('finds a state outline that would beat the ring, and passes one that stands down on focus', () => {
+		const css = `
+			.a { outline: none; }
+			.b--active { outline: 2px solid red; }
+			.c--active:not(:focus-visible) { outline: 2px solid red; }
+			.d:not(:focus-visible), .e { outline-offset: 1px; }
+			.f { box-shadow: 0 1px 2px red; }
+			.g:focus { outline: none; }
+			@media print { .h { outline: 1px solid black; } }`;
+		expect(unguardedOutlines([{ path: 'x.css', css }])).toEqual(['x.css: .a', 'x.css: .b--active', 'x.css: .d:not(:focus-visible), .e']);
 	});
 
 	it('counts a rule only in its own file: the global ring outside app.css is a scoped style', () => {

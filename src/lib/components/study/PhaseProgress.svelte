@@ -104,6 +104,9 @@
 	.phase-dot--current {
 		background-color: var(--accent-color);
 		color: var(--on-accent);
+	}
+	/* A state outline: :not(:focus-visible) keeps it off the focus ring (focusRing.test.ts). */
+	.phase-dot--current:not(:focus-visible) {
 		outline: 2px solid color-mix(in srgb, var(--accent-color) 40%, transparent);
 		outline-offset: 2px;
 	}

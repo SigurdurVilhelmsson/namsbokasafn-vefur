@@ -201,7 +201,7 @@
 				class="rounded-full px-3 py-1 text-xs font-medium transition-all {filterCategory === category
 					? 'pte-filter-category--active'
 					: 'opacity-80 hover:opacity-100'}"
-				style="background-color: {colors.bg}; color: {colors.text}; {filterCategory === category ? `outline: 2px solid var(--accent-color); outline-offset: 1px;` : ''}"
+				style="background-color: {colors.bg}; color: {colors.text};"
 			>
 				{label}
 			</button>
@@ -209,7 +209,8 @@
 	</div>
 
 	<!-- Periodic table grid -->
-	<div class="overflow-x-auto" role="grid" aria-label="Lotukerfið">
+	<!-- p-1: room for a focused edge cell's ring, which the scroll box would clip -->
+	<div class="overflow-x-auto p-1" role="grid" aria-label="Lotukerfið">
 		<div
 			class="grid min-w-[900px] gap-0.5"
 			style="grid-template-columns: repeat(18, minmax(48px, 1fr)); grid-template-rows: repeat(10, minmax(52px, 64px));"
@@ -225,10 +226,9 @@
 							onclick={() => handleElementClick(element)}
 							onkeydown={(e) => handleKeyDown(e, element)}
 							data-atomic-number={element.atomicNumber}
-							class="group relative flex h-full w-full flex-col items-center justify-center rounded border p-0.5 text-center transition-all duration-200 focus:outline-none
-								{isFiltered ? 'opacity-25' : ''}"
-							style="background-color: {colors.bg}; border-color: {colors.border}; color: {colors.text};
-								{isHighlighted ? `outline: 2px solid var(--accent-color); outline-offset: 1px;` : ''}"
+							class="group relative flex h-full w-full flex-col items-center justify-center rounded border p-0.5 text-center transition-all duration-200 focus:outline-none focus-visible:z-10
+								{isFiltered ? 'opacity-25' : ''} {isHighlighted ? 'pte-element--highlighted' : ''}"
+							style="background-color: {colors.bg}; border-color: {colors.border}; color: {colors.text};"
 							aria-label="{element.nameIs} ({element.symbol}), sætistala {element.atomicNumber}"
 						>
 							<span class="absolute left-0.5 top-0 text-[clamp(0.4rem,0.7vw,0.6rem)] opacity-70">{element.atomicNumber}</span>
@@ -437,6 +437,15 @@
 {/if}
 
 <style>
+	/* State outlines stand down while the control has focus, so the global ring shows: a
+	   scoped class outranks *:focus-visible (focusRing.test.ts). The focused cell is raised
+	   (focus-visible:z-10) so later cells do not paint over its ring. */
+	.pte-filter-category--active:not(:focus-visible),
+	.pte-element--highlighted:not(:focus-visible) {
+		outline: 2px solid var(--accent-color);
+		outline-offset: 1px;
+	}
+
 	/* Search */
 	.pte-search-icon {
 		position: absolute;

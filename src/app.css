@@ -449,10 +449,12 @@
 }
 
 /* The only focus style (plan step S2.2, decision D01, register UI-07): a 2 px --focus-ring
-   outline over a solid 2 px --focus-gap, so the ring's inner neighbour is a known colour on
-   every surface. It stays outside every @layer, so it beats Tailwind's focus:outline-none and
-   focus:ring-* utilities. Give no other :focus or :focus-visible rule an outline (none
-   included) or a box-shadow: focusRing.test.ts fails on either, and on this rule moving. */
+   outline over a solid 2 px --focus-gap, so the ring's inner neighbour is a known colour
+   (except on a control whose own rule sets a box-shadow, which outranks this one: the timer
+   pill, the phone tools button and its links, a flashcard). It stays outside every @layer, so
+   it beats Tailwind's focus:outline-none and focus:ring-* utilities. Give no other :focus or
+   :focus-visible rule an outline (none included) or a box-shadow, and add :not(:focus-visible)
+   to a rule that draws an outline for a state: focusRing.test.ts fails otherwise. */
 *:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
