@@ -58,7 +58,7 @@
 			</h3>
 			<ul class="quiz-help-list">
 				<li>Hér birtast dæmi sem þú hefur opnað í köflunum.</li>
-				<li>Dæmi sem þú hefur ekki enn reynt, eða hefur átt erfitt með, koma fyrst.</li>
+				<li>Dæmi sem þú hefur ekki enn reynt koma fyrst, svo þau sem þú hefur ekki enn náð tökum á.</li>
 				<li>Markmiðið er að hjálpa þér að læra, ekki að meta þig.</li>
 			</ul>
 		</div>

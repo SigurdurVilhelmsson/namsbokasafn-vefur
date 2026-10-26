@@ -33,6 +33,29 @@ describe('deleteLocalCaches', () => {
 		expect(deleted.sort()).toEqual([...expected].sort());
 	});
 
+	it('never throws when Cache Storage fails, so the erase still clears localStorage', async () => {
+		vi.stubGlobal('caches', { keys: vi.fn(async () => Promise.reject(new DOMException('The operation is insecure.', 'SecurityError'))) });
+		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+		await expect(deleteLocalCaches()).resolves.toEqual([]);
+		error.mockRestore();
+	});
+
+	it('deletes the other caches when one deletion fails, and reports only those deleted', async () => {
+		const deleted: string[] = [];
+		vi.stubGlobal('caches', {
+			keys: vi.fn(async () => ['offline-book:a', 'book-content', 'book-images']),
+			delete: vi.fn(async (name: string) => {
+				if (name === 'book-content') throw new Error('I/O error');
+				deleted.push(name);
+				return true;
+			})
+		});
+		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+		expect(await deleteLocalCaches()).toEqual(['offline-book:a', 'book-images']);
+		expect(deleted.sort()).toEqual(['book-images', 'offline-book:a']);
+		error.mockRestore();
+	});
+
 	it('does nothing where Cache Storage does not exist (an insecure context)', async () => {
 		vi.stubGlobal('caches', undefined);
 		expect(await deleteLocalCaches()).toEqual([]);
@@ -49,5 +72,18 @@ describe('clearAllStorage', () => {
 		clearAllStorage();
 		const left = Array.from({ length: localStorage.length }, (_, i) => localStorage.key(i));
 		expect(left).toEqual(['another-site']);
+	});
+});
+
+describe('clearAllStorage stops store writes until the reload', () => {
+	it('a store saving after the erase writes nothing (no in-memory state comes back)', async () => {
+		// The flag is module state: load fresh copies so the other tests are not affected.
+		vi.resetModules();
+		const { clearAllStorage: clear } = await import('./storageMigration');
+		const { safeSetItem } = await import('./localStorage');
+		expect(safeSetItem('namsbokasafn:reader', '{"before":1}')).toBe(true);
+		clear();
+		expect(safeSetItem('namsbokasafn:reader', '{"seeded":1}')).toBe(false);
+		expect(localStorage.getItem('namsbokasafn:reader')).toBeNull();
 	});
 });

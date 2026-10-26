@@ -165,7 +165,7 @@
 	function handleClearData() {
 		// D20: proposed wording (S3.2: says what it clears), checked in the batch before the train that ships it.
 		const message =
-			'Eyða lestrartölfræði, lotum, dagaröð og markmiðum í Námsgreiningu á þessu tæki? Námsmarkmið, minniskort, bókamerki, glósur og framvinda í bókunum haldast. Þetta er ekki hægt að afturkalla.';
+			'Eyða lestrartölfræði, lotum, röð daga og markmiðum í Námsgreiningu í þessum vafra? Námsmarkmið, minniskort, bókamerki, yfirstrikanir, athugasemdir og framvinda í bókunum haldast. Þetta er ekki hægt að afturkalla.';
 		if (confirm(message)) {
 			analyticsStore.clearAllData();
 		}
@@ -177,7 +177,7 @@
 	async function handleEraseAll() {
 		// D20: proposed wording (S3.2: the erase), checked in the batch before the train that ships it.
 		const message =
-			'Eyða öllu sem Námsbókasafn geymir í þessum vafra: framvindu, bókamerkjum, glósum, minniskortum, námsmarkmiðum, æfingadæmum, tölfræði og stillingum? Niðurhalaðar bækur eyðast líka. Þetta er ekki hægt að afturkalla.';
+			'Eyða öllu sem Námsbókasafn geymir í þessum vafra: framvindu, bókamerkjum, yfirstrikunum, athugasemdum, minniskortum, námsmarkmiðum, æfingadæmum, tölfræði og stillingum? Niðurhalaðar bækur eyðast líka. Þetta er ekki hægt að afturkalla.';
 		if (!confirm(message)) return;
 		await deleteLocalCaches();
 		clearAllStorage();

@@ -123,6 +123,37 @@ test.describe('Honest data controls (S3.2)', () => {
 		await expect(page.getByText('Engin minniskort enn')).toBeVisible();
 	});
 
+	// Normally the reloaded page writes every store's defaults, which also resets other tabs. When
+	// that reload fails (offline, no page is precached), another open tab must still drop the
+	// erased data when it sees the removals, not write it back on its next change.
+	test('another open tab drops the erased data, even when the reload fails', async ({ context, page }) => {
+		test.skip(!SECTION, 'no published book is synced');
+		const [, chapter, section] = SECTION!.match(/\/kafli\/([^/]+)\/([^/]+)\//)!;
+		await context.addInitScript((d) => {
+			if (sessionStorage.getItem('e2e-erase-seeded')) return;
+			sessionStorage.setItem('e2e-erase-seeded', '1');
+			for (const [k, v] of Object.entries(d)) localStorage.setItem(k, JSON.stringify(v));
+		}, seeds(BOOK!, chapter, section));
+
+		const reading = await context.newPage();
+		await reading.goto(SECTION!);
+		await expect(reading.locator('.reading-content')).toBeVisible();
+		await page.goto(`/${BOOK}/greining/`);
+		await page.waitForLoadState('networkidle');
+		expect((await storedKeys(page))['namsbokasafn:reader']).toContain(MARK);
+
+		// The erasing tab's reload fails, as it would offline.
+		await page.route((url) => url.pathname.includes('/greining'), (route) => route.abort());
+		page.on('dialog', (dialog) => void dialog.accept());
+		await page.getByRole('button', { name: 'Eyða öllum gögnum á þessu tæki' }).click();
+		await expect.poll(async () => Object.keys(await storedKeys(reading))).not.toContain('namsbokasafn:reader');
+
+		// Scrolling makes the reading tab save its reader state again.
+		await reading.mouse.wheel(0, 1500);
+		await expect.poll(async () => (await storedKeys(reading))['namsbokasafn:reader'] ?? '').not.toBe('');
+		expect((await storedKeys(reading))['namsbokasafn:reader']).not.toContain(MARK);
+	});
+
 	test("'Hreinsa tölfræði' says what it clears and what stays", async ({ page }) => {
 		test.skip(!BOOK, 'no published book is synced');
 		await page.goto(`/${BOOK}/greining/`);
@@ -142,6 +173,8 @@ test.describe('Honest data controls (S3.2)', () => {
 		test.skip(!BOOK, 'no published book is synced');
 		await page.goto(`/${BOOK}/prof/`);
 		await expect(page.locator('h1')).toHaveText('Próf');
+		// PED-29: the heading and the nav entry that leads here say the same thing.
+		await expect(page.locator(`a[href^="/${BOOK}/prof"]`).first()).toContainText('Próf');
 		await expect(page.locator('.quiz-subtext')).not.toContainText('Aðlagað');
 		await expect(page.locator('.quiz-help')).not.toContainText(/aðlög/i);
 		await expect(page).toHaveTitle(/^Próf \|/);

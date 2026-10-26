@@ -33,6 +33,18 @@ export function getStorageUsageBytes(): number {
 	return total;
 }
 
+/** Set by the erase (clearAllStorage): no store saves again before the page reloads. */
+let writesSuspended = false;
+
+/**
+ * Stop every store from saving until the page reloads. clearAllStorage() calls it before it
+ * removes the keys, so no store writes its in-memory state back in the moment before the
+ * reload (plan step S3.2). There is no way to resume: the reload starts a fresh page.
+ */
+export function suspendWritesUntilReload(): void {
+	writesSuspended = true;
+}
+
 // Typical browser localStorage limit
 const QUOTA_LIMIT = 5 * 1024 * 1024; // 5 MB
 const WARN_THRESHOLD = 0.8; // 80%
@@ -43,6 +55,7 @@ const WARN_THRESHOLD = 0.8; // 80%
  * Returns true if the write succeeded, false otherwise.
  */
 export function safeSetItem(key: string, value: string): boolean {
+	if (writesSuspended) return false;
 	try {
 		localStorage.setItem(key, value);
 
@@ -76,14 +89,20 @@ export function dismissStorageWarning(): void {
  * The 'storage' event fires only in OTHER tabs when localStorage changes,
  * so there is no circular update risk.
  *
+ * A removal (another tab's erase, or localStorage.clear(), which reports key null) is passed
+ * on as 'null': every store parses it to null, which validateStoreData replaces with the
+ * defaults, so this tab drops the erased data instead of writing it back on its next change.
+ *
  * @param key - The localStorage key to watch
- * @param onExternalChange - Callback with the parsed new value
+ * @param onExternalChange - Callback with the raw new value ('null' when the key was removed)
  * @returns Cleanup function to remove the listener
  */
 export function onStorageChange(key: string, onExternalChange: (newValue: string) => void): () => void {
 	const handler = (e: StorageEvent) => {
-		if (e.key === key && e.newValue) {
-			onExternalChange(e.newValue);
+		if (e.key === key) {
+			onExternalChange(e.newValue ?? 'null');
+		} else if (e.key === null) {
+			onExternalChange('null');
 		}
 	};
 
