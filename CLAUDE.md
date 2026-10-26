@@ -628,7 +628,77 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-10-26 (afternoon) — train 5 deployed: S3.1 (#308) and S3.2 (#309) are live; D20 batch 3 checked (#310)
+
+Measured on 2026-10-26 against `main` = `590de02` (#310) and the live site.
+
+- **Prod runs build `1793025632459`**, deployed at 16:12:36 UTC (the server's clock) from `main` `590de02` with no content sync, replacing train 4's build `1793012580618`. This is the plan's train 3 (S3.4); S3.3 is not done, and S3.4 ships without it. Undeployed on `main`: only the PR that adds this entry. It sent 337 files and deleted none, none under `content/`: 273 chemistry pages, 25 print pages, `200.html`, `index.html`, `sw.js`, `_app/version.json` and 35 new `/_app/immutable/` files (1 stylesheet, 12 chunks, 2 entry files, 20 page nodes). `sitemap.xml` was not sent: it is byte-identical to the live one (same 366 URLs and `<lastmod>` date).
+- **#308 is plan step S3.1** (register PED-12, PED-13, KEEP-08): practice review keeps the whole question and its maths. Merged at 13:20:25 UTC as `cfa2842` (parents `e278f4c` and `7d99fa2`; 3 commits, 12 files). `main`'s tree equals the `git merge-tree` simulation made before the merge (control: `e278f4c`'s tree differs). In short:
+  - `practiceReveal.ts` walks back from the answer to the problem's `p.para-title`, matched by class because the heading's wording varies (16 ways in efni `main`'s content, 12 in the live sync), or to the previous answer or its self-assessment row. It keeps equations, images and tables, and stores the question and the answer's body (without its "Svar:") as text and as trimmed HTML.
+  - `utils/practiceSnapshot.ts` filters that HTML through an allow-list: paragraphs, line breaks and `div`s, emphasis, underline, sup/sub, tables, lists, same-site images and MathML. It drops MathJax's SVG and shows the assistive `<math>` beside it, which was hidden only by its inline style. It also drops the page's own controls (the equations' "LaTeX", "🔗" and "⊕" buttons, the English gloss) and unwraps everything else.
+  - `quiz.ts`: `contentHtml` and `answerHtml`, and `recordPracticeProblem()`, which creates a record or replaces its snapshot while keeping its progress, so the broken copies in students' browsers heal on the next reveal.
+  - `PracticeSnapshot.svelte` shows the snapshot in /prof's AdaptiveQuiz and /nam's PracticePhase and ReviewPhase.
+- **Counted with the real `equations` and `practiceReveal` actions** over all 292 Check-your-learning problems, on three copies of the content, with the same result on each: the review's copy (this machine's ② preview), the live content (the deploy lane) and efni `main` `b019d25f6`.
+  - Before (`main` `e278f4c`): 47 questions stored empty and 19 cut short (66 broken); 57 problems showing a power of ten as plain digits ("1022"), and 4 that lost one with the cut question; all 292 answers starting "Svar:".
+  - After: 0, 0, 0 and 0. All 58 problems with a power of ten keep every one of their 95 powers as an element.
+  - On the live content the stored HTML is 170,013 characters for all 292 problems, and the largest problem is 4,840 (174,331 and 4,827 on the review's copy; 173,415 and 4,823 on efni `main`).
+  - The counter is not in the repo. Don't use the review's `profTextAll.mjs` (in `~/.cache/reader-review/review-scratch/ped-stem/scripts/`, not in the repo) for this: it carries its own copy of the old walk.
+- **#309 is plan step S3.2** (register PED-14, PED-29). Merged at 14:13:59 UTC as `aba7e76` (parents `cfa2842` and `e9da5a1`; 2 commits, 10 files). `main`'s tree equals the simulation (control: `cfa2842`'s tree differs).
+  - /greining's "Hreinsa gögn" confirmed erasing all study data but reset only the analytics store. It is now "Hreinsa tölfræði", and its confirm names what it clears and what stays.
+  - The new "Eyða öllum gögnum á þessu tæki" runs three steps in order. `deleteLocalCaches()` deletes the downloaded books and the browsing caches; the precache stays, and it never throws. `clearAllStorage()` then suspends every store write until the reload. Last, `location.reload()`. Downloaded books go too, and the confirm says so.
+  - /prof no longer claims to adapt the next question: it is "Próf", as in the nav. `git grep -n -i -E 'aðlög|nuverandi' -- src` finds nothing (9 hits before).
+  - Both red buttons on /greining are `red-700`. The ratchet's two light-theme entries for the old button are gone, so `e2e/a11y-baseline.json` is down from 6 entries to 4.
+- 🔑 **Rules these PRs leave for later code:**
+  - **A store's `onStorageChange` callback receives `'null'` when another tab removes its key** (or calls `localStorage.clear()`), and must turn it into the store's defaults. All eight stores do, through `validateStoreData` (by design, analytics keeps this tab's open session and offline keeps this tab's download progress). Before, removals were ignored, so another tab wrote its old state back after an erase whenever the erasing tab's reload did not boot (offline).
+  - **`clearAllStorage()` blocks every `safeSetItem` until the page reloads.** Call it only right before a reload.
+  - **A stored practice snapshot is filtered again when shown, and appended as nodes.** Never pass it to `{@html}`.
+- **D20's third batch is checked.** [USER] approved all eleven S3.2 strings as written on 2026-10-26, keeping "á þessu tæki" and "Próf". #310 removed the markers: merged at 14:38:59 UTC as `590de02`, 11 deleted comment lines and no string changes; tree equals the simulation. `git grep -n 'D20: proposed' -- src` finds nothing.
+- **CI:**
+  - #308's head `7d99fa2`: 967 unit tests; e2e 150 passed, 31 skipped, 0 failed (PR run 40327825721, 8.0 min). `main` `cfa2842` (run 40329729337): green, e2e the same.
+  - #309's head `e9da5a1`: 976 unit tests; e2e 154 passed, 31 skipped, 0 failed (PR run 40335471789, 8.5 min). `main` `aba7e76` (run 40337720156): green, e2e the same.
+  - #310 (PR run 40337825178) and `main` `590de02` (run 40341571223): green, e2e 154 passed, 31 skipped, 0 failed.
+- **Pre-PR reviews** (three lenses each, then a skeptic per finding). Each new test for a fix fails with the fix removed.
+  - **S3.1:** 4 findings: 3 confirmed, all low and fixed (underlines kept, the question's paragraphs separated in its text, a store-test gap); 1 refuted.
+  - **S3.2:** 9 findings: 4 confirmed, all low and fixed (a Cache Storage failure stopped the erase silently; writes in the moment before the reload and from other tabs; words the UI doesn't use; an overstated help line); 2 refuted; 3 not verified, one of which became a test.
+- **The gates, run from the deploy lane by its checklist:**
+  - `main`'s CI was green on `590de02`;
+  - content validation found no issues, with only the warnings train 4 had;
+  - no `D20: proposed` strings and no sync stamp on either side;
+  - all 2,481 chemistry content files byte-identical to the server;
+  - a second dry run just before `--apply` gave the same 337 and 0.
+- **Backup and rollback:** the previous build is backed up on the server at `~/backups/namsbokasafn-build-2026-10-26-v1793012580618` (3,647 files, identical to the live build when copied). To roll back: `ssh siggi@kvenno.app 'rsync -a ~/backups/namsbokasafn-build-2026-10-26-v1793012580618/ /var/www/namsbokasafn-vefur/build/'`. Its dry run (`-n`) would copy back 302 files and delete none; the train's 35 new `_app/` files would stay, unused.
+- **Verified live:**
+  - the version equals the lane's build;
+  - every `/_app/immutable/` file that the catalogue, chemistry's home, §1.1 and the three frozen books' homes name loads (27 to 43 per page, 0 missing; a made-up path answers 404);
+  - organic answers 404;
+  - in headless Chromium with every request outside namsbokasafn.is blocked: 0 page errors and 0 failed requests to the site on 7 pages at 390 and 1280 px.
+- **S3.4's check, a repaired problem on /prof on the live site**, in a fresh browser profile. Before `--apply` the same script's checks failed on the live site: both records were stored without HTML, §4.4's question was stored without its text, §3.1's 10<sup>22</sup> was flattened, /prof was not "Próf", and /greining had neither new button. It then stopped at the erase, which the old page has no button for. After it, all nine checks pass:
+  - revealing §4.4's Freon problem and §3.1's gold-atoms answer stores both with HTML;
+  - /prof shows §4.4's question whole, with its equation as MathML, no buttons, and an answer without "Svar:";
+  - /prof shows §3.1's 10<sup>22</sup> as an element;
+  - /prof says "Próf", and /greining shows both new buttons;
+  - the erase leaves no seeded key and no `offline-book:` cache.
+- ⚠️ **The live chemistry is the 2026-08 sync, so its wording differs from efni `main`'s**: §3.1's gold-atoms problem says "Au-frumeindir" and §4.4's Freon problem "prósentuheimtur", where efni `main` and the CI e2e have "Au-atóm" and "prósentunýtni" (efni's §4.4 still says "prósentuheimtur" elsewhere on the page). A check run against the live site must use the live wording.
+- **Known, not fixed** (in #308's and #309's bodies):
+  - links inside a stored problem are unwrapped: 23 of them, 14 in-page anchors and 9 to other pages (7 to appendices, 1 to §1.4's table, 1 to §17.2's figure), which would have worked on /prof;
+  - PED-13's step 2, fetching the section's HTML by the stored address, is not built;
+  - the service worker's cache-expiry records (IndexedDB `workbox-expiration`) survive the erase;
+  - another tab's open reading session survives it;
+  - a download running in another tab keeps writing to its cache;
+  - efni content: Check-your-learning answers that hold only "Svar:" show an empty answer. There are 6 on the live site (4-1 ×2, 4-2 ×2, 7-2, 15-3) and 2 on efni `main` (7-2, 15-3).
+- **npm audit:** no package changes since `eab25c7` (production tree 0; full tree 3, all low).
+- **Next, by the plan:** S3.3 (the page-view ruling in code, a privacy page and "Tilkynna villu"), which needs [USER]'s D03 data-rule wording. For [USER]: that wording, the real-phone check of the sidebar's focus order (S1.3's last box), S0.4 before 1 November, and listening to the timer pill on the live site while a phase runs.
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+
 ### 2026-10-26 — train 4 deployed: S2.1's accent tokens (#304) and S2.2's focus ring (#306) are live
+
+> ⚠️ **Superseded on three points — read the 2026-10-26 (afternoon) entry above first.**
+>
+> - Train 5 deployed `main` `590de02`, so prod runs build `1793025632459`, and "Undeployed on `main`: only the PR that adds this entry" no longer holds.
+> - Its Next bullet's S3.1 and S3.2 are done and live.
+> - M3's train has run (train 5, the plan's train 3) without S3.3.
+>
+> The rest of this entry stands.
 
 Measured on 2026-10-26 against `main` = `eab25c7` (#306) and the live site.
 
