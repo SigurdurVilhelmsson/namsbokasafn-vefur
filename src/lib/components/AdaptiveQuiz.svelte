@@ -143,7 +143,6 @@
 			Engin æfingadæmi tiltæk
 		</h3>
 		<p class="aq-empty-text">
-			<!-- D20: proposed wording (S3.2, PED-29: how a problem gets here), checked in the batch before the train that ships it. -->
 			Þegar þú opnar svar við æfingadæmi í köflunum birtist dæmið hér.
 		</p>
 	</div>
@@ -227,7 +226,6 @@
 		<div class="aq-header">
 			<div class="flex items-center gap-2">
 				<Icon name="lightbulb" style="color: var(--accent-strong);" />
-				<!-- D20: proposed wording (S3.2, PED-29: no adaptive claim), checked in the batch before the train that ships it. -->
 				<span class="text-sm font-semibold" style="color: var(--text-primary);">Æfingadæmi</span>
 			</div>
 			<div class="flex items-center gap-3">
@@ -315,7 +313,6 @@
 		<!-- Footer with current score -->
 		{#if quizState.answers.size > 0}
 			<div class="aq-footer">
-				<!-- D20: proposed wording (S3.2, PED-29: the accent was missing), checked in the batch before the train that ships it. -->
 				<span class="text-sm" style="color: var(--text-tertiary);">Núverandi einkunn</span>
 				<div class="flex items-center gap-2">
 					<span class="aq-correct-indicator text-sm">

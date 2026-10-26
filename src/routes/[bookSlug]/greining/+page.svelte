@@ -163,7 +163,6 @@
 	// streaks, activity, and the goals on the Markmið tab). Learning objectives (/markmid),
 	// flashcards, bookmarks, highlights and reading progress stay (plan step S3.2, PED-14).
 	function handleClearData() {
-		// D20: proposed wording (S3.2: says what it clears), checked in the batch before the train that ships it.
 		const message =
 			'Eyða lestrartölfræði, lotum, röð daga og markmiðum í Námsgreiningu í þessum vafra? Námsmarkmið, minniskort, bókamerki, yfirstrikanir, athugasemdir og framvinda í bókunum haldast. Þetta er ekki hægt að afturkalla.';
 		if (confirm(message)) {
@@ -175,7 +174,6 @@
 	// caches first, then every namsbokasafn key, then reload at once, before any store can
 	// write its in-memory state back (plan step S3.2, PED-14).
 	async function handleEraseAll() {
-		// D20: proposed wording (S3.2: the erase), checked in the batch before the train that ships it.
 		const message =
 			'Eyða öllu sem Námsbókasafn geymir í þessum vafra: framvindu, bókamerkjum, yfirstrikunum, athugasemdum, minniskortum, námsmarkmiðum, æfingadæmum, tölfræði og stillingum? Niðurhalaðar bækur eyðast líka. Þetta er ekki hægt að afturkalla.';
 		if (!confirm(message)) return;
@@ -237,14 +235,12 @@
 				onclick={handleClearData}
 				class="text-sm px-3 py-1.5 rounded-lg text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
 			>
-				<!-- D20: proposed wording (S3.2: the button says what it clears), checked in the batch before the train that ships it. -->
 				Hreinsa tölfræði
 			</button>
 			<button
 				onclick={handleEraseAll}
 				class="text-sm px-3 py-1.5 rounded-lg text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
 			>
-				<!-- D20: proposed wording (S3.2: the erase, the plan's text), checked in the batch before the train that ships it. -->
 				Eyða öllum gögnum á þessu tæki
 			</button>
 		</div>

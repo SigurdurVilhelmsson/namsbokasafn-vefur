@@ -17,7 +17,6 @@
 </script>
 
 <svelte:head>
-	<!-- D20: proposed wording (S3.2, PED-29: no adaptive claim; 'Próf' as in the nav), checked in the batch before the train that ships it. -->
 	<title>Próf | Námsbókasafn</title>
 	<meta property="og:title" content="Próf | Námsbókasafn" />
 	<meta name="description" content="Æfðu aftur dæmi úr köflunum — þau sem þú hefur ekki enn náð tökum á koma fyrst." />
@@ -35,7 +34,6 @@
 				<Icon name="chevron-left" size="sm" />
 				Til baka
 			</a>
-			<!-- D20: proposed wording (S3.2, PED-29: the heading and subtitle), checked in the batch before the train that ships it. -->
 			<h1 class="quiz-heading">Próf</h1>
 			<p class="quiz-subtext">
 				{#if chapterSlug}
@@ -53,7 +51,6 @@
 		<div class="quiz-help">
 			<h3 class="quiz-help-title">
 				<Icon name="info" size="sm" />
-				<!-- D20: proposed wording (S3.2, PED-29: the help says where the problems come from; the next question does not adapt), checked in the batch before the train that ships it. -->
 				Hvaðan koma dæmin?
 			</h3>
 			<ul class="quiz-help-list">
