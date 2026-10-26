@@ -221,6 +221,9 @@
           <li>Hvað er rangt (t.d. "orðið X ætti að vera Y")</li>
           <li>Netfang ef þú vilt fá svar (valfrjálst)</li>
         </ol>
+
+        <!-- S3.3 (PED-14). D20: proposed -->
+        <p>Formið opnar tölvupóstforrit þess sem sendir. Hvað vefurinn geymir og hvað fer af tækinu stendur á síðunni <a href="/personuvernd/">Gögnin þín og persónuvernd</a>.</p>
       </section>
 
       <!-- Section: Support -->

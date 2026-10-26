@@ -33,7 +33,7 @@ export type Capability = 'index' | 'glossary';
 interface Toc {
 	index?: unknown;
 	glossary?: unknown;
-	chapters?: { number: number; slug?: string; sections?: { file?: string; title?: string }[] }[];
+	chapters?: { number: number; slug?: string; sections?: { file?: string; title?: string; reviewed?: boolean }[] }[];
 }
 
 function readToc(slug: string): Toc | null {
@@ -254,4 +254,16 @@ export function tocSectionUrls(slug: string): string[] {
 		}
 	}
 	return urls;
+}
+
+/**
+ * Reader URL of the book's first module section that is still machine-translated
+ * (no `reviewed: true` in toc.json, so the page shows the MT notice), or null.
+ */
+export function machineTranslatedSection(slug: string): string | null {
+	for (const chapter of readToc(slug)?.chapters ?? []) {
+		const section = chapter.sections?.find((s) => !s.reviewed && s.file && /^\d+-[1-9]\d*-.+\.html$/.test(s.file));
+		if (section?.file) return `/${slug}/kafli/${String(chapter.number).padStart(2, '0')}/${section.file.slice(0, -5)}/`;
+	}
+	return null;
 }

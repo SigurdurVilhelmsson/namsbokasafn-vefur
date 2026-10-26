@@ -487,6 +487,27 @@
 					{/if}
 				</div>
 			{/if}
+
+			<!-- About the site (S3.3, PED-15/PED-14): before this, no page in the
+			     reader linked /feedback, /for-teachers or a privacy note. D20: proposed -->
+			<div class="study-tools">
+				<h3 class="study-tools-heading">Um vefinn</h3>
+
+				<a href="/personuvernd/" class="study-tool-link">
+					<Icon name="shield-check" />
+					<span>Gögnin þín og persónuvernd</span>
+				</a>
+
+				<a href="/feedback/" class="study-tool-link">
+					<Icon name="message-square" />
+					<span>Endurgjöf</span>
+				</a>
+
+				<a href="/for-teachers/" class="study-tool-link">
+					<Icon name="circle-help" />
+					<span>Fyrir kennara</span>
+				</a>
+			</div>
 		</nav>
 	</div>
 </aside>

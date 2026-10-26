@@ -28,6 +28,7 @@ const book = syncedBooks()[0];
 const section = sectionsContaining('<p', 1)[0];
 const PAGES = [
 	'/',
+	'/personuvernd/',
 	`/${book}/`,
 	`/${book}/leyfi/`,
 	`/${book}/minniskort/`,

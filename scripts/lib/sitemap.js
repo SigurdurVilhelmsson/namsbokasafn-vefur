@@ -15,7 +15,7 @@ import { isRetired } from './published-books.js';
 export const BASE_URL = 'https://namsbokasafn.is';
 
 /** Static pages that don't depend on content */
-const STATIC_PAGES = ['/', '/feedback', '/for-teachers'];
+const STATIC_PAGES = ['/', '/feedback', '/for-teachers', '/personuvernd'];
 
 /** Per-book tool pages (relative to /{bookSlug}) */
 const BOOK_PAGES = [

@@ -3,8 +3,10 @@
   Public feedback submission for teachers and students
 -->
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { FEEDBACK_TYPES, type FeedbackType } from '$lib/config';
   import { getAllBooks } from '$lib/types/book';
+  import { readFeedbackPrefill } from '$lib/utils/feedbackPrefill';
   import Icon from '$lib/components/Icon.svelte';
 
   const FEEDBACK_EMAIL = 'namsbokasafn@gmail.com';
@@ -21,6 +23,17 @@
   // UI state
   let submitSuccess = $state(false);
   let submitError = $state('');
+
+  // 'Tilkynna villu' on a machine-translated section links here with the
+  // section's book, chapter and section (S3.3, PED-15). Read in the browser
+  // only, never in a load function, and checked and capped in readFeedbackPrefill.
+  onMount(() => {
+    const prefill = readFeedbackPrefill(window.location.search, getAllBooks().map((b) => b.slug));
+    if (prefill.tegund) selectedType = prefill.tegund;
+    if (prefill.bok) book = prefill.bok;
+    if (prefill.kafli) chapter = prefill.kafli;
+    if (prefill.hluti) section = prefill.hluti;
+  });
 
   function handleSubmit() {
     // Validate
@@ -191,6 +204,12 @@
               </div>
             </div>
 
+            <!-- Said before sending, not only after (PED-15). D20: proposed -->
+            <p class="email-note">
+              <Icon name="mail" size="sm" />
+              <span>Þegar þú smellir á „Senda endurgjöf“ opnast tölvupóstforritið þitt með skilaboðunum. Þau berast okkur aðeins ef þú sendir póstinn, og þá sjáum við netfangið þitt.</span>
+            </p>
+
             <!-- Submit -->
             <div class="form-actions">
               <button type="submit" class="btn-primary">
@@ -201,11 +220,16 @@
           </form>
         </div>
 
-        <!-- Help Link -->
+        <!-- Help Links -->
         <div class="help-link">
-          <a href="/for-teachers">
+          <a href="/for-teachers/">
             <Icon name="circle-help" size="sm" />
             Leiðbeiningar fyrir kennara
+          </a>
+          <!-- D20: proposed -->
+          <a href="/personuvernd/">
+            <Icon name="shield-check" size="sm" />
+            Gögnin þín og persónuvernd
           </a>
         </div>
       {/if}
@@ -501,6 +525,21 @@
     margin-top: 0.125rem;
   }
 
+  .email-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 1.5rem 0 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+
+  .email-note :global(svg) {
+    flex-shrink: 0;
+    margin-top: 0.15rem;
+  }
+
   /* Submit */
   .form-actions {
     margin-top: 1.5rem;
@@ -527,10 +566,13 @@
     background: var(--accent-fill-hover);
   }
 
-  /* Help link */
+  /* Help links */
   .help-link {
     margin-top: 1.5rem;
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
   }
 
   .help-link a {
