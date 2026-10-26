@@ -20,6 +20,19 @@ describe('snapshotOf', () => {
 		expect(snap.text).toBe('1022 H2O ab');
 	});
 
+	it('keeps an underline, which can carry the question (§4.2: the underlined element)', () => {
+		const snap = snapshotOf(html('<p>(a) K<u class="x">N</u>O<sub>3</sub></p>'));
+		expect(snap.html).toBe('<p>(a) K<u>N</u>O<sub>3</sub></p>');
+		expect(sanitiseSnapshotHtml(snap.html)).toBe(snap.html);
+	});
+
+	it('separates sibling paragraphs in the text when they come without the whitespace between them', () => {
+		const box = document.createElement('div');
+		box.innerHTML = '<p>(a) Leggðu saman 2,334 ml og 0,31 ml.</p><p>(b) Dragðu 55,8752 m frá 56,533 m.</p>';
+		const snap = snapshotOf([...box.children]);
+		expect(snap.text).toBe('(a) Leggðu saman 2,334 ml og 0,31 ml. (b) Dragðu 55,8752 m frá 56,533 m.');
+	});
+
 	it('does not change the page nodes it copies', () => {
 		const nodes = html('<p class="keep"><b class="bionic-bold">Hv</b>að?</p>');
 		snapshotOf(nodes);

@@ -5,7 +5,8 @@
  * /prof and /nam can show it again. Text alone loses the maths: the textContent of
  * `10<sup>22</sup>` is '1022', and a fraction collapses. So the store also keeps a trimmed
  * copy of the HTML, limited to the elements and attributes below:
- *   - kept: paragraphs, emphasis, sup/sub, tables, lists, images with a same-site address, and
+ *   - kept: paragraphs, emphasis, underline (§4.2 asks about the underlined element), sup/sub,
+ *     tables, lists, images with a same-site address, and
  *     MathML. The page's MathJax SVG is dropped, and the hidden assistive `<math>` beside it is
  *     shown instead (it was hidden only by its inline style, which is not kept). Browsers
  *     render MathML natively, so the snapshot needs no MathJax and works offline;
@@ -19,7 +20,7 @@
  */
 
 const HTML_TAGS = new Set([
-	'p', 'br', 'sup', 'sub', 'em', 'strong', 'i',
+	'p', 'br', 'sup', 'sub', 'em', 'strong', 'i', 'u',
 	'table', 'caption', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
 	'ul', 'ol', 'li', 'div', 'img'
 ]);
@@ -109,7 +110,14 @@ export interface PracticeSnapshot {
  */
 export function snapshotOf(nodes: Node[]): PracticeSnapshot {
 	const box = document.createElement('div');
-	for (const node of nodes) box.appendChild(node.cloneNode(true));
+	for (const node of nodes) {
+		// Sibling blocks taken without the whitespace between them (the question's elements)
+		// would run together in the text: '…0,31 ml.(b) Dragðu…'.
+		if (node.nodeType === Node.ELEMENT_NODE && box.lastChild?.nodeType === Node.ELEMENT_NODE) {
+			box.appendChild(document.createTextNode(' '));
+		}
+		box.appendChild(node.cloneNode(true));
+	}
 	cleanTree(box);
 	return { text: normaliseText(box.textContent ?? ''), html: box.innerHTML.trim() };
 }
