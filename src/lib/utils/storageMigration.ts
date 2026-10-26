@@ -4,6 +4,7 @@
  */
 
 import { browser } from '$app/environment';
+import { BROWSE_IMAGE_CACHE, CONTENT_CACHE, OFFLINE_CACHE_PREFIX } from '$lib/sw/runtimeCaching';
 
 // Map of old keys to new keys
 const KEY_MIGRATIONS: Record<string, string> = {
@@ -92,7 +93,25 @@ export function getStorageSize(): number {
 }
 
 /**
- * Clear all namsbokasafn data from localStorage
+ * Delete what this site keeps for the reader in Cache Storage (plan step S3.2, PED-14):
+ * every downloaded book (`offline-book:<slug>`) and the browsing caches of pages and
+ * figures, which also show what was read. The service worker's precache (the app itself)
+ * stays. Run it before clearAllStorage(): with the record of downloads gone but the caches
+ * kept, a book shows as 'Sótt (0 B)' while its files stay on the device.
+ * @returns the names of the caches deleted
+ */
+export async function deleteLocalCaches(): Promise<string[]> {
+	if (!browser || typeof caches === 'undefined') return [];
+	const names = (await caches.keys()).filter(
+		(name) => name.startsWith(OFFLINE_CACHE_PREFIX) || name === CONTENT_CACHE || name === BROWSE_IMAGE_CACHE
+	);
+	await Promise.all(names.map((name) => caches.delete(name)));
+	return names;
+}
+
+/**
+ * Clear all namsbokasafn data from localStorage. Every store writes its in-memory state back
+ * on its next change, so reload the page straight after (see /greining's erase).
  */
 export function clearAllStorage(): void {
 	if (!browser) return;

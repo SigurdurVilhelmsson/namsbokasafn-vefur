@@ -20,13 +20,9 @@
 			"color-contrast | .subject-accordion > .subject-accordion-header > .subject-accordion-title | span"
 		],
 		"greining 1280 dark": [],
-		"greining 1280 light": [
-			"color-contrast | .text-red-600 | button"
-		],
+		"greining 1280 light": [],
 		"greining 390 dark": [],
-		"greining 390 light": [
-			"color-contrast | .text-red-600 | button"
-		],
+		"greining 390 light": [],
 		"section 1280 dark": [],
 		"section 1280 light": [
 			"color-contrast | .sm\\:text-sm > | span"

@@ -1,5 +1,5 @@
 <!--
-  Quiz Page - Adaptive quiz for practicing problems
+  Quiz page (/prof): practice review of problems the reader has opened in the book (AdaptiveQuiz).
 -->
 <script lang="ts">
 	import { page } from '$app/stores';
@@ -17,10 +17,11 @@
 </script>
 
 <svelte:head>
-	<title>Aðlögunarpróf | Námsbókasafn</title>
-	<meta property="og:title" content="Aðlögunarpróf | Námsbókasafn" />
-	<meta name="description" content="Próf og æfingar til að meta skilning á námsefni" />
-	<meta property="og:description" content="Próf og æfingar til að meta skilning á námsefni" />
+	<!-- D20: proposed wording (S3.2, PED-29: no adaptive claim; 'Próf' as in the nav), checked in the batch before the train that ships it. -->
+	<title>Próf | Námsbókasafn</title>
+	<meta property="og:title" content="Próf | Námsbókasafn" />
+	<meta name="description" content="Æfðu aftur dæmi úr köflunum — þau sem þú hefur ekki enn náð tökum á koma fyrst." />
+	<meta property="og:description" content="Æfðu aftur dæmi úr köflunum — þau sem þú hefur ekki enn náð tökum á koma fyrst." />
 	<meta property="og:type" content="website" />
 	<link rel="canonical" href="https://namsbokasafn.is/{bookSlug}/prof/" />
 	<meta property="og:url" content="https://namsbokasafn.is/{bookSlug}/prof/" />
@@ -34,12 +35,13 @@
 				<Icon name="chevron-left" size="sm" />
 				Til baka
 			</a>
-			<h1 class="quiz-heading">Aðlögunarpróf</h1>
+			<!-- D20: proposed wording (S3.2, PED-29: the heading and subtitle), checked in the batch before the train that ships it. -->
+			<h1 class="quiz-heading">Próf</h1>
 			<p class="quiz-subtext">
 				{#if chapterSlug}
 					Æfingadæmi úr kafla: {chapterSlug}
 				{:else}
-					Aðlagað að þínum framförum – áhersla á dæmi sem þú þarft að æfa
+					Dæmi sem þú hefur opnað í köflunum — þau sem þú hefur ekki enn náð tökum á koma fyrst.
 				{/if}
 			</p>
 		</div>
@@ -51,13 +53,13 @@
 		<div class="quiz-help">
 			<h3 class="quiz-help-title">
 				<Icon name="info" size="sm" />
-				Hvernig virkar aðlögunarpróf?
+				<!-- D20: proposed wording (S3.2, PED-29: the help says where the problems come from; the next question does not adapt), checked in the batch before the train that ships it. -->
+				Hvaðan koma dæmin?
 			</h3>
 			<ul class="quiz-help-list">
-				<li>Prófið velur dæmi sem passa við það sem þú ert að læra</li>
-				<li>Dæmi sem þú hefur ekki leyst fá forgang</li>
-				<li>Eftir að þú svarar er næsta spurning aðlöguð</li>
-				<li>Markmiðið er að hjálpa þér að læra, ekki að meta þig</li>
+				<li>Hér birtast dæmi sem þú hefur opnað í köflunum.</li>
+				<li>Dæmi sem þú hefur ekki enn reynt, eða hefur átt erfitt með, koma fyrst.</li>
+				<li>Markmiðið er að hjálpa þér að læra, ekki að meta þig.</li>
 			</ul>
 		</div>
 	</div>
