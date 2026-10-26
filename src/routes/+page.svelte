@@ -358,7 +358,6 @@
           <Icon name="clipboard-check" size="md" style="color: var(--subject-math)" />
         </div>
         <h3>Próf</h3>
-        <!-- D20: proposed wording (S3.2, PED-29: no adaptive claim), checked in the batch before the train that ships it. -->
         <p>Æfðu aftur dæmi sem þú hefur opnað í köflunum</p>
       </div>
 
