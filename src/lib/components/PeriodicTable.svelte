@@ -26,7 +26,6 @@
 	let selectedElement: Element | null = $state(null);
 	let filterCategory: ElementCategory | null = $state(null);
 	let searchQuery = $state('');
-	let focusedIndex: number | null = $state(null);
 
 	// Grid positions for standard periodic table layout
 	const ELEMENT_POSITIONS: Record<number, { row: number; col: number }> = {
@@ -145,7 +144,6 @@
 		});
 
 		if (targetElement) {
-			focusedIndex = targetElement.atomicNumber;
 			const button = document.querySelector(`[data-atomic-number="${targetElement.atomicNumber}"]`) as HTMLButtonElement;
 			button?.focus();
 		}
@@ -221,7 +219,6 @@
 				{@const colors = CATEGORY_COLORS[element.category]}
 				{@const isHighlighted = highlightElements.includes(element.atomicNumber)}
 				{@const isFiltered = (filterCategory !== null && element.category !== filterCategory) || (searchQuery !== '' && !searchMatchIds.has(element.atomicNumber))}
-				{@const isFocused = focusedIndex === element.atomicNumber}
 				{#if pos}
 					<div style="grid-row: {pos.row + 1}; grid-column: {pos.col + 1};">
 						<button
@@ -231,7 +228,7 @@
 							class="group relative flex h-full w-full flex-col items-center justify-center rounded border p-0.5 text-center transition-all duration-200 focus:outline-none
 								{isFiltered ? 'opacity-25' : ''}"
 							style="background-color: {colors.bg}; border-color: {colors.border}; color: {colors.text};
-								{isHighlighted || isFocused ? `outline: 2px solid var(--accent-color); outline-offset: 1px;` : ''}"
+								{isHighlighted ? `outline: 2px solid var(--accent-color); outline-offset: 1px;` : ''}"
 							aria-label="{element.nameIs} ({element.symbol}), sætistala {element.atomicNumber}"
 						>
 							<span class="absolute left-0.5 top-0 text-[clamp(0.4rem,0.7vw,0.6rem)] opacity-70">{element.atomicNumber}</span>
@@ -461,10 +458,9 @@
 	.pte-search-input::placeholder {
 		color: var(--text-tertiary);
 	}
+	/* The ring is the global *:focus-visible rule's (app.css). */
 	.pte-search-input:focus {
-		outline: none;
 		border-color: var(--accent-color);
-		box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-color) 20%, transparent);
 	}
 	@media (min-width: 640px) {
 		.pte-search-input { width: 16rem; }

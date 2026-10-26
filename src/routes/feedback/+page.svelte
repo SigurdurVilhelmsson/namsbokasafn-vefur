@@ -415,12 +415,11 @@
     transition: border-color 0.15s, box-shadow 0.15s;
   }
 
+  /* The ring is the global *:focus-visible rule's (app.css). */
   .form-input:focus,
   .form-select:focus,
   .form-textarea:focus {
-    outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 3px var(--accent-light, rgba(199, 140, 32, 0.1));
   }
 
   .form-textarea {

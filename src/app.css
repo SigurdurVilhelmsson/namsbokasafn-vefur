@@ -75,9 +75,11 @@
     --accent-subtle: #f0e4c8;
     --accent-decorative: #c78c20;
     --header-banner: #c78c20;
-    /* Decision D01's ring colour: bronze, 5.75:1 on white. Native radios use it now
-       (accent-color); plan step S2.2 (UI-07) puts it on every focus ring. */
+    /* Decision D01's ring colour: bronze, on every focus ring (plan step S2.2, UI-07) and as
+       the native radios' accent-color. 5.75:1 on its gap, 4.55-5.75:1 on the five surfaces. */
     --focus-ring: #8a5d0e;
+    /* The solid band between a focused control and its ring: a known colour on every surface. */
+    --focus-gap: #ffffff;
 
     /* Shadows (warm-tinted) */
     --shadow-sm: 0 1px 2px rgba(27, 40, 56, 0.06);
@@ -127,8 +129,9 @@
     --accent-decorative: #e8a838;
     --header-banner: #e8a838;
     /* Dark ring: today's dark accent, kept (confirmed 2026-10-24). D01 ruled only the
-       light ring; this one already passes 3:1 (tokens.test.ts). */
+       light ring; this one is 6.64-8.66:1 on the gap and the surfaces (tokens.test.ts). */
     --focus-ring: #e8a838;
+    --focus-gap: #16161c;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -445,11 +448,15 @@
   pointer-events: none;
 }
 
-/* Focus styles - Enhanced for better visibility on busy backgrounds */
+/* The only focus style (plan step S2.2, decision D01, register UI-07): a 2 px --focus-ring
+   outline over a solid 2 px --focus-gap, so the ring's inner neighbour is a known colour on
+   every surface. It stays outside every @layer, so it beats Tailwind's focus:outline-none and
+   focus:ring-* utilities. Give no other :focus or :focus-visible rule an outline (none
+   included) or a box-shadow: focusRing.test.ts fails on either, and on this rule moving. */
 *:focus-visible {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 3px;
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent-color) 20%, transparent);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--focus-gap);
 }
 
 /* Reading content styles */
@@ -1088,11 +1095,6 @@
   background-color: var(--bg-secondary);
 }
 
-.equation-wrapper:focus {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
-}
-
 .equation-content {
   overflow-x: auto;
   overflow-y: hidden;
@@ -1253,7 +1255,6 @@
 .glossary-term:focus {
   background-color: var(--accent-light);
   border-bottom-style: solid;
-  outline: none;
 }
 
 /* English gloss injected by the glossaryTerms action from efni's data-en.

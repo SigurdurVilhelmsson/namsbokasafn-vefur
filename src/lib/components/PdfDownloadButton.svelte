@@ -109,11 +109,6 @@
 		background: var(--accent-fill-hover);
 	}
 
-	.pdf-btn-primary:focus-visible {
-		outline: 2px solid var(--accent-color, #c78c20);
-		outline-offset: 2px;
-	}
-
 	.pdf-btn-compact {
 		padding: 0.4rem 0.75rem;
 		font-size: 0.8rem;
