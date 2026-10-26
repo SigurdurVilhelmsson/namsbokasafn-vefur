@@ -177,7 +177,11 @@ test.describe('The focus ring (S2.2, D01)', () => {
 				await expectRing(page, next, 'next-section link');
 
 				await page.getByRole('button', { name: 'Stillingar', exact: true }).filter({ visible: true }).first().click();
-				const option = page.getByRole('dialog').getByRole('group', { name: 'Línubil' }).getByRole('button').first();
+				const dialog = page.getByRole('dialog');
+				// The dialog moves focus to 'Loka' 50 ms after it opens. Wait for that first, or on a
+				// slow runner it takes focus back from the option mid-test (seen in CI).
+				await expect(dialog.getByRole('button', { name: 'Loka', exact: true })).toBeFocused();
+				const option = dialog.getByRole('group', { name: 'Línubil' }).getByRole('button').first();
 				await expect(option).toBeVisible();
 				await tabTo(page, option);
 				await expectRing(page, option, 'Settings option');
