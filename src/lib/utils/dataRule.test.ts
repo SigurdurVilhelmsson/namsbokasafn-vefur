@@ -6,8 +6,11 @@
  * Until plan step S3.3 a production build sent a page-view event by sendBeacon
  * to the editorial server (src/lib/utils/api.ts, built with VITE_API_URL). This
  * guard fails if any of that comes back: a beacon, the editorial host, its
- * analytics endpoint or the env variable that pointed at it. A new way to send
- * data needs a new decision first, not an exception here.
+ * analytics endpoint or the env variable that pointed at it, and also the other
+ * ways a page sends data without waiting for an answer (a keepalive fetch, an
+ * XMLHttpRequest) or reads a public env variable through SvelteKit. None of
+ * these appears in src or static today. A new way to send data needs a new
+ * decision first, not an exception here.
  *
  * It reads the source only. S3.3's request log of a production-env build is the
  * runtime check, and a page that loads a third-party script would not show here.
@@ -30,7 +33,8 @@ function walk(dir: string): string[] {
 	});
 }
 
-export const SENDS_DATA = /sendBeacon|VITE_API_URL|ritstjorn\.namsbokasafn\.is|\/api\/analytics|\bapiUrl\(/;
+export const SENDS_DATA =
+	/sendBeacon|VITE_API_URL|ritstjorn\.namsbokasafn\.is|\/api\/analytics|\bapiUrl\(|keepalive|XMLHttpRequest|\$env\/(static|dynamic)\/public/;
 
 const FILES = [...walk(join(ROOT, 'src')), ...walk(join(ROOT, 'static'))].filter(
 	(path) => /\.(svelte|ts|js|html|css)$/.test(path) && !/\.test\.ts$/.test(path)
@@ -49,7 +53,10 @@ describe('the data rule (D03)', () => {
 		"navigator.sendBeacon(url, blob)",
 		"import.meta.env.VITE_API_URL",
 		"var l='https://ritstjorn.namsbokasafn.is'",
-		"apiUrl('/api/analytics/event')"
+		"apiUrl('/api/analytics/event')",
+		'fetch(url, { method: "POST", body, keepalive: true })',
+		'const xhr = new XMLHttpRequest()',
+		"import { PUBLIC_STATS_URL } from '$env/static/public'"
 	])('the pattern matches %s', (line) => {
 		expect(SENDS_DATA.test(line)).toBe(true);
 	});

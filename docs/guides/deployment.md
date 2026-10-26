@@ -26,9 +26,9 @@ it. Nothing is edited in the lane. It only pulls `main`.
   books) and `provenance/`, copied from the server's
   `/var/www/namsbokasafn-vefur/build/`. It is the server's content, so a deploy
   from the lane sends no content.
-- **Its `.env.production`:** copied from the main checkout, so builds from the
-  lane send the page-view event until decision D03's step (S3.3) removes it in
-  code.
+- **Its `.env.production`:** copied from the main checkout. Since S3.3 (decision
+  D03) no code reads its `VITE_API_URL`, so builds from the lane send nothing to
+  the editorial server; the line is dead and can go.
 - **No sync runs in the lane.** A deploy from the lane publishes no new content,
   and a sync run in another checkout never reaches it (`sync-content.js` writes
   to its own checkout's `static/content`). Publishing new content has no written

@@ -56,7 +56,7 @@ export function readFeedbackPrefill(search: string | URLSearchParams, bookSlugs:
 	const type = FEEDBACK_TYPES.find((t) => t.value === tegund);
 	if (type) prefill.tegund = type.value;
 
-	const bok = params.get('bok');
+	const bok = params.get('bok')?.trim().toLowerCase();
 	if (bok && bookSlugs.includes(bok)) prefill.bok = bok;
 
 	const kafli = slugParam(params.get('kafli'), PREFILL_LIMITS.kafli);

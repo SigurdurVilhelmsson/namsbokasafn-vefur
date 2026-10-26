@@ -479,6 +479,13 @@
 						<span>Námsmarkmið</span>
 					</a>
 
+					<!-- S3.3: the privacy page sends students to Námsgreining for the erase
+					     button, and no page linked it. D20: proposed -->
+					<a href="/{bookSlug}/greining/" class="study-tool-link">
+						<Icon name="chart-column" />
+						<span>Námsgreining</span>
+					</a>
+
 					{#if hasPeriodicTable}
 						<a href="/{bookSlug}/lotukerfi" class="study-tool-link">
 							<Icon name="atom" />
@@ -505,7 +512,7 @@
 
 				<a href="/for-teachers/" class="study-tool-link">
 					<Icon name="circle-help" />
-					<span>Fyrir kennara</span>
+					<span>Leiðbeiningar fyrir kennara</span>
 				</a>
 			</div>
 		</nav>

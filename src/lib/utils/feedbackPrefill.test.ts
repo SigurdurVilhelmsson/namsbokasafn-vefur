@@ -34,6 +34,10 @@ describe('readFeedbackPrefill', () => {
 		expect(readFeedbackPrefill('', BOOKS)).toEqual({});
 	});
 
+	it('accepts a book slug in another case or with spaces around it', () => {
+		expect(readFeedbackPrefill('?bok=%20EFNAFRAEDI-2E%20', BOOKS).bok).toBe('efnafraedi-2e');
+	});
+
 	it('drops a book the form does not offer', () => {
 		expect(readFeedbackPrefill('?bok=lifraen-efnafraedi', BOOKS).bok).toBeUndefined();
 	});

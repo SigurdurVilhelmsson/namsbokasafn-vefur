@@ -46,12 +46,21 @@ test.describe("'Tilkynna villu' (PED-15)", () => {
 	});
 
 	test('values the form does not offer are dropped, not shown', async ({ page }) => {
-		await page.goto('/feedback/?tegund=spam&bok=not-a-book&kafli=%3Cb%3E1%3C%2Fb%3E&hluti=a%20b');
-		await expect(page.getByRole('heading', { level: 1, name: 'Endurgjöf' })).toBeVisible();
-		await expect(page.locator('#book')).toHaveValue('');
+		// The valid type proves the prefill ran: the empty fields are then its verdict,
+		// not the server-rendered form before hydration. (A <select> cannot show a value
+		// it does not offer, so #book proves nothing here.)
+		await page.goto('/feedback/?tegund=translation_error&bok=not-a-book&kafli=%3Cb%3E1%3C%2Fb%3E&hluti=a%20b');
+		await expect(page.getByRole('radio', { name: /Villa í þýðingu/ })).toBeChecked();
 		await expect(page.locator('#chapter')).toHaveValue('');
 		await expect(page.locator('#section')).toHaveValue('');
-		await expect(page.locator('input[name="type"]:checked')).toHaveCount(0);
+		await expect(page.locator('.back-link')).toHaveAttribute('href', '/');
+	});
+
+	test("'Til baka' returns to the section the report came from", async ({ page }) => {
+		test.skip(!SECTION, 'no machine-translated section in a published book');
+		const [bok, , kafli, hluti] = SECTION!.split('/').filter(Boolean);
+		await page.goto(`/feedback/?tegund=translation_error&bok=${bok}&kafli=${kafli}&hluti=${hluti}`);
+		await expect(page.locator('.back-link')).toHaveAttribute('href', SECTION!);
 	});
 
 	test('the form says it opens the e-mail before the student sends anything', async ({ page }) => {
@@ -69,11 +78,14 @@ test.describe('The privacy page (PED-14)', () => {
 	test("is reachable from the reader's navigation, with /feedback and /for-teachers", async ({ page }) => {
 		test.skip(!SECTION, 'no machine-translated section in a published book');
 		await page.goto(SECTION!);
+		// The toggle's handler exists only once the page has hydrated (as in focus-sidebar-tabs).
+		await page.waitForLoadState('networkidle');
 		await page.getByRole('button', { name: 'Opna/loka valmynd', exact: true }).click();
 		const sidebar = page.locator('aside.sidebar');
 		await expect(sidebar).toHaveCSS('visibility', 'visible');
 		await expect(sidebar.getByRole('link', { name: 'Endurgjöf' })).toHaveAttribute('href', '/feedback/');
-		await expect(sidebar.getByRole('link', { name: 'Fyrir kennara' })).toHaveAttribute('href', '/for-teachers/');
+		await expect(sidebar.getByRole('link', { name: 'Leiðbeiningar fyrir kennara' })).toHaveAttribute('href', '/for-teachers/');
+		await expect(sidebar.getByRole('link', { name: 'Námsgreining' })).toHaveAttribute('href', /\/greining\/$/);
 		await sidebar.getByRole('link', { name: 'Gögnin þín og persónuvernd' }).click();
 		await expect(page).toHaveURL((u) => u.pathname === '/personuvernd/');
 		await expect(page.getByRole('heading', { level: 1 })).toHaveText('Gögnin þín og persónuvernd');
@@ -92,8 +104,9 @@ test.describe('The privacy page (PED-14)', () => {
 		await page.goto('/personuvernd/');
 		const main = page.locator('main');
 		await expect(main).toContainText('GoatCounter');
-		await expect(main).toContainText('opnar tölvupóstforritið þitt');
+		await expect(main).toContainText('opnar tölvupóstforritið');
 		await expect(main).toContainText('Eyða öllum gögnum á þessu tæki');
+		await expect(main.getByRole('link', { name: 'Námsgreiningu' })).toHaveAttribute('href', /\/greining\/$/);
 		await expect(main).toContainText('ekki lögfræðiráðgjöf');
 	});
 });

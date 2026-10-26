@@ -20,6 +20,10 @@
   let userName = $state('');
   let userEmail = $state('');
 
+  // Where 'Til baka' goes: the section the student came from, when the
+  // prefill named one, else the catalogue.
+  let backHref = $state('/');
+
   // UI state
   let submitSuccess = $state(false);
   let submitError = $state('');
@@ -33,6 +37,9 @@
     if (prefill.bok) book = prefill.bok;
     if (prefill.kafli) chapter = prefill.kafli;
     if (prefill.hluti) section = prefill.hluti;
+    if (prefill.bok && prefill.kafli && prefill.hluti) {
+      backHref = `/${prefill.bok}/kafli/${prefill.kafli}/${prefill.hluti}/`;
+    }
   });
 
   function handleSubmit() {
@@ -93,7 +100,7 @@
   <!-- Header -->
   <header class="feedback-header">
     <div class="container">
-      <a href="/" class="back-link">
+      <a href={backHref} class="back-link">
         <Icon name="arrow-left" size="sm" />
         Til baka
       </a>
@@ -168,11 +175,11 @@
               </div>
               <div class="form-group">
                 <label class="form-label" for="chapter">Kafli</label>
-                <input type="text" id="chapter" bind:value={chapter} class="form-input" placeholder="t.d. 1 eða 1.2" />
+                <input type="text" id="chapter" bind:value={chapter} class="form-input" placeholder="t.d. 1" /><!-- D20: proposed -->
               </div>
               <div class="form-group">
                 <label class="form-label" for="section">Hluti</label>
-                <input type="text" id="section" bind:value={section} class="form-input" placeholder="t.d. 1-1" />
+                <input type="text" id="section" bind:value={section} class="form-input" placeholder="t.d. 1.2" /><!-- D20: proposed -->
               </div>
             </div>
 
@@ -200,7 +207,8 @@
               <div class="form-group">
                 <label class="form-label" for="userEmail">Netfang (valfrjálst)</label>
                 <input type="email" id="userEmail" bind:value={userEmail} class="form-input" placeholder="netfang@domain.is" />
-                <span class="form-hint">Ef þú vilt fá svar</span>
+                <!-- The note below says we see the sender's address anyway. D20: proposed -->
+                <span class="form-hint">Ef þú vilt svar á annað netfang en það sem þú sendir frá</span>
               </div>
             </div>
 

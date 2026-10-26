@@ -455,7 +455,7 @@
     <p class="footer-links">
       <a href="/personuvernd/">Gögnin þín og persónuvernd</a> ·
       <a href="/feedback/">Endurgjöf</a> ·
-      <a href="/for-teachers/">Fyrir kennara</a>
+      <a href="/for-teachers/">Leiðbeiningar fyrir kennara</a>
     </p>
   </footer>
 </div>
@@ -1407,6 +1407,11 @@
      are about 1.05:1 apart, so the links are underlined at rest (axe link-in-text-block). */
   .footer .footer-links {
     margin-top: 0.5rem;
+  }
+
+  /* Break between the links at 390 px, never inside one. */
+  .footer .footer-links a {
+    white-space: nowrap;
   }
 
   .footer a {

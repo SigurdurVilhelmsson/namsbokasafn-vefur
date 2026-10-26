@@ -11,6 +11,12 @@
 -->
 <script lang="ts">
 	import Icon from '$lib/components/Icon.svelte';
+	import { getAvailableBooks } from '$lib/types/book';
+
+	// The erase button is on every book's Námsgreining page and clears every book,
+	// so any published book's page will do.
+	const firstBook = getAvailableBooks()[0];
+	const greiningHref = firstBook ? `/${firstBook.slug}/greining/` : null;
 
 	const description =
 		'Hvað Námsbókasafn geymir í vafranum þínum, hvað fer af tækinu og hvernig þú eyðir því.';
@@ -40,8 +46,9 @@
 		<div class="container">
 			<h1>Gögnin þín og persónuvernd</h1>
 			<p class="lead">
-				Það sem þú gerir í Námsbókasafni er geymt í þessum vafra, á þessu tæki. Það er ekki sent til
-				okkar og við sjáum það ekki.
+				Framvinda þín, athugasemdir, minniskort og annað sem þú gerir í Námsbókasafni er geymt í
+				þessum vafra, á þessu tæki, og er ekki sent til okkar. Af tækinu fara aðeins beiðnir um
+				síðurnar sjálfar, talning síðuflettinga og endurgjöf ef þú sendir hana. Nánar hér fyrir neðan.
 			</p>
 
 			<section aria-labelledby="stored">
@@ -51,7 +58,7 @@
 					<li>framvindu í bókunum: hvaða hlutar eru lesnir, hvar þú varst og bókamerki;</li>
 					<li>yfirstrikanir og athugasemdir sem þú skrifar;</li>
 					<li>minniskort og hvernig þér gekk að rifja þau upp;</li>
-					<li>námsmarkmið sem þú hefur merkt sem lokið;</li>
+					<li>námsmarkmið sem þú hefur merkt sem lokið, og hve vel þú telur þig kunna þau;</li>
 					<li>æfingadæmi sem þú hefur opnað og hvernig þér gekk með þau;</li>
 					<li>lestrartölfræði í Námsgreiningu: hve lengi og hvenær þú lest, lotur, röð daga og markmið;</li>
 					<li>síðustu leitarorð;</li>
@@ -66,18 +73,24 @@
 
 			<section aria-labelledby="leaves">
 				<h2 id="leaves">Það sem fer af tækinu</h2>
+				<h3>Vefþjónn Námsbókasafns</h3>
+				<p>
+					Síðurnar og efni bókanna eru sótt af vefþjóni Námsbókasafns. Eins og flestir vefþjónar
+					skráir hann hverja slíka beiðni: IP-tölu, tíma, slóð, upplýsingar um vafrann og hvaðan var
+					vísað á síðuna. Skrárnar eru geymdar í allt að 90 daga.
+				</p>
 				<h3>Talning síðuflettinga</h3>
 				<p>
 					Við teljum síðuflettingar með
 					<a href="https://www.goatcounter.com/help/privacy" target="_blank" rel="noopener noreferrer"
 						>GoatCounter</a
-					>, án vafrakaka. Þegar þú opnar síðu sendir vafrinn GoatCounter slóð hennar, titil, breidd
-					skjásins og síðuna sem vísaði þér hingað, ef hún er til. Eins og allar beiðnir á netinu ber
-					hún líka IP-tölu þína og upplýsingar um vafrann. Samkvæmt persónuverndarstefnu GoatCounter
-					vistar það hvorki IP-töluna né allar upplýsingarnar um vafrann: það les úr þeim land, vafra
-					og stýrikerfi, og geymir IP-töluna aðeins í vinnsluminni í allt að 8 klukkustundir, til að
-					telja endurteknar heimsóknir ekki tvisvar. Gögnin eru geymd á netþjónum í Finnlandi og
-					Þýskalandi.
+					>, án vafrakaka. Þegar þú opnar síðu sendir vafrinn GoatCounter slóð hennar og titil, breidd
+					skjásins, síðuna sem vísaði þér hingað ef hún er til, og merki um hvort vafrinn virðist
+					sjálfvirkur. Sendingin ber líka, eins og allar beiðnir á netinu, IP-tölu þína og upplýsingar
+					um vafrann. Samkvæmt persónuverndarstefnu GoatCounter vistar það hvorki IP-töluna né allar
+					upplýsingarnar um vafrann, heldur les úr þeim land, tungumál, vafra og stýrikerfi.
+					IP-töluna geymir það aðeins í vinnsluminni, í allt að 8 klukkustundir, svo að sami gestur sé
+					ekki talinn tvisvar. Gögnin eru geymd á netþjónum í Finnlandi og Þýskalandi.
 				</p>
 				<h3>Endurgjöf</h3>
 				<p>
@@ -94,10 +107,12 @@
 				<p class="note">
 					<Icon name="info" size="sm" />
 					<span>
-						Undantekning, 26. október 2026: bækurnar Eðlisfræði, Líffræði og Örverufræði, sem eru í
-						hléi, keyra enn eldri útgáfu vefsins þegar síða í þeim er opnuð beint. Sú útgáfa sendir
-						ritstjórnarvef Námsbókasafns heiti bókar, kafla og hluta við hverja síðu sem er opnuð, og
-						vefþjónninn skráir með því upplýsingar um vafrann og síðuna sem vísaði þangað.
+						Undantekning, 26. október 2026: síður í sýnishornunum Eðlisfræði, Líffræði og
+						Örverufræði nota enn eldri útgáfu vefsins þegar þær eru opnaðar beint, til dæmis úr
+						bókamerki eða leitarvél eða með því að endurhlaða síðuna. Sú útgáfa sendir ritstjórnarvef
+						Námsbókasafns heiti bókar, kafla og hluta við hverja síðu sem er opnuð, líka í öðrum
+						bókum ef þú heldur áfram þaðan um tengla, þar til síðan er endurhlaðin. Vefþjónn
+						ritstjórnarvefsins skráir um leið upplýsingar um vafrann.
 					</span>
 				</p>
 			</section>
@@ -106,13 +121,19 @@
 				<h2 id="erase">Að eyða gögnunum</h2>
 				<ul>
 					<li>
-						Í Námsgreiningu í hverri bók er hnappurinn „Eyða öllum gögnum á þessu tæki“. Hann eyðir
-						öllu sem Námsbókasafn geymir í þessum vafra, líka niðurhöluðum bókum.
+						Í {#if greiningHref}<a href={greiningHref}>Námsgreiningu</a>{:else}Námsgreiningu{/if} er
+						hnappurinn „Eyða öllum gögnum á þessu tæki“. Hann eyðir öllu sem talið er upp hér að ofan,
+						í öllum bókunum, líka niðurhöluðum bókum og afritum af síðum og myndum. Eftir standa forrit
+						vefsins sjálfs og stuttur listi yfir síður og myndir sem voru skoðaðar nýlega.
 					</li>
-					<li>Þú getur líka eytt gögnum vefsvæðisins namsbokasafn.is í stillingum vafrans.</li>
+					<li>
+						Til að eyða öllu, líka því, skaltu eyða gögnum vefsvæðisins namsbokasafn.is í stillingum
+						vafrans.
+					</li>
 					<li>
 						Á sameiginlegu tæki, til dæmis í skólanum, er best að nota einkaglugga (huliðsglugga).
-						Þá eyðist allt þegar glugganum er lokað.
+						Þá eyðist allt þegar öllum einkagluggum er lokað. Skrár sem þú flytur út eða sækir verða
+						þó eftir á tækinu.
 					</li>
 					<li>Gögnin fylgja vafranum: þau flytjast ekki á milli tækja eða vafra.</li>
 				</ul>
