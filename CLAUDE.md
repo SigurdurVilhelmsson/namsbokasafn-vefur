@@ -657,6 +657,7 @@ Measured on 2026-10-26 against `main` = `02ca01b` (#312) and the live site.
   - **Is GoatCounter's individual-pageview setting on?** It is off by default, and the page assumes it is off.
   - **Should the privacy page say what the access log is used for?** `scripts/setup-goaccess.sh` builds a password-protected traffic report from it, with IP addresses anonymised.
   - **Should efni get the correction above?** Its pre-S plan carries the wrong claim.
+  - **Also still for [USER]:** the real-phone check of the sidebar's focus order (S1.3's last box), S0.4 before 1 November, listening to the timer pill on the live site while a phase runs, and the May 2027 exam dates (before S9.0).
 - **Train 6 is a proposal, not confirmed:** S3.3 with fixes and invisible work only (SF.1, SF.2, SF.3, SF.5, S5.1, S8.1) before S (1 November), then M4, because D05 means no train after S4.1 merges until January. [USER] has not ruled on it.
 - **npm audit:** #312 changed no package.
 - **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
