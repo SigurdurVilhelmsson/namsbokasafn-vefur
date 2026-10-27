@@ -480,7 +480,7 @@
 					</a>
 
 					<!-- S3.3: the privacy page sends students to Námsgreining for the erase
-					     button, and no page linked it. D20: proposed -->
+					     button, and no page linked it. -->
 					<a href="/{bookSlug}/greining/" class="study-tool-link">
 						<Icon name="chart-column" />
 						<span>Námsgreining</span>
@@ -496,7 +496,7 @@
 			{/if}
 
 			<!-- About the site (S3.3, PED-15/PED-14): before this, no page in the
-			     reader linked /feedback, /for-teachers or a privacy note. D20: proposed -->
+			     reader linked /feedback, /for-teachers or a privacy note. -->
 			<div class="study-tools">
 				<h3 class="study-tools-heading">Um vefinn</h3>
 

@@ -25,7 +25,6 @@
 	<p class="preview-banner__text">
 		<strong>Vélþýtt efni.</strong>
 		Þessi eining hefur ekki enn verið yfirlesin og kann að innihalda þýðingarvillur.
-		<!-- D20: proposed -->
 		<a class="preview-banner__report" href={feedbackHref({ bok: bookSlug, kafli: chapterSlug, hluti: sectionSlug })}
 			>Tilkynna villu</a
 		>

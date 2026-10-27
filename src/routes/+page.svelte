@@ -451,7 +451,7 @@
       eða
       <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>) — sjá leyfissíðu hverrar bókar
     </p>
-    <!-- S3.3 (PED-14, PED-15). D20: proposed -->
+    <!-- S3.3 (PED-14, PED-15) -->
     <p class="footer-links">
       <a href="/personuvernd/">Gögnin þín og persónuvernd</a> ·
       <a href="/feedback/">Endurgjöf</a> ·
