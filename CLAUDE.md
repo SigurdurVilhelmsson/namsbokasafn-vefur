@@ -629,7 +629,46 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-10-27 — S3.3 merged (#312), not deployed; D20 batch 4 and three questions wait for [USER]
+
+Measured on 2026-10-26 against `main` = `02ca01b` (#312) and the live site.
+
+- **Prod still runs train 5's build `1793025632459`** (`main` `590de02`). Undeployed on `main`: #311 (docs), #312 and the PR that adds this entry. 🔴 **`main` is not train-ready:** #312's 12 `D20: proposed` markers stop the deploy lane's checklist at step 2 until [USER] checks D20 batch 4 and a PR removes them.
+- **#312 is plan step S3.3** (decisions D03 and D20; register KEEP-01, PED-39, PED-15, PED-14). Merged at 22:39:01 UTC as `02ca01b` (parents `9c4f96e` and `c39683b`; 4 commits, 24 files). `main`'s tree equals the `git merge-tree` simulation made before the merge (control: `9c4f96e`'s tree differs). In short:
+  - **D03, in code:** `src/lib/utils/api.ts` is deleted (`trackPageView` and three helpers nothing called), with `API_BASE_URL` and `apiUrl` in `config.ts` and the book layout's page-view effect. No code reads `VITE_API_URL` any more, so the deploy lane's `.env.production` line is dead (`docs/guides/deployment.md` says so). The editorial host left `connect-src` in all 10 CSP blocks of `nginx-config-example.conf`, which is a recommendation: the live nginx is unchanged.
+  - **`/personuvernd/`, "Gögnin þín og persónuvernd" (new):** prerendered and in the sitemap (366 → 367 URLs), linked from the sidebar's new "Um vefinn" block, the catalogue footer, /feedback and /for-teachers. Written from the request log below: what the browser stores; what leaves the device (requests to the site's own server, whose access log keeps about 90 days; GoatCounter's page count and what count.js sends; feedback the student sends); that exports stay on the device; the erase and what it leaves behind; private windows; that it is not legal advice.
+  - **"Tilkynna villu"** in the MT notice links `/feedback/?tegund=translation_error&bok=…&kafli=…&hluti=…`, built from the section's route params. `readFeedbackPrefill()` (`src/lib/utils/feedbackPrefill.ts`) reads them in `onMount` and keeps only a book the form offers, a known type and capped slugs; "Til baka" then returns to the section. **No free-text parameter:** GoatCounter's count.js sends `location.search`, so text put in the URL would leave the device.
+  - /feedback says, above the send button, that the form opens the student's e-mail and that we then see their address. The sidebar's Námsverkfæri gains "Námsgreining": no page linked `/greining/`, where the erase button is.
+  - **The data rule** is under "Notes for Code Reviewers" above, in [USER]'s approved wording (version (b), 2026-10-26). `src/lib/utils/dataRule.test.ts` fails on `sendBeacon`, the editorial host, `/api/analytics`, `apiUrl(`, `VITE_API_URL`, `keepalive`, `XMLHttpRequest` or `$env/*/public` anywhere in `src` or `static` (synced content excluded). It failed with the old `api.ts` put back.
+- **The request log** (Playwright, every request a browser made). The build used the deploy lane's `.env.production`, which still sets `VITE_API_URL`, so it tested the removal; a build without it sends nothing either way. A copy of the live content; a fake non-localhost host mapped to 127.0.0.1, because count.js skips the count on localhost; GoatCounter's `/count` and the editorial endpoint answered locally with 204, never sent. Route: catalogue, chemistry home, §1.2 (full load), §1.3 (client-side), "Tilkynna villu" (client-side), then /greining, /prof, /ordabok, /feedback and /personuvernd (full loads).
+  - #312's build: 381 requests, 365 to the site. To other hosts only `gc.zgo.at/count.js` and `POST …goatcounter.com/count`, 8 each: one per full load, none on the client-side moves.
+  - The live site, the control: 355 and 335, the same GoatCounter pair, plus `POST ritstjorn.namsbokasafn.is/api/analytics/event` on every book page, the client-side move included.
+  - Bundles: 0 files with the editorial host or `sendBeacon` in #312's build; 1 of each in train 5's.
+- ⚠️ **Correction: the three paused books never sent the page-view event.** On 2026-10-26 Claude told [USER] and the efni session that their kept 2026-08-19 pages still send it until efni's G1.19, and the privacy page carried a dated note saying so until `c39683b`. That was wrong. That build was made without `VITE_API_URL`: its config chunk (`/_app/immutable/chunks/DPIVvOBq2.js`) is `var l="";`, and the beacon function starts `if(!Wa)return;`. None of its 34 chunks names the editorial host. On the live site physics sent 0 events over a full load and two in-app moves; the control, chemistry's home on the current build, sent 1. Claude had gone by `sendBeacon` appearing in the bundle. Once train 6 ships nothing sends the event, except a tab left open on an earlier chemistry build, until it reloads. efni has not been told yet (a question below).
+- **CI:** #312's head `c39683b` (run 40410312197): 997 unit tests; e2e 163 passed, 31 skipped, 0 failed in 8.4 min. `main` `02ca01b` (run 40414060041): all three jobs green, 997 unit tests, e2e 163 passed in 6.0 min.
+- **Pre-PR review:** four lenses (code correctness; every claim on the privacy page; the Icelandic, UX and accessibility; test validity), then a skeptic per finding: 26 findings (20 serious, 6 nits). All 11 that reached a skeptic were confirmed, 3 at a lower severity, and all 26 were fixed in `a5c5dea` except those under "Known, not fixed". A second pass re-checked the rewritten page against the request logs, count.js, GoatCounter's privacy policy and the live nginx config, and found 6 more, fixed in `c39683b`.
+- **Known, not fixed** (in #312's body):
+  - The service worker's expiry records (IndexedDB `workbox-expiration`, up to 500 pages and 100 figures), the precache and the browser's HTTP cache survive the erase. The page says so and points to clearing site data in the browser.
+  - Physics embeds (latent): efni `main`'s physics content embeds YouTube and PhET with no click-to-load step, which would send the reader's IP address to Google and PhET once physics is synced. It needs a decision and a privacy-page update before then, with the CSP `frame-src` item.
+  - README and `.env.production.example` still name `VITE_TTS_PROXY_URL`, and the example CSP still allows `tutor.namsbokasafn.is`. Nothing reads or calls either.
+  - The data rule names recall entries, which `main` does not have yet (kept as approved).
+- **For [USER], before train 6:**
+  - **D20 batch 4:** 12 markers (`git grep -n 'D20: proposed' -- src`), one of which covers the whole privacy page (`src/routes/personuvernd/+page.svelte`); #312's body tabulates the others. "Námsgreining" in the sidebar can be dropped in this check.
+  - **Is GoatCounter's individual-pageview setting on?** It is off by default, and the page assumes it is off.
+  - **Should the privacy page say what the access log is used for?** `scripts/setup-goaccess.sh` builds a password-protected traffic report from it, with IP addresses anonymised.
+  - **Should efni get the correction above?** Its pre-S plan carries the wrong claim.
+- **Train 6 is a proposal, not confirmed:** S3.3 with fixes and invisible work only (SF.1, SF.2, SF.3, SF.5, S5.1, S8.1) before S (1 November), then M4, because D05 means no train after S4.1 merges until January. [USER] has not ruled on it.
+- **npm audit:** #312 changed no package.
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+
 ### 2026-10-26 (afternoon) — train 5 deployed: S3.1 (#308) and S3.2 (#309) are live; D20 batch 3 checked (#310)
+
+> ⚠️ **Superseded on two points — read the 2026-10-27 entry above first.**
+>
+> - #312 (S3.3) merged after it and is not deployed, so "Undeployed on `main`: only the PR that adds this entry" no longer holds. Prod still runs build `1793025632459`.
+> - Its Next bullet's S3.3 is merged, with the D03 wording approved; the [USER] items left are listed in the 2026-10-27 entry.
+>
+> The rest of this entry stands.
 
 Measured on 2026-10-26 against `main` = `590de02` (#310) and the live site.
 
