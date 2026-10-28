@@ -175,11 +175,11 @@
               </div>
               <div class="form-group">
                 <label class="form-label" for="chapter">Kafli</label>
-                <input type="text" id="chapter" bind:value={chapter} class="form-input" placeholder="t.d. 1" /><!-- D20: proposed -->
+                <input type="text" id="chapter" bind:value={chapter} class="form-input" placeholder="t.d. 1" />
               </div>
               <div class="form-group">
                 <label class="form-label" for="section">Hluti</label>
-                <input type="text" id="section" bind:value={section} class="form-input" placeholder="t.d. 1.2" /><!-- D20: proposed -->
+                <input type="text" id="section" bind:value={section} class="form-input" placeholder="t.d. 1.2" />
               </div>
             </div>
 
@@ -207,12 +207,12 @@
               <div class="form-group">
                 <label class="form-label" for="userEmail">Netfang (valfrjálst)</label>
                 <input type="email" id="userEmail" bind:value={userEmail} class="form-input" placeholder="netfang@domain.is" />
-                <!-- The note below says we see the sender's address anyway. D20: proposed -->
+                <!-- The note below says we see the sender's address anyway. -->
                 <span class="form-hint">Ef þú vilt svar á annað netfang en það sem þú sendir frá</span>
               </div>
             </div>
 
-            <!-- Said before sending, not only after (PED-15). D20: proposed -->
+            <!-- Said before sending, not only after (PED-15). -->
             <p class="email-note">
               <Icon name="mail" size="sm" />
               <span>Þegar þú smellir á „Senda endurgjöf“ opnast tölvupóstforritið þitt með skilaboðunum. Þau berast okkur aðeins ef þú sendir póstinn, og þá sjáum við netfangið þitt.</span>
@@ -234,7 +234,6 @@
             <Icon name="circle-help" size="sm" />
             Leiðbeiningar fyrir kennara
           </a>
-          <!-- D20: proposed -->
           <a href="/personuvernd/">
             <Icon name="shield-check" size="sm" />
             Gögnin þín og persónuvernd

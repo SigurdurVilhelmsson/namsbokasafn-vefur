@@ -219,10 +219,10 @@
         <ol>
           <li>Hvaða kafla/hluta vandamálið er í</li>
           <li>Hvað er rangt (t.d. "orðið X ætti að vera Y")</li>
-          <li>Annað netfang ef þú vilt svar þangað (valfrjálst)</li><!-- D20: proposed -->
+          <li>Annað netfang ef þú vilt svar þangað (valfrjálst)</li>
         </ol>
 
-        <!-- S3.3 (PED-14). D20: proposed -->
+        <!-- S3.3 (PED-14) -->
         <p>Formið opnar tölvupóstforritið þitt, og við sjáum netfangið sem pósturinn er sendur frá. Hvað vefurinn geymir og hvað fer af tækinu stendur á síðunni <a href="/personuvernd/">Gögnin þín og persónuvernd</a>.</p>
       </section>
 

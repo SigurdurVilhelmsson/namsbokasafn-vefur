@@ -104,6 +104,8 @@ test.describe('The privacy page (PED-14)', () => {
 		await page.goto('/personuvernd/');
 		const main = page.locator('main');
 		await expect(main).toContainText('GoatCounter');
+		// What the server's access log is for ([USER], D20 batch 4).
+		await expect(main).toContainText('gæta öryggis vefsins');
 		await expect(main).toContainText('opnar tölvupóstforritið');
 		await expect(main).toContainText('Eyða öllum gögnum á þessu tæki');
 		await expect(main.getByRole('link', { name: 'Námsgreiningu' })).toHaveAttribute('href', /\/greining\/$/);

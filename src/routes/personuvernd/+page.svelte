@@ -7,7 +7,9 @@
   page load. If a feature ever sends anything else, D03's data rule in
   CLAUDE.md needs a new decision first, and this page must change with it.
 
-  D20: proposed. Every string on this page is new and waits for [USER]'s check.
+  Checked by [USER] as D20 batch 4 (2026-10-27). GoatCounter's individual-pageview
+  setting is off ([USER], 2026-10-27); the GoatCounter paragraph assumes it, so it
+  must change if that setting is ever turned on.
 -->
 <script lang="ts">
 	import Icon from '$lib/components/Icon.svelte';
@@ -78,6 +80,8 @@
 					Síðurnar og efni bókanna eru sótt af vefþjóni Námsbókasafns. Eins og flestir vefþjónar
 					skráir hann beiðnir um síðurnar og texta bókanna (ekki myndir): IP-tölu, tíma, slóð,
 					upplýsingar um vafrann og hvaðan var vísað á síðuna. Skrárnar eru geymdar í um 90 daga.
+					Þær eru notaðar til að gæta öryggis vefsins og koma auga á misnotkun, til að finna og laga
+					villur og til að fylgjast með álagi á vefþjóninn.
 				</p>
 				<h3>Talning síðuflettinga</h3>
 				<p>
@@ -134,7 +138,7 @@
 				<h2 id="more">Gott að vita</h2>
 				<p>Þessi síða lýsir því hvernig vefurinn virkar. Hún er ekki lögfræðiráðgjöf.</p>
 				<p>Spurningar? Sendu okkur línu með <a href="/feedback/">endurgjafarforminu</a>.</p>
-				<p class="updated">Síðast uppfært 26. október 2026.</p>
+				<p class="updated">Síðast uppfært 27. október 2026.</p>
 			</section>
 		</div>
 	</main>
