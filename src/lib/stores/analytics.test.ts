@@ -130,3 +130,62 @@ describe('analytics store sessions', () => {
 		expect(state.currentSession).toEqual(localSession);
 	});
 });
+
+describe('analytics store counters (plan step S5.4, PED-17)', () => {
+	const BOOK = 'efnafraedi-2e';
+	const stored = () => JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '{}').counters;
+
+	beforeEach(() => {
+		localStorage.clear();
+	});
+
+	it('saves a counted event', async () => {
+		await importStore();
+		analyticsStore.countEvent(BOOK, 'recallShown');
+		expect(stored()).toEqual({ [BOOK]: { recallShown: 1 } });
+	});
+
+	it('loads state saved before counters existed with no counts', async () => {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(persistedState()));
+		await importStore();
+		expect(get(analyticsStore).counters).toEqual({});
+	});
+
+	it('drops an unknown counter key on load', async () => {
+		const counters = { [BOOK]: { recallShown: 2, pageTurn: 7 }, 'not-a-book': { recallShown: 1 } };
+		localStorage.setItem(STORAGE_KEY, JSON.stringify(persistedState({ counters })));
+		await importStore();
+		expect(get(analyticsStore).counters).toEqual({ [BOOK]: { recallShown: 2 } });
+	});
+
+	it("drops an unknown counter key in another tab's write", async () => {
+		await importStore();
+		const counters = { [BOOK]: { recallSaved: 3, pageTurn: 7 } };
+		window.dispatchEvent(
+			new StorageEvent('storage', { key: STORAGE_KEY, newValue: JSON.stringify(persistedState({ counters })) })
+		);
+		expect(get(analyticsStore).counters).toEqual({ [BOOK]: { recallSaved: 3 } });
+	});
+
+	it("'Hreinsa tölfræði' (clearAllData) empties them", async () => {
+		await importStore();
+		analyticsStore.countEvent(BOOK, 'recallSkipped');
+		analyticsStore.clearAllData();
+		expect(stored()).toEqual({});
+	});
+});
+
+describe('analytics store counters: an uncounted book', () => {
+	beforeEach(() => {
+		localStorage.clear();
+	});
+
+	it('writes nothing for a book that is not counted', async () => {
+		await importStore();
+		// The test setup's localStorage is a mock whose setItem is already a spy.
+		const setItem = vi.mocked(localStorage.setItem);
+		setItem.mockClear();
+		analyticsStore.countEvent('not-a-book', 'recallShown');
+		expect(setItem).not.toHaveBeenCalled();
+	});
+});

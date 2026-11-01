@@ -110,6 +110,8 @@ test.describe('Honest data controls (S3.2)', () => {
 		await page.getByRole('button', { name: 'Eyða öllum gögnum á þessu tæki' }).click();
 		await reloaded;
 		expect(messages[0]).toContain('Niðurhalaðar bækur eyðast líka');
+		// The recall entries (S5.2) are erased too, so the list names them (S5.4).
+		expect(messages[0]).toContain('upprifjunum');
 
 		const after = await storedKeys(page);
 		for (const [key, value] of Object.entries(after)) expect(value, `${key} after the erase`).not.toContain(MARK);
@@ -167,6 +169,10 @@ test.describe('Honest data controls (S3.2)', () => {
 		await expect.poll(() => message).toContain('Námsmarkmið');
 		expect(message).toContain('haldast');
 		expect(message).not.toContain('öllum námsupplýsingum');
+		// S5.4: the recall counts are erased with the statistics, and what was typed stays.
+		const [erased, kept] = message.split('?');
+		expect(erased).toContain('upprifjun');
+		expect(kept).toContain('upprifjun');
 	});
 
 	test('/prof does not claim to adapt the next question', async ({ page }) => {

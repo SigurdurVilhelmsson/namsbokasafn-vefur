@@ -10,6 +10,7 @@ import { get } from 'svelte/store';
 import RecallPrompt from './RecallPrompt.svelte';
 import { recallStore } from '$lib/stores/recall';
 import { announcement, ANNOUNCE_DELAY_MS } from '$lib/stores/announcer';
+import { analyticsStore } from '$lib/stores/analytics';
 
 const WHY_SEEN_KEY = 'namsbokasafn:seen-why-recall';
 
@@ -77,6 +78,7 @@ beforeEach(() => {
 	vi.useFakeTimers();
 	pointer('fine');
 	localStorage.clear();
+	analyticsStore.reset();
 });
 
 afterEach(() => {
@@ -276,5 +278,65 @@ describe("RecallPrompt: the one-time 'why' line", () => {
 		const t = render();
 		save(t);
 		expect(localStorage.getItem(WHY_SEEN_KEY)).toBe('1');
+	});
+});
+
+describe('RecallPrompt: local counters (S5.4, PED-17)', () => {
+	/** This book's counts in the analytics store */
+	const counts = () => get(analyticsStore).counters['efnafraedi-2e'] ?? {};
+	const close = () => {
+		unmount(component!);
+		component = null;
+	};
+
+	it('records that it was shown, once', () => {
+		render();
+		expect(counts()).toEqual({ recallShown: 1 });
+	});
+
+	it("records 'Sleppa' as skipped", () => {
+		const t = render();
+		button(t, 'Sleppa')?.click();
+		expect(counts()).toEqual({ recallShown: 1, recallSkipped: 1 });
+	});
+
+	it('records Escape on an empty box as skipped', () => {
+		const t = render();
+		key(t, { key: 'Escape' });
+		expect(counts()).toEqual({ recallShown: 1, recallSkipped: 1 });
+	});
+
+	it('records a save', () => {
+		const t = render();
+		save(t);
+		expect(counts()).toEqual({ recallShown: 1, recallSaved: 1 });
+	});
+
+	it('records no save for a blank Ctrl+Enter', () => {
+		const t = render();
+		type(t, '   ');
+		key(t, { key: 'Enter', ctrlKey: true });
+		expect(counts()).toEqual({ recallShown: 1 });
+	});
+
+	it('records an abandon when it closes with neither a save nor a skip', () => {
+		render();
+		close();
+		expect(counts()).toEqual({ recallShown: 1, recallAbandoned: 1 });
+	});
+
+	it('records no abandon when it closes after a save and Loka', () => {
+		const t = render();
+		save(t);
+		button(t, 'Loka')?.click();
+		close();
+		expect(counts()).toEqual({ recallShown: 1, recallSaved: 1 });
+	});
+
+	it("records no abandon when it closes after 'Sleppa'", () => {
+		const t = render();
+		button(t, 'Sleppa')?.click();
+		close();
+		expect(counts()).toEqual({ recallShown: 1, recallSkipped: 1 });
 	});
 });

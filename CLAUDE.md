@@ -48,7 +48,7 @@ npm run format           # Prettier formatting
 - `flashcard.ts`: SM-2 spaced repetition, study sessions, card ratings
 - `quiz.ts`: Quiz attempts and scores
 - `annotation.ts`: Text highlights and notes with export capability
-- `analytics.ts`: Study analytics and reading patterns
+- `analytics.ts`: Study analytics and reading patterns, and since S5.4 the local counters (`counters`, rules in `src/lib/utils/counters.ts`): per-book counts of the recall prompt shown, saved, skipped and abandoned, never free text and never through `logActivity` (its log keeps 500 entries, its export 100). A new event joins the closed list in `counters.ts`; unknown books and events are dropped on load. They leave the device only through the student-started export (D09, S5.5), which does not exist yet
 - `glossary.ts`: Glossary state and term lookup
 - `objectives.ts`: Learning objectives tracking
 - `offline.ts`: PWA offline state

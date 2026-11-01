@@ -64,7 +64,11 @@
 					<li>það sem þú skrifar þegar þú rifjar upp efni kafla eftir lesturinn;</li>
 					<li>námsmarkmið sem þú hefur merkt sem lokið, og hve vel þú telur þig kunna þau;</li>
 					<li>æfingadæmi sem þú hefur opnað og hvernig þér gekk með þau;</li>
-					<li>lestrartölfræði í Námsgreiningu: hve lengi og hvenær þú lest, lotur, röð daga og markmið;</li>
+					<!-- D20: proposed wording (S5.4): the recall counts join the statistics item. -->
+					<li>
+						lestrartölfræði í Námsgreiningu: hve lengi og hvenær þú lest, lotur, röð daga og markmið,
+						og hve oft upprifjun birtist og hvernig þú brást við henni;
+					</li>
 					<li>síðustu leitarorð;</li>
 					<!-- D20: proposed wording (S5.3): the recall 'why' line's seen flag joins the settings
 					     item. Worded to cover S4.3's flashcard flag too, which rewrites this line on

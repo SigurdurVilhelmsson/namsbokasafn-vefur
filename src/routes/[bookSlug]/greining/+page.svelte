@@ -9,6 +9,7 @@
 	import { analyticsStore, streakInfo, todayStats } from '$lib/stores/analytics';
 	import { loadTableOfContents, findSectionBySlug } from '$lib/utils/contentLoader';
 	import { getTodayDateString } from '$lib/utils/storeHelpers';
+	import { recallSummaryLine, recallTotals } from '$lib/utils/counters';
 	import { clearAllStorage, deleteLocalCaches } from '$lib/utils/storageMigration';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 	import {
@@ -162,9 +163,12 @@
 	// Clear this page's statistics: the analytics store (sessions, reading times, daily stats,
 	// streaks, activity, and the goals on the Markmið tab). Learning objectives (/markmid),
 	// flashcards, bookmarks, highlights and reading progress stay (plan step S3.2, PED-14).
+	// The recall counts go with the statistics; the recalls a reader typed stay (S5.4).
 	function handleClearData() {
+		// D20: proposed wording (S5.4): the recall counts join what is erased, the typed recalls
+		// join what stays.
 		const message =
-			'Eyða lestrartölfræði, lotum, röð daga og markmiðum í Námsgreiningu í þessum vafra? Námsmarkmið, minniskort, bókamerki, yfirstrikanir, athugasemdir og framvinda í bókunum haldast. Þetta er ekki hægt að afturkalla.';
+			'Eyða lestrartölfræði, lotum, röð daga, markmiðum og tölum um upprifjun í Námsgreiningu í þessum vafra? Námsmarkmið, minniskort, bókamerki, yfirstrikanir, athugasemdir, það sem þú skrifaðir í upprifjun og framvinda í bókunum haldast. Þetta er ekki hægt að afturkalla.';
 		if (confirm(message)) {
 			analyticsStore.clearAllData();
 		}
@@ -174,8 +178,9 @@
 	// caches first, then every namsbokasafn key, then reload at once, before any store can
 	// write its in-memory state back (plan step S3.2, PED-14).
 	async function handleEraseAll() {
+		// D20: proposed wording (S5.4): 'upprifjunum' added; the recall entries (S5.2) are erased too.
 		const message =
-			'Eyða öllu sem Námsbókasafn geymir í þessum vafra: framvindu, bókamerkjum, yfirstrikunum, athugasemdum, minniskortum, námsmarkmiðum, æfingadæmum, tölfræði og stillingum? Niðurhalaðar bækur eyðast líka. Þetta er ekki hægt að afturkalla.';
+			'Eyða öllu sem Námsbókasafn geymir í þessum vafra: framvindu, bókamerkjum, yfirstrikunum, athugasemdum, minniskortum, upprifjunum, námsmarkmiðum, æfingadæmum, tölfræði og stillingum? Niðurhalaðar bækur eyðast líka. Þetta er ekki hægt að afturkalla.';
 		if (!confirm(message)) return;
 		await deleteLocalCaches();
 		clearAllStorage();
@@ -188,6 +193,9 @@
 	}
 
 	// Reactive data
+	// The recall prompt's own counts, added up across books like the cards above (plan step
+	// S5.4, PED-17); null until a prompt has been shown
+	let recallLine = $derived(recallSummaryLine(recallTotals($analyticsStore.counters)));
 	let last7Days = $derived(getLast7Days());
 	let maxSeconds = $derived(Math.max(...last7Days.map((d) => d.seconds), 1));
 	let topSections = $derived(getTopSections(5));
@@ -322,6 +330,11 @@
 						</div>
 					</div>
 				</div>
+
+				{#if recallLine}
+					<!-- D20: proposed wording (S5.4): the line itself is in lib/utils/counters.ts -->
+					<p class="mb-8 text-sm text-[var(--text-secondary)]" data-recall-summary>{recallLine}</p>
+				{/if}
 
 				<!-- Weekly Chart -->
 				<div class="mb-8 p-6 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
