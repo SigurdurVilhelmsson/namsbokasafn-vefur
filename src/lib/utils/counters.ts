@@ -85,7 +85,8 @@ const takesSingular = (n: number): boolean => n % 10 === 1 && n % 100 !== 11;
 export function recallSummaryLine(totals: RecallTotals): string | null {
 	if (totals.shown === 0) return null;
 	const noun = takesSingular(totals.saved) ? 'upprifjun' : 'upprifjanir';
-	// D20: proposed wording (S5.4, PED-17): the summary on /greining.
+	// The summary on /greining (S5.4, PED-17). It adds up all books, as the page's other figures
+	// do ([USER], 2026-11-01).
 	return `Þú hefur vistað ${totals.saved} ${noun} og sleppt ${totals.skipped}.`;
 }
 

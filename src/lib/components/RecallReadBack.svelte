@@ -28,7 +28,6 @@
 </script>
 
 {#if entry}
-	<!-- D20: proposed wording (S5.5): the region's name and the heading. -->
 	<div
 		class="recall-readback mt-8 rounded-xl border border-[var(--accent-subtle)] bg-[var(--accent-light)] p-5"
 		role="region"
