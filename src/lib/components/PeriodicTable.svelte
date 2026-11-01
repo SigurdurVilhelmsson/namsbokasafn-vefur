@@ -155,6 +155,15 @@
 		else if (e.key === 'ArrowRight' && selectedElement && selectedElement.atomicNumber < 118) navigateElement('next');
 	}
 
+	// While the dialog is open the window handles keys pressed outside it (focus can stay on
+	// the table cell behind it); the dialog's own handler takes the keys pressed inside it, so
+	// the window skips those, or one arrow press would move two elements (code review M14).
+	let dialogEl: HTMLElement | undefined = $state();
+	function handleWindowKeyDown(e: KeyboardEvent) {
+		if (dialogEl?.contains(e.target as Node)) return;
+		handleModalKeyDown(e);
+	}
+
 	function getPhaseLabel(element: Element): string {
 		const phase = getElementPhase(element);
 		if (phase === 'solid') return 'Fast';
@@ -163,7 +172,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={selectedElement ? handleModalKeyDown : undefined} />
+<svelte:window onkeydown={selectedElement ? handleWindowKeyDown : undefined} />
 
 <div class="space-y-4">
 	<!-- Search and filters -->
@@ -254,16 +263,18 @@
 		class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
 		onclick={closeModal}
 		onkeydown={handleModalKeyDown}
+		bind:this={dialogEl}
 		role="dialog"
 		aria-modal="true"
 		aria-labelledby="element-modal-title"
 		tabindex="-1"
 		transition:fade={{ duration: 150 }}
 	>
+		<!-- Clicks stop here so a click inside does not close the dialog; keys go on to the
+		     dialog's handler (stopping them too swallowed Escape and the arrows, M14) -->
 		<div
 			class="pte-modal"
 			onclick={(e) => e.stopPropagation()}
-			onkeydown={(e) => e.stopPropagation()}
 			role="presentation"
 			transition:scale={{ duration: 200, start: 0.95 }}
 		>
