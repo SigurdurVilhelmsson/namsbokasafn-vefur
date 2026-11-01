@@ -15,24 +15,31 @@
 
 	let { data }: { data: PageData } = $props();
 
+	// Names the card region after its visible label ('Spurning', then 'Svar')
+	const cardLabelId = $props.id();
+
 	let isFlipped = $state(false);
+	// Pre-reveal self-prediction (predict-first: judge before seeing the answer)
+	let predictedKnown: boolean | null = $state(null);
 
 	$effect(() => {
 		if ($studyProgress.current !== undefined) {
 			isFlipped = false;
+			predictedKnown = null;
 		}
 	});
 
 	// All user decks from the store
 	let allDecks = $derived($flashcardStore.decks);
 
-	function flip() {
-		isFlipped = !isFlipped;
+	function predictAndFlip(known: boolean) {
+		predictedKnown = known;
+		isFlipped = true;
 	}
 
 	function rate(rating: DifficultyRating) {
 		if ($currentCard) {
-			flashcardStore.rateCard($currentCard.id, rating);
+			flashcardStore.rateCard($currentCard.id, rating, predictedKnown ?? undefined);
 		}
 	}
 
@@ -189,25 +196,33 @@
 			</div>
 
 			<!-- Card -->
-			<button
-				onclick={flip}
-				class="flashcard-card"
-			>
+			<div class="flashcard-card" role="region" aria-labelledby={cardLabelId}>
 				<div class="text-center">
-					<span class="flashcard-card-label">
+					<span id={cardLabelId} class="flashcard-card-label">
 						{isFlipped ? 'Svar' : 'Spurning'}
 					</span>
 					<p class="flashcard-card-text">
 						{isFlipped ? $currentCard.back : $currentCard.front}
 					</p>
 				</div>
-			</button>
+			</div>
 
-			<!-- Flip hint or rating buttons -->
+			<!-- Predict-first prompt or rating buttons -->
 			{#if !isFlipped}
-				<p class="flashcard-hint">
-					Smelltu á kortið til að sjá svarið
-				</p>
+				<!-- D20: proposed wording (KEEP-02, predict-first): the hint, 'Man það' and 'Man það ekki'. -->
+				<div class="mt-6">
+					<p class="flashcard-hint" style="margin-bottom: 1rem;">
+						Reyndu fyrst að rifja upp svarið — manstu það?
+					</p>
+					<div class="grid grid-cols-2 gap-2">
+						<button onclick={() => predictAndFlip(true)} class="flashcard-predict">
+							Man það
+						</button>
+						<button onclick={() => predictAndFlip(false)} class="flashcard-predict">
+							Man það ekki
+						</button>
+					</div>
+				</div>
 			{:else}
 				<div class="mt-6">
 					<p class="flashcard-hint" style="margin-bottom: 1rem;">
@@ -478,6 +493,20 @@
 	}
 
 	/* Rating buttons */
+	.flashcard-predict {
+		padding: 0.75rem;
+		border-radius: 0.75rem;
+		border: 1px solid var(--border-color);
+		background-color: var(--bg-secondary);
+		color: var(--text-primary);
+		font-weight: 500;
+		transition: all 0.15s;
+	}
+	.flashcard-predict:hover {
+		border-color: var(--accent-color);
+		background-color: var(--accent-light);
+	}
+
 	.flashcard-rating {
 		padding: 0.75rem;
 		border-radius: var(--radius-lg);

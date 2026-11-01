@@ -1,5 +1,5 @@
 <!--
-  ReviewPhase - Flashcard review with flip + rate, adapted from minniskort page
+  ReviewPhase - Flashcard review (predict, reveal, rate), adapted from minniskort page
 -->
 <script lang="ts">
 	import type { DueFlashcard } from '$lib/utils/studySession';
@@ -19,6 +19,9 @@
 
 	let { dueFlashcards, reviewProblems, oncomplete }: Props = $props();
 
+	// Names the card region after its visible label ('Spurning', then 'Svar')
+	const cardLabelId = $props.id();
+
 	// Combined items: flashcards first, then problems
 	type ReviewItem =
 		| { type: 'flashcard'; card: DueFlashcard }
@@ -31,19 +34,27 @@
 
 	let currentIndex = $state(0);
 	let isFlipped = $state(false);
+	// Pre-reveal self-prediction (predict-first: judge before seeing the answer)
+	let predictedKnown: boolean | null = $state(null);
 	let completedCount = $state(0);
 
 	let currentItem = $derived(items[currentIndex]);
 	let total = $derived(items.length);
 	let progress = $derived(total > 0 ? Math.round((currentIndex / total) * 100) : 0);
 
-	function flip() {
+	function predictAndFlip(known: boolean) {
+		predictedKnown = known;
+		isFlipped = true;
+	}
+
+	// Practice problems reveal directly; they have their own self-assessment
+	function revealAnswer() {
 		isFlipped = true;
 	}
 
 	function rateFlashcard(rating: DifficultyRating) {
 		if (currentItem?.type !== 'flashcard') return;
-		flashcardStore.rateCard(currentItem.card.cardId, rating);
+		flashcardStore.rateCard(currentItem.card.cardId, rating, predictedKnown ?? undefined);
 		completedCount++;
 		advance();
 	}
@@ -59,6 +70,7 @@
 		if (currentIndex < total - 1) {
 			currentIndex++;
 			isFlipped = false;
+			predictedKnown = null;
 		} else {
 			oncomplete?.(completedCount);
 		}
@@ -96,24 +108,32 @@
 
 	{#if currentItem?.type === 'flashcard'}
 		<!-- Flashcard review -->
-		<button
-			onclick={flip}
-			class="rp-card"
-		>
+		<div class="rp-card" role="region" aria-labelledby={cardLabelId}>
 			<div class="text-center">
-				<span class="rp-card-label">
+				<span id={cardLabelId} class="rp-card-label">
 					{isFlipped ? 'Svar' : 'Spurning'}
 				</span>
 				<p class="rp-card-text">
 					{isFlipped ? currentItem.card.back : currentItem.card.front}
 				</p>
 			</div>
-		</button>
+		</div>
 
 		{#if !isFlipped}
-			<p class="rp-hint">
-				Smelltu á kortið til að sjá svarið
-			</p>
+			<!-- D20: proposed wording (KEEP-02, predict-first): the hint, 'Man það' and 'Man það ekki'. -->
+			<div class="mt-4">
+				<p class="rp-hint" style="margin-bottom: 0.75rem;">
+					Reyndu fyrst að rifja upp svarið — manstu það?
+				</p>
+				<div class="grid grid-cols-2 gap-2">
+					<button onclick={() => predictAndFlip(true)} class="rp-predict">
+						Man það
+					</button>
+					<button onclick={() => predictAndFlip(false)} class="rp-predict">
+						Man það ekki
+					</button>
+				</div>
+			</div>
 		{:else}
 			<div class="mt-4">
 				<p class="rp-hint" style="margin-bottom: 0.75rem;">
@@ -172,7 +192,7 @@
 
 			{#if !isFlipped}
 				<button
-					onclick={flip}
+					onclick={revealAnswer}
 					class="rp-show-answer-btn"
 				>
 					Sýna svar
@@ -271,6 +291,20 @@
 		color: var(--text-tertiary);
 		margin-top: 0.75rem;
 	}
+	.rp-predict {
+		padding: 0.625rem;
+		border-radius: 0.625rem;
+		border: 1px solid var(--border-color);
+		background-color: var(--bg-secondary);
+		color: var(--text-primary);
+		font-weight: 500;
+		transition: all 0.15s;
+	}
+	.rp-predict:hover {
+		border-color: var(--accent-color);
+		background-color: var(--accent-light);
+	}
+
 	/* Rating buttons */
 	.rp-rating {
 		padding: 0.75rem;
