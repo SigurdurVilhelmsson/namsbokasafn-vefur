@@ -17,6 +17,8 @@
 #   Reports are saved to /var/www/namsbokasafn-vefur/build/traffic-report.html
 #   View at: https://namsbokasafn.is/traffic-report.html
 #   (Protected by nginx location block — see nginx config)
+#   REPORT_DIR is the deploy target, so every deploy's rsync --delete removes the report
+#   (scripts/deploy.js). Generate it again after a deploy.
 
 set -euo pipefail
 
@@ -70,9 +72,8 @@ install() {
     info "     (Make sure the nginx location block is in place — see nginx config)"
 }
 
-# Find log files, optionally filtering by date range
+# Find log files (the date range is goaccess's --keep-last, set in generate_report)
 find_logs() {
-    local days="${1:-0}"
     local logs=""
 
     # Current log
@@ -116,7 +117,7 @@ generate_report() {
     info "Generating traffic report..."
 
     local logs
-    logs=$(find_logs "$days")
+    logs=$(find_logs)
 
     local date_filter=""
     if [ "$days" -gt 0 ] 2>/dev/null; then
@@ -125,20 +126,23 @@ generate_report() {
         info "Filtering to last $days days"
     fi
 
-    # Build the goaccess command
+    # Build the goaccess command as an array, so the title stays one argument. As a string,
+    # its spaces split it and the stray '-' told goaccess to read stdin (code review M21).
     # COMBINED log format covers most nginx default configs
-    local cmd="goaccess"
-    cmd="$cmd --log-format=COMBINED"
-    cmd="$cmd --output=$REPORT_FILE"
-    cmd="$cmd --html-report-title='Námsbókasafn - Umferðarskýrsla'"
-    cmd="$cmd --ignore-crawlers"
-    cmd="$cmd --anonymize-ip"
-    cmd="$cmd --exclude-ip=127.0.0.1"
-    cmd="$cmd --real-os"
-    cmd="$cmd --double-decode"
+    local cmd=(
+        goaccess
+        --log-format=COMBINED
+        "--output=$REPORT_FILE"
+        "--html-report-title=Námsbókasafn - Umferðarskýrsla"
+        --ignore-crawlers
+        --anonymize-ip
+        --exclude-ip=127.0.0.1
+        --real-os
+        --double-decode
+    )
 
     if [ -n "$date_filter" ]; then
-        cmd="$cmd $date_filter"
+        cmd+=("$date_filter")
     fi
 
     # Handle both plain and gzipped logs
@@ -152,13 +156,14 @@ generate_report() {
         fi
     done
 
-    # Process logs (pipe gzipped through zcat)
+    # Process logs (pipe gzipped through zcat). The log lists split on spaces on purpose:
+    # they are fixed nginx paths.
     if [ -n "$gz_logs" ] && [ -n "$plain_logs" ]; then
-        (zcat $gz_logs 2>/dev/null; cat $plain_logs) | $cmd -
+        (zcat $gz_logs 2>/dev/null; cat $plain_logs) | "${cmd[@]}" -
     elif [ -n "$gz_logs" ]; then
-        zcat $gz_logs | $cmd -
+        zcat $gz_logs | "${cmd[@]}" -
     else
-        $cmd $plain_logs
+        "${cmd[@]}" $plain_logs
     fi
 
     # Set permissions so nginx can serve it
