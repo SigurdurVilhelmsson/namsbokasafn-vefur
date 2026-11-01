@@ -635,7 +635,7 @@ would vanish exactly when the build needs it.
 
 Measured on 2026-11-01 against `main` = `e85457d` (#323) and the live site.
 
-- **Prod runs build `1793518115596`**, deployed at 07:43 UTC (07:43:03 by the server's clock) from `main` `e85457d` with no content sync, replacing train 6's build `1793484688243`. Undeployed on `main`: only the PR that adds this entry. It sent 323 files and deleted none, none under `content/`:
+- **Prod runs build `1793518115596`**, deployed at 07:43 UTC (07:43:03 by the server's clock) from `main` `e85457d` with no content sync, replacing train 6's build `1793484688243`. Undeployed on `main`: only the PR that adds this entry (later that day also S5.1 and S5.2; see Next). It sent 323 files and deleted none, none under `content/`:
   - 273 chemistry pages, 25 print pages, `200.html`, `index.html`, `personuvernd/index.html`, `sw.js` and `_app/version.json`;
   - `sitemap.xml`, sent only because its `<lastmod>` moved to 2026-11-01 (the same 367 URLs);
   - #321's two new pages, `feedback/index.html` and `for-teachers/index.html`;
@@ -684,6 +684,7 @@ Measured on 2026-11-01 against `main` = `e85457d` (#323) and the live site.
 - **npm audit:** no package changed since train 6 (`package.json` and the lockfile are the same as on `db1653c`), so it stands as recorded on 2026-10-31: production tree 0, full tree 26.
 - **Next:**
   - _(Updated later on 2026-11-01.)_ M4's code is complete on `feature/reader-m4`: S4.1 (#316), S4.2 (#326), S4.3 (#328) and S4.4 (#329), with `main` merged in by #327. Before its January train (S4.5): [USER]'s D20 check of its 10 markers and a look at the 'Rétt' rating, which S4.2 turned from amber to blue, then batch D's P0.3 items on a build. Then M5 on `main`.
+  - _(Later still on 2026-11-01.)_ M5 started on `main`, not deployed: S5.1, the recall store with a guard that every section-keyed store follows renames (#331, `9a4c678`), and S5.2, the section-end recall prompt in place of 'Vel gert!' with `readerPolicy.ts` and D10's trigger (#332, `b770eff`). The next train would ship S5.2: let S5.3 (the prompt's accessibility) land first, and [USER] check its `D20: proposed` strings.
   - For [USER]: the phone and screen-reader checks (S1.3's last box, S0.4, and equations), a glance at GoatCounter's dashboard, the May 2027 exam dates, and #320's question.
 - **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
 
