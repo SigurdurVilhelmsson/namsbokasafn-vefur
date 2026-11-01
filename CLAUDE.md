@@ -681,7 +681,7 @@ Measured on 2026-11-01 against `main` = `e85457d` (#323) and the live site.
 - 🔑 **Two PRs that add a test at the same spot in one spec conflict.** #322 and #323 each inserted a test before the same line of `e2e/phone-layout.spec.ts`. Simulating all seven merges in order with `git merge-tree` before merging anything showed that conflict and no other. #323 was rebased onto `main` once #322 had merged, kept both tests, and merged after its own CI passed.
 - **npm audit:** no package changed since train 6 (`package.json` and the lockfile are the same as on `db1653c`), so it stands as recorded on 2026-10-31: production tree 0, full tree 26.
 - **Next:**
-  - S4.2 on `feature/reader-m4`: focus to the revealed answer, one status announcer, the "Þú sagðir: …" echo (D20) and the rating colour tokens with one RatingButtons.
+  - _(Updated later on 2026-11-01.)_ M4's code is complete on `feature/reader-m4`: S4.1 (#316), S4.2 (#326), S4.3 (#328) and S4.4 (#329), with `main` merged in by #327. Before its January train (S4.5): [USER]'s D20 check of its 10 markers and a look at the 'Rétt' rating, which S4.2 turned from amber to blue, then batch D's P0.3 items on a build. Then M5 on `main`.
   - For [USER]: the phone and screen-reader checks (S1.3's last box, S0.4, and equations), a glance at GoatCounter's dashboard, the May 2027 exam dates, and #320's question.
 - **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
 
