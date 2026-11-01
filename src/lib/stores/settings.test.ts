@@ -194,6 +194,118 @@ describe('settings store', () => {
 		});
 	});
 
+	describe('the settings seam: only choices are stored (S6.1, D02)', () => {
+		const KEY = 'namsbokasafn:settings';
+		/** Byte for byte what main's store saved on a first load, before any choice */
+		const MAIN_FIRST_LOAD = {
+			theme: 'light',
+			fontSize: 'medium',
+			fontFamily: 'serif',
+			lineHeight: 'normal',
+			lineWidth: 'medium',
+			sidebarOpen: false,
+			shortcutPreferences: {},
+			bionicReading: false,
+			glossaryHighlighting: true,
+			showTermEnglish: true
+		};
+
+		const storedRaw = () => localStorage.getItem(KEY);
+		const stored = () => JSON.parse(storedRaw() ?? 'null');
+
+		/** Load a fresh store module over whatever is stored now */
+		async function load(seed?: unknown) {
+			if (seed !== undefined) localStorage.setItem(KEY, JSON.stringify(seed));
+			vi.resetModules();
+			return import('./settings');
+		}
+
+		const storageEvent = (newValue: string | null) =>
+			window.dispatchEvent(new StorageEvent('storage', { key: KEY, newValue }));
+
+		it('a fresh profile stores only the marker', async () => {
+			localStorage.clear();
+			await load();
+			expect(storedRaw()).toBe('{"_version":1,"_born":1}');
+		});
+
+		it('a profile saved by main keeps every value and is marked born 0', async () => {
+			await load(MAIN_FIRST_LOAD);
+			expect(stored()).toEqual({ _version: 1, _born: 0, ...MAIN_FIRST_LOAD });
+		});
+
+		it('a profile saved by main is stored unchanged by a second load', async () => {
+			await load(MAIN_FIRST_LOAD);
+			const first = storedRaw();
+			await load();
+			expect(storedRaw()).toBe(first);
+		});
+
+		it("a stored 'wide' line width still loads as 'wide'", async () => {
+			const module = await load({ lineWidth: 'wide' });
+			expect(get(module.lineWidth)).toBe('wide');
+		});
+
+		it("choosing the default ('light') still stores it as a choice", () => {
+			settings.setTheme('light');
+			expect(stored()).toEqual({ _version: 1, _born: 1, theme: 'light' });
+		});
+
+		it.each([
+			['toggleTheme', { theme: 'dark' }],
+			['toggleBionicReading', { bionicReading: true }],
+			['toggleGlossaryHighlighting', { glossaryHighlighting: false }],
+			['toggleShowTermEnglish', { showTermEnglish: false }]
+		] as const)('%s stores only its own key', (method, expected) => {
+			settings[method]();
+			expect(stored()).toEqual({ _version: 1, _born: 1, ...expected });
+		});
+
+		it("the sidebar's open state is kept, but is not a choice", () => {
+			settings.toggleSidebar();
+			expect(stored()).toEqual({ _version: 1, _born: 1, sidebarOpen: true });
+			expect(settings.profile().chosen).toEqual([]);
+		});
+
+		it('a setter lists its key among the choices', () => {
+			settings.setLineWidth('narrow');
+			expect(settings.profile().chosen).toEqual(['lineWidth']);
+		});
+
+		it('profile() reports the marker of a fresh profile and of a pre-seam one', async () => {
+			expect(settings.profile().born).toBe(1);
+			const module = await load(MAIN_FIRST_LOAD);
+			expect(module.settings.profile().born).toBe(0);
+		});
+
+		it("another tab's choices survive this tab's next change, and nothing else is added", () => {
+			storageEvent('{"_version":1,"_born":1,"theme":"dark"}');
+			settings.setFontSize('large');
+			expect(stored()).toEqual({ _version: 1, _born: 1, theme: 'dark', fontSize: 'large' });
+			expect(get(theme)).toBe('dark');
+		});
+
+		it("another tab's erase returns this tab to the defaults without writing", () => {
+			settings.setTheme('dark');
+			vi.mocked(localStorage.setItem).mockClear();
+			storageEvent(null);
+			expect(get(theme)).toBe('light');
+			expect(localStorage.setItem).not.toHaveBeenCalled();
+		});
+
+		it("a newer build's keys, version and marker survive this build's next change", async () => {
+			const module = await load({ _version: 2, _born: 2, readingMode: 'paged', theme: 'dark' });
+			module.settings.setFontSize('large');
+			expect(stored()).toEqual({ _version: 2, _born: 2, readingMode: 'paged', theme: 'dark', fontSize: 'large' });
+		});
+
+		it('reset() forgets the choices and keeps the marker', async () => {
+			const module = await load({ _version: 1, _born: 0, theme: 'dark', readingMode: 'paged' });
+			module.settings.reset();
+			expect(stored()).toEqual({ _version: 1, _born: 0, readingMode: 'paged' });
+		});
+	});
+
 	describe('reset', () => {
 		it('should reset all settings to defaults', () => {
 			settings.setTheme('dark');
