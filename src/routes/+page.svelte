@@ -229,11 +229,13 @@
                   {book.status === 'available' ? 'Í boði' : 'Í vinnslu'}
                 </span>
               </div>
-              <div class="caption-row caption-licence">
-                <LicenceBadge code={book.attribution.derivativeLicence} />
-              </div>
             </div>
           </a>
+          <!-- Beside the card link, never inside it: the badge is a link, and a link inside a
+               link made the parser split the card, so the page failed to hydrate -->
+          <div class="caption-row caption-licence">
+            <LicenceBadge code={book.attribution.derivativeLicence} />
+          </div>
         </article>
       {/each}
     </div>
@@ -260,11 +262,12 @@
                   <span class="caption-meta">{book.stats?.translatedChapters ?? 1} kafli í forskoðun</span>
                   <span class="book-status status-preview">Forskoðun</span>
                 </div>
-                <div class="caption-row caption-licence">
-                  <LicenceBadge code={book.attribution.derivativeLicence} />
-                </div>
               </div>
             </a>
+            <!-- Beside the card link, never inside it (see the translations grid) -->
+            <div class="caption-row caption-licence">
+              <LicenceBadge code={book.attribution.derivativeLicence} />
+            </div>
           </article>
         {/each}
       </div>
@@ -864,8 +867,9 @@
     gap: 0.5rem;
   }
 
+  /* Outside the link now: 0.75rem = the caption's 0.35rem gap + the 0.4rem this row had */
   .caption-licence {
-    margin-top: 0.4rem;
+    margin-top: 0.75rem;
     justify-content: flex-start;
   }
 
