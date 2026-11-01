@@ -96,13 +96,7 @@ npm run preview     # Preview the build locally at http://localhost:4173
 
 ### 5. Environment variables (optional)
 
-The app works fully without environment variables for local development. In production, `.env.production` contains:
-
-| Variable             | Purpose                                           |
-| -------------------- | ------------------------------------------------- |
-| `VITE_TTS_PROXY_URL` | Text-to-speech proxy endpoint (Cloudflare Worker) |
-
-These are public URLs, not secrets.
+None. Nothing in `src/` reads an environment variable: the last one, `VITE_API_URL`, went with the page-view event in S3.3 (decision D03).
 
 ## Server Deployment
 
