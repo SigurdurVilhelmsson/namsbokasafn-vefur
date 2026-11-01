@@ -377,3 +377,58 @@ test.describe('Where the counts and the routines are described (S5.4)', () => {
 		await expect(page.locator('nav.toc a[href="#teaching"]')).toHaveCount(1);
 	});
 });
+
+test.describe("S5.4's new text under axe", () => {
+	test.skip(!BOOK, 'No published book is synced');
+
+	/** Store the theme, open the page, and wait until hydration has applied it */
+	async function openInTheme(page: Page, url: string, theme: 'light' | 'dark') {
+		await page.addInitScript((t) => {
+			const key = 'namsbokasafn:settings';
+			let stored: Record<string, unknown>;
+			try {
+				stored = JSON.parse(localStorage.getItem(key) || '{}');
+			} catch {
+				stored = {};
+			}
+			localStorage.setItem(key, JSON.stringify({ ...stored, theme: t }));
+		}, theme);
+		await page.goto(url);
+		const dark = /(^|\s)dark(\s|$)/;
+		if (theme === 'dark') await expect(page.locator('html')).toHaveClass(dark, { timeout: 15000 });
+		else await expect(page.locator('html')).not.toHaveClass(dark);
+	}
+
+	async function axe(page: Page, selector: string) {
+		const results = await new AxeBuilder({ page })
+			.include(selector)
+			.withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+			.analyze();
+		return {
+			violations: results.violations.flatMap((v) => v.nodes.map((n) => `${v.id}: ${n.target.join(' ')}`)),
+			measured: results.passes.find((p) => p.id === 'color-contrast')?.nodes.length ?? 0
+		};
+	}
+
+	for (const theme of ['light', 'dark'] as const) {
+		test(`${theme}: the /greining summary line`, async ({ page }) => {
+			await page.addInitScript((book) => {
+				const counters = { [book!]: { recallShown: 3, recallSaved: 2, recallSkipped: 1 } };
+				localStorage.setItem('namsbokasafn:analytics', JSON.stringify({ counters }));
+			}, BOOK);
+			await openInTheme(page, `/${BOOK}/greining/`, theme);
+			await expect(page.getByText(/^Þú hefur vistað/)).toBeVisible({ timeout: 15000 });
+			const { violations, measured } = await axe(page, '[data-recall-summary]');
+			expect(violations).toEqual([]);
+			expect(measured, 'axe measured the line').toBe(1);
+		});
+
+		test(`${theme}: the teaching section on /for-teachers`, async ({ page }) => {
+			await openInTheme(page, '/for-teachers/', theme);
+			const { violations, measured } = await axe(page, 'section#teaching');
+			expect(violations).toEqual([]);
+			// The control: the heading, the paragraphs, the list items and the link
+			expect(measured, 'axe measured the section').toBeGreaterThanOrEqual(6);
+		});
+	}
+});

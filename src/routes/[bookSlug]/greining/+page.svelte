@@ -333,7 +333,7 @@
 
 				{#if recallLine}
 					<!-- D20: proposed wording (S5.4): the line itself is in lib/utils/counters.ts -->
-					<p class="mb-8 text-sm text-[var(--text-secondary)]">{recallLine}</p>
+					<p class="mb-8 text-sm text-[var(--text-secondary)]" data-recall-summary>{recallLine}</p>
 				{/if}
 
 				<!-- Weekly Chart -->
