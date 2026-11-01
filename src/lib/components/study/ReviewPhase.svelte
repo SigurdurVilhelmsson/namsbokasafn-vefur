@@ -10,6 +10,9 @@
 	import { quizStore } from '$lib/stores/quiz';
 	import PracticeSnapshot from '$lib/components/PracticeSnapshot.svelte';
 	import { storedAnswerText } from '$lib/utils/practiceSnapshot';
+	import RatingButtons from './RatingButtons.svelte';
+	import { announce } from '$lib/stores/announcer';
+	import { tick } from 'svelte';
 
 	interface Props {
 		dueFlashcards: DueFlashcard[];
@@ -21,6 +24,7 @@
 
 	// Names the card region after its visible label ('Spurning', then 'Svar')
 	const cardLabelId = $props.id();
+	const problemLabelId = `${cardLabelId}-problem`;
 
 	// Combined items: flashcards first, then problems
 	type ReviewItem =
@@ -42,14 +46,24 @@
 	let total = $derived(items.length);
 	let progress = $derived(total > 0 ? Math.round((currentIndex / total) * 100) : 0);
 
-	function predictAndFlip(known: boolean) {
+	// Where focus goes when the control that had it disappears (plan step S4.2, UI-01)
+	let cardEl: HTMLElement | undefined = $state();
+	let problemEl: HTMLElement | undefined = $state();
+	let answerEl: HTMLElement | undefined = $state();
+
+	async function predictAndFlip(known: boolean) {
 		predictedKnown = known;
 		isFlipped = true;
+		// Onto the answer, never a rating button: a held Enter would then rate it 'Aftur'
+		await tick();
+		cardEl?.focus();
 	}
 
 	// Practice problems reveal directly; they have their own self-assessment
-	function revealAnswer() {
+	async function revealAnswer() {
 		isFlipped = true;
+		await tick();
+		answerEl?.focus();
 	}
 
 	function rateFlashcard(rating: DifficultyRating) {
@@ -66,11 +80,15 @@
 		advance();
 	}
 
-	function advance() {
+	async function advance() {
 		if (currentIndex < total - 1) {
 			currentIndex++;
 			isFlipped = false;
 			predictedKnown = null;
+			// Onto the next card's question or problem, and say where in the set it is
+			await tick();
+			(currentItem?.type === 'problem' ? problemEl : cardEl)?.focus();
+			announce(`${currentIndex + 1} af ${total}`);
 		} else {
 			oncomplete?.(completedCount);
 		}
@@ -108,7 +126,8 @@
 
 	{#if currentItem?.type === 'flashcard'}
 		<!-- Flashcard review -->
-		<div class="rp-card" role="region" aria-labelledby={cardLabelId}>
+		<!-- Focusable from script only: focus lands here after a prediction and a rating -->
+		<div class="rp-card" role="region" aria-labelledby={cardLabelId} tabindex="-1" bind:this={cardEl}>
 			<div class="text-center">
 				<span id={cardLabelId} class="rp-card-label">
 					{isFlipped ? 'Svar' : 'Spurning'}
@@ -116,6 +135,10 @@
 				<p class="rp-card-text">
 					{isFlipped ? currentItem.card.back : currentItem.card.front}
 				</p>
+				{#if isFlipped && predictedKnown !== null}
+					<!-- D20: proposed wording (PED-20): the prediction echoed on the answer side, 'Þú sagðir: …'. -->
+					<p class="rp-echo">Þú sagðir: {predictedKnown ? 'Man það' : 'Man það ekki'}</p>
+				{/if}
 			</div>
 		</div>
 
@@ -139,51 +162,13 @@
 				<p class="rp-hint" style="margin-bottom: 0.75rem;">
 					Hversu auðvelt var þetta?
 				</p>
-				<div class="grid grid-cols-4 gap-2">
-					<button
-						onclick={() => rateFlashcard('again')}
-						class="rp-rating rp-rating--again"
-					>
-						<div class="font-medium text-sm">Aftur</div>
-						{#if previewIntervals}
-							<div class="text-xs opacity-75">{previewIntervals.again}</div>
-						{/if}
-					</button>
-					<button
-						onclick={() => rateFlashcard('hard')}
-						class="rp-rating rp-rating--hard"
-					>
-						<div class="font-medium text-sm">Erfitt</div>
-						{#if previewIntervals}
-							<div class="text-xs opacity-75">{previewIntervals.hard}</div>
-						{/if}
-					</button>
-					<button
-						onclick={() => rateFlashcard('good')}
-						class="rp-rating rp-rating--good"
-					>
-						<div class="font-medium text-sm">Gott</div>
-						{#if previewIntervals}
-							<!-- No opacity: faded --accent-strong drops below 4.5:1 -->
-							<div class="text-xs">{previewIntervals.good}</div>
-						{/if}
-					</button>
-					<button
-						onclick={() => rateFlashcard('easy')}
-						class="rp-rating rp-rating--easy"
-					>
-						<div class="font-medium text-sm">Auðvelt</div>
-						{#if previewIntervals}
-							<div class="text-xs opacity-75">{previewIntervals.easy}</div>
-						{/if}
-					</button>
-				</div>
+				<RatingButtons intervals={previewIntervals} onrate={rateFlashcard} compact />
 			</div>
 		{/if}
 	{:else if currentItem?.type === 'problem'}
 		<!-- Practice problem review -->
-		<div class="rp-problem-card">
-			<span class="rp-problem-label">
+		<div class="rp-problem-card" role="region" aria-labelledby={problemLabelId} tabindex="-1" bind:this={problemEl}>
+			<span id={problemLabelId} class="rp-problem-label">
 				Æfingadæmi
 			</span>
 			<div class="mb-4" style="color: var(--text-primary);">
@@ -198,7 +183,7 @@
 					Sýna svar
 				</button>
 			{:else}
-				<div class="rp-answer-box">
+				<div class="rp-answer-box" tabindex="-1" bind:this={answerEl}>
 					<h5 class="rp-answer-title">Svar</h5>
 					<div class="rp-answer-text">
 						<PracticeSnapshot html={currentItem.problem.answerHtml} text={storedAnswerText(currentItem.problem.answer)} />
@@ -265,12 +250,12 @@
 		background-color: var(--bg-secondary);
 		box-shadow: var(--shadow-lg);
 		border: 1px solid var(--border-color);
-		cursor: pointer;
-		transition: transform 0.15s;
 		text-align: left;
 	}
-	.rp-card:hover {
-		transform: scale(1.01);
+	.rp-echo {
+		margin-top: 0.75rem;
+		font-size: 0.875rem;
+		color: var(--text-secondary);
 	}
 	.rp-card-label {
 		display: block;
@@ -304,24 +289,6 @@
 		border-color: var(--accent-color);
 		background-color: var(--accent-light);
 	}
-
-	/* Rating buttons */
-	.rp-rating {
-		padding: 0.75rem;
-		border-radius: var(--radius-lg);
-		transition: opacity 0.15s;
-	}
-	.rp-rating:hover { opacity: 0.85; }
-	.rp-rating--again { background-color: #fef2f2; color: #b91c1c; }
-	:global(.dark) .rp-rating--again { background-color: rgba(127,29,29,0.3); color: #fca5a5; }
-	.rp-rating--hard { background-color: #fff7ed; color: #c2410c; }
-	:global(.dark) .rp-rating--hard { background-color: rgba(124,45,18,0.3); color: #fdba74; }
-	.rp-rating--good { background-color: var(--accent-light); color: var(--accent-strong); }
-	/* --accent-strong text must not fade: its hover cue is the deeper tint instead of the
-	   shared opacity (strong on --accent-subtle is 4.55:1). */
-	.rp-rating--good:hover { opacity: 1; background-color: var(--accent-subtle); }
-	.rp-rating--easy { background-color: #ecfdf5; color: #047857; }
-	:global(.dark) .rp-rating--easy { background-color: rgba(6,78,59,0.3); color: #6ee7b7; }
 
 	/* Problem card */
 	.rp-problem-card {
@@ -357,29 +324,25 @@
 	}
 	/* A tint, not an opacity fade: faded --accent-strong drops below 4.5:1. */
 	.rp-show-answer-btn:hover { background-color: var(--accent-subtle); }
+	/* The answer and the self-assessment use the rating tokens (S4.2, UI-16): green for the
+	   answer and 'Rétt', red for 'Rangt', with no hex colours and no opacity fade on text. */
 	.rp-answer-box {
 		border-radius: var(--radius-lg);
-		border: 1px solid #a7f3d0;
-		background-color: #ecfdf5;
+		border: 1px solid var(--border-color);
+		background-color: var(--rating-easy-bg);
 		padding: 1rem;
 		margin-bottom: 1rem;
-	}
-	:global(.dark) .rp-answer-box {
-		border-color: rgba(6,78,59,0.5);
-		background-color: rgba(6,78,59,0.2);
 	}
 	.rp-answer-title {
 		font-size: 0.875rem;
 		font-weight: 600;
-		color: #047857;
+		color: var(--rating-easy);
 		margin-bottom: 0.25rem;
 	}
-	:global(.dark) .rp-answer-title { color: #34d399; }
 	.rp-answer-text {
 		font-size: 0.875rem;
-		color: #065f46;
+		color: var(--text-primary);
 	}
-	:global(.dark) .rp-answer-text { color: #a7f3d0; }
 	.rp-assess-btn {
 		display: flex;
 		flex: 1;
@@ -387,30 +350,20 @@
 		justify-content: center;
 		gap: 0.5rem;
 		border-radius: var(--radius-lg);
-		border: 2px solid;
+		border: 2px solid transparent;
 		padding: 0.5rem 1rem;
 		font-weight: 500;
-		transition: opacity 0.15s;
+		transition: border-color 0.15s;
 	}
-	.rp-assess-btn:hover { opacity: 0.85; }
+	.rp-assess-btn:hover {
+		border-color: currentColor;
+	}
 	.rp-assess-btn--correct {
-		border-color: #86efac;
-		background-color: #ecfdf5;
-		color: #047857;
-	}
-	:global(.dark) .rp-assess-btn--correct {
-		border-color: rgba(6,78,59,0.5);
-		background-color: rgba(6,78,59,0.2);
-		color: #34d399;
+		background-color: var(--rating-easy-bg);
+		color: var(--rating-easy);
 	}
 	.rp-assess-btn--wrong {
-		border-color: #fca5a5;
-		background-color: #fef2f2;
-		color: #b91c1c;
-	}
-	:global(.dark) .rp-assess-btn--wrong {
-		border-color: rgba(127,29,29,0.5);
-		background-color: rgba(127,29,29,0.2);
-		color: #fca5a5;
+		background-color: var(--rating-again-bg);
+		color: var(--rating-again);
 	}
 </style>
