@@ -667,7 +667,7 @@ Measured on 2026-10-31 against `main` = `db1653c` (#314) and the live site.
   - three new ones: `deepmerge` 4.2.0–4.3.1 (low, through SvelteKit), `glob` 9.0.0–14.0.1 (moderate, through workbox-build) and `minimatch` <11.0.1 (moderate, through eslint, typescript-eslint and workbox-build).
   - npm's only offered fixes are major downgrades (eslint 4.0.0, `@vite-pwa/sveltekit` 0.0.1), so nothing is fixable inside the current versions. An override would force a new major onto packages that pin an older one (the `brace-expansion` lesson above); not tried. They don't block a deploy: the production tree is what ships.
 - **The deploy lane** is at `db1653c`. Its `.env.production` still has the dead `VITE_API_URL` line.
-- **Next, by the plan:** M4 (S4.1, predict-first). Under D05, no train runs from the merge of S4.1 until January, and [USER] has yet to choose: accept that lock, keep M4 on a feature branch, or re-rule D05. Also for [USER]: the real-phone check of the sidebar's focus order (S1.3's last box), S0.4, and the May 2027 exam dates (before S9.0).
+- **Next, by the plan:** M4 (S4.1, predict-first). Under D05, no train runs from the merge of S4.1 until January. On 2026-11-01 [USER] chose to keep M4 on a feature branch, `feature/reader-m4`, so trains can still run from `main` (`docs/decisions/2026-11-01-reader-d05-m4-on-a-feature-branch.md`); S4.1 is PR #316 into it. Also for [USER]: the real-phone check of the sidebar's focus order (S1.3's last box), S0.4, and the May 2027 exam dates (before S9.0).
 - **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
 
 ### 2026-10-27 — S3.3 merged (#312), not deployed; D20 batch 4 and three questions wait for [USER]
