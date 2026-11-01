@@ -87,7 +87,13 @@ const PAIRS: Pair[] = [
 	// surface outside it. Native radios use --focus-ring as their accent colour too.
 	...['--focus-gap', ...SURFACES].map((bg) => ({ fg: '--focus-ring', bg, min: 3, use: 'focus ring and radios' })),
 	// A light-theme radio has a white face (dark mode paints it dark).
-	{ fg: '--focus-ring', bg: '#ffffff', min: 3, use: 'radio on its white face', themes: ['light'] }
+	{ fg: '--focus-ring', bg: '#ffffff', min: 3, use: 'radio on its white face', themes: ['light'] },
+	// The flashcard rating buttons (S4.2, UI-16): each rating's label on its tint, and the
+	// interval preview, in --text-secondary, on the same tint.
+	...['again', 'hard', 'good', 'easy'].flatMap((r) => [
+		{ fg: `--rating-${r}`, bg: `--rating-${r}-bg`, min: 4.5, use: `'${r}' rating label` },
+		{ fg: '--text-secondary', bg: `--rating-${r}-bg`, min: 4.5, use: `'${r}' interval preview` }
+	])
 ];
 
 const key = (theme: string, p: Pair) => `${theme}: ${p.fg} on ${p.bg} (min ${p.min})`;

@@ -80,6 +80,18 @@
     --focus-ring: #8a5d0e;
     /* The solid band between a focused control and its ring: a known colour on every surface. */
     --focus-gap: #ffffff;
+    /* The flashcard rating scale (plan step S4.2, UI-16): a text colour and a tint per
+       rating, none of them the accent. Blue is allowed here: CLAUDE.md keeps it for rating
+       scales. Each text colour, and --text-secondary for the interval line, clears 4.5:1 on
+       its tint (tokens.test.ts). */
+    --rating-again: #b91c1c;
+    --rating-again-bg: #fef2f2;
+    --rating-hard: #9a3412;
+    --rating-hard-bg: #fff7ed;
+    --rating-good: #1d4ed8;
+    --rating-good-bg: #eff6ff;
+    --rating-easy: #047857;
+    --rating-easy-bg: #ecfdf5;
 
     /* Shadows (warm-tinted) */
     --shadow-sm: 0 1px 2px rgba(27, 40, 56, 0.06);
@@ -132,6 +144,14 @@
        light ring; this one is 6.64-8.66:1 on the gap and the surfaces (tokens.test.ts). */
     --focus-ring: #e8a838;
     --focus-gap: #16161c;
+    --rating-again: #fca5a5;
+    --rating-again-bg: #3a1d21;
+    --rating-hard: #fdba74;
+    --rating-hard-bg: #38261a;
+    --rating-good: #93c5fd;
+    --rating-good-bg: #1b2840;
+    --rating-easy: #6ee7b7;
+    --rating-easy-bg: #12302a;
 
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);

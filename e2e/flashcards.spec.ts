@@ -14,43 +14,7 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
-import { syncedBooks } from './helpers/content-fixtures';
-
-const STORAGE_KEY = 'namsbokasafn:flashcards';
-const CARDS = [
-	{ id: 'e2e-1', front: 'Hvað er mól?', back: 'Magn efnis' },
-	{ id: 'e2e-2', front: 'Hvað er atóm?', back: 'Minnsta eining frumefnis' }
-];
-
-async function openFlashcards(page: Page, { seed }: { seed: boolean }) {
-	if (seed) {
-		await page.addInitScript(
-			({ key, cards }) => {
-				// Only on the first load: a reload must see what the app saved
-				if (localStorage.getItem(key)) return;
-				const created = new Date().toISOString();
-				localStorage.setItem(
-					key,
-					JSON.stringify({
-						decks: [
-							{
-								id: 'e2e-deck',
-								name: 'Prófunarstokkur',
-								created,
-								cards: cards.map((c) => ({ ...c, created }))
-							}
-						]
-					})
-				);
-			},
-			{ key: STORAGE_KEY, cards: CARDS }
-		);
-	}
-	await page.goto(`/${syncedBooks()[0]}/minniskort/`);
-	await expect(page.getByRole('heading', { name: 'Minniskort', level: 1 })).toBeVisible({
-		timeout: 15000
-	});
-}
+import { CARDS, STORAGE_KEY, openFlashcards } from './helpers/flashcards';
 
 const RATINGS = ['Aftur', 'Erfitt', 'Gott', 'Auðvelt'];
 

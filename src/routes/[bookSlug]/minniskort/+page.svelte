@@ -12,6 +12,9 @@
 		studyStats
 	} from '$lib/stores';
 	import type { DifficultyRating } from '$lib/types/flashcard';
+	import RatingButtons from '$lib/components/study/RatingButtons.svelte';
+	import { announce } from '$lib/stores/announcer';
+	import { tick } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
@@ -32,14 +35,27 @@
 	// All user decks from the store
 	let allDecks = $derived($flashcardStore.decks);
 
-	function predictAndFlip(known: boolean) {
+	// Where focus goes when the control that had it disappears (plan step S4.2, UI-01)
+	let cardEl: HTMLElement | undefined = $state();
+	let doneHeadingEl: HTMLElement | undefined = $state();
+
+	async function predictAndFlip(known: boolean) {
 		predictedKnown = known;
 		isFlipped = true;
+		// Onto the answer, never a rating button: a held Enter would then rate it 'Aftur'
+		await tick();
+		cardEl?.focus();
 	}
 
-	function rate(rating: DifficultyRating) {
-		if ($currentCard) {
-			flashcardStore.rateCard($currentCard.id, rating, predictedKnown ?? undefined);
+	async function rate(rating: DifficultyRating) {
+		if (!$currentCard) return;
+		flashcardStore.rateCard($currentCard.id, rating, predictedKnown ?? undefined);
+		await tick();
+		if ($studyProgress.isComplete) {
+			doneHeadingEl?.focus();
+		} else {
+			cardEl?.focus();
+			announce(`Kort ${$studyProgress.current + 1} af ${$studyProgress.total}`);
 		}
 	}
 
@@ -149,7 +165,7 @@
 				</svg>
 			</div>
 
-			<h2 class="flashcard-subheading">
+			<h2 class="flashcard-subheading" tabindex="-1" bind:this={doneHeadingEl}>
 				Vel gert!
 			</h2>
 			<p class="flashcard-description">
@@ -196,7 +212,14 @@
 			</div>
 
 			<!-- Card -->
-			<div class="flashcard-card" role="region" aria-labelledby={cardLabelId}>
+			<!-- Focusable from script only: focus lands here after a prediction and a rating -->
+			<div
+				class="flashcard-card"
+				role="region"
+				aria-labelledby={cardLabelId}
+				tabindex="-1"
+				bind:this={cardEl}
+			>
 				<div class="text-center">
 					<span id={cardLabelId} class="flashcard-card-label">
 						{isFlipped ? 'Svar' : 'Spurning'}
@@ -204,6 +227,10 @@
 					<p class="flashcard-card-text">
 						{isFlipped ? $currentCard.back : $currentCard.front}
 					</p>
+					{#if isFlipped && predictedKnown !== null}
+						<!-- D20: proposed wording (PED-20): the prediction echoed on the answer side, 'Þú sagðir: …'. -->
+						<p class="flashcard-echo">Þú sagðir: {predictedKnown ? 'Man það' : 'Man það ekki'}</p>
+					{/if}
 				</div>
 			</div>
 
@@ -228,44 +255,7 @@
 					<p class="flashcard-hint" style="margin-bottom: 1rem;">
 						Hversu auðvelt var þetta?
 					</p>
-					<div class="grid grid-cols-4 gap-2">
-						<button
-							onclick={() => rate('again')}
-							class="flashcard-rating flashcard-rating--again"
-						>
-							<div class="font-medium">Aftur</div>
-							{#if previewIntervals}
-								<div class="text-xs opacity-75">{previewIntervals.again}</div>
-							{/if}
-						</button>
-						<button
-							onclick={() => rate('hard')}
-							class="flashcard-rating flashcard-rating--hard"
-						>
-							<div class="font-medium">Erfitt</div>
-							{#if previewIntervals}
-								<div class="text-xs opacity-75">{previewIntervals.hard}</div>
-							{/if}
-						</button>
-						<button
-							onclick={() => rate('good')}
-							class="flashcard-rating flashcard-rating--good"
-						>
-							<div class="font-medium">Gott</div>
-							{#if previewIntervals}
-								<div class="text-xs">{previewIntervals.good}</div>
-							{/if}
-						</button>
-						<button
-							onclick={() => rate('easy')}
-							class="flashcard-rating flashcard-rating--easy"
-						>
-							<div class="font-medium">Auðvelt</div>
-							{#if previewIntervals}
-								<div class="text-xs opacity-75">{previewIntervals.easy}</div>
-							{/if}
-						</button>
-					</div>
+					<RatingButtons intervals={previewIntervals} onrate={rate} />
 				</div>
 			{/if}
 		</div>
@@ -463,12 +453,12 @@
 		background-color: var(--bg-secondary);
 		box-shadow: var(--shadow-lg);
 		border: 1px solid var(--border-color);
-		cursor: pointer;
-		transition: transform 0.15s;
 		text-align: left;
 	}
-	.flashcard-card:hover {
-		transform: scale(1.01);
+	.flashcard-echo {
+		margin-top: 1rem;
+		font-size: 0.875rem;
+		color: var(--text-secondary);
 	}
 	.flashcard-card-label {
 		display: block;
@@ -492,7 +482,7 @@
 		margin-top: 1rem;
 	}
 
-	/* Rating buttons */
+	/* Prediction buttons (the ratings are RatingButtons) */
 	.flashcard-predict {
 		padding: 0.75rem;
 		border-radius: 0.75rem;
@@ -507,49 +497,4 @@
 		background-color: var(--accent-light);
 	}
 
-	.flashcard-rating {
-		padding: 0.75rem;
-		border-radius: var(--radius-lg);
-		transition: background-color 0.15s, opacity 0.15s;
-	}
-	.flashcard-rating:hover {
-		opacity: 0.85;
-	}
-	/* Again - red */
-	.flashcard-rating--again {
-		background-color: #fef2f2;
-		color: #b91c1c;
-	}
-	:global(.dark) .flashcard-rating--again {
-		background-color: rgba(127, 29, 29, 0.3);
-		color: #fca5a5;
-	}
-	/* Hard - amber */
-	.flashcard-rating--hard {
-		background-color: #fff7ed;
-		color: #c2410c;
-	}
-	:global(.dark) .flashcard-rating--hard {
-		background-color: rgba(124, 45, 18, 0.3);
-		color: #fdba74;
-	}
-	/* Good - accent */
-	.flashcard-rating--good {
-		background-color: var(--accent-light);
-		color: var(--accent-strong);
-	}
-	/* A deeper tint, not the shared opacity fade: --accent-strong at 85% drops below 4.5:1 */
-	.flashcard-rating--good:hover {
-		opacity: 1;
-		background-color: var(--accent-subtle);
-	}
-	/* Easy - green */
-	.flashcard-rating--easy {
-		background-color: #ecfdf5;
-		color: #047857;
-	}
-	:global(.dark) .flashcard-rating--easy {
-		background-color: rgba(6, 78, 59, 0.3);
-		color: #6ee7b7;
-	}
 </style>

@@ -10,6 +10,7 @@
 	import PWAUpdater from '$lib/components/PWAUpdater.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
 	import StorageWarning from '$lib/components/StorageWarning.svelte';
+	import LiveAnnouncer from '$lib/components/LiveAnnouncer.svelte';
 	import '../app.css';
 
 	let { children }: { children: Snippet } = $props();
@@ -49,3 +50,6 @@
 
 <!-- Storage quota warning -->
 <StorageWarning />
+
+<!-- The app's one polite status region: components speak through announce() -->
+<LiveAnnouncer />
