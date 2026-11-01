@@ -105,6 +105,45 @@ test.describe('Phone layout', () => {
 		expect(itemHit).toBe(true);
 	});
 
+	// Measured on the live build of 2026-10-25: after 'Fyrri kafli', the next four
+	// Tab stops were the collapsed menu's invisible links.
+	test('the collapsed tools menu takes no Tab stops, and a scroll hands focus back', async ({ browser }) => {
+		const urls = sectionsContaining('<p', 1);
+		test.skip(urls.length === 0, 'No synced section');
+
+		const page = await phonePage(browser, { touch: false });
+		await openSection(page, urls[0]);
+		const fab = page.locator('.fab-button');
+		await expect(fab).toBeVisible();
+		const focusInMenu = () => page.evaluate(() => !!document.activeElement?.closest('.fab-menu'));
+
+		// Collapsed: the links come just before the button, and Shift+Tab skips them
+		await fab.focus();
+		await page.keyboard.press('Shift+Tab');
+		expect(await focusInMenu()).toBe(false);
+		// That focus move can scroll the page, and a late scroll event would close
+		// the menu we open next (the menu collapses on scroll by design)
+		await page.waitForFunction(
+			() => new Promise((done) => {
+				const y = window.scrollY;
+				setTimeout(() => done(window.scrollY === y), 250);
+			})
+		);
+
+		// Open, the same key lands on a link: the control that this test can see one
+		await fab.focus();
+		await page.keyboard.press('Enter');
+		await expect(fab).toHaveAttribute('aria-expanded', 'true');
+		await page.keyboard.press('Shift+Tab');
+		expect(await focusInMenu()).toBe(true);
+
+		// A scroll collapses the menu, which goes inert: focus moves to the button, not <body>
+		// (Up if the earlier focus move left the page at its foot, down otherwise)
+		await page.evaluate(() => window.scrollTo(0, window.scrollY > 100 ? 0 : 400));
+		await expect(fab).toHaveAttribute('aria-expanded', 'false');
+		await expect(fab).toBeFocused();
+	});
+
 	test('the timer pill does not cover the tools button', async ({ browser }) => {
 		const urls = sectionsContaining('<p', 1);
 		test.skip(urls.length === 0, 'No synced section');
