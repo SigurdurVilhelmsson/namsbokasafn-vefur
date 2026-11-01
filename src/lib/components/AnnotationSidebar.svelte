@@ -2,6 +2,7 @@
   AnnotationSidebar - Shows all annotations with filtering and export
 -->
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { slide, fade } from 'svelte/transition';
 	import Icon from '$lib/components/Icon.svelte';
 	import { annotationStore } from '$lib/stores/annotation';
@@ -36,6 +37,38 @@
 	let filter: FilterType = $state('all');
 	let showFilterMenu = $state(false);
 	let confirmDelete: string | null = $state(null);
+
+	// Keyboard (code review M13): opening moves focus to 'Loka', Escape inside the panel closes
+	// it, and closing hands focus back to the control that had it before, so it never falls to
+	// <body> when the panel leaves. The element refs are read through untrack() and the
+	// bookkeeping is plain variables, so the effect depends on isOpen alone (CLAUDE.md,
+	// reactivity pitfalls).
+	let panelEl: HTMLElement | undefined = $state();
+	let closeButton: HTMLButtonElement | undefined = $state();
+	let returnFocusTo: HTMLElement | null = null;
+	let wasOpen = false;
+	$effect(() => {
+		const open = isOpen;
+		if (open && !wasOpen) {
+			returnFocusTo = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+			queueMicrotask(() => untrack(() => closeButton)?.focus({ preventScroll: true }));
+		} else if (!open && wasOpen) {
+			const active = document.activeElement;
+			const panel = untrack(() => panelEl);
+			const focusWasInside = !active || active === document.body || !!panel?.contains(active);
+			if (focusWasInside && returnFocusTo?.isConnected) returnFocusTo.focus({ preventScroll: true });
+			returnFocusTo = null;
+		}
+		wasOpen = open;
+	});
+
+	function handlePanelKeyDown(e: KeyboardEvent) {
+		if (e.key !== 'Escape') return;
+		// Handled here, so the global Escape shortcut does not act on it as well
+		e.preventDefault();
+		e.stopPropagation();
+		onClose();
+	}
 
 	// Subscribe to annotation store
 	let allAnnotations = $derived($annotationStore.annotations.filter((a: Annotation) => a.bookSlug === bookSlug));
@@ -118,6 +151,9 @@
 		class="ann-panel fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l shadow-xl"
 		role="dialog"
 		aria-label="Athugasemdir"
+		tabindex="-1"
+		bind:this={panelEl}
+		onkeydown={handlePanelKeyDown}
 		transition:slide={{ duration: 200, axis: 'x' }}
 	>
 		<!-- Header -->
@@ -131,6 +167,7 @@
 			</div>
 			<button
 				onclick={onClose}
+				bind:this={closeButton}
 				class="ann-btn-ghost rounded-lg p-2 transition-colors"
 				aria-label="Loka"
 			>
