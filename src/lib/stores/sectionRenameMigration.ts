@@ -14,6 +14,7 @@ import { annotationStore } from './annotation';
 import { analyticsStore } from './analytics';
 import { objectivesStore } from './objectives';
 import { quizStore } from './quiz';
+import { recallStore } from './recall';
 
 export function migrateRenamedSections(bookSlug: string, toc: TableOfContents): void {
 	if (!browser) return;
@@ -32,7 +33,8 @@ export function migrateRenamedSections(bookSlug: string, toc: TableOfContents): 
 		['annotations', annotationStore],
 		['analytics', analyticsStore],
 		['objectives', objectivesStore],
-		['quiz', quizStore]
+		['quiz', quizStore],
+		['recall', recallStore]
 	] as const) {
 		try {
 			store.renameSections(renames);

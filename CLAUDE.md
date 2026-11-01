@@ -52,7 +52,7 @@ npm run format           # Prettier formatting
 - `glossary.ts`: Glossary state and term lookup
 - `objectives.ts`: Learning objectives tracking
 - `offline.ts`: PWA offline state
-- `recall.ts`: Free-recall entries written after completing a section (reader v1.1 branch)
+- `recall.ts`: Free-recall entries written after completing a section. On main since plan step S5.1 (ported from v1.1 `dde768e`, each entry validated, moved by section renames); nothing writes it until S5.2 ports the prompt
 
 ### Content Loading
 
@@ -611,10 +611,10 @@ would vanish exactly when the build needs it.
   the stub, **never load-bearing**, and must not be applied until the old page is gone from the
   deployed tree (`return 301` runs before `try_files` and has no on-disk guard).
 - **A reader's saved state follows the rename** (#258). Read marks, bookmarks, highlights, ticked
-  objectives, practice attempts and reading times are all keyed by section slug, so without this they
+  objectives, practice attempts, reading times and recall entries are all keyed by section slug, so without this they
   stay under the old slug and vanish from the renamed page. `src/lib/utils/sectionRenames.ts` is the
   pure core; `migrateRenamedSections()` (`src/lib/stores/sectionRenameMigration.ts`) applies it to the
-  five stores, each through its own `renameSections()`, and `loadTableOfContents` calls it on every
+  six stores, each through its own `renameSections()`, and `loadTableOfContents` calls it on every
   table-of-contents load in the browser.
   - 🔴 **Only ACTIVE rows move anything** — the same `exactSectionExists` gate the route uses. An
     inert row's old page is still the live one, so moving its data would empty the page the reader is
@@ -622,6 +622,8 @@ would vanish exactly when the build needs it.
   - Each transform is idempotent and returns the **same object** when nothing matched, so a store
     saves only when something moved. A **new store keyed by section** must get a `renameSections()`
     and a line in `migrateRenamedSections()`, or its data is silently left behind.
+    `src/lib/stores/sectionKeyedStores.test.ts` fails on a store file that uses `sectionSlug`,
+    `sectionKey` or `createSectionKey` and is neither migrated nor exempted there with a reason.
   - A page that snapshots store data on mount must load the TOC **before** it mounts: `/prof` has a
     browser-only `+page.ts` load for exactly this, because on a hard load the migration otherwise
     landed after the quiz had snapshotted, and answers were dropped. Don't move the TOC fetch into a

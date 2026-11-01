@@ -43,6 +43,9 @@ export {
 // Annotation
 export { annotationStore, totalAnnotations, annotationsWithNotes } from './annotation';
 
+// Recall store (free-recall entries after a section; the prompt comes in plan step S5.2)
+export { recallStore, recallEntryCount, type RecallEntry } from './recall';
+
 // Quiz
 export { quizStore, currentQuizSession, quizProgress } from './quiz';
 
