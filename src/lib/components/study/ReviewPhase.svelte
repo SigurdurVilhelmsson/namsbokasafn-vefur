@@ -1,5 +1,5 @@
 <!--
-  ReviewPhase - Flashcard review (predict, reveal, rate), adapted from minniskort page
+  ReviewPhase - /nam's review: due flashcards (one PredictThenRate round each), then practice problems
 -->
 <script lang="ts">
 	import type { DueFlashcard } from '$lib/utils/studySession';
@@ -10,7 +10,7 @@
 	import { quizStore } from '$lib/stores/quiz';
 	import PracticeSnapshot from '$lib/components/PracticeSnapshot.svelte';
 	import { storedAnswerText } from '$lib/utils/practiceSnapshot';
-	import RatingButtons from './RatingButtons.svelte';
+	import PredictThenRate from './PredictThenRate.svelte';
 	import { announce } from '$lib/stores/announcer';
 	import { tick } from 'svelte';
 
@@ -22,9 +22,9 @@
 
 	let { dueFlashcards, reviewProblems, oncomplete }: Props = $props();
 
-	// Names the card region after its visible label ('Spurning', then 'Svar')
-	const cardLabelId = $props.id();
-	const problemLabelId = `${cardLabelId}-problem`;
+	// Names the problem region after its visible label ('Æfingadæmi')
+	const uid = $props.id();
+	const problemLabelId = `${uid}-problem`;
 
 	// Combined items: flashcards first, then problems
 	type ReviewItem =
@@ -37,9 +37,8 @@
 	]);
 
 	let currentIndex = $state(0);
+	// A practice problem's answer shown (a flashcard's round keeps its own state)
 	let isFlipped = $state(false);
-	// Pre-reveal self-prediction (predict-first: judge before seeing the answer)
-	let predictedKnown: boolean | null = $state(null);
 	let completedCount = $state(0);
 
 	let currentItem = $derived(items[currentIndex]);
@@ -47,17 +46,9 @@
 	let progress = $derived(total > 0 ? Math.round((currentIndex / total) * 100) : 0);
 
 	// Where focus goes when the control that had it disappears (plan step S4.2, UI-01)
-	let cardEl: HTMLElement | undefined = $state();
+	let round: ReturnType<typeof PredictThenRate> | undefined = $state();
 	let problemEl: HTMLElement | undefined = $state();
 	let answerEl: HTMLElement | undefined = $state();
-
-	async function predictAndFlip(known: boolean) {
-		predictedKnown = known;
-		isFlipped = true;
-		// Onto the answer, never a rating button: a held Enter would then rate it 'Aftur'
-		await tick();
-		cardEl?.focus();
-	}
 
 	// Practice problems reveal directly; they have their own self-assessment
 	async function revealAnswer() {
@@ -66,9 +57,9 @@
 		answerEl?.focus();
 	}
 
-	function rateFlashcard(rating: DifficultyRating) {
+	function rateFlashcard(rating: DifficultyRating, predictedKnown: boolean) {
 		if (currentItem?.type !== 'flashcard') return;
-		flashcardStore.rateCard(currentItem.card.cardId, rating, predictedKnown ?? undefined);
+		flashcardStore.rateCard(currentItem.card.cardId, rating, predictedKnown);
 		completedCount++;
 		advance();
 	}
@@ -84,10 +75,9 @@
 		if (currentIndex < total - 1) {
 			currentIndex++;
 			isFlipped = false;
-			predictedKnown = null;
 			// Onto the next card's question or problem, and say where in the set it is
 			await tick();
-			(currentItem?.type === 'problem' ? problemEl : cardEl)?.focus();
+			(currentItem?.type === 'problem' ? problemEl : round)?.focus();
 			announce(`${currentIndex + 1} af ${total}`);
 		} else {
 			oncomplete?.(completedCount);
@@ -125,46 +115,17 @@
 	</div>
 
 	{#if currentItem?.type === 'flashcard'}
-		<!-- Flashcard review -->
-		<!-- Focusable from script only: focus lands here after a prediction and a rating -->
-		<div class="rp-card" role="region" aria-labelledby={cardLabelId} tabindex="-1" bind:this={cardEl}>
-			<div class="text-center">
-				<span id={cardLabelId} class="rp-card-label">
-					{isFlipped ? 'Svar' : 'Spurning'}
-				</span>
-				<p class="rp-card-text">
-					{isFlipped ? currentItem.card.back : currentItem.card.front}
-				</p>
-				{#if isFlipped && predictedKnown !== null}
-					<!-- D20: proposed wording (PED-20): the prediction echoed on the answer side, 'Þú sagðir: …'. -->
-					<p class="rp-echo">Þú sagðir: {predictedKnown ? 'Man það' : 'Man það ekki'}</p>
-				{/if}
-			</div>
-		</div>
-
-		{#if !isFlipped}
-			<!-- D20: proposed wording (KEEP-02, predict-first): the hint, 'Man það' and 'Man það ekki'. -->
-			<div class="mt-4">
-				<p class="rp-hint" style="margin-bottom: 0.75rem;">
-					Reyndu fyrst að rifja upp svarið — manstu það?
-				</p>
-				<div class="grid grid-cols-2 gap-2">
-					<button onclick={() => predictAndFlip(true)} class="rp-predict">
-						Man það
-					</button>
-					<button onclick={() => predictAndFlip(false)} class="rp-predict">
-						Man það ekki
-					</button>
-				</div>
-			</div>
-		{:else}
-			<div class="mt-4">
-				<p class="rp-hint" style="margin-bottom: 0.75rem;">
-					Hversu auðvelt var þetta?
-				</p>
-				<RatingButtons intervals={previewIntervals} onrate={rateFlashcard} compact />
-			</div>
-		{/if}
+		<!-- One predict-first round per card: keyed, so each card starts on its question -->
+		{#key currentItem.card.cardId}
+			<PredictThenRate
+				bind:this={round}
+				front={currentItem.card.front}
+				back={currentItem.card.back}
+				intervals={previewIntervals}
+				onrate={rateFlashcard}
+				compact
+			/>
+		{/key}
 	{:else if currentItem?.type === 'problem'}
 		<!-- Practice problem review -->
 		<div class="rp-problem-card" role="region" aria-labelledby={problemLabelId} tabindex="-1" bind:this={problemEl}>
@@ -241,53 +202,6 @@
 		border-radius: 9999px;
 		background-color: var(--accent-color);
 		transition: width 0.3s;
-	}
-	.rp-card {
-		width: 100%;
-		min-height: 250px;
-		padding: 1.5rem;
-		border-radius: var(--radius-xl);
-		background-color: var(--bg-secondary);
-		box-shadow: var(--shadow-lg);
-		border: 1px solid var(--border-color);
-		text-align: left;
-	}
-	.rp-echo {
-		margin-top: 0.75rem;
-		font-size: 0.875rem;
-		color: var(--text-secondary);
-	}
-	.rp-card-label {
-		display: block;
-		font-size: 0.75rem;
-		font-weight: 500;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: var(--text-tertiary);
-		margin-bottom: 1rem;
-	}
-	.rp-card-text {
-		font-size: 1.125rem;
-		color: var(--text-primary);
-	}
-	.rp-hint {
-		text-align: center;
-		font-size: 0.875rem;
-		color: var(--text-tertiary);
-		margin-top: 0.75rem;
-	}
-	.rp-predict {
-		padding: 0.625rem;
-		border-radius: 0.625rem;
-		border: 1px solid var(--border-color);
-		background-color: var(--bg-secondary);
-		color: var(--text-primary);
-		font-weight: 500;
-		transition: all 0.15s;
-	}
-	.rp-predict:hover {
-		border-color: var(--accent-color);
-		background-color: var(--accent-light);
 	}
 
 	/* Problem card */

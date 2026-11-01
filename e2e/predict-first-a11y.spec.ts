@@ -105,3 +105,35 @@ test.describe('Predict-first on /nam', () => {
 		await expect(echo(page)).toHaveText('Þú sagðir: Man það');
 	});
 });
+
+test.describe('Predict-first on /nam, after a rating', () => {
+	test("focus moves to the next card's question, and the counter is spoken", async ({ page }) => {
+		await seedDeck(page);
+		await page.goto(`/${syncedBooks()[0]}/nam/`);
+		await page.getByRole('button', { name: /Hefja nám/ }).click();
+		await expect(question(page)).toBeVisible({ timeout: 15000 });
+		await predict(page, 'Man það').click();
+		await page.getByRole('button', { name: /^Gott/ }).focus();
+		await page.keyboard.press('Enter');
+		await expect(question(page)).toBeFocused();
+		await expect(page.locator('[role="status"][aria-live="polite"]', { hasText: '2 af 2' })).toHaveCount(1);
+	});
+});
+
+test.describe("Predict-first's one-time 'why' line (plan step S4.3, PED-25)", () => {
+	test('shows on the first card of a fresh profile, and never again', async ({ page }) => {
+		await startSession(page);
+		const why = page.getByText(/^Af hverju\?/);
+		await expect(why).toBeVisible();
+
+		await predict(page, 'Man það').click();
+		await page.getByRole('button', { name: /^Gott/ }).click();
+		await expect(question(page)).toBeVisible();
+		await expect(why).toHaveCount(0);
+
+		// The next visit resumes the session on the second card, still without it
+		await page.reload();
+		await expect(question(page)).toBeVisible({ timeout: 15000 });
+		await expect(why).toHaveCount(0);
+	});
+});

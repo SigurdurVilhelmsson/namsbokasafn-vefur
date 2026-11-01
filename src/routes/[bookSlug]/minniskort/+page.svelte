@@ -12,49 +12,27 @@
 		studyStats
 	} from '$lib/stores';
 	import type { DifficultyRating } from '$lib/types/flashcard';
-	import RatingButtons from '$lib/components/study/RatingButtons.svelte';
+	import PredictThenRate from '$lib/components/study/PredictThenRate.svelte';
 	import { announce } from '$lib/stores/announcer';
 	import { tick } from 'svelte';
 
 	let { data }: { data: PageData } = $props();
 
-	// Names the card region after its visible label ('Spurning', then 'Svar')
-	const cardLabelId = $props.id();
-
-	let isFlipped = $state(false);
-	// Pre-reveal self-prediction (predict-first: judge before seeing the answer)
-	let predictedKnown: boolean | null = $state(null);
-
-	$effect(() => {
-		if ($studyProgress.current !== undefined) {
-			isFlipped = false;
-			predictedKnown = null;
-		}
-	});
-
 	// All user decks from the store
 	let allDecks = $derived($flashcardStore.decks);
 
 	// Where focus goes when the control that had it disappears (plan step S4.2, UI-01)
-	let cardEl: HTMLElement | undefined = $state();
+	let round: ReturnType<typeof PredictThenRate> | undefined = $state();
 	let doneHeadingEl: HTMLElement | undefined = $state();
 
-	async function predictAndFlip(known: boolean) {
-		predictedKnown = known;
-		isFlipped = true;
-		// Onto the answer, never a rating button: a held Enter would then rate it 'Aftur'
-		await tick();
-		cardEl?.focus();
-	}
-
-	async function rate(rating: DifficultyRating) {
+	async function rate(rating: DifficultyRating, predictedKnown: boolean) {
 		if (!$currentCard) return;
-		flashcardStore.rateCard($currentCard.id, rating, predictedKnown ?? undefined);
+		flashcardStore.rateCard($currentCard.id, rating, predictedKnown);
 		await tick();
 		if ($studyProgress.isComplete) {
 			doneHeadingEl?.focus();
 		} else {
-			cardEl?.focus();
+			round?.focus();
 			announce(`Kort ${$studyProgress.current + 1} af ${$studyProgress.total}`);
 		}
 	}
@@ -211,53 +189,16 @@
 				</div>
 			</div>
 
-			<!-- Card -->
-			<!-- Focusable from script only: focus lands here after a prediction and a rating -->
-			<div
-				class="flashcard-card"
-				role="region"
-				aria-labelledby={cardLabelId}
-				tabindex="-1"
-				bind:this={cardEl}
-			>
-				<div class="text-center">
-					<span id={cardLabelId} class="flashcard-card-label">
-						{isFlipped ? 'Svar' : 'Spurning'}
-					</span>
-					<p class="flashcard-card-text">
-						{isFlipped ? $currentCard.back : $currentCard.front}
-					</p>
-					{#if isFlipped && predictedKnown !== null}
-						<!-- D20: proposed wording (PED-20): the prediction echoed on the answer side, 'Þú sagðir: …'. -->
-						<p class="flashcard-echo">Þú sagðir: {predictedKnown ? 'Man það' : 'Man það ekki'}</p>
-					{/if}
-				</div>
-			</div>
-
-			<!-- Predict-first prompt or rating buttons -->
-			{#if !isFlipped}
-				<!-- D20: proposed wording (KEEP-02, predict-first): the hint, 'Man það' and 'Man það ekki'. -->
-				<div class="mt-6">
-					<p class="flashcard-hint" style="margin-bottom: 1rem;">
-						Reyndu fyrst að rifja upp svarið — manstu það?
-					</p>
-					<div class="grid grid-cols-2 gap-2">
-						<button onclick={() => predictAndFlip(true)} class="flashcard-predict">
-							Man það
-						</button>
-						<button onclick={() => predictAndFlip(false)} class="flashcard-predict">
-							Man það ekki
-						</button>
-					</div>
-				</div>
-			{:else}
-				<div class="mt-6">
-					<p class="flashcard-hint" style="margin-bottom: 1rem;">
-						Hversu auðvelt var þetta?
-					</p>
-					<RatingButtons intervals={previewIntervals} onrate={rate} />
-				</div>
-			{/if}
+			<!-- One predict-first round per card: keyed, so each card starts on its question -->
+			{#key $currentCard.id}
+				<PredictThenRate
+					bind:this={round}
+					front={$currentCard.front}
+					back={$currentCard.back}
+					intervals={previewIntervals}
+					onrate={rate}
+				/>
+			{/key}
 		</div>
 	{/if}
 </div>
@@ -445,56 +386,7 @@
 	}
 
 	/* Card */
-	.flashcard-card {
-		width: 100%;
-		min-height: 300px;
-		padding: 2rem;
-		border-radius: var(--radius-xl);
-		background-color: var(--bg-secondary);
-		box-shadow: var(--shadow-lg);
-		border: 1px solid var(--border-color);
-		text-align: left;
-	}
-	.flashcard-echo {
-		margin-top: 1rem;
-		font-size: 0.875rem;
-		color: var(--text-secondary);
-	}
-	.flashcard-card-label {
-		display: block;
-		font-size: 0.75rem;
-		font-weight: 500;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		color: var(--text-tertiary);
-		margin-bottom: 1rem;
-	}
-	.flashcard-card-text {
-		font-size: 1.25rem;
-		color: var(--text-primary);
-	}
 
-	/* Hint text */
-	.flashcard-hint {
-		text-align: center;
-		font-size: 0.875rem;
-		color: var(--text-tertiary);
-		margin-top: 1rem;
-	}
 
-	/* Prediction buttons (the ratings are RatingButtons) */
-	.flashcard-predict {
-		padding: 0.75rem;
-		border-radius: 0.75rem;
-		border: 1px solid var(--border-color);
-		background-color: var(--bg-secondary);
-		color: var(--text-primary);
-		font-weight: 500;
-		transition: all 0.15s;
-	}
-	.flashcard-predict:hover {
-		border-color: var(--accent-color);
-		background-color: var(--accent-light);
-	}
 
 </style>
