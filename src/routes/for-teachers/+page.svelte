@@ -37,6 +37,8 @@
         <h2>Efnisyfirlit</h2>
         <ul>
           <li><a href="#access">Aðgangur að efni</a></li>
+          <!-- D20: proposed wording (S5.4) -->
+          <li><a href="#teaching">Kennsla með Námsbókasafni</a></li>
           <li><a href="#content-status">Staða efnis</a></li>
           <li><a href="#known-issues">Þekkt vandamál</a></li>
           <li><a href="#quality">Gæði þýðinga</a></li>
@@ -81,6 +83,27 @@
       </section>
 
       <!-- Section: Content Status -->
+      <!-- Section: Teaching (plan step S5.4; PED-39's routines, PED-25's 'why' for teachers).
+           D20: proposed wording: the whole section. Recall only for now: predict-first comes to
+           main with M4 (S4.5). -->
+      <section class="section" id="teaching">
+        <h2>
+          <Icon name="square-pen" size="md" class="text-[var(--accent-strong)]" />
+          Kennsla með Námsbókasafni
+        </h2>
+
+        <p>Í lok hvers kafla biður Námsbókasafn nemandann að rifja upp 2–3 meginatriði kaflans með eigin orðum, án þess að fletta til baka. Upprifjun úr minni styrkir námið meira en endurlestur. Nemandinn getur alltaf sleppt henni.</p>
+
+        <h3>Þrjár leiðir til að nota upprifjunina í kennslu</h3>
+        <ol>
+          <li>Settu nemendum fyrir kafla og biddu þá að ljúka upprifjuninni í lok hans.</li>
+          <li>Byrjaðu næstu kennslustund á því að spyrja aftur um meginatriði kaflans, til dæmis á töflunni.</li>
+          <li>Láttu nemendur bera upprifjun sína saman í pörum og við námsmarkmið kaflans.</li>
+        </ol>
+
+        <p>Upprifjunin er geymd í vafra nemandans og fer ekki af tækinu, svo þú sérð hana aðeins ef nemandinn sýnir þér hana. Á Námsgreiningu sér nemandinn hve oft hann hefur vistað eða sleppt upprifjun, og þær tölur fara ekki heldur af tækinu. Nánar á síðunni <a href="/personuvernd/">Gögnin þín og persónuvernd</a>.</p>
+      </section>
+
       <section class="section" id="content-status">
         <h2>
           <Icon name="clipboard-check" size="md" class="text-[var(--accent-strong)]" />

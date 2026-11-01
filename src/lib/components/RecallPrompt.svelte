@@ -17,6 +17,11 @@
     and focus must not fall to <body>;
   - Escape acts as 'Sleppa' only while the box is empty, so typed recall is never thrown away;
   - on touch screens no autofocus (it opens the keyboard over the text) and no Ctrl+Enter hint.
+
+  Counted in plan step S5.4 (PED-17), as local aggregate counts per book (lib/utils/counters.ts):
+  shown on mount, saved, skipped ('Sleppa' or Escape), and abandoned when it unmounts with
+  neither (the reader went on to another section). A tab closed with the prompt open counts as
+  shown only: unmount never runs.
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
@@ -24,6 +29,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import { recallStore } from '$lib/stores/recall';
 	import { announce } from '$lib/stores/announcer';
+	import { analyticsStore } from '$lib/stores/analytics';
 	import { safeSetItem } from '$lib/utils/localStorage';
 
 	interface Props {
@@ -60,7 +66,14 @@
 	let keyboardLikely = $state(false);
 	let textareaElement: HTMLTextAreaElement | undefined = $state();
 
+	// Plain variables, not $state: bookkeeping that no markup reads. The book is fixed at mount,
+	// since the page updates the props before it closes the prompt on navigation.
+	let countedBook = '';
+	let settled = false;
+
 	onMount(() => {
+		countedBook = bookSlug;
+		analyticsStore.countEvent(countedBook, 'recallShown');
 		try {
 			showWhy = localStorage.getItem(WHY_SEEN_KEY) === null;
 		} catch {
@@ -75,6 +88,10 @@
 		const active = document.activeElement;
 		const focusIdle = !active || active === document.body;
 		if (keyboardLikely && focusIdle) textareaElement?.focus();
+
+		return () => {
+			if (!settled) analyticsStore.countEvent(countedBook, 'recallAbandoned');
+		};
 	});
 
 	function markWhySeen() {
@@ -84,6 +101,8 @@
 	function handleSave() {
 		if (!text.trim()) return;
 		recallStore.addEntry(bookSlug, chapterSlug, sectionSlug, text);
+		settled = true;
+		analyticsStore.countEvent(countedBook, 'recallSaved');
 		markWhySeen();
 		saved = true;
 		announce(SAVED_MESSAGE);
@@ -91,6 +110,8 @@
 	}
 
 	function handleSkip() {
+		settled = true;
+		analyticsStore.countEvent(countedBook, 'recallSkipped');
 		markWhySeen();
 		onclose?.();
 	}

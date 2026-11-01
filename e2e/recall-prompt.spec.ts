@@ -8,6 +8,9 @@
  * skip or Escape, the save is spoken by the shared announcer, Escape never discards typed
  * text, the phone layout fits, touch screens get no autofocus or keyboard hint, axe passes
  * with text typed, and the 'why' line shows once.
+ *
+ * Plan step S5.4 (PED-17, KEEP-01): the prompt's shown, saved, skipped and abandoned counts
+ * are kept on the device, nothing is sent, and /greining shows a one-line summary.
  */
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect, type Browser, type Page } from '@playwright/test';
@@ -289,5 +292,88 @@ test.describe("The recall prompt's one-time 'why' line (S5.3, PED-25)", () => {
 		await expect(page.locator('.reading-content').first()).toBeVisible({ timeout: 15000 });
 		await atEnd(page, () => expect(recall(page)).toBeVisible({ timeout: 2500 }));
 		await expect(recall(page)).not.toContainText('Af hverju?');
+	});
+});
+
+test.describe('Local counters (S5.4, PED-17, KEEP-01)', () => {
+	test.skip(!SECTION, 'No synced numbered section');
+
+	/** This book's counts, as the browser stores them */
+	const storedCounts = (page: Page) =>
+		page.evaluate(
+			(book) => JSON.parse(localStorage.getItem('namsbokasafn:analytics') ?? '{}').counters?.[book] ?? {},
+			BOOK
+		);
+
+	test("records a shown prompt and a 'Sleppa'", async ({ page }) => {
+		await open(page, SECTION!);
+		await reachEnd(page);
+		await expect(recall(page)).toBeVisible();
+		await expect.poll(() => storedCounts(page)).toEqual({ recallShown: 1 });
+		await page.getByRole('button', { name: 'Sleppa' }).click();
+		await expect.poll(() => storedCounts(page)).toEqual({ recallShown: 1, recallSkipped: 1 });
+	});
+
+	test('records an abandon when the reader goes on with the prompt open', async ({ page }) => {
+		await open(page, SECTION!);
+		await reachEnd(page);
+		await expect(recall(page)).toBeVisible();
+		await nextLink(page).click();
+		await expect(recall(page)).toHaveCount(0);
+		await expect.poll(() => storedCounts(page)).toEqual({ recallShown: 1, recallAbandoned: 1 });
+	});
+
+	test('sends nothing: every request while it counts is a GET to this site', async ({ page }) => {
+		await open(page, SECTION!);
+		await page.waitForLoadState('networkidle');
+		const origin = new URL(page.url()).origin;
+		const offending: string[] = [];
+		page.on('request', (req) => {
+			if (req.method() !== 'GET' || new URL(req.url()).origin !== origin) offending.push(`${req.method()} ${req.url()}`);
+		});
+		await reachEnd(page);
+		await box(page).fill(RECALL_TEXT);
+		await recall(page).getByRole('button', { name: 'Vista' }).click();
+		await expect.poll(() => storedCounts(page)).toEqual({ recallShown: 1, recallSaved: 1 });
+		expect(offending).toEqual([]);
+	});
+});
+
+test.describe('The recall summary on /greining (S5.4)', () => {
+	test.skip(!BOOK, 'No published book is synced');
+
+	const summary = (page: Page) => page.getByText(/^Þú hefur vistað/);
+
+	test('says how many the reader saved and skipped', async ({ page }) => {
+		await page.addInitScript((book) => {
+			const counters = { [book!]: { recallShown: 4, recallSaved: 2, recallSkipped: 1, recallAbandoned: 1 } };
+			localStorage.setItem('namsbokasafn:analytics', JSON.stringify({ counters }));
+		}, BOOK);
+		await page.goto(`/${BOOK}/greining/`);
+		await expect(summary(page)).toHaveText('Þú hefur vistað 2 upprifjanir og sleppt 1.');
+	});
+
+	test('says nothing before any prompt was shown', async ({ page }) => {
+		await page.goto(`/${BOOK}/greining/`);
+		// Control: the overview has rendered, so an absent line is not a page still loading.
+		await expect(page.getByText('Heildartími')).toBeVisible({ timeout: 15000 });
+		await expect(summary(page)).toHaveCount(0);
+	});
+});
+
+test.describe('Where the counts and the routines are described (S5.4)', () => {
+	test('the privacy page lists the recall counts among what the browser keeps', async ({ page }) => {
+		await page.goto('/personuvernd/');
+		const stored = page.locator('section[aria-labelledby="stored"] li', { hasText: 'Námsgreining' });
+		await expect(stored).toContainText('upprifjun');
+	});
+
+	test('/for-teachers has a teaching section with three routines and the privacy link', async ({ page }) => {
+		await page.goto('/for-teachers/');
+		const teaching = page.locator('section#teaching');
+		await expect(teaching.getByRole('heading', { level: 2 })).toHaveText('Kennsla með Námsbókasafni');
+		await expect(teaching.locator('ol > li')).toHaveCount(3);
+		await expect(teaching.getByRole('link', { name: /persónuvernd/i })).toHaveAttribute('href', '/personuvernd/');
+		await expect(page.locator('nav.toc a[href="#teaching"]')).toHaveCount(1);
 	});
 });

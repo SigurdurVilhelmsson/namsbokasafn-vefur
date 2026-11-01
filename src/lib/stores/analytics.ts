@@ -8,6 +8,7 @@ import { type SectionRename, renameInAnalytics } from '$lib/utils/sectionRenames
 import { browser } from '$app/environment';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isArray, isObject, isNumber, isNullOrString } from '$lib/utils/storeValidation';
+import { incrementCounter, sanitizeCounters, type CounterEvent, type Counters } from '$lib/utils/counters';
 import {
 	createSectionKey,
 	getCurrentTimestamp,
@@ -113,6 +114,8 @@ interface AnalyticsState {
 	lastActiveDate: string | null;
 	goals: StudyGoal[];
 	hourlyReadingData: Record<number, { totalSeconds: number; sessionCount: number }>;
+	/** Local counts per book and event (plan step S5.4, lib/utils/counters.ts) */
+	counters: Counters;
 }
 
 const defaultState: AnalyticsState = {
@@ -125,7 +128,8 @@ const defaultState: AnalyticsState = {
 	longestStreak: 0,
 	lastActiveDate: null,
 	goals: [],
-	hourlyReadingData: {}
+	hourlyReadingData: {},
+	counters: {}
 };
 
 function getWeekStart(date: Date): string {
@@ -159,7 +163,8 @@ const analyticsValidators = {
 	longestStreak: isNumber,
 	lastActiveDate: isNullOrString,
 	goals: isArray,
-	hourlyReadingData: isObject
+	hourlyReadingData: isObject,
+	counters: isObject
 };
 
 function loadState(): AnalyticsState {
@@ -176,6 +181,7 @@ function loadState(): AnalyticsState {
 			return {
 				...state,
 				sectionReadingTimes: migrateRecordKeys(state.sectionReadingTimes),
+				counters: sanitizeCounters(state.counters),
 				currentSession: null
 			};
 		}
@@ -204,7 +210,11 @@ function createAnalyticsStore() {
 			try {
 				_externalUpdate = true;
 				const incoming = validateStoreData(JSON.parse(newValue), defaultState, analyticsValidators);
-				update((current) => ({ ...incoming, currentSession: current.currentSession }));
+				update((current) => ({
+					...incoming,
+					counters: sanitizeCounters(incoming.counters),
+					currentSession: current.currentSession
+				}));
 			} catch { /* ignore */ }
 			finally { _externalUpdate = false; }
 		});
@@ -465,6 +475,13 @@ function createAnalyticsStore() {
 
 		logActivity: logActivityInternal,
 		updateStreak: updateStreakInternal,
+
+		/** Add one to a book's event count (lib/utils/counters.ts). Saves only on change. */
+		countEvent: (bookSlug: string, event: CounterEvent) => {
+			const state = get({ subscribe });
+			const counters = incrementCounter(state.counters, bookSlug, event);
+			if (counters !== state.counters) set({ ...state, counters });
+		},
 
 		// Statistics getters
 		getTotalReadingTime: (): number => {
