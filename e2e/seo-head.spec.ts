@@ -29,6 +29,8 @@ const section = sectionsContaining('<p', 1)[0];
 const PAGES = [
 	'/',
 	'/personuvernd/',
+	'/feedback/',
+	'/for-teachers/',
 	`/${book}/`,
 	`/${book}/leyfi/`,
 	`/${book}/minniskort/`,
