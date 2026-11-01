@@ -101,7 +101,8 @@
           <li>Láttu nemendur bera upprifjun sína saman í pörum og við námsmarkmið kaflans.</li>
         </ol>
 
-        <p>Upprifjunin er geymd í vafra nemandans og fer ekki af tækinu, svo þú sérð hana aðeins ef nemandinn sýnir þér hana. Á Námsgreiningu sér nemandinn hve oft hann hefur vistað eða sleppt upprifjun, og þær tölur fara ekki heldur af tækinu. Nánar á síðunni <a href="/personuvernd/">Gögnin þín og persónuvernd</a>.</p>
+        <!-- D20: proposed wording (S5.5): the read-back with 'Eyða' and the counts export. -->
+        <p>Upprifjunin er geymd í vafra nemandans og fer ekki af tækinu, svo þú sérð hana aðeins ef nemandinn sýnir þér hana. Nemandinn sér hana aftur í lok kaflans og getur eytt henni. Á Námsgreiningu sér nemandinn hve oft hann hefur vistað eða sleppt upprifjun. Með „Flytja út“ getur hann sótt þær tölur í skrá, eftir að hafa séð hvað í henni er, og sent þér hana ef hann vill; textinn sjálfur fer aldrei í skrána. Nánar á síðunni <a href="/personuvernd/">Gögnin þín og persónuvernd</a>.</p>
       </section>
 
       <section class="section" id="content-status">

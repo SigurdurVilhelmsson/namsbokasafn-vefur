@@ -18,7 +18,8 @@
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
 	import RecallPrompt from '$lib/components/RecallPrompt.svelte';
-	import { recallStore } from '$lib/stores/recall';
+	import RecallReadBack from '$lib/components/RecallReadBack.svelte';
+	import { entriesForSection, recallStore } from '$lib/stores/recall';
 	import { isFrontMatterChapter, recallTrigger } from '$lib/utils/readerPolicy';
 	import { createObjectiveKey } from '$lib/utils/storeHelpers';
 	import { fade, fly } from 'svelte/transition';
@@ -29,6 +30,7 @@
 	let shareSuccess = $state(false);
 	let shareTimeout: ReturnType<typeof setTimeout>;
 	let showRecallPrompt = $state(false);
+	let showRecallReadBack = $state(false);
 	let showContinuePrompt = $state(false);
 	let savedPosition: { scrollY: number; percentage: number } | null = $state(null);
 	let continuePromptTimeout: ReturnType<typeof setTimeout>;
@@ -99,6 +101,7 @@
 		analyticsStore.startReadingSession(data.bookSlug, data.chapterSlug, data.sectionSlug);
 
 		showRecallPrompt = false;
+		showRecallReadBack = false;
 
 		// Reset the continue-reading prompt, then check this section's saved position
 		clearTimeout(continuePromptTimeout);
@@ -172,6 +175,16 @@
 		}) !== null
 	);
 
+	// Whether this section has a saved recall to read back on a return visit (plan step S5.5,
+	// D18's 2026-11-01 follow-up): the prompt shows once per section, so its entry shows instead
+	let hasRecallEntry = $derived(
+		entriesForSection($recallStore, {
+			bookSlug: data.bookSlug,
+			chapterSlug: data.chapterSlug,
+			sectionSlug: data.sectionSlug
+		}).length > 0
+	);
+
 	/**
 	 * The two mark-read buttons. Decision D10: marking read by hand does not open the recall
 	 * prompt; the prompt waits for the end of the section.
@@ -180,12 +193,18 @@
 		reader.markAsRead(data.bookSlug, data.chapterSlug, data.sectionSlug);
 	}
 
-	/** The reader reached the section's end: mark it read, and open its prompt if one is owed */
+	/**
+	 * The reader reached the section's end: mark it read, and open its prompt if one is owed, or
+	 * else read back the recall saved on an earlier visit (S5.5)
+	 */
 	function reachedEnd() {
 		reader.markAsRead(data.bookSlug, data.chapterSlug, data.sectionSlug);
-		if (!recallOwed) return;
-		recallStore.markPrompted(data.bookSlug, data.chapterSlug, data.sectionSlug);
-		showRecallPrompt = true;
+		if (recallOwed) {
+			recallStore.markPrompted(data.bookSlug, data.chapterSlug, data.sectionSlug);
+			showRecallPrompt = true;
+		} else if (hasRecallEntry) {
+			showRecallReadBack = true;
+		}
 	}
 
 	/**
@@ -204,6 +223,11 @@
 
 	function closeRecallPrompt() {
 		showRecallPrompt = false;
+		focusAfterRecall();
+	}
+
+	function closeRecallReadBack() {
+		showRecallReadBack = false;
 		focusAfterRecall();
 	}
 
@@ -464,11 +488,12 @@
 
 		<!-- End of section detection: marks the section read, and opens its recall prompt if one
 		     is owed. It stays on for a section marked read by hand whose prompt has not shown,
-		     because under D10 the prompt waits for the end. -->
+		     because under D10 the prompt waits for the end, and for a section with a saved recall,
+		     which it reads back (S5.5). -->
 		<div
 			use:readDetection={{
 				onRead: reachedEnd,
-				enabled: !isRead || recallOwed,
+				enabled: !isRead || recallOwed || hasRecallEntry,
 				minVisibleTime: 1500
 			}}
 			class="h-4"
@@ -486,6 +511,17 @@
 			sectionNumber={data.navigation.current.section.number}
 			onsaved={focusAfterRecall}
 			onclose={closeRecallPrompt}
+		/>
+	{/if}
+
+	<!-- A section already recalled reads its entry back at the end instead (S5.5) -->
+	{#if showRecallReadBack}
+		<RecallReadBack
+			bookSlug={data.bookSlug}
+			chapterSlug={data.chapterSlug}
+			sectionSlug={data.sectionSlug}
+			sectionNumber={data.navigation.current.section.number}
+			onclose={closeRecallReadBack}
 		/>
 	{/if}
 

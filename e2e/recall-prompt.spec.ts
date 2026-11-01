@@ -11,15 +11,21 @@
  *
  * Plan step S5.4 (PED-17, KEEP-01): the prompt's shown, saved, skipped and abandoned counts
  * are kept on the device, nothing is sent, and /greining shows a one-line summary.
+ *
+ * Plan step S5.5 (D18 and its 2026-11-01 follow-up, D09, CODE-24): the saved text shows with
+ * 'Eyða', a return visit reads the entry back at the section end, and 'Flytja út' on /greining
+ * offers a counts-only file after a preview, sending nothing.
  */
 import AxeBuilder from '@axe-core/playwright';
 import { test, expect, type Browser, type Page } from '@playwright/test';
 import { firstModuleSection, frontMatterSection, publishedBook, sectionOfType } from './helpers/content-fixtures';
+import { textContrast } from './helpers/contrast';
 
 const BOOK = publishedBook();
 const SECTION = BOOK ? firstModuleSection(BOOK) : null;
 
-const recall = (page: Page) => page.getByRole('region', { name: 'Upprifjun' });
+// Exact: the read-back's region, 'Upprifjun þín' (S5.5), contains this name
+const recall = (page: Page) => page.getByRole('region', { name: 'Upprifjun', exact: true });
 /** Shown only while the section is unread, so its absence shows read detection ran */
 const bottomMarkRead = (page: Page) => page.getByRole('button', { name: 'Merkja kafla sem lesinn' });
 
@@ -429,6 +435,202 @@ test.describe("S5.4's new text under axe", () => {
 			expect(violations).toEqual([]);
 			// The control: the heading, the paragraphs, the list items and the link
 			expect(measured, 'axe measured the section').toBeGreaterThanOrEqual(6);
+		});
+	}
+});
+
+/** Store a theme before the page loads (as in dark-figure-card.spec.ts) */
+async function seedThemeS55(page: Page, theme: 'light' | 'dark') {
+	await page.addInitScript((t) => {
+		const key = 'namsbokasafn:settings';
+		let stored: Record<string, unknown>;
+		try {
+			stored = JSON.parse(localStorage.getItem(key) || '{}');
+		} catch {
+			stored = {};
+		}
+		localStorage.setItem(key, JSON.stringify({ ...stored, theme: t }));
+	}, theme);
+}
+
+async function axeS55(page: Page, selector: string) {
+	const results = await new AxeBuilder({ page })
+		.include(selector)
+		.withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+		.analyze();
+	return {
+		violations: results.violations.flatMap((v) => v.nodes.map((n) => `${v.id}: ${n.target.join(' ')}`)),
+		measured: results.passes.find((p) => p.id === 'color-contrast')?.nodes.length ?? 0
+	};
+}
+
+const readBack = (page: Page) => page.getByRole('region', { name: 'Upprifjun þín' });
+const storedEntries = (page: Page) =>
+	page.evaluate(() => JSON.parse(localStorage.getItem('namsbokasafn:recall') ?? '{}').entries ?? []);
+
+/** Save a recall at the end of SECTION, with its text */
+async function saveRecall(page: Page, text: string) {
+	await promptOpen(page);
+	await box(page).fill(text);
+	await recall(page).getByRole('button', { name: 'Vista' }).click();
+	await expect(recall(page).locator('blockquote')).toHaveText(text);
+}
+
+test.describe('Recall read-back with a delete (S5.5, D18)', () => {
+	test.skip(!SECTION, 'No synced numbered section');
+	const TEXT = 'Atóm eru gerð úr kjarna og rafeindum.';
+
+	test("the saved message shows the text, and 'Eyða' deletes it and moves focus on", async ({ page }) => {
+		await saveRecall(page, TEXT);
+		page.once('dialog', (dialog) => void dialog.accept());
+		await recall(page).getByRole('button', { name: 'Eyða' }).click();
+		await expect(recall(page)).toHaveCount(0);
+		await expectFocusOnNext(page);
+		await expect(announcer(page, /eytt/)).toHaveCount(1, { timeout: 500 });
+		expect(await storedEntries(page)).toEqual([]);
+	});
+
+	test('a return visit reads the entry back at the end, without the prompt or a focus move', async ({ page }) => {
+		await saveRecall(page, TEXT);
+		await recall(page).getByRole('button', { name: 'Loka' }).click();
+		await expect(readBack(page)).toHaveCount(0); // not in the visit that saved it
+		await nextLink(page).click();
+		await expect(page.locator('.reading-content').first()).toBeVisible({ timeout: 15000 });
+		await open(page, SECTION!);
+		await atEnd(page, () => expect(readBack(page)).toBeVisible({ timeout: 2500 }));
+		await expect(readBack(page).locator('blockquote')).toHaveText(TEXT);
+		await expect(recall(page)).toHaveCount(0);
+		expect(await readBack(page).evaluate((el) => el.contains(document.activeElement))).toBe(false);
+	});
+
+	test("on a return visit, 'Eyða' deletes the entry and moves focus on", async ({ page }) => {
+		await saveRecall(page, TEXT);
+		await open(page, SECTION!);
+		await atEnd(page, () => expect(readBack(page)).toBeVisible({ timeout: 2500 }));
+		page.once('dialog', (dialog) => void dialog.accept());
+		await readBack(page).getByRole('button', { name: 'Eyða' }).click();
+		await expect(readBack(page)).toHaveCount(0);
+		await expectFocusOnNext(page);
+		expect(await storedEntries(page)).toEqual([]);
+	});
+
+	for (const theme of ['light', 'dark'] as const) {
+		test(`${theme}: the saved message and the read-back pass axe`, async ({ page }) => {
+			await seedThemeS55(page, theme);
+			await saveRecall(page, TEXT);
+			await page.waitForTimeout(400); // the fly-in transition
+			const saved = await axeS55(page, '.recall-prompt');
+			await open(page, SECTION!);
+			await atEnd(page, () => expect(readBack(page)).toBeVisible({ timeout: 2500 }));
+			const back = await axeS55(page, '.recall-readback');
+			expect([...saved.violations, ...back.violations]).toEqual([]);
+			// The control: the message, the text and both buttons in each
+			expect([saved.measured >= 4, back.measured >= 4], `measured ${saved.measured}, ${back.measured}`).toEqual([true, true]);
+		});
+	}
+});
+
+test.describe("'Flytja út' on /greining: counts only, previewed (S5.5, D09)", () => {
+	test.skip(!BOOK, 'No published book is synced');
+	const SECRET = 'Leynilegur upprifjunartexti sem má ekki fara í skrána.';
+
+	/** Seed counts and one recall entry with a text that must never reach the file */
+	async function seed(page: Page) {
+		await page.addInitScript(
+			({ book, secret }) => {
+				const counters = { [book!]: { recallShown: 3, recallSaved: 2, recallSkipped: 1 } };
+				localStorage.setItem('namsbokasafn:analytics', JSON.stringify({ counters }));
+				const entry = { id: 'e1', bookSlug: book, chapterSlug: '01', sectionSlug: '1-1-x', text: secret, createdAt: '2026-11-01T10:00:00.000Z' };
+				localStorage.setItem('namsbokasafn:recall', JSON.stringify({ entries: [entry], prompted: [] }));
+			},
+			{ book: BOOK, secret: SECRET }
+		);
+	}
+
+	const exportButton = (page: Page) => page.getByRole('button', { name: 'Flytja út', exact: true });
+	const dialog = (page: Page) => page.getByRole('dialog', { name: 'Flytja út tölur' });
+
+	test('shows the file first, then saves exactly that, with counts and no recall text, sending nothing', async ({ page }) => {
+		await seed(page);
+		await page.goto(`/${BOOK}/greining/`);
+		await page.waitForLoadState('networkidle');
+		const origin = new URL(page.url()).origin;
+		const offending: string[] = [];
+		page.on('request', (req) => {
+			if (req.method() !== 'GET' || new URL(req.url()).origin !== origin) offending.push(`${req.method()} ${req.url()}`);
+		});
+		await exportButton(page).click();
+		await expect(dialog(page)).toBeVisible();
+		const preview = (await dialog(page).locator('pre').textContent()) ?? '';
+		const [download] = await Promise.all([
+			page.waitForEvent('download'),
+			dialog(page).getByRole('button', { name: 'Sækja skrá' }).click()
+		]);
+		expect(download.suggestedFilename()).toMatch(/^namsbokasafn-tolur-\d{4}-\d{2}-\d{2}\.json$/);
+		const file = await (await import('node:fs/promises')).readFile((await download.path())!, 'utf-8');
+		expect(file).toBe(preview);
+		expect(JSON.parse(file).counts).toEqual({ [BOOK!]: { recallShown: 3, recallSaved: 2, recallSkipped: 1 } });
+		expect(file).not.toContain('Leynilegur');
+		await expect(dialog(page)).toHaveCount(0);
+		expect(offending).toEqual([]);
+	});
+
+	test("focus comes back to 'Flytja út' after 'Hætta við' and after Escape", async ({ page }) => {
+		await seed(page);
+		await page.goto(`/${BOOK}/greining/`);
+		await page.waitForLoadState('networkidle');
+		await exportButton(page).click();
+		await dialog(page).getByRole('button', { name: 'Hætta við' }).click();
+		await expect(dialog(page)).toHaveCount(0);
+		await expect(exportButton(page)).toBeFocused();
+		await exportButton(page).click();
+		await expect(dialog(page)).toBeVisible();
+		await page.keyboard.press('Escape');
+		await expect(dialog(page)).toHaveCount(0);
+		await expect(exportButton(page)).toBeFocused();
+	});
+
+	test("the whole statistics file is still there, as 'Sækja alla tölfræði'", async ({ page }) => {
+		await page.goto(`/${BOOK}/greining/`);
+		await page.waitForLoadState('networkidle');
+		const [download] = await Promise.all([
+			page.waitForEvent('download'),
+			page.getByRole('button', { name: 'Sækja alla tölfræði' }).click()
+		]);
+		expect(download.suggestedFilename()).toMatch(/^namsbokasafn-analytics-/);
+	});
+
+	test('on a phone the preview scrolls inside the dialog, not the page', async ({ page }) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		await seed(page);
+		await page.goto(`/${BOOK}/greining/`);
+		await page.waitForLoadState('networkidle');
+		await exportButton(page).click();
+		await expect(dialog(page)).toBeVisible();
+		const box = (await dialog(page).boundingBox())!;
+		const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+		expect([box.x >= 0, box.x + box.width <= 390, overflow <= 0]).toEqual([true, true, true]);
+	});
+
+	for (const theme of ['light', 'dark'] as const) {
+		test(`${theme}: the open dialog passes axe`, async ({ page }) => {
+			await seedThemeS55(page, theme);
+			await seed(page);
+			await page.goto(`/${BOOK}/greining/`);
+			const dark = /(^|\s)dark(\s|$)/;
+			if (theme === 'dark') await expect(page.locator('html')).toHaveClass(dark, { timeout: 15000 });
+			await page.waitForLoadState('networkidle');
+			await exportButton(page).click();
+			await expect(dialog(page)).toBeVisible();
+			const { violations, measured } = await axeS55(page, 'dialog');
+			expect(violations).toEqual([]);
+			// The control: axe measured the heading and both buttons. It cannot find the background
+			// of the paragraphs and the preview in a modal dialog's top layer ('partially overlaps
+			// other elements'), so those three are measured here.
+			expect(measured, 'axe measured the dialog').toBeGreaterThanOrEqual(3);
+			for (const selector of ['dialog p:nth-of-type(1)', 'dialog p:nth-of-type(2)', 'dialog pre']) {
+				expect(await textContrast(page, selector), selector).toBeGreaterThanOrEqual(4.5);
+			}
 		});
 	}
 });

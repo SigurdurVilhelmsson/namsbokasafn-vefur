@@ -192,3 +192,38 @@ describe('recall store: prompted sections', () => {
 		expect([get(recallStore).entries.length, get(recallStore).prompted]).toEqual([1, []]);
 	});
 });
+
+describe('recall store: read-back (S5.5, CODE-24)', () => {
+	let entriesForSection: typeof import('./recall').entriesForSection;
+	const ref = { bookSlug: 'book-a', chapterSlug: '01', sectionSlug: '1-1' };
+
+	beforeEach(async () => {
+		localStorage.clear();
+		await importStore();
+		entriesForSection = (await import('./recall')).entriesForSection;
+	});
+
+	it('returns the entry it adds', () => {
+		const entry = recallStore.addEntry('book-a', '01', '1-1', 'Atóm');
+		expect(get(recallStore).entries).toEqual([entry]);
+	});
+
+	it('returns null for blank text', () => {
+		expect(recallStore.addEntry('book-a', '01', '1-1', '   ')).toBeNull();
+	});
+
+	it("selects only the section's own entries, oldest first", () => {
+		const first = recallStore.addEntry('book-a', '01', '1-1', 'fyrst');
+		recallStore.addEntry('book-a', '01', '1-2', 'annar kafli');
+		recallStore.addEntry('book-b', '01', '1-1', 'önnur bók');
+		const second = recallStore.addEntry('book-a', '01', '1-1', 'síðast');
+		expect(entriesForSection(get(recallStore), ref)).toEqual([first, second]);
+	});
+
+	it('deleting one of two entries leaves exactly the other', () => {
+		const first = recallStore.addEntry('book-a', '01', '1-1', 'fyrst')!;
+		const second = recallStore.addEntry('book-a', '01', '1-1', 'síðast')!;
+		recallStore.removeEntry(first.id);
+		expect(entriesForSection(get(recallStore), ref)).toEqual([second]);
+	});
+});

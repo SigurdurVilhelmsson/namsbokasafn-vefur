@@ -22,11 +22,16 @@
   shown on mount, saved, skipped ('Sleppa' or Escape), and abandoned when it unmounts with
   neither (the reader went on to another section). A tab closed with the prompt open counts as
   shown only: unmount never runs.
+
+  Read back in plan step S5.5 (D18 and its 2026-11-01 follow-up): the saved message shows the text
+  just saved, with 'Eyða' (RecallEntryCard). A delete closes the prompt, so the page moves focus;
+  the save stays counted.
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fly } from 'svelte/transition';
 	import Icon from '$lib/components/Icon.svelte';
+	import RecallEntryCard from '$lib/components/RecallEntryCard.svelte';
 	import { recallStore } from '$lib/stores/recall';
 	import { announce } from '$lib/stores/announcer';
 	import { analyticsStore } from '$lib/stores/analytics';
@@ -61,6 +66,9 @@
 
 	let text = $state('');
 	let saved = $state(false);
+	/** The entry this prompt saved, found in the store, so a delete anywhere removes it here */
+	let savedId: string | null = $state(null);
+	let savedEntry = $derived(savedId ? $recallStore.entries.find((e) => e.id === savedId) : undefined);
 	let showWhy = $state(false);
 	/** A fine pointer that can hover: a desktop or laptop, where a keyboard is near */
 	let keyboardLikely = $state(false);
@@ -100,7 +108,7 @@
 
 	function handleSave() {
 		if (!text.trim()) return;
-		recallStore.addEntry(bookSlug, chapterSlug, sectionSlug, text);
+		savedId = recallStore.addEntry(bookSlug, chapterSlug, sectionSlug, text)?.id ?? null;
 		settled = true;
 		analyticsStore.countEvent(countedBook, 'recallSaved');
 		markWhySeen();
@@ -136,19 +144,30 @@
 	aria-label="Upprifjun"
 	transition:fly={{ y: 12, duration: 250 }}
 >
+	{#snippet closeButton()}
+		<button
+			onclick={() => onclose?.()}
+			class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)]"
+		>
+			Loka
+		</button>
+	{/snippet}
 	{#if saved}
-		<div class="flex items-center justify-between gap-3">
-			<div class="flex items-center gap-2 text-[var(--accent-strong)]">
-				<Icon name="check" />
-				<span class="font-medium">{SAVED_MESSAGE}</span>
-			</div>
-			<button
-				onclick={() => onclose?.()}
-				class="shrink-0 rounded-lg px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)]"
-			>
-				Loka
-			</button>
+		<div class="flex items-center gap-2 text-[var(--accent-strong)]">
+			<Icon name="check" />
+			<span class="font-medium">{SAVED_MESSAGE}</span>
 		</div>
+		{#if savedEntry}
+			<RecallEntryCard entry={savedEntry} ondeleted={() => onclose?.()}>
+				{#snippet actions()}
+					{@render closeButton()}
+				{/snippet}
+			</RecallEntryCard>
+		{:else}
+			<div class="mt-3 flex justify-end">
+				{@render closeButton()}
+			</div>
+		{/if}
 	{:else}
 		<h3 id="{uid}-heading" class="mb-1 flex items-center gap-2 font-semibold text-[var(--text-primary)]">
 			<Icon name="square-pen" class="text-[var(--accent-strong)]" />

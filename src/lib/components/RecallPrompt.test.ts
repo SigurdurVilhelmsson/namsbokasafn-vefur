@@ -79,6 +79,7 @@ beforeEach(() => {
 	pointer('fine');
 	localStorage.clear();
 	analyticsStore.reset();
+	recallStore.reset();
 });
 
 afterEach(() => {
@@ -338,5 +339,82 @@ describe('RecallPrompt: local counters (S5.4, PED-17)', () => {
 		button(t, 'Sleppa')?.click();
 		close();
 		expect(counts()).toEqual({ recallShown: 1, recallSkipped: 1 });
+	});
+});
+
+describe("RecallPrompt: the saved text and 'Eyða' (S5.5, D18)", () => {
+	const TEXT = 'Eðliseiginleikar breyta ekki efninu.';
+	const counts = () => get(analyticsStore).counters['efnafraedi-2e'] ?? {};
+	const entries = () => get(recallStore).entries;
+	const confirmAnswer = (answer: boolean) => vi.spyOn(window, 'confirm').mockReturnValue(answer);
+
+	it('shows the text just saved', () => {
+		const t = render();
+		save(t);
+		expect(t.querySelector('blockquote')?.textContent?.trim()).toBe(TEXT);
+	});
+
+	it('shows the saved text as text, never as markup', () => {
+		const t = render();
+		type(t, '<b>feitt</b>');
+		key(t, { key: 'Enter', ctrlKey: true });
+		expect([t.querySelector('blockquote b'), t.querySelector('blockquote')?.textContent?.trim()]).toEqual([
+			null,
+			'<b>feitt</b>'
+		]);
+	});
+
+	it("'Eyða' removes the saved entry once confirmed", () => {
+		confirmAnswer(true);
+		const t = render();
+		save(t);
+		button(t, 'Eyða')?.click();
+		expect(entries()).toEqual([]);
+	});
+
+	it("'Eyða' closes the prompt, so the page moves focus", () => {
+		confirmAnswer(true);
+		const onclose = vi.fn();
+		const t = render({ onclose });
+		save(t);
+		button(t, 'Eyða')?.click();
+		expect(onclose).toHaveBeenCalledTimes(1);
+	});
+
+	it("'Eyða' announces the deletion", () => {
+		confirmAnswer(true);
+		const t = render();
+		save(t);
+		button(t, 'Eyða')?.click();
+		vi.advanceTimersByTime(ANNOUNCE_DELAY_MS);
+		expect(get(announcement)).toMatch(/eytt/);
+	});
+
+	it('a declined confirm keeps the entry and the prompt', () => {
+		confirmAnswer(false);
+		const onclose = vi.fn();
+		const t = render({ onclose });
+		save(t);
+		const eyda = button(t, 'Eyða');
+		eyda?.click();
+		expect([eyda !== undefined, entries().length, onclose.mock.calls.length]).toEqual([true, 1, 0]);
+	});
+
+	it('a delete is not counted as an abandon', () => {
+		confirmAnswer(true);
+		const t = render();
+		save(t);
+		button(t, 'Eyða')?.click();
+		unmount(component!);
+		component = null;
+		expect([entries().length, counts()]).toEqual([0, { recallShown: 1, recallSaved: 1 }]);
+	});
+
+	it("keeps 'Loka' when the entry is deleted in another tab", () => {
+		const t = render();
+		save(t);
+		recallStore.removeEntry(entries()[0].id);
+		flushSync();
+		expect([t.querySelector('blockquote'), button(t, 'Loka')?.textContent?.trim()]).toEqual([null, 'Loka']);
 	});
 });

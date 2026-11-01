@@ -79,6 +79,14 @@ export function isSectionRef(value: unknown): value is SectionRef {
 const sameSection = (a: SectionRef, b: SectionRef) =>
 	a.bookSlug === b.bookSlug && a.chapterSlug === b.chapterSlug && a.sectionSlug === b.sectionSlug;
 
+/**
+ * A section's own entries, oldest first (plan step S5.5, CODE-24). Pure, so a component reads
+ * it as `$derived(entriesForSection($recallStore, ref))` and updates when the store does.
+ */
+export function entriesForSection(state: { entries: RecallEntry[] }, ref: SectionRef): RecallEntry[] {
+	return state.entries.filter((entry) => sameSection(entry, ref));
+}
+
 /** Parse stored JSON into a state: unknown shapes give the defaults, bad items are dropped */
 function toState(stored: unknown): RecallState {
 	const state = validateStoreData(stored, defaultState, recallValidators);
@@ -143,9 +151,10 @@ function createRecallStore() {
 			update((state) => ({ ...state, prompted: [...state.prompted, ref].slice(-MAX_PROMPTED) }));
 		},
 
-		addEntry: (bookSlug: string, chapterSlug: string, sectionSlug: string, text: string) => {
+		/** Save a recall. Returns the new entry, or null for blank text. */
+		addEntry: (bookSlug: string, chapterSlug: string, sectionSlug: string, text: string): RecallEntry | null => {
 			const trimmed = text.trim();
-			if (!trimmed) return;
+			if (!trimmed) return null;
 
 			const entry: RecallEntry = {
 				id: generateId(),
@@ -160,6 +169,7 @@ function createRecallStore() {
 				...state,
 				entries: [...state.entries, entry].slice(-MAX_ENTRIES)
 			}));
+			return entry;
 		},
 
 		removeEntry: (id: string) => {
