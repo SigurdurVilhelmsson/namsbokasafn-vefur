@@ -33,6 +33,24 @@ export const DIFFICULTY_TO_QUALITY: Record<DifficultyRating, StudyQuality> = {
   easy: 5
 };
 
+/**
+ * The ratings in the order the buttons show them, with their labels: by correctness, as
+ * decision D04 ruled ('Erfitt' became 'Að hluta', 'Gott' became 'Rétt'; srs.ts and the
+ * qualities above are unchanged). Every place that shows a rating reads this table.
+ */
+// D20: proposed wording (D04, PED-08): 'Rangt', 'Að hluta' and 'Rétt' ('Auðvelt' is unchanged).
+export const RATINGS: { value: DifficultyRating; label: string }[] = [
+  { value: 'again', label: 'Rangt' },
+  { value: 'hard', label: 'Að hluta' },
+  { value: 'good', label: 'Rétt' },
+  { value: 'easy', label: 'Auðvelt' }
+];
+
+export const RATING_LABELS = Object.fromEntries(RATINGS.map((r) => [r.value, r.label])) as Record<
+  DifficultyRating,
+  string
+>;
+
 // SM-2 SRS study record
 export interface FlashcardStudyRecord {
   cardId: string;

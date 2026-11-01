@@ -5,7 +5,7 @@
   to AA in both themes.
 -->
 <script lang="ts">
-	import type { DifficultyRating } from '$lib/types/flashcard';
+	import { RATINGS, type DifficultyRating } from '$lib/types/flashcard';
 
 	interface Props {
 		/** The next interval for each rating, shown under its label; null hides the line */
@@ -16,13 +16,6 @@
 	}
 
 	let { intervals, onrate, compact = false }: Props = $props();
-
-	const RATINGS: { value: DifficultyRating; label: string }[] = [
-		{ value: 'again', label: 'Aftur' },
-		{ value: 'hard', label: 'Erfitt' },
-		{ value: 'good', label: 'Gott' },
-		{ value: 'easy', label: 'Auðvelt' }
-	];
 </script>
 
 <div class="rating-grid">

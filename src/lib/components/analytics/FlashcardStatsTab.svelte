@@ -4,6 +4,7 @@
 <script lang="ts">
 	import { flashcardStore, flashcardSuccessRate, weeklyFlashcardStats } from '$lib/stores';
 	import { getTodayDateString } from '$lib/utils/storeHelpers';
+	import { RATING_LABELS } from '$lib/types/flashcard';
 
 	// Format date for display
 	function formatDate(dateStr: string): string {
@@ -96,28 +97,28 @@
 				{#if distribution.total > 0}
 					<div class="space-y-2">
 						<div class="flex items-center gap-2">
-							<span class="w-14 text-xs text-gray-600 dark:text-gray-400">Aftur</span>
+							<span class="w-16 whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">{RATING_LABELS.again}</span>
 							<div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
 								<div class="h-full bg-red-500" style="width: {distribution.again}%"></div>
 							</div>
 							<span class="w-8 text-xs text-right text-gray-600 dark:text-gray-400">{distribution.again}%</span>
 						</div>
 						<div class="flex items-center gap-2">
-							<span class="w-14 text-xs text-gray-600 dark:text-gray-400">Erfitt</span>
+							<span class="w-16 whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">{RATING_LABELS.hard}</span>
 							<div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
 								<div class="h-full bg-orange-500" style="width: {distribution.hard}%"></div>
 							</div>
 							<span class="w-8 text-xs text-right text-gray-600 dark:text-gray-400">{distribution.hard}%</span>
 						</div>
 						<div class="flex items-center gap-2">
-							<span class="w-14 text-xs text-gray-600 dark:text-gray-400">Gott</span>
+							<span class="w-16 whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">{RATING_LABELS.good}</span>
 							<div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
 								<div class="h-full bg-green-500" style="width: {distribution.good}%"></div>
 							</div>
 							<span class="w-8 text-xs text-right text-gray-600 dark:text-gray-400">{distribution.good}%</span>
 						</div>
 						<div class="flex items-center gap-2">
-							<span class="w-14 text-xs text-gray-600 dark:text-gray-400">Auðvelt</span>
+							<span class="w-16 whitespace-nowrap text-xs text-gray-600 dark:text-gray-400">{RATING_LABELS.easy}</span>
 							<div class="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
 								<div class="h-full bg-blue-500" style="width: {distribution.easy}%"></div>
 							</div>
