@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import { books, retiredBooks } from '$lib/types/book';
 import {
 	COUNTER_EVENTS,
+	countsExport,
 	incrementCounter,
 	recallSummaryLine,
 	recallTotals,
@@ -111,5 +112,27 @@ describe('recallSummaryLine', () => {
 			'Þú hefur vistað 11 upprifjanir og sleppt 0.',
 			'Þú hefur vistað 12 upprifjanir og sleppt 5.'
 		]);
+	});
+});
+
+describe('countsExport (S5.5, D09)', () => {
+	const counters: Counters = { [BOOK]: { recallShown: 3, recallSaved: 2, recallSkipped: 1 } };
+
+	it('holds the format, the version, the date and the counts, and nothing else', () => {
+		expect(JSON.parse(countsExport(counters, '2026-11-01'))).toEqual({
+			format: 'namsbokasafn-counts',
+			version: 1,
+			date: '2026-11-01',
+			counts: counters
+		});
+	});
+
+	it('leaves out anything the counters may not hold', () => {
+		const dirty = { [BOOK]: { recallShown: 1, note: 'texti' }, 'not-a-book': { recallShown: 1 } } as unknown as Counters;
+		expect(JSON.parse(countsExport(dirty, '2026-11-01')).counts).toEqual({ [BOOK]: { recallShown: 1 } });
+	});
+
+	it('is indented, so the preview reads line by line', () => {
+		expect(countsExport({}, '2026-11-01').split('\n').length).toBeGreaterThan(1);
 	});
 });

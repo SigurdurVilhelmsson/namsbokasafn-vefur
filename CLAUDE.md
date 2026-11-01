@@ -48,11 +48,11 @@ npm run format           # Prettier formatting
 - `flashcard.ts`: SM-2 spaced repetition, study sessions, card ratings
 - `quiz.ts`: Quiz attempts and scores
 - `annotation.ts`: Text highlights and notes with export capability
-- `analytics.ts`: Study analytics and reading patterns, and since S5.4 the local counters (`counters`, rules in `src/lib/utils/counters.ts`): per-book counts of the recall prompt shown, saved, skipped and abandoned, never free text and never through `logActivity` (its log keeps 500 entries, its export 100). A new event joins the closed list in `counters.ts`; unknown books and events are dropped on load. They leave the device only through the student-started export (D09, S5.5), which does not exist yet
+- `analytics.ts`: Study analytics and reading patterns, and since S5.4 the local counters (`counters`, rules in `src/lib/utils/counters.ts`): per-book counts of the recall prompt shown, saved, skipped and abandoned, never free text and never through `logActivity` (its log keeps 500 entries, its export 100). A new event joins the closed list in `counters.ts`; unknown books and events are dropped on load. They leave the device only in the counts-only file of 'Flytja út' on /greining, which the student sees before saving it (`countsExport()`, D09, S5.5)
 - `glossary.ts`: Glossary state and term lookup
 - `objectives.ts`: Learning objectives tracking
 - `offline.ts`: PWA offline state
-- `recall.ts`: Free-recall entries written after completing a section, and the sections already prompted (D10: once per section). Ported from v1.1 `dde768e` in S5.1 (each entry validated, moved by section renames); `RecallPrompt.svelte` writes it since S5.2 (#332)
+- `recall.ts`: Free-recall entries written after completing a section, and the sections already prompted (D10: once per section). Ported from v1.1 `dde768e` in S5.1 (each entry validated, moved by section renames); `RecallPrompt.svelte` writes it since S5.2 (#332); since S5.5 a saved entry is read back with 'Eyða' after the save and at the end of a return visit (`entriesForSection()`, `RecallEntryCard.svelte`, `RecallReadBack.svelte`; D18's 2026-11-01 follow-up)
 
 Three rules every store keeps (from S3.2 and S3.1, 2026-10-26):
 

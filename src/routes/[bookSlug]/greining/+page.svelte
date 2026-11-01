@@ -9,7 +9,7 @@
 	import { analyticsStore, streakInfo, todayStats } from '$lib/stores/analytics';
 	import { loadTableOfContents, findSectionBySlug } from '$lib/utils/contentLoader';
 	import { getTodayDateString } from '$lib/utils/storeHelpers';
-	import { recallSummaryLine, recallTotals } from '$lib/utils/counters';
+	import { countsExport, recallSummaryLine, recallTotals } from '$lib/utils/counters';
 	import { clearAllStorage, deleteLocalCaches } from '$lib/utils/storageMigration';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 	import {
@@ -148,7 +148,28 @@
 		return entries;
 	}
 
-	// Export analytics data
+	// The counts-only export (plan step S5.5, D09): 'Flytja út' shows the file first, and
+	// 'Sækja skrá' saves exactly the text shown. Nothing is sent; the student decides whether
+	// and to whom to send the file. The text is made once, when the dialog opens.
+	let countsDialog: HTMLDialogElement | undefined = $state();
+	let countsFile = $state('');
+
+	function openCountsExport() {
+		countsFile = countsExport($analyticsStore.counters, getTodayDateString());
+		countsDialog?.showModal();
+	}
+
+	function downloadCounts() {
+		const url = URL.createObjectURL(new Blob([countsFile], { type: 'application/json' }));
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `namsbokasafn-tolur-${getTodayDateString()}.json`;
+		a.click();
+		URL.revokeObjectURL(url);
+		countsDialog?.close();
+	}
+
+	// Download the whole statistics file ('Sækja alla tölfræði'; it was 'Flytja út' until S5.5)
 	function handleExport() {
 		const jsonData = analyticsStore.exportAnalytics();
 		const blob = new Blob([jsonData], { type: 'application/json' });
@@ -232,11 +253,19 @@
 			Námsgreining
 		</h1>
 		<div class="flex flex-wrap gap-2">
+			<!-- D20: proposed wording (S5.5, D09): 'Flytja út' is now the counts-only export, and the
+			     whole statistics file it used to download is 'Sækja alla tölfræði'. -->
+			<button
+				onclick={openCountsExport}
+				class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+			>
+				Flytja út
+			</button>
 			<button
 				onclick={handleExport}
 				class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
 			>
-				Flytja út
+				Sækja alla tölfræði
 			</button>
 			<!-- red-700, not red-600: 4.5:1 on the light page (the ratchet's old entry for this button). -->
 			<button
@@ -253,6 +282,47 @@
 			</button>
 		</div>
 	</div>
+
+	<!-- The counts-only export's preview (S5.5, D09). A native modal dialog: focus moves in, and
+	     focus returns to 'Flytja út' when it closes. D20: proposed wording, all of it. -->
+	<!-- It closes itself on Escape: the site's Escape shortcut ('closeModal') calls preventDefault,
+	     which stops a native dialog's own Escape. -->
+	<dialog
+		bind:this={countsDialog}
+		onkeydown={(e) => {
+			if (e.key === 'Escape') countsDialog?.close();
+		}}
+		aria-labelledby="counts-export-title"
+		class="m-auto w-[calc(100%-2rem)] max-w-lg rounded-xl border border-[var(--border-color)] bg-[var(--bg-primary)] p-5 text-[var(--text-primary)] backdrop:bg-black/50"
+	>
+		<h2 id="counts-export-title" class="text-lg font-semibold">Flytja út tölur</h2>
+		<p class="mt-2 text-sm text-[var(--text-secondary)]">
+			Skráin geymir aðeins tölurnar hér fyrir neðan: hve oft upprifjun birtist í hverri bók og hvernig
+			þú brást við henni, og daginn í dag. Ekkert sem þú skrifaðir fer í hana.
+		</p>
+		<p class="mt-2 text-sm text-[var(--text-secondary)]">
+			Ekkert er sent. Þú ræður hvort og hverjum þú sendir skrána, til dæmis kennaranum þínum.
+		</p>
+		<!-- Focusable, so a keyboard can scroll it -->
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
+		<pre
+			tabindex="0"
+			class="mt-3 max-h-64 overflow-auto rounded-lg bg-[var(--bg-secondary)] p-3 text-xs text-[var(--text-primary)]">{countsFile}</pre>
+		<div class="mt-4 flex justify-end gap-2">
+			<button
+				onclick={() => countsDialog?.close()}
+				class="rounded-lg px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-secondary)]"
+			>
+				Hætta við
+			</button>
+			<button
+				onclick={downloadCounts}
+				class="rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors hover:bg-[var(--accent-fill-hover)]"
+			>
+				Sækja skrá
+			</button>
+		</div>
+	</dialog>
 
 	<!-- Tab Navigation -->
 	<AnalyticsTabs bind:activeTab onchange={handleTabChange} />

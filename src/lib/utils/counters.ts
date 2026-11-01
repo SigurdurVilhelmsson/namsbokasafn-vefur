@@ -6,8 +6,8 @@
  * whose log keeps 500 entries and whose export keeps 100. Keys are a registered book slug
  * and an event from the closed list below, so the stored object stays bounded however
  * many events are recorded, and nothing is keyed by section (no rename migration needed).
- * They leave the device only through an export the student starts and previews (D09,
- * plan step S5.5); the analytics export does not carry them yet.
+ * They leave the device only in the counts export below, which the student starts and
+ * previews (D09, plan step S5.5).
  */
 import { books } from '$lib/types/book';
 
@@ -87,4 +87,15 @@ export function recallSummaryLine(totals: RecallTotals): string | null {
 	const noun = takesSingular(totals.saved) ? 'upprifjun' : 'upprifjanir';
 	// D20: proposed wording (S5.4, PED-17): the summary on /greining.
 	return `Þú hefur vistað ${totals.saved} ${noun} og sleppt ${totals.skipped}.`;
+}
+
+/**
+ * The counts-only export (plan step S5.5, D09): the file 'Flytja út' on /greining offers after
+ * the student has seen exactly this text. Counts per book and the day it was made, and nothing
+ * else: no recall text, no section, no time of day, no identifier. It is a download only; the
+ * student decides whether and to whom to send it.
+ */
+export function countsExport(counters: Counters, date: string): string {
+	const file = { format: 'namsbokasafn-counts', version: 1, date, counts: sanitizeCounters(counters) };
+	return JSON.stringify(file, null, 2);
 }

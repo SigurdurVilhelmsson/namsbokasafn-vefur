@@ -113,9 +113,11 @@
 					netfangið þitt og það sem þú skrifaðir.
 				</p>
 				<h3>Útflutningur</h3>
+				<!-- D20: proposed wording (S5.5, D09): the counts export joins the exports. -->
 				<p>
-					Ef þú flytur út athugasemdir eða tölfræði verður skráin til á tækinu þínu. Hún fer ekki
-					lengra nema þú sendir hana.
+					Ef þú flytur út athugasemdir, tölfræði eða tölur um upprifjun verður skráin til á tækinu
+					þínu. Hún fer ekki lengra nema þú sendir hana. Áður en þú sækir tölurnar um upprifjun sérðu
+					nákvæmlega hvað fer í skrána: tölurnar einar, ekkert sem þú skrifaðir.
 				</p>
 				<p>Annað sem þú gerir hér fer ekki af tækinu.</p>
 			</section>
@@ -139,6 +141,8 @@
 						Þá eyðist allt þegar öllum einkagluggum er lokað. Skrár sem þú flytur út eða vistar á
 						tækinu, til dæmis myndir, verða þó eftir.
 					</li>
+					<!-- D20: proposed wording (S5.5, D18): one recall can be deleted on its own. -->
+					<li>Upprifjun um einn kafla geturðu eytt með „Eyða“ þegar hún birtist í lok kaflans.</li>
 					<li>Gögnin fylgja vafranum: þau flytjast ekki á milli tækja eða vafra.</li>
 				</ul>
 			</section>
@@ -147,7 +151,7 @@
 				<h2 id="more">Gott að vita</h2>
 				<p>Þessi síða lýsir því hvernig vefurinn virkar. Hún er ekki lögfræðiráðgjöf.</p>
 				<p>Spurningar? Sendu okkur línu með <a href="/feedback/">endurgjafarforminu</a>.</p>
-				<p class="updated">Síðast uppfært 27. október 2026.</p>
+				<p class="updated">Síðast uppfært 1. nóvember 2026.</p>
 			</section>
 		</div>
 	</main>
