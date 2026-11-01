@@ -3,7 +3,8 @@
  * Takes store state as input, returns a plan. Testable without store mocking.
  */
 
-import type { TableOfContents, SectionType } from '$lib/types/content';
+import type { TableOfContents } from '$lib/types/content';
+import { skippedByStudySession } from '$lib/utils/readerPolicy';
 import type { ReadingProgress } from '$lib/stores/reader';
 import type { PracticeProblem } from '$lib/stores/quiz';
 import { getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
@@ -117,15 +118,6 @@ const REVIEW_PROBLEM_MINUTES = 1;
 const ADAPTIVE_PROBLEM_MINUTES = 2;
 const OBJECTIVE_MINUTES = 0.5;
 
-// Section types to skip when finding unread content
-const SKIP_SECTION_TYPES: SectionType[] = [
-	'introduction',
-	'glossary',
-	'equations',
-	'summary',
-	'exercises',
-	'answer-key'
-];
 
 /**
  * Build a session plan from pre-computed diagnostics.
@@ -237,7 +229,7 @@ export function findUnreadSections(
 
 		for (const section of chapter.sections) {
 			// Skip non-content sections
-			if (section.type && SKIP_SECTION_TYPES.includes(section.type)) {
+			if (skippedByStudySession(section.type)) {
 				continue;
 			}
 

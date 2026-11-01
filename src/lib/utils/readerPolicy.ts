@@ -1,0 +1,66 @@
+/**
+ * The reader's rules about section types, in one place (plan step S5.2, register CODE-22).
+ * Typed against SectionType, so a misspelt type fails svelte-check. Each choice [USER] has
+ * ruled is a named constant; nothing here presets an open call.
+ */
+import type { SectionType } from '$lib/types/content';
+
+/** The chapter rollups: pages that gather a whole chapter rather than teach one section */
+export const ROLLUP_SECTION_TYPES: ReadonlySet<SectionType> = new Set<SectionType>([
+	'glossary',
+	'equations',
+	'summary',
+	'exercises',
+	'answer-key'
+]);
+
+export function isRollup(type: SectionType | undefined): boolean {
+	return type !== undefined && ROLLUP_SECTION_TYPES.has(type);
+}
+
+/** The front matter (Formáli) lives in chapter folder 00 and has no section type */
+export const FRONT_MATTER_CHAPTER = '00';
+
+export function isFrontMatterChapter(chapterSlug: string): boolean {
+	return chapterSlug === FRONT_MATTER_CHAPTER;
+}
+
+/**
+ * The unit a recall prompt covers. Call 2 was ruled per section on 2026-10-23
+ * (docs/decisions/2026-10-23-reader-call2-recall-once-per-section.md).
+ */
+export const RECALL_GRANULARITY = 'section' as const;
+
+/**
+ * What a page offers at its end. The recall prompt belongs to a section that teaches one
+ * thing: not a rollup, a chapter introduction or the front matter (call 2's type gate,
+ * PED-04). The front matter has no type, so it needs the second input.
+ */
+export function endOfUnitActivity(type: SectionType | undefined, isFrontMatter: boolean): 'recall' | null {
+	if (isFrontMatter || isRollup(type) || type === 'introduction') return null;
+	return 'recall';
+}
+
+/**
+ * Whether reaching a section's end opens its recall prompt. Decision D10 ruled that marking
+ * a section read by hand does not open it: the prompt waits for the end of the section. So
+ * the trigger is reaching the end, once per section (call 2), whether or not the section
+ * was already marked read.
+ */
+export function recallTrigger({
+	type,
+	isFrontMatter,
+	alreadyPrompted
+}: {
+	type: SectionType | undefined;
+	isFrontMatter: boolean;
+	alreadyPrompted: boolean;
+}): typeof RECALL_GRANULARITY | null {
+	if (alreadyPrompted) return null;
+	return endOfUnitActivity(type, isFrontMatter) === 'recall' ? RECALL_GRANULARITY : null;
+}
+
+/** The section types the guided study session skips when it looks for unread content */
+export function skippedByStudySession(type: SectionType | undefined): boolean {
+	return isRollup(type) || type === 'introduction';
+}

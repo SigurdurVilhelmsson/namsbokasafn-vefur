@@ -60,6 +60,8 @@
 					<li>framvindu í bókunum: hvaða hlutar eru lesnir, hvar þú varst og bókamerki;</li>
 					<li>yfirstrikanir og athugasemdir sem þú skrifar;</li>
 					<li>minniskort og hvernig þér gekk að rifja þau upp;</li>
+					<!-- D20: proposed wording (S5.2): the recall entries, now that the prompt writes them. -->
+					<li>það sem þú skrifar þegar þú rifjar upp efni kafla eftir lesturinn;</li>
 					<li>námsmarkmið sem þú hefur merkt sem lokið, og hve vel þú telur þig kunna þau;</li>
 					<li>æfingadæmi sem þú hefur opnað og hvernig þér gekk með þau;</li>
 					<li>lestrartölfræði í Námsgreiningu: hve lengi og hvenær þú lest, lotur, röð daga og markmið;</li>
