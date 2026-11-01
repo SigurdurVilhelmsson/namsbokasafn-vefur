@@ -66,7 +66,10 @@
 					<li>æfingadæmi sem þú hefur opnað og hvernig þér gekk með þau;</li>
 					<li>lestrartölfræði í Námsgreiningu: hve lengi og hvenær þú lest, lotur, röð daga og markmið;</li>
 					<li>síðustu leitarorð;</li>
-					<li>stillingar, til dæmis letur, línubil og litaþema;</li>
+					<!-- D20: proposed wording (S5.3): the recall 'why' line's seen flag joins the settings
+					     item. Worded to cover S4.3's flashcard flag too, which rewrites this line on
+					     feature/reader-m4: at S4.5 keep this version. -->
+					<li>stillingar, til dæmis letur, línubil og litaþema, og hvaða skýringar þú hefur þegar séð;</li>
 					<li>bækur sem þú hefur sótt til að lesa án nettengingar.</li>
 				</ul>
 				<p>

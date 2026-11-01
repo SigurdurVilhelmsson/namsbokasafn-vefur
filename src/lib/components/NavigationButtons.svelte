@@ -61,6 +61,7 @@
 				aria-expanded={dropdownOpen}
 				aria-haspopup="listbox"
 				aria-describedby="breadcrumb-btn-hint"
+				data-nav="sections"
 			>
 				<span class="truncate min-w-0">
 					Kafli {current.chapter.number} › {current.section.number}

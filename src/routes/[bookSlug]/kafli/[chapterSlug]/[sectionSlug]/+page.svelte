@@ -188,6 +188,25 @@
 		showRecallPrompt = true;
 	}
 
+	/**
+	 * After the recall prompt saves or closes, its form leaves the DOM with focus inside it, so
+	 * move focus to the next step: the next-section link, or on a book's last section the
+	 * section list (plan step S5.3, UI-01). Never the content wrapper, which would send a screen
+	 * reader back to the start of the section.
+	 */
+	async function focusAfterRecall() {
+		await tick();
+		const next =
+			document.querySelector<HTMLElement>('[data-nav="next"]') ??
+			document.querySelector<HTMLElement>('[data-nav="sections"]');
+		next?.focus();
+	}
+
+	function closeRecallPrompt() {
+		showRecallPrompt = false;
+		focusAfterRecall();
+	}
+
 	// Reactive checks using subscribed state
 	let isRead = $derived(isSectionRead(progress, data.bookSlug, data.chapterSlug, data.sectionSlug));
 	let isBookmarked = $derived(isSectionBookmarked(bookmarks, data.bookSlug, data.chapterSlug, data.sectionSlug));
@@ -464,7 +483,9 @@
 			bookSlug={data.bookSlug}
 			chapterSlug={data.chapterSlug}
 			sectionSlug={data.sectionSlug}
-			onclose={() => (showRecallPrompt = false)}
+			sectionNumber={data.navigation.current.section.number}
+			onsaved={focusAfterRecall}
+			onclose={closeRecallPrompt}
 		/>
 	{/if}
 
