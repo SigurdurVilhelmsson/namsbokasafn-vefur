@@ -285,6 +285,15 @@ describe('settings store', () => {
 			expect(get(theme)).toBe('dark');
 		});
 
+		it("an unreadable value from another tab is ignored, so this tab's next change keeps every choice", () => {
+			settings.setTheme('dark');
+			vi.mocked(localStorage.setItem).mockClear();
+			storageEvent('{not json');
+			expect(localStorage.setItem).not.toHaveBeenCalled();
+			settings.setFontSize('large');
+			expect(stored()).toEqual({ _version: 1, _born: 1, theme: 'dark', fontSize: 'large' });
+		});
+
 		it("another tab's erase returns this tab to the defaults without writing", () => {
 			settings.setTheme('dark');
 			vi.mocked(localStorage.setItem).mockClear();

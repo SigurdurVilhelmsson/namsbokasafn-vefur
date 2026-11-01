@@ -143,8 +143,8 @@ function createSettingsStore() {
 	/** Record what the reader set and apply it. Every setter, toggle and reset goes through here. */
 	const choose = (patch: Partial<SettingsState>) => {
 		record = { ...record, values: { ...record.values, ...patch } };
-		persist();
 		set(resolveSettings(record, settingsSchema));
+		persist();
 	};
 
 	const current = () => get({ subscribe });
@@ -163,9 +163,16 @@ function createSettingsStore() {
 		});
 
 		// Cross-tab synchronization: take the other tab's record whole, and write nothing.
-		// A removal arrives as 'null' and reads as a fresh profile.
+		// A removal arrives as 'null' and reads as a fresh profile. A value that does not
+		// parse is ignored, so this tab's next change cannot write its choices away.
 		onStorageChange(STORAGE_KEY, (newValue) => {
-			record = readRecord(newValue);
+			let parsed: unknown;
+			try {
+				parsed = JSON.parse(newValue);
+			} catch {
+				return;
+			}
+			record = migrateStored(parsed);
 			set(resolveSettings(record, settingsSchema));
 		});
 	}
