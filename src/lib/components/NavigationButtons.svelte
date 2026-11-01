@@ -21,6 +21,7 @@
 
 	let dropdownOpen = $state(false);
 	let dropdownRef: HTMLDivElement;
+	let buttonRef: HTMLButtonElement;
 
 	function toggleDropdown() {
 		dropdownOpen = !dropdownOpen;
@@ -30,10 +31,13 @@
 		dropdownOpen = false;
 	}
 
+	// A disclosure of links: Escape closes it from the button or from any link in the list,
+	// and focus goes back to the button rather than to <body> when the list leaves
 	function handleKeydown(e: KeyboardEvent) {
-		if (e.key === 'Escape') {
-			closeDropdown();
-		}
+		if (e.key !== 'Escape' || !dropdownOpen) return;
+		e.stopPropagation();
+		closeDropdown();
+		buttonRef?.focus();
 	}
 
 	function handleClickOutside(e: MouseEvent) {
@@ -54,12 +58,16 @@
 			     description: a `hidden` span outside the button. aria-describedby still reads a
 			     hidden span, while an sr-only one would also be a stray line in browse mode,
 			     and inside the button it would join the name. -->
+			<!-- A disclosure (aria-expanded, aria-controls) of a list of links: no listbox, no
+			     options and no arrow keys, which a list of links does not need (worklist
+			     bl-breadcrumb-keyboard-model) -->
 			<button
+				bind:this={buttonRef}
 				onclick={(e: MouseEvent) => { e.stopPropagation(); toggleDropdown(); }}
 				onkeydown={handleKeydown}
 				class="breadcrumb-btn"
 				aria-expanded={dropdownOpen}
-				aria-haspopup="listbox"
+				aria-controls="breadcrumb-sections"
 				aria-describedby="breadcrumb-btn-hint"
 				data-nav="sections"
 			>
@@ -73,30 +81,33 @@
 
 			<!-- Dropdown list -->
 			{#if dropdownOpen}
-				<div
+				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+				<ul
+					id="breadcrumb-sections"
 					class="breadcrumb-dropdown"
-					role="listbox"
 					aria-label="Undirkaflar"
+					onkeydown={handleKeydown}
 				>
 					{#each current.chapter.sections as section (section.file)}
 						{@const sectionPath = getSectionPath(section)}
 						{@const isCurrent = sectionPath === currentSectionPath}
-						<a
-							href="/{bookSlug}/kafli/{currentChapterPath}/{sectionPath}"
-							role="option"
-							aria-selected={isCurrent}
-							onclick={closeDropdown}
-							class="breadcrumb-option {isCurrent ? 'current' : ''}"
-						>
-							{#if isCurrent}
-								<Icon name="check" size="sm" class="flex-shrink-0" />
-							{:else}
-								<span class="w-4"></span>
-							{/if}
-							<span class="truncate">{section.number} {section.title}</span>
-						</a>
+						<li>
+							<a
+								href="/{bookSlug}/kafli/{currentChapterPath}/{sectionPath}"
+								aria-current={isCurrent ? 'page' : undefined}
+								onclick={closeDropdown}
+								class="breadcrumb-option {isCurrent ? 'current' : ''}"
+							>
+								{#if isCurrent}
+									<Icon name="check" size="sm" class="flex-shrink-0" />
+								{:else}
+									<span class="w-4"></span>
+								{/if}
+								<span class="truncate">{section.number} {section.title}</span>
+							</a>
+						</li>
 					{/each}
-				</div>
+				</ul>
 			{/if}
 		</div>
 
@@ -208,6 +219,9 @@
 		top: 100%;
 		z-index: 20;
 		margin-top: 0.25rem;
+		/* A <ul> now (a list of links): no bullets or indent, as the old <div> had none */
+		list-style: none;
+		padding: 0;
 		width: 100%;
 		max-height: 16rem;
 		overflow-y: auto;
