@@ -256,6 +256,21 @@ export function tocSectionUrls(slug: string): string[] {
 	return urls;
 }
 
+/** Reader URL of the book's module section with the longest title (a stress case for one-line layouts), or null. */
+export function longestTitledSection(slug: string): string | null {
+	let best: { url: string; length: number } | null = null;
+	for (const chapter of readToc(slug)?.chapters ?? []) {
+		for (const section of chapter.sections ?? []) {
+			if (!section.file || !/^\d+-[1-9]\d*-.+\.html$/.test(section.file)) continue;
+			const length = (section.title ?? '').length;
+			if (!best || length > best.length) {
+				best = { url: `/${slug}/kafli/${String(chapter.number).padStart(2, '0')}/${section.file.slice(0, -5)}/`, length };
+			}
+		}
+	}
+	return best?.url ?? null;
+}
+
 /**
  * Reader URL of the book's first module section that is still machine-translated
  * (no `reviewed: true` in toc.json, so the page shows the MT notice), or null.

@@ -20,6 +20,14 @@
 	// this. As $state it made the timer a dependency of that effect, so opening
 	// the menu (which arms the timer) re-ran the effect and closed it at once.
 	let inactivityTimer: ReturnType<typeof setTimeout> | null = null;
+	// Element refs, plain for the same reason: close() runs inside an effect.
+	let menuEl: HTMLElement | undefined;
+	let fabEl: HTMLButtonElement | undefined;
+
+	/** True while keyboard focus is on one of the menu's links */
+	function focusInMenu(): boolean {
+		return !!menuEl && menuEl.contains(document.activeElement);
+	}
 
 	/** Toggle FAB expanded/collapsed state */
 	function toggle() {
@@ -38,7 +46,9 @@
 		clearInactivityTimer();
 		if (expanded) {
 			inactivityTimer = setTimeout(() => {
-				expanded = false;
+				// Never pull the menu away from a keyboard user who is in it
+				if (focusInMenu()) resetInactivityTimer();
+				else expanded = false;
 			}, 5000);
 		}
 	}
@@ -54,6 +64,8 @@
 	/** Handle scroll — collapse immediately */
 	function handleScroll() {
 		if (expanded) {
+			// The collapsed menu is inert, so focus inside it would fall to <body>
+			if (focusInMenu()) fabEl?.focus();
 			expanded = false;
 			clearInactivityTimer();
 		}
@@ -118,10 +130,15 @@
 	{/if}
 
 	<!-- Study tool icons stacked above the FAB -->
+	<!-- Inert while collapsed: its links are invisible, so they must not take
+	     Tab stops or reach screen readers (worklist bl-mobile-nav-collapsed-tab) -->
 	<nav
+		bind:this={menuEl}
+		id="fab-menu"
 		class="fab-menu"
 		class:fab-menu-open={expanded}
 		aria-label="Verkfæravalmynd"
+		inert={!expanded}
 	>
 		{#each tools as tool, i (tool.icon)}
 			<a
@@ -148,6 +165,7 @@
 
 	<!-- Main FAB button -->
 	<button
+		bind:this={fabEl}
 		class="fab-button"
 		class:fab-button-expanded={expanded}
 		onclick={toggle}

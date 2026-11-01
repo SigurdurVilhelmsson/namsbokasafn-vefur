@@ -629,7 +629,113 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
+### 2026-11-01 — train 7 deployed: seven small fixes are live; M4 lives on `feature/reader-m4`
+
+Measured on 2026-11-01 against `main` = `e85457d` (#323) and the live site.
+
+- **Prod runs build `1793518115596`**, deployed at 07:43 UTC (07:43:03 by the server's clock) from `main` `e85457d` with no content sync, replacing train 6's build `1793484688243`. Undeployed on `main`: only the PR that adds this entry. It sent 323 files and deleted none, none under `content/`:
+  - 273 chemistry pages, 25 print pages, `200.html`, `index.html`, `personuvernd/index.html`, `sw.js` and `_app/version.json`;
+  - `sitemap.xml`, sent only because its `<lastmod>` moved to 2026-11-01 (the same 367 URLs);
+  - #321's two new pages, `feedback/index.html` and `for-teachers/index.html`;
+  - 17 new `/_app/immutable/` files: 2 stylesheets, 4 chunks, 2 entry files and 9 page nodes.
+- **What went live.** [USER] approved clearing the private worklist's quick-win and backlog groups on 2026-11-01 and asked for the quick wins on `main`, one PR each:
+  - #322: at phone width the collapsed tools menu is `inert`, so its four invisible links no longer take Tab stops or reach screen readers. The menu can collapse with focus inside it: the 5-second auto-collapse waits while focus is on a link, and a scroll moves focus to the button first. The nav got the `id` the button's `aria-controls` already named.
+  - #323: a long section title in the breadcrumb ends in an ellipsis at phone width, and its chevron stays on screen (`max-width` on the button, `min-w-0` on the title span). Before, §19.1's button ran to 522 px at 390 px.
+  - #324: in the dark theme, figure images sit on a white card, so efni's transparent vector figures no longer draw black lines on the dark page (efni C140 ㊶). The figure lightbox still has no card.
+  - #321: `/feedback` and `/for-teachers` are prerendered (June code review M19), so each page has its own HTML, title and description without JavaScript.
+  - Not in the build:
+    - #318: the README says the app needs no environment variables, `.env.production.example` is deleted, and the tutor host left the example CSP. The live CSP still allows the tutor and editorial hosts, which nothing calls; removing them is optional server work.
+    - #319: the dead `scripts/check-status.mjs` is deleted (M22).
+    - #320: the Markdown-era tagging tools are retired. `add-book` and `check-content` are Markdown-era too, and left for [USER] to decide.
+- **The gates, run from the deploy lane by its checklist:**
+  - `main`'s CI was green on `e85457d` (run 41284851656);
+  - content validation found no issues, and the build had only train 6's warnings;
+  - no `D20: proposed` strings and no sync stamp on either side;
+  - all 2,481 chemistry content files byte-identical to the server;
+  - the dry run's 323 paths, listed by a separate `rsync --dry-run --itemize-changes` as on train 6, were the ones above;
+  - the sitemap has the live site's 367 URLs;
+  - a second dry run just before `--apply` gave the same 323 and 0.
+- **Backup and rollback:** the previous build is backed up on the server at `~/backups/namsbokasafn-build-2026-11-01-v1793484688243` (3,746 files, identical to the live build when copied). To roll back: `ssh siggi@kvenno.app 'rsync -a ~/backups/namsbokasafn-build-2026-11-01-v1793484688243/ /var/www/namsbokasafn-vefur/build/'`. Its dry run (`-n`) would copy back 304 files and delete none. The train's 19 new files (17 `_app/` files and the two new pages) would stay.
+- **Verified live:**
+  - the version equals the lane's build;
+  - every `/_app/immutable/` file that nine pages name loads: the catalogue, chemistry's home, §1.1, the three frozen books' homes, `/feedback/`, `/for-teachers/` and `/personuvernd/` (24 to 42 per page, 0 missing; a made-up path answers 404);
+  - organic answers 404;
+  - in headless Chromium, with every request outside namsbokasafn.is blocked and recorded, on 8 pages at 390 and 1280 px: 0 page errors and 0 failed requests to the site. The only request to another host was `gc.zgo.at/count.js`.
+  - one check per fix:
+    - `/feedback/` and `/for-teachers/` answer with their own `<title>` in the raw HTML;
+    - on §1.1 at 375 px, the collapsed menu is `inert` and Shift+Tab from its button skips the links; open, the same key reaches one;
+    - §19.1's breadcrumb ends at 343 px of 375, with an ellipsis;
+    - on §5.3 a figure image's background is white in dark and transparent in light.
+- **Also on 2026-11-01:**
+  - The vefur S tag was re-made at 00:00:56 UTC (the 2026-10-31 entry has the details).
+  - #315, the 2026-10-31 entry, merged at [USER]'s word. Its first e2e job hung for 5 h 50 min in "Install Playwright browsers"; a cancel and re-run passed, as under "CI" above.
+  - **D05 is carried out with M4 on a feature branch** ([USER]; `docs/decisions/2026-11-01-reader-d05-m4-on-a-feature-branch.md`, #317). D05's one January train stands. M4's step PRs merge into `feature/reader-m4`, which merges into `main` at S4.5, so trains like this one carry none of M4.
+  - **S4.1 merged into `feature/reader-m4`** (#316, `7630856`), not into `main`:
+    - predict-first on /minniskort and in /nam's review phase ("Man það" / "Man það ekki" before the answer shows);
+    - the card is a region named "Spurning", then "Svar";
+    - three new strings marked `D20: proposed` on that branch;
+    - `flashcards.spec.ts` at 5 of 5 with 0 skips.
+    - Measured on its build: after a keyboard prediction, focus falls to `<body>`. S4.2 fixes that.
+  - Issue #197 was closed as fixed by #200; no issue is open.
+  - The private worklist was cleared: 17 rows closed (superseded, folded into other rows, or parked as ideas), with their notes moved to rows that stay visible.
+- 🔑 **Two PRs that add a test at the same spot in one spec conflict.** #322 and #323 each inserted a test before the same line of `e2e/phone-layout.spec.ts`. Simulating all seven merges in order with `git merge-tree` before merging anything showed that conflict and no other. #323 was rebased onto `main` once #322 had merged, kept both tests, and merged after its own CI passed.
+- **npm audit:** no package changed since train 6 (`package.json` and the lockfile are the same as on `db1653c`), so it stands as recorded on 2026-10-31: production tree 0, full tree 26.
+- **Next:**
+  - S4.2 on `feature/reader-m4`: focus to the revealed answer, one status announcer, the "Þú sagðir: …" echo (D20) and the rating colour tokens with one RatingButtons.
+  - For [USER]: the phone and screen-reader checks (S1.3's last box, S0.4, and equations), a glance at GoatCounter's dashboard, the May 2027 exam dates, and #320's question.
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+
+### 2026-10-31 — train 6 deployed: S3.3 is live; vefur is tagged `s-2026-11-01`
+
+> ⚠️ **Superseded on one point — read the 2026-11-01 entry above first.** Train 7 deployed `main` `e85457d`, so prod runs build `1793518115596`, and "Undeployed on `main`: only the PR that adds this entry" no longer holds. The rest of this entry stands.
+
+Measured on 2026-10-31 against `main` = `db1653c` (#314) and the live site.
+
+- **Prod runs build `1793484688243`**, deployed at 22:16 UTC (the server's clock) from `main` `db1653c` with no content sync, replacing train 5's build `1793025632459`. Undeployed on `main`: only the PR that adds this entry. It sent 367 files and deleted none, none under `content/`: 273 chemistry pages, 25 print pages, `200.html`, `index.html`, `sitemap.xml`, `sw.js`, `_app/version.json`, the new `personuvernd/index.html` and 63 new `/_app/immutable/` files (4 stylesheets, 25 chunks, 2 entry files, 32 page nodes: one more than before, for the privacy page). `sitemap.xml` went because it gained `/personuvernd/` (366 → 367 URLs; no other URL changed).
+- **What went live:**
+  - S3.3 (#312; the 2026-10-27 entry has the details): the page-view event to the editorial server is gone; `/personuvernd/`, "Tilkynna villu" and the /feedback prefill; the sidebar's "Um vefinn" block and its "Námsgreining" link.
+  - #314: D20 batch 4 checked ([USER] approved all 12 strings as written on 2026-10-27 and merged #314 on 2026-10-28 at 16:20 UTC as `db1653c`), plus one new sentence on the privacy page, after "Skrárnar eru geymdar í um 90 daga.": "Þær eru notaðar til að gæta öryggis vefsins og koma auga á misnotkun, til að finna og laga villur og til að fylgjast með álagi á vefþjóninn."
+  - GoatCounter's individual-pageview setting is off ([USER], 2026-10-27), as the page assumes; a comment in the page records it.
+- **[USER] ruled train 6's scope on 2026-10-31: S3.3 and #314 only.** The rest of Claude's 2026-10-26 proposal (SF.1, SF.2, SF.3, SF.5, S5.1, S8.1) was not built and did not ship.
+- **The gates, run from the deploy lane by its checklist:**
+  - `main`'s CI was green on `db1653c` (run 40725012514);
+  - content validation found no issues, and the build had only the three warnings trains 1–5 had (workbox's "glob pattern", Vite's `configLoader` notice and the bundler's 20 `node:fs` notices);
+  - no `D20: proposed` strings and no sync stamp on either side;
+  - all 2,481 chemistry content files byte-identical to the server;
+  - the sitemap differs from the live one by `/personuvernd/` alone;
+  - a second dry run just before `--apply` gave the same 367 and 0.
+  - ⚠️ `deploy.js` prints only counts. The path list above came from a separate `rsync --dry-run --itemize-changes` with the rules and flags the script prints. In that output a file sent to the server is itemized `<f…`, not `>f…`.
+- **Backup and rollback:** the previous build is backed up on the server at `~/backups/namsbokasafn-build-2026-10-31-v1793025632459` (3,682 files, identical to the live build when copied). To roll back: `ssh siggi@kvenno.app 'rsync -a ~/backups/namsbokasafn-build-2026-10-31-v1793025632459/ /var/www/namsbokasafn-vefur/build/'`. Its dry run (`-n`) would copy back 303 files and delete none; the train's 64 new files (63 `_app/` files and `personuvernd/index.html`) would stay.
+- **Verified live:**
+  - the version equals the lane's build;
+  - every `/_app/immutable/` file that the catalogue, chemistry's home, §1.1, the three frozen books' homes and `/personuvernd/` name loads (25 to 42 per page, 0 missing; a made-up path answers 404);
+  - organic answers 404, and the live sitemap has 367 URLs;
+  - **D03 on the live site:** chemistry's home loads 31 JS files, and none names the editorial host or `sendBeacon` (1 did on train 5's build, measured the same evening);
+  - in headless Chromium, with every request outside namsbokasafn.is blocked and recorded, at 390 and 1280 px on the catalogue, chemistry's home, §1.1, `/personuvernd/`, `/feedback/`, `/greining/` and physics's home: 0 page errors, 0 failed requests to the site, and the only request to another host was `gc.zgo.at/count.js`;
+  - on §1.2, "Tilkynna villu" opens `/feedback/?tegund=translation_error&bok=efnafraedi-2e&kafli=01&hluti=1-2-efnishamur-og-flokkun-efnis` with the chapter, the section and "Villa í þýðingu" filled in. §1.1 has no notice: it is a reviewed section.
+- 🔑 **Since train 6 nothing on the site sends the page-view event**, except a tab left open on an earlier chemistry build, until it reloads. The paused books never sent it (the 2026-10-27 entry's correction).
+- **vefur is tagged for S:** an annotated `s-2026-11-01` on `db1653c` ([USER], 2026-10-31), with the message "S (1 November 2026): vefur main as deployed in train 6, build 1793484688243.", pushed by its own refspec at 00:00:56 UTC on 1 November (its tagger date). ⚠️ It was first pushed at 22:20 UTC on 31 October, 90 minutes before S. [USER] spotted it, and at their word it was deleted from GitHub and locally at 22:22 UTC, then re-made after midnight with the same message, once `main` (still `db1653c`) and the live build (still `1793484688243`) were checked. A tag named for a date waits for that date, in UTC. There are no branch-tip tags: the two reader branches are frozen, and v1.1's tip already has `reader-v1.1-port-source`. efni tags its own `main` `s-2026-11-01` after its 00:00 UTC content check on 1 November, and its branch tips under the sibling prefix `s-2026-11-01-tip/`, because git cannot hold both `s-2026-11-01` and `s-2026-11-01/<x>`.
+- **Synced with efni** at [USER]'s request (2026-10-31):
+  - efni re-measured the paused-books correction and accepted it. Its pre-S plan (`docs/plans/2026-10-26-pre-s-week-plan.md`, §7, line 258) still says G1.19 stops the frozen books' beacon; efni will fix that line in a docs branch after the tag if [USER] agrees.
+  - G1.19 has been live on Ritstjóri since 2026-10-28.
+  - Nothing efni merged from 2026-10-26 to 10-31 changes what vefur serves. Re-measured here: of 140 files changed, the only `books/` files are 16 under `efnafraedi-2e/ai-review/`, which is not synced, and no handoff changed.
+  - The ② re-render and the redirect recompute stay after S, with no date.
+- **npm audit, 2026-10-31 (on `db1653c`):** production tree 0. The full tree is 26 packages (5 low, 21 moderate, 0 high), up from 3 low on 2026-10-26, all in development tools. They come from five advisories:
+  - SvelteKit's two (low, known; fixed only in SvelteKit 3, #293 left open);
+  - three new ones: `deepmerge` 4.2.0–4.3.1 (low, through SvelteKit), `glob` 9.0.0–14.0.1 (moderate, through workbox-build) and `minimatch` <11.0.1 (moderate, through eslint, typescript-eslint and workbox-build).
+  - npm's only offered fixes are major downgrades (eslint 4.0.0, `@vite-pwa/sveltekit` 0.0.1), so nothing is fixable inside the current versions. An override would force a new major onto packages that pin an older one (the `brace-expansion` lesson above); not tried. They don't block a deploy: the production tree is what ships.
+- **The deploy lane** is at `db1653c`. Its `.env.production` still has the dead `VITE_API_URL` line.
+- **Next, by the plan:** M4 (S4.1, predict-first). Under D05, no train runs from the merge of S4.1 until January. On 2026-11-01 [USER] chose to keep M4 on a feature branch, `feature/reader-m4`, so trains can still run from `main` (`docs/decisions/2026-11-01-reader-d05-m4-on-a-feature-branch.md`); S4.1 is PR #316 into it. Also for [USER]: the real-phone check of the sidebar's focus order (S1.3's last box), S0.4, and the May 2027 exam dates (before S9.0).
+- **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
+
 ### 2026-10-27 — S3.3 merged (#312), not deployed; D20 batch 4 and three questions wait for [USER]
+
+> ⚠️ **Superseded on two points — read the 2026-10-31 entry above first.**
+>
+> - Train 6 deployed `main` `db1653c` on 2026-10-31, so S3.3 is live and "Prod still runs train 5's build" no longer holds. Its 🔴 "`main` is not train-ready" bullet is lifted: #314 removed the 12 markers.
+> - Its "For [USER], before train 6" questions are answered: D20 batch 4 approved as written, GoatCounter's individual-pageview setting off, the access-log sentence added (#314), the correction sent to efni (2026-10-31), and train 6's scope ruled.
+>
+> The rest of this entry stands.
 
 Measured on 2026-10-26 against `main` = `02ca01b` (#312) and the live site.
 

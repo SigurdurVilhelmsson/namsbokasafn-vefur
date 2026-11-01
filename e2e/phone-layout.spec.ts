@@ -8,7 +8,7 @@
  */
 
 import { test, expect, type Browser, type Page } from '@playwright/test';
-import { sectionsContaining } from './helpers/content-fixtures';
+import { longestTitledSection, sectionsContaining, syncedBooks } from './helpers/content-fixtures';
 
 const PHONE = { width: 375, height: 667 };
 
@@ -103,6 +103,72 @@ test.describe('Phone layout', () => {
 		// No tap-through here: the menu auto-closes after 5s, which a loaded CI
 		// runner can reach before a tap lands.
 		expect(itemHit).toBe(true);
+	});
+
+	// Measured on the live build of 2026-10-25: after 'Fyrri kafli', the next four
+	// Tab stops were the collapsed menu's invisible links.
+	test('the collapsed tools menu takes no Tab stops, and a scroll hands focus back', async ({ browser }) => {
+		const urls = sectionsContaining('<p', 1);
+		test.skip(urls.length === 0, 'No synced section');
+
+		const page = await phonePage(browser, { touch: false });
+		await openSection(page, urls[0]);
+		const fab = page.locator('.fab-button');
+		await expect(fab).toBeVisible();
+		const focusInMenu = () => page.evaluate(() => !!document.activeElement?.closest('.fab-menu'));
+
+		// Collapsed: the links come just before the button, and Shift+Tab skips them
+		await fab.focus();
+		await page.keyboard.press('Shift+Tab');
+		expect(await focusInMenu()).toBe(false);
+		// That focus move can scroll the page, and a late scroll event would close
+		// the menu we open next (the menu collapses on scroll by design)
+		await page.waitForFunction(
+			() => new Promise((done) => {
+				const y = window.scrollY;
+				setTimeout(() => done(window.scrollY === y), 250);
+			})
+		);
+
+		// Open, the same key lands on a link: the control that this test can see one
+		await fab.focus();
+		await page.keyboard.press('Enter');
+		await expect(fab).toHaveAttribute('aria-expanded', 'true');
+		await page.keyboard.press('Shift+Tab');
+		expect(await focusInMenu()).toBe(true);
+
+		// A scroll collapses the menu, which goes inert: focus moves to the button, not <body>
+		// (Up if the earlier focus move left the page at its foot, down otherwise)
+		await page.evaluate(() => window.scrollTo(0, window.scrollY > 100 ? 0 : 400));
+		await expect(fab).toHaveAttribute('aria-expanded', 'false');
+		await expect(fab).toBeFocused();
+	});
+
+	// Before: the button grew to fit the whole title (522 px on §19.1 at 390 px), main's
+	// overflow-x: hidden clipped it mid-word, and the chevron sat off-screen.
+	test('a long title in the section breadcrumb ends in an ellipsis, chevron on screen', async ({ browser }) => {
+		const url = longestTitledSection(syncedBooks()[0]);
+		test.skip(!url, 'No synced section');
+
+		const page = await phonePage(browser, { touch: false });
+		await openSection(page, url!);
+		const button = page.locator('.breadcrumb-btn');
+		await expect(button).toBeVisible();
+		const m = await button.evaluate((el) => {
+			const text = el.querySelector('.truncate') as HTMLElement;
+			const chevron = el.querySelector('.breadcrumb-chevron') as HTMLElement;
+			return {
+				vw: document.documentElement.clientWidth,
+				buttonRight: el.getBoundingClientRect().right,
+				chevronRight: chevron.getBoundingClientRect().right,
+				cut: text.scrollWidth > text.clientWidth,
+				ellipsis: getComputedStyle(text).textOverflow
+			};
+		});
+		expect(m.buttonRight).toBeLessThanOrEqual(m.vw);
+		expect(m.chevronRight).toBeLessThanOrEqual(m.vw);
+		expect(m.cut).toBe(true);
+		expect(m.ellipsis).toBe('ellipsis');
 	});
 
 	test('the timer pill does not cover the tools button', async ({ browser }) => {
