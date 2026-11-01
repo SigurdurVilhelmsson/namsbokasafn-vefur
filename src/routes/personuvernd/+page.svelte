@@ -64,7 +64,8 @@
 					<li>æfingadæmi sem þú hefur opnað og hvernig þér gekk með þau;</li>
 					<li>lestrartölfræði í Námsgreiningu: hve lengi og hvenær þú lest, lotur, röð daga og markmið;</li>
 					<li>síðustu leitarorð;</li>
-					<li>stillingar, til dæmis letur, línubil og litaþema;</li>
+					<!-- D20: proposed wording (S4.3): the 'why' line's seen flag joins the settings item. -->
+					<li>stillingar, til dæmis letur, línubil og litaþema, og hvort þú hefur séð skýringu á minniskortunum;</li>
 					<li>bækur sem þú hefur sótt til að lesa án nettengingar.</li>
 				</ul>
 				<p>

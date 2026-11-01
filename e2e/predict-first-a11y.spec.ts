@@ -105,3 +105,21 @@ test.describe('Predict-first on /nam', () => {
 		await expect(echo(page)).toHaveText('Þú sagðir: Man það');
 	});
 });
+
+test.describe("Predict-first's one-time 'why' line (plan step S4.3, PED-25)", () => {
+	test('shows on the first card of a fresh profile, and never again', async ({ page }) => {
+		await startSession(page);
+		const why = page.getByText(/^Af hverju\?/);
+		await expect(why).toBeVisible();
+
+		await predict(page, 'Man það').click();
+		await page.getByRole('button', { name: /^Gott/ }).click();
+		await expect(question(page)).toBeVisible();
+		await expect(why).toHaveCount(0);
+
+		// The next visit resumes the session on the second card, still without it
+		await page.reload();
+		await expect(question(page)).toBeVisible({ timeout: 15000 });
+		await expect(why).toHaveCount(0);
+	});
+});
