@@ -25,11 +25,11 @@
 		"greining 390 light": [],
 		"section 1280 dark": [],
 		"section 1280 light": [
-			"color-contrast | .sm\\:text-sm > | span"
+			"color-contrast | .sm\\:text-sm > span | span"
 		],
 		"section 390 dark": [],
 		"section 390 light": [
-			"color-contrast | .sm\\:text-sm > | span"
+			"color-contrast | .sm\\:text-sm > span | span"
 		],
 		"settings 1280 dark": [],
 		"settings 1280 light": [],

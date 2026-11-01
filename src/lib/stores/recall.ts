@@ -21,6 +21,8 @@ import { renameInRecall, type SectionRename } from '$lib/utils/sectionRenames';
 const STORAGE_KEY = 'namsbokasafn:recall';
 /** The newest entries kept; older ones are dropped, on add and on load */
 export const MAX_ENTRIES = 500;
+/** The newest prompted sections kept (a book has a few hundred) */
+export const MAX_PROMPTED = 2000;
 
 export interface RecallEntry {
 	id: string;
@@ -31,16 +33,31 @@ export interface RecallEntry {
 	createdAt: string;
 }
 
+/** A section, by the keys a rename moves */
+export interface SectionRef {
+	bookSlug: string;
+	chapterSlug: string;
+	sectionSlug: string;
+}
+
 interface RecallState {
 	entries: RecallEntry[];
+	/**
+	 * Sections whose prompt has shown. Call 2 ruled one prompt per section, and D10 lets a
+	 * section be marked read by hand before its prompt, so the read mark cannot say whether
+	 * the prompt is spent (plan step S5.2).
+	 */
+	prompted: SectionRef[];
 }
 
 const defaultState: RecallState = {
-	entries: []
+	entries: [],
+	prompted: []
 };
 
 const recallValidators = {
-	entries: isArray
+	entries: isArray,
+	prompted: isArray
 };
 
 const STRING_FIELDS = ['id', 'bookSlug', 'chapterSlug', 'sectionSlug', 'createdAt'] as const;
@@ -53,10 +70,22 @@ export function isRecallEntry(value: unknown): value is RecallEntry {
 	return typeof entry.text === 'string' && entry.text.trim() !== '';
 }
 
-/** Parse stored JSON into a state: unknown shapes give the defaults, bad entries are dropped */
+export function isSectionRef(value: unknown): value is SectionRef {
+	if (typeof value !== 'object' || value === null) return false;
+	const ref = value as Record<string, unknown>;
+	return ['bookSlug', 'chapterSlug', 'sectionSlug'].every((field) => typeof ref[field] === 'string');
+}
+
+const sameSection = (a: SectionRef, b: SectionRef) =>
+	a.bookSlug === b.bookSlug && a.chapterSlug === b.chapterSlug && a.sectionSlug === b.sectionSlug;
+
+/** Parse stored JSON into a state: unknown shapes give the defaults, bad items are dropped */
 function toState(stored: unknown): RecallState {
 	const state = validateStoreData(stored, defaultState, recallValidators);
-	return { entries: state.entries.filter(isRecallEntry).slice(-MAX_ENTRIES) };
+	return {
+		entries: state.entries.filter(isRecallEntry).slice(-MAX_ENTRIES),
+		prompted: state.prompted.filter(isSectionRef).slice(-MAX_PROMPTED)
+	};
 }
 
 function loadState(): RecallState {
@@ -103,7 +132,15 @@ function createRecallStore() {
 		renameSections: (renames: SectionRename[]) => {
 			const state = get({ subscribe });
 			const entries = renameInRecall(state.entries, renames);
-			if (entries !== state.entries) set({ ...state, entries });
+			const prompted = renameInRecall(state.prompted, renames);
+			if (entries !== state.entries || prompted !== state.prompted) set({ entries, prompted });
+		},
+
+		/** Remember that a section's prompt has shown, so it does not show again */
+		markPrompted: (bookSlug: string, chapterSlug: string, sectionSlug: string) => {
+			const ref = { bookSlug, chapterSlug, sectionSlug };
+			if (get({ subscribe }).prompted.some((p) => sameSection(p, ref))) return;
+			update((state) => ({ ...state, prompted: [...state.prompted, ref].slice(-MAX_PROMPTED) }));
 		},
 
 		addEntry: (bookSlug: string, chapterSlug: string, sectionSlug: string, text: string) => {
@@ -120,12 +157,13 @@ function createRecallStore() {
 			};
 
 			update((state) => ({
+				...state,
 				entries: [...state.entries, entry].slice(-MAX_ENTRIES)
 			}));
 		},
 
 		removeEntry: (id: string) => {
-			update((state) => ({ entries: state.entries.filter((e) => e.id !== id) }));
+			update((state) => ({ ...state, entries: state.entries.filter((e) => e.id !== id) }));
 		},
 
 		reset: () => set(defaultState)

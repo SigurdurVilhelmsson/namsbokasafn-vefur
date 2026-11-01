@@ -33,7 +33,8 @@ export type Capability = 'index' | 'glossary';
 interface Toc {
 	index?: unknown;
 	glossary?: unknown;
-	chapters?: { number: number; slug?: string; sections?: { file?: string; title?: string; reviewed?: boolean }[] }[];
+	chapters?: { number: number; slug?: string; sections?: { file?: string; title?: string; reviewed?: boolean; type?: string }[] }[];
+	frontMatter?: { file?: string }[];
 }
 
 function readToc(slug: string): Toc | null {
@@ -138,7 +139,7 @@ export function glossaryTerms(slug: string): GlossaryTerm[] {
 export function bookWithFrontMatter(): string | null {
 	return (
 		syncedBooks().find((slug) => {
-			const toc = readToc(slug) as { frontMatter?: unknown[] } | null;
+			const toc = readToc(slug);
 			return (toc?.frontMatter?.length ?? 0) > 0;
 		}) ?? null
 	);
@@ -254,6 +255,21 @@ export function tocSectionUrls(slug: string): string[] {
 		}
 	}
 	return urls;
+}
+
+/** Reader URL of the book's first section of a given type ('glossary', 'summary', …), or null. */
+export function sectionOfType(slug: string, type: string): string | null {
+	for (const chapter of readToc(slug)?.chapters ?? []) {
+		const section = chapter.sections?.find((s) => s.type === type && s.file);
+		if (section?.file) return `/${slug}/kafli/${String(chapter.number).padStart(2, '0')}/${section.file.slice(0, -5)}/`;
+	}
+	return null;
+}
+
+/** Reader URL of the book's first front-matter page (the Formáli, chapter 00), or null. */
+export function frontMatterSection(slug: string): string | null {
+	const file = readToc(slug)?.frontMatter?.[0]?.file;
+	return file ? `/${slug}/kafli/00/${file.slice(0, -5)}/` : null;
 }
 
 /** Reader URL of the book's module section with the longest title (a stress case for one-line layouts), or null. */

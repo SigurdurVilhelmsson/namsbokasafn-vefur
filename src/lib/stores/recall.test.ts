@@ -159,3 +159,36 @@ describe('recall store: renamed sections (#258)', () => {
 		expect(vi.mocked(localStorage.setItem).mock.calls.length).toBe(writes);
 	});
 });
+
+// Plan step S5.2: one prompt per section (call 2), even for a section marked read by hand (D10)
+describe('recall store: prompted sections', () => {
+	beforeEach(async () => {
+		localStorage.clear();
+		await importStore();
+	});
+
+	it('remembers a prompted section once', () => {
+		recallStore.markPrompted('book-a', '01', '1-1');
+		recallStore.markPrompted('book-a', '01', '1-1');
+		expect(get(recallStore).prompted).toEqual([{ bookSlug: 'book-a', chapterSlug: '01', sectionSlug: '1-1' }]);
+	});
+
+	it('moves a prompted section with a rename', () => {
+		recallStore.markPrompted('book-a', '01', '1-1');
+		recallStore.renameSections([{ bookSlug: 'book-a', fromChapter: '01', fromSlug: '1-1', toChapter: '01', toSlug: '1-1-nytt' }]);
+		expect(get(recallStore).prompted.map((p) => p.sectionSlug)).toEqual(['1-1-nytt']);
+	});
+
+	it('loads only valid prompted sections', async () => {
+		const good = { bookSlug: 'book-a', chapterSlug: '01', sectionSlug: '1-1' };
+		localStorage.setItem(STORAGE_KEY, JSON.stringify({ entries: [], prompted: [null, { bookSlug: 'book-a' }, good] }));
+		await importStore();
+		expect(get(recallStore).prompted).toEqual([good]);
+	});
+
+	it('loads S5.1 data, which has no prompted list, as none prompted', async () => {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify({ entries: [validEntry()] }));
+		await importStore();
+		expect([get(recallStore).entries.length, get(recallStore).prompted]).toEqual([1, []]);
+	});
+});
