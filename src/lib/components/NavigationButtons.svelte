@@ -62,7 +62,7 @@
 				aria-haspopup="listbox"
 				aria-describedby="breadcrumb-btn-hint"
 			>
-				<span class="truncate">
+				<span class="truncate min-w-0">
 					Kafli {current.chapter.number} › {current.section.number}
 					{current.section.title}
 				</span>
@@ -180,6 +180,10 @@
 		border-radius: var(--radius-md);
 		padding: 0.25rem 0.5rem;
 		margin-left: -0.5rem;
+		/* Never wider than the column (the 0.5rem gives back the negative margin), so
+		   a long title ends in the span's ellipsis and the chevron stays on screen.
+		   The span needs min-width: 0 too, or as a flex item it refuses to shrink. */
+		max-width: calc(100% + 0.5rem);
 	}
 
 	.breadcrumb-btn:hover {
