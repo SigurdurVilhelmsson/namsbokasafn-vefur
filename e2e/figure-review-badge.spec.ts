@@ -26,6 +26,8 @@ import { sectionsContaining } from './helpers/content-fixtures';
 
 const BADGE = '"Vélþýtt"';
 
+type Theme = 'light' | 'dark';
+
 /** Reader URL of a section with figures, picked from the synced content. */
 const SECTION = sectionsContaining('<figure', 1)[0];
 
@@ -53,6 +55,38 @@ async function insertFigure(page: Page, state: string | null) {
 		{ id, state }
 	);
 	return page.locator(`#${id}`);
+}
+
+/** Store the theme the way the Settings dialog does, before the page's scripts run. */
+async function seedTheme(page: Page, theme: Theme): Promise<void> {
+	await page.addInitScript((t) => {
+		const key = 'namsbokasafn:settings';
+		let stored: Record<string, unknown>;
+		try {
+			stored = JSON.parse(localStorage.getItem(key) || '{}');
+		} catch {
+			stored = {};
+		}
+		localStorage.setItem(key, JSON.stringify({ ...stored, theme: t }));
+	}, theme);
+}
+
+/**
+ * Open the section in a stored theme, and wait until hydration has applied it.
+ *
+ * Hydration sets the `dark` class from the stored theme twice: the settings store when it
+ * loads, then the root layout's theme `$effect`. A class added by hand is safe only after
+ * both, which these tests got by waiting for a figure: the section's content renders after
+ * the root layout mounts (measured 2026-11-01). Storing the theme instead makes both agree
+ * with it, so the tests no longer depend on that order (as in dark-figure-card.spec.ts).
+ */
+async function openInTheme(page: Page, theme: Theme): Promise<void> {
+	await seedTheme(page, theme);
+	await page.goto(SECTION);
+	const html = page.locator('html');
+	const dark = /(^|\s)dark(\s|$)/;
+	if (theme === 'dark') await expect(html).toHaveClass(dark, { timeout: 15000 });
+	else await expect(html).not.toHaveClass(dark);
 }
 
 /** A computed style of the figure's `::before` box. */
@@ -85,14 +119,19 @@ test.describe('Figure review badge — reader', () => {
 		expect(await badgeStyle(page, 'figure-review-fixture-none', 'content')).toBe('none');
 	});
 
-	test('the badge has its own colours in dark mode', async ({ page }) => {
-		await page.goto(SECTION);
-		await insertFigure(page, 'mt-preview');
+	test('the badge has its own colours in dark mode', async ({ page, context }) => {
 		const id = 'figure-review-fixture-mt-preview';
-		await page.evaluate(() => document.documentElement.classList.remove('dark'));
+		await openInTheme(page, 'light');
+		await insertFigure(page, 'mt-preview');
 		const light = await badgeStyle(page, id, 'background-color');
-		await page.evaluate(() => document.documentElement.classList.add('dark'));
-		const dark = await badgeStyle(page, id, 'background-color');
+		// Each theme in its own page load: switching the class by hand on one page could still
+		// be undone by the layout's $effect. Closing the first page first keeps the second
+		// page's stored theme from reaching it as a cross-tab change.
+		await page.close();
+		const darkPage = await context.newPage();
+		await openInTheme(darkPage, 'dark');
+		await insertFigure(darkPage, 'mt-preview');
+		const dark = await badgeStyle(darkPage, id, 'background-color');
 		expect(dark).not.toBe(light);
 	});
 
@@ -110,9 +149,8 @@ test.describe('Figure review badge — reader', () => {
 
 	test('printing in dark mode keeps the black border', async ({ page }) => {
 		// The .dark rule's selector outranks the print rule's, hence its !important.
-		await page.goto(SECTION);
+		await openInTheme(page, 'dark');
 		await insertFigure(page, 'mt-preview');
-		await page.evaluate(() => document.documentElement.classList.add('dark'));
 		await page.emulateMedia({ media: 'print' });
 		const id = 'figure-review-fixture-mt-preview';
 		expect({
