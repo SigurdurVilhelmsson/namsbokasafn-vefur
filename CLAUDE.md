@@ -652,7 +652,7 @@ would vanish exactly when the build needs it.
 
 ## Current Development Status
 
-Only what a session needs today. Every dated entry up to 2026-11-01 (each train's gates, counts, backups and live checks) is in `docs/archive/status-log-2026.md`. **A train rewrites this block and puts its details in its PR body**; don't add dated entries here.
+Only what a session needs today. Every dated entry up to train 7 (2026-11-01; each train's gates, counts, backups and live checks) is in `docs/archive/status-log-2026.md`. **A train rewrites this block and puts its details in its PR body**; don't add dated entries here.
 
 As of 2026-11-01 (`main` `d7b2ed9`):
 
