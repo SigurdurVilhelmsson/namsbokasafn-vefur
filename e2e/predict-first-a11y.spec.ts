@@ -36,16 +36,16 @@ test.describe('Predict-first on /minniskort', () => {
 		await page.keyboard.press('Enter');
 		await expect(answer(page)).toBeFocused();
 
-		// A held key repeats. With focus on a rating button, this recorded 'Aftur'.
+		// A held key repeats. With focus on a rating button, this recorded 'Rangt' (then 'Aftur').
 		for (let i = 0; i < 5; i++) await page.keyboard.press('Enter');
 		expect(await reviewCount(page)).toBe(0);
 		await expect(answer(page)).toBeVisible();
 	});
 
-	test("after 'Gott', focus is on the next question, and the counter is spoken", async ({ page }) => {
+	test("after 'Rétt', focus is on the next question, and the counter is spoken", async ({ page }) => {
 		await startSession(page);
 		await predict(page, 'Man það').click();
-		await page.getByRole('button', { name: /^Gott/ }).focus();
+		await page.getByRole('button', { name: /^Rétt/ }).focus();
 		await page.keyboard.press('Enter');
 		await expect(question(page)).toBeFocused();
 		await expect(page.locator('[role="status"][aria-live="polite"]', { hasText: 'Kort 2 af 2' })).toHaveCount(1);
@@ -55,7 +55,7 @@ test.describe('Predict-first on /minniskort', () => {
 		await startSession(page);
 		for (let i = 0; i < 2; i++) {
 			await predict(page, 'Man það').click();
-			await page.getByRole('button', { name: /^Gott/ }).click();
+			await page.getByRole('button', { name: /^Rétt/ }).click();
 		}
 		await expect(page.getByRole('heading', { name: 'Vel gert!' })).toBeFocused();
 	});
@@ -113,7 +113,7 @@ test.describe('Predict-first on /nam, after a rating', () => {
 		await page.getByRole('button', { name: /Hefja nám/ }).click();
 		await expect(question(page)).toBeVisible({ timeout: 15000 });
 		await predict(page, 'Man það').click();
-		await page.getByRole('button', { name: /^Gott/ }).focus();
+		await page.getByRole('button', { name: /^Rétt/ }).focus();
 		await page.keyboard.press('Enter');
 		await expect(question(page)).toBeFocused();
 		await expect(page.locator('[role="status"][aria-live="polite"]', { hasText: '2 af 2' })).toHaveCount(1);
@@ -127,7 +127,7 @@ test.describe("Predict-first's one-time 'why' line (plan step S4.3, PED-25)", ()
 		await expect(why).toBeVisible();
 
 		await predict(page, 'Man það').click();
-		await page.getByRole('button', { name: /^Gott/ }).click();
+		await page.getByRole('button', { name: /^Rétt/ }).click();
 		await expect(question(page)).toBeVisible();
 		await expect(why).toHaveCount(0);
 

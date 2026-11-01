@@ -27,7 +27,7 @@ describe('RatingButtons', () => {
 	it('shows the four ratings in order, each with its interval', () => {
 		const target = render({ intervals: INTERVALS, onrate: () => {} });
 		const names = [...target.querySelectorAll('button')].map((b) => b.textContent?.replace(/\s+/g, ' ').trim());
-		expect(names).toEqual(['Aftur <1 mín', 'Erfitt 1 dagur', 'Gott 3 dagar', 'Auðvelt 7 dagar']);
+		expect(names).toEqual(['Rangt <1 mín', 'Að hluta 1 dagur', 'Rétt 3 dagar', 'Auðvelt 7 dagar']);
 	});
 
 	it('hides the interval line when there are no intervals', () => {
@@ -35,7 +35,7 @@ describe('RatingButtons', () => {
 		expect(target.querySelectorAll('.rating-interval')).toHaveLength(0);
 	});
 
-	it("reports the rating that was pressed ('Gott' gives 'good')", () => {
+	it("reports the rating that was pressed ('Rétt' gives 'good')", () => {
 		const onrate = vi.fn();
 		const target = render({ intervals: INTERVALS, onrate });
 		(target.querySelectorAll('button')[2] as HTMLButtonElement).click();

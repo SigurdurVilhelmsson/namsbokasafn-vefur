@@ -40,24 +40,57 @@ describe('PredictThenRate', () => {
 		expect(target.querySelector('.rating-grid')).toBeNull();
 	});
 
-	it("after 'Man það' and then 'Gott', reports ('good', true)", async () => {
+	it("after 'Man það' and then 'Rétt', reports ('good', true)", async () => {
 		const onrate = vi.fn();
 		const target = render(onrate);
 		button(target, 'Man það').click();
 		flushSync();
 		await Promise.resolve();
 		expect(target.textContent).toContain(CARD.back);
-		button(target, 'Gott').click();
+		button(target, 'Rétt').click();
 		expect(onrate).toHaveBeenCalledWith('good', true);
 	});
 
-	it("after 'Man það ekki', reports false with the rating", () => {
+	it("after 'Man það ekki' and 'Rangt', reports ('again', false) at once: no message", () => {
 		const onrate = vi.fn();
 		const target = render(onrate);
 		button(target, 'Man það ekki').click();
 		flushSync();
-		button(target, 'Aftur').click();
+		button(target, 'Rangt').click();
 		expect(onrate).toHaveBeenCalledWith('again', false);
+	});
+
+	it('asks for correctness, not ease', () => {
+		const target = render();
+		button(target, 'Man það').click();
+		flushSync();
+		expect(target.querySelector('.ptr-hint')?.textContent).toBe('Berðu saman við svarið: hafðirðu rétt fyrir þér?');
+	});
+});
+
+// Decision D04 (PED-20): after 'Man það' and a miss, a message before the next card
+describe("PredictThenRate after 'Man það' and a miss", () => {
+	it.each(['Rangt', 'Að hluta'] as const)("'%s' shows the message, with the answer, and records nothing yet", async (label) => {
+		const onrate = vi.fn();
+		const target = render(onrate);
+		button(target, 'Man það').click();
+		flushSync();
+		button(target, label).click();
+		flushSync();
+		expect(target.querySelector('.ptr-miss')?.textContent).toBe('Þú hélst að þú myndir þetta — skoðaðu svarið vel.');
+		expect(target.textContent).toContain(CARD.back);
+		expect(onrate).not.toHaveBeenCalled();
+	});
+
+	it("'Áfram' then records the rating and the prediction", () => {
+		const onrate = vi.fn();
+		const target = render(onrate);
+		button(target, 'Man það').click();
+		flushSync();
+		button(target, 'Rangt').click();
+		flushSync();
+		button(target, 'Áfram').click();
+		expect(onrate).toHaveBeenCalledWith('again', true);
 	});
 });
 

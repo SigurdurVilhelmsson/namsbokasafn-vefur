@@ -16,7 +16,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import { CARDS, STORAGE_KEY, openFlashcards } from './helpers/flashcards';
 
-const RATINGS = ['Aftur', 'Erfitt', 'Gott', 'Auðvelt'];
+const RATINGS = ['Rangt', 'Að hluta', 'Rétt', 'Auðvelt'];
 
 /** The question card of the running session, and which seeded card it shows */
 async function currentCard(page: Page) {
@@ -66,13 +66,13 @@ test.describe('Flashcard Page', () => {
 		}
 	});
 
-	test("'Man það ekki' then 'Gott' moves on, saves both, and survives a reload", async ({ page }) => {
+	test("'Man það ekki' then 'Rétt' moves on, saves both, and survives a reload", async ({ page }) => {
 		await openFlashcards(page, { seed: true });
 		await page.getByRole('button', { name: 'Æfa' }).click();
 		const { card } = await currentCard(page);
 		await page.getByRole('button', { name: 'Man það ekki', exact: true }).click();
 		await expect(page.getByRole('region', { name: 'Svar', exact: true })).toContainText(card.back);
-		await page.getByRole('button', { name: /^Gott/ }).click();
+		await page.getByRole('button', { name: /^Rétt/ }).click();
 
 		// The other card comes up next
 		const next = page.getByRole('region', { name: 'Spurning', exact: true });

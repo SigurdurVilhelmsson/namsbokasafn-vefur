@@ -27,7 +27,19 @@ import { getTodayDateString, getYesterdayDateString, getCurrentTimestamp, format
 
 const STORAGE_KEY = 'namsbokasafn:flashcards';
 
-type StudyMode = 'all' | 'due' | 'new';
+/**
+ * A study session (decision D04, PED-11):
+ * - 'due' ('Æfa'): the cards that are due, plus at most NEW_CARDS_PER_SESSION new ones;
+ * - 'extra' ('Aukaæfing'): every card. A card that is not due yet keeps its schedule when
+ *   remembered, and a miss reschedules it as usual (see rateCard).
+ */
+export type SessionMode = 'due' | 'extra';
+
+/** At most this many never-studied cards join a due session (D04: the reviewer suggests 10) */
+export const NEW_CARDS_PER_SESSION = 10;
+
+/** The lowest SM-2 quality that counts as remembered: srs.ts's MIN_CORRECT_QUALITY, which it keeps private */
+const PASS_QUALITY = 3;
 
 interface DeckStats {
 	total: number;
@@ -46,6 +58,8 @@ export interface FlashcardReviewEntry {
 	/** Pre-reveal self-prediction ("do I know this?"), when the user gave one.
 	 *  Compared against wasCorrect for confidence calibration. */
 	predictedKnown?: boolean;
+	/** Made in 'Aukaæfing' (extra practice), which a calibration view should leave out (PED-11) */
+	extra?: boolean;
 }
 
 // Daily flashcard stats for tracking
@@ -69,6 +83,7 @@ interface FlashcardState {
 	currentCardIndex: number;
 	showAnswer: boolean;
 	studyQueue: string[];
+	sessionMode: SessionMode;
 	todayStudied: number;
 	studyStreak: number;
 	lastStudyDate: string | null;
@@ -83,6 +98,7 @@ const defaultState: FlashcardState = {
 	currentCardIndex: 0,
 	showAnswer: false,
 	studyQueue: [],
+	sessionMode: 'due',
 	todayStudied: 0,
 	studyStreak: 0,
 	lastStudyDate: null,
@@ -119,16 +135,14 @@ function createEmptyFlashcardDailyStats(date: string): FlashcardDailyStats {
 function buildStudyQueue(
 	cardIds: string[],
 	studyRecords: Record<string, FlashcardStudyRecord>,
-	studyMode: StudyMode
+	mode: SessionMode
 ): string[] {
-	switch (studyMode) {
-		case 'due':
-			return getDueCards(cardIds, studyRecords);
-		case 'new':
-			return getNewCards(cardIds, studyRecords);
-		default:
-			return sortCardsByPriority(cardIds, studyRecords);
-	}
+	if (mode === 'extra') return sortCardsByPriority(cardIds, studyRecords);
+	// getDueCards counts every new card as due, so the new ones are capped apart
+	const due = getDueCards(cardIds, studyRecords);
+	const reviews = due.filter((id) => studyRecords[id]);
+	const fresh = getNewCards(due, studyRecords).slice(0, NEW_CARDS_PER_SESSION);
+	return sortCardsByPriority([...reviews, ...fresh], studyRecords);
 }
 
 const flashcardValidators = {
@@ -138,6 +152,7 @@ const flashcardValidators = {
 	currentCardIndex: isNumber,
 	showAnswer: isBoolean,
 	studyQueue: isArray,
+	sessionMode: (value: unknown) => value === 'due' || value === 'extra',
 	todayStudied: isNumber,
 	studyStreak: isNumber,
 	lastStudyDate: isNullOrString,
@@ -226,20 +241,21 @@ function createFlashcardStore() {
 		},
 
 		// Study session
-		startStudySession: (deckId: string, studyMode: StudyMode = 'all') => {
+		startStudySession: (deckId: string, mode: SessionMode = 'due') => {
 			const deck = getDeck(deckId);
 			if (!deck) return;
 
 			const state = get({ subscribe });
 			const cardIds = deck.cards.map((c) => c.id);
-			const queue = buildStudyQueue(cardIds, state.studyRecords, studyMode);
+			const queue = buildStudyQueue(cardIds, state.studyRecords, mode);
 
 			update((s) => ({
 				...s,
 				currentDeckId: deckId,
 				currentCardIndex: 0,
 				showAnswer: false,
-				studyQueue: queue
+				studyQueue: queue,
+				sessionMode: mode
 			}));
 		},
 
@@ -278,11 +294,24 @@ function createFlashcardStore() {
 		},
 
 		// SRS functions
-		rateCard: (cardId: string, rating: DifficultyRating, predictedKnown?: boolean) => {
+		/**
+		 * Record a rating and move to the next card. `extra` marks a review made in 'Aukaæfing'
+		 * (extra practice): a card that is not due yet keeps its schedule when remembered, and a
+		 * miss reschedules it as in any session (decision D04, PED-11). /nam's review never
+		 * passes it.
+		 */
+		rateCard: (
+			cardId: string,
+			rating: DifficultyRating,
+			predictedKnown?: boolean,
+			{ extra = false }: { extra?: boolean } = {}
+		) => {
 			const quality = DIFFICULTY_TO_QUALITY[rating];
 			const state = get({ subscribe });
 			const existingRecord = state.studyRecords[cardId];
-			const newRecord = processReview(cardId, quality, existingRecord);
+			const keepSchedule =
+				extra && existingRecord !== undefined && !isCardDue(existingRecord) && quality >= PASS_QUALITY;
+			const newRecord = keepSchedule ? existingRecord : processReview(cardId, quality, existingRecord);
 
 			const today = getTodayDateString();
 			const isNewDay = state.lastStudyDate !== today;
@@ -296,8 +325,9 @@ function createFlashcardStore() {
 				cardId,
 				timestamp: getCurrentTimestamp(),
 				rating,
-				wasCorrect: quality >= 3, // good or easy
-				...(predictedKnown !== undefined ? { predictedKnown } : {})
+				wasCorrect: quality >= PASS_QUALITY, // good or easy
+				...(predictedKnown !== undefined ? { predictedKnown } : {}),
+				...(extra ? { extra: true } : {})
 			};
 
 			// Update daily stats
@@ -305,7 +335,7 @@ function createFlashcardStore() {
 			const updatedTodayStats: FlashcardDailyStats = {
 				...todayStats,
 				cardsReviewed: todayStats.cardsReviewed + 1,
-				correctCount: todayStats.correctCount + (quality >= 3 ? 1 : 0),
+				correctCount: todayStats.correctCount + (quality >= PASS_QUALITY ? 1 : 0),
 				againCount: todayStats.againCount + (rating === 'again' ? 1 : 0),
 				hardCount: todayStats.hardCount + (rating === 'hard' ? 1 : 0),
 				goodCount: todayStats.goodCount + (rating === 'good' ? 1 : 0),
@@ -362,7 +392,8 @@ function createFlashcardStore() {
 				currentDeckId: null,
 				currentCardIndex: 0,
 				showAnswer: false,
-				studyQueue: []
+				studyQueue: [],
+				sessionMode: 'due'
 			}));
 		},
 
@@ -413,7 +444,8 @@ export const currentCard = derived([flashcardStore, currentDeck], ([$store, $dec
 export const studyProgress = derived(flashcardStore, ($store) => ({
 	current: $store.currentCardIndex,
 	total: $store.studyQueue.length,
-	isComplete: $store.currentCardIndex >= $store.studyQueue.length
+	isComplete: $store.currentCardIndex >= $store.studyQueue.length,
+	mode: $store.sessionMode
 }));
 
 export const studyStats = derived(flashcardStore, ($store) => ({

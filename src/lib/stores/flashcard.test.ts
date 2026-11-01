@@ -2,7 +2,7 @@
  * Tests for flashcard store
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { get } from 'svelte/store';
 import type { FlashcardDeck, Flashcard } from '$lib/types/flashcard';
 
@@ -56,7 +56,7 @@ describe('flashcard store', () => {
 			expect(rateOnce('good', true)).toMatchObject({ predictedKnown: true, wasCorrect: true });
 		});
 
-		// 'Man það ekki', then 'Gott': the learner was wrong to doubt it. Kills the
+		// 'Man það ekki', then 'Rétt' (then 'Gott'): the learner was wrong to doubt it. Kills the
 		// mutant that stores predictedKnown as true whenever one is given.
 		it('stores "Man það ekki" (false) even when the card is then rated correct', () => {
 			expect(rateOnce('good', false)).toMatchObject({ predictedKnown: false, wasCorrect: true });
@@ -391,6 +391,139 @@ describe('flashcard store', () => {
 			expect(state.studyRecords).toEqual({});
 			expect(state.currentDeckId).toBeNull();
 			expect(state.todayStudied).toBe(0);
+		});
+	});
+
+	// Plan step S4.4, decision D04 (PED-11): 'Æfa' takes due cards; 'Aukaæfing' grows no
+	// interval that is not due yet, but a miss still reschedules.
+	describe('due sessions and extra practice (D04)', () => {
+		const queue = () => get(flashcardStore).studyQueue;
+		const cardsFor = (n: number) => Array.from({ length: n }, (_, i) => createTestCard(`c${i + 1}`));
+
+		it('a due session takes at most NEW_CARDS_PER_SESSION new cards', async () => {
+			const { NEW_CARDS_PER_SESSION } = await import('./flashcard');
+			flashcardStore.addDeck(createTestDeck('d1', 'Deck', cardsFor(NEW_CARDS_PER_SESSION + 5)));
+			flashcardStore.startStudySession('d1');
+			expect(queue()).toHaveLength(NEW_CARDS_PER_SESSION);
+		});
+
+		it('a card remembered today is not in the next due session', () => {
+			flashcardStore.addDeck(createTestDeck('d1', 'Deck', cardsFor(2)));
+			flashcardStore.startStudySession('d1');
+			flashcardStore.rateCard(queue()[0], 'good');
+			const rated = get(flashcardStore).reviewHistory[0].cardId;
+			flashcardStore.startStudySession('d1');
+			expect(queue()).not.toContain(rated);
+		});
+
+		it('extra practice takes every card, due or not', () => {
+			flashcardStore.addDeck(createTestDeck('d1', 'Deck', cardsFor(2)));
+			flashcardStore.startStudySession('d1');
+			flashcardStore.rateCard(queue()[0], 'good');
+			flashcardStore.startStudySession('d1', 'extra');
+			expect(queue()).toHaveLength(2);
+		});
+
+		it('remembering a card that is not due, in extra practice, leaves its schedule alone', () => {
+			flashcardStore.addDeck(createTestDeck('d1', 'Deck', [createTestCard('c1')]));
+			flashcardStore.startStudySession('d1');
+			flashcardStore.rateCard('c1', 'good');
+			const before = flashcardStore.getCardRecord('c1');
+			flashcardStore.startStudySession('d1', 'extra');
+			flashcardStore.rateCard('c1', 'good', true, { extra: true });
+			expect(flashcardStore.getCardRecord('c1')).toEqual(before);
+		});
+
+		it("marks extra practice reviews 'extra', and no others", () => {
+			flashcardStore.addDeck(createTestDeck('d1', 'Deck', [createTestCard('c1')]));
+			flashcardStore.startStudySession('d1');
+			flashcardStore.rateCard('c1', 'good');
+			flashcardStore.startStudySession('d1', 'extra');
+			flashcardStore.rateCard('c1', 'good', true, { extra: true });
+			expect(get(flashcardStore).reviewHistory.map((r) => r.extra)).toEqual([undefined, true]);
+		});
+
+		it.each(['again', 'hard'] as const)("a miss ('%s') in extra practice still reschedules the card", (rating) => {
+			flashcardStore.addDeck(createTestDeck('d1', 'Deck', [createTestCard('c1')]));
+			flashcardStore.startStudySession('d1');
+			flashcardStore.rateCard('c1', 'good');
+			flashcardStore.startStudySession('d1', 'extra');
+			flashcardStore.rateCard('c1', rating, true, { extra: true });
+			expect(flashcardStore.getCardRecord('c1')).toMatchObject({ interval: 1, consecutiveCorrect: 0 });
+		});
+
+		// PED-11's acceptance: through the app, four 'Rétt' on one day give 1 day, not 38
+		it("four 'Rétt' on one day leave the interval at 1 day", () => {
+			flashcardStore.addDeck(createTestDeck('d1', 'Deck', [createTestCard('c1')]));
+			flashcardStore.startStudySession('d1');
+			flashcardStore.rateCard('c1', 'good');
+			flashcardStore.startStudySession('d1');
+			expect(queue()).toEqual([]);
+			for (let i = 0; i < 3; i++) {
+				flashcardStore.startStudySession('d1', 'extra');
+				flashcardStore.rateCard('c1', 'good', true, { extra: true });
+			}
+			expect(flashcardStore.getCardRecord('c1')?.interval).toBe(1);
+		});
+	});
+
+	// The table in docs/decisions/2026-11-01-reader-d04-interval-table-as-built.md, measured
+	// here with a fake clock: each 'Rétt' is given on the day the card falls due.
+	describe("the interval table as built (D04's decision file)", () => {
+		const DAY = 24 * 60 * 60 * 1000;
+		let now: number;
+		const advance = (days: number) => {
+			now += days * DAY;
+			vi.setSystemTime(now);
+		};
+		const record = () => flashcardStore.getCardRecord('c1')!;
+
+		beforeEach(() => {
+			now = new Date('2026-11-02T10:00:00Z').getTime();
+			vi.useFakeTimers({ toFake: ['Date'] });
+			vi.setSystemTime(now);
+			flashcardStore.addDeck(createTestDeck('d1', 'Deck', [createTestCard('c1')]));
+		});
+
+		afterEach(() => {
+			vi.useRealTimers();
+		});
+
+		const rateDue = (rating: 'again' | 'hard' | 'good') => {
+			flashcardStore.startStudySession('d1');
+			expect(get(flashcardStore).studyQueue).toEqual(['c1']);
+			flashcardStore.rateCard('c1', rating);
+		};
+
+		it("'Rétt' on each due day: 1, 6, 15 and 38 days, ease 2.50", () => {
+			const intervals: number[] = [];
+			rateDue('good');
+			intervals.push(record().interval);
+			for (const wait of [1, 6, 15]) {
+				advance(wait);
+				rateDue('good');
+				intervals.push(record().interval);
+			}
+			expect([intervals, record().ease]).toEqual([[1, 6, 15, 38], 2.5]);
+		});
+
+		it.each([1, 6, 15])("'Að hluta' when the interval is %i days: 1 day, ease 2.18, the streak reset", (interval) => {
+			rateDue('good');
+			for (const wait of [1, 6].slice(0, [1, 6, 15].indexOf(interval))) {
+				advance(wait);
+				rateDue('good');
+			}
+			expect(record().interval).toBe(interval);
+			advance(interval);
+			rateDue('hard');
+			expect(record()).toMatchObject({ interval: 1, consecutiveCorrect: 0 });
+			expect(record().ease).toBeCloseTo(2.18, 2);
+		});
+
+		it("'Rangt' on a new card: 1 day, ease 1.70", () => {
+			rateDue('again');
+			expect(record().interval).toBe(1);
+			expect(record().ease).toBeCloseTo(1.7, 2);
 		});
 	});
 });

@@ -12,6 +12,7 @@
 		studyStats
 	} from '$lib/stores';
 	import type { DifficultyRating } from '$lib/types/flashcard';
+	import type { SessionMode } from '$lib/stores/flashcard';
 	import PredictThenRate from '$lib/components/study/PredictThenRate.svelte';
 	import { announce } from '$lib/stores/announcer';
 	import { tick } from 'svelte';
@@ -27,7 +28,9 @@
 
 	async function rate(rating: DifficultyRating, predictedKnown: boolean) {
 		if (!$currentCard) return;
-		flashcardStore.rateCard($currentCard.id, rating, predictedKnown);
+		flashcardStore.rateCard($currentCard.id, rating, predictedKnown, {
+			extra: $studyProgress.mode === 'extra'
+		});
 		await tick();
 		if ($studyProgress.isComplete) {
 			doneHeadingEl?.focus();
@@ -37,9 +40,17 @@
 		}
 	}
 
-	function startStudy(deckId: string) {
-		flashcardStore.startStudySession(deckId);
+	/** 'Æfa' starts a due session, 'Aukaæfing' an extra one (decision D04, PED-11) */
+	async function startStudy(deckId: string, mode: SessionMode = 'due') {
+		flashcardStore.startStudySession(deckId, mode);
+		// The button that started it is gone: focus the first card, or the empty state
+		await tick();
+		if ($studyProgress.isComplete) doneHeadingEl?.focus();
+		else round?.focus();
 	}
+
+	// A due session with nothing in it gets its own screen, not 'Vel gert!'
+	let nothingDue = $derived($studyProgress.mode === 'due' && $studyProgress.total === 0);
 
 	let activeDeckStats = $derived($currentDeck
 		? flashcardStore.getDeckStats($currentDeck.id)
@@ -123,13 +134,23 @@
 								{/if}
 							</div>
 						</div>
-						<button
-							onclick={() => startStudy(deck.id)}
-							class="deck-card-btn"
-							disabled={deck.cards.length === 0}
-						>
-							Æfa
-						</button>
+						<div class="deck-card-actions">
+							<button
+								onclick={() => startStudy(deck.id)}
+								class="deck-card-btn"
+								disabled={deck.cards.length === 0}
+							>
+								Æfa
+							</button>
+							<!-- D20: proposed wording (D04, PED-11): 'Aukaæfing', extra practice with every card. -->
+							<button
+								onclick={() => startStudy(deck.id, 'extra')}
+								class="flashcard-secondary-btn"
+								disabled={deck.cards.length === 0}
+							>
+								Aukaæfing
+							</button>
+						</div>
 					</div>
 				{/each}
 			</div>
@@ -144,10 +165,21 @@
 			</div>
 
 			<h2 class="flashcard-subheading" tabindex="-1" bind:this={doneHeadingEl}>
-				Vel gert!
+				{#if nothingDue}
+					<!-- D20: proposed wording (D04, PED-11): the empty due session, and the line after extra practice. -->
+					Ekkert kort á dagskrá
+				{:else}
+					Vel gert!
+				{/if}
 			</h2>
 			<p class="flashcard-description">
-				Þú hefur lokið öllum kortum fyrir í dag.
+				{#if nothingDue}
+					Engin kort eru komin á tíma í dag. Viltu taka aukaæfingu með öllum kortunum?
+				{:else if $studyProgress.mode === 'extra'}
+					Aukaæfingu lokið.
+				{:else}
+					Þú hefur lokið öllum kortum fyrir í dag.
+				{/if}
 			</p>
 
 			<div class="flex justify-center gap-4">
@@ -157,11 +189,12 @@
 				>
 					Til baka
 				</button>
+				<!-- A second due session the same day would be empty: offer extra practice instead -->
 				<button
-					onclick={() => { if ($currentDeck) startStudy($currentDeck.id); }}
+					onclick={() => { if ($currentDeck) startStudy($currentDeck.id, 'extra'); }}
 					class="flashcard-primary-btn"
 				>
-					Æfa aftur
+					Aukaæfing
 				</button>
 			</div>
 		</div>
@@ -293,6 +326,19 @@
 		font-weight: 500;
 	}
 
+	/* 'Æfa' and 'Aukaæfing': stacked on a phone, side by side from 640 px */
+	.deck-card-actions {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		flex-shrink: 0;
+	}
+	@media (min-width: 640px) {
+		.deck-card-actions {
+			flex-direction: row;
+		}
+	}
+
 	.deck-card-btn {
 		padding: 0.5rem 1rem;
 		border-radius: var(--radius-lg);
@@ -345,8 +391,12 @@
 		border: 1px solid var(--border-color);
 		transition: background-color 0.15s;
 	}
-	.flashcard-secondary-btn:hover {
+	.flashcard-secondary-btn:hover:not(:disabled) {
 		background-color: var(--bg-tertiary);
+	}
+	.flashcard-secondary-btn:disabled {
+		color: var(--text-disabled);
+		cursor: not-allowed;
 	}
 
 	/* Study streak */
