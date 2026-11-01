@@ -336,8 +336,8 @@ Static site on a Linode server (nginx). Output goes to the `build/` directory. N
   **Do not make the full-tree audit blocking** — a dev-tree advisory with no fix yet must
   not block a deploy of a static site whose production tree is the thing that ships.
   **But do READ the output; it drifts, and nothing reports it** (the step is
-  `continue-on-error`): between August and October 2026 the full tree went 0 → 3 → 0 → 4 → 0
-  → 26 while the production tree stayed at 0. Current Development Status carries the latest
+  `continue-on-error`): between August and October 2026 the full tree swung between 0 and 26
+  packages several times while the production tree stayed at 0. Current Development Status carries the latest
   count. A lockfile-only refresh can clear advisories **inside** the existing overrides
   without touching one. ⚠️ **A zero is not by
   itself a control** — a bare `npm audit` reports `found 0 vulnerabilities` whether the

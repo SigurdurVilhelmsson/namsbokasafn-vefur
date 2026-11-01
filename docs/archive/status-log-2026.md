@@ -1,4 +1,4 @@
-# Status log, July–November 2026
+# Status log, June–November 2026
 
 Moved out of `CLAUDE.md` on 2026-11-01, word for word, so that CLAUDE.md (loaded into every
 Claude Code session) holds only what a session needs today. Nothing here is maintained:
@@ -12,7 +12,7 @@ it is the record as written at each date, and later entries supersede earlier on
 From 2026-11-01 on, a train rewrites CLAUDE.md's short "Current Development Status" block and
 puts its details (gates, counts, backup, live checks) in its PR body, not here.
 
-## Part A — dated status entries (2026-07-25 → 2026-11-01)
+## Part A — dated status entries (June 2026 → 2026-11-01)
 
 ### 2026-11-01 — train 7 deployed: seven small fixes are live; M4 lives on `feature/reader-m4`
 
