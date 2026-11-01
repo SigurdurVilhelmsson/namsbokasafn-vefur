@@ -68,8 +68,13 @@
 		}
 		keyboardLikely =
 			typeof window.matchMedia === 'function' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-		// Not on touch screens: focusing the box opens the on-screen keyboard over the text
-		if (keyboardLikely) textareaElement?.focus();
+		// Not on touch screens: focusing the box opens the on-screen keyboard over the text. And
+		// only while focus is idle: the prompt opens 1.5 s after the section's end comes into
+		// view, which a keyboard user reaches by tabbing, so focus may sit on 'Næsti kafli' or
+		// another control by then, and taking it would move them somewhere they did not go.
+		const active = document.activeElement;
+		const focusIdle = !active || active === document.body;
+		if (keyboardLikely && focusIdle) textareaElement?.focus();
 	});
 
 	function markWhySeen() {

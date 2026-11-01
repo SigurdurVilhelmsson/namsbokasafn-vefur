@@ -174,6 +174,13 @@ for (const viewport of [
 			await expectFocusOnNext(page);
 		});
 
+		test("opening at the section's end does not take focus from the next-section link", async ({ page }) => {
+			await open(page, SECTION!);
+			await nextLink(page).focus();
+			await atEnd(page, () => expect(recall(page)).toBeVisible({ timeout: 2500 }));
+			await expect(nextLink(page)).toBeFocused();
+		});
+
 		test('Escape on a box holding text keeps the text and the prompt', async ({ page }) => {
 			await promptOpen(page);
 			await page.keyboard.type(RECALL_TEXT);

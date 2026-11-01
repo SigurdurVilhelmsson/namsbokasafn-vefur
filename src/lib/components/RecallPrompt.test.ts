@@ -227,6 +227,14 @@ describe('RecallPrompt: touch screens', () => {
 		expect(document.activeElement).toBe(textarea(t));
 	});
 
+	it('does not take focus from a control the reader is on', () => {
+		const link = document.body.appendChild(document.createElement('a'));
+		link.href = '#next';
+		link.focus();
+		render();
+		expect(document.activeElement).toBe(link);
+	});
+
 	it('does not focus the box on a touch screen', () => {
 		pointer('coarse');
 		const t = render();
