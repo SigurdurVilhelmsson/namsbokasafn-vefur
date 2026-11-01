@@ -7,6 +7,8 @@
   page load. If a feature ever sends anything else, D03's data rule in
   CLAUDE.md needs a new decision first, and this page must change with it.
 
+  The recall items (S5.2-S5.5) were checked by [USER] as D20 batch 5 (2026-11-01).
+
   Checked by [USER] as D20 batch 4 (2026-10-27). GoatCounter's individual-pageview
   setting is off ([USER], 2026-10-27); the GoatCounter paragraph assumes it, so it
   must change if that setting is ever turned on.
@@ -60,17 +62,15 @@
 					<li>framvindu í bókunum: hvaða hlutar eru lesnir, hvar þú varst og bókamerki;</li>
 					<li>yfirstrikanir og athugasemdir sem þú skrifar;</li>
 					<li>minniskort og hvernig þér gekk að rifja þau upp;</li>
-					<!-- D20: proposed wording (S5.2): the recall entries, now that the prompt writes them. -->
 					<li>það sem þú skrifar þegar þú rifjar upp efni kafla eftir lesturinn;</li>
 					<li>námsmarkmið sem þú hefur merkt sem lokið, og hve vel þú telur þig kunna þau;</li>
 					<li>æfingadæmi sem þú hefur opnað og hvernig þér gekk með þau;</li>
-					<!-- D20: proposed wording (S5.4): the recall counts join the statistics item. -->
 					<li>
 						lestrartölfræði í Námsgreiningu: hve lengi og hvenær þú lest, lotur, röð daga og markmið,
 						og hve oft upprifjun birtist og hvernig þú brást við henni;
 					</li>
 					<li>síðustu leitarorð;</li>
-					<!-- D20: proposed wording (S5.3): the recall 'why' line's seen flag joins the settings
+					<!-- S5.3: the recall 'why' line's seen flag joins the settings
 					     item. Worded to cover S4.3's flashcard flag too, which rewrites this line on
 					     feature/reader-m4: at S4.5 keep this version. -->
 					<li>stillingar, til dæmis letur, línubil og litaþema, og hvaða skýringar þú hefur þegar séð;</li>
@@ -113,7 +113,6 @@
 					netfangið þitt og það sem þú skrifaðir.
 				</p>
 				<h3>Útflutningur</h3>
-				<!-- D20: proposed wording (S5.5, D09): the counts export joins the exports. -->
 				<p>
 					Ef þú flytur út athugasemdir, tölfræði eða tölur um upprifjun verður skráin til á tækinu
 					þínu. Hún fer ekki lengra nema þú sendir hana. Áður en þú sækir tölurnar um upprifjun sérðu
@@ -141,7 +140,6 @@
 						Þá eyðist allt þegar öllum einkagluggum er lokað. Skrár sem þú flytur út eða vistar á
 						tækinu, til dæmis myndir, verða þó eftir.
 					</li>
-					<!-- D20: proposed wording (S5.5, D18): one recall can be deleted on its own. -->
 					<li>Upprifjun um einn kafla geturðu eytt með „Eyða“ þegar hún birtist í lok kaflans.</li>
 					<li>Gögnin fylgja vafranum: þau flytjast ekki á milli tækja eða vafra.</li>
 				</ul>

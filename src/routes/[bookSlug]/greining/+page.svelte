@@ -186,8 +186,6 @@
 	// flashcards, bookmarks, highlights and reading progress stay (plan step S3.2, PED-14).
 	// The recall counts go with the statistics; the recalls a reader typed stay (S5.4).
 	function handleClearData() {
-		// D20: proposed wording (S5.4): the recall counts join what is erased, the typed recalls
-		// join what stays.
 		const message =
 			'Eyða lestrartölfræði, lotum, röð daga, markmiðum og tölum um upprifjun í Námsgreiningu í þessum vafra? Námsmarkmið, minniskort, bókamerki, yfirstrikanir, athugasemdir, það sem þú skrifaðir í upprifjun og framvinda í bókunum haldast. Þetta er ekki hægt að afturkalla.';
 		if (confirm(message)) {
@@ -199,7 +197,7 @@
 	// caches first, then every namsbokasafn key, then reload at once, before any store can
 	// write its in-memory state back (plan step S3.2, PED-14).
 	async function handleEraseAll() {
-		// D20: proposed wording (S5.4): 'upprifjunum' added; the recall entries (S5.2) are erased too.
+		// It names the recall entries (S5.2), which it erases too (S5.4).
 		const message =
 			'Eyða öllu sem Námsbókasafn geymir í þessum vafra: framvindu, bókamerkjum, yfirstrikunum, athugasemdum, minniskortum, upprifjunum, námsmarkmiðum, æfingadæmum, tölfræði og stillingum? Niðurhalaðar bækur eyðast líka. Þetta er ekki hægt að afturkalla.';
 		if (!confirm(message)) return;
@@ -253,8 +251,8 @@
 			Námsgreining
 		</h1>
 		<div class="flex flex-wrap gap-2">
-			<!-- D20: proposed wording (S5.5, D09): 'Flytja út' is now the counts-only export, and the
-			     whole statistics file it used to download is 'Sækja alla tölfræði'. -->
+			<!-- 'Flytja út' is the counts-only export (S5.5, D09); the whole statistics file it used to
+			     download is 'Sækja alla tölfræði'. -->
 			<button
 				onclick={openCountsExport}
 				class="text-sm px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -284,7 +282,7 @@
 	</div>
 
 	<!-- The counts-only export's preview (S5.5, D09). A native modal dialog: focus moves in, and
-	     focus returns to 'Flytja út' when it closes. D20: proposed wording, all of it. -->
+	     focus returns to 'Flytja út' when it closes. -->
 	<!-- It closes itself on Escape: the site's Escape shortcut ('closeModal') calls preventDefault,
 	     which stops a native dialog's own Escape. -->
 	<dialog
@@ -402,7 +400,7 @@
 				</div>
 
 				{#if recallLine}
-					<!-- D20: proposed wording (S5.4): the line itself is in lib/utils/counters.ts -->
+					<!-- The line itself is in lib/utils/counters.ts (S5.4) -->
 					<p class="mb-8 text-sm text-[var(--text-secondary)]" data-recall-summary>{recallLine}</p>
 				{/if}
 

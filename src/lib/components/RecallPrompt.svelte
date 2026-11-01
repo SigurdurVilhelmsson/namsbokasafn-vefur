@@ -53,7 +53,7 @@
 
 	const uid = $props.id();
 
-	// D20: proposed wording (S5.3, PED-18): the saved message, announced as shown.
+	// The saved message, announced as shown (S5.3, PED-18).
 	const SAVED_MESSAGE = 'Vistað — góð upprifjun festir efnið í minni.';
 
 	/**
@@ -135,9 +135,9 @@
 	}
 </script>
 
-<!-- D20: proposed wording (S5.2, ported from v1.1): every string in this component, new on main;
-     S5.3 changed the heading, the instruction, the placeholder, the hint's place, 'Vista', and
-     added the 'why' line and 'Loka'. -->
+<!-- Every string in this component is new on main (S5.2, ported from v1.1); S5.3 changed the
+     heading, the instruction, the placeholder, the hint's place, 'Vista', and added the 'why'
+     line and 'Loka'. Checked by [USER] as D20 batch 5 (2026-11-01). -->
 <div
 	class="recall-prompt mt-8 rounded-xl border border-[var(--accent-subtle)] bg-[var(--accent-light)] p-5"
 	role="region"

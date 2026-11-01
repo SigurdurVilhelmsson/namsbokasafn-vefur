@@ -37,7 +37,6 @@
         <h2>Efnisyfirlit</h2>
         <ul>
           <li><a href="#access">Aðgangur að efni</a></li>
-          <!-- D20: proposed wording (S5.4) -->
           <li><a href="#teaching">Kennsla með Námsbókasafni</a></li>
           <li><a href="#content-status">Staða efnis</a></li>
           <li><a href="#known-issues">Þekkt vandamál</a></li>
@@ -84,8 +83,8 @@
 
       <!-- Section: Content Status -->
       <!-- Section: Teaching (plan step S5.4; PED-39's routines, PED-25's 'why' for teachers).
-           D20: proposed wording: the whole section. Recall only for now: predict-first comes to
-           main with M4 (S4.5). -->
+           Recall only for now: predict-first comes to main with M4 (S4.5).
+           Checked by [USER] as D20 batch 5 (2026-11-01). -->
       <section class="section" id="teaching">
         <h2>
           <Icon name="square-pen" size="md" class="text-[var(--accent-strong)]" />
@@ -101,7 +100,6 @@
           <li>Láttu nemendur bera upprifjun sína saman í pörum og við námsmarkmið kaflans.</li>
         </ol>
 
-        <!-- D20: proposed wording (S5.5): the read-back with 'Eyða' and the counts export. -->
         <p>Upprifjunin er geymd í vafra nemandans og fer ekki af tækinu, svo þú sérð hana aðeins ef nemandinn sýnir þér hana. Nemandinn sér hana aftur í lok kaflans og getur eytt henni. Á Námsgreiningu sér nemandinn hve oft hann hefur vistað eða sleppt upprifjun. Með „Flytja út“ getur hann sótt þær tölur í skrá, eftir að hafa séð hvað í henni er, og sent þér hana ef hann vill; textinn sjálfur fer aldrei í skrána. Nánar á síðunni <a href="/personuvernd/">Gögnin þín og persónuvernd</a>.</p>
       </section>
 

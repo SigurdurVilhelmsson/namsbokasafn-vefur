@@ -22,7 +22,7 @@
 
 	let { entry, ondeleted, actions }: Props = $props();
 
-	// D20: proposed wording (S5.5): the confirm and the announcement of a deleted recall.
+	// The confirm and the announcement of a deleted recall (S5.5).
 	const CONFIRM_DELETE = 'Eyða þessari upprifjun? Þetta er ekki hægt að afturkalla.';
 	const DELETED_MESSAGE = 'Upprifjuninni var eytt.';
 
@@ -40,7 +40,6 @@
 	{entry.text}
 </blockquote>
 <div class="mt-3 flex justify-end gap-2">
-	<!-- D20: proposed wording (S5.5) -->
 	<button
 		onclick={handleDelete}
 		class="rounded-lg px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
