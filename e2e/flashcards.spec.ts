@@ -7,6 +7,10 @@
  * clicking through the landing page, lost a client-side navigation race, and
  * called a bare test.skip(). Past that, they looked for a "Byrja námsæfingu"
  * button the page no longer has, and would have skipped on it.
+ *
+ * Predict-first (plan step S4.1, KEEP-02): the card is not a button. The answer
+ * and the ratings appear only after 'Man það' or 'Man það ekki'. Never bring
+ * tap-to-flip back: it would remove the intervention.
  */
 
 import { test, expect, type Page } from '@playwright/test';
@@ -48,9 +52,11 @@ async function openFlashcards(page: Page, { seed }: { seed: boolean }) {
 	});
 }
 
+const RATINGS = ['Aftur', 'Erfitt', 'Gott', 'Auðvelt'];
+
 /** The question card of the running session, and which seeded card it shows */
 async function currentCard(page: Page) {
-	const question = page.getByRole('button', { name: /^Spurning/ });
+	const question = page.getByRole('region', { name: 'Spurning', exact: true });
 	await expect(question).toBeVisible();
 	const text = (await question.textContent()) ?? '';
 	const card = CARDS.find((c) => text.includes(c.front));
@@ -76,29 +82,36 @@ test.describe('Flashcard Page', () => {
 		await currentCard(page);
 	});
 
-	test('flipping a card shows its answer and the four ratings', async ({ page }) => {
+	test('the answer stays hidden until a prediction is made', async ({ page }) => {
 		await openFlashcards(page, { seed: true });
 		await page.getByRole('button', { name: 'Æfa' }).click();
-		const { question, card } = await currentCard(page);
-		await question.click();
+		const { card } = await currentCard(page);
 
-		// Scoped to <main>: the sidebar is in the accessibility tree on desktop (S1.2),
-		// and its 'Svarlykill' button also starts with "Svar".
-		await expect(page.getByRole('main').getByRole('button', { name: /^Svar/ })).toContainText(card.back);
-		for (const rating of ['Aftur', 'Erfitt', 'Gott', 'Auðvelt']) {
+		// Before a prediction: no answer, no ratings, and no card to tap
+		await expect(page.getByRole('main').getByText(card.back)).toHaveCount(0);
+		for (const rating of RATINGS) {
+			await expect(page.getByRole('button', { name: new RegExp(`^${rating}`) })).toHaveCount(0);
+		}
+		await expect(page.getByRole('button', { name: /^Spurning/ })).toHaveCount(0);
+
+		// Exact: 'Man það' is also the start of 'Man það ekki'
+		await page.getByRole('button', { name: 'Man það', exact: true }).click();
+		await expect(page.getByRole('region', { name: 'Svar', exact: true })).toContainText(card.back);
+		for (const rating of RATINGS) {
 			await expect(page.getByRole('button', { name: new RegExp(`^${rating}`) })).toBeVisible();
 		}
 	});
 
-	test('rating a card moves on and is saved across a reload', async ({ page }) => {
+	test("'Man það ekki' then 'Gott' moves on, saves both, and survives a reload", async ({ page }) => {
 		await openFlashcards(page, { seed: true });
 		await page.getByRole('button', { name: 'Æfa' }).click();
-		const { question, card } = await currentCard(page);
-		await question.click();
+		const { card } = await currentCard(page);
+		await page.getByRole('button', { name: 'Man það ekki', exact: true }).click();
+		await expect(page.getByRole('region', { name: 'Svar', exact: true })).toContainText(card.back);
 		await page.getByRole('button', { name: /^Gott/ }).click();
 
 		// The other card comes up next
-		const next = page.getByRole('button', { name: /^Spurning/ });
+		const next = page.getByRole('region', { name: 'Spurning', exact: true });
 		await expect(next).not.toContainText(card.front);
 
 		const saved = await page.evaluate((key) => {
@@ -106,6 +119,13 @@ test.describe('Flashcard Page', () => {
 			return Object.keys(state.studyRecords ?? {});
 		}, STORAGE_KEY);
 		expect(saved).toContain(card.id);
+
+		// The review records the doubt beside the outcome: predicted unknown, rated correct
+		const review = await page.evaluate((key) => {
+			const state = JSON.parse(localStorage.getItem(key) ?? '{}');
+			return (state.reviewHistory ?? []).at(-1);
+		}, STORAGE_KEY);
+		expect(review).toMatchObject({ cardId: card.id, rating: 'good', predictedKnown: false, wasCorrect: true });
 
 		// A reload resumes the session on the next card
 		await page.reload();

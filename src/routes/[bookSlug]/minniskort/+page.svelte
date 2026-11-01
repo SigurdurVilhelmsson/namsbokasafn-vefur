@@ -15,6 +15,9 @@
 
 	let { data }: { data: PageData } = $props();
 
+	// Names the card region after its visible label ('Spurning', then 'Svar')
+	const cardLabelId = $props.id();
+
 	let isFlipped = $state(false);
 	// Pre-reveal self-prediction (predict-first: judge before seeing the answer)
 	let predictedKnown: boolean | null = $state(null);
@@ -193,9 +196,9 @@
 			</div>
 
 			<!-- Card -->
-			<div class="flashcard-card">
+			<div class="flashcard-card" role="region" aria-labelledby={cardLabelId}>
 				<div class="text-center">
-					<span class="flashcard-card-label">
+					<span id={cardLabelId} class="flashcard-card-label">
 						{isFlipped ? 'Svar' : 'Spurning'}
 					</span>
 					<p class="flashcard-card-text">
@@ -206,6 +209,7 @@
 
 			<!-- Predict-first prompt or rating buttons -->
 			{#if !isFlipped}
+				<!-- D20: proposed wording (KEEP-02, predict-first): the hint, 'Man það' and 'Man það ekki'. -->
 				<div class="mt-6">
 					<p class="flashcard-hint" style="margin-bottom: 1rem;">
 						Reyndu fyrst að rifja upp svarið — manstu það?

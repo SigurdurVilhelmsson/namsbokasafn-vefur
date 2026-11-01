@@ -1,5 +1,5 @@
 <!--
-  ReviewPhase - Flashcard review with flip + rate, adapted from minniskort page
+  ReviewPhase - Flashcard review (predict, reveal, rate), adapted from minniskort page
 -->
 <script lang="ts">
 	import type { DueFlashcard } from '$lib/utils/studySession';
@@ -18,6 +18,9 @@
 	}
 
 	let { dueFlashcards, reviewProblems, oncomplete }: Props = $props();
+
+	// Names the card region after its visible label ('Spurning', then 'Svar')
+	const cardLabelId = $props.id();
 
 	// Combined items: flashcards first, then problems
 	type ReviewItem =
@@ -105,9 +108,9 @@
 
 	{#if currentItem?.type === 'flashcard'}
 		<!-- Flashcard review -->
-		<div class="rp-card">
+		<div class="rp-card" role="region" aria-labelledby={cardLabelId}>
 			<div class="text-center">
-				<span class="rp-card-label">
+				<span id={cardLabelId} class="rp-card-label">
 					{isFlipped ? 'Svar' : 'Spurning'}
 				</span>
 				<p class="rp-card-text">
@@ -117,6 +120,7 @@
 		</div>
 
 		{#if !isFlipped}
+			<!-- D20: proposed wording (KEEP-02, predict-first): the hint, 'Man það' and 'Man það ekki'. -->
 			<div class="mt-4">
 				<p class="rp-hint" style="margin-bottom: 0.75rem;">
 					Reyndu fyrst að rifja upp svarið — manstu það?

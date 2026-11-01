@@ -33,30 +33,6 @@ function createTestDeck(id: string, name: string, cards: Flashcard[] = []): Flas
 }
 
 describe('flashcard store', () => {
-	describe('predict-first review recording', () => {
-		it('stores the pre-reveal prediction in review history', async () => {
-			const deck = createTestDeck('d1', 'Deck', [createTestCard('c1')]);
-			flashcardStore.addDeck(deck);
-			flashcardStore.startStudySession('d1');
-			flashcardStore.rateCard('c1', 'good', true);
-
-			const reviews = flashcardStore.getRecentReviews(1);
-			expect(reviews[0].predictedKnown).toBe(true);
-			expect(reviews[0].wasCorrect).toBe(true);
-		});
-
-		it('leaves prediction undefined when none was given', () => {
-			const deck = createTestDeck('d1', 'Deck', [createTestCard('c1')]);
-			flashcardStore.addDeck(deck);
-			flashcardStore.startStudySession('d1');
-			flashcardStore.rateCard('c1', 'again');
-
-			const reviews = flashcardStore.getRecentReviews(1);
-			expect(reviews[0].predictedKnown).toBeUndefined();
-			expect(reviews[0].wasCorrect).toBe(false);
-		});
-	});
-
 	beforeEach(async () => {
 		localStorage.clear();
 		vi.resetModules();
@@ -66,6 +42,29 @@ describe('flashcard store', () => {
 		currentCard = module.currentCard;
 		studyProgress = module.studyProgress;
 		studyStats = module.studyStats;
+	});
+
+	describe('predict-first review recording', () => {
+		function rateOnce(rating: 'again' | 'good', predictedKnown?: boolean) {
+			flashcardStore.addDeck(createTestDeck('d1', 'Deck', [createTestCard('c1')]));
+			flashcardStore.startStudySession('d1');
+			flashcardStore.rateCard('c1', rating, predictedKnown);
+			return flashcardStore.getRecentReviews(1)[0];
+		}
+
+		it('stores "Man það" (true) beside the outcome', () => {
+			expect(rateOnce('good', true)).toMatchObject({ predictedKnown: true, wasCorrect: true });
+		});
+
+		// 'Man það ekki', then 'Gott': the learner was wrong to doubt it. Kills the
+		// mutant that stores predictedKnown as true whenever one is given.
+		it('stores "Man það ekki" (false) even when the card is then rated correct', () => {
+			expect(rateOnce('good', false)).toMatchObject({ predictedKnown: false, wasCorrect: true });
+		});
+
+		it('leaves the prediction out when none was given', () => {
+			expect(rateOnce('again')).not.toHaveProperty('predictedKnown');
+		});
 	});
 
 	describe('default values', () => {
