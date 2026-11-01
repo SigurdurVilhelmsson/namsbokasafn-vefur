@@ -89,6 +89,15 @@ export function formatLocalDate(date: Date): string {
 }
 
 /**
+ * Whether an ISO timestamp (stored in UTC) falls on a local date (YYYY-MM-DD). A prefix test
+ * on the timestamp compares a UTC date with a local one, which is wrong outside UTC near
+ * midnight (code review M7).
+ */
+export function isOnLocalDate(isoTimestamp: string, localDate: string): boolean {
+  return formatLocalDate(new Date(isoTimestamp)) === localDate;
+}
+
+/**
  * Get today's date as a local date string (YYYY-MM-DD)
  */
 export function getTodayDateString(): string {
