@@ -35,6 +35,20 @@ async function seedTheme(page: Page, theme: Theme): Promise<void> {
 	}, theme);
 }
 
+/**
+ * Mark `sectionUrl`'s recall prompt as already shown (D10: once per section), with no saved
+ * entry, so nothing opens at the section's end. Otherwise the prompt opens about 1.5 s after
+ * the end comes into view, pushes the next-section link below the viewport between the
+ * screenshot and the measurement, and the ring samples off-screen black (measured: the link
+ * moved from y 607 to 825 at 720 px).
+ */
+async function seedRecallSpent(page: Page, sectionUrl: string): Promise<void> {
+	const [bookSlug, , chapterSlug, sectionSlug] = sectionUrl.split('/').filter(Boolean);
+	await page.addInitScript((ref) => {
+		localStorage.setItem('namsbokasafn:recall', JSON.stringify({ entries: [], prompted: [ref] }));
+	}, { bookSlug, chapterSlug, sectionSlug });
+}
+
 async function expectTheme(page: Page, theme: Theme): Promise<void> {
 	const html = page.locator('html');
 	if (theme === 'dark') await expect(html).toHaveClass(/(^|\s)dark(\s|$)/);
@@ -164,6 +178,7 @@ test.describe('The focus ring (S2.2, D01)', () => {
 			test('the header, the next-section link and a Settings option show the ring', async ({ page }) => {
 				test.skip(!SECTION, 'no published book is synced');
 				await seedTheme(page, theme);
+				await seedRecallSpent(page, SECTION!);
 				await page.goto(SECTION!);
 				await page.waitForLoadState('networkidle');
 				await expectTheme(page, theme);
@@ -175,6 +190,9 @@ test.describe('The focus ring (S2.2, D01)', () => {
 				const next = page.locator('.nav-btn-next').first();
 				await tabTo(page, next);
 				await expectRing(page, next, 'next-section link');
+				// Past read detection's 1.5 s, the seeded prompt still has not opened
+				await page.waitForTimeout(2000);
+				await expect(page.getByRole('region', { name: 'Upprifjun', exact: true })).toHaveCount(0);
 
 				await page.getByRole('button', { name: 'Stillingar', exact: true }).filter({ visible: true }).first().click();
 				const dialog = page.getByRole('dialog');
