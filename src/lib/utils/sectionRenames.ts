@@ -174,6 +174,12 @@ export function renameInAnnotations<A extends AnnotationLike>(list: A[], renames
 	return changed ? next : list;
 }
 
+/**
+ * Recall entries (namsbokasafn:recall) carry the same three keys as highlights and random
+ * ids, so they move the same way.
+ */
+export const renameInRecall = renameInAnnotations;
+
 // ---------------------------------------------------------------------------
 // Analytics: reading times, activity log, sessions (namsbokasafn:analytics)
 // ---------------------------------------------------------------------------
