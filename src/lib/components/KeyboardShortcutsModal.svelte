@@ -51,6 +51,38 @@
 		}
 	}
 
+	// A captured key is shown for 300 ms, then saved to the shortcut it was pressed for. The
+	// save remembers that shortcut: it used to read editingAction when the timer fired, so a key
+	// pressed for one shortcut landed on the next one opened (code review M10).
+	let pendingSave: { action: ShortcutAction; key: string; timer: ReturnType<typeof setTimeout> } | null = null;
+
+	function scheduleSave(action: ShortcutAction, key: string): void {
+		cancelPendingSave();
+		const timer = setTimeout(() => {
+			pendingSave = null;
+			settings.setShortcut(action, key);
+			if (editingAction === action) {
+				editingAction = null;
+				pendingKey = null;
+			}
+		}, 300);
+		pendingSave = { action, key, timer };
+	}
+
+	/** Save a key already pressed now, instead of after the delay */
+	function flushPendingSave(): void {
+		if (!pendingSave) return;
+		const { action, key, timer } = pendingSave;
+		clearTimeout(timer);
+		pendingSave = null;
+		settings.setShortcut(action, key);
+	}
+
+	function cancelPendingSave(): void {
+		if (pendingSave) clearTimeout(pendingSave.timer);
+		pendingSave = null;
+	}
+
 	// Handle key capture when editing
 	function handleEditKeyDown(event: KeyboardEvent): void {
 		if (!editingAction) return;
@@ -60,6 +92,12 @@
 
 		// Ignore modifier-only keys
 		if (['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) {
+			return;
+		}
+
+		// Escape cancels the edit; it is never saved as a binding (code review M10)
+		if (event.key === 'Escape') {
+			handleCancelEdit();
 			return;
 		}
 
@@ -77,39 +115,25 @@
 			const fullSequence = `g ${key}`;
 			pendingKey = fullSequence;
 			keySequence = [];
-
-			// Save after a brief delay to show the key
-			setTimeout(() => {
-				if (editingAction) {
-					settings.setShortcut(editingAction, fullSequence);
-				}
-				editingAction = null;
-				pendingKey = null;
-			}, 300);
+			scheduleSave(editingAction, fullSequence);
 			return;
 		}
 
 		// Single key shortcut
 		pendingKey = key;
 		keySequence = [];
-
-		// Save after a brief delay to show the key
-		setTimeout(() => {
-			if (editingAction) {
-				settings.setShortcut(editingAction, key);
-			}
-			editingAction = null;
-			pendingKey = null;
-		}, 300);
+		scheduleSave(editingAction, key);
 	}
 
 	function handleCancelEdit(): void {
+		cancelPendingSave();
 		editingAction = null;
 		pendingKey = null;
 		keySequence = [];
 	}
 
 	function handleStartEdit(action: ShortcutAction): void {
+		flushPendingSave();
 		editingAction = action;
 		pendingKey = null;
 		keySequence = [];
@@ -152,6 +176,7 @@
 			window.removeEventListener('keydown', handleGlobalKeyDown);
 			window.removeEventListener('keydown', handleEditKeyDown, true);
 			document.body.style.overflow = '';
+			flushPendingSave();
 		};
 	});
 </script>
