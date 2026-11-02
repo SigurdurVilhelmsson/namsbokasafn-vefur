@@ -35,6 +35,7 @@ interface Toc {
 	glossary?: unknown;
 	chapters?: { number: number; slug?: string; sections?: { file?: string; title?: string; reviewed?: boolean; type?: string }[] }[];
 	frontMatter?: { file?: string }[];
+	answerKey?: { chapter: number | string }[];
 }
 
 function readToc(slug: string): Toc | null {
@@ -230,6 +231,15 @@ export function firstModuleSection(slug: string): string | null {
 		if (file) return `/${slug}/kafli/${String(chapter.number).padStart(2, '0')}/${file.slice(0, -5)}/`;
 	}
 	return null;
+}
+
+/**
+ * Reader URL of the book's first answer-key page, or null. Its `.reading-content` is in the
+ * prerendered HTML; a section page's arrives only once the app has fetched the section.
+ */
+export function firstAnswerKeyPage(slug: string): string | null {
+	const entry = readToc(slug)?.answerKey?.[0];
+	return entry ? `/${slug}/svarlykill/${entry.chapter}/` : null;
 }
 
 /** Title of the section `firstModuleSection()` picks, or null. */

@@ -3,6 +3,31 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Pre-paint (reader plan S6.2, register UI-22): apply the stored theme and line width
+         before the page draws, so a dark-theme reader sees no light flash and a stored width
+         no reflow when the app starts. It repeats the settings store's checks (settings.ts),
+         and settings.test.ts runs this script against the store. The 'dark' class also sets
+         color-scheme, through app.css. The print pages stay light, as their layout forces. -->
+    <script>
+      (function () {
+        try {
+          if (location.pathname.indexOf("/print/") === 0) return;
+          var s = JSON.parse(localStorage.getItem("namsbokasafn:settings"));
+          if (!s) return;
+          var html = document.documentElement;
+          if (s.theme === "dark") html.classList.add("dark");
+          if (
+            s.lineWidth === "narrow" ||
+            s.lineWidth === "medium" ||
+            s.lineWidth === "wide"
+          ) {
+            html.setAttribute("data-line-width", s.lineWidth);
+          }
+        } catch (e) {
+          // Storage blocked or unreadable: the app applies the defaults when it starts
+        }
+      })();
+    </script>
     <link rel="icon" href="%sveltekit.assets%/favicon.svg" />
 
     %sveltekit.head%

@@ -160,6 +160,9 @@ function createSettingsStore() {
 			} else {
 				document.documentElement.classList.remove('dark');
 			}
+			// app.css's width rules read this attribute. app.html's pre-paint script sets it
+			// from storage before the app runs; from here on the store keeps it in step (S6.2).
+			document.documentElement.setAttribute('data-line-width', state.lineWidth);
 		});
 
 		// Cross-tab synchronization: take the other tab's record whole, and write nothing.

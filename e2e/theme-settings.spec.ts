@@ -4,7 +4,7 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
-import { firstModuleSection, publishedBook } from './helpers/content-fixtures';
+import { firstAnswerKeyPage, firstModuleSection, publishedBook } from './helpers/content-fixtures';
 
 test.describe('Theme Toggle', () => {
 	test('should toggle dark mode on landing page', async ({ page }) => {
@@ -169,14 +169,112 @@ test.describe('Settings Persistence', () => {
 	});
 });
 
-// ---------------------------------------------------------------------------------------
-// Settings groups say which option is selected (plan step S1.3, register UI-03)
-// ---------------------------------------------------------------------------------------
-
 const SECTION = (() => {
 	const book = publishedBook();
 	return book ? firstModuleSection(book) : null;
 })();
+
+/** A page whose .reading-content is prerendered (a section's arrives only after the app fetches it) */
+const ANSWER_KEY = (() => {
+	const book = publishedBook();
+	return book ? firstAnswerKeyPage(book) : null;
+})();
+
+// ---------------------------------------------------------------------------------------
+// The stored theme and line width apply before the page draws (plan step S6.2, register UI-22)
+// ---------------------------------------------------------------------------------------
+
+test.describe('Pre-paint: the stored theme and line width apply before the app runs (UI-22)', () => {
+	test.use({ serviceWorkers: 'block' });
+
+	const KEY = 'namsbokasafn:settings';
+
+	/** Abort every script the build emits, so only app.html's inline scripts can run */
+	const blockAppScripts = (page: Page) => page.route('**/_app/immutable/**/*.js', (route) => route.abort());
+
+	/** Store a settings value before any page script runs, and record <html> at DOMContentLoaded */
+	async function prepare(page: Page, stored: string) {
+		await page.addInitScript(
+			([key, value]) => {
+				localStorage.setItem(key, value);
+				document.addEventListener('DOMContentLoaded', () => {
+					const html = document.documentElement;
+					(window as unknown as { atDomContentLoaded: unknown }).atDomContentLoaded = {
+						dark: html.classList.contains('dark'),
+						lineWidth: html.getAttribute('data-line-width')
+					};
+				});
+			},
+			[KEY, stored]
+		);
+	}
+
+	const atDomContentLoaded = (page: Page) =>
+		page.evaluate(() => (window as unknown as { atDomContentLoaded: unknown }).atDomContentLoaded);
+
+	const storedNow = (page: Page) => page.evaluate((key) => localStorage.getItem(key), KEY);
+
+	/** A width token resolved in the page, e.g. var(--line-width-narrow) */
+	const token = (page: Page, name: string) =>
+		page.evaluate((n) => {
+			const probe = document.createElement('div');
+			probe.style.maxWidth = `var(${n})`;
+			document.body.append(probe);
+			const value = getComputedStyle(probe).maxWidth;
+			probe.remove();
+			return value;
+		}, name);
+
+	const readingWidth = (page: Page) =>
+		page.locator('.reading-content').first().evaluate((el) => getComputedStyle(el).maxWidth);
+
+	test("with the app's JavaScript blocked, a stored 'dark' makes <html> dark at DOMContentLoaded", async ({
+		page
+	}) => {
+		// Saved before the seam: had the app run, it would have rewritten this with _version and _born
+		const seed = '{"theme":"dark"}';
+		await prepare(page, seed);
+		await blockAppScripts(page);
+		await page.goto('/', { waitUntil: 'load' });
+
+		expect(await storedNow(page), "the app's JavaScript never ran").toBe(seed);
+		expect(await atDomContentLoaded(page)).toEqual({ dark: true, lineWidth: null });
+		expect(await page.evaluate(() => getComputedStyle(document.documentElement).colorScheme)).toBe('dark');
+	});
+
+	test("with the app's JavaScript blocked, a stored 'narrow' sets the reading width before the app runs", async ({
+		page
+	}) => {
+		test.skip(!ANSWER_KEY, 'no published book with an answer key is synced');
+		const seed = '{"lineWidth":"narrow"}';
+		await prepare(page, seed);
+		await blockAppScripts(page);
+		await page.goto(ANSWER_KEY!, { waitUntil: 'load' });
+
+		expect(await storedNow(page), "the app's JavaScript never ran").toBe(seed);
+		expect(await atDomContentLoaded(page)).toEqual({ dark: false, lineWidth: 'narrow' });
+		const narrow = await token(page, '--line-width-narrow');
+		expect(narrow, 'the prerendered default is a different width').not.toBe(await token(page, '--line-width-medium'));
+		expect(await readingWidth(page)).toBe(narrow);
+	});
+
+	test('with the app running, a stored width still gives way to the reader\'s next choice', async ({ page }) => {
+		test.skip(!SECTION, 'no published book is synced');
+		await prepare(page, '{"_version":1,"_born":1,"lineWidth":"narrow"}');
+		await page.goto(SECTION!);
+		await page.waitForLoadState('networkidle');
+		expect(await readingWidth(page)).toBe(await token(page, '--line-width-narrow'));
+
+		await page.getByRole('button', { name: 'Stillingar', exact: true }).filter({ visible: true }).first().click();
+		const dialog = page.getByRole('dialog');
+		await dialog.getByRole('group', { name: 'Línubreidd', exact: true }).getByRole('button', { name: /Breitt/ }).click();
+		await expect.poll(() => readingWidth(page)).toBe(await token(page, '--line-width-wide'));
+	});
+});
+
+// ---------------------------------------------------------------------------------------
+// Settings groups say which option is selected (plan step S1.3, register UI-03)
+// ---------------------------------------------------------------------------------------
 
 const SEGMENTS = {
 	Línubil: { key: 'lineHeight', labels: { normal: 'Venjulegt', relaxed: 'Rýmra', loose: 'Rúmt' } },
