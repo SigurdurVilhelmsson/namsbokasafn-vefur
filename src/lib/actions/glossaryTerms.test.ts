@@ -449,6 +449,27 @@ describe('glossaryTerms action', () => {
 			action.destroy();
 		});
 
+		// Code review M20: client-side navigation replaces the content, which detaches the term
+		// under an open tooltip. teardown() hid it only when the term was still inside the node,
+		// so the tooltip stayed on screen, clickable (pointer-events: auto).
+		it('hides an open tooltip when navigation replaces the content under it', async () => {
+			const node = document.body.appendChild(createContentNode([{ text: 'efni (e. matter)' }]));
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			getDfnElements(node)[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+			const tooltip = [...document.querySelectorAll<HTMLElement>('.glossary-tooltip')].at(-1)!;
+			expect(tooltip.style.visibility).toBe('visible');
+
+			node.replaceChildren(document.createElement('p'));
+			await new Promise((r) => setTimeout(r, 80));
+
+			expect(tooltip.style.visibility).toBe('hidden');
+			expect(tooltip.style.pointerEvents).toBe('none');
+			action.destroy();
+			node.remove();
+		});
+
 		it('should remove event listeners on destroy', async () => {
 			const node = createContentNode([{ text: 'efni (e. matter)' }]);
 			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });

@@ -512,8 +512,11 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 		}
 		processedDfnElements = [];
 
-		// Hide tooltip if showing
-		if (tooltipElement && currentSpan && node.contains(currentSpan)) {
+		// Hide the tooltip if it belongs to this content, or to a term that has left the page:
+		// client-side navigation replaces the content, detaching the term under an open
+		// tooltip, which then stayed on screen and clickable (code review M20). A term still
+		// attached elsewhere belongs to another instance of this action, so it is left alone.
+		if (tooltipElement && currentSpan && (!currentSpan.isConnected || node.contains(currentSpan))) {
 			hideTooltipImmediate();
 		}
 
