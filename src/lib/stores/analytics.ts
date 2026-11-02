@@ -16,6 +16,7 @@ import {
 	getYesterdayDateString,
 	formatLocalDate,
 	generateId,
+	isOnLocalDate,
 	migrateRecordKeys
 } from '$lib/utils/storeHelpers';
 
@@ -324,7 +325,7 @@ function createAnalyticsStore() {
 						const today = getTodayDateString();
 						const todayStats = state.dailyStats[today] || createEmptyDailyStats(today);
 						const visitedToday = state.sessions.some(
-							(s) => s.sectionKey === sectionKey && s.startTime.startsWith(today)
+							(s) => s.sectionKey === sectionKey && isOnLocalDate(s.startTime, today)
 						);
 
 						// Update hourlyReadingData (mirrors endReadingSession)
@@ -426,7 +427,7 @@ function createAnalyticsStore() {
 				const today = getTodayDateString();
 				const todayStats = state.dailyStats[today] || createEmptyDailyStats(today);
 				const visitedToday = state.sessions.some(
-					(s) => s.sectionKey === sectionKey && s.startTime.startsWith(today)
+					(s) => s.sectionKey === sectionKey && isOnLocalDate(s.startTime, today)
 				);
 
 				// Update hourly reading data

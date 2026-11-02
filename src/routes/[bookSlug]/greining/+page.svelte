@@ -8,7 +8,7 @@
 	import type { TableOfContents } from '$lib/types/content';
 	import { analyticsStore, streakInfo, todayStats } from '$lib/stores/analytics';
 	import { loadTableOfContents, findSectionBySlug } from '$lib/utils/contentLoader';
-	import { getTodayDateString } from '$lib/utils/storeHelpers';
+	import { formatLocalDate, getTodayDateString } from '$lib/utils/storeHelpers';
 	import { countsExport, recallSummaryLine, recallTotals } from '$lib/utils/counters';
 	import { clearAllStorage, deleteLocalCaches } from '$lib/utils/storageMigration';
 	import Skeleton from '$lib/components/Skeleton.svelte';
@@ -113,7 +113,8 @@
 		for (let i = 6; i >= 0; i--) {
 			const d = new Date(today);
 			d.setDate(d.getDate() - i);
-			const dateStr = d.toISOString().split('T')[0];
+			// Local, like the dailyStats keys; a UTC key showed the wrong day outside UTC (M7)
+			const dateStr = formatLocalDate(d);
 			const stats = $analyticsStore.dailyStats[dateStr];
 			days.push({
 				date: dateStr,

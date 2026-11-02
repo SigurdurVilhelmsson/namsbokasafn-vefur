@@ -189,3 +189,38 @@ describe('analytics store counters: an uncounted book', () => {
 		expect(setItem).not.toHaveBeenCalled();
 	});
 });
+
+// Code review M7: the daily stats are keyed by the reader's local date, but "already visited
+// today" compared a UTC timestamp with it. Invisible in Iceland (UTC all year); elsewhere a
+// section read again the same morning counted as a new visit.
+describe('dates follow the reader’s clock, not UTC (code review M7)', () => {
+	const originalTz = process.env.TZ;
+
+	beforeEach(() => {
+		localStorage.clear();
+		process.env.TZ = 'Pacific/Auckland';
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
+		if (originalTz === undefined) delete process.env.TZ;
+		else process.env.TZ = originalTz;
+	});
+
+	it('a second read of a section the same local morning is not counted as another visit', async () => {
+		// 19:00 UTC on 1 November is 08:00 on 2 November in Auckland (UTC+13)
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date('2026-11-01T19:00:00Z'));
+		expect(new Date().getDate(), 'the timezone took effect').toBe(2);
+		await importStore();
+
+		analyticsStore.startReadingSession('book', 'ch', 'sec');
+		vi.setSystemTime(new Date('2026-11-01T19:05:00Z'));
+		analyticsStore.endReadingSession();
+		analyticsStore.startReadingSession('book', 'ch', 'sec');
+		vi.setSystemTime(new Date('2026-11-01T19:10:00Z'));
+		analyticsStore.endReadingSession();
+
+		expect(get(analyticsStore).dailyStats['2026-11-02'].sectionsVisited).toBe(1);
+	});
+});
