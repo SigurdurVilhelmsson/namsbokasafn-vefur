@@ -135,10 +135,10 @@
 				</blockquote>
 			</div>
 
-			<!-- Color selector -->
+			<!-- Color selector. D20: proposed: 'Litur yfirstrikunar' (was the misspelt 'yfirstrokunar', S7.1) -->
 			<div class="mb-4">
 				<span class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-300">
-					Litur yfirstrokunar
+					Litur yfirstrikunar
 				</span>
 				<div class="flex gap-2">
 					{#each HIGHLIGHT_COLORS as { color: c, label, hex } (c)}
