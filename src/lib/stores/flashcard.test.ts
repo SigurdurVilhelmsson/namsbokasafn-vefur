@@ -131,6 +131,62 @@ describe('flashcard store', () => {
 			const retrieved = flashcardStore.getDeck('deck-1');
 			expect(retrieved?.cards).toHaveLength(0);
 		});
+
+		// deleteCard is the student's delete on /minniskort (plan step S7.2, register UI-14)
+		describe('deleteCard', () => {
+			beforeEach(() => {
+				const cards = [createTestCard('card-1'), createTestCard('card-2')];
+				flashcardStore.addDeck(createTestDeck('deck-1', 'Test Deck', cards));
+				flashcardStore.rateCard('card-1', 'good');
+				flashcardStore.rateCard('card-2', 'hard');
+			});
+
+			it('drops the card from its deck', () => {
+				flashcardStore.deleteCard('deck-1', 'card-1');
+				expect(flashcardStore.getDeck('deck-1')?.cards.map((c) => c.id)).toEqual(['card-2']);
+			});
+
+			it("drops the card's study record", () => {
+				flashcardStore.deleteCard('deck-1', 'card-1');
+				expect(flashcardStore.getCardRecord('card-1')).toBeUndefined();
+			});
+
+			it("keeps the other card's study record", () => {
+				const before = flashcardStore.getCardRecord('card-2');
+				flashcardStore.deleteCard('deck-1', 'card-1');
+				expect(flashcardStore.getCardRecord('card-2')).toEqual(before);
+			});
+
+			it('keeps the review history, which records reviews that happened', () => {
+				flashcardStore.deleteCard('deck-1', 'card-1');
+				expect(get(flashcardStore).reviewHistory.map((e) => e.cardId)).toEqual([
+					'card-1',
+					'card-2'
+				]);
+			});
+
+			it('saves the delete', () => {
+				flashcardStore.deleteCard('deck-1', 'card-1');
+				const stored = JSON.parse(localStorage.getItem('namsbokasafn:flashcards')!);
+				expect(stored.decks[0].cards.map((c: Flashcard) => c.id)).toEqual(['card-2']);
+				expect(Object.keys(stored.studyRecords)).toEqual(['card-2']);
+			});
+
+			it("keeps another deck's card and its record when named with the wrong deck", () => {
+				flashcardStore.addDeck(createTestDeck('deck-2', 'Other', [createTestCard('card-3')]));
+				flashcardStore.rateCard('card-3', 'easy');
+				flashcardStore.deleteCard('deck-1', 'card-3');
+				expect(flashcardStore.getDeck('deck-2')?.cards).toHaveLength(1);
+				expect(flashcardStore.getCardRecord('card-3')).toBeDefined();
+			});
+
+			it('leaves the state unchanged for a card the deck does not hold', () => {
+				const before = get(flashcardStore);
+				flashcardStore.deleteCard('deck-1', 'card-9');
+				flashcardStore.deleteCard('deck-9', 'card-2');
+				expect(get(flashcardStore)).toEqual(before);
+			});
+		});
 	});
 
 	describe('study session', () => {

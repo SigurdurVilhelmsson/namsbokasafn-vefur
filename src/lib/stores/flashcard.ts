@@ -213,6 +213,25 @@ function createFlashcardStore() {
 			}));
 		},
 
+		// The student's delete on /minniskort (plan step S7.2, UI-14): the card and its study
+		// record go; the review history stays, as the record of reviews that happened. It is
+		// reached only from the deck list, where no session runs, so the study queue is left alone.
+		deleteCard: (deckId: string, cardId: string) => {
+			update((state) => {
+				const deck = state.decks.find((d) => d.id === deckId);
+				if (!deck?.cards.some((c) => c.id === cardId)) return state;
+				const studyRecords = { ...state.studyRecords };
+				delete studyRecords[cardId];
+				return {
+					...state,
+					decks: state.decks.map((d) =>
+						d === deck ? { ...d, cards: d.cards.filter((c) => c.id !== cardId) } : d
+					),
+					studyRecords
+				};
+			});
+		},
+
 		removeCardFromDeck: (deckId: string, cardId: string) => {
 			update((state) => ({
 				...state,

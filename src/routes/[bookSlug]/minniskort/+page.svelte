@@ -4,6 +4,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import Icon from '$lib/components/Icon.svelte';
+	import DeckCardList from '$lib/components/DeckCardList.svelte';
 	import {
 		flashcardStore,
 		currentDeck,
@@ -130,6 +131,8 @@
 							Æfa
 						</button>
 					</div>
+					<!-- Each card with 'Eyða' (S7.2, UI-14) -->
+					<DeckCardList deckId={deck.id} />
 				{/each}
 			</div>
 		{/if}
