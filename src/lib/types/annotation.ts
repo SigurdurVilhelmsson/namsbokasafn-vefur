@@ -73,15 +73,18 @@ export interface AnnotationStats {
   withNotes: number;
 }
 
-export interface SelectionPosition {
-  x: number;
-  y: number;
+/** A selection's box in viewport pixels (getBoundingClientRect), which the popup is placed by */
+export interface SelectionAnchor {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
 }
 
 export interface TextSelection {
   text: string;
   range: Range;
-  position: SelectionPosition;
+  anchor: SelectionAnchor;
 }
 
 export interface ExportedAnnotation {

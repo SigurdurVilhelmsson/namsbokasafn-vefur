@@ -31,6 +31,10 @@
 
 	let containerElement: HTMLDivElement;
 	let selection: TextSelection | null = $state(null);
+	// How the popup opens for this selection (S7.1): focus moves in only for a keyboard
+	// selection, and a touch selection puts it below, clear of the phone's own selection menu
+	let popupTakesFocus = $state(false);
+	let popupSide: 'above' | 'below' = $state('above');
 	let showNoteModal = $state(false);
 	let showFlashcardModal = $state(false);
 	let showGlossaryTooltip = $state(false);
@@ -258,12 +262,27 @@
 		applyHighlightToRange(range, color);
 	}
 
-	/**
-	 * Handle text selection
+	/*
+	 * Opening the popup (reader plan S7.1, register UI-13). It used to open only from a mouseup
+	 * on the article, so a touch selection (no mouse event) or a keyboard selection never reached
+	 * it. Now any selection change opens it, after a short pause, and a mouse selection is still
+	 * read when the button comes up, so a mouse user who pauses mid-drag sees no popup yet.
 	 */
-	function handleMouseUp() {
+	const SELECTION_SETTLE_MS = 200;
+	let settleTimer: ReturnType<typeof setTimeout> | undefined;
+	let lastInput: 'keyboard' | 'mouse' | 'touch' | 'pen' | null = null;
+	let mouseDown = false;
+	let mouseDownInside = false;
+
+	const focusInPopup = () => !!(document.activeElement as HTMLElement | null)?.closest('[data-selection-popup]');
+
+	/** Read the current selection into the popup's state */
+	function readSelection() {
+		clearTimeout(settleTimer);
+		if (mouseDown) return; // a mouse drag is read when the button comes up
+
 		const windowSelection = window.getSelection();
-		if (!windowSelection || windowSelection.isCollapsed) {
+		if (!windowSelection || windowSelection.isCollapsed || windowSelection.rangeCount === 0) {
 			selection = null;
 			return;
 		}
@@ -281,20 +300,114 @@
 			return;
 		}
 
-		// Position for the popup: viewport coordinates, since SelectionPopup
-		// and GlossaryTooltip render with position: fixed (no scrollY offset)
+		// Viewport coordinates, since SelectionPopup and GlossaryTooltip render with
+		// position: fixed (no scrollY offset)
 		const rect = range.getBoundingClientRect();
-		const position = {
-			x: rect.left + rect.width / 2,
-			y: rect.top
-		};
-
+		popupTakesFocus = lastInput === 'keyboard';
+		popupSide = lastInput === 'touch' ? 'below' : 'above';
 		selection = {
 			text: selectedText,
 			range,
-			position
+			anchor: { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }
 		};
 	}
+
+	function handleSelectionChange() {
+		clearTimeout(settleTimer);
+		settleTimer = setTimeout(readSelection, SELECTION_SETTLE_MS);
+	}
+
+	function handlePointerDown(event: PointerEvent) {
+		lastInput = event.pointerType === 'mouse' || event.pointerType === 'touch' || event.pointerType === 'pen'
+			? event.pointerType
+			: 'mouse';
+		if (event.pointerType === 'mouse') {
+			mouseDown = true;
+			mouseDownInside = !!containerElement?.contains(event.target as Node);
+		}
+	}
+
+	function handlePointerUp(event: PointerEvent) {
+		// Only a mouse is gated: a long-press hands the gesture to the browser, so a finger's
+		// pointerup may never come
+		if (event.pointerType !== 'mouse') return;
+		mouseDown = false;
+		if (mouseDownInside) readSelection();
+	}
+
+	function handlePointerCancel(event: PointerEvent) {
+		if (event.pointerType === 'mouse') mouseDown = false;
+	}
+
+	function handleKeyDown() {
+		lastInput = 'keyboard';
+	}
+
+	/**
+	 * Shift with an arrow, Home or End in the toolbar: focus came in while the reader was still
+	 * selecting from the keyboard, so extend the selection as the key would have, and leave
+	 * focus in the toolbar. The change is read at once, not after the pause, so a colour pressed
+	 * straight after it applies to the extended text. Selection.modify is not standard, but
+	 * every engine we serve has it; without it the key does nothing.
+	 */
+	function handleExtendSelection(event: KeyboardEvent) {
+		const windowSelection = window.getSelection() as (Selection & { modify?: (alter: string, direction: string, granularity: string) => void }) | null;
+		if (!windowSelection?.modify || windowSelection.rangeCount === 0) return;
+		const backward = event.key === 'ArrowLeft' || event.key === 'ArrowUp' || event.key === 'Home';
+		const granularity =
+			event.key === 'ArrowUp' || event.key === 'ArrowDown'
+				? 'line'
+				: event.key === 'Home' || event.key === 'End'
+					? 'lineboundary'
+					: event.ctrlKey || event.altKey
+						? 'word'
+						: 'character';
+		windowSelection.modify('extend', backward ? 'backward' : 'forward', granularity);
+		readSelection();
+	}
+
+	/**
+	 * Put focus back in the article after the toolbar had it, so it never drops to <body>. The
+	 * article takes focus only for this moment (a standing tabindex would make every click in
+	 * the text move the Tab order back to its top).
+	 */
+	function focusArticle() {
+		if (!containerElement) return;
+		containerElement.setAttribute('tabindex', '-1');
+		containerElement.addEventListener('blur', () => containerElement?.removeAttribute('tabindex'), { once: true });
+		containerElement.focus({ preventScroll: true });
+	}
+
+	/** Close the popup from the toolbar: focus back to the article, the selection collapsed in place */
+	function returnToArticle() {
+		const range = selection?.range;
+		selection = null;
+		focusArticle();
+		const windowSelection = window.getSelection();
+		if (range && windowSelection) {
+			const caret = range.cloneRange();
+			caret.collapse(false);
+			windowSelection.removeAllRanges();
+			windowSelection.addRange(caret);
+		}
+	}
+
+	onMount(() => {
+		document.addEventListener('selectionchange', handleSelectionChange);
+		document.addEventListener('pointerdown', handlePointerDown, true);
+		document.addEventListener('pointerup', handlePointerUp, true);
+		document.addEventListener('pointercancel', handlePointerCancel, true);
+		document.addEventListener('keydown', handleKeyDown, true);
+		// This component remounts on every section change ({#key} in the section page)
+		return () => {
+			clearTimeout(settleTimer);
+			document.removeEventListener('selectionchange', handleSelectionChange);
+			document.removeEventListener('pointerdown', handlePointerDown, true);
+			document.removeEventListener('pointerup', handlePointerUp, true);
+			document.removeEventListener('pointercancel', handlePointerCancel, true);
+			document.removeEventListener('keydown', handleKeyDown, true);
+		};
+	});
 
 	/**
 	 * Handle highlight action
@@ -317,6 +430,11 @@
 		// Apply visual highlight
 		applyHighlight(selection.range, color);
 
+		// Chosen from the keyboard: focus back to the article, with the caret after the highlight
+		if (focusInPopup()) {
+			returnToArticle();
+			return;
+		}
 		// Clear selection
 		window.getSelection()?.removeAllRanges();
 		selection = null;
@@ -362,9 +480,15 @@
 	}
 
 	/**
-	 * Close popup
+	 * Close popup. From inside the toolbar (Escape or 'Loka' from the keyboard), focus goes back
+	 * to the article and the selection collapses in place, so a caret-browsing reader keeps their
+	 * place; otherwise the selection is cleared, as before.
 	 */
-	function handleClosePopup() {
+	function handleClosePopup({ hadFocus }: { hadFocus: boolean }) {
+		if (hadFocus) {
+			returnToArticle();
+			return;
+		}
 		selection = null;
 		window.getSelection()?.removeAllRanges();
 	}
@@ -422,8 +546,8 @@
 		if (term) {
 			glossaryTerm = term;
 			glossaryPosition = {
-				x: selection.position.x,
-				y: selection.position.y + 40 // Position below the selection
+				x: (selection.anchor.left + selection.anchor.right) / 2,
+				y: selection.anchor.top + 40 // Position below the selection
 			};
 			showGlossaryTooltip = true;
 		} else {
@@ -445,15 +569,17 @@
 	}
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div bind:this={containerElement} onmouseup={handleMouseUp} class="text-highlighter">
+<div bind:this={containerElement} class="text-highlighter">
 	{@render children?.()}
 </div>
 
 <!-- Selection popup -->
 {#if selection}
 	<SelectionPopup
-		position={selection.position}
+		anchor={selection.anchor}
+		prefer={popupSide}
+		focusOnOpen={popupTakesFocus}
+		onExtendSelection={handleExtendSelection}
 		onHighlight={handleHighlight}
 		onAddNote={handleAddNote}
 		onCreateFlashcard={handleCreateFlashcard}
