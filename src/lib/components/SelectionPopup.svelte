@@ -43,7 +43,7 @@
 		onExtendSelection
 	}: Props = $props();
 
-	// The name says the colour in the dative, as 'með' requires (D20: proposed)
+	// The name says the colour in the dative, as 'með' requires
 	const HIGHLIGHT_COLORS: { color: HighlightColor; label: string; dative: string; hex: string }[] = [
 		{ color: 'yellow', label: 'Gulur', dative: 'gulum', hex: '#f5e6b8' },
 		{ color: 'green', label: 'Gulbrúnn', dative: 'gulbrúnum', hex: '#f0d0a0' },
@@ -143,7 +143,6 @@
 	});
 </script>
 
-<!-- D20: proposed: 'Valmöguleikar yfirstrikunar' (was the misspelt 'Valmoguleikar yfirstrokunar') -->
 <div
 	bind:this={popupElement}
 	class="fixed z-50 w-max"
@@ -201,8 +200,7 @@
 
 		<!-- Glossary lookup button. Named by its word 'Orðasafn' at every width (screen-reader only
 		     below 640 px): an aria-label 'Fletta upp í orðasafni' did not contain the visible word,
-		     which WCAG 2.5.3 (Label in Name) requires; the longer phrase stays as its tooltip.
-		     D20: proposed (the button's spoken name changes from 'Fletta upp í orðasafni' to 'Orðasafn') -->
+		     which WCAG 2.5.3 (Label in Name) requires; the longer phrase stays as its tooltip. -->
 		{#if onGlossaryLookup}
 			<button
 				onclick={onGlossaryLookup}

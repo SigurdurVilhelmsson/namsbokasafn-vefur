@@ -135,7 +135,7 @@
 				</blockquote>
 			</div>
 
-			<!-- Color selector. D20: proposed: 'Litur yfirstrikunar' (was the misspelt 'yfirstrokunar', S7.1) -->
+			<!-- Color selector -->
 			<div class="mb-4">
 				<span class="mb-2 block text-sm font-medium text-gray-500 dark:text-gray-300">
 					Litur yfirstrikunar
