@@ -61,7 +61,6 @@
 				<ul>
 					<li>framvindu í bókunum: hvaða hlutar eru lesnir, hvar þú varst og bókamerki;</li>
 					<li>yfirstrikanir og athugasemdir sem þú skrifar;</li>
-					<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
 					<li>minnisspjöld og hvernig þér gekk að rifja þau upp;</li>
 					<li>það sem þú skrifar þegar þú rifjar upp efni kafla eftir lesturinn;</li>
 					<li>námsmarkmið sem þú hefur merkt sem lokið, og hve vel þú telur þig kunna þau;</li>

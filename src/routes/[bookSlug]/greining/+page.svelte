@@ -85,7 +85,6 @@
 			case 'reading':
 				return { icon: '📖', text: action === 'started' ? 'Byrjaði að lesa' : 'Las kafla' };
 			case 'flashcard':
-				// D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02)
 				return { icon: '🧠', text: 'Æfði minnisspjöld' };
 			case 'quiz':
 				return { icon: '📝', text: 'Tók próf' };

@@ -13,7 +13,6 @@
 	const tabs: { id: TabId; label: string; icon: IconName }[] = [
 		{ id: 'yfirlit', label: 'Yfirlit', icon: 'chart-column' },
 		{ id: 'lestur', label: 'Lestur', icon: 'book-open' },
-		// D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02)
 		{ id: 'minniskort', label: 'Minnisspjöld', icon: 'credit-card' },
 		{ id: 'markmiđ', label: 'Markmið', icon: 'shield-check' }
 	];
