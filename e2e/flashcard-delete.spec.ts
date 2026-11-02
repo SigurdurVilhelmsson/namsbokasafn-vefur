@@ -52,7 +52,7 @@ async function openSeeded(page: Page) {
 		{ key: STORAGE_KEY, cards: CARDS }
 	);
 	await page.goto(`/${syncedBooks()[0]}/minniskort/`);
-	await expect(page.getByRole('heading', { name: 'Minniskort', level: 1 })).toBeVisible({
+	await expect(page.getByRole('heading', { level: 1 })).toBeVisible({
 		timeout: 15000
 	});
 }
@@ -66,44 +66,47 @@ const stored = (page: Page) =>
 		};
 	}, STORAGE_KEY);
 
+/** The deck row's card count, by its number: the word after it is UI text that may change */
+const deckTotal = (page: Page) => page.locator('.deck-card-stats span').first();
+
 const deleteButton = (page: Page, front: string) =>
-	page.getByRole('button', { name: `Eyða korti: ${front}` });
+	page.getByRole('button', { name: `Eyða spjaldi: ${front}` });
 
 test.describe('Deleting a flashcard', () => {
 	test('a confirmed delete removes the card and its record, across a reload', async ({ page }) => {
 		await openSeeded(page);
-		await page.getByText('Kortin í stokknum').click();
+		await page.getByText('Spjöldin í stokknum').click();
 		page.once('dialog', (dialog) => {
 			expect(dialog.type()).toBe('confirm');
-			expect(dialog.message()).toBe('Eyða þessu korti? Þetta er ekki hægt að afturkalla.');
+			expect(dialog.message()).toBe('Eyða þessu spjaldi? Þetta er ekki hægt að afturkalla.');
 			void dialog.accept();
 		});
 		await deleteButton(page, CARDS[0].front).click();
 
 		await expect(deleteButton(page, CARDS[0].front)).toHaveCount(0);
 		await expect(deleteButton(page, CARDS[1].front)).toBeFocused();
-		await expect(page.getByText('1 kort', { exact: true })).toBeVisible();
+		await expect(deckTotal(page)).toHaveText(/^1 /);
 
 		await page.reload();
-		await expect(page.getByText('1 kort', { exact: true })).toBeVisible({ timeout: 15000 });
+		await expect(deckTotal(page)).toHaveText(/^1 /, { timeout: 15000 });
 		expect(await stored(page)).toEqual({ cards: ['del-2'], records: ['del-2'] });
 	});
 
 	test('a cancelled delete keeps the card and its record', async ({ page }) => {
 		await openSeeded(page);
-		await page.getByText('Kortin í stokknum').click();
+		await page.getByText('Spjöldin í stokknum').click();
 		page.once('dialog', (dialog) => void dialog.dismiss());
 		await deleteButton(page, CARDS[0].front).click();
 
 		await expect(deleteButton(page, CARDS[0].front)).toBeVisible();
-		await expect(page.getByText(`${CARDS.length} kort`, { exact: true })).toBeVisible();
+		await expect(deckTotal(page)).toHaveText(new RegExp(`^${CARDS.length} `));
 		expect(await stored(page)).toEqual({ cards: ['del-1', 'del-2'], records: ['del-1', 'del-2'] });
 	});
 
 	test('the card list is collapsed until opened, and passes axe', async ({ page }) => {
 		await openSeeded(page);
 		await expect(deleteButton(page, CARDS[0].front)).toBeHidden();
-		await page.getByText('Kortin í stokknum').click();
+		await page.getByText('Spjöldin í stokknum').click();
 		await expect(deleteButton(page, CARDS[0].front)).toBeVisible();
 		const results = await new AxeBuilder({ page }).include('.deck-cards').withTags(WCAG_TAGS).analyze();
 		expect(

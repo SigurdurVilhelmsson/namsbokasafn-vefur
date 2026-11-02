@@ -71,9 +71,9 @@ describe('DeckCardList', () => {
 	it("names each 'Eyða' by its card, so the buttons differ", () => {
 		const t = render();
 		expect(deleteButtons(t).map((b) => b.getAttribute('aria-label'))).toEqual([
-			'Eyða korti: Hvað er mól?',
-			'Eyða korti: Hvað er atóm?',
-			'Eyða korti: Hvað er jón?'
+			'Eyða spjaldi: Hvað er mól?',
+			'Eyða spjaldi: Hvað er atóm?',
+			'Eyða spjaldi: Hvað er jón?'
 		]);
 		expect(deleteButtons(t).map((b) => b.textContent?.trim())).toEqual(['Eyða', 'Eyða', 'Eyða']);
 	});
@@ -81,7 +81,7 @@ describe('DeckCardList', () => {
 	it('asks before it deletes', async () => {
 		const t = render();
 		await clickDelete(deleteButtons(t)[0]);
-		expect(confirmSpy).toHaveBeenCalledWith('Eyða þessu korti? Þetta er ekki hægt að afturkalla.');
+		expect(confirmSpy).toHaveBeenCalledWith('Eyða þessu spjaldi? Þetta er ekki hægt að afturkalla.');
 	});
 
 	it('keeps the card when the student cancels', async () => {
@@ -105,19 +105,19 @@ describe('DeckCardList', () => {
 		const t = render();
 		await clickDelete(deleteButtons(t)[1]);
 		vi.advanceTimersByTime(ANNOUNCE_DELAY_MS);
-		expect(get(announcement)).toBe('Kortinu var eytt.');
+		expect(get(announcement)).toBe('Spjaldinu var eytt.');
 	});
 
 	it("moves focus to the next card's 'Eyða'", async () => {
 		const t = render();
 		await clickDelete(deleteButtons(t)[1]);
-		expect(document.activeElement?.getAttribute('aria-label')).toBe('Eyða korti: Hvað er jón?');
+		expect(document.activeElement?.getAttribute('aria-label')).toBe('Eyða spjaldi: Hvað er jón?');
 	});
 
 	it("moves focus to the previous card's 'Eyða' when the last card goes", async () => {
 		const t = render();
 		await clickDelete(deleteButtons(t)[2]);
-		expect(document.activeElement?.getAttribute('aria-label')).toBe('Eyða korti: Hvað er atóm?');
+		expect(document.activeElement?.getAttribute('aria-label')).toBe('Eyða spjaldi: Hvað er atóm?');
 	});
 
 	it('moves focus to the summary when the deck is left empty', async () => {
