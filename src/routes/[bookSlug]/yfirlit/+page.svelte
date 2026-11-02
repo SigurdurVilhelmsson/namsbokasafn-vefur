@@ -55,6 +55,12 @@
 		}
 	});
 
+	// Only the newest choice may write its results: each chip starts a long run of fetches, and
+	// a slower earlier run ('Allir kaflar') used to replace a quicker later one (code review M17).
+	// Plain variables, not $state: bookkeeping, never rendered.
+	let currentRequest = 0;
+	let inFlight: AbortController | null = null;
+
 	/**
 	 * Select a chapter (or all chapters) and fetch review blocks
 	 */
@@ -65,6 +71,12 @@
 		sectionGroups = [];
 
 		if (!toc) return;
+
+		inFlight?.abort();
+		const controller = new AbortController();
+		inFlight = controller;
+		const request = ++currentRequest;
+		const isCurrent = () => request === currentRequest;
 
 		const chapters = index === null
 			? toc.chapters
@@ -80,9 +92,11 @@
 				const chapterFolder = getChapterFolder(chapter);
 
 				for (const section of chapter.sections) {
+					if (!isCurrent()) return;
 					try {
 						const response = await fetch(
-							`/content/${data.bookSlug}/chapters/${chapterFolder}/${section.file}`
+							`/content/${data.bookSlug}/chapters/${chapterFolder}/${section.file}`,
+							{ signal: controller.signal }
 						);
 						if (!response.ok) continue;
 
@@ -99,12 +113,14 @@
 				}
 			}
 
+			if (!isCurrent()) return;
 			sectionGroups = groups;
 		} catch (e) {
+			if (!isCurrent()) return;
 			error = 'Villa við að sækja efni';
 			console.error(e);
 		} finally {
-			loadingBlocks = false;
+			if (isCurrent()) loadingBlocks = false;
 		}
 	}
 
