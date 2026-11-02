@@ -2,8 +2,11 @@
  * Tests for settings store
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { get } from 'svelte/store';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import type { SettingsState } from './settings';
 
 // Need to reset module between tests to get fresh store instances
 let settings: typeof import('./settings').settings;
@@ -312,6 +315,251 @@ describe('settings store', () => {
 			const module = await load({ _version: 1, _born: 0, theme: 'dark', readingMode: 'paged' });
 			module.settings.reset();
 			expect(stored()).toEqual({ _version: 1, _born: 0, readingMode: 'paged' });
+		});
+	});
+
+	describe('every default and validator is pinned (S6.2, register CODE-20)', () => {
+		const KEY = 'namsbokasafn:settings';
+
+		async function load(seed?: unknown) {
+			if (seed !== undefined) localStorage.setItem(KEY, JSON.stringify(seed));
+			vi.resetModules();
+			return import('./settings');
+		}
+
+		// No setting on main is an open call (those are the paged reader's), so each default is
+		// pinned literally: changing one must change this table on purpose. A default that becomes
+		// an open call is compared with defaultSettings instead, never with a literal.
+		it('pins every default', async () => {
+			const { defaultSettings } = await load();
+			expect(defaultSettings).toEqual({
+				theme: 'light',
+				fontSize: 'medium',
+				fontFamily: 'serif',
+				lineHeight: 'normal',
+				lineWidth: 'medium',
+				sidebarOpen: false,
+				shortcutPreferences: {},
+				bionicReading: false,
+				glossaryHighlighting: true,
+				showTermEnglish: true
+			});
+		});
+
+		it('pins every default shortcut', async () => {
+			const module = await load();
+			expect(module.DEFAULT_SHORTCUTS).toEqual({
+				prevSection: 'ArrowLeft',
+				nextSection: 'ArrowRight',
+				goHome: 'g h',
+				goFlashcards: 'g f',
+				goGlossary: 'g o',
+				toggleSidebar: 's',
+				toggleFocusMode: 'f',
+				toggleTheme: 't',
+				openSearch: '/',
+				showShortcuts: '?',
+				closeModal: 'Escape'
+			});
+		});
+
+		it('a fresh profile has every default in effect', async () => {
+			const module = await load();
+			expect(get(module.settings)).toEqual(module.defaultSettings);
+		});
+
+		/** Every value each validator must accept */
+		const VALID: { [K in keyof SettingsState]: SettingsState[K][] } = {
+			theme: ['light', 'dark'],
+			fontSize: ['small', 'medium', 'large', 'xlarge'],
+			fontFamily: ['serif', 'sans', 'opendyslexic'],
+			lineHeight: ['normal', 'relaxed', 'loose'],
+			lineWidth: ['narrow', 'medium', 'wide'],
+			sidebarOpen: [true, false],
+			shortcutPreferences: [{}, { prevSection: 'h' }],
+			bionicReading: [true, false],
+			glossaryHighlighting: [true, false],
+			showTermEnglish: [true, false]
+		};
+
+		/** Values each validator must refuse: wrong type, wrong case, another setting's value, a later release's value */
+		const INVALID: Record<keyof SettingsState, unknown[]> = {
+			theme: ['system', 'Dark', 1, null],
+			fontSize: ['narrow', 'huge', 16, null],
+			fontFamily: ['atkinson', 'Serif', null],
+			lineHeight: ['medium', 'tight', 1.5, null],
+			lineWidth: ['small', 'full', 52, null],
+			sidebarOpen: ['true', 1, null],
+			shortcutPreferences: [[], 'h', null],
+			bionicReading: ['true', 1, null],
+			glossaryHighlighting: ['false', 0, null],
+			showTermEnglish: ['false', 0, null]
+		};
+
+		const cases = (table: Record<string, readonly unknown[]>) =>
+			Object.entries(table).flatMap(([key, values]) =>
+				values.map((value) => [key as keyof SettingsState, value] as const)
+			);
+
+		it.each(cases(VALID))('a stored %s of %j survives the load', async (key, value) => {
+			const module = await load({ _version: 1, _born: 1, [key]: value });
+			expect(get(module.settings)[key]).toEqual(value);
+		});
+
+		it.each(cases(INVALID))('a stored %s of %j loads as the default', async (key, value) => {
+			const module = await load({ _version: 1, _born: 1, [key]: value });
+			expect(get(module.settings)[key]).toEqual(module.defaultSettings[key]);
+		});
+
+		it.each(cases(INVALID))('a stored %s of %j is not counted as a choice', async (key, value) => {
+			const module = await load({ _version: 1, _born: 1, [key]: value });
+			expect(module.settings.profile().chosen).not.toContain(key);
+		});
+
+		it("an invalid stored value is kept as stored through this build's next change", async () => {
+			const module = await load({ fontSize: 'huge' });
+			module.settings.setTheme('dark');
+			expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual({
+				_version: 1,
+				_born: 0,
+				fontSize: 'huge',
+				theme: 'dark'
+			});
+		});
+	});
+
+	describe('the pre-paint script in app.html agrees with the store (S6.2, register UI-22)', () => {
+		const KEY = 'namsbokasafn:settings';
+		const html = document.documentElement;
+
+		/** The first inline script before %sveltekit.head%, as app.html ships it */
+		const PREPAINT = (() => {
+			const file = readFileSync(join(process.cwd(), 'src', 'app.html'), 'utf8');
+			const head = file.slice(0, file.indexOf('%sveltekit.head%'));
+			return head.match(/<script>([\s\S]*?)<\/script>/)?.[1] ?? '';
+		})();
+
+		const clearHtml = () => {
+			html.classList.remove('dark');
+			html.removeAttribute('data-line-width');
+		};
+
+		/** Run the script on a clean <html> over the given stored value, and report what it set */
+		function prepaint(raw: string | null) {
+			clearHtml();
+			localStorage.clear();
+			if (raw !== null) localStorage.setItem(KEY, raw);
+			new Function(PREPAINT)();
+			return { dark: html.classList.contains('dark'), lineWidth: html.getAttribute('data-line-width') };
+		}
+
+		/** What the store makes of the same stored value: dark or not, and a valid stored width */
+		async function store(raw: string | null) {
+			clearHtml();
+			localStorage.clear();
+			if (raw !== null) localStorage.setItem(KEY, raw);
+			vi.resetModules();
+			const module = await import('./settings');
+			const state = get(module.settings);
+			return {
+				dark: state.theme === 'dark',
+				lineWidth: module.settings.profile().chosen.includes('lineWidth') ? state.lineWidth : null
+			};
+		}
+
+		afterEach(() => {
+			clearHtml();
+			history.replaceState(null, '', '/');
+		});
+
+		it('app.html has an inline script before %sveltekit.head%', () => {
+			expect(PREPAINT.trim()).not.toBe('');
+		});
+
+		const PRE_SEAM_DARK = {
+			theme: 'dark',
+			fontSize: 'medium',
+			fontFamily: 'serif',
+			lineHeight: 'normal',
+			lineWidth: 'medium',
+			sidebarOpen: false,
+			shortcutPreferences: {},
+			bionicReading: false,
+			glossaryHighlighting: true,
+			showTermEnglish: true
+		};
+
+		it.each([
+			['nothing stored', null],
+			['a fresh profile', '{"_version":1,"_born":1}'],
+			["a chosen 'dark'", '{"_version":1,"_born":1,"theme":"dark"}'],
+			["a chosen 'light'", '{"_version":1,"_born":1,"theme":"light"}'],
+			["a pre-seam profile on 'dark'", JSON.stringify(PRE_SEAM_DARK)],
+			["a newer build's profile on 'dark'", '{"_version":2,"_born":2,"theme":"dark","readingMode":"paged"}'],
+			// 'system' is not a theme yet; S12's P1.4 port extends the script to it (plan line 1252)
+			["a stored 'system'", '{"_version":1,"_born":1,"theme":"system"}'],
+			["a stored 'Dark'", '{"_version":1,"_born":1,"theme":"Dark"}'],
+			["a stored 'narrow'", '{"_version":1,"_born":1,"lineWidth":"narrow"}'],
+			["a stored 'medium'", '{"_version":1,"_born":1,"lineWidth":"medium"}'],
+			["a stored 'wide'", '{"_version":1,"_born":1,"lineWidth":"wide"}'],
+			["a stored 'small' width", '{"_version":1,"_born":1,"lineWidth":"small"}'],
+			['a stored width of 52', '{"_version":1,"_born":1,"lineWidth":52}'],
+			["'dark' and 'narrow' together", '{"_version":1,"_born":1,"theme":"dark","lineWidth":"narrow"}'],
+			['a value that does not parse', '{not json'],
+			['an array', '["dark"]'],
+			['a string', '"dark"'],
+			['null', 'null']
+		])('%s: the script sets what the store will', async (_label, raw) => {
+			const before = prepaint(raw);
+			expect(before).toEqual(await store(raw));
+		});
+
+		it("a stored 'dark' turns the page dark before the app runs", () => {
+			expect(prepaint('{"_version":1,"_born":1,"theme":"dark"}').dark).toBe(true);
+		});
+
+		it("a stored 'narrow' sets data-line-width before the app runs", () => {
+			expect(prepaint('{"_version":1,"_born":1,"lineWidth":"narrow"}').lineWidth).toBe('narrow');
+		});
+
+		it('a localStorage that throws leaves the page light and raises nothing', () => {
+			clearHtml();
+			vi.mocked(localStorage.getItem).mockImplementationOnce(() => {
+				throw new DOMException('denied', 'SecurityError');
+			});
+			expect(() => new Function(PREPAINT)()).not.toThrow();
+			expect(html.classList.contains('dark')).toBe(false);
+		});
+
+		it("the print pages stay light: the script leaves /print/ alone, as the print layout's light theme expects", () => {
+			history.replaceState(null, '', '/print/efnafraedi-2e/bok/');
+			expect(prepaint('{"_version":1,"_born":1,"theme":"dark","lineWidth":"narrow"}')).toEqual({
+				dark: false,
+				lineWidth: null
+			});
+		});
+
+		it("the store keeps data-line-width in step with a reader's change, so a stored width never sticks", async () => {
+			prepaint('{"_version":1,"_born":1,"lineWidth":"narrow"}');
+			vi.resetModules();
+			const module = await import('./settings');
+			module.settings.setLineWidth('wide');
+			expect(html.getAttribute('data-line-width')).toBe('wide');
+		});
+
+		it('the store sets data-line-width to the width in effect on a fresh profile', async () => {
+			clearHtml();
+			vi.resetModules();
+			const module = await import('./settings');
+			expect(html.getAttribute('data-line-width')).toBe(get(module.settings).lineWidth);
+		});
+
+		it("another tab's erase returns data-line-width to the default", async () => {
+			prepaint('{"_version":1,"_born":1,"lineWidth":"narrow"}');
+			vi.resetModules();
+			const module = await import('./settings');
+			window.dispatchEvent(new StorageEvent('storage', { key: KEY, newValue: null }));
+			expect(html.getAttribute('data-line-width')).toBe(module.defaultSettings.lineWidth);
 		});
 	});
 

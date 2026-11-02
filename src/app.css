@@ -390,6 +390,23 @@
   max-width: var(--line-width-wide);
 }
 
+/* The same widths keyed on <html data-line-width>, and they outrank the classes above
+   (plan step S6.2, register CODE-05). app.html's pre-paint script sets the attribute from
+   storage before the page draws, while the book layout's class is still the prerendered
+   default; the settings store keeps it in step after that. Keep the classes too: when nothing
+   is stored they carry the default from settings.ts, so no width is named twice. */
+:root[data-line-width="narrow"] .reading-content {
+  max-width: var(--line-width-narrow);
+}
+
+:root[data-line-width="medium"] .reading-content {
+  max-width: var(--line-width-medium);
+}
+
+:root[data-line-width="wide"] .reading-content {
+  max-width: var(--line-width-wide);
+}
+
 /* Container */
 .container {
   max-width: 80rem;
