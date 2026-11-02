@@ -85,7 +85,8 @@
 			case 'reading':
 				return { icon: '📖', text: action === 'started' ? 'Byrjaði að lesa' : 'Las kafla' };
 			case 'flashcard':
-				return { icon: '🧠', text: 'Æfði minniskort' };
+				// D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02)
+				return { icon: '🧠', text: 'Æfði minnisspjöld' };
 			case 'quiz':
 				return { icon: '📝', text: 'Tók próf' };
 			case 'objective':
@@ -188,7 +189,7 @@
 	// The recall counts go with the statistics; the recalls a reader typed stay (S5.4).
 	function handleClearData() {
 		const message =
-			'Eyða lestrartölfræði, lotum, röð daga, markmiðum og tölum um upprifjun í Námsgreiningu í þessum vafra? Námsmarkmið, minniskort, bókamerki, yfirstrikanir, athugasemdir, það sem þú skrifaðir í upprifjun og framvinda í bókunum haldast. Þetta er ekki hægt að afturkalla.';
+			'Eyða lestrartölfræði, lotum, röð daga, markmiðum og tölum um upprifjun í Námsgreiningu í þessum vafra? Námsmarkmið, minnisspjöld, bókamerki, yfirstrikanir, athugasemdir, það sem þú skrifaðir í upprifjun og framvinda í bókunum haldast. Þetta er ekki hægt að afturkalla.';
 		if (confirm(message)) {
 			analyticsStore.clearAllData();
 		}
@@ -200,7 +201,7 @@
 	async function handleEraseAll() {
 		// It names the recall entries (S5.2), which it erases too (S5.4).
 		const message =
-			'Eyða öllu sem Námsbókasafn geymir í þessum vafra: framvindu, bókamerkjum, yfirstrikunum, athugasemdum, minniskortum, upprifjunum, námsmarkmiðum, æfingadæmum, tölfræði og stillingum? Niðurhalaðar bækur eyðast líka. Þetta er ekki hægt að afturkalla.';
+			'Eyða öllu sem Námsbókasafn geymir í þessum vafra: framvindu, bókamerkjum, yfirstrikunum, athugasemdum, minnisspjöldum, upprifjunum, námsmarkmiðum, æfingadæmum, tölfræði og stillingum? Niðurhalaðar bækur eyðast líka. Þetta er ekki hægt að afturkalla.';
 		if (!confirm(message)) return;
 		await deleteLocalCaches();
 		clearAllStorage();
@@ -480,7 +481,7 @@
 						</div>
 						<div>
 							<p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{$todayStats.flashcardsReviewed}</p>
-							<p class="text-sm text-gray-500 dark:text-gray-400">Minniskort í dag</p>
+							<p class="text-sm text-gray-500 dark:text-gray-400">Minnisspjöld í dag</p>
 						</div>
 						<div>
 							<p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{$streakInfo.longest}</p>

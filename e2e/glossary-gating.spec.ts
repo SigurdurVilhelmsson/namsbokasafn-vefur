@@ -23,7 +23,7 @@ test.describe('Orðasafn gating (R6-6)', () => {
 		test.skip(!WITH_GLOSSARY, 'no synced book ships a glossary — nothing to assert the positive case on');
 		await page.goto(`/${WITH_GLOSSARY}`);
 		await page.waitForLoadState('networkidle');
-		// Minniskort is unconditional — its presence proves the sidebar toc loaded.
+		// The /minniskort link is unconditional — its presence proves the sidebar toc loaded.
 		await expect(page.locator(`aside.sidebar a[href$="/${WITH_GLOSSARY}/minniskort"]`)).toHaveCount(
 			1
 		);

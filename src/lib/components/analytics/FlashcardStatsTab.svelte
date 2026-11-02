@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import { flashcardStore, flashcardSuccessRate, weeklyFlashcardStats } from '$lib/stores';
+	import { countNoun } from '$lib/utils/plural';
 	import { getTodayDateString } from '$lib/utils/storeHelpers';
 
 	// Format date for display
@@ -81,7 +82,8 @@
 			<!-- Stats -->
 			<div class="space-y-4">
 				<div>
-					<p class="text-sm text-gray-500 dark:text-gray-400">Heildar kort</p>
+					<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
+					<p class="text-sm text-gray-500 dark:text-gray-400">Heildar spjöld</p>
 					<p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{$flashcardSuccessRate.total}</p>
 				</div>
 				<div>
@@ -154,7 +156,7 @@
 								? 'bg-green-500'
 								: 'bg-gray-300 dark:bg-gray-600'}"
 							style="height: {Math.max(height, 4)}%"
-							title="{day.cardsReviewed} kort, {successRate}% rétt"
+							title="{countNoun(day.cardsReviewed, 'spjald', 'spjöld')}, {successRate}% rétt"
 						></div>
 					</div>
 					<span class="text-xs font-medium {isToday ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}">

@@ -43,7 +43,7 @@ async function openFlashcards(page: Page, { seed }: { seed: boolean }) {
 		);
 	}
 	await page.goto(`/${syncedBooks()[0]}/minniskort/`);
-	await expect(page.getByRole('heading', { name: 'Minniskort', level: 1 })).toBeVisible({
+	await expect(page.getByRole('heading', { name: 'Minnisspjöld', level: 1 })).toBeVisible({
 		timeout: 15000
 	});
 }
@@ -61,13 +61,13 @@ async function currentCard(page: Page) {
 test.describe('Flashcard Page', () => {
 	test('says there are no cards yet in a fresh profile', async ({ page }) => {
 		await openFlashcards(page, { seed: false });
-		await expect(page.getByText('Engin minniskort enn')).toBeVisible();
+		await expect(page.getByText('Engin minnisspjöld enn')).toBeVisible();
 	});
 
 	test('lists a deck with its card count', async ({ page }) => {
 		await openFlashcards(page, { seed: true });
 		await expect(page.getByText('Prófunarstokkur')).toBeVisible();
-		await expect(page.getByText(`${CARDS.length} kort`)).toBeVisible();
+		await expect(page.getByText(`${CARDS.length} spjöld`)).toBeVisible();
 	});
 
 	test('Æfa starts a session on a card of the deck', async ({ page }) => {
@@ -109,7 +109,7 @@ test.describe('Flashcard Page', () => {
 
 		// A reload resumes the session on the next card
 		await page.reload();
-		await expect(page.getByText(`Kort 2 af ${CARDS.length}`)).toBeVisible({ timeout: 15000 });
+		await expect(page.getByText(`Spjald 2 af ${CARDS.length}`)).toBeVisible({ timeout: 15000 });
 		const afterReload = await page.evaluate((key) => {
 			const state = JSON.parse(localStorage.getItem(key) ?? '{}');
 			return Object.keys(state.studyRecords ?? {});

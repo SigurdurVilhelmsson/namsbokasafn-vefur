@@ -10,6 +10,7 @@
  * previews (D09, plan step S5.5).
  */
 import { books } from '$lib/types/book';
+import { takesSingular } from './plural';
 
 /** The closed list of events. A new event is a new entry here, and nothing else. */
 export const COUNTER_EVENTS = ['recallShown', 'recallSaved', 'recallSkipped', 'recallAbandoned'] as const;
@@ -74,9 +75,6 @@ export function recallTotals(counters: Counters): RecallTotals {
 	}
 	return totals;
 }
-
-/** Icelandic takes the singular after a number ending in 1, except 11 (1, 21, 101; not 11, 111) */
-const takesSingular = (n: number): boolean => n % 10 === 1 && n % 100 !== 11;
 
 /**
  * /greining's one-line summary, about the student's own use only: no comparison and no

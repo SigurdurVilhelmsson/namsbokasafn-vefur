@@ -186,16 +186,16 @@
 			<span class="hidden sm:inline">Athugasemd</span>
 		</button>
 
-		<!-- Create flashcard button -->
+		<!-- Create flashcard button. D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
 		<button
 			onclick={onCreateFlashcard}
 			tabindex={tab(CARD)}
 			class="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-500 dark:text-gray-300 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-gray-100"
-			aria-label="Búa til minniskort"
-			title="Búa til minniskort"
+			aria-label="Búa til minnisspjald"
+			title="Búa til minnisspjald"
 		>
 			<Icon name="sparkles" size="sm" />
-			<span class="hidden sm:inline">Minniskort</span>
+			<span class="hidden sm:inline">Minnisspjald</span>
 		</button>
 
 		<!-- Glossary lookup button. Named by its word 'Orðasafn' at every width (screen-reader only

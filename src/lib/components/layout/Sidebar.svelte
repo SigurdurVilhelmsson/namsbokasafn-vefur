@@ -459,7 +459,8 @@
 
 					<a href="/{bookSlug}/minniskort" class="study-tool-link">
 						<Icon name="credit-card" />
-						<span>Minniskort</span>
+						<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
+						<span>Minnisspjöld</span>
 					</a>
 
 					{#if toc.glossary}

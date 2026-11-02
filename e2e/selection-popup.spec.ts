@@ -21,7 +21,7 @@ const SECTION = BOOK ? firstModuleSection(BOOK) : null;
 const popup = (page: Page) =>
 	page
 		.locator('[role="toolbar"], [role="dialog"]')
-		.filter({ has: page.getByRole('button', { name: 'Búa til minniskort' }) });
+		.filter({ has: page.getByRole('button', { name: 'Búa til minnisspjald' }) });
 const article = (page: Page) => page.locator('.text-highlighter');
 
 interface Box {

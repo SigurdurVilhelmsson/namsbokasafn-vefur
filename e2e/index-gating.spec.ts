@@ -24,7 +24,7 @@ test.describe('Atriðisorðaskrá gating (R6-4)', () => {
 		const slug = WITH_INDEX as string;
 		await page.goto(`/${slug}`);
 		await page.waitForLoadState('networkidle');
-		// Minniskort is unconditional — its presence proves the sidebar toc loaded.
+		// The /minniskort link is unconditional — its presence proves the sidebar toc loaded.
 		await expect(page.locator(`aside.sidebar a[href$="/${slug}/minniskort"]`)).toHaveCount(1);
 		await expect(page.locator(`aside.sidebar a[href$="/${slug}/atridiordasskra"]`)).toHaveCount(1);
 	});
