@@ -186,7 +186,7 @@
 			<span class="hidden sm:inline">Athugasemd</span>
 		</button>
 
-		<!-- Create flashcard button. D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
+		<!-- Create flashcard button -->
 		<button
 			onclick={onCreateFlashcard}
 			tabindex={tab(CARD)}

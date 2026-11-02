@@ -154,7 +154,6 @@
 				id="flashcard-modal-title"
 				class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100"
 			>
-				<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
 				<Icon name="sparkles" class="text-[var(--accent-strong)]" />
 				Búa til minnisspjald
 			</h2>

@@ -77,7 +77,6 @@
 		Endurtekningar
 	</h2>
 	<p class="rp-description">
-		<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
 		Farðu yfir spjöld og dæmi sem þarfnast endurtekningar.
 	</p>
 

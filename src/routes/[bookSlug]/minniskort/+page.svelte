@@ -59,7 +59,6 @@
 </svelte:head>
 
 <div class="max-w-2xl mx-auto">
-	<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
 	<h1 class="flashcard-heading">
 		Minnisspjöld
 	</h1>

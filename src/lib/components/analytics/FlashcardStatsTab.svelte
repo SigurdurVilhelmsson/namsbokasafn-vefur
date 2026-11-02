@@ -82,7 +82,6 @@
 			<!-- Stats -->
 			<div class="space-y-4">
 				<div>
-					<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
 					<p class="text-sm text-gray-500 dark:text-gray-400">Heildar spjöld</p>
 					<p class="text-2xl font-bold text-gray-900 dark:text-gray-100">{$flashcardSuccessRate.total}</p>
 				</div>

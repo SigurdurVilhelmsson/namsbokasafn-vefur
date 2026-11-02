@@ -16,8 +16,7 @@
 
 	let cards = $derived($flashcardStore.decks.find((d) => d.id === deckId)?.cards ?? []);
 
-	// D20: proposed (S7.2): the confirm and the announcement, worded as the recall delete's
-	// ('spjald', not 'kort': [USER], 2026-11-02)
+	// The confirm and the announcement (S7.2), worded as the recall delete's
 	const CONFIRM_DELETE = 'Eyða þessu spjaldi? Þetta er ekki hægt að afturkalla.';
 	const DELETED_MESSAGE = 'Spjaldinu var eytt.';
 
@@ -35,7 +34,6 @@
 </script>
 
 <details class="deck-cards">
-	<!-- D20: proposed (S7.2): 'Spjöldin í stokknum', 'Stokkurinn er tómur.' and 'Eyða spjaldi: <front>' -->
 	<summary bind:this={summaryEl} class="deck-cards-summary">Spjöldin í stokknum</summary>
 	{#if cards.length > 0}
 		<ul bind:this={listEl} class="deck-cards-list">

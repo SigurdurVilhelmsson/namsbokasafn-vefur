@@ -21,7 +21,6 @@
 		},
 		{
 			type: 'daily_flashcards',
-			// D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02)
 			label: 'Æfa minnisspjöld',
 			unit: 'cards',
 			defaultTarget: 20,

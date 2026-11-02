@@ -337,7 +337,7 @@
     </div>
 
     <div class="tools-grid">
-      <!-- Minnisspjöld. D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
+      <!-- Minnisspjöld -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
           <Icon name="credit-card" size="md" style="color: var(--accent-strong)" />
