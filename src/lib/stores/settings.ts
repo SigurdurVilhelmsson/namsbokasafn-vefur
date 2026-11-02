@@ -1,12 +1,24 @@
 /**
  * Settings Store - Full SvelteKit implementation
  * Ported from React/Zustand settingsStore.ts
+ *
+ * Stores only what the reader set, with a version and a profile-age marker (plan step S6.1,
+ * register CODE-05, decision D02); the format and its rules are in settingsMigration.ts.
+ * The store's value is still every setting in effect: the set keys over the defaults.
  */
 
 import { writable, derived, get } from 'svelte/store';
 import { browser } from '$app/environment';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
-import { validateStoreData, isOneOf, isBoolean, isObject } from '$lib/utils/storeValidation';
+import { isOneOf, isBoolean, isObject } from '$lib/utils/storeValidation';
+import {
+	chosenKeys,
+	migrateStored,
+	resolveSettings,
+	serializeRecord,
+	type SettingsRecord,
+	type SettingsSchema
+} from '$lib/utils/settingsMigration';
 
 // Types
 export type Theme = 'light' | 'dark';
@@ -44,7 +56,7 @@ export const DEFAULT_SHORTCUTS: Record<ShortcutAction, string> = {
 
 export type ShortcutPreferences = Partial<Record<ShortcutAction, string>>;
 
-interface SettingsState {
+export interface SettingsState {
 	theme: Theme;
 	fontSize: FontSize;
 	fontFamily: FontFamily;
@@ -59,7 +71,7 @@ interface SettingsState {
 
 const STORAGE_KEY = 'namsbokasafn:settings';
 
-const defaultSettings: SettingsState = {
+export const defaultSettings: SettingsState = {
 	theme: 'light',
 	fontSize: 'medium',
 	fontFamily: 'serif',
@@ -85,31 +97,64 @@ const settingsValidators = {
 	showTermEnglish: isBoolean
 };
 
-function loadSettings(): SettingsState {
-	if (!browser) return defaultSettings;
+const settingsSchema: SettingsSchema<SettingsState> = {
+	defaults: defaultSettings,
+	validators: settingsValidators,
+	// Screen state, kept across loads but never counted as a choice
+	screenKeys: ['sidebarOpen']
+};
 
+/** Parse a stored value into a record; anything unreadable is a fresh profile */
+function readRecord(raw: string | null): SettingsRecord {
 	try {
-		const stored = localStorage.getItem(STORAGE_KEY);
-		if (stored) {
-			return validateStoreData(JSON.parse(stored), defaultSettings, settingsValidators);
-		}
+		return migrateStored(raw === null ? null : JSON.parse(raw));
 	} catch (e) {
 		console.warn('Failed to load settings:', e);
+		return migrateStored(null);
 	}
-	return defaultSettings;
+}
+
+function loadRecord(): SettingsRecord {
+	if (!browser) return migrateStored(null);
+	try {
+		return readRecord(localStorage.getItem(STORAGE_KEY));
+	} catch (e) {
+		console.warn('Failed to load settings:', e);
+		return migrateStored(null);
+	}
+}
+
+/** What the reader has set on this device, for later defaults. Not reactive: read it when needed. */
+export interface SettingsProfile {
+	/** The settings version the profile was created under; 0 = it predates the seam */
+	born: number;
+	/** The settings the reader chose (the sidebar's open state is never one) */
+	chosen: (keyof SettingsState)[];
 }
 
 function createSettingsStore() {
-	const { subscribe, set, update } = writable<SettingsState>(loadSettings());
+	let record = loadRecord();
+	const { subscribe, set } = writable<SettingsState>(resolveSettings(record, settingsSchema));
 
-	// Persist to localStorage on every change
-	let _externalUpdate = false;
+	const persist = () => {
+		if (browser) safeSetItem(STORAGE_KEY, serializeRecord(record));
+	};
+
+	/** Record what the reader set and apply it. Every setter, toggle and reset goes through here. */
+	const choose = (patch: Partial<SettingsState>) => {
+		record = { ...record, values: { ...record.values, ...patch } };
+		set(resolveSettings(record, settingsSchema));
+		persist();
+	};
+
+	const current = () => get({ subscribe });
+
 	if (browser) {
+		// The first load writes the version and the marker, even when nothing is chosen
+		persist();
+
+		// Update dark class on html element (always, even for cross-tab updates)
 		subscribe((state) => {
-			if (!_externalUpdate) {
-				safeSetItem(STORAGE_KEY, JSON.stringify(state));
-			}
-			// Update dark class on html element (always, even for cross-tab updates)
 			if (state.theme === 'dark') {
 				document.documentElement.classList.add('dark');
 			} else {
@@ -117,13 +162,18 @@ function createSettingsStore() {
 			}
 		});
 
-		// Cross-tab synchronization
+		// Cross-tab synchronization: take the other tab's record whole, and write nothing.
+		// A removal arrives as 'null' and reads as a fresh profile. A value that does not
+		// parse is ignored, so this tab's next change cannot write its choices away.
 		onStorageChange(STORAGE_KEY, (newValue) => {
+			let parsed: unknown;
 			try {
-				_externalUpdate = true;
-				set(validateStoreData(JSON.parse(newValue), defaultSettings, settingsValidators));
-			} catch { /* ignore invalid data from other tabs */ }
-			finally { _externalUpdate = false; }
+				parsed = JSON.parse(newValue);
+			} catch {
+				return;
+			}
+			record = migrateStored(parsed);
+			set(resolveSettings(record, settingsSchema));
 		});
 	}
 
@@ -131,66 +181,65 @@ function createSettingsStore() {
 		subscribe,
 
 		// Theme methods
-		setTheme: (theme: Theme) => update((s) => ({ ...s, theme })),
+		setTheme: (theme: Theme) => choose({ theme }),
 
-		toggleTheme: () =>
-			update((s) => ({
-				...s,
-				theme: s.theme === 'light' ? 'dark' : 'light'
-			})),
+		toggleTheme: () => choose({ theme: current().theme === 'light' ? 'dark' : 'light' }),
 
 		// Font size methods
-		setFontSize: (fontSize: FontSize) => update((s) => ({ ...s, fontSize })),
+		setFontSize: (fontSize: FontSize) => choose({ fontSize }),
 
 		// Font family methods
-		setFontFamily: (fontFamily: FontFamily) => update((s) => ({ ...s, fontFamily })),
+		setFontFamily: (fontFamily: FontFamily) => choose({ fontFamily }),
 
 		// Line height methods
-		setLineHeight: (lineHeight: LineHeight) => update((s) => ({ ...s, lineHeight })),
+		setLineHeight: (lineHeight: LineHeight) => choose({ lineHeight }),
 
 		// Line width methods
-		setLineWidth: (lineWidth: LineWidth) => update((s) => ({ ...s, lineWidth })),
+		setLineWidth: (lineWidth: LineWidth) => choose({ lineWidth }),
 
 		// Sidebar methods
-		setSidebarOpen: (sidebarOpen: boolean) => update((s) => ({ ...s, sidebarOpen })),
+		setSidebarOpen: (sidebarOpen: boolean) => choose({ sidebarOpen }),
 
-		toggleSidebar: () => update((s) => ({ ...s, sidebarOpen: !s.sidebarOpen })),
+		toggleSidebar: () => choose({ sidebarOpen: !current().sidebarOpen }),
 
 		// Keyboard shortcut methods
 		setShortcut: (action: ShortcutAction, key: string) =>
-			update((s) => ({
-				...s,
-				shortcutPreferences: {
-					...s.shortcutPreferences,
-					[action]: key
-				}
-			})),
+			choose({ shortcutPreferences: { ...current().shortcutPreferences, [action]: key } }),
 
-		resetShortcut: (action: ShortcutAction) =>
-			update((s) => {
-				const newPrefs = { ...s.shortcutPreferences };
-				delete newPrefs[action];
-				return { ...s, shortcutPreferences: newPrefs };
-			}),
-
-		resetAllShortcuts: () => update((s) => ({ ...s, shortcutPreferences: {} })),
-
-		// Bionic reading methods
-		setBionicReading: (enabled: boolean) => update((s) => ({ ...s, bionicReading: enabled })),
-		toggleBionicReading: () => update((s) => ({ ...s, bionicReading: !s.bionicReading })),
-
-		// Glossary highlighting methods
-		setGlossaryHighlighting: (enabled: boolean) => update((s) => ({ ...s, glossaryHighlighting: enabled })),
-		toggleGlossaryHighlighting: () => update((s) => ({ ...s, glossaryHighlighting: !s.glossaryHighlighting })),
-		setShowTermEnglish: (enabled: boolean) => update((s) => ({ ...s, showTermEnglish: enabled })),
-		toggleShowTermEnglish: () => update((s) => ({ ...s, showTermEnglish: !s.showTermEnglish })),
-
-		getShortcut: (action: ShortcutAction): string => {
-			const state = get({ subscribe });
-			return state.shortcutPreferences[action] || DEFAULT_SHORTCUTS[action];
+		resetShortcut: (action: ShortcutAction) => {
+			const newPrefs = { ...current().shortcutPreferences };
+			delete newPrefs[action];
+			choose({ shortcutPreferences: newPrefs });
 		},
 
-		reset: () => set(defaultSettings)
+		resetAllShortcuts: () => choose({ shortcutPreferences: {} }),
+
+		// Bionic reading methods
+		setBionicReading: (enabled: boolean) => choose({ bionicReading: enabled }),
+		toggleBionicReading: () => choose({ bionicReading: !current().bionicReading }),
+
+		// Glossary highlighting methods
+		setGlossaryHighlighting: (enabled: boolean) => choose({ glossaryHighlighting: enabled }),
+		toggleGlossaryHighlighting: () => choose({ glossaryHighlighting: !current().glossaryHighlighting }),
+		setShowTermEnglish: (enabled: boolean) => choose({ showTermEnglish: enabled }),
+		toggleShowTermEnglish: () => choose({ showTermEnglish: !current().showTermEnglish }),
+
+		getShortcut: (action: ShortcutAction): string => {
+			return current().shortcutPreferences[action] || DEFAULT_SHORTCUTS[action];
+		},
+
+		/** The profile-age marker and the keys the reader chose (not reactive) */
+		profile: (): SettingsProfile => ({ born: record.born, chosen: chosenKeys(record, settingsSchema) }),
+
+		/** Forget every choice; keep the marker and any key a newer build wrote. Only tests call it. */
+		reset: () => {
+			const kept = Object.fromEntries(
+				Object.entries(record.values).filter(([key]) => !(key in defaultSettings))
+			);
+			record = { ...record, values: kept };
+			persist();
+			set(resolveSettings(record, settingsSchema));
+		}
 	};
 }
 

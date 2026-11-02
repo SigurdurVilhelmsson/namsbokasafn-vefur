@@ -108,25 +108,48 @@ test.describe('Theme Toggle', () => {
 });
 
 test.describe('Settings Persistence', () => {
-	test('should store settings in localStorage', async ({ page }) => {
+	// The settings seam (S6.1, D02): a fresh profile stores the version and the profile-age
+	// marker, and no setting until the reader chooses one
+	test('a fresh visit stores only the marker', async ({ page }) => {
 		await page.goto('/');
 		await page.waitForLoadState('networkidle');
 		await expect(page.getByRole('heading', { name: /Námsbækur/i })).toBeVisible({
 			timeout: 15000
 		});
 
-		// Check that settings key exists after page load
-		const hasSettings = await page.evaluate(() => {
-			const stored = localStorage.getItem('namsbokasafn:settings');
-			if (!stored) return false;
-			const settings = JSON.parse(stored);
-			return (
-				typeof settings.theme === 'string' &&
-				typeof settings.fontSize === 'string' &&
-				typeof settings.fontFamily === 'string'
-			);
-		});
-		expect(hasSettings).toBe(true);
+		const stored = await page.evaluate(() => localStorage.getItem('namsbokasafn:settings'));
+		expect(stored).toBe('{"_version":1,"_born":1}');
+	});
+
+	test("a profile saved before the seam keeps its values, and the reader's next choice adds only itself", async ({
+		page
+	}) => {
+		const legacy = {
+			theme: 'dark',
+			fontSize: 'large',
+			fontFamily: 'serif',
+			lineHeight: 'normal',
+			lineWidth: 'medium',
+			sidebarOpen: false,
+			shortcutPreferences: {},
+			bionicReading: false,
+			glossaryHighlighting: true,
+			showTermEnglish: true
+		};
+		await page.addInitScript((value) => {
+			if (!sessionStorage.getItem('seeded')) {
+				localStorage.setItem('namsbokasafn:settings', value);
+				sessionStorage.setItem('seeded', '1');
+			}
+		}, JSON.stringify(legacy));
+		await page.goto('/');
+		await page.waitForLoadState('networkidle');
+		await expect(page.locator('html.dark')).toBeAttached();
+
+		await page.locator('button.theme-toggle').click();
+		await expect(page.locator('html.dark')).not.toBeAttached();
+		const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('namsbokasafn:settings') || '{}'));
+		expect(stored).toEqual({ _version: 1, _born: 0, ...legacy, theme: 'light' });
 	});
 
 	test('should have default light theme on fresh visit', async ({ page }) => {
@@ -199,8 +222,19 @@ test.describe('Settings groups say which option is selected (UI-03)', () => {
 				const buttons = dialog.getByRole('group', { name: group, exact: true }).getByRole('button');
 				const label = (value: string) => labels[value as keyof typeof labels];
 
+				/** With nothing stored (S6.1: a fresh profile stores no setting), the default is in effect: one option is pressed */
+				const pressed = async () => {
+					const values: string[] = [];
+					for (const [v, text] of Object.entries(labels)) {
+						if ((await buttons.filter({ hasText: text }).getAttribute('aria-pressed')) === 'true') values.push(v);
+					}
+					expect(values, 'exactly one option is pressed').toHaveLength(1);
+					return values[0];
+				};
+				const inEffect = async () => (await stored(page, key)) ?? (await pressed());
+
 				const check = async () => {
-					const value = await stored(page, key);
+					const value = await inEffect();
 					for (const [v, text] of Object.entries(labels)) {
 						const button = buttons.filter({ hasText: text });
 						await expect(button, `${text}`).toHaveAttribute('aria-pressed', v === value ? 'true' : 'false');
@@ -209,7 +243,7 @@ test.describe('Settings groups say which option is selected (UI-03)', () => {
 				};
 
 				await check();
-				const current = await stored(page, key);
+				const current = await inEffect();
 				const target = Object.keys(labels).find((v) => v !== current)!;
 				await buttons.filter({ hasText: label(target) }).click();
 				await expect.poll(() => stored(page, key)).toBe(target);

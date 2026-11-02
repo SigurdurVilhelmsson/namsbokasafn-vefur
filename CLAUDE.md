@@ -43,7 +43,7 @@ npm run format           # Prettier formatting
 ### State Management
 
 - **Svelte stores** (`src/lib/stores/`) with localStorage persistence
-- `settings.ts`: Theme, typography (font family/size, line height/width), keyboard shortcuts, sidebar state, bionic reading, glossary highlighting, `showTermEnglish` (`readingMode` is only on the `feature/reader-v1.1` and `feature/reader-v1.2` branches)
+- `settings.ts`: Theme, typography (font family/size, line height/width), keyboard shortcuts, sidebar state, bionic reading, glossary highlighting, `showTermEnglish` (`readingMode` is only on the `feature/reader-v1.1` and `feature/reader-v1.2` branches). Since S6.1 (the settings seam, D02) it stores only what the reader set, flat, beside `_version` and the profile-age marker `_born` (the settings version the profile was created under; 0 for a profile from before the seam, whose saved values all count as chosen). The store's value is still every setting in effect; `settings.profile()` gives `born` and the chosen keys (the sidebar's open state is stored but never a choice). The rules are in `src/lib/utils/settingsMigration.ts`: a build carries keys it does not know through on write and never lowers `_version`, so a tab on an older build cannot drop a newer build's setting. A frozen book's 2026-08-19 bundle writes the old full format back, so that profile reads as pre-seam afterwards
 - `reader.ts`: Reading progress, bookmarks, current location
 - `flashcard.ts`: SM-2 spaced repetition, study sessions, card ratings
 - `quiz.ts`: Quiz attempts and scores
@@ -56,7 +56,7 @@ npm run format           # Prettier formatting
 
 Three rules every store keeps (from S3.2 and S3.1, 2026-10-26):
 
-- **A store's `onStorageChange` callback receives `'null'` when another tab removes its key** (or calls `localStorage.clear()`), and must turn it into the store's defaults. All nine persisted stores do, through `validateStoreData` (`glossary.ts` persists nothing; by design analytics keeps this tab's open session and offline this tab's download progress); otherwise another tab writes its old state back after an erase.
+- **A store's `onStorageChange` callback receives `'null'` when another tab removes its key** (or calls `localStorage.clear()`), and must turn it into the store's defaults. All nine persisted stores do, through `validateStoreData` (settings through `migrateStored`, which reads `null` as a fresh profile; `glossary.ts` persists nothing; by design analytics keeps this tab's open session and offline this tab's download progress); otherwise another tab writes its old state back after an erase.
 - **`clearAllStorage()` blocks every `safeSetItem` until the page reloads.** Call it only right before a reload.
 - **A stored practice snapshot is filtered again when shown, and appended as nodes.** Never pass it to `{@html}`.
 
@@ -665,7 +665,7 @@ As of 2026-11-01 (`main` `d7b2ed9`):
   - the erase on /greining leaves the service worker's expiry records, the precache and the HTTP cache (the privacy page says so);
   - a stored practice problem unwraps its links, and PED-13's step 2 (fetching the section by the stored address) is not built;
   - `buildIndex` leaves `isBuilding` set if a build rejects;
-  - a hard load of a frozen book runs its 2026-08-19 bundles (the old search crawl, white on amber) until that book is deployed again;
+  - a hard load of a frozen book runs its 2026-08-19 bundles (the old search crawl, white on amber, and, once S6.1 ships, a settings rewrite in the old full format that makes the profile read as pre-seam) until that book is deployed again;
   - physics embeds load YouTube and PhET with no click-to-load step, which would send readers' IP addresses there: decide it with the CSP `frame-src` fix, before physics is synced.
 - **npm audit** (re-measured 2026-11-01 in the deploy lane for train 8; no package changed since 2026-10-31): production tree 0; full tree 26 (5 low, 21 moderate), all development tools, with no fix inside the current majors.
 - **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
