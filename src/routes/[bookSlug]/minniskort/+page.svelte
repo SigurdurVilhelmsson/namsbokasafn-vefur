@@ -3,6 +3,7 @@
 -->
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { countNoun } from '$lib/utils/plural';
 	import Icon from '$lib/components/Icon.svelte';
 	import DeckCardList from '$lib/components/DeckCardList.svelte';
 	import {
@@ -48,18 +49,19 @@
 </script>
 
 <svelte:head>
-	<title>Minniskort | {data.book?.title ?? 'Bók'}</title>
-	<meta property="og:title" content="Minniskort | {data.book?.title ?? 'Bók'}" />
-	<meta name="description" content="Minniskort og endurtekningarkerfi fyrir {data.book?.title ?? 'kennslubók'}" />
-	<meta property="og:description" content="Minniskort og endurtekningarkerfi fyrir {data.book?.title ?? 'kennslubók'}" />
+	<title>Minnisspjöld | {data.book?.title ?? 'Bók'}</title>
+	<meta property="og:title" content="Minnisspjöld | {data.book?.title ?? 'Bók'}" />
+	<meta name="description" content="Minnisspjöld og endurtekningarkerfi fyrir {data.book?.title ?? 'kennslubók'}" />
+	<meta property="og:description" content="Minnisspjöld og endurtekningarkerfi fyrir {data.book?.title ?? 'kennslubók'}" />
 	<meta property="og:type" content="website" />
 	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/minniskort/" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/minniskort/" />
 </svelte:head>
 
 <div class="max-w-2xl mx-auto">
+	<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
 	<h1 class="flashcard-heading">
-		Minniskort
+		Minnisspjöld
 	</h1>
 
 	{#if !$currentDeck}
@@ -74,10 +76,10 @@
 				</div>
 
 				<h2 class="flashcard-subheading">
-					Engin minniskort enn
+					Engin minnisspjöld enn
 				</h2>
 				<p class="flashcard-description">
-					Til að búa til minniskort, veldu texta í kafla og smelltu á „Minniskort" í valmyndinni sem birtist.
+					Til að búa til minnisspjald, veldu texta í kafla og smelltu á „Minnisspjald" í valmyndinni sem birtist.
 				</p>
 
 				<a
@@ -114,7 +116,7 @@
 								<p class="deck-card-desc">{deck.description}</p>
 							{/if}
 							<div class="deck-card-stats">
-								<span>{stats.total} kort</span>
+								<span>{countNoun(stats.total, 'spjald', 'spjöld')}</span>
 								{#if stats.due > 0}
 									<span class="deck-card-stats-due">{stats.due} til endurtekningar</span>
 								{/if}
@@ -149,7 +151,7 @@
 				Vel gert!
 			</h2>
 			<p class="flashcard-description">
-				Þú hefur lokið öllum kortum fyrir í dag.
+				Þú hefur lokið öllum spjöldum fyrir í dag.
 			</p>
 
 			<div class="flex justify-center gap-4">
@@ -173,7 +175,7 @@
 			<!-- Progress bar -->
 			<div class="mb-6">
 				<div class="flashcard-progress-text">
-					<span>Kort {$studyProgress.current + 1} af {$studyProgress.total}</span>
+					<span>Spjald {$studyProgress.current + 1} af {$studyProgress.total}</span>
 					<span>{$studyProgress.total > 0 ? Math.round(($studyProgress.current / $studyProgress.total) * 100) : 0}%</span>
 				</div>
 				<div
@@ -209,7 +211,7 @@
 			<!-- Flip hint or rating buttons -->
 			{#if !isFlipped}
 				<p class="flashcard-hint">
-					Smelltu á kortið til að sjá svarið
+					Smelltu á spjaldið til að sjá svarið
 				</p>
 			{:else}
 				<div class="mt-6">

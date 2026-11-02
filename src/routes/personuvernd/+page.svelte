@@ -50,7 +50,7 @@
 		<div class="container">
 			<h1>Gögnin þín og persónuvernd</h1>
 			<p class="lead">
-				Framvinda þín, athugasemdir, minniskort og annað sem þú gerir í Námsbókasafni eru geymd í
+				Framvinda þín, athugasemdir, minnisspjöld og annað sem þú gerir í Námsbókasafni eru geymd í
 				þessum vafra, á þessu tæki, og eru ekki send til okkar. Af tækinu fara aðeins beiðnir um
 				síðurnar sjálfar, talning síðuflettinga og endurgjöf ef þú sendir hana. Nánar hér fyrir neðan.
 			</p>
@@ -61,7 +61,8 @@
 				<ul>
 					<li>framvindu í bókunum: hvaða hlutar eru lesnir, hvar þú varst og bókamerki;</li>
 					<li>yfirstrikanir og athugasemdir sem þú skrifar;</li>
-					<li>minniskort og hvernig þér gekk að rifja þau upp;</li>
+					<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
+					<li>minnisspjöld og hvernig þér gekk að rifja þau upp;</li>
 					<li>það sem þú skrifar þegar þú rifjar upp efni kafla eftir lesturinn;</li>
 					<li>námsmarkmið sem þú hefur merkt sem lokið, og hve vel þú telur þig kunna þau;</li>
 					<li>æfingadæmi sem þú hefur opnað og hvernig þér gekk með þau;</li>

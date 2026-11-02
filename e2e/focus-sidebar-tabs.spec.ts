@@ -122,7 +122,7 @@ test.describe('The desktop sidebar is in the accessibility tree (UI-06)', () => 
 
 test.describe('The /greining tabs on a phone (UI-15)', () => {
 	test.use({ viewport: PHONE });
-	const LABELS = ['Yfirlit', 'Lestur', 'Minniskort', 'Markmið'];
+	const LABELS = ['Yfirlit', 'Lestur', 'Minnisspjöld', 'Markmið'];
 
 	test('each tab is named by its label, and only the selected one is in the Tab order', async ({ page }) => {
 		test.skip(!BOOK, 'no published book is synced');

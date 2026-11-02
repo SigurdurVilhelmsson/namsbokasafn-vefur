@@ -122,7 +122,7 @@ test.describe('Honest data controls (S3.2)', () => {
 		await page.goto(`/${BOOK}/bokamerki/`);
 		await expect(page.getByText('Engin bókamerki')).toBeVisible();
 		await page.goto(`/${BOOK}/minniskort/`);
-		await expect(page.getByText('Engin minniskort enn')).toBeVisible();
+		await expect(page.getByText('Engin minnisspjöld enn')).toBeVisible();
 	});
 
 	// Normally the reloaded page writes every store's defaults, which also resets other tabs. When

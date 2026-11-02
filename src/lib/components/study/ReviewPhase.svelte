@@ -77,7 +77,8 @@
 		Endurtekningar
 	</h2>
 	<p class="rp-description">
-		Farðu yfir kort og dæmi sem þarfnast endurtekningar.
+		<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
+		Farðu yfir spjöld og dæmi sem þarfnast endurtekningar.
 	</p>
 
 	<!-- Progress bar -->
@@ -112,7 +113,7 @@
 
 		{#if !isFlipped}
 			<p class="rp-hint">
-				Smelltu á kortið til að sjá svarið
+				Smelltu á spjaldið til að sjá svarið
 			</p>
 		{:else}
 			<div class="mt-4">

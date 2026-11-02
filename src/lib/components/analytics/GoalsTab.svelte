@@ -4,6 +4,7 @@
 <script lang="ts">
 	import { analyticsStore, type GoalType, type GoalUnit, type GoalProgress } from '$lib/stores';
 	import Icon from '$lib/components/Icon.svelte';
+	import { takesSingular } from '$lib/utils/plural';
 
 	let showAddModal = $state(false);
 	let newGoalType: GoalType = $state('daily_reading_time');
@@ -20,10 +21,11 @@
 		},
 		{
 			type: 'daily_flashcards',
-			label: 'Æfa minniskort',
+			// D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02)
+			label: 'Æfa minnisspjöld',
 			unit: 'cards',
 			defaultTarget: 20,
-			description: 'Æfa ákveðinn fjölda minniskorta á dag'
+			description: 'Æfa ákveðinn fjölda minnisspjalda á dag'
 		},
 		{
 			type: 'weekly_sections',
@@ -48,13 +50,13 @@
 	function formatUnit(unit: GoalUnit, count: number): string {
 		switch (unit) {
 			case 'minutes':
-				return count === 1 ? 'mínúta' : 'mínútur';
+				return takesSingular(count) ? 'mínúta' : 'mínútur';
 			case 'cards':
-				return count === 1 ? 'kort' : 'kort';
+				return takesSingular(count) ? 'spjald' : 'spjöld';
 			case 'sections':
-				return count === 1 ? 'kafli' : 'kaflar';
+				return takesSingular(count) ? 'kafli' : 'kaflar';
 			case 'days':
-				return count === 1 ? 'dagur' : 'dagar';
+				return takesSingular(count) ? 'dagur' : 'dagar';
 		}
 	}
 

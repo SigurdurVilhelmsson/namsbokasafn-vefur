@@ -58,7 +58,8 @@ const SHORTCUT_METADATA: Record<
 	},
 	goFlashcards: {
 		description: 'Go to flashcards',
-		descriptionIs: 'Fara í minniskort',
+		// D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02)
+		descriptionIs: 'Fara í minnisspjöld',
 		category: 'navigation'
 	},
 	goGlossary: {

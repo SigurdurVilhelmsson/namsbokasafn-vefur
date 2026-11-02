@@ -111,7 +111,8 @@
 		},
 		{
 			href: `/${bookSlug}/minniskort`,
-			label: 'Minniskort',
+			// D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02)
+			label: 'Minnisspjöld',
 			icon: 'flashcards' as const
 		}
 	]);

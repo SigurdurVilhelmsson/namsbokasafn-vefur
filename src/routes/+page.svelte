@@ -102,8 +102,8 @@
 <svelte:head>
   <title>Námsbókasafn – Opnar kennslubækur á íslensku</title>
   <meta property="og:title" content="Námsbókasafn – Opnar kennslubækur á íslensku" />
-  <meta name="description" content="Gagnvirkt námsefni með íslenskum þýðingum á OpenStax kennslubókum. Orðasafn, minniskort og æfingar." />
-  <meta property="og:description" content="Gagnvirkt námsefni með íslenskum þýðingum á OpenStax kennslubókum. Orðasafn, minniskort og æfingar." />
+  <meta name="description" content="Gagnvirkt námsefni með íslenskum þýðingum á OpenStax kennslubókum. Orðasafn, minnisspjöld og æfingar." />
+  <meta property="og:description" content="Gagnvirkt námsefni með íslenskum þýðingum á OpenStax kennslubókum. Orðasafn, minnisspjöld og æfingar." />
   <meta property="og:type" content="website" />
   <link rel="canonical" href="https://namsbokasafn.is/" />
   <meta property="og:url" content="https://namsbokasafn.is/" />
@@ -337,12 +337,12 @@
     </div>
 
     <div class="tools-grid">
-      <!-- Minniskort -->
+      <!-- Minnisspjöld. D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
       <div class="tool-card">
         <div class="tool-card-icon" style="background-color: color-mix(in srgb, var(--accent-color) 12%, transparent)">
           <Icon name="credit-card" size="md" style="color: var(--accent-strong)" />
         </div>
-        <h3>Minniskort</h3>
+        <h3>Minnisspjöld</h3>
         <p>Endurtekningarkerfi sem aðlagar sig að þér</p>
       </div>
 

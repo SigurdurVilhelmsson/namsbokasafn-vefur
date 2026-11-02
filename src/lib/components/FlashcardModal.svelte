@@ -7,6 +7,7 @@
 	import { fade, scale } from 'svelte/transition';
 	import { flashcardStore } from '$lib/stores/flashcard';
 	import type { Flashcard, FlashcardDeck } from '$lib/types/flashcard';
+	import { countNoun } from '$lib/utils/plural';
 
 	interface Props {
 		selectedText: string;
@@ -153,8 +154,9 @@
 				id="flashcard-modal-title"
 				class="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-gray-100"
 			>
+				<!-- D20: proposed: 'spjald' for 'kort' in this file's strings ([USER], 2026-11-02) -->
 				<Icon name="sparkles" class="text-[var(--accent-strong)]" />
-				Búa til minniskort
+				Búa til minnisspjald
 			</h2>
 			<button
 				onclick={onClose}
@@ -212,7 +214,7 @@
 
 				{#if decks.length === 0 && !showNewDeckInput}
 					<p class="text-sm text-gray-500 dark:text-gray-400 mb-2">
-						Enginn stokkur til. Búðu til nýjan stokk til að vista minniskortið.
+						Enginn stokkur til. Búðu til nýjan stokk til að vista minnisspjaldið.
 					</p>
 				{/if}
 
@@ -223,7 +225,7 @@
 						class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-gray-900 dark:text-gray-100 focus:border-[var(--accent-color)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-color)]/20"
 					>
 						{#each decks as deck (deck.id)}
-							<option value={deck.id}>{deck.name} ({deck.cards.length} kort)</option>
+							<option value={deck.id}>{deck.name} ({countNoun(deck.cards.length, 'spjald', 'spjöld')})</option>
 						{/each}
 					</select>
 				{/if}
@@ -268,7 +270,7 @@
 				class="flex items-center gap-2 rounded-lg bg-[var(--accent-color)] px-4 py-2 text-sm font-medium text-[var(--on-accent)] transition-colors enabled:hover:bg-[var(--accent-fill-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
 			>
 				<Icon name="check" size="sm" />
-				Vista minniskort
+				Vista minnisspjald
 			</button>
 		</div>
 	</div>
