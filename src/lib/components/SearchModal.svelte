@@ -98,8 +98,10 @@
 		searchHistory = getSearchHistory();
 	}
 
-	// Debounced search
+	// Debounced search. Reading selectedChapter here makes a filter change search again: the
+	// timeout reads it untracked, so it used to wait for the next keystroke (code review M9).
 	$effect(() => {
+		void selectedChapter;
 		if (query && toc && bookSlug) {
 			clearTimeout(searchTimeout);
 			searchTimeout = setTimeout(() => performSearch(), 200);

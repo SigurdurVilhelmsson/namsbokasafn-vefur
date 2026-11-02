@@ -140,3 +140,38 @@ test.describe('Search Modal', () => {
 		await expect(searchModal).not.toBeVisible();
 	});
 });
+
+// Code review M9 (June 2026): choosing a chapter in the filter must search again. The
+// debounced search used to track only the query, so the filter did nothing until the
+// reader typed. The count line's 'í völdum kafla' shows at once either way, so the test
+// reads each result's chapter instead.
+test('choosing a chapter in the filter narrows the results without typing again', async ({ page }) => {
+	await navigateToBook(page);
+	await page.waitForTimeout(2000);
+	await page.keyboard.press('/');
+	const dialog = page.locator('div[role="dialog"][aria-modal="true"]');
+	await expect(dialog).toBeVisible({ timeout: 5000 });
+
+	/** Each result's chapter, read from its first line ('Kafli …'); a snippet can start with 'Kafli' too */
+	const chapterOf = () =>
+		dialog.locator('button').evaluateAll((buttons) =>
+			buttons
+				.map((b) => b.querySelector('p')?.textContent?.trim() ?? '')
+				.filter((t) => t.startsWith('Kafli '))
+				.map((t) => t.replace(/^Kafli /, ''))
+		);
+
+	await page.locator('input#search-input').fill('efni');
+	await expect.poll(async () => (await chapterOf()).length, { timeout: 30000 }).toBeGreaterThan(0);
+	const before = [...new Set(await chapterOf())];
+	expect(before.length, 'the query should hit more than one chapter').toBeGreaterThan(1);
+
+	await dialog.locator('button[aria-label="Síur"]').click();
+	const filter = page.locator('select#chapter-filter');
+	const options = (await filter.locator('option').allTextContents()).map((t) => t.trim());
+	const target = before.slice(1).find((title) => options.includes(title))!;
+	expect(target, 'a result chapter is among the filter options').toBeTruthy();
+	await filter.selectOption({ label: target });
+
+	await expect.poll(async () => [...new Set(await chapterOf())], { timeout: 10000 }).toEqual([target]);
+});
