@@ -63,7 +63,7 @@ test.describe('Accent contrast the ratchet cannot see (D01)', () => {
 				await page.waitForLoadState('networkidle');
 				await expectTheme(page, theme);
 				await page.locator('.breadcrumb-btn').click();
-				await expect(page.getByRole('listbox', { name: 'Undirkaflar' })).toBeVisible();
+				await expect(page.getByRole('list', { name: 'Undirkaflar' })).toBeVisible();
 				const current = await textContrast(page, '.breadcrumb-option.current .truncate');
 				expect(current, `current section at ${current.toFixed(2)}:1`).toBeGreaterThanOrEqual(4.5);
 				const { violations } = await new AxeBuilder({ page })
