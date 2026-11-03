@@ -2,42 +2,34 @@
  * Page-break algorithm for the hybrid paged reading mode (reader plan P0.4).
  *
  * Pure function over measured block items: given each block's height and
- * break classification, produce inner-page ranges that fit the available
- * viewport height. DOM measurement and classification live in the consumer
- * (PagedReaderControls); keeping this pure makes the break logic testable.
+ * whether it is a heading, produce inner-page ranges that fit the available
+ * height. DOM measurement lives in the consumer (PagedReaderControls), and the
+ * pager's other decisions (budget, hash, keys, swipes, steps) in pager.ts;
+ * keeping this pure makes the break logic testable. It imports nothing.
  */
-
-/** Blocks never split across pages: one taller than a page gets a page of its
- *  own and scrolls there (figures, tables, display equations, note/example boxes). */
-export const ATOMIC_SELECTOR = [
-	'figure',
-	'table',
-	'pre',
-	'.equation',
-	'.math-display',
-	'mjx-container[display]',
-	'.note',
-	'.example',
-	'.exercise',
-	'.checkpoint',
-	'.learning-objectives',
-	'.chapter-outline',
-	'.practice-problem-container',
-	'.practice-problem'
-].join(', ');
 
 /** Headings, kept on the same page as the block after them. */
 export const KEEP_WITH_NEXT_SELECTOR = 'h2, h3, h4';
 
+/**
+ * Every block is whole: pages break only between blocks, never inside one, so a
+ * block taller than the page gets a page of its own (with the headings before
+ * it) and the window scrolls there. v1.1 also flagged figures, tables, display
+ * equations and boxes as "atomic"; the flag changed no split for any positive
+ * height and only gave a 0 px block before an oversized one a page of its own,
+ * so plan step S8.1 deleted it (register CODE-18, CODE-20).
+ */
 export interface PaginateItem {
 	/** Measured block height in px (margins included by the measurer) */
 	height: number;
-	/** Never split across pages and never left dangling mid-overflow:
-	 *  figures, tables, display equations, note/example boxes */
-	atomic: boolean;
 	/** Headings: if this would be the last item on a page, move it to the
 	 *  top of the next page instead */
 	keepWithNext: boolean;
+}
+
+/** How the page breaker treats a rendered block: only headings are special */
+export function classifyBlock(el: Element): Pick<PaginateItem, 'keepWithNext'> {
+	return { keepWithNext: el.matches(KEEP_WITH_NEXT_SELECTOR) };
 }
 
 /** Half-open index range [start, end) into the item list */
@@ -49,10 +41,20 @@ export interface PageRange {
 /**
  * Split `items` into pages of at most `viewportH` px.
  *
- * Headings (keepWithNext) never end a page and are never left alone on one.
- * When a heading plus the block after it overruns a page, they share it and
- * the page overruns by the heading: one extra page turn for a lone heading
- * was the worse trade (QA E4).
+ * A page is as full as it can be: it ends only where its next block (with the
+ * headings carried over to introduce it) would not fit. It runs over the budget
+ * only when every sized block on it but the last is a heading: an oversized
+ * block opening a page, or headings kept with the block after them. When a
+ * heading plus the block after it overruns a page, they share it and the page
+ * overruns by the heading: one extra page turn for a lone heading was the worse
+ * trade (QA E4). A page's last sized block is a heading only when it is the
+ * last page, or when two or more headings overran the page together.
+ *
+ * A block of 0 px or less (an empty element, or negative margins) never makes
+ * a page of its own, which would show nothing, and never parts a heading from
+ * the block after it: it always fits on the page it follows, travels with the
+ * headings and block after it when they open a new page, and at the end of the
+ * items joins the last page.
  */
 export function paginate(items: PaginateItem[], viewportH: number): PageRange[] {
 	const pages: PageRange[] = [];
@@ -66,10 +68,11 @@ export function paginate(items: PaginateItem[], viewportH: number): PageRange[] 
 			pageH = 0;
 		}
 	};
-	/** Start of the run of headings directly before `i` on the current page */
+	/** Start of the run of headings directly before `i` on the current page.
+	 *  A block of 0 px or less in or before the run travels with it. */
 	const headingsBefore = (i: number) => {
 		let s = i;
-		while (s > start && items[s - 1].keepWithNext) s--;
+		while (s > start && (items[s - 1].keepWithNext || items[s - 1].height <= 0)) s--;
 		return s;
 	};
 
@@ -77,33 +80,25 @@ export function paginate(items: PaginateItem[], viewportH: number): PageRange[] 
 	while (i < items.length) {
 		const item = items[i];
 
-		// Unavoidable overflow: an atomic block taller than the page gets a
-		// page of its own (it scrolls internally in the renderer), together
-		// with the headings that introduce it
-		if (item.atomic && item.height > viewportH) {
-			const s = headingsBefore(i);
-			flush(s);
-			pages.push({ start: s, end: i + 1 });
-			start = i + 1;
-			pageH = 0;
-			i++;
-			continue;
-		}
-
-		// First item on a page always goes on it, even if oversized
-		// (non-atomic text blocks taller than the viewport are rare)
-		if (pageH === 0 || pageH + item.height <= viewportH) {
+		// The first item on a page always goes on it, even if oversized: the
+		// next item then breaks, so the block keeps a page of its own and the
+		// window scrolls there. A heading taller than the page keeps the
+		// block after it, through the headings-only rule below. A block of
+		// 0 px or less always fits, so it never stands in for that block.
+		if (pageH === 0 || item.height <= 0 || pageH + item.height <= viewportH) {
 			pageH += item.height;
 			i++;
 			continue;
 		}
 
 		// Item doesn't fit: break before it, pulling trailing keep-with-next
-		// items (headings) over to the new page so they aren't stranded
+		// items (headings, and 0 px blocks among them) over to the new page so
+		// they aren't stranded
 		const breakAt = headingsBefore(i);
 		if (breakAt === start) {
-			// The page holds only headings: keep them with this block and let
-			// the page overrun, then start the next page after it
+			// The page holds only headings (and 0 px blocks): keep them with
+			// this block and let the page overrun, then start the next page
+			// after it
 			flush(i + 1);
 			i++;
 			continue;
@@ -113,7 +108,12 @@ export function paginate(items: PaginateItem[], viewportH: number): PageRange[] 
 		for (let h = breakAt; h < i; h++) pageH += items[h].height;
 	}
 
-	flush(items.length);
+	// Blocks of 0 px or less left after the last break join the page before them
+	if (pages.length > 0 && items.slice(start).every((item) => item.height <= 0)) {
+		pages[pages.length - 1].end = items.length;
+	} else {
+		flush(items.length);
+	}
 	return pages;
 }
 
@@ -125,8 +125,9 @@ export function pageIndexForItem(pages: PageRange[], itemIndex: number): number 
 	return pages.length > 0 ? pages.length - 1 : 0;
 }
 
-/** A reading unit: a sub-section (`wrapper` is its <section>), or the intro
- *  blocks before the first sub-section (`wrapper` null). */
+/** A reading unit: a sub-section (`wrapper` is its <section>), or a run of
+ *  blocks outside the sub-sections (`wrapper` null): the intro before the
+ *  first one, or blocks between or after them. */
 export interface ContentUnit {
 	wrapper: HTMLElement | null;
 	children: HTMLElement[];

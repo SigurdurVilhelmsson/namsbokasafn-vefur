@@ -1,13 +1,24 @@
 /**
- * Tests for the page-break algorithm (reader plan P0.4 test plan)
+ * Tests for the page-break algorithm (reader plan P0.4 test plan; plan step S8.1
+ * added the survivor tests, the 0 px rule and the property tests, register
+ * CODE-20, KEEP-04, KEEP-06)
  */
 
 import { describe, it, expect } from 'vitest';
-import { paginate, pageIndexForItem, buildUnits, itemIndexForTarget, type PaginateItem } from './paginate';
+import {
+	paginate,
+	pageIndexForItem,
+	buildUnits,
+	itemIndexForTarget,
+	classifyBlock,
+	type PaginateItem,
+	type PageRange
+} from './paginate';
 
 function block(height: number, opts: Partial<PaginateItem> = {}): PaginateItem {
-	return { height, atomic: false, keepWithNext: false, ...opts };
+	return { height, keepWithNext: false, ...opts };
 }
+const heading = (height: number) => block(height, { keepWithNext: true });
 
 describe('paginate', () => {
 	it('puts a short sub-section on a single page', () => {
@@ -25,18 +36,18 @@ describe('paginate', () => {
 		]);
 	});
 
-	it('moves an atomic block that would overflow onto the next page', () => {
-		// Two paragraphs fill most of the page; the figure must not share
+	it('moves a block that would overflow onto the next page whole', () => {
+		// Two paragraphs fill most of the page; the third must not share
 		// the overflow — it starts the next page intact
-		const pages = paginate([block(300), block(300), block(300, { atomic: true })], 768);
+		const pages = paginate([block(300), block(300), block(300)], 768);
 		expect(pages).toEqual([
 			{ start: 0, end: 2 },
 			{ start: 2, end: 3 }
 		]);
 	});
 
-	it('gives an atomic block taller than the viewport its own page', () => {
-		const pages = paginate([block(200), block(900, { atomic: true }), block(200)], 768);
+	it('gives a block taller than the page a page of its own', () => {
+		const pages = paginate([block(200), block(900), block(200)], 768);
 		expect(pages).toEqual([
 			{ start: 0, end: 1 },
 			{ start: 1, end: 2 },
@@ -69,11 +80,8 @@ describe('paginate', () => {
 		expect(pages).toEqual([{ start: 0, end: 2 }]);
 	});
 
-	it('keeps a heading with an oversized atomic block', () => {
-		const pages = paginate(
-			[block(200), block(60, { keepWithNext: true }), block(900, { atomic: true }), block(200)],
-			768
-		);
+	it('keeps a heading with an oversized block after other content', () => {
+		const pages = paginate([block(200), heading(60), block(900), block(200)], 768);
 		expect(pages).toEqual([
 			{ start: 0, end: 1 },
 			{ start: 1, end: 3 },
@@ -96,6 +104,188 @@ describe('paginate', () => {
 
 	it('handles an empty item list', () => {
 		expect(paginate([], 768)).toEqual([]);
+	});
+
+	// The budget is inclusive: a page may fill it exactly (health mutant [4], <= to <)
+	it('puts blocks that sum exactly to the budget on one page', () => {
+		expect(paginate([block(300), block(300), block(168)], 768)).toEqual([{ start: 0, end: 3 }]);
+		expect(paginate([block(300), block(300), block(169)], 768)).toEqual([
+			{ start: 0, end: 2 },
+			{ start: 2, end: 3 }
+		]);
+	});
+
+	// The first-item rule (health mutant [17]): a heading taller than the page
+	// opens it and keeps the block after it, instead of a page of its own
+	it('keeps a heading taller than the page with the block after it', () => {
+		expect(paginate([heading(900), block(100), block(100)], 768)).toEqual([
+			{ start: 0, end: 2 },
+			{ start: 2, end: 3 }
+		]);
+	});
+
+	// Headings that ended the previous page (a heading-only overrun) stay there:
+	// the run carried to a new page starts no earlier than that page
+	it('never carries headings back past the top of the page', () => {
+		expect(paginate([heading(500), heading(500), heading(100), block(700)], 768)).toEqual([
+			{ start: 0, end: 2 },
+			{ start: 2, end: 4 }
+		]);
+	});
+
+	// A block of 0 px never makes a page that shows nothing. v1.1's atomic flag
+	// gave the empty block before an oversized figure a page of its own.
+	it('keeps a 0 px block with the oversized block after it', () => {
+		expect(paginate([block(0), block(900), block(100)], 768)).toEqual([
+			{ start: 0, end: 2 },
+			{ start: 2, end: 3 }
+		]);
+	});
+
+	it('carries a 0 px block that opens a page along with the headings after it', () => {
+		// Without the rule: [0 px] alone, then [h2 p]
+		expect(paginate([block(0), heading(200), block(200)], 300)).toEqual([{ start: 0, end: 3 }]);
+	});
+
+	it('joins 0 px blocks left at the end to the last page', () => {
+		// The heading-only overrun ends a page after 'p100'; the 0 px block joins it
+		expect(paginate([heading(400), block(100), block(0)], 300)).toEqual([{ start: 0, end: 3 }]);
+	});
+
+	it('gives a list of 0 px blocks one page', () => {
+		expect(paginate([block(0), block(0)], 300)).toEqual([{ start: 0, end: 2 }]);
+	});
+});
+
+describe('classifyBlock', () => {
+	const el = (html: string) => {
+		const host = document.createElement('div');
+		host.innerHTML = html;
+		return host.firstElementChild as Element;
+	};
+
+	it('keeps h2, h3 and h4 with the block after them', () => {
+		for (const tag of ['h2', 'h3', 'h4']) {
+			expect(classifyBlock(el(`<${tag}>T</${tag}>`)), tag).toEqual({ keepWithNext: true });
+		}
+	});
+
+	it('treats every other block as a plain block', () => {
+		const others = [
+			'<h1>T</h1>',
+			'<h5>T</h5>',
+			'<p>a</p>',
+			'<figure></figure>',
+			'<table></table>',
+			'<div class="example"></div>',
+			'<div class="note"></div>',
+			'<section><h2>T</h2></section>',
+			'<ul><li>a</li></ul>'
+		];
+		for (const html of others) {
+			expect(classifyBlock(el(html)), html).toEqual({ keepWithNext: false });
+		}
+	});
+});
+
+/** Small seeded PRNG (mulberry32), so a failing case can be replayed */
+function prng(seed: number) {
+	let a = seed;
+	return () => {
+		a = (a + 0x6d2b79f5) | 0;
+		let t = Math.imul(a ^ (a >>> 15), 1 | a);
+		t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+	};
+}
+
+/**
+ * The rules paginate() promises, as one check: null when they hold, else what
+ * broke. Sized blocks are those taller than 0 px; 0 px blocks may sit anywhere.
+ */
+function brokenRule(items: PaginateItem[], budget: number, pages: PageRange[]): string | null {
+	// The pages partition [0, n) in order, none empty
+	let next = 0;
+	for (const page of pages) {
+		if (page.start !== next || page.end <= page.start) return `not a partition at ${JSON.stringify(page)}`;
+		next = page.end;
+	}
+	if (next !== items.length) return `covers ${next} of ${items.length} items`;
+
+	const sum = (from: number, to: number) => items.slice(from, to).reduce((s, it) => s + it.height, 0);
+	for (let p = 0; p < pages.length; p++) {
+		const { start, end } = pages[p];
+		const sized = items.slice(start, end).filter((it) => it.height > 0);
+		const last = p === pages.length - 1;
+
+		// No page shows nothing, unless it is the only one
+		if (sized.length === 0 && pages.length > 1) return `page ${p} holds only 0 px blocks`;
+
+		// Over budget only when every sized block but the last is a heading
+		if (sum(start, end) > budget && !sized.slice(0, -1).every((it) => it.keepWithNext)) {
+			return `page ${p} overruns with a block before its last that is not a heading`;
+		}
+
+		// A page's last sized block is a heading only on the last page, or when
+		// two or more headings overran the page together: a heading is never
+		// left alone at the end of a page
+		if (
+			!last &&
+			sized.at(-1)?.keepWithNext &&
+			(sized.length < 2 || !sized.every((it) => it.keepWithNext) || sum(start, end) <= budget)
+		) {
+			return `page ${p} ends with a heading`;
+		}
+
+		// Maximal: the page ends only where its next sized non-heading block,
+		// with the headings carried before it, would not have fitted
+		if (!last) {
+			let k = end;
+			while (k < items.length - 1 && (items[k].keepWithNext || items[k].height <= 0)) k++;
+			if (sum(start, k + 1) <= budget) return `page ${p} could have held up to item ${k}`;
+		}
+	}
+	return null;
+}
+
+describe('paginate properties (seeded, 10,000 lists each)', () => {
+	// Heights from 1 to 2,000 px; half the lists use 50 px steps, so blocks
+	// often fill a page exactly and the budget boundary is exercised
+	function randomList(rand: () => number, zeroShare: number) {
+		const coarse = rand() < 0.5;
+		const length = Math.floor(rand() * 30);
+		const budget = coarse ? 50 * (5 + Math.floor(rand() * 26)) : 240 + Math.floor(rand() * 1300);
+		const items = Array.from({ length }, () =>
+			block(
+				rand() < zeroShare
+					? 0
+					: coarse
+						? 50 * (1 + Math.floor(rand() * 40))
+						: 1 + Math.floor(rand() * 2000),
+				{ keepWithNext: rand() < 0.25 }
+			)
+		);
+		return { items, budget };
+	}
+
+	function check(seed: number, zeroShare: number) {
+		const rand = prng(seed);
+		for (let n = 0; n < 10_000; n++) {
+			const { items, budget } = randomList(rand, zeroShare);
+			const broken = brokenRule(items, budget, paginate(items, budget));
+			if (broken) {
+				const heights = items.map((it) => (it.keepWithNext ? `h${it.height}` : it.height));
+				expect.fail(`list ${n} (seed ${seed}), budget ${budget}, [${heights.join(', ')}]: ${broken}`);
+			}
+		}
+	}
+
+	it('keeps every rule for blocks of 1 to 2,000 px', () => {
+		check(20261103, 0);
+	});
+
+	it('keeps every rule when a fifth of the blocks are 0 px', () => {
+		check(31102026, 0.2);
 	});
 });
 
@@ -159,6 +349,23 @@ describe('buildUnits', () => {
 		expect(units.map((u) => tags(u.children))).toEqual([
 			['header'],
 			['h2', 'p', 'h3', 'p', 'p', 'h3', 'p']
+		]);
+	});
+
+	// Blocks between or after sub-sections are units of their own, like the intro
+	it('makes blocks between and after sub-sections units of their own', () => {
+		const units = buildUnits(
+			article(
+				'<header></header><main><section><p>a</p></section><p>b</p>' +
+					'<section><p>c</p></section><p>d</p><p>e</p></main>'
+			)
+		);
+		expect(units.map((u) => [u.wrapper?.tagName.toLowerCase() ?? null, tags(u.children)])).toEqual([
+			[null, ['header']],
+			['section', ['p']],
+			[null, ['p']],
+			['section', ['p']],
+			[null, ['p', 'p']]
 		]);
 	});
 
