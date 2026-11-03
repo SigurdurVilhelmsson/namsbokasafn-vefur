@@ -19,13 +19,26 @@
 	import { keyBelongsElsewhere } from '$lib/actions/keyboardShortcuts';
 	import {
 		paginate,
-		pageIndexForItem,
 		buildUnits as buildContentUnits,
 		itemIndexForTarget,
-		ATOMIC_SELECTOR,
-		KEEP_WITH_NEXT_SELECTOR,
+		classifyBlock,
 		type PageRange
 	} from '$lib/utils/paginate';
+	import {
+		PAGE_BUDGET,
+		pageBudget,
+		encodePageHash,
+		resolvePageHash,
+		positionLabel,
+		keyAction,
+		swipeAction,
+		stepNext,
+		stepPrev,
+		pageAnchor,
+		pageAfterResplit,
+		flatIndexForItem,
+		type ItemPosition
+	} from '$lib/utils/pager';
 
 	interface Props {
 		/** Wrapper around the rendered content (contains .reading-content) */
@@ -60,12 +73,6 @@
 	let observer: MutationObserver | undefined;
 	let navEl: HTMLElement | undefined = $state();
 
-	/** Where scrollToContentTop() puts the top of the container */
-	const SCROLL_OFFSET = 96;
-	/** Room kept free under the page controls for what floats in the bottom
-	 *  corners and centre: the tools button and timer pill on phones, the timer
-	 *  pill on desktop, the focus-mode bar. Each covered "Næsta" (QA E18). */
-	const BOTTOM_CLEARANCE = 76;
 	/** How long to wait for images before the first split (QA E2/E8/E9) */
 	const IMAGE_WAIT_MS = 1500;
 
@@ -74,7 +81,7 @@
 	 *  Until the controls exist the gap below is an estimate, corrected by
 	 *  calibrate() once they render. */
 	let gapAbove = 0;
-	let gapBelow = 150;
+	let gapBelow = PAGE_BUDGET.initialGapBelow;
 
 	/** The deep-link / cross-reference target the reader was sent to. While set,
 	 *  a re-split keeps its page on screen; any page turn clears it. */
@@ -83,10 +90,15 @@
 	/** Reading height of a page, scrolled to the content top. It used to be the
 	 *  viewport minus a fixed 260px; the real chrome is larger (QA E1). */
 	function availableHeight(): number {
-		return Math.max(
-			240,
-			window.innerHeight - SCROLL_OFFSET - gapAbove - gapBelow - BOTTOM_CLEARANCE
-		);
+		return pageBudget({ innerHeight: window.innerHeight, gapAbove, gapBelow });
+	}
+
+	/** Each unit's page count, and each unit's pages: what pager.ts reads */
+	function pageCounts(): number[] {
+		return units.map((unit) => unit.pages.length);
+	}
+	function unitPages(): PageRange[][] {
+		return units.map((unit) => unit.pages);
 	}
 
 
@@ -127,8 +139,7 @@
 		for (const unit of units) {
 			const items = unit.children.map((el) => ({
 				height: measure(el),
-				atomic: el.matches(ATOMIC_SELECTOR),
-				keepWithNext: el.matches(KEEP_WITH_NEXT_SELECTOR)
+				...classifyBlock(el)
 			}));
 			unit.pages = paginate(items, viewportH);
 			if (unit.pages.length === 0) {
@@ -169,19 +180,14 @@
 
 	function scrollToContentTop() {
 		if (!container) return;
-		const top = container.getBoundingClientRect().top + window.scrollY - 96;
+		const top = container.getBoundingClientRect().top + window.scrollY - PAGE_BUDGET.scrollOffset;
 		window.scrollTo({ top: Math.max(0, top) });
 	}
 
 	function updateHash() {
 		const flat = flatPages[current];
 		if (!flat) return;
-		const hash =
-			flat.unit === 0 && flat.page === 0
-				? window.location.pathname + window.location.search
-				: flat.page === 0
-					? `#sub-${flat.unit}`
-					: `#sub-${flat.unit}-p-${flat.page}`;
+		const hash = encodePageHash(flat) || window.location.pathname + window.location.search;
 		try {
 			history.replaceState(history.state, '', hash);
 		} catch {
@@ -189,16 +195,11 @@
 		}
 	}
 
-	function positionLabel(): string {
-		const f = flatPages[current];
-		if (!f) return '';
-		return `Hluti ${f.unit + 1} af ${units.length} · Síða ${f.page + 1} af ${units[f.unit]?.pages.length ?? 1}`;
-	}
-
 	/** Announce what the label shows; it used to count flat pages over the
 	 *  whole section while the label counted per sub-section (QA E19). */
 	function announce() {
-		announcement = positionLabel();
+		const f = flatPages[current];
+		announcement = f ? positionLabel(f, pageCounts()) : '';
 	}
 
 	/** `keepHash` leaves an element deep link (#CNX_…) in the URL, so a reload
@@ -229,49 +230,42 @@
 	}
 
 	function next() {
-		const flat = flatPages[current];
-		if (!flat) return;
+		if (!flatPages[current]) return;
 		target = null;
-		const unit = units[flat.unit];
+		const step = stepNext(current, pageCounts(), { section: completionFired, units: completedUnits });
 		// Advancing past a sub-section's last page marks it read
-		if (flat.page === unit.pages.length - 1) {
-			markUnitComplete(flat.unit);
-		}
-		if (current < flatPages.length - 1) {
-			showPage(current + 1);
-		} else {
-			completeSection();
-		}
+		if (step.unitComplete !== null) markUnitComplete(step.unitComplete);
+		if (step.index !== null) showPage(step.index);
+		else if (step.sectionComplete) completeSection();
 	}
 
 	function prev() {
 		target = null;
-		if (current > 0) showPage(current - 1);
+		const index = stepPrev(current, pageCounts());
+		if (index !== null) showPage(index);
 	}
 
 	function resolveHash(hash: string): number | null {
-		const m = hash.match(/^#sub-(\d+)(?:-p-(\d+))?$/);
-		if (m) {
-			const u = parseInt(m[1], 10);
-			const p = m[2] ? parseInt(m[2], 10) : 0;
-			const idx = flatPages.findIndex((f) => f.unit === u && f.page === p);
-			return idx >= 0 ? idx : null;
-		}
-		// Element deep link (cross-references, figure/equation anchors)
+		const page = resolvePageHash(hash, pageCounts());
+		if (page !== null) return page;
+		// Element deep link (cross-references, figure/equation anchors);
+		// elementForHash returns null for any '#sub-<digits>' hash
 		const el = elementForHash(hash);
 		return el ? pageForElement(el) : null;
 	}
 
-	function pageForElement(el: HTMLElement): number | null {
+	/** The block an element is or sits in, or null when it is in no unit */
+	function itemForElement(el: HTMLElement): ItemPosition | null {
 		for (let u = 0; u < units.length; u++) {
-			const i = itemIndexForTarget(units[u].children, el);
-			if (i >= 0) {
-				const p = pageIndexForItem(units[u].pages, i);
-				const idx = flatPages.findIndex((f) => f.unit === u && f.page === p);
-				return idx >= 0 ? idx : null;
-			}
+			const item = itemIndexForTarget(units[u].children, el);
+			if (item >= 0) return { unit: u, item };
 		}
 		return null;
+	}
+
+	function pageForElement(el: HTMLElement): number | null {
+		const at = itemForElement(el);
+		return at ? flatIndexForItem(at, unitPages()) : null;
 	}
 
 	/** The element an element deep link points at, or null for #sub-… and none */
@@ -285,20 +279,23 @@
 	}
 
 	function handleKeyDown(event: KeyboardEvent) {
-		if (event.defaultPrevented || isTyping() || keyBelongsElsewhere(event)) return;
-		if (event.ctrlKey || event.metaKey || event.altKey) return;
-		// Space presses a focused control (Fyrri, "Sýna svar", a glossary term)
-		if (event.key === ' ' && document.activeElement?.closest('button, a[href], summary, [role="button"]')) {
-			return;
-		}
-
-		if (event.key === 'ArrowRight' || event.key === 'PageDown' || (event.key === ' ' && !event.shiftKey)) {
-			event.preventDefault();
-			next();
-		} else if (event.key === 'ArrowLeft' || event.key === 'PageUp' || (event.key === ' ' && event.shiftKey)) {
-			event.preventDefault();
-			prev();
-		}
+		// Getters, so each is read only when keyAction needs it, in v1.1's order
+		const turn = keyAction(event, {
+			get typing() {
+				return isTyping();
+			},
+			get belongsElsewhere() {
+				return keyBelongsElsewhere(event);
+			},
+			// Space presses a focused control (Fyrri, "Sýna svar", a glossary term)
+			get focusOnControl() {
+				return !!document.activeElement?.closest('button, a[href], summary, [role="button"]');
+			}
+		});
+		if (!turn) return;
+		event.preventDefault();
+		if (turn === 'next') next();
+		else prev();
 	}
 
 	let touchStartX = 0;
@@ -311,10 +308,9 @@
 		const dx = event.changedTouches[0].clientX - touchStartX;
 		const dy = event.changedTouches[0].clientY - touchStartY;
 		// Horizontal swipes only; leave vertical gestures to the browser
-		if (Math.abs(dx) > 60 && Math.abs(dy) < 40) {
-			if (dx < 0) next();
-			else prev();
-		}
+		const turn = swipeAction(dx, dy);
+		if (turn === 'next') next();
+		else if (turn === 'prev') prev();
 	}
 
 	function handleHashChange() {
@@ -336,8 +332,7 @@
 	function recompute() {
 		if (!ready || failed) return;
 		try {
-			const flat = flatPages[current];
-			const anchor = flat ? { unit: flat.unit, item: units[flat.unit].pages[flat.page].start } : null;
+			const anchor = pageAnchor(flatPages[current], unitPages());
 
 			restoreAll();
 			const root = contentRoot();
@@ -350,13 +345,11 @@
 			// ~100ms after landing (QA E8)
 			// Content rebuilt under us (bionic reading): the old target is gone
 			if (target && !target.isConnected) target = null;
-			let idx: number | null = target ? pageForElement(target) : null;
-			if (idx === null && anchor && anchor.unit < units.length) {
-				const p = pageIndexForItem(units[anchor.unit].pages, anchor.item);
-				const found = flatPages.findIndex((f) => f.unit === anchor.unit && f.page === p);
-				idx = found >= 0 ? found : null;
-			}
-			showPage(idx ?? 0, { scroll: false, keepHash: target !== null });
+			const index = pageAfterResplit(
+				{ target: target ? itemForElement(target) : null, anchor },
+				unitPages()
+			);
+			showPage(index, { scroll: false, keepHash: target !== null });
 		} catch (e) {
 			console.warn('Paged mode recompute failed; falling back to scrolling:', e);
 			fail();
@@ -511,11 +504,13 @@
 	});
 
 	let flat = $derived(flatPages[current]);
-	let unitPageCount = $derived(flat ? units[flat.unit]?.pages.length ?? 1 : 1);
+	let label = $derived(flat ? positionLabel(flat, pageCounts()) : '');
 </script>
 
 {#if ready && !failed && flatPages.length > 0}
 	<!-- data-paged-reader: the global ←/→ section shortcut steps aside for it -->
+	<!-- D20: proposed (S8.2): 'Síðuflakk', 'Fyrri síða', 'Fyrri', 'Næsta síða' and 'Næsta',
+	     as v1.1 wrote them at dde768e; the label is pager.ts's positionLabel (S8.1) -->
 	<nav class="paged-nav" aria-label="Síðuflakk" data-paged-reader bind:this={navEl}>
 		<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
 			<Icon name="chevron-left" size="sm" />
@@ -523,9 +518,7 @@
 		</button>
 
 		<span class="paged-nav-label">
-			{#if flat}
-				Hluti {flat.unit + 1} af {units.length} · Síða {flat.page + 1} af {unitPageCount}
-			{/if}
+			{label}
 		</span>
 
 		<button
