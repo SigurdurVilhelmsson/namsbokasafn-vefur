@@ -35,18 +35,24 @@ export type PageTurn = 'next' | 'prev';
  * budget-maximise-usable-lines.md), and S9.5 applies it here, so a new budget is an
  * edit to these constants.
  */
-export const PAGE_BUDGET = {
+export const PAGE_BUDGET: Readonly<{
+	scrollOffset: number;
+	bottomClearance: number;
+	initialGapBelow: number;
+	floor: number;
+}> = {
 	/** Where a page turn scrolls the top of the content to, below the window's top */
 	scrollOffset: 96,
 	/** Room kept free under the page controls for what floats in the bottom corners and
-	 *  centre: the tools button and timer pill on phones, the focus-mode bar (QA E18) */
+	 *  centre: the tools button and timer pill on phones, the timer pill on desktop, the
+	 *  focus-mode bar. Each covered 'Næsta' (QA E18). */
 	bottomClearance: 76,
 	/** The gap between the last block and the bottom of the page controls, until the
 	 *  controls exist and are measured */
 	initialGapBelow: 150,
 	/** The smallest page, however short the window */
 	floor: 240
-} as const;
+};
 
 /**
  * The height a page may fill, scrolled to the content top: the window's inner height
@@ -124,17 +130,22 @@ export function decodePageHash(hash: string): PagePosition | null {
 
 /**
  * The flat index a page hash opens. A page past the end of its unit opens that unit's
- * last page (CODE-16): v1.1 opened the section's first page, so '#sub-2-p-10' written
- * on a phone, where unit 2 has 12 pages, sent a tablet reader (7 pages) back to the
- * start. Null when the hash is not a page hash or its unit does not exist (the content
- * changed), and the component then opens the first page, as for a bare URL.
+ * last page (CODE-16). v1.1 had no page for it: on arrival it opened the section's
+ * first page, so '#sub-2-p-10' written on a phone, where unit 2 has 12 pages, sent a
+ * tablet reader (7 pages) back to the start, and on a hash change it stayed put.
+ *
+ * Null for any other hash: the component then tries it as an element deep link
+ * (elementForHash, which skips '#sub-<digits>…') and opens the page holding that
+ * element. Null too for a unit the section lacks (the content changed): on arrival the
+ * component opens the first page, as for a bare URL, and on a hash change it stays on
+ * the page shown, as in v1.1.
  */
 export function resolvePageHash(hash: string, pageCounts: readonly number[]): number | null {
 	const named = decodePageHash(hash);
 	if (!named) return null;
-	// flatIndexOf gives null for a unit the section lacks
-	const lastPage = Math.max(0, (pageCounts[named.unit] ?? 0) - 1);
-	return flatIndexOf({ unit: named.unit, page: Math.min(named.page, lastPage) }, pageCounts);
+	// For a unit the section lacks, the count is 0 and flatIndexOf gives null
+	const count = pageCounts[named.unit] ?? 0;
+	return flatIndexOf({ unit: named.unit, page: Math.min(named.page, count - 1) }, pageCounts);
 }
 
 // =============================================================================
@@ -162,9 +173,15 @@ export type PageKey = Pick<
 	'key' | 'shiftKey' | 'ctrlKey' | 'metaKey' | 'altKey' | 'defaultPrevented'
 >;
 
-/** What the component knows about the page when a key arrives */
+/**
+ * What the component knows about the page when a key arrives. The fields may be
+ * getters: keyAction reads them as v1.1 did, `typing` first, `belongsElsewhere` only
+ * when not typing, and `focusOnControl` only for Space, so keyBelongsElsewhere() need
+ * not run for a key typed into a field.
+ */
 export interface KeyContext {
-	/** Focus is in a text field, a select or editable content */
+	/** Focus is in an <input> of any type (a checkbox too), a textarea, a select or
+	 *  editable content: isTyping() as v1.1 computed it */
 	typing: boolean;
 	/** keyBelongsElsewhere(): an open dialog, a selection being extended with Shift and
 	 *  an arrow, or a focused box that scrolls sideways */
@@ -195,12 +212,12 @@ export function keyAction(event: PageKey, context: KeyContext): PageTurn | null 
 }
 
 /** A swipe turns a page only when it is clearly sideways, in px */
-export const SWIPE = {
+export const SWIPE: Readonly<{ minDistance: number; maxDrift: number }> = {
 	/** It must travel further than this sideways */
 	minDistance: 60,
 	/** and less than this up or down, so vertical gestures stay the browser's */
 	maxDrift: 40
-} as const;
+};
 
 /** Whether a touch that moved `dx` sideways and `dy` up or down is a page swipe */
 export function isPageSwipe(dx: number, dy: number): boolean {
@@ -265,19 +282,22 @@ export function pageAnchor(
 	shown: PagePosition | null | undefined,
 	pages: readonly (readonly PageRange[])[]
 ): ItemPosition | null {
-	const range = shown ? pages[shown.unit]?.[shown.page] : undefined;
-	return shown && range ? { unit: shown.unit, item: range.start } : null;
+	if (!shown) return null;
+	const range = pages[shown.unit]?.[shown.page];
+	return range ? { unit: shown.unit, item: range.start } : null;
 }
 
 /**
- * The flat index of the page holding a block, or null when its unit does not exist. A
- * block past the end of its unit counts as on the unit's last page (pageIndexForItem).
+ * The flat index of the page holding a block, or null when its unit does not exist or
+ * the block is not a block index (itemIndexForTarget's -1, 'not found'). A block past
+ * the end of its unit counts as on the unit's last page (pageIndexForItem).
  */
 export function flatIndexForItem(
 	at: ItemPosition,
 	pages: readonly (readonly PageRange[])[]
 ): number | null {
 	if (!Number.isInteger(at.unit) || at.unit < 0 || at.unit >= pages.length) return null;
+	if (!Number.isInteger(at.item) || at.item < 0) return null;
 	const page = pageIndexForItem(pages[at.unit], at.item);
 	return flatIndexOf(
 		{ unit: at.unit, page },

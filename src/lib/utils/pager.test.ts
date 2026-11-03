@@ -31,6 +31,21 @@ import {
 const COUNTS = [3, 4, 7];
 
 describe('pageBudget', () => {
+	// Today's values, v1.1's at dde768e (:64, :68, :77, :87). S9.5 changes this pin
+	// when it applies call 1; the formula tests below stay computed from the constants.
+	it("holds v1.1's values until call 1 is applied", () => {
+		expect(PAGE_BUDGET).toEqual({ scrollOffset: 96, bottomClearance: 76, initialGapBelow: 150, floor: 240 });
+	});
+
+	// v1.1 keeps the gap below in a variable it re-measures (calibrate()); the
+	// constants are typed as numbers so that compiles (svelte-check reads this file)
+	it('seeds a variable the component re-measures', () => {
+		let gapBelow = PAGE_BUDGET.initialGapBelow;
+		expect(gapBelow).toBeGreaterThan(0);
+		gapBelow = 132;
+		expect(gapBelow).toBe(132);
+	});
+
 	// Expected values come from the constants, never a literal: call 1's ruling
 	// changes the constants (S9.5), and these tests must hold either way
 	it('is the window less the offset, the measured gaps and the clearance', () => {
@@ -143,6 +158,11 @@ describe('the page hash', () => {
 
 	it("reads '#sub-0' as the first page", () => {
 		expect(decodePageHash('#sub-0')).toEqual({ unit: 0, page: 0 });
+	});
+
+	// v1.1's parseInt read leading zeros, so a hand-typed link still works
+	it('reads numbers with leading zeros', () => {
+		expect(decodePageHash('#sub-02-p-003')).toEqual({ unit: 2, page: 3 });
 	});
 
 	it('reads nothing from a hash that is not a page hash', () => {
@@ -279,6 +299,11 @@ describe('keyAction', () => {
 });
 
 describe('swipes', () => {
+	// v1.1's thresholds (dde768e :314); no e2e test swipes
+	it("holds v1.1's thresholds", () => {
+		expect(SWIPE).toEqual({ minDistance: 60, maxDrift: 40 });
+	});
+
 	it('needs more than the minimum distance sideways', () => {
 		expect(isPageSwipe(SWIPE.minDistance, 0)).toBe(false);
 		expect(isPageSwipe(SWIPE.minDistance + 1, 0)).toBe(true);
@@ -333,6 +358,21 @@ describe('steps', () => {
 	it('finishes the section once', () => {
 		const after = { section: true, units: new Set([2]) };
 		expect(stepNext(13, COUNTS, after)).toEqual({ index: null, unitComplete: null, sectionComplete: false });
+	});
+
+	// The two records are separate: a re-split can rebuild the units after the
+	// last one was marked read, and the section's 'once' rests on its own flag
+	it('keeps the unit and section records apart', () => {
+		expect(stepNext(13, COUNTS, { section: false, units: new Set([2]) })).toEqual({
+			index: null,
+			unitComplete: null,
+			sectionComplete: true
+		});
+		expect(stepNext(13, COUNTS, { section: true, units: new Set<number>() })).toEqual({
+			index: null,
+			unitComplete: 2,
+			sectionComplete: false
+		});
 	});
 
 	it('finishes a one-page section on its only page', () => {
@@ -407,6 +447,13 @@ describe('re-splits', () => {
 		expect(flatIndexForItem({ unit: 1, item: 40 }, after)).toBe(6);
 		expect(flatIndexForItem({ unit: 2, item: 0 }, after)).toBeNull();
 		expect(flatIndexForItem({ unit: -1, item: 0 }, after)).toBeNull();
+		expect(flatIndexForItem({ unit: 0.5, item: 0 }, after)).toBeNull();
+	});
+
+	// itemIndexForTarget's -1 means 'not found', not 'the last page'
+	it('finds no page for a block index that is not one', () => {
+		for (const item of [-1, NaN, 1.5]) expect(flatIndexForItem({ unit: 1, item }, after), String(item)).toBeNull();
+		expect(pageAfterResplit({ target: { unit: 1, item: -1 }, anchor: { unit: 0, item: 0 } }, after)).toBe(0);
 	});
 
 	it('keeps the block the reader was on in view across a re-split', () => {

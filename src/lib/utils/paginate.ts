@@ -15,9 +15,10 @@ export const KEEP_WITH_NEXT_SELECTOR = 'h2, h3, h4';
  * Every block is whole: pages break only between blocks, never inside one, so a
  * block taller than the page gets a page of its own (with the headings before
  * it) and the window scrolls there. v1.1 also flagged figures, tables, display
- * equations and boxes as "atomic"; the flag changed no split for any positive
- * height and only gave a 0 px block before an oversized one a page of its own,
- * so plan step S8.1 deleted it (register CODE-18, CODE-20).
+ * equations and boxes as "atomic". No block was both atomic and a heading (the
+ * two selectors never matched the same element), so the flag changed no split
+ * for any positive height and only gave a 0 px block before an oversized one a
+ * page of its own; plan step S8.1 deleted it (register CODE-18, CODE-20).
  */
 export interface PaginateItem {
 	/** Measured block height in px (margins included by the measurer) */
@@ -39,7 +40,7 @@ export interface PageRange {
 }
 
 /**
- * Split `items` into pages of at most `viewportH` px.
+ * Split the items into pages of at most `viewportH` px.
  *
  * A page is as full as it can be: it ends only where its next block (with the
  * headings carried over to introduce it) would not fit. It runs over the budget
@@ -50,13 +51,13 @@ export interface PageRange {
  * trade (QA E4). A page's last sized block is a heading only when it is the
  * last page, or when two or more headings overran the page together.
  *
- * A block of 0 px or less (an empty element, or negative margins) never makes
- * a page of its own, which would show nothing, and never parts a heading from
- * the block after it: it always fits on the page it follows, travels with the
- * headings and block after it when they open a new page, and at the end of the
- * items joins the last page.
+ * A block of 0 px (an empty element) never makes a page of its own, which would
+ * show nothing, and never parts a heading from the block after it: it shares
+ * the page of the next block taller than 0 px, and at the end of the items
+ * joins the last page. A negative height (negative margins) counts as 0 px.
  */
-export function paginate(items: PaginateItem[], viewportH: number): PageRange[] {
+export function paginate(input: PaginateItem[], viewportH: number): PageRange[] {
+	const items = input.map((item) => (item.height < 0 ? { ...item, height: 0 } : item));
 	const pages: PageRange[] = [];
 	let start = 0;
 	let pageH = 0;
@@ -69,10 +70,10 @@ export function paginate(items: PaginateItem[], viewportH: number): PageRange[] 
 		}
 	};
 	/** Start of the run of headings directly before `i` on the current page.
-	 *  A block of 0 px or less in or before the run travels with it. */
+	 *  A 0 px block in or before the run travels with it. */
 	const headingsBefore = (i: number) => {
 		let s = i;
-		while (s > start && (items[s - 1].keepWithNext || items[s - 1].height <= 0)) s--;
+		while (s > start && (items[s - 1].keepWithNext || items[s - 1].height === 0)) s--;
 		return s;
 	};
 
@@ -83,9 +84,9 @@ export function paginate(items: PaginateItem[], viewportH: number): PageRange[] 
 		// The first item on a page always goes on it, even if oversized: the
 		// next item then breaks, so the block keeps a page of its own and the
 		// window scrolls there. A heading taller than the page keeps the
-		// block after it, through the headings-only rule below. A block of
-		// 0 px or less always fits, so it never stands in for that block.
-		if (pageH === 0 || item.height <= 0 || pageH + item.height <= viewportH) {
+		// block after it, through the headings-only rule below. A 0 px block
+		// always fits, so it never stands in for that block.
+		if (pageH === 0 || item.height === 0 || pageH + item.height <= viewportH) {
 			pageH += item.height;
 			i++;
 			continue;
@@ -108,8 +109,8 @@ export function paginate(items: PaginateItem[], viewportH: number): PageRange[] 
 		for (let h = breakAt; h < i; h++) pageH += items[h].height;
 	}
 
-	// Blocks of 0 px or less left after the last break join the page before them
-	if (pages.length > 0 && items.slice(start).every((item) => item.height <= 0)) {
+	// 0 px blocks left after the last break join the page before them
+	if (pages.length > 0 && items.slice(start).every((item) => item.height === 0)) {
 		pages[pages.length - 1].end = items.length;
 	} else {
 		flush(items.length);

@@ -5,6 +5,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
 	paginate,
 	pageIndexForItem,
@@ -155,6 +158,43 @@ describe('paginate', () => {
 	it('gives a list of 0 px blocks one page', () => {
 		expect(paginate([block(0), block(0)], 300)).toEqual([{ start: 0, end: 2 }]);
 	});
+
+	// A 0 px block shares the page of the next sized block, so a break before
+	// that block takes it along (v1.1 left it on the page before)
+	it('moves a 0 px block to the page of the block after it', () => {
+		expect(paginate([block(300), block(0), block(500)], 768)).toEqual([
+			{ start: 0, end: 1 },
+			{ start: 1, end: 3 }
+		]);
+		expect(paginate([block(500), block(0), heading(100), block(300)], 768)).toEqual([
+			{ start: 0, end: 1 },
+			{ start: 1, end: 4 }
+		]);
+	});
+
+	// Negative margins can make a measured height negative: it counts as 0 px.
+	// Without that, [p300 -10 h900 p100] parted the heading from p100.
+	it('counts a negative height as 0 px', () => {
+		expect(paginate([block(300), block(-10), heading(900), block(100)], 768)).toEqual([
+			{ start: 0, end: 1 },
+			{ start: 1, end: 4 }
+		]);
+		expect(paginate([block(100), block(-100), block(900)], 768)).toEqual([
+			{ start: 0, end: 1 },
+			{ start: 1, end: 3 }
+		]);
+	});
+
+	// KEEP-03: the break logic stays pure, so it never reaches for the DOM or a store
+	it('imports nothing', () => {
+		const IMPORT = /^\s*import\b|\brequire\(|\bimport\(/m;
+		// Control: the pattern finds an import when there is one
+		expect(IMPORT.test("import { x } from './y';")).toBe(true);
+		// A string, not new URL(): jsdom's URL is not the one node:url accepts
+		const here = dirname(fileURLToPath(import.meta.url));
+		const source = readFileSync(join(here, 'paginate.ts'), 'utf8');
+		expect(source.match(IMPORT)).toBeNull();
+	});
 });
 
 describe('classifyBlock', () => {
@@ -201,9 +241,11 @@ function prng(seed: number) {
 
 /**
  * The rules paginate() promises, as one check: null when they hold, else what
- * broke. Sized blocks are those taller than 0 px; 0 px blocks may sit anywhere.
+ * broke. Sized blocks are those taller than 0 px; a negative height counts as
+ * 0 px, as the docstring says.
  */
-function brokenRule(items: PaginateItem[], budget: number, pages: PageRange[]): string | null {
+function brokenRule(input: PaginateItem[], budget: number, pages: PageRange[]): string | null {
+	const items = input.map((it) => ({ ...it, height: Math.max(0, it.height) }));
 	// The pages partition [0, n) in order, none empty
 	let next = 0;
 	for (const page of pages) {
@@ -211,6 +253,17 @@ function brokenRule(items: PaginateItem[], budget: number, pages: PageRange[]): 
 		next = page.end;
 	}
 	if (next !== items.length) return `covers ${next} of ${items.length} items`;
+
+	// A 0 px block shares the page of the next sized block; after the last
+	// sized block, it is on the last page
+	const pageOf = (i: number) => pages.findIndex((page) => i >= page.start && i < page.end);
+	for (let i = 0; i < items.length; i++) {
+		if (items[i].height > 0) continue;
+		let k = i + 1;
+		while (k < items.length && items[k].height === 0) k++;
+		const expected = k < items.length ? pageOf(k) : pages.length - 1;
+		if (pageOf(i) !== expected) return `the 0 px block ${i} is on page ${pageOf(i)}, not ${expected}`;
+	}
 
 	const sum = (from: number, to: number) => items.slice(from, to).reduce((s, it) => s + it.height, 0);
 	for (let p = 0; p < pages.length; p++) {
@@ -250,7 +303,8 @@ function brokenRule(items: PaginateItem[], budget: number, pages: PageRange[]): 
 
 describe('paginate properties (seeded, 10,000 lists each)', () => {
 	// Heights from 1 to 2,000 px; half the lists use 50 px steps, so blocks
-	// often fill a page exactly and the budget boundary is exercised
+	// often fill a page exactly and the budget boundary is exercised. Of the
+	// `zeroShare` blocks, half are 0 px and half negative (-1 to -200 px).
 	function randomList(rand: () => number, zeroShare: number) {
 		const coarse = rand() < 0.5;
 		const length = Math.floor(rand() * 30);
@@ -258,7 +312,9 @@ describe('paginate properties (seeded, 10,000 lists each)', () => {
 		const items = Array.from({ length }, () =>
 			block(
 				rand() < zeroShare
-					? 0
+					? rand() < 0.5
+						? 0
+						: -1 - Math.floor(rand() * 200)
 					: coarse
 						? 50 * (1 + Math.floor(rand() * 40))
 						: 1 + Math.floor(rand() * 2000),
@@ -284,7 +340,7 @@ describe('paginate properties (seeded, 10,000 lists each)', () => {
 		check(20261103, 0);
 	});
 
-	it('keeps every rule when a fifth of the blocks are 0 px', () => {
+	it('keeps every rule when a fifth of the blocks are 0 px or negative', () => {
 		check(31102026, 0.2);
 	});
 });
