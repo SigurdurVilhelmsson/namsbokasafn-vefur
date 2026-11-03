@@ -145,7 +145,15 @@ export function keyBelongsElsewhere(event: KeyboardEvent): boolean {
  * (`data-nav` on NavigationButtons). Returns false when there is none, so the
  * key keeps its default on pages without section navigation.
  */
-function navigatePrevNext(direction: 'prev' | 'next'): boolean {
+/** Keys the paged reader turns pages with (PagedReaderControls). */
+const PAGE_TURN_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', ' ']);
+
+function navigatePrevNext(direction: 'prev' | 'next', key: string): boolean {
+	// A paged section turns pages with these keys; leave them to it. Keyed on
+	// the section page's mark, present from mount, not on the page controls:
+	// those render only once images and fonts are in, and in that gap → skipped
+	// a section. A shortcut rebound to another key still works.
+	if (document.querySelector('[data-paged-section]') && PAGE_TURN_KEYS.has(key)) return false;
 	const link = document.querySelector<HTMLElement>(`[data-nav="${direction}"]`);
 	if (!link || link.hasAttribute('disabled')) return false;
 	link.click();
@@ -269,8 +277,8 @@ export function keyboardShortcuts(node: HTMLElement, options: KeyboardShortcutsO
 			currentOptions;
 
 		return {
-			prevSection: () => !keyBelongsElsewhere(event) && navigatePrevNext('prev'),
-			nextSection: () => !keyBelongsElsewhere(event) && navigatePrevNext('next'),
+			prevSection: () => !keyBelongsElsewhere(event) && navigatePrevNext('prev', event.key),
+			nextSection: () => !keyBelongsElsewhere(event) && navigatePrevNext('next', event.key),
 			goHome: () => {
 				if (bookSlug) goto(`/${bookSlug}`);
 			},

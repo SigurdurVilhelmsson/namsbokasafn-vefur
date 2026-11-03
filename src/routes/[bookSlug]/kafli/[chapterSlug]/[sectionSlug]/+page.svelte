@@ -8,6 +8,7 @@
 	import type { PageData } from './$types';
 	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
 	import { isSectionRead, isSectionBookmarked, getSavedScrollPosition, type ScrollPositions } from '$lib/stores/reader';
+	import { readingMode, type ReadingMode } from '$lib/stores/settings';
 	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
@@ -16,11 +17,18 @@
 	import PreviewBanner from '$lib/components/PreviewBanner.svelte';
 	import BookAttribution from '$lib/components/BookAttribution.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
+	import PagedReaderControls from '$lib/components/PagedReaderControls.svelte';
 	import { readDetection } from '$lib/actions/readDetection';
 	import RecallPrompt from '$lib/components/RecallPrompt.svelte';
 	import RecallReadBack from '$lib/components/RecallReadBack.svelte';
 	import { entriesForSection, recallStore } from '$lib/stores/recall';
-	import { isFrontMatterChapter, recallTrigger } from '$lib/utils/readerPolicy';
+	import {
+		isFrontMatterChapter,
+		readingModeFromSearch,
+		recallTrigger,
+		resolveReadingMode,
+		shouldPage
+	} from '$lib/utils/readerPolicy';
 	import { createObjectiveKey } from '$lib/utils/storeHelpers';
 	import { fade, fly } from 'svelte/transition';
 
@@ -34,6 +42,21 @@
 	let showContinuePrompt = $state(false);
 	let savedPosition: { scrollY: number; percentage: number } | null = $state(null);
 	let continuePromptTimeout: ReturnType<typeof setTimeout>;
+
+	// The pager (plan step S8.2), dark: a section pages only under a '?lestur=sidur' link or a
+	// mode the reader picked, never by default (D06). The link is read once, in the browser,
+	// when this page mounts: never at prerender, never stored (PED-35). SvelteKit reuses this
+	// component across sections, so a link's mode lasts until the reader leaves the section
+	// pages ([USER], 2026-11-03; S8.4 revisits it). Until onMount runs nothing pages, so
+	// prerender and hydration match main, and a mode the link overrides never mounts the pager.
+	let linkMode: ReadingMode | null = $state(null);
+	let modeReady = $state(false);
+	// Bound to the content wrapper inside {#key}; the pager works on it (dde768e :32-33)
+	let contentWrapper: HTMLElement | undefined = $state();
+	// A rollup always scrolls (ruling 2). The type comes from the table of contents.
+	let paged = $derived(
+		modeReady && shouldPage(resolveReadingMode(linkMode, $readingMode), data.navigation.current.section.type)
+	);
 
 	// Print the current section
 	function handlePrint() {
@@ -122,6 +145,11 @@
 	onMount(() => {
 		window.addEventListener('scroll', handleScroll, { passive: true });
 
+		// The visit-only link (PED-35). Only here: SvelteKit fails the build when a prerendered
+		// page reads the query string, and a load function would run at prerender.
+		linkMode = readingModeFromSearch(window.location.search);
+		modeReady = true;
+
 		return () => {
 			window.removeEventListener('scroll', handleScroll);
 		};
@@ -195,7 +223,8 @@
 
 	/**
 	 * The reader reached the section's end: mark it read, and open its prompt if one is owed, or
-	 * else read back the recall saved on an earlier visit (S5.5)
+	 * else read back the recall saved on an earlier visit (S5.5). Scrolled, the end is the marker
+	 * below the content coming into view; paged, it is 'Næsta' on the last page (ruling 3).
 	 */
 	function reachedEnd() {
 		reader.markAsRead(data.bookSlug, data.chapterSlug, data.sectionSlug);
@@ -470,30 +499,42 @@
 	     navigation: highlight restoration, equation/figure enhancement, lazy
 	     images and read detection all run their mount-time setup per section. -->
 	{#key sectionKey}
-		<TextHighlighter
-			bookSlug={data.bookSlug}
-			chapterSlug={data.chapterSlug}
-			sectionSlug={data.sectionSlug}
-		>
-			<ContentRenderer
-				content={data.section.content}
+		<!-- The pager's container (dde768e :419-421). data-paged-section is there from mount,
+		     before the page controls render, so the ←/→ section shortcut steps aside for the pager.
+		     It sits below the objectives, so the pager's arrival scroll passes them (ruling 1). -->
+		<div bind:this={contentWrapper} data-paged-section={paged || undefined}>
+			<TextHighlighter
 				bookSlug={data.bookSlug}
 				chapterSlug={data.chapterSlug}
 				sectionSlug={data.sectionSlug}
-				chapterNumber={data.chapterNumber}
-				sectionType={data.section.type || ''}
-				hideStaticObjectives={!!(data.section.objectives && data.section.objectives.length > 0)}
-			/>
-		</TextHighlighter>
+			>
+				<ContentRenderer
+					content={data.section.content}
+					bookSlug={data.bookSlug}
+					chapterSlug={data.chapterSlug}
+					sectionSlug={data.sectionSlug}
+					chapterNumber={data.chapterNumber}
+					sectionType={data.section.type || ''}
+					hideStaticObjectives={!!(data.section.objectives && data.section.objectives.length > 0)}
+				/>
+			</TextHighlighter>
+		</div>
+
+		{#if paged}
+			<!-- 'Næsta' on the last page is the section's end (ruling 3), so it runs reachedEnd.
+			     v1.1 passed markAsRead (dde768e :442), which under D10 no longer opens the prompt. -->
+			<PagedReaderControls container={contentWrapper} oncomplete={reachedEnd} />
+		{/if}
 
 		<!-- End of section detection: marks the section read, and opens its recall prompt if one
 		     is owed. It stays on for a section marked read by hand whose prompt has not shown,
 		     because under D10 the prompt waits for the end, and for a section with a saved recall,
-		     which it reads back (S5.5). -->
+		     which it reads back (S5.5). Paged, it stands down (dde768e :451): it sits under the
+		     page controls, so it would fire on the first page; the pager's last 'Næsta' is the end. -->
 		<div
 			use:readDetection={{
 				onRead: reachedEnd,
-				enabled: !isRead || recallOwed || hasRecallEntry,
+				enabled: (!isRead || recallOwed || hasRecallEntry) && !paged,
 				minVisibleTime: 1500
 			}}
 			class="h-4"

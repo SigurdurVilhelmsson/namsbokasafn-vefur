@@ -306,15 +306,53 @@ describe('settings store', () => {
 		});
 
 		it("a newer build's keys, version and marker survive this build's next change", async () => {
-			const module = await load({ _version: 2, _born: 2, readingMode: 'paged', theme: 'dark' });
+			const module = await load({ _version: 2, _born: 2, laterSetting: 'x', theme: 'dark' });
 			module.settings.setFontSize('large');
-			expect(stored()).toEqual({ _version: 2, _born: 2, readingMode: 'paged', theme: 'dark', fontSize: 'large' });
+			expect(stored()).toEqual({ _version: 2, _born: 2, laterSetting: 'x', theme: 'dark', fontSize: 'large' });
 		});
 
 		it('reset() forgets the choices and keeps the marker', async () => {
-			const module = await load({ _version: 1, _born: 0, theme: 'dark', readingMode: 'paged' });
+			const module = await load({ _version: 1, _born: 0, theme: 'dark', readingMode: 'paged', laterSetting: 'x' });
 			module.settings.reset();
-			expect(stored()).toEqual({ _version: 1, _born: 0, readingMode: 'paged' });
+			expect(stored()).toEqual({ _version: 1, _born: 0, laterSetting: 'x' });
+		});
+
+		describe('readingMode (S8.2, PED-01, D06): stored only when picked', () => {
+			it('a fresh profile and a profile saved by main have no mode and store none', async () => {
+				let module = await load();
+				expect([get(module.settings).readingMode, module.settings.profile().chosen]).toEqual([null, []]);
+				expect(storedRaw()).toBe('{"_version":1,"_born":1}');
+				module = await load(MAIN_FIRST_LOAD);
+				expect(get(module.settings).readingMode).toBeNull();
+				expect(module.settings.profile().chosen).not.toContain('readingMode');
+				expect(stored()).not.toHaveProperty('readingMode');
+			});
+
+			it.each(['paged', 'scrolled'])('a stored %s is read and counted as chosen', async (mode) => {
+				const module = await load({ _version: 1, _born: 1, readingMode: mode });
+				expect(get(module.readingMode)).toBe(mode);
+				expect(module.settings.profile().chosen).toEqual(['readingMode']);
+			});
+
+			it("a link's value ('sidur') is not a stored mode, and is carried through as stored", async () => {
+				const module = await load({ _version: 1, _born: 1, readingMode: 'sidur' });
+				expect(get(module.readingMode)).toBeNull();
+				module.settings.setTheme('dark');
+				expect(stored()).toEqual({ _version: 1, _born: 1, readingMode: 'sidur', theme: 'dark' });
+			});
+
+			it('setReadingMode stores only its own key and lists it as chosen', async () => {
+				const module = await load();
+				module.settings.setReadingMode('scrolled');
+				expect(stored()).toEqual({ _version: 1, _born: 1, readingMode: 'scrolled' });
+				expect(module.settings.profile().chosen).toEqual(['readingMode']);
+			});
+
+			it("another setter leaves a stored mode as it is", async () => {
+				const module = await load({ _version: 1, _born: 1, readingMode: 'paged' });
+				module.settings.toggleTheme();
+				expect(stored()).toEqual({ _version: 1, _born: 1, readingMode: 'paged', theme: 'dark' });
+			});
 		});
 	});
 
@@ -338,6 +376,8 @@ describe('settings store', () => {
 				fontFamily: 'serif',
 				lineHeight: 'normal',
 				lineWidth: 'medium',
+				// "Not chosen", not call 3's answer: the unchosen mode is readerPolicy's (D06)
+				readingMode: null,
 				sidebarOpen: false,
 				shortcutPreferences: {},
 				bionicReading: false,
@@ -375,6 +415,7 @@ describe('settings store', () => {
 			fontFamily: ['serif', 'sans', 'opendyslexic'],
 			lineHeight: ['normal', 'relaxed', 'loose'],
 			lineWidth: ['narrow', 'medium', 'wide'],
+			readingMode: ['paged', 'scrolled'],
 			sidebarOpen: [true, false],
 			shortcutPreferences: [{}, { prevSection: 'h' }],
 			bionicReading: [true, false],
@@ -389,6 +430,7 @@ describe('settings store', () => {
 			fontFamily: ['atkinson', 'Serif', null],
 			lineHeight: ['medium', 'tight', 1.5, null],
 			lineWidth: ['small', 'full', 52, null],
+			readingMode: ['sidur', 'skrun', 'auto', 'Paged', 1, null],
 			sidebarOpen: ['true', 1, null],
 			shortcutPreferences: [[], 'h', null],
 			bionicReading: ['true', 1, null],

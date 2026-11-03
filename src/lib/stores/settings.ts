@@ -26,6 +26,7 @@ export type FontSize = 'small' | 'medium' | 'large' | 'xlarge';
 export type FontFamily = 'serif' | 'sans' | 'opendyslexic';
 export type LineHeight = 'normal' | 'relaxed' | 'loose';
 export type LineWidth = 'narrow' | 'medium' | 'wide';
+export type ReadingMode = 'paged' | 'scrolled';
 
 export type ShortcutAction =
 	| 'prevSection'
@@ -62,6 +63,7 @@ export interface SettingsState {
 	fontFamily: FontFamily;
 	lineHeight: LineHeight;
 	lineWidth: LineWidth;
+	readingMode: ReadingMode | null;
 	sidebarOpen: boolean;
 	shortcutPreferences: ShortcutPreferences;
 	bionicReading: boolean;
@@ -77,6 +79,7 @@ export const defaultSettings: SettingsState = {
 	fontFamily: 'serif',
 	lineHeight: 'normal',
 	lineWidth: 'medium',
+	readingMode: null,
 	sidebarOpen: false,
 	shortcutPreferences: {},
 	bionicReading: false,
@@ -90,6 +93,7 @@ const settingsValidators = {
 	fontFamily: isOneOf('serif', 'sans', 'opendyslexic'),
 	lineHeight: isOneOf('normal', 'relaxed', 'loose'),
 	lineWidth: isOneOf('narrow', 'medium', 'wide'),
+	readingMode: isOneOf('paged', 'scrolled'),
 	sidebarOpen: isBoolean,
 	shortcutPreferences: isObject,
 	bionicReading: isBoolean,
@@ -200,6 +204,10 @@ function createSettingsStore() {
 		// Line width methods
 		setLineWidth: (lineWidth: LineWidth) => choose({ lineWidth }),
 
+		// Reading mode: stored only when the reader picks one (D06, PED-01). Nothing calls it
+		// until a picker is rendered (S9.3's in-view switch, S11.5's reading-mode setting).
+		setReadingMode: (readingMode: ReadingMode) => choose({ readingMode }),
+
 		// Sidebar methods
 		setSidebarOpen: (sidebarOpen: boolean) => choose({ sidebarOpen }),
 
@@ -254,6 +262,7 @@ export const fontSize = derived(settings, ($settings) => $settings.fontSize);
 export const fontFamily = derived(settings, ($settings) => $settings.fontFamily);
 export const lineHeight = derived(settings, ($settings) => $settings.lineHeight);
 export const lineWidth = derived(settings, ($settings) => $settings.lineWidth);
+export const readingMode = derived(settings, ($settings) => $settings.readingMode);
 export const sidebarOpen = derived(settings, ($settings) => $settings.sidebarOpen);
 export const bionicReading = derived(settings, ($settings) => $settings.bionicReading);
 export const glossaryHighlighting = derived(settings, ($settings) => $settings.glossaryHighlighting);
