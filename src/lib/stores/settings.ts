@@ -205,7 +205,7 @@ function createSettingsStore() {
 		setLineWidth: (lineWidth: LineWidth) => choose({ lineWidth }),
 
 		// Reading mode: stored only when the reader picks one (D06, PED-01). Nothing calls it
-		// until a picker is rendered (S9.3's in-view switch, S11.5's 'Lestrarstilling').
+		// until a picker is rendered (S9.3's in-view switch, S11.5's reading-mode setting).
 		setReadingMode: (readingMode: ReadingMode) => choose({ readingMode }),
 
 		// Sidebar methods
