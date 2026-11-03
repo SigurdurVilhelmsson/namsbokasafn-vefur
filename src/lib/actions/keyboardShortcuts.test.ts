@@ -5,7 +5,7 @@
  * These tests cover the exported utility functions.
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 let formatShortcutKey: typeof import('./keyboardShortcuts').formatShortcutKey;
 let groupShortcutsByCategory: typeof import('./keyboardShortcuts').groupShortcutsByCategory;
@@ -202,5 +202,97 @@ describe('keyboardShortcuts utilities', () => {
 				expect(validCategories).toContain(s.category);
 			});
 		});
+	});
+});
+
+// The section shortcuts step aside for a paged section (plan step S8.2, dde768e). The global
+// listener runs before the pager's, so without this its preventDefault() would make the
+// pager's keyAction give up on ← / →, and → would change section instead of page.
+describe('the section shortcuts and a paged section', () => {
+	let action: ReturnType<typeof import('./keyboardShortcuts').keyboardShortcuts>;
+	let settingsStore: typeof import('$lib/stores/settings').settings;
+	const clicks = { prev: vi.fn(), next: vi.fn() };
+
+	/** A section page's nav buttons, as NavigationButtons marks them */
+	function addNavButtons() {
+		for (const direction of ['prev', 'next'] as const) {
+			// A <button>, not an <a href>: jsdom does not implement navigation
+			const button = document.createElement('button');
+			button.dataset.nav = direction;
+			button.addEventListener('click', clicks[direction]);
+			document.body.append(button);
+		}
+	}
+
+	function markPaged() {
+		const wrapper = document.createElement('div');
+		wrapper.setAttribute('data-paged-section', 'true');
+		document.body.append(wrapper);
+		return wrapper;
+	}
+
+	/** Press a key as the browser would; returns whether something prevented its default */
+	function press(key: string): boolean {
+		const event = new KeyboardEvent('keydown', { key, cancelable: true, bubbles: true });
+		window.dispatchEvent(event);
+		return event.defaultPrevented;
+	}
+
+	beforeEach(async () => {
+		localStorage.clear();
+		vi.resetModules();
+		const module = await import('./keyboardShortcuts');
+		settingsStore = (await import('$lib/stores/settings')).settings;
+		document.body.innerHTML = '';
+		clicks.prev.mockClear();
+		clicks.next.mockClear();
+		addNavButtons();
+		const node = document.createElement('div');
+		document.body.append(node);
+		action = module.keyboardShortcuts(node, { bookSlug: 'efnafraedi-2e' });
+	});
+
+	afterEach(() => {
+		action.destroy();
+		document.body.innerHTML = '';
+	});
+
+	it('without the mark, → and ← change section and take the key', () => {
+		expect(press('ArrowRight')).toBe(true);
+		expect(press('ArrowLeft')).toBe(true);
+		expect([clicks.next.mock.calls.length, clicks.prev.mock.calls.length]).toEqual([1, 1]);
+	});
+
+	it('with the mark, → and ← neither change section nor take the key', () => {
+		markPaged();
+		expect(press('ArrowRight')).toBe(false);
+		expect(press('ArrowLeft')).toBe(false);
+		expect([clicks.next.mock.calls.length, clicks.prev.mock.calls.length]).toEqual([0, 0]);
+	});
+
+	it('with the mark, a section shortcut rebound to PageDown or PageUp steps aside too', () => {
+		settingsStore.setShortcut('nextSection', 'PageDown');
+		settingsStore.setShortcut('prevSection', 'PageUp');
+		markPaged();
+		expect(press('PageDown')).toBe(false);
+		expect(press('PageUp')).toBe(false);
+		expect([clicks.next.mock.calls.length, clicks.prev.mock.calls.length]).toEqual([0, 0]);
+	});
+
+	it('with the mark, a section shortcut rebound to a key the pager does not use still works', () => {
+		settingsStore.setShortcut('nextSection', 'w');
+		settingsStore.setShortcut('prevSection', 'q');
+		markPaged();
+		expect(press('w')).toBe(true);
+		expect(press('q')).toBe(true);
+		expect([clicks.next.mock.calls.length, clicks.prev.mock.calls.length]).toEqual([1, 1]);
+	});
+
+	it('reads the mark at each key, so → changes section again once the mark is gone', () => {
+		const wrapper = markPaged();
+		press('ArrowRight');
+		wrapper.remove();
+		expect(press('ArrowRight')).toBe(true);
+		expect(clicks.next).toHaveBeenCalledTimes(1);
 	});
 });
