@@ -20,9 +20,12 @@ export default defineConfig({
 		// These can be slow when running the full test suite due to module resolution overhead
 		hookTimeout: 60000,
 		testTimeout: 60000,
-		// Retry flaky tests up to 2 times
-		// Some store tests use vi.resetModules() which can occasionally cause timing issues
-		retry: 2,
+		// No retries: a test that fails once fails the run, so a flaky test shows up
+		// instead of passing on its second try (plan step S8.1, register CODE-20). It
+		// was 2, for store tests that use vi.resetModules(); the whole suite passed six
+		// runs in a row with retry 0 on 2026-11-03. If one of those flakes, fix its
+		// timing rather than raise this.
+		retry: 0,
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'text-summary', 'lcov'],
