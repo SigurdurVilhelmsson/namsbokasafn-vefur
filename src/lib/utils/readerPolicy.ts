@@ -4,6 +4,7 @@
  * ruled is a named constant; nothing here presets an open call.
  */
 import type { SectionType } from '$lib/types/content';
+import type { ReadingMode } from '$lib/stores/settings';
 
 /** The chapter rollups: pages that gather a whole chapter rather than teach one section */
 export const ROLLUP_SECTION_TYPES: ReadonlySet<SectionType> = new Set<SectionType>([
@@ -63,4 +64,36 @@ export function recallTrigger({
 /** The section types the guided study session skips when it looks for unread content */
 export function skippedByStudySession(type: SectionType | undefined): boolean {
 	return isRollup(type) || type === 'introduction';
+}
+
+/**
+ * The mode a reader who has not picked one reads in. D06 (2026-10-23) keeps the default
+ * scrolled until call 3 is ruled; call 3 may later resolve it from the profile-age marker.
+ */
+export const UNCHOSEN_READING_MODE: ReadingMode = 'scrolled';
+
+/**
+ * The visit-only link parameter (PED-35): never stored, read in the browser only. The three
+ * link words are URL text that teachers will share, so they are checked like UI strings.
+ */
+export const READING_MODE_PARAM = 'lestur'; // D20: proposed
+const READING_MODE_VALUES: Record<string, ReadingMode> = {
+	sidur: 'paged', // D20: proposed
+	skrun: 'scrolled' // D20: proposed
+};
+
+/** The mode a `?lestur=` link asks for, or null when it asks for none we know */
+export function readingModeFromSearch(search: string): ReadingMode | null {
+	const value = new URLSearchParams(search).get(READING_MODE_PARAM);
+	return value !== null && Object.hasOwn(READING_MODE_VALUES, value) ? READING_MODE_VALUES[value] : null;
+}
+
+/** The mode in effect: a link's for this visit, else the reader's choice, else the unchosen mode */
+export function resolveReadingMode(override: ReadingMode | null, chosen: ReadingMode | null): ReadingMode {
+	return override ?? chosen ?? UNCHOSEN_READING_MODE;
+}
+
+/** Ruling 2: a rollup always scrolls */
+export function shouldPage(mode: ReadingMode, type: SectionType | undefined): boolean {
+	return mode === 'paged' && !isRollup(type);
 }

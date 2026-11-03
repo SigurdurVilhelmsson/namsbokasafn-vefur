@@ -11,7 +11,11 @@ import {
 	isFrontMatterChapter,
 	isRollup,
 	recallTrigger,
-	skippedByStudySession
+	readingModeFromSearch,
+	resolveReadingMode,
+	shouldPage,
+	skippedByStudySession,
+	UNCHOSEN_READING_MODE
 } from './readerPolicy';
 
 const ROLLUPS: SectionType[] = ['glossary', 'equations', 'summary', 'exercises', 'answer-key'];
@@ -70,5 +74,38 @@ describe('the study session', () => {
 
 	it('keeps a numbered section', () => {
 		expect(skippedByStudySession(undefined)).toBe(false);
+	});
+});
+
+describe('the reading mode (S8.2: D06, PED-01, PED-35, ruling 2)', () => {
+	it.each(ROLLUPS)('a rollup (%s) is never paged', (type) => {
+		expect(shouldPage('paged', type)).toBe(false);
+	});
+
+	// The introduction pin records current behaviour, not a ruling: ruling 2 names only rollups
+	it('a numbered section and an introduction are paged in paged mode, and not in scrolled', () => {
+		expect([shouldPage('paged', undefined), shouldPage('paged', 'introduction')]).toEqual([true, true]);
+		expect([shouldPage('scrolled', undefined), shouldPage('scrolled', 'introduction')]).toEqual([false, false]);
+	});
+
+	it('a link wins over a choice, and a choice over the unchosen mode', () => {
+		expect(resolveReadingMode('scrolled', 'paged')).toBe('scrolled');
+		expect(resolveReadingMode('paged', 'scrolled')).toBe('paged');
+		expect(resolveReadingMode(null, 'paged')).toBe('paged');
+		expect(resolveReadingMode(null, null)).toBe(UNCHOSEN_READING_MODE);
+	});
+
+	it.each([
+		['?lestur=sidur', 'paged'],
+		['?lestur=skrun', 'scrolled'],
+		['?a=1&lestur=sidur', 'paged'],
+		['', null],
+		['?lestur=', null],
+		['?lestur=paged', null],
+		['?lestur=Sidur', null],
+		['?lestur=constructor', null],
+		['?lestur=toString', null]
+	] as const)('%j asks for %s', (search, mode) => {
+		expect(readingModeFromSearch(search)).toBe(mode);
 	});
 });
