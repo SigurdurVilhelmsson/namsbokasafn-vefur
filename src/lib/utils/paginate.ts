@@ -118,7 +118,7 @@ export function paginate(items: PaginateItem[], viewportH: number): PageRange[] 
 }
 
 /** Find the page containing a given item index (e.g. a deep-link target) */
-export function pageIndexForItem(pages: PageRange[], itemIndex: number): number {
+export function pageIndexForItem(pages: readonly PageRange[], itemIndex: number): number {
 	for (let p = 0; p < pages.length; p++) {
 		if (itemIndex >= pages[p].start && itemIndex < pages[p].end) return p;
 	}
