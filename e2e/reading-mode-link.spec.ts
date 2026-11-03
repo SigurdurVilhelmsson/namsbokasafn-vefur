@@ -23,8 +23,11 @@ const FRESH_PROFILE = '{"_version":1,"_born":1}';
 const pager = (page: Page) => page.getByRole('navigation', { name: 'Síðuflakk' });
 const label = (page: Page) => page.locator('.paged-nav-label');
 const recall = (page: Page) => page.getByRole('region', { name: 'Upprifjun', exact: true });
-/** Blocks the pager hid. The content itself carries no hidden attribute. */
-const hiddenBlocks = (page: Page) => page.locator('article.cnx-module [hidden]');
+/**
+ * Blocks the pager hid. The published content carries no hidden attribute, but practiceReveal
+ * adds a hidden self-assessment row after each practice answer, in scrolled mode too.
+ */
+const hiddenBlocks = (page: Page) => page.locator('article.cnx-module [hidden]:not(.practice-self-assess)');
 
 const storedRaw = (page: Page) => page.evaluate((key) => localStorage.getItem(key), KEY);
 const stored = async (page: Page) => JSON.parse((await storedRaw(page)) ?? 'null');
@@ -106,7 +109,9 @@ test.describe('The pager through a ?lestur= link (S8.2)', () => {
 
 	test("the first page does not spend the recall prompt; the last 'Næsta' opens it", async ({ page }) => {
 		await openPaged(page, withLink(SECTION!, 'sidur'));
-		// Past the end marker's 1.5 s: it sits under the page controls, and must stand down
+		// The end marker sits just under the page controls, in view on the first page, so it
+		// would fire after 1.5 s if it did not stand down while paged
+		await expect(page.locator('[data-section-end]')).toBeInViewport({ ratio: 0.5 });
 		await page.waitForTimeout(3000);
 		await expect(recall(page)).toHaveCount(0);
 		await expect(page.getByRole('button', { name: 'Merkja kafla sem lesinn' })).toBeVisible();
@@ -117,6 +122,9 @@ test.describe('The pager through a ?lestur= link (S8.2)', () => {
 		}
 		await expect(recall(page)).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Merkja kafla sem lesinn' })).toHaveCount(0);
+		// It opened on the last page: the last unit's last page, where 'Næsta' is spent
+		await expect(label(page)).toHaveText(/^Hluti (\d+) af \1 · Síða (\d+) af \2$/);
+		await expect(next).toBeDisabled();
 	});
 
 	test("?lestur=skrun overrides a stored 'paged' without changing storage", async ({ page }) => {
@@ -155,10 +163,36 @@ test.describe('The pager through a ?lestur= link (S8.2)', () => {
 		await openPaged(page, withLink(SECTION!, 'sidur'));
 
 		await openScrolled(page, withLink(SUMMARY!, 'sidur'));
-		const nextHref = await page.locator('a.nav-btn-next').getAttribute('href');
-		test.skip(!nextHref, 'The summary is the last section');
+		const nextLink = page.locator('a.nav-btn-next');
+		test.skip((await nextLink.count()) === 0, 'The summary is the last section');
+		const nextHref = await nextLink.getAttribute('href');
 		await pressRight(page);
 		await expect(page).toHaveURL((u) => u.pathname.replace(/\/$/, '') === nextHref!.replace(/\/$/, ''));
+		expect(await storedRaw(page)).toBe(FRESH_PROFILE);
+	});
+
+	test('a rollup reached from a paged section under ?lestur=sidur does not page', async ({ page }) => {
+		const glossary = BOOK ? sectionOfType(BOOK, 'glossary') : null;
+		test.skip(!glossary, 'No key-terms page in this content');
+		await openScrolled(page, withLink(glossary!, 'sidur'));
+		const prevLink = page.locator('a.nav-btn-prev');
+		test.skip((await prevLink.count()) === 0, 'The key-terms page is the first section');
+		const glossaryPath = new URL(page.url()).pathname;
+
+		// Back to the section before it, in the app: SvelteKit reuses the page, so the link's
+		// mode carries on ([USER], 2026-11-03; S8.4 may change this) and that section pages
+		const prevHref = await prevLink.getAttribute('href');
+		await prevLink.click();
+		await expect(page).toHaveURL((u) => u.pathname.replace(/\/$/, '') === prevHref!.replace(/\/$/, ''));
+		await expect(pager(page)).toBeVisible({ timeout: 15000 });
+
+		// Forward to the rollup, in the app: the mode is recomputed for its type (ruling 2)
+		await page.locator('a.nav-btn-next').click();
+		await expect(page).toHaveURL((u) => u.pathname.replace(/\/$/, '') === glossaryPath.replace(/\/$/, ''));
+		await expect(page.locator('[data-paged-section]')).toHaveCount(0);
+		await page.waitForTimeout(2000);
+		await expect(pager(page)).toHaveCount(0);
+		await expect(hiddenBlocks(page)).toHaveCount(0);
 		expect(await storedRaw(page)).toBe(FRESH_PROFILE);
 	});
 });
