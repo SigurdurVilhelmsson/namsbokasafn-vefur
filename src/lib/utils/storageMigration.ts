@@ -196,12 +196,35 @@ function emptyExpirationStore(): Promise<Exclude<ExpirationClearResult, 'timed-o
 }
 
 /**
+ * Runtime caches that earlier service workers on this origin made and no current worker uses
+ * or deletes, so a browser that ran one may still hold them. Exact names, from each worker's
+ * runtimeCaching config in git history:
+ * - the SvelteKit worker until 921132b (2026-03-01): 'google-fonts-cache' and
+ *   'gstatic-fonts-cache', Google Fonts' stylesheets and font files (edcb7b0, 435b62a);
+ * - the React reader's worker (96feef2, 2025-12-31, the last config on archive/react-v1):
+ *   'content-json' (tables of contents, glossaries), 'content-markdown' (sections),
+ *   'content-images' (figures) and 'book-covers'.
+ * Every rule in those configs named its cache, so none fell back to workbox's default
+ * `workbox-runtime-…` name. Never a prefix here: the current precache is
+ * `workbox-precache-v2-<scope>` and must stay.
+ */
+export const LEGACY_CACHES: readonly string[] = [
+	'google-fonts-cache',
+	'gstatic-fonts-cache',
+	'content-json',
+	'content-markdown',
+	'content-images',
+	'book-covers'
+];
+
+/**
  * Delete what this site keeps for the reader in Cache Storage (plan step S3.2, PED-14):
- * every downloaded book (`offline-book:<slug>`) and the browsing caches of pages and
- * figures, which also show what was read. The service worker's precache (the app itself)
- * stays; its expiry records go with clearExpirationRecords(). Run it before
- * clearAllStorage(): with the record of downloads gone but the caches kept, a book shows as
- * 'Sótt (0 B)' while its files stay on the device.
+ * every downloaded book (`offline-book:<slug>`), the browsing caches of pages and figures,
+ * which also show what was read, and the runtime caches earlier workers left behind
+ * (LEGACY_CACHES; the React reader's held sections and figures too). The service worker's
+ * precache (the app itself) stays; its expiry records go with clearExpirationRecords(). Run
+ * it before clearAllStorage(): with the record of downloads gone but the caches kept, a book
+ * shows as 'Sótt (0 B)' while its files stay on the device.
  *
  * It never throws: where Cache Storage fails (it has rejected in private windows), the erase
  * must still clear localStorage, so a failure is logged and the deletions that worked stand.
@@ -212,7 +235,11 @@ export async function deleteLocalCaches(): Promise<string[]> {
 	let names: string[];
 	try {
 		names = (await caches.keys()).filter(
-			(name) => name.startsWith(OFFLINE_CACHE_PREFIX) || name === CONTENT_CACHE || name === BROWSE_IMAGE_CACHE
+			(name) =>
+				name.startsWith(OFFLINE_CACHE_PREFIX) ||
+				name === CONTENT_CACHE ||
+				name === BROWSE_IMAGE_CACHE ||
+				LEGACY_CACHES.includes(name)
 		);
 	} catch (e) {
 		console.error('Could not list the caches to delete:', e);

@@ -239,6 +239,40 @@ describe('deleteLocalCaches', () => {
 		expect(deleted.sort()).toEqual([...expected].sort());
 	});
 
+	it("deletes the caches earlier workers left (the React reader's pages and figures, Google Fonts), by exact name only", async () => {
+		const names = [
+			'google-fonts-cache',
+			'gstatic-fonts-cache',
+			'content-json',
+			'content-markdown',
+			'content-images',
+			'book-covers',
+			'workbox-precache-v2-https://namsbokasafn.is/',
+			// Near misses of a legacy name are someone else's caches, or a future one of ours.
+			'content-images-v2',
+			'my-book-covers',
+			'some-other-cache'
+		];
+		const deleted: string[] = [];
+		vi.stubGlobal('caches', {
+			keys: vi.fn(async () => names),
+			delete: vi.fn(async (name: string) => {
+				deleted.push(name);
+				return true;
+			})
+		});
+		const expected = [
+			'google-fonts-cache',
+			'gstatic-fonts-cache',
+			'content-json',
+			'content-markdown',
+			'content-images',
+			'book-covers'
+		];
+		expect(await deleteLocalCaches()).toEqual(expected);
+		expect(deleted.sort()).toEqual([...expected].sort());
+	});
+
 	it('never throws when Cache Storage fails, so the erase still clears localStorage', async () => {
 		vi.stubGlobal('caches', { keys: vi.fn(async () => Promise.reject(new DOMException('The operation is insecure.', 'SecurityError'))) });
 		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
