@@ -72,7 +72,9 @@
 		>
 			<Icon name="download" size="sm" />
 			<span>{label}</span>
-			<span class="pdf-btn-size">{sizeLabel}</span>
+			<!-- D20: proposed: the size in parentheses, as the primary button shows it, so the
+			     visible text is in the link's name (WCAG 2.5.3; axe's label-content-name-mismatch) -->
+			<span class="pdf-btn-size">({sizeLabel})</span>
 		</a>
 	{:else}
 		<a
