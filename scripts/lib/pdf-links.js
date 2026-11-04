@@ -21,8 +21,10 @@
  * from scratch with `defineNamedDest` (register a target) + `addGoToLink` (draw a
  * clickable rect over a row/word that points at that name).
  *
- * Collisions: auto-generated ids that repeat across separately-rendered chapters
- * (observed: only footnote-return anchors `fnref-N`) would clobber in a flat dict.
+ * Collisions: ids that repeat across separately-rendered chapters would clobber in
+ * a flat dict. Observed: the footnote-return anchors `fnref-N` until the print
+ * loaders scoped them per section (`printFootnotes.ts`), and since then only
+ * `foot-00001`, a footnote id chapter 1 and the appendices each hold once.
  * `mergeChapterDests` namespaces a name only when it is known to collide, so the
  * globally-unique content ids (`CNX_Chem_NN_*`) stay untouched and cross-chapter
  * resolution keeps working. The links that point at a namespaced name are the one
