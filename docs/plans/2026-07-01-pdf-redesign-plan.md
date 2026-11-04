@@ -1,6 +1,6 @@
 # PDF Output Redesign — Design Spec & Implementation Plan
 
-> **Status (2026-10-01):** PR #182 merged to `main` on 2026-07-02. Done: **Phase 0** (spikes) ✓ · **Phase 1** (visual redesign, incl. duplex margins + pagination) ✓ · **Task 1.8** (build date + MT watermark) ✓ · **Task 4.1** (standalone-only colophon) ✓ · **Phase 2 core** — content-link resurrection + clickable TOC ✓ (2.1 fonts deferred, 2.2 section outline blocked-noted) · **Phase 3** — link styling ✓ and back-of-book glossary with term-links ✓. **Next:** Task 3.3 exercise↔answer — no longer blocked (synced chemistry carries `data-has-answer` on all 22 `.eoc-exercise` files) but not built; Phase 4.2/4.3 metadata/footer; Phase 5 profiles. No PDF is served on namsbokasafn.is yet (`/downloads/efnafraedi-2e/manifest.json` answers with the 3,012-byte app shell). Created 2026-07-01.
+> **Status (2026-10-01):** PR #182 merged to `main` on 2026-07-02. Done: **Phase 0** (spikes) ✓ · **Phase 1** (visual redesign, incl. duplex margins + pagination) ✓ · **Task 1.8** (build date + MT watermark) ✓ · **Task 4.1** (standalone-only colophon) ✓ · **Phase 2 core** — content-link resurrection + clickable TOC ✓ (2.1 fonts deferred, 2.2 section outline blocked-noted) · **Phase 3** — link styling ✓ and back-of-book glossary with term-links ✓. **Next:** Task 3.3 exercise↔answer — no longer blocked (synced chemistry carries `data-has-answer` on all 22 `.eoc-exercise` files) but not built; Phase 5 profiles. (Phase 4.2/4.3 metadata and footer licence line done 2026-11-04, with the book-title fix; see their notes.) No PDF is served on namsbokasafn.is yet (`/downloads/efnafraedi-2e/manifest.json` answers with the 3,012-byte app shell). Created 2026-07-01.
 > **For agentic workers:** use `superpowers:subagent-driven-development` or `superpowers:executing-plans` to implement task-by-task. Steps use `- [ ]` checkboxes.
 > **Attached to:** `docs/plans/2026-06-10-audit-remediation-and-reader-v1.1-roadmap.md` (§ Planned) and the open-work triage `docs/plans/2026-06-30-open-work-triage-vs-efni.md` (backlog).
 
@@ -322,17 +322,21 @@ Each phase ends with a **regenerate-one-chapter + benchmark** deliverable, indep
 
 **Files:** `scripts/generate-pdfs.js` (already `setTitle`/`setLanguage`).
 
-- [ ] Set `Author`, `Subject` (= licence name + URL), `Keywords`, keep `Lang='is'`, on both book and chapter docs. Optionally write XMP `dc:rights` = licence URL.
-- [ ] **Acceptance:** `pdfinfo` shows Title/Author/Subject/Keywords; licence URL present in metadata.
-- [ ] Commit: `feat(pdf): licence-aware document metadata`.
+- [x] Set `Author`, `Subject` (= licence name + URL), `Keywords`, keep `Lang='is'`, on both book and chapter docs. XMP `dc:rights` skipped: pdf-lib has no XMP API, and `Subject` already carries the licence URL.
+- [x] **Acceptance:** `pdfinfo` shows Title/Author/Subject/Keywords; licence URL present in metadata.
+- [x] Commit: `feat(pdf): licence-aware document metadata`.
+
+**Note (2026-11-04):** done with the title fix it needed first (`fix(pdf): book title from book.ts, not toc.json's slug`): the PDFs took their title from `toc.json`, whose chemistry `title` is the slug, so 873 running headers and every document title read "efnafraedi-2e". Title, metadata and licence line now come from `src/lib/types/book.ts` through `scripts/lib/book-config.js` (esbuild, as in `validate-content.js`) and `scripts/lib/pdf-attribution.js`, and a book without a `book.ts` entry stops before printing. **Author is not the "OpenStax; þýðing: Námsbókasafn" suggested above**, which would make Námsbókasafn the translator: it is the original authors and publisher, then the colophon's own credit line (`creditLine()`), so machine translation is credited to the machine, as everywhere else. Subject is the colophon's licence sentence; Keywords add "kennslubók" and "íslensk þýðing" (`D20: proposed`).
 
 ### Task 4.3: Footer licence line (optional)
 
 **Files:** `scripts/generate-pdfs.js` (`stampPages`).
 
-- [ ] Add a short licence/source line to the folio band (e.g., "CC BY 4.0 · openstax.org / namsbokasafn.is"), NC-SA variant from flags.
-- [ ] **Acceptance:** every content page footer carries the licence line; greyscale-legible.
-- [ ] Commit: `feat(pdf): licence line in footer`.
+- [x] Add a short licence/source line to the folio band (e.g., "CC BY 4.0 · openstax.org / namsbokasafn.is"), NC-SA variant from flags.
+- [x] **Acceptance:** every content page footer carries the licence line; greyscale-legible.
+- [x] Commit: `feat(pdf): licence line in footer`.
+
+**Note (2026-11-04):** "CC BY 4.0 · openstax.org · namsbokasafn.is", centred on the folio's baseline, 7 pt, `#6b6b6b`; the licence name is the descriptor's, so an NC-SA book gets its own from the data. It goes on every numbered page (chapter openers, appendices and glossary included) and not on the unnumbered front matter or the colophon page appended to a standalone chapter, which state the licence in full: 1,759 of 1,762 book pages on the 2026-11-04 run. ⚠️ Two things that run showed, not fixed here: (1) **chapter 10's print varies from run to run** with no code change (112, 108 and 105 pages in three prints of the same route, 76 images not loaded each time), so the book's page count and every page number after chapter 10 can change between two runs of the same commit; (2) Chromium's full binary failed with `Printing failed` at chapter 6 in this sandbox, and `PDF_CHROMIUM_PATH` set to Playwright's `chrome-headless-shell` printed the whole book.
 
 ---
 
