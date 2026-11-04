@@ -155,6 +155,39 @@ describe('scopeFootnoteBackLinks', () => {
 		expect(idB).toBe('fn-vidauki-0-fnref-1');
 	});
 
+	it("keys on the back link, not the name: a reference id that isn't fnref-N is renamed too", () => {
+		// If efni renamed its reference ids, two sections could still both say 'ref-a'.
+		const other = (fid: string): PrintFootnoteBlock => ({
+			content:
+				`<p><sup class="footnote-ref"><a href="#${fid}" id="ref-a">1</a></sup></p>` +
+				`<li id="${fid}" class="footnote-item"><a href="#ref-a" class="footnote-backref">↩</a></li>`
+		});
+		const doc = render(scopeFootnoteBackLinks([other('eip-a'), other('eip-b')], '07'));
+		const backs = [...doc.querySelectorAll('a.footnote-backref')];
+		expect(backs.map((b) => b.getAttribute('href'))).toEqual([
+			`#${footnoteRefAnchorId('07', 0, 'ref-a')}`,
+			`#${footnoteRefAnchorId('07', 1, 'ref-a')}`
+		]);
+		backs.forEach((back, i) => {
+			const targets = targetsOf(doc, back);
+			expect(targets).toHaveLength(1);
+			expect(blockOf(targets[0])).toBe(String(i));
+		});
+	});
+
+	it('rewrites only real id and href attributes, never data-id or xlink:href', () => {
+		const block = section(['eip-a', 1]);
+		block.content = block.content.replace(
+			'<main>',
+			'<main><span data-id="fnref-1"></span><svg><use xlink:href="#fnref-1"></use></svg>'
+		);
+		const [out] = scopeFootnoteBackLinks([block], '03');
+		expect(out.content).toContain('data-id="fnref-1"');
+		expect(out.content).toContain('xlink:href="#fnref-1"');
+		// The real pair still moved.
+		expect(out.content).toContain(`id="${footnoteRefAnchorId('03', 0, 'fnref-1')}"`);
+	});
+
 	it('reads single-quoted attributes and a ">" inside a quoted value', () => {
 		const blocks: PrintFootnoteBlock[] = [
 			section(['eip-a', 1]),
