@@ -16,9 +16,8 @@
  *   would name two elements, and Chromium resolves it to the first: the exercise. The
  *   links target `ex-<scope>-<id>` and `ans-<scope>-<id>` instead, ids no content
  *   carries. The scope (the loader passes the zero-padded chapter number) keeps a name
- *   unique across chapters: generate-pdfs.js namespaces a destination name that two
- *   chapters share, but not the annotations that point at it, so in the merged book a
- *   shared name would leave its links pointing at nothing.
+ *   unique across chapters, so it never needs the merge's collision handling (which
+ *   namespaces a name two chapters share, and the links to it, in generate-pdfs.js).
  * - **Only pairs the render holds.** An exercise gets a link only when its answer entry
  *   is in this render's answer key, and an answer entry only when its exercise is in
  *   this render's sections, so no link points at a missing target either way.

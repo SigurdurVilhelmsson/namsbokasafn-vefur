@@ -140,8 +140,8 @@ async function startDevServer(port) {
 /**
  * Run `fn` with a fresh page, closed afterwards. One page reused for every
  * print kept the earlier chapters' decoded figures: the browser's memory rose
- * to 6.2 GB by chapter 10 of a whole-book run, against 3.2 GB for chapter 10
- * printed on its own page.
+ * to 6.2 GB by chapter 10 of a whole-book run, against a 2.9 GB peak over a
+ * whole run with a page per print.
  */
 async function withPrintPage(context, fn) {
 	const page = await context.newPage();
