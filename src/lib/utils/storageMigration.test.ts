@@ -26,14 +26,15 @@ type FakeDb = { version: number; stores: Map<string, Map<string, unknown>> };
  * microtasks. `connections` counts the connections still open.
  */
 function fakeIndexedDB(
-	options: { neverAnswer?: boolean; failClear?: boolean; throwOnOpen?: boolean } = {}
+	options: { neverAnswer?: boolean; failClear?: boolean; throwOnOpen?: boolean; holdClear?: boolean } = {}
 ) {
 	const dbs = new Map<string, FakeDb>();
-	const state = { connections: 0, opens: 0 };
+	// `live` holds every connection handed out, so a test can fire its onversionchange.
+	const state = { connections: 0, opens: 0, live: [] as Array<{ onversionchange: null | (() => void) }> };
 	const connect = (db: FakeDb) => {
 		state.connections++;
 		let closed = false;
-		return {
+		const connection = {
 			version: db.version,
 			onversionchange: null as null | (() => void),
 			objectStoreNames: { contains: (name: string) => db.stores.has(name) },
@@ -51,6 +52,7 @@ function fakeIndexedDB(
 					objectStore: () => ({
 						clear: () => {
 							if (mode !== 'readwrite') throw new DOMException('Read only', 'ReadOnlyError');
+							if (options.holdClear) return; // stays in flight
 							queueMicrotask(() => {
 								if (options.failClear) {
 									tx.error = new DOMException('Disk I/O error', 'UnknownError');
@@ -66,6 +68,8 @@ function fakeIndexedDB(
 				return tx;
 			}
 		};
+		state.live.push(connection);
+		return connection;
 	};
 	const factory = {
 		open(name: string, version?: number) {
@@ -174,6 +178,34 @@ describe('clearExpirationRecords', () => {
 		await vi.advanceTimersByTimeAsync(1);
 		expect(result).toBe('timed-out');
 		expect(EXPIRATION_CLEAR_TIMEOUT_MS).toBeLessThanOrEqual(2000);
+		error.mockRestore();
+	});
+
+	it("lets go of its connection when someone else's upgrade or delete asks, even mid-clear", async () => {
+		vi.useFakeTimers();
+		const { factory, dbs, state } = fakeIndexedDB({ holdClear: true });
+		workboxDatabase(dbs, { a: { timestamp: 1 } });
+		vi.stubGlobal('indexedDB', factory);
+		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const result = clearExpirationRecords();
+		await vi.advanceTimersByTimeAsync(0);
+		expect(state.connections).toBe(1);
+		// A versionchange (another tab's upgrade, or a deleteDatabase) reaches the open connection.
+		state.live.at(-1)?.onversionchange?.();
+		expect(state.connections).toBe(0);
+		await vi.advanceTimersByTimeAsync(EXPIRATION_CLEAR_TIMEOUT_MS);
+		await expect(result).resolves.toBe('timed-out');
+		error.mockRestore();
+	});
+
+	it("reads a database without workbox's store as absent, and logs nothing", async () => {
+		const { factory, dbs, state } = fakeIndexedDB();
+		dbs.set(EXPIRATION_DB, { version: 1, stores: new Map() });
+		vi.stubGlobal('indexedDB', factory);
+		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+		expect(await clearExpirationRecords()).toBe('absent');
+		expect(error).not.toHaveBeenCalled();
+		expect(state.connections).toBe(0);
 		error.mockRestore();
 	});
 
