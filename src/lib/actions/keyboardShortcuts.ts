@@ -153,14 +153,21 @@ const PAGE_TURN_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown',
  * Go to the previous or next section by clicking the section nav link (`data-nav` on
  * NavigationButtons). Returns false, so the key keeps its default, when there is no such
  * link, when it is disabled, or when the section is paged ([data-paged-section]) and
- * `key` is one the pager turns pages with.
+ * `key` is one the pager turns pages with, unless the pager is at its end and the
+ * direction is 'next'.
  */
 function navigatePrevNext(direction: 'prev' | 'next', key: string): boolean {
 	// A paged section turns pages with these keys; leave them to it. Keyed on
 	// the section page's mark, present from mount, not on the page controls:
 	// those render only once images and fonts are in, and in that gap → skipped
-	// a section. A shortcut rebound to another key still works.
-	if (document.querySelector('[data-paged-section]') && PAGE_TURN_KEYS.has(key)) return false;
+	// a section. A shortcut rebound to another key still works. Once the pager is
+	// on its last page and has finished the section (the mark reads 'end', the
+	// state that disables 'Næsta'), it has no page left to turn, so → goes on to
+	// the next section (CODE-17). ← keeps turning back a page: freeing it would
+	// leave the section.
+	const mark = document.querySelector('[data-paged-section]');
+	const pagerAtEnd = direction === 'next' && mark?.getAttribute('data-paged-section') === 'end';
+	if (mark && PAGE_TURN_KEYS.has(key) && !pagerAtEnd) return false;
 	const link = document.querySelector<HTMLElement>(`[data-nav="${direction}"]`);
 	if (!link || link.hasAttribute('disabled')) return false;
 	link.click();

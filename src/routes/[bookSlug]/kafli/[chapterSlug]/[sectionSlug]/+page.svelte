@@ -18,12 +18,15 @@
 	import BookAttribution from '$lib/components/BookAttribution.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import PagedReaderControls from '$lib/components/PagedReaderControls.svelte';
+	import type { PagerState } from '$lib/utils/pager';
 	import { readDetection } from '$lib/actions/readDetection';
 	import RecallPrompt from '$lib/components/RecallPrompt.svelte';
 	import RecallReadBack from '$lib/components/RecallReadBack.svelte';
 	import { entriesForSection, recallStore } from '$lib/stores/recall';
 	import {
+		endMarkerActive,
 		isFrontMatterChapter,
+		pagedSectionMark,
 		readingModeFromSearch,
 		recallTrigger,
 		resolveReadingMode,
@@ -47,16 +50,20 @@
 	// mode the reader picked, never by default (D06). The link is read once, in the browser,
 	// when this page mounts: never at prerender, never stored (PED-35). SvelteKit reuses this
 	// component across sections, so a link's mode lasts until the reader leaves the section
-	// pages ([USER], 2026-11-03; S8.4 revisits it). Until onMount runs nothing pages, so
-	// prerender and hydration match main, and a mode the link overrides never mounts the pager.
+	// pages ([USER], 2026-11-03; kept on 2026-11-04 for S9.0 to rule with the crossover
+	// design). Until onMount runs nothing pages, so prerender and hydration match main, and a
+	// mode the link overrides never mounts the pager.
 	let linkMode: ReadingMode | null = $state(null);
 	let modeReady = $state(false);
+	// What the pager reports (S8.4, CODE-17): ← / → and the end marker follow it, not the mode
+	let pagerState: PagerState = $state('pending');
 	// Bound to the content wrapper inside {#key}; the pager works on it (dde768e :32-33)
 	let contentWrapper: HTMLElement | undefined = $state();
 	// A rollup always scrolls (ruling 2). The type comes from the table of contents.
 	let paged = $derived(
 		modeReady && shouldPage(resolveReadingMode(linkMode, $readingMode), data.navigation.current.section.type)
 	);
+	let pagedMark = $derived(pagedSectionMark(paged, pagerState));
 
 	// Print the current section
 	function handlePrint() {
@@ -502,7 +509,7 @@
 		<!-- The pager's container (dde768e :419-421). data-paged-section is there from mount,
 		     before the page controls render, so the ←/→ section shortcut steps aside for the pager.
 		     It sits below the objectives, so the pager's arrival scroll passes them (ruling 1). -->
-		<div bind:this={contentWrapper} data-paged-section={paged || undefined}>
+		<div bind:this={contentWrapper} data-paged-section={pagedMark}>
 			<TextHighlighter
 				bookSlug={data.bookSlug}
 				chapterSlug={data.chapterSlug}
@@ -523,7 +530,11 @@
 		{#if paged}
 			<!-- 'Næsta' on the last page is the section's end (ruling 3), so it runs reachedEnd.
 			     v1.1 passed markAsRead (dde768e :442), which under D10 no longer opens the prompt. -->
-			<PagedReaderControls container={contentWrapper} oncomplete={reachedEnd} />
+			<PagedReaderControls
+				container={contentWrapper}
+				oncomplete={reachedEnd}
+				onstatechange={(state) => (pagerState = state)}
+			/>
 		{/if}
 
 		<!-- End of section detection: marks the section read, and opens its recall prompt if one
@@ -534,7 +545,7 @@
 		<div
 			use:readDetection={{
 				onRead: reachedEnd,
-				enabled: (!isRead || recallOwed || hasRecallEntry) && !paged,
+				enabled: (!isRead || recallOwed || hasRecallEntry) && endMarkerActive(paged, pagerState),
 				minVisibleTime: 1500
 			}}
 			class="h-4"

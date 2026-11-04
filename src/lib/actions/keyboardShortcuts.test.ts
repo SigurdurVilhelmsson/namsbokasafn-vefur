@@ -288,6 +288,20 @@ describe('the section shortcuts and a paged section', () => {
 		expect([clicks.next.mock.calls.length, clicks.prev.mock.calls.length]).toEqual([1, 1]);
 	});
 
+	it("at the pager's end, → changes section and takes the key; ← still steps aside (S8.4)", () => {
+		markPaged().setAttribute('data-paged-section', 'end');
+		expect(press('ArrowRight')).toBe(true);
+		expect(press('ArrowLeft')).toBe(false);
+		expect([clicks.next.mock.calls.length, clicks.prev.mock.calls.length]).toEqual([1, 0]);
+	});
+
+	it("at the pager's end, a next-section shortcut rebound to PageDown changes section too", () => {
+		settingsStore.setShortcut('nextSection', 'PageDown');
+		markPaged().setAttribute('data-paged-section', 'end');
+		expect(press('PageDown')).toBe(true);
+		expect(clicks.next).toHaveBeenCalledTimes(1);
+	});
+
 	it('typing in editable content keeps → from changing section, contenteditable="" included', () => {
 		document.body.insertAdjacentHTML('beforeend', '<div id="ed" tabindex="0" contenteditable=""></div>');
 		(document.getElementById('ed') as HTMLElement).focus();
