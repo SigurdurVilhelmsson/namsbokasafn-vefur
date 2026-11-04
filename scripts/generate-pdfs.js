@@ -15,6 +15,9 @@
  *     measured first, then the front matter is re-printed with page numbers
  *     fed in via downloads/<slug>/toc-pages.json)
  *   - PDF bookmarks (outline) for the TOC, every chapter and the appendices
+ *   - document metadata (title, author, subject = licence, keywords,
+ *     language) on the book and on every chapter PDF, from
+ *     src/lib/types/book.ts (scripts/lib/pdf-attribution.js)
  *
  * Standalone chapter PDFs are stamped with the same book-absolute page
  * numbers, so a printed chapter matches the full book and its TOC.
@@ -66,7 +69,7 @@ import {
 } from './lib/pdf-links.js';
 import { assertPrintable, pdfBooks } from './lib/pdf-books.js';
 import { loadBookConfig } from './lib/book-config.js';
-import { pdfBookInfo } from './lib/pdf-attribution.js';
+import { applyDocumentInfo, chapterDocInfo, pdfBookInfo } from './lib/pdf-attribution.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -240,11 +243,11 @@ function addOutline(doc, items) {
 }
 
 async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
-	// The title comes from book.ts, the source the /print routes render from,
-	// and never from toc.json's `title`: generate-toc.js falls back to the slug
-	// there when efni's toc has none, so the chemistry toc.json (live too) says
-	// "efnafraedi-2e". Resolved before any printing, so a book without a book.ts
-	// entry fails at once.
+	// Title and metadata come from book.ts, the source the /print routes render
+	// from, and never from toc.json's `title`: generate-toc.js falls back to the
+	// slug there when efni's toc has none, so the chemistry toc.json (live too)
+	// says "efnafraedi-2e". Resolved before any printing, so a book without a
+	// book.ts entry fails at once.
 	const bookInfo = pdfBookInfo(bookConfig, bookSlug);
 	const toc = loadToc(bookSlug);
 	const bookOutDir = join(OUTPUT_DIR, bookSlug);
@@ -347,8 +350,7 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 
 	const bookTitle = bookInfo.title;
 	const merged = await PDFDocument.create();
-	merged.setTitle(bookTitle, { showInWindowTitleBar: true });
-	merged.setLanguage('is');
+	applyDocumentInfo(merged, bookInfo);
 
 	const front = await PDFDocument.load(readFileSync(frontMatterFile));
 	for (const p of await merged.copyPages(front, front.getPageIndices())) merged.addPage(p);
@@ -380,10 +382,10 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 		// Standalone chapter file — book-absolute page numbers so a printed
 		// chapter matches the full book and its TOC.
 		const standalone = await PDFDocument.load(readFileSync(part.rawFile));
-		standalone.setTitle(`${bookTitle} — ${part.chapterNum}. ${part.title}`, {
-			showInWindowTitleBar: true
-		});
-		standalone.setLanguage('is');
+		applyDocumentInfo(
+			standalone,
+			chapterDocInfo(bookInfo, { number: part.chapterNum, title: part.title })
+		);
 		await stampPages(standalone, headerForPage);
 		// Append the standalone-only colophon as an unstamped addendum page (so a
 		// chapter shared on its own still carries full CC-BY attribution). It is
@@ -527,7 +529,7 @@ async function main() {
 
 	console.log(`Generating PDFs for ${targetBooks.length} book(s): ${targetBooks.join(', ')}`);
 
-	// Titles, from src/lib/types/book.ts.
+	// Titles, licences and credits, from src/lib/types/book.ts.
 	const bookConfig = await loadBookConfig(ROOT);
 
 	mkdirSync(OUTPUT_DIR, { recursive: true });
