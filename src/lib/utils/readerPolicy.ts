@@ -75,12 +75,14 @@ export const UNCHOSEN_READING_MODE: ReadingMode = 'scrolled';
 
 /**
  * The visit-only link parameter (PED-35): never stored, read in the browser only. The three
- * link words are URL text that teachers will share, so they are checked like UI strings.
+ * link words are URL text that teachers will share, so they were checked like UI strings
+ * ([USER], D20 batch 9, 2026-11-04) and are final: a link a teacher has shared must keep
+ * working, so renaming a word means accepting the old one too.
  */
-export const READING_MODE_PARAM = 'lestur'; // D20: proposed
+export const READING_MODE_PARAM = 'lestur';
 const READING_MODE_VALUES: Record<string, ReadingMode> = {
-	sidur: 'paged', // D20: proposed
-	skrun: 'scrolled' // D20: proposed
+	sidur: 'paged',
+	skrun: 'scrolled'
 };
 
 /** The mode a `?lestur=` link asks for, or null when it asks for none we know */

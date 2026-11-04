@@ -158,9 +158,9 @@ export function resolvePageHash(hash: string, pageCounts: readonly number[]): nu
  * reads as one page, as in v1.1.
  */
 export function positionLabel({ unit, page }: PagePosition, pageCounts: readonly number[]): string {
-	// D20: proposed (S8.1): the pager's position label, 'Hluti N af M · Síða X af Y',
-	// as v1.1 wrote it at dde768e; readers see it only through a '?lestur=sidur' link until a
-	// reading-mode picker is rendered (D06).
+	// The pager's position label, 'Hluti N af M · Síða X af Y', as v1.1 wrote it at dde768e
+	// (S8.1; checked by [USER] as D20 batch 9, 2026-11-04). Readers see it only through a
+	// '?lestur=sidur' link until a reading-mode picker is rendered (D06).
 	return `Hluti ${unit + 1} af ${pageCounts.length} · Síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
 }
 
