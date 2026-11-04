@@ -182,7 +182,8 @@ export type PageKey = Pick<
  */
 export interface KeyContext {
 	/** Focus is in an <input> of any type (a checkbox too), a textarea, a select or
-	 *  editable content: isTyping() as v1.1 computed it */
+	 *  editable content: keyboardShortcuts.ts's isTyping(), the global shortcuts' rule too
+	 *  (S8.4, CODE-18) */
 	typing: boolean;
 	/** keyBelongsElsewhere(): an open dialog, a selection being extended with Shift and
 	 *  an arrow, or a focused box that scrolls sideways */
@@ -322,4 +323,25 @@ export function pageAfterResplit(
 	if (fromTarget !== null) return fromTarget;
 	const fromAnchor = anchor ? flatIndexForItem(anchor, pages) : null;
 	return fromAnchor ?? 0;
+}
+
+/**
+ * What the pager tells the section page, which keys ← / → and the end marker on it:
+ * 'pending' from mount until its keys are live (fonts, images, the first split);
+ * 'ready' while it turns pages; 'end' on the last page once 'Næsta' has finished the
+ * section (the same test that disables 'Næsta'); 'failed' once it has given the section
+ * back to scrolling. A pager its owner destroyed reports nothing more.
+ */
+export type PagerState = 'pending' | 'ready' | 'end' | 'failed';
+
+export function pagerState(s: {
+	failed: boolean;
+	live: boolean;
+	current: number;
+	pages: number;
+	sectionComplete: boolean;
+}): PagerState {
+	if (s.failed) return 'failed';
+	if (!s.live) return 'pending';
+	return s.sectionComplete && s.current === s.pages - 1 ? 'end' : 'ready';
 }

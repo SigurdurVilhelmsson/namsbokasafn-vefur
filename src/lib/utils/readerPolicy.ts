@@ -5,6 +5,7 @@
  */
 import type { SectionType } from '$lib/types/content';
 import type { ReadingMode } from '$lib/stores/settings';
+import type { PagerState } from './pager';
 
 /** The chapter rollups: pages that gather a whole chapter rather than teach one section */
 export const ROLLUP_SECTION_TYPES: ReadonlySet<SectionType> = new Set<SectionType>([
@@ -96,4 +97,20 @@ export function resolveReadingMode(override: ReadingMode | null, chosen: Reading
 /** Ruling 2: a rollup always scrolls */
 export function shouldPage(mode: ReadingMode, type: SectionType | undefined): boolean {
 	return mode === 'paged' && !isRollup(type);
+}
+
+/**
+ * The section wrapper's data-paged-section (plan step S8.4, CODE-17): present while the
+ * section is paged and its pager has not failed, from the pager's mount on, so the ← / →
+ * section shortcut steps aside for it (keyboardShortcuts.ts); its value is the pager's
+ * state, and 'end' lets → go on to the next section. Gone once the pager fails: the
+ * section scrolls again and ← / → change section, as in scrolled mode.
+ */
+export function pagedSectionMark(paged: boolean, state: PagerState): Exclude<PagerState, 'failed'> | undefined {
+	return paged && state !== 'failed' ? state : undefined;
+}
+
+/** Whether the end-of-section marker detects reading: scrolled, or paged with a failed pager */
+export function endMarkerActive(paged: boolean, state: PagerState): boolean {
+	return !paged || state === 'failed';
 }

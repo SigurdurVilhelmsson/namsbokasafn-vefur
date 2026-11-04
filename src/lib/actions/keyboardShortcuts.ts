@@ -103,16 +103,29 @@ const SHORTCUT_METADATA: Record<
 // =============================================================================
 
 /**
- * Check if user is typing in an input field
+ * One rule for "a key typed here belongs to the field", read by the global shortcuts and
+ * by the pager's keyAction (KeyContext.typing; plan step S8.4, register CODE-18).
+ *
+ * Any <input> counts, a checkbox or radio too: a radio group and a range slider use the
+ * arrows, and Space toggles a checkbox, so neither the section shortcuts nor the pager may
+ * take those keys from it. Editable content counts by the nearest valid contenteditable
+ * value, in any letter case: "", "true" and "plaintext-only" do, so an element inside an
+ * editable host does, and a contenteditable="false" island does not. Any other value is
+ * invalid and inherits, as the HTML spec says, so the search goes on to the next ancestor
+ * with the attribute. That is what isContentEditable computes in a browser; jsdom does not
+ * implement isContentEditable, so the rule is written out.
  */
-function isTyping(): boolean {
-	const activeElement = document.activeElement;
-	if (!activeElement) return false;
+const EDITABLE_VALUES = new Set(['', 'true', 'plaintext-only']);
 
-	const tagName = activeElement.tagName.toLowerCase();
-	const isEditable = activeElement.getAttribute('contenteditable') === 'true';
-
-	return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || isEditable;
+export function isTyping(el: Element | null = document.activeElement): boolean {
+	if (!el) return false;
+	if (el.matches('input, textarea, select')) return true;
+	for (let host = el.closest('[contenteditable]'); host; host = host.parentElement?.closest('[contenteditable]') ?? null) {
+		const value = host.getAttribute('contenteditable')!.toLowerCase();
+		if (value === 'false') return false;
+		if (EDITABLE_VALUES.has(value)) return true;
+	}
+	return false;
 }
 
 /**
@@ -147,14 +160,26 @@ const PAGE_TURN_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown',
  * Go to the previous or next section by clicking the section nav link (`data-nav` on
  * NavigationButtons). Returns false, so the key keeps its default, when there is no such
  * link, when it is disabled, or when the section is paged ([data-paged-section]) and
- * `key` is one the pager turns pages with.
+ * `key` is one the pager turns pages with, unless the pager is at its end and the
+ * direction is 'next'.
  */
 function navigatePrevNext(direction: 'prev' | 'next', key: string): boolean {
 	// A paged section turns pages with these keys; leave them to it. Keyed on
 	// the section page's mark, present from mount, not on the page controls:
 	// those render only once images and fonts are in, and in that gap → skipped
-	// a section. A shortcut rebound to another key still works.
-	if (document.querySelector('[data-paged-section]') && PAGE_TURN_KEYS.has(key)) return false;
+	// a section. A shortcut rebound to another key still works. Once the pager is
+	// on its last page and has finished the section (the mark reads 'end', the
+	// state that disables 'Næsta'), it has no page left to turn, so → goes on to
+	// the next section (CODE-17). ← keeps turning back a page: freeing it would
+	// leave the section. This listener must run BEFORE the pager's, and does: the
+	// layout adds it once at mount, the pager at the end of its async init, and a
+	// target's listeners run in the order they were added. Run after it, it would
+	// read the 'end' that Svelte's flush between the two listeners writes, so the
+	// press that turned to the last page (or finished the section) would change
+	// section too. Moving this listener later or the pager's earlier breaks that.
+	const mark = document.querySelector('[data-paged-section]');
+	const pagerAtEnd = direction === 'next' && mark?.getAttribute('data-paged-section') === 'end';
+	if (mark && PAGE_TURN_KEYS.has(key) && !pagerAtEnd) return false;
 	const link = document.querySelector<HTMLElement>(`[data-nav="${direction}"]`);
 	if (!link || link.hasAttribute('disabled')) return false;
 	link.click();

@@ -24,7 +24,8 @@ import {
 	flatIndexForItem,
 	pageAfterResplit,
 	type KeyContext,
-	type PageKey
+	type PageKey,
+	pagerState
 } from './pager';
 
 // Three units of 3, 4 and 7 pages: flat indexes 0-2, 3-6 and 7-13
@@ -484,5 +485,17 @@ describe('re-splits', () => {
 	it('opens the first page with neither, or with an anchor in a unit that is gone', () => {
 		expect(pageAfterResplit({ target: null, anchor: null }, after)).toBe(0);
 		expect(pageAfterResplit({ target: null, anchor: { unit: 4, item: 0 } }, after)).toBe(0);
+	});
+});
+
+describe('pagerState (S8.4, CODE-17)', () => {
+	const base = { failed: false, live: true, current: 0, pages: 3, sectionComplete: false };
+	it("is 'failed' first, then 'pending' until live, then 'end' only on the last page once complete", () => {
+		expect(pagerState({ ...base, failed: true, live: false })).toBe('failed');
+		expect(pagerState({ ...base, live: false })).toBe('pending');
+		expect(pagerState(base)).toBe('ready');
+		expect(pagerState({ ...base, current: 2 })).toBe('ready');
+		expect(pagerState({ ...base, current: 1, sectionComplete: true })).toBe('ready');
+		expect(pagerState({ ...base, current: 2, sectionComplete: true })).toBe('end');
 	});
 });

@@ -13,14 +13,14 @@
   (mode switch, destroy, failure) returns the exact scrolled experience.
 -->
 <script lang="ts">
-	import { tick } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { get } from 'svelte/store';
 	import Icon from '$lib/components/Icon.svelte';
 	import { browser } from '$app/environment';
 	import { settings } from '$lib/stores/settings';
 	// Aliased: the component has its own announce() and announcement
 	import { announce as speak, announcement as liveText } from '$lib/stores/announcer';
-	import { keyBelongsElsewhere } from '$lib/actions/keyboardShortcuts';
+	import { isTyping, keyBelongsElsewhere } from '$lib/actions/keyboardShortcuts';
 	import {
 		paginate,
 		buildUnits as buildContentUnits,
@@ -41,7 +41,9 @@
 		pageAnchor,
 		pageAfterResplit,
 		flatIndexForItem,
-		type ItemPosition
+		pagerState,
+		type ItemPosition,
+		type PagerState
 	} from '$lib/utils/pager';
 
 	interface Props {
@@ -54,9 +56,11 @@
 		 *  passes none: call 2 ruled recall once per section (2026-10-23); plan step S11.7
 		 *  would wire it only under a later ruling. */
 		onsubsectioncomplete?: (index: number) => void;
+		/** Each change of state, for the section page's ← / → step-aside and end marker */
+		onstatechange?: (state: PagerState) => void;
 	}
 
-	let { container, oncomplete, onsubsectioncomplete }: Props = $props();
+	let { container, oncomplete, onsubsectioncomplete, onstatechange }: Props = $props();
 
 	interface Unit {
 		wrapper: HTMLElement | null; // the <section>, or null for intro content
@@ -74,9 +78,27 @@
 	const completedUnits = new Set<number>();
 	let completionFired = $state(false);
 
-	let cleanups: (() => void)[] = [];
 	let recomputeTimer: ReturnType<typeof setTimeout> | undefined;
-	let observer: MutationObserver | undefined;
+	/** This effect run's controller: its abort removes every listener init added. Not $state. */
+	let run: AbortController | undefined;
+	/** The keys, swipes and hash changes are live (init's last step). Not $state. */
+	let live = false;
+	let reported: PagerState | null = null;
+
+	/** Tell the page the state, on a change only; a destroyed pager says nothing */
+	function report() {
+		if (!failed && run?.signal.aborted) return;
+		const state = pagerState({
+			failed,
+			live,
+			current,
+			pages: flatPages.length,
+			sectionComplete: completionFired
+		});
+		if (state === reported) return;
+		reported = state;
+		onstatechange?.(state);
+	}
 	let navEl: HTMLElement | undefined = $state();
 
 	/** How long to wait for images before the first split (QA E2/E8/E9) */
@@ -114,15 +136,6 @@
 			container.querySelector<HTMLElement>('article.cnx-module') ??
 			container.querySelector<HTMLElement>('.reading-content') ??
 			container
-		);
-	}
-
-	function isTyping(): boolean {
-		const el = document.activeElement;
-		if (!el) return false;
-		const tag = el.tagName;
-		return (
-			tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (el as HTMLElement).isContentEditable
 		);
 	}
 
@@ -217,6 +230,7 @@
 		if (!keepHash) updateHash();
 		announce();
 		if (scroll) scrollToContentTop();
+		report();
 	}
 
 	function markUnitComplete(unitIndex: number) {
@@ -233,11 +247,12 @@
 	function completeSection() {
 		if (completionFired) return;
 		completionFired = true;
+		report();
 		oncomplete?.();
 	}
 
 	function next() {
-		if (!flatPages[current]) return;
+		if (!ready || failed || !flatPages[current]) return;
 		target = null;
 		const step = stepNext(current, pageCounts(), { section: completionFired, units: completedUnits });
 		// Leaving a sub-section's last page reports it once, through onsubsectioncomplete
@@ -247,6 +262,7 @@
 	}
 
 	function prev() {
+		if (!ready || failed) return;
 		target = null;
 		const index = stepPrev(current, pageCounts());
 		if (index !== null) showPage(index);
@@ -321,6 +337,7 @@
 	}
 
 	function handleHashChange() {
+		if (!ready || failed) return;
 		const hash = window.location.hash;
 		const idx = resolveHash(hash);
 		target = elementForHash(hash);
@@ -363,10 +380,16 @@
 		}
 	}
 
+	/** Give the section back to scrolling: show every block, forget the pages, tell the
+	 *  page, and remove every listener this run added (CODE-17) */
 	function fail() {
 		failed = true;
 		ready = false;
 		restoreAll();
+		units = [];
+		flatPages = [];
+		report();
+		run?.abort();
 	}
 
 	async function loadImages(root: HTMLElement) {
@@ -393,13 +416,14 @@
 		}
 	}
 
-	async function init(el: HTMLElement) {
+	async function init(el: HTMLElement, signal: AbortSignal) {
 		try {
 			// Heights are only stable once fonts are in; MathJax SVG is
 			// pre-rendered and images recompute via their load events
 			await document.fonts?.ready;
 			await tick();
-			if (failed || container !== el) return;
+			// Destroyed or failed while waiting: its owner switched modes or left (CODE-17)
+			if (signal.aborted) return;
 
 			const root = contentRoot();
 			if (!root || root.children.length === 0) {
@@ -412,7 +436,7 @@
 			// loads until that page is shown. Load them all now, wait briefly
 			// for them, and let any straggler re-split through its load event.
 			await loadImages(root);
-			if (failed || container !== el) return;
+			if (signal.aborted) return;
 
 			units = buildUnits(root);
 			computePages();
@@ -430,12 +454,13 @@
 			// the title alone and its controls below the fold.
 			showPage(fromHash ?? 0, { keepHash: target !== null });
 			await tick();
+			if (signal.aborted) return;
 			calibrate();
+			// calibrate() re-splits, and a re-split can fail
+			if (signal.aborted) return;
 
 			// Late-loading images change heights — recompute around them
-			const onAssetLoad = () => scheduleRecompute();
-			root.addEventListener('load', onAssetLoad, true);
-			cleanups.push(() => root.removeEventListener('load', onAssetLoad, true));
+			root.addEventListener('load', () => scheduleRecompute(), { capture: true, signal });
 
 			// On a touch screen the URL bar showing or hiding changes only the
 			// height, by well under 120px; re-splitting for it would move the
@@ -451,21 +476,12 @@
 				lastH = h;
 				scheduleRecompute();
 			};
-			window.addEventListener('resize', onResize);
-			cleanups.push(() => window.removeEventListener('resize', onResize));
-
-			window.addEventListener('keydown', handleKeyDown);
-			cleanups.push(() => window.removeEventListener('keydown', handleKeyDown));
-
-			window.addEventListener('hashchange', handleHashChange);
-			cleanups.push(() => window.removeEventListener('hashchange', handleHashChange));
-
-			el.addEventListener('touchstart', handleTouchStart, { passive: true });
-			el.addEventListener('touchend', handleTouchEnd, { passive: true });
-			cleanups.push(() => {
-				el.removeEventListener('touchstart', handleTouchStart);
-				el.removeEventListener('touchend', handleTouchEnd);
-			});
+			window.addEventListener('resize', onResize, { signal });
+			window.addEventListener('keydown', handleKeyDown, { signal });
+			window.addEventListener('hashchange', handleHashChange, { signal });
+			el.addEventListener('touchstart', handleTouchStart, { passive: true, signal });
+			el.addEventListener('touchend', handleTouchEnd, { passive: true, signal });
+			signal.addEventListener('abort', () => clearTimeout(recomputeTimer), { once: true });
 
 			// Typography settings change block heights
 			let firstSettings = true;
@@ -476,17 +492,23 @@
 				}
 				scheduleRecompute();
 			});
-			cleanups.push(unsubscribe);
+			signal.addEventListener('abort', unsubscribe, { once: true });
 
 			// Re-split if a direct child of the content root is added or removed. With efni's
 			// markup those are the header and the body (sometimes a section after it), so this
 			// rarely fires. Bionic reading wraps and unwraps text in place and never triggers
 			// it; the settings subscription above re-splits for that. Whether to keep it is
 			// CODE-27's question (M11).
-			observer = new MutationObserver(() => scheduleRecompute());
+			const observer = new MutationObserver(() => scheduleRecompute());
 			observer.observe(root, { childList: true });
-			cleanups.push(() => observer?.disconnect());
+			signal.addEventListener('abort', () => observer.disconnect(), { once: true });
+
+			live = true;
+			report();
 		} catch (e) {
+			// A run its owner already ended has nothing to give back: its fail() would report
+			// 'failed' for a pager that is gone and abort the run that replaced it
+			if (signal.aborted) return;
 			console.warn('Paged mode init failed; falling back to scrolling:', e);
 			fail();
 		}
@@ -496,16 +518,20 @@
 		const el = container;
 		if (!browser || !el) return;
 
+		const controller = new AbortController();
+		run = controller;
 		failed = false;
 		completionFired = false;
 		completedUnits.clear();
-		init(el);
+		live = false;
+		reported = null;
+		// untrack: report() reads $state, which must not become this effect's dependencies
+		untrack(report);
+		init(el, controller.signal);
 
 		return () => {
+			controller.abort();
 			clearTimeout(recomputeTimer);
-			for (const cleanup of cleanups) cleanup();
-			cleanups = [];
-			observer = undefined;
 			restoreAll();
 			units = [];
 			flatPages = [];

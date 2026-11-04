@@ -594,6 +594,169 @@ test.describe('Paged reading mode', () => {
 		await expect(page.getByRole('region', { name: 'Upprifjun' })).toBeVisible();
 	});
 
+	// Register CODE-17 (S8.4): ← / → and the end marker follow the pager's state, not the mode.
+
+	test('a pager that fails gives the section back: no mark, no hidden block, and → changes section', async ({
+		page
+	}) => {
+		// Fail init after it has added its key listener: its observer of the article throws.
+		// Only the pager observes article.cnx-module (answerLinks and glossaryTerms observe
+		// the content wrapper), so nothing else is touched.
+		await page.addInitScript(() => {
+			const observe = MutationObserver.prototype.observe;
+			MutationObserver.prototype.observe = function (target, options) {
+				if (target instanceof Element && target.matches('article.cnx-module') && options?.childList) {
+					throw new Error('forced pager failure (S8.4)');
+				}
+				return observe.call(this, target, options);
+			};
+		});
+		const failed = page.waitForEvent('console', (m) => m.text().startsWith('Paged mode init failed'));
+		await page.goto(SECTION!);
+		await failed;
+		await expect(page.locator('[data-paged-section]')).toHaveCount(0);
+		await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toHaveCount(0);
+		await expect(page.locator(HIDDEN_BLOCKS)).toHaveCount(0);
+
+		const nextHref = (await page.locator('a.nav-btn-next').getAttribute('href'))!;
+		await page.locator('body').click({ position: { x: 5, y: 5 } });
+		await page.keyboard.press('ArrowRight');
+		await expect(page).toHaveURL((u) => samePath(u, nextHref));
+	});
+
+	test("a pager that fails lets the section's end mark it read and open its recall", async ({ page }) => {
+		await page.addInitScript(() => {
+			Object.defineProperty(document.fonts, 'ready', {
+				configurable: true,
+				get: () => Promise.reject(new Error('forced pager failure (S8.4)'))
+			});
+		});
+		const failed = page.waitForEvent('console', (m) => m.text().startsWith('Paged mode init failed'));
+		await page.goto(SECTION!);
+		await failed;
+		await expect(page.locator('[data-paged-section]')).toHaveCount(0);
+		// Hold the end in view until read detection (1.5 s) opens the prompt: late images push
+		// the marker back out of view after one scroll (recall-prompt.spec.ts's atEnd)
+		const prompt = page.getByRole('region', { name: 'Upprifjun', exact: true });
+		await expect(async () => {
+			await page.locator('[data-section-end]').evaluate((el) => el.scrollIntoView({ block: 'center' }));
+			await expect(prompt).toBeVisible({ timeout: 2500 });
+		}).toPass({ timeout: 20000 });
+		await expect(page.getByRole('button', { name: 'Merkja kafla sem lesinn' })).toHaveCount(0);
+	});
+
+	test('switched to scrolling 300 ms after arrival, while the pager waits for images, nothing stays hidden', async ({
+		page
+	}) => {
+		const urls = sectionsContaining('<img', 1);
+		test.skip(urls.length === 0, 'No section with images');
+		// Slow images keep the pager in its wait (up to 1.5 s after the fonts)
+		await page.route(/\.(png|jpe?g|svg|gif|webp)$/, async (route) => {
+			await new Promise((r) => setTimeout(r, 3000));
+			await route.continue();
+		});
+		// Not 'load': it waits for the slow images in view, by which time the pager is up
+		await page.goto(urls[0], { waitUntil: 'domcontentloaded' });
+		await page.locator('[data-paged-section]').waitFor({ state: 'attached', timeout: 15000 });
+		await page.waitForTimeout(300);
+		// The switch must land in the wait, or this test proves nothing
+		expect(await page.getByRole('navigation', { name: 'Síðuflakk' }).count(), 'the pager was up within 300 ms').toBe(0);
+		// The reader's choice arriving from another tab, as the settings store hears it
+		await page.evaluate((key) => {
+			const state = JSON.parse(localStorage.getItem(key) ?? '{}');
+			state.readingMode = 'scrolled';
+			const value = JSON.stringify(state);
+			localStorage.setItem(key, value);
+			window.dispatchEvent(new StorageEvent('storage', { key, newValue: value }));
+		}, SETTINGS_KEY);
+		await expect(page.locator('[data-paged-section]')).toHaveCount(0);
+		await page.waitForTimeout(5000);
+		await expect(page.locator(HIDDEN_BLOCKS)).toHaveCount(0);
+		await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toHaveCount(0);
+		// Nothing it left behind re-splits: a resize hides nothing either
+		await page.setViewportSize({ width: 1100, height: 700 });
+		await page.waitForTimeout(500);
+		await expect(page.locator(HIDDEN_BLOCKS)).toHaveCount(0);
+	});
+
+	test("after the last 'Næsta', → goes on to the next section and ← still turns back a page", async ({ page }) => {
+		test.setTimeout(120000);
+		await page.goto(SECTION!);
+		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
+		await expect(nav).toBeVisible({ timeout: 15000 });
+		const label = nav.locator('.paged-nav-label');
+		const next = nav.getByRole('button', { name: 'Næsta síða' });
+		for (let i = 0; i < PAGE_CAP && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+			const text = (await label.textContent())!.trim();
+			await next.click();
+			await expect(label).not.toHaveText(text);
+		}
+		await next.click();
+		const prompt = page.getByRole('region', { name: 'Upprifjun', exact: true });
+		await expect(prompt).toBeVisible();
+		await expect(page.locator('[data-paged-section="end"]')).toBeAttached();
+		// Skip the prompt: focus goes to the next-section link (S5.3). Escape would skip it
+		// only from inside its box, and focus is still on 'Næsta'.
+		await prompt.getByRole('button', { name: 'Sleppa' }).click();
+		await expect(prompt).toHaveCount(0);
+		const path = new URL(page.url()).pathname;
+
+		await page.keyboard.press('ArrowLeft');
+		await expect(label).not.toHaveText(LAST_PAGE);
+		expect(new URL(page.url()).pathname).toBe(path);
+		await page.keyboard.press('ArrowRight');
+		await expect(label).toHaveText(LAST_PAGE);
+		expect(new URL(page.url()).pathname).toBe(path);
+
+		const nextHref = (await page.locator('a.nav-btn-next').getAttribute('href'))!;
+		await page.keyboard.press('ArrowRight');
+		await expect(page).toHaveURL((u) => samePath(u, nextHref));
+	});
+
+	test("a pager that fails after its last 'Næsta' does not run the section's end again", async ({ page }) => {
+		test.setTimeout(120000);
+		await page.goto(SECTION!);
+		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
+		await expect(nav).toBeVisible({ timeout: 15000 });
+		const label = nav.locator('.paged-nav-label');
+		const next = nav.getByRole('button', { name: 'Næsta síða' });
+		for (let i = 0; i < PAGE_CAP && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+			const text = (await label.textContent())!.trim();
+			await next.click();
+			await expect(label).not.toHaveText(text);
+		}
+		await next.click();
+		const prompt = page.getByRole('region', { name: 'Upprifjun', exact: true });
+		await expect(prompt).toBeVisible();
+		await prompt.getByRole('textbox').fill('Efni er allt sem hefur massa og tekur pláss.');
+		await prompt.getByRole('button', { name: 'Vista', exact: true }).click();
+		// The saved message stays until 'Loka'
+		await expect(prompt.getByRole('button', { name: 'Loka' })).toBeVisible();
+
+		// The next re-split fails: measuring a block of the section throws
+		const failed = page.waitForEvent('console', (m) => m.text().startsWith('Paged mode recompute failed'));
+		await page.evaluate(() => {
+			const real = window.getComputedStyle;
+			window.getComputedStyle = ((el: Element, pseudo?: string | null) => {
+				if (el.closest('.reading-content')) throw new Error('forced pager failure (S8.4)');
+				return real(el, pseudo);
+			}) as typeof window.getComputedStyle;
+			window.dispatchEvent(new Event('resize'));
+			setTimeout(() => (window.getComputedStyle = real), 1000);
+		});
+		await failed;
+		await expect(page.locator('[data-paged-section]')).toHaveCount(0);
+
+		// The section scrolls again and its end marker reads again. Held in view well past read
+		// detection's 1.5 s, it must not open the read-back beside the prompt.
+		for (let i = 0; i < 4; i++) {
+			await page.locator('[data-section-end]').evaluate((el) => el.scrollIntoView({ block: 'center' }));
+			await page.waitForTimeout(1000);
+		}
+		await expect(page.getByRole('region', { name: 'Upprifjun þín' })).toHaveCount(0);
+		await expect(prompt.getByRole('button', { name: 'Loka' })).toBeVisible();
+	});
+
 	// Register CODE-16 (S8.1's pager.ts): a page number past its unit's end, written on
 	// a smaller screen, opens that unit's last page and rewrites the hash to it. v1.1
 	// opened the section's first page.
