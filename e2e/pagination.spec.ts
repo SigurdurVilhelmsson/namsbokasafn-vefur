@@ -11,11 +11,27 @@
 
 import { test, expect, type Page } from '@playwright/test';
 import { MODULE_BODY_SELECTOR } from '../src/lib/utils/paginate';
-import { sectionsContaining, rollupSection } from './helpers/content-fixtures';
+import { PAGE_BUDGET } from '../src/lib/utils/pager';
+import {
+	sectionsContaining,
+	rollupSection,
+	publishedBook,
+	firstModuleSection
+} from './helpers/content-fixtures';
 import { seedSettings } from './helpers/seedSettings';
 
 /** A reader who picked paged (stored once per tab, so a test's own write survives reloads) */
 const PAGED = { readingMode: 'paged' } as const;
+
+const BOOK = publishedBook();
+/** The published book's first module section ('1-1-…'): the fixed fixture of tests 2-4 */
+const SECTION = BOOK ? firstModuleSection(BOOK) : null;
+/** The label on a section's last page: the last unit's last page */
+const LAST_PAGE = /^Hluti (\d+) af \1 · Síða (\d+) af \2$/;
+/** Ends a walk through a section's pages that never reaches the last one */
+const PAGE_CAP = 150;
+const samePath = (url: string | URL, path: string) =>
+	new URL(url, 'http://x').pathname.replace(/\/$/, '') === path.replace(/\/$/, '');
 
 /**
  * The blocks of the page on screen, split as the paginator splits them: the article's
@@ -56,51 +72,65 @@ async function shownPage(page: Page) {
 /** Blocks the pager hid. practiceReveal's self-assessment row is hidden in scrolled mode too. */
 const HIDDEN_BLOCKS = '.reading-content [hidden]:not(.practice-self-assess)';
 
-/** Click through landing → book → first section. Returns false when the
- *  synced content needed for the journey isn't present. */
-async function openFirstSection(page: Page): Promise<boolean> {
-	await page.goto('/');
-	await page.waitForLoadState('networkidle');
-
-	const bookLink = page.getByRole('link', { name: /Efnafræði/i }).first();
-	if (!(await bookLink.isVisible({ timeout: 10000 }).catch(() => false))) return false;
-	await bookLink.click();
-	// A client-side navigation keeps the document, so networkidle can resolve
-	// before it starts; without this wait the chapter-link lookup below ran on
-	// the landing page, found nothing and SKIPPED the test (2 of 3 skipped).
-	await expect(page).toHaveURL(/\/efnafraedi-2e\//);
-	await page.waitForLoadState('networkidle');
-
-	const sectionLink = page.locator('a[href*="/kafli/"]').first();
-	if (!(await sectionLink.isVisible({ timeout: 10000 }).catch(() => false))) return false;
-	await sectionLink.click();
-	await expect(page).toHaveURL(/\/kafli\/.+\/.+/);
-	await page.waitForLoadState('networkidle');
-	return true;
+/** The page count a label gives: units, and pages in the shown unit */
+function labelCounts(text: string): { units: number; pages: number } {
+	const m = text.match(/Hluti \d+ af (\d+) · Síða \d+ af (\d+)/)!;
+	return { units: Number(m[1]), pages: Number(m[2]) };
 }
 
 test.describe('Paged reading mode', () => {
+	test.skip(!SECTION, 'No synced module section');
 	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
 
+	// The one click-through (register CODE-19): each step waits for what it needs, so a
+	// slow page fails or passes and never skips. It asserts the pager on module sections
+	// only: introductions and the Formáli page today too, which M9 may change.
 	test('shows pagination controls on a section page', async ({ page }) => {
-		test.skip(!(await openFirstSection(page)), 'No section content available');
-
 		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
+		const label = nav.locator('.paged-nav-label');
+		const nextSection = page.locator('a.nav-btn-next');
+		const chapter = SECTION!.split('/')[3];
+
+		await page.goto('/');
+		await page.locator(`a[href="/${BOOK}"], a[href="/${BOOK}/"]`).first().click();
+		await expect(page).toHaveURL((u) => samePath(u, `/${BOOK}`));
+		const chapterCard = page.locator(`main a[href^="/${BOOK}/kafli/${chapter}/"]`).first();
+		await expect(chapterCard).toBeVisible({ timeout: 15000 });
+		await chapterCard.click();
+		await expect(page).toHaveURL(/\/kafli\/[^/]+\/[^/]+\/?$/);
+
+		// In the app from the chapter's first page to its first module section
+		for (let i = 0; i < 3 && !samePath(page.url(), SECTION!); i++) {
+			const href = (await nextSection.getAttribute('href'))!;
+			await nextSection.click();
+			await expect(page).toHaveURL((u) => samePath(u, href));
+		}
+		expect(samePath(page.url(), SECTION!), `reached ${page.url()}`).toBe(true);
 		await expect(nav).toBeVisible({ timeout: 15000 });
-		await expect(nav.getByText(/Hluti \d+ af \d+/)).toBeVisible();
+		await expect(label).toHaveText(/^Hluti 1 af \d+ · Síða 1 af \d+$/);
+		await nav.getByRole('button', { name: 'Næsta síða' }).click();
+		await expect(page).toHaveURL(/#sub-\d+(-p-\d+)?$/);
+
+		// On to the next section in the app: SvelteKit reuses the page, and its pager
+		// starts again on the first page, with no page hash
+		const href = (await nextSection.getAttribute('href'))!;
+		await nextSection.click();
+		await expect(page).toHaveURL((u) => samePath(u, href) && !u.hash);
+		await expect(nav).toBeVisible({ timeout: 15000 });
+		await expect(label).toHaveText(/^Hluti 1 af \d+ · Síða 1 af \d+$/);
 	});
 
 	test('Næsta advances and updates the position label and hash', async ({ page }) => {
-		test.skip(!(await openFirstSection(page)), 'No section content available');
-
+		await page.goto(SECTION!);
 		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
 		await expect(nav).toBeVisible({ timeout: 15000 });
 
 		const label = nav.locator('.paged-nav-label');
 		const before = await label.textContent();
+		const { units, pages } = labelCounts(before!);
+		expect(units > 1 || pages > 1, `${SECTION} is one page: pick a longer fixture`).toBe(true);
 
 		const nextButton = nav.getByRole('button', { name: 'Næsta síða' });
-		test.skip(await nextButton.isDisabled(), 'Section fits a single page');
 		await nextButton.click();
 
 		await expect(label).not.toHaveText(before ?? '', { timeout: 5000 });
@@ -120,28 +150,55 @@ test.describe('Paged reading mode', () => {
 	// keeps a page of its own and scrolls there. shownPage() splits the body
 	// wrapper and nested <section>s itself before counting, so a wrapper the
 	// paginator wrongly took as one block shows up as many blocks and still fails.
+	//
+	// Since S8.3 it also holds the controls to the page budget (register CODE-19): on
+	// every page but an allowed overrun, the controls end within the window less the
+	// scroll offset and the bottom clearance (PAGE_BUDGET), with 24 px for the
+	// controls' own margins. Summing block heights alone let a page 200 px too tall
+	// pass. Measured on chemistry at 1280x720: worst 502 px against 572.
 	test('every page of a section fits the viewport', async ({ page }) => {
-		test.skip(!(await openFirstSection(page)), 'No section content available');
-
+		test.setTimeout(180000);
+		const fixtures = [...new Set([...sectionsContaining('<p', 1), SECTION!])];
 		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
-		await expect(nav).toBeVisible();
+		const label = nav.locator('.paged-nav-label');
 		const next = nav.getByRole('button', { name: 'Næsta síða' });
 
-		for (let i = 0; i < 40; i++) {
-			const { visible, count, headed, viewport } = await shownPage(page);
-			const ok = visible <= viewport || count === 1 || headed;
-			expect(
-				ok,
-				`page ${i + 1}: ${Math.round(visible)}px of content in ${count} block(s) in a ${viewport}px window`
-			).toBe(true);
-			if (await next.isDisabled()) break;
-			await next.click();
-			await page.waitForTimeout(300);
+		for (const url of fixtures) {
+			await page.goto(url);
+			await expect(nav).toBeVisible({ timeout: 15000 });
+			await page.waitForTimeout(500);
+			for (let i = 0; ; i++) {
+				expect(i, `${url}: more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
+				const text = (await label.textContent())!.trim();
+				const { visible, count, headed, viewport } = await shownPage(page);
+				expect(count, `${url} ${text}: a page with no block`).toBeGreaterThan(0);
+				const ok = visible <= viewport || count === 1 || headed;
+				expect(
+					ok,
+					`${url} ${text}: ${Math.round(visible)}px of content in ${count} block(s) in a ${viewport}px window`
+				).toBe(true);
+				if (!headed) {
+					const used = await page.evaluate(
+						() =>
+							document.querySelector('nav.paged-nav')!.getBoundingClientRect().bottom -
+							document.querySelector('[data-paged-section]')!.getBoundingClientRect().top
+					);
+					const limit = viewport - PAGE_BUDGET.scrollOffset - PAGE_BUDGET.bottomClearance + 24;
+					expect(
+						used,
+						`${url} ${text}: the controls end ${Math.round(used)}px below the content top; the budget allows ${limit}`
+					).toBeLessThanOrEqual(limit);
+				}
+				if (LAST_PAGE.test(text)) break;
+				await next.click();
+				await expect(label).not.toHaveText(text);
+				await page.waitForTimeout(300);
+			}
 		}
 	});
 
 	test('continuous-scroll setting restores the scrolled experience', async ({ page }) => {
-		test.skip(!(await openFirstSection(page)), 'No section content available');
+		await page.goto(SECTION!);
 
 		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
 		await expect(nav).toBeVisible({ timeout: 15000 });
@@ -229,12 +286,16 @@ test.describe('Paged reading mode', () => {
 		const next = nav.getByRole('button', { name: 'Næsta síða' });
 		const changes: string[] = [];
 
-		for (let i = 0; i < 40; i++) {
+		// To the last page, by its label: v1.1 stopped after 40 pages, so on a section of
+		// 40 pages or fewer the last click finished the section and the label could not
+		// change (the fixture has 54 today)
+		for (let i = 0; ; i++) {
+			expect(i, `more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
 			const before = (await label.textContent())!.trim();
 			await page.waitForTimeout(1200);
 			const after = (await label.textContent())!.trim();
 			if (after !== before) changes.push(`${before} -> ${after}`);
-			if (await next.isDisabled()) break;
+			if (LAST_PAGE.test(after)) break;
 			await next.click();
 			await expect(label).not.toHaveText(after);
 		}
@@ -436,7 +497,8 @@ test.describe('Paged reading mode', () => {
 	for (const { kind, type } of [
 		{ kind: 'summary', type: 'summary' },
 		{ kind: 'exercises', type: 'exercises' },
-		{ kind: 'key-terms', type: 'glossary' }
+		{ kind: 'key-terms', type: 'glossary' },
+		{ kind: 'key-equations', type: 'equations' }
 	] as const) {
 		test(`a chapter ${kind} page scrolls instead of paging`, async ({ page }) => {
 			// Siggi, 2026-10-04: rollups are reference lists; paged, chapter 1's
@@ -451,9 +513,11 @@ test.describe('Paged reading mode', () => {
 			await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toHaveCount(0);
 			await expect(page.locator(HIDDEN_BLOCKS)).toHaveCount(0);
 
-			// And ← / → are section keys again there
-			const nextHref = await page.locator('a.nav-btn-next').getAttribute('href');
-			test.skip(!nextHref, 'Last page of the book');
+			// And ← / → are section keys again there. Count first: getAttribute waits
+			// for the link and threw, so the skip could never run
+			const nextLink = page.locator('a.nav-btn-next');
+			test.skip((await nextLink.count()) === 0, 'Last page of the book');
+			const nextHref = await nextLink.getAttribute('href');
 			await page.locator('body').click({ position: { x: 5, y: 5 } });
 			await page.keyboard.press('ArrowRight');
 			await expect(page).toHaveURL(
@@ -476,8 +540,8 @@ test.describe('Paged reading mode', () => {
 		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
 		await expect(nav).toBeVisible({ timeout: 15000 });
 		const label = nav.locator('.paged-nav-label');
-		const units = Number((await label.textContent())!.match(/Hluti \d+ af (\d+)/)![1]);
-		test.skip(units < 2, 'Section has one part');
+		const { units } = labelCounts((await label.textContent())!);
+		expect(units, `${urls[0]} has one part: pick a fixture with sub-sections`).toBeGreaterThanOrEqual(2);
 
 		// Arrive by a link to the last part, skipping every part before it
 		await page.evaluate((u) => (location.hash = `#sub-${u - 1}`), units);
@@ -493,6 +557,19 @@ test.describe('Paged reading mode', () => {
 		}
 		await next.click();
 		await expect(page.getByRole('region', { name: 'Upprifjun' })).toBeVisible();
+	});
+
+	// Register CODE-16 (S8.1's pager.ts): a page number past its unit's end, written on
+	// a smaller screen, opens that unit's last page and rewrites the hash to it. v1.1
+	// opened the section's first page.
+	test("a page past its sub-section's end opens that sub-section's last page", async ({ page }) => {
+		const urls = sectionsContaining('<section', 5);
+		test.skip(urls.length === 0, 'No section with sub-sections');
+
+		await page.goto(`${urls[0]}#sub-1-p-99`);
+		const label = page.getByRole('navigation', { name: 'Síðuflakk' }).locator('.paged-nav-label');
+		await expect(label).toHaveText(/^Hluti 2 af \d+ · Síða (\d+) af \1$/, { timeout: 15000 });
+		await expect(page).toHaveURL(/#sub-1(-p-\d+)?$/);
 	});
 });
 
