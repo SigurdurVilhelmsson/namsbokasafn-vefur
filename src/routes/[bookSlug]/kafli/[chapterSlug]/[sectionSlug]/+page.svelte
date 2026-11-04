@@ -42,6 +42,8 @@
 	let shareTimeout: ReturnType<typeof setTimeout>;
 	let showRecallPrompt = $state(false);
 	let showRecallReadBack = $state(false);
+	// reachedEnd() runs once per visit to a section, whichever end gets there first (S8.4)
+	let endReached = false;
 	let showContinuePrompt = $state(false);
 	let savedPosition: { scrollY: number; percentage: number } | null = $state(null);
 	let continuePromptTimeout: ReturnType<typeof setTimeout>;
@@ -132,6 +134,7 @@
 
 		showRecallPrompt = false;
 		showRecallReadBack = false;
+		endReached = false;
 
 		// Reset the continue-reading prompt, then check this section's saved position
 		clearTimeout(continuePromptTimeout);
@@ -232,8 +235,14 @@
 	 * The reader reached the section's end: mark it read, and open its prompt if one is owed, or
 	 * else read back the recall saved on an earlier visit (S5.5). Scrolled, the end is the marker
 	 * below the content coming into view; paged, it is 'Næsta' on the last page (ruling 3).
+	 *
+	 * Once per visit: a pager that fails after its last 'Næsta', or a switch to scrolling after
+	 * it, wakes the end marker, which has not fired on this visit. A second run would open the
+	 * read-back beside the prompt that is still showing its saved message (S8.4's review).
 	 */
 	function reachedEnd() {
+		if (endReached) return;
+		endReached = true;
 		reader.markAsRead(data.bookSlug, data.chapterSlug, data.sectionSlug);
 		if (recallOwed) {
 			recallStore.markPrompted(data.bookSlug, data.chapterSlug, data.sectionSlug);
@@ -541,7 +550,9 @@
 		     is owed. It stays on for a section marked read by hand whose prompt has not shown,
 		     because under D10 the prompt waits for the end, and for a section with a saved recall,
 		     which it reads back (S5.5). Paged, it stands down (dde768e :451): it sits under the
-		     page controls, so it would fire on the first page; the pager's last 'Næsta' is the end. -->
+		     page controls, so it would fire on the first page; the pager's last 'Næsta' is the end.
+		     If the pager fails, the section scrolls again and the marker reads again (S8.4,
+		     endMarkerActive); reachedEnd() still runs only once per visit. -->
 		<div
 			use:readDetection={{
 				onRead: reachedEnd,

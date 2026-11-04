@@ -713,6 +713,50 @@ test.describe('Paged reading mode', () => {
 		await expect(page).toHaveURL((u) => samePath(u, nextHref));
 	});
 
+	test("a pager that fails after its last 'Næsta' does not run the section's end again", async ({ page }) => {
+		test.setTimeout(120000);
+		await page.goto(SECTION!);
+		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
+		await expect(nav).toBeVisible({ timeout: 15000 });
+		const label = nav.locator('.paged-nav-label');
+		const next = nav.getByRole('button', { name: 'Næsta síða' });
+		for (let i = 0; i < PAGE_CAP && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+			const text = (await label.textContent())!.trim();
+			await next.click();
+			await expect(label).not.toHaveText(text);
+		}
+		await next.click();
+		const prompt = page.getByRole('region', { name: 'Upprifjun', exact: true });
+		await expect(prompt).toBeVisible();
+		await prompt.getByRole('textbox').fill('Efni er allt sem hefur massa og tekur pláss.');
+		await prompt.getByRole('button', { name: 'Vista', exact: true }).click();
+		// The saved message stays until 'Loka'
+		await expect(prompt.getByRole('button', { name: 'Loka' })).toBeVisible();
+
+		// The next re-split fails: measuring a block of the section throws
+		const failed = page.waitForEvent('console', (m) => m.text().startsWith('Paged mode recompute failed'));
+		await page.evaluate(() => {
+			const real = window.getComputedStyle;
+			window.getComputedStyle = ((el: Element, pseudo?: string | null) => {
+				if (el.closest('.reading-content')) throw new Error('forced pager failure (S8.4)');
+				return real(el, pseudo);
+			}) as typeof window.getComputedStyle;
+			window.dispatchEvent(new Event('resize'));
+			setTimeout(() => (window.getComputedStyle = real), 1000);
+		});
+		await failed;
+		await expect(page.locator('[data-paged-section]')).toHaveCount(0);
+
+		// The section scrolls again and its end marker reads again. Held in view well past read
+		// detection's 1.5 s, it must not open the read-back beside the prompt.
+		for (let i = 0; i < 4; i++) {
+			await page.locator('[data-section-end]').evaluate((el) => el.scrollIntoView({ block: 'center' }));
+			await page.waitForTimeout(1000);
+		}
+		await expect(page.getByRole('region', { name: 'Upprifjun þín' })).toHaveCount(0);
+		await expect(prompt.getByRole('button', { name: 'Loka' })).toBeVisible();
+	});
+
 	// Register CODE-16 (S8.1's pager.ts): a page number past its unit's end, written on
 	// a smaller screen, opens that unit's last page and rewrites the hash to it. v1.1
 	// opened the section's first page.
