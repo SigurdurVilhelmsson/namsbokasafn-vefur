@@ -150,7 +150,8 @@
 				<h2 id="more">Gott að vita</h2>
 				<p>Þessi síða lýsir því hvernig vefurinn virkar. Hún er ekki lögfræðiráðgjöf.</p>
 				<p>Spurningar? Sendu okkur línu með <a href="/feedback/">endurgjafarforminu</a>.</p>
-				<p class="updated">Síðast uppfært 1. nóvember 2026.</p>
+				<!-- D20: proposed: the date moves with the erase item's change (bl-erase-workbox-expiration). -->
+				<p class="updated">Síðast uppfært 4. nóvember 2026.</p>
 			</section>
 		</div>
 	</main>
