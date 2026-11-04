@@ -171,7 +171,12 @@ function navigatePrevNext(direction: 'prev' | 'next', key: string): boolean {
 	// on its last page and has finished the section (the mark reads 'end', the
 	// state that disables 'Næsta'), it has no page left to turn, so → goes on to
 	// the next section (CODE-17). ← keeps turning back a page: freeing it would
-	// leave the section.
+	// leave the section. This listener must run BEFORE the pager's, and does: the
+	// layout adds it once at mount, the pager at the end of its async init, and a
+	// target's listeners run in the order they were added. Run after it, it would
+	// read the 'end' that Svelte's flush between the two listeners writes, so the
+	// press that turned to the last page (or finished the section) would change
+	// section too. Moving this listener later or the pager's earlier breaks that.
 	const mark = document.querySelector('[data-paged-section]');
 	const pagerAtEnd = direction === 'next' && mark?.getAttribute('data-paged-section') === 'end';
 	if (mark && PAGE_TURN_KEYS.has(key) && !pagerAtEnd) return false;
