@@ -23,6 +23,12 @@
  * Standalone chapter PDFs are stamped with the same book-absolute page
  * numbers, so a printed chapter matches the full book and its TOC.
  *
+ * Each route is printed only once every image on it has loaded
+ * (scripts/lib/pdf-print.js); one that fails or is still loading after the
+ * bound stops that book with a list of the images, and nothing is written for
+ * it, since a missing figure would print as nothing and move every page number
+ * after it.
+ *
  * Output: static/downloads/<slug>/
  *   - <slug>-kafli-NN.pdf       (one per chapter)
  *   - <slug>-bok.pdf            (full book)
@@ -69,7 +75,8 @@ import {
 	namespaceChapterLinks,
 	writeMergedDests
 } from './lib/pdf-links.js';
-import { assertPrintable, pdfBooks } from './lib/pdf-books.js';
+import { pdfBooks } from './lib/pdf-books.js';
+import { printToPdf } from './lib/pdf-print.js';
 import { loadBookConfig } from './lib/book-config.js';
 import {
 	applyDocumentInfo,
@@ -128,28 +135,6 @@ async function startDevServer(port) {
 	await server.listen();
 	const url = `http://127.0.0.1:${port}`;
 	return { server, url };
-}
-
-async function printToPdf(page, url, outFile) {
-	assertPrintable(await page.goto(url, { waitUntil: 'load', timeout: 60000 }), url);
-	// Give layout/fonts a beat to settle. Pre-rendered MathJax SVG doesn't need
-	// time, but custom fonts swap async on first request.
-	await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
-	await page.evaluate(() => document.fonts?.ready);
-
-	// Headers/footers are stamped afterwards with pdf-lib (continuous book
-	// numbering, running headers), so Chromium prints content only.
-	await page.pdf({
-		path: outFile,
-		format: 'A4',
-		printBackground: true,
-		preferCSSPageSize: true, // honor @page rules in print.css
-		displayHeaderFooter: false,
-		// preferCSSPageSize honours print.css's @page margins (20/22/22/22mm —
-		// symmetric binding-safe sides for double-sided binding); these mirror
-		// that for clarity and any non-CSS-page-size fallback.
-		margin: { top: '20mm', bottom: '22mm', left: '22mm', right: '22mm' }
-	});
 }
 
 async function getPdfPageCount(file) {
@@ -293,6 +278,17 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 	const tocPagesFile = join(bookOutDir, 'toc-pages.json');
 	rmSync(tocPagesFile, { force: true });
 
+	// Every print waits for its images and throws if one did not load
+	// (scripts/lib/pdf-print.js): a missing figure would print as nothing and
+	// move every later page number, so the book stops instead. The count is for
+	// the run log.
+	const images = { prints: 0, loaded: 0 };
+	const printRoute = async (url, outFile) => {
+		const report = await printToPdf(page, url, outFile);
+		images.prints++;
+		images.loaded += report.loaded;
+	};
+
 	// --- Pass 1: print raw chapter/appendix PDFs and measure them ------------
 
 	const chapterParts = [];
@@ -301,7 +297,7 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 		const url = `${baseUrl}/print/${bookSlug}/kafli/${chSlug}/`;
 		const rawFile = join(bookTmpDir, `${bookSlug}-kafli-${chSlug}-raw.pdf`);
 		console.log(`  ${bookSlug} kafli ${chSlug}: ${chapter.title}`);
-		await printToPdf(page, url, rawFile);
+		await printRoute(url, rawFile);
 		chapterParts.push({
 			chapterNum: chapter.number,
 			title: chapter.title,
@@ -315,7 +311,7 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 	if ((toc.appendices ?? []).length > 0) {
 		const rawFile = join(bookTmpDir, `${bookSlug}-vidauki-raw.pdf`);
 		console.log(`  ${bookSlug}: appendices (${toc.appendices.length})`);
-		await printToPdf(page, `${baseUrl}/print/${bookSlug}/vidauki/`, rawFile);
+		await printRoute(`${baseUrl}/print/${bookSlug}/vidauki/`, rawFile);
 		appendixPart = { rawFile, pageCount: await getPdfPageCount(rawFile) };
 	}
 
@@ -324,7 +320,7 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 	if (existsSync(join(CONTENT_DIR, bookSlug, 'glossary.json'))) {
 		const rawFile = join(bookTmpDir, `${bookSlug}-ordabok-raw.pdf`);
 		console.log(`  ${bookSlug}: glossary (orðaskrá)`);
-		await printToPdf(page, `${baseUrl}/print/${bookSlug}/ordabok/`, rawFile);
+		await printRoute(`${baseUrl}/print/${bookSlug}/ordabok/`, rawFile);
 		glossaryPart = { rawFile, pageCount: await getPdfPageCount(rawFile) };
 	}
 
@@ -364,7 +360,7 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 
 	const frontMatterFile = join(bookTmpDir, `${bookSlug}-front.pdf`);
 	console.log(`  ${bookSlug}: front matter (title + TOC)`);
-	await printToPdf(page, `${baseUrl}/print/${bookSlug}/bok/`, frontMatterFile);
+	await printRoute(`${baseUrl}/print/${bookSlug}/bok/`, frontMatterFile);
 	const frontPageCount = await getPdfPageCount(frontMatterFile);
 
 	// Colophon page — identical for every chapter, so render once and append it
@@ -372,7 +368,7 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 	// per-chapter colophon; it carries the single front-matter colophon instead.
 	const colophonFile = join(bookTmpDir, `${bookSlug}-colophon.pdf`);
 	console.log(`  ${bookSlug}: colophon (standalone chapters)`);
-	await printToPdf(page, `${baseUrl}/print/${bookSlug}/colophon/`, colophonFile);
+	await printRoute(`${baseUrl}/print/${bookSlug}/colophon/`, colophonFile);
 
 	// --- Stamp + write standalone chapter PDFs, assemble the full book -------
 
@@ -533,7 +529,7 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 
 	const fullBookFile = join(bookOutDir, `${bookSlug}-bok.pdf`);
 	console.log(
-		`  ${bookSlug}: assembling bok.pdf (${merged.getPageCount()} pages; ${collidingNames.size} shared anchor names namespaced, ${renamedLinks} links renamed with them)`
+		`  ${bookSlug}: assembling bok.pdf (${merged.getPageCount()} pages; ${images.loaded} images loaded in ${images.prints} prints, none missing; ${collidingNames.size} shared anchor names namespaced, ${renamedLinks} links renamed with them)`
 	);
 	writeFileSync(fullBookFile, await merged.save());
 
