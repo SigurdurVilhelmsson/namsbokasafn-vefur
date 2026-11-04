@@ -9,25 +9,21 @@
 
 import { test, expect, type Browser, type Page } from '@playwright/test';
 import { longestTitledSection, sectionsContaining, syncedBooks } from './helpers/content-fixtures';
+import { seedSettings } from './helpers/seedSettings';
 
 const PHONE = { width: 375, height: 667 };
 
-/** Scrolled mode where the reader has paged mode, so every block is laid out. */
+/**
+ * A phone page with a chosen 'scrolled', so every block is laid out: neither a later
+ * default (open call 3) nor S8.4's run with 'paged' seeded for every spec pages it.
+ */
 async function phonePage(browser: Browser, opts: { touch: boolean }): Promise<Page> {
 	const context = await browser.newContext({
 		viewport: PHONE,
 		isMobile: opts.touch,
 		hasTouch: opts.touch
 	});
-	await context.addInitScript(() => {
-		try {
-			const key = 'namsbokasafn:settings';
-			const stored = JSON.parse(localStorage.getItem(key) || '{}');
-			localStorage.setItem(key, JSON.stringify({ ...stored, readingMode: 'scrolled' }));
-		} catch {
-			// Storage blocked: the default mode applies, which the tests tolerate.
-		}
-	});
+	await seedSettings(context, { readingMode: 'scrolled' });
 	return context.newPage();
 }
 

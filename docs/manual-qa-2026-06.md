@@ -9,11 +9,16 @@ you go. Each batch is independent.
 
 - **Batch A–C:** production (namsbokasafn.is) after deploying current `main`,
   or `npm run dev` against main.
-- **Batch D–E:** a build of `feature/reader-v1.1` (all four P0 items merged).
-  These gate the v1.1.0 merge to main.
+- **Batch D–E:** first on S0.3's trial build (step S0.4): `feature/reader-v1.1`
+  at `dde768e` merged with main `62ea95e` of 2026-10-23, never pushed. Then
+  batch E runs again on `main` at S9.6, as M9 amends it (S9.1; M9's exit
+  criterion is batch E "as amended"). Batch D's P0.3 items also run on a
+  `main` build at S4.5. `feature/reader-v1.1` is never merged into main: its
+  pieces are ported to main as small PRs.
 - **Batch F:** on the Linode server itself.
-- **Batch G:** a build of `feature/reader-v1.2` (all four P1 items merged).
-  Gates the v1.2.0 merge, after v1.1.0 ships.
+- **Batch G:** a build of `main` after the step that ports each P1 item:
+  P1.4 at S12.4, P1.2 at S13.4, P1.3 at S14.4, P1.1 at S14.7, each item
+  amended to the ruled form first. `feature/reader-v1.2` is never merged.
 
 Automated coverage already in place (no need to re-verify by hand):
 svelte-check, ESLint, the full Vitest suite, and Playwright e2e (incl. the
@@ -144,7 +149,8 @@ The reactivity sweep (#112), store fixes (#113, #115, #116) and Icelandic (#117)
 
 ## Batch D — Reader v1.1: measure, predict-first, recall (~15 min)
 
-Run against a `feature/reader-v1.1` build.
+Run on S0.3's trial build (S0.4); the P0.3 items run again on a `main` build at
+S4.5 (see "Where to run what").
 
 - [ ] **P0.1:** in a private window (fresh profile), body text uses the
       narrow measure (~70 chars/line). Your normal profile keeps whatever
@@ -185,8 +191,12 @@ equation-heavy section.
 - [ ] Reload a deep link (`...#sub-2-p-1`) — it opens on that page.
 - [ ] Change font size mid-section — pages recompute, you stay within ±1
       page of where you were. Same for window resize.
-- [ ] Bionic reading toggle in paged mode — content rebuilds, pagination
-      recovers (MutationObserver heal).
+- [ ] Bionic reading toggle in paged mode — the bold comes and goes on the
+      page you are on, and the pages re-split with you within ±1 page of
+      where you were. (The re-split comes from the pager's settings
+      subscription, which re-splits on settings changes such as typography;
+      bionic reading wraps and unwraps words in place, so nothing is
+      rebuilt.)
 - [ ] Settings → Lestrarstilling → "Samfellt skrun": controls disappear,
       the full section scrolls exactly as before, nothing missing. Toggle
       back — pagination returns.
@@ -201,26 +211,40 @@ equation-heavy section.
 
 **Judgment calls — note your verdict**
 
-- [ ] Available-height heuristic (viewport − 260 px chrome): do pages feel
-      right, or chopped too short / too tall? → tune the constant in
-      `PagedReaderControls.availableHeight()`.
-- [ ] Should the recall prompt fire per _sub-section_ instead of per
-      section (the spec's preference — callback already wired)? Decide
-      after reading a few chapters paged.
+- [ ] Page height: a page may fill the window's inner height − 96 px − the
+      gap above the first block − the gap below the last − 76 px, never
+      below 240 px (the same on the trial build and on main today). Do
+      pages feel right, or chopped too short / too tall? Note the lines per
+      page, and how many pages need window scrolling, at each width.
+      _2026-11-04: call 1 was ruled on 2026-10-23: maximise usable lines.
+      S9.5 applies it, so main's pages grow after S9.5, and M9 amends this
+      item then._
+- _2026-11-04: per-section or per-sub-section recall is no longer a
+  judgment call here. Call 2 was ruled per section on 2026-10-23, as
+  built: the prompt comes once, at the section's end. The pager's
+  `onsubsectioncomplete` callback is declared but not passed: the section
+  page gives the pager only `oncomplete`._
 - [ ] Default `paged` for everyone, or `scrolled` default with paged
-      opt-in for launch? (Plan says paged default; this is the moment to
-      veto.)
+      opt-in for launch? This is open call 3: [USER] rules it at S10.2,
+      from the in-class crossover, and until then D06 keeps main's default
+      scrolled. (The trial build pages by default only because v1.1 was
+      written that way.)
 
 **Screen reader (VoiceOver or NVDA, ~10 min)**
 
-- [ ] Page turns announce "Síða X af Y".
+- [ ] On arrival and on each page turn, the screen reader announces
+      "Hluti N af M · Síða X af Y", the label's own text.
 - [ ] The "Samfellt skrun" setting is discoverable and its explanation read.
 - [ ] In scrolled mode the section reads top-to-bottom normally.
 
 ## Batch G — Reader v1.2: P1 features (~20 min)
 
-Run against a `feature/reader-v1.2` build. Gates the v1.2.0 merge
-(after v1.1.0 ships).
+Run on a build of `main` after the step that ports each P1 item: P1.4 at
+S12.4, P1.2 at S13.4, P1.3 at S14.4 and P1.1 at S14.7. Each step amends
+its items to the ruled form first, because this batch was written for a
+`feature/reader-v1.2` build (on which P1.2 never renders). v1.2 is never
+merged into main; each item gates the train that ships its feature (the
+exit criteria of M12–M14).
 
 - [ ] **P1.4 fonts:** Settings → Leturgerð shows "Atkinson Hyperlegible"
       ("Hannað fyrir hámarks læsileika") and it renders in the preview and
@@ -277,5 +301,8 @@ Run against a `feature/reader-v1.2` build. Gates the v1.2.0 merge
 
 ---
 
-When D and E pass (and the judgment calls are decided),
-`feature/reader-v1.1` is ready to merge to main as **v1.1.0**.
+`feature/reader-v1.1` is never merged into main (strategy C): it stays
+frozen at `dde768e` (tag `reader-v1.1-port-source`) as the porting source,
+and each piece moves to main as a small PR. **v1.1.0** is tagged on main at
+S11.4, once [USER] has ruled call 3 (S10.2) and batch E, as M9 amends it,
+passes on the release build.

@@ -79,6 +79,9 @@ export const defaultSettings: SettingsState = {
 	fontFamily: 'serif',
 	lineHeight: 'normal',
 	lineWidth: 'medium',
+	// null: not chosen. What an unchosen reader sees is readerPolicy's UNCHOSEN_READING_MODE
+	// (scrolled until call 3 is ruled, D06); the evidence for paging is hypothesis-level
+	// (review R1, register PED-26), so nothing here picks a default.
 	readingMode: null,
 	sidebarOpen: false,
 	shortcutPreferences: {},

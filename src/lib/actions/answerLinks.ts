@@ -1,16 +1,21 @@
 /**
  * Answer Links Action
  *
- * Enables bidirectional navigation between exercises (:::practice-problem{#fs-id*})
- * and their answers (:::answer-entry{#fs-id*}) in answer key pages.
+ * Links end-of-chapter exercises and their answers both ways, by data efni's renderer writes.
  *
- * When viewing exercises:
- * - Adds "Sjá svar" (See answer) link to each exercise
- * - Links to the answer-key section with the specific answer highlighted
+ * On a chapter's exercise page (`.eoc-exercise`), an exercise whose `data-has-answer` is
+ * 'true' gets its number (`data-exercise-number`) turned into a link to
+ * /<book>/svarlykill/<chapter>#<id>, the id being `data-problem-id`, `id` or
+ * `data-exercise-id`. Pages rendered before efni wrote `data-has-answer` fall back to odd
+ * numbers.
  *
- * When viewing answer key:
- * - Adds "Sjá æfingu" (See exercise) link to each answer
- * - Links back to the exercises section with the specific exercise highlighted
+ * On the answer key (`.answer-entry`), each answer's number links back to its exercise on
+ * the chapter's exercise page (by `data-exercise-id` or `id`); an answer with no number
+ * gets an 'Æfing' button instead.
+ *
+ * On every page it is mounted on (section, appendix, answer key), arriving with a hash
+ * scrolls the element with that id smoothly to the centre 100 ms after mount and
+ * highlights it for 2 s, whatever the element is.
  */
 
 import { browser } from '$app/environment';
@@ -233,7 +238,7 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 
 		// Find exercise/answer containers
 		if (isExercisePage && chapterNumber) {
-			// On exercises page - add "See answer" links to odd-numbered exercises
+			// On an exercise page, link each answered exercise's number to its answer
 			// Answer keys are now at /svarlykill/[chapter] route
 			const exercises = node.querySelectorAll<HTMLElement>('.eoc-exercise');
 

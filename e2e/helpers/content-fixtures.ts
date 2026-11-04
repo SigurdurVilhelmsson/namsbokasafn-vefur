@@ -23,6 +23,7 @@ import { readdirSync, readFileSync, existsSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { PUBLISHED_BOOKS, isRetired } from '../../scripts/lib/published-books.js';
+import type { SectionType } from '../../src/lib/types/content';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CONTENT_DIR = join(HERE, '..', '..', 'static', 'content');
@@ -274,6 +275,16 @@ export function sectionOfType(slug: string, type: string): string | null {
 		if (section?.file) return `/${slug}/kafli/${String(chapter.number).padStart(2, '0')}/${section.file.slice(0, -5)}/`;
 	}
 	return null;
+}
+
+/**
+ * Reader URL of the published book's first chapter rollup of a TOC type ('summary',
+ * 'exercises', 'glossary' for key terms, 'equations' for key equations), or null. It
+ * reads the type the reader's policy reads (readerPolicy.isRollup), not the file name.
+ */
+export function rollupSection(type: SectionType): string | null {
+	const book = publishedBook();
+	return book ? sectionOfType(book, type) : null;
 }
 
 /** Reader URL of the book's first front-matter page (the Formáli, chapter 00), or null. */

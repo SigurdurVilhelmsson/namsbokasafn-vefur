@@ -159,7 +159,8 @@ export function resolvePageHash(hash: string, pageCounts: readonly number[]): nu
  */
 export function positionLabel({ unit, page }: PagePosition, pageCounts: readonly number[]): string {
 	// D20: proposed (S8.1): the pager's position label, 'Hluti N af M · Síða X af Y',
-	// as v1.1 wrote it at dde768e; no reader sees it until the pager is ported (S8.2).
+	// as v1.1 wrote it at dde768e; readers see it only through a '?lestur=sidur' link until a
+	// reading-mode picker is rendered (D06).
 	return `Hluti ${unit + 1} af ${pageCounts.length} · Síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
 }
 
@@ -238,7 +239,8 @@ export function swipeAction(dx: number, dy: number): PageTurn | null {
 export interface NextStep {
 	/** The flat index to show next, or null to stay */
 	index: number | null;
-	/** The unit whose last page this press leaves, to mark read; null if none or done */
+	/** The unit whose last page this press leaves, reported once (the component's
+	 *  onsubsectioncomplete); null if none or already reported */
 	unitComplete: number | null;
 	/** This press finishes the section; at most once */
 	sectionComplete: boolean;

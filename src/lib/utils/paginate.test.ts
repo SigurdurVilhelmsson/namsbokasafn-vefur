@@ -14,6 +14,7 @@ import {
 	buildUnits,
 	itemIndexForTarget,
 	classifyBlock,
+	MODULE_BODY_SELECTOR,
 	type PaginateItem,
 	type PageRange
 } from './paginate';
@@ -429,6 +430,96 @@ describe('buildUnits', () => {
 	it('still handles a module whose blocks are direct children', () => {
 		const units = buildUnits(article('<h1>T</h1><p>a</p><section><p>b</p></section>'));
 		expect(units.map((u) => tags(u.children))).toEqual([['h1', 'p'], ['p']]);
+	});
+
+	// efni plans a non-landmark wrapper for the module body instead of a second <main>
+	// (register UI-30, efni handoff H5; efni names it, `cnx-body` is the proposal). Both
+	// forms page alike (H7). The fixture has every shape buildUnits handles: intro blocks,
+	// a nested sub-section, a block between sub-sections, and efni's footnotes after the body.
+	describe('with either module-body wrapper (S8.3)', () => {
+		const body =
+			'<p>a</p><figure>f</figure>' +
+			'<section><h2>S1</h2><p>b</p><section><h3>S1.1</h3><p>c</p></section></section>' +
+			'<p>d</p><section><h2>S2</h2><p>e</p></section>';
+		const footnotes = '<section class="footnotes"><h2>N</h2><ol><li>n</li></ol></section>';
+		const module = (open: string, close: string) =>
+			article(`<header><h1>T</h1></header>${open}${body}${close}${footnotes}`);
+		const shape = (root: HTMLElement) =>
+			buildUnits(root).map((u) => ({
+				wrapper: u.wrapper?.tagName.toLowerCase() ?? null,
+				blocks: u.children.map((el) => `${tags([el])[0]}:${el.textContent}`)
+			}));
+		const withMain = shape(module('<main>', '</main>'));
+
+		it('pages a <main> body block by block (the control)', () => {
+			expect(withMain).toEqual([
+				{ wrapper: null, blocks: ['header:T', 'p:a', 'figure:f'] },
+				{ wrapper: 'section', blocks: ['h2:S1', 'p:b', 'h3:S1.1', 'p:c'] },
+				{ wrapper: null, blocks: ['p:d'] },
+				{ wrapper: 'section', blocks: ['h2:S2', 'p:e'] },
+				{ wrapper: 'section', blocks: ['h2:N', 'ol:n'] }
+			]);
+		});
+
+		it('gives a div.cnx-body body the same units as a <main> body', () => {
+			expect(shape(module('<div class="cnx-body">', '</div>'))).toEqual(withMain);
+		});
+
+		// The selector names a class, not an element, so efni may pick the element
+		it('looks through the wrapper whatever its element', () => {
+			expect(shape(module('<section class="cnx-body">', '</section>'))).toEqual(withMain);
+		});
+
+		it('never takes the wrapper itself for a block or a unit', () => {
+			for (const root of [module('<main>', '</main>'), module('<div class="cnx-body">', '</div>')]) {
+				const wrapper = root.children[1];
+				for (const unit of buildUnits(root)) {
+					expect(unit.wrapper).not.toBe(wrapper);
+					expect(unit.children).not.toContain(wrapper);
+				}
+			}
+		});
+
+		// Only the wrapper: any other top-level <div> stays one block, as the June
+		// markup's learning-objectives <div> did
+		it('keeps any other top-level <div> as one block', () => {
+			expect(shape(article('<div class="learning-objectives"><p>x</p></div><p>a</p>'))).toEqual([
+				{ wrapper: null, blocks: ['div:x', 'p:a'] }
+			]);
+		});
+
+		it('names both forms in one exported selector', () => {
+			const first = (html: string) => article(html).firstElementChild!;
+			expect(first('<main></main>').matches(MODULE_BODY_SELECTOR)).toBe(true);
+			expect(first('<div class="cnx-body"></div>').matches(MODULE_BODY_SELECTOR)).toBe(true);
+			for (const other of ['<div></div>', '<section></section>', '<header></header>'])
+				expect(first(other).matches(MODULE_BODY_SELECTOR)).toBe(false);
+		});
+	});
+
+	// A guardrail (register KEEP-08): a worked example pages as one block, so no page
+	// break falls between its problem and its 'Lausn', and a display equation is never
+	// split. The fixture is chemistry 1.4's Dæmi 1.1 as published (text shortened),
+	// once in the body and once inside a sub-section.
+	it('keeps a worked example and a display equation each one block', () => {
+		const example =
+			'<aside id="Example_01_04_01" class="example" data-example-number="1.1">' +
+			'<p class="example-label">Dæmi 1.1</p><h4>Útreikningur eðlismassa</h4><p>Gefið…</p>' +
+			'<p class="para-title"><strong>Lausn</strong></p><p>Rúmmálið…</p>' +
+			'<div class="equation unnumbered"><span class="mathjax-display">…</span></div></aside>';
+		const equation = '<div class="equation unnumbered"><span class="mathjax-display">…</span></div>';
+		const units = buildUnits(
+			article(
+				`<header><h1>T</h1></header><main><p>a</p>${example}` +
+					`<section><h2>S</h2>${example}${equation}<p>b</p></section></main>`
+			)
+		);
+		expect(units.map((u) => tags(u.children))).toEqual([
+			['header', 'p', 'aside'],
+			['h2', 'aside', 'div', 'p']
+		]);
+		const solution = units[0].children[2].querySelector('.para-title');
+		expect(units.flatMap((u) => u.children)).not.toContain(solution);
 	});
 });
 

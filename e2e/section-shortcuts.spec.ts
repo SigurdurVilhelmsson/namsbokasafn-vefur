@@ -8,18 +8,15 @@
 
 import { test, expect, type Page } from '@playwright/test';
 import { sectionsContaining } from './helpers/content-fixtures';
+import { seedSettings } from './helpers/seedSettings';
 
-/** Keep reader v1.1's paged mode, which claims the arrows for page turns, out of it. */
+/**
+ * Keep the pager, which claims the arrows for page turns, out of it: a chosen 'scrolled',
+ * so neither a later default (open call 3) nor S8.4's run with 'paged' seeded for every
+ * spec pages these tests. Without a link or a choice main scrolls anyway (D06).
+ */
 async function scrolledMode(page: Page): Promise<void> {
-	await page.addInitScript(() => {
-		try {
-			const key = 'namsbokasafn:settings';
-			const stored = JSON.parse(localStorage.getItem(key) || '{}');
-			localStorage.setItem(key, JSON.stringify({ ...stored, readingMode: 'scrolled' }));
-		} catch {
-			// Storage blocked: nothing to set.
-		}
-	});
+	await seedSettings(page, { readingMode: 'scrolled' });
 }
 
 /** Record whether the app prevented the default of the next key press. */

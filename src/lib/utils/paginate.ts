@@ -146,19 +146,27 @@ function sectionBlocks(section: HTMLElement): HTMLElement[] {
 }
 
 /**
+ * The module body's wrapper, looked through by buildUnits: efni's renderer puts
+ * the body in <main> today (`article.cnx-module > header + main`), and plans a
+ * non-landmark wrapper instead (register UI-30, efni handoff H5). Both forms stay
+ * accepted: the frozen books and a book downloaded for offline reading keep <main>.
+ * Matched against the article's direct children only.
+ */
+export const MODULE_BODY_SELECTOR = 'main, .cnx-body';
+
+/**
  * Split a module's blocks into units at its <section> boundaries.
  *
- * efni's renderer puts the module body in <main>, after a <header> with the
- * title (`article.cnx-module > header + main`). The blocks to paginate are
- * <main>'s children, so <main> is looked through rather than treated as one
- * block, which made a whole section a single page. Markup without <main>
- * (the shape this was first written against) still works.
+ * The blocks to paginate are the body wrapper's children (MODULE_BODY_SELECTOR),
+ * so the wrapper is looked through rather than treated as one block, which made
+ * a whole section a single page. Markup without a wrapper (the shape this was
+ * first written against) still works.
  */
 export function buildUnits(root: HTMLElement): ContentUnit[] {
 	const result: ContentUnit[] = [];
 	let intro: HTMLElement[] = [];
 	const blocks = (Array.from(root.children) as HTMLElement[]).flatMap((el) =>
-		el.tagName === 'MAIN' ? (Array.from(el.children) as HTMLElement[]) : [el]
+		el.matches(MODULE_BODY_SELECTOR) ? (Array.from(el.children) as HTMLElement[]) : [el]
 	);
 
 	for (const child of blocks) {
