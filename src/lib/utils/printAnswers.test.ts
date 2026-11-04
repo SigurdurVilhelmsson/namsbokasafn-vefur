@@ -262,6 +262,28 @@ describe('linkExercisesToAnswers', () => {
 		expect(targets[0].closest('article')?.classList.contains('exercises')).toBe(true);
 	});
 
+	it('gives a repeated answer entry one target, and links every copy back', () => {
+		const doc = render(
+			linkExercisesToAnswers(
+				[exercisesBlock({ id: 'fs-a', n: '1', has: 'true' }), answerKeyBlock(['fs-a', '1'], ['fs-a', '1'])],
+				'01'
+			)
+		);
+		// Exactly one element carries the answer's anchor, and it is the first copy's link.
+		const anchors = [...doc.querySelectorAll('[id]')].filter(
+			(el) => el.id === answerAnchorId('01', 'fs-a')
+		);
+		expect(anchors).toHaveLength(1);
+		expect(anchors[0].closest('.answer-entry')).toBe(doc.querySelectorAll('.answer-entry')[0]);
+		// Both copies link back to the exercise.
+		const back = backLinks(doc);
+		expect(back).toHaveLength(2);
+		for (const link of back) expect(targetsOf(doc, link)).toHaveLength(1);
+		// The forward link has one place to land.
+		const [fwd] = forwardLinks(doc);
+		expect(targetsOf(doc, fwd)).toHaveLength(1);
+	});
+
 	it('falls back to the first copy when no copy is on the exercises page', () => {
 		const section = (n: number): PrintAnswerBlock => ({
 			type: 'section',
