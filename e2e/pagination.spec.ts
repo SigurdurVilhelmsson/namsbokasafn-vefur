@@ -1,13 +1,60 @@
 /**
- * Paged reading mode (reader plan P0.4)
- *
- * Paged is the default reading mode: a section renders as viewport-fitting
+ * Paged reading mode (reader plan P0.4): a section renders as viewport-fitting
  * pages with Fyrri/Næsta navigation instead of one long scroll.
+ *
+ * v1.1's 19 tests (dde768e), run on main since plan step S8.3 (register CODE-19).
+ * On main paging is not the default: a section pages only for a reader who chose
+ * paged or under a ?lestur=sidur link (D06; the default is open call 3). So every
+ * test here seeds a chosen 'paged' through seedSettings, and passes whatever the
+ * interim default is.
  */
 
 import { test, expect, type Page } from '@playwright/test';
-import { ATOMIC_SELECTOR } from '../src/lib/utils/paginate';
+import { MODULE_BODY_SELECTOR } from '../src/lib/utils/paginate';
 import { sectionsContaining, rollupSection } from './helpers/content-fixtures';
+import { seedSettings } from './helpers/seedSettings';
+
+/** A reader who picked paged (stored once per tab, so a test's own write survives reloads) */
+const PAGED = { readingMode: 'paged' } as const;
+
+/**
+ * The blocks of the page on screen, split as the paginator splits them: the article's
+ * children in document order, looking through the module-body wrapper (<main>, or
+ * efni's planned .cnx-body: MODULE_BODY_SELECTOR) and nested <section>s. A wrapper the
+ * paginator wrongly took as one block shows up here as many blocks. An unknown child
+ * that holds sub-sections is a body wrapper efni has not told us about, so it throws.
+ */
+async function shownPage(page: Page) {
+	return page.evaluate((bodySelector) => {
+		const root = document.querySelector('article.cnx-module') as HTMLElement;
+		const stray = Array.from(root.children).find(
+			(el) => el.tagName !== 'SECTION' && !el.matches(bodySelector) && el.querySelector('section')
+		);
+		if (stray) {
+			throw new Error(
+				`article.cnx-module > <${stray.tagName.toLowerCase()} class="${stray.className}"> holds ` +
+					'sub-sections: a module-body wrapper paginate.ts does not know (MODULE_BODY_SELECTOR)'
+			);
+		}
+		const flat = (el: Element): Element[] =>
+			el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
+		const shown = Array.from(root.children)
+			.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
+			.flatMap(flat)
+			.filter((el) => (el as HTMLElement).offsetParent !== null);
+		return {
+			visible: shown.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0),
+			count: shown.length,
+			// Headings followed by one block: kept together even when they
+			// overrun, rather than strand the heading on a page of its own
+			headed: shown.slice(0, -1).every((el) => /^H[2-4]$/.test(el.tagName)),
+			viewport: window.innerHeight
+		};
+	}, MODULE_BODY_SELECTOR);
+}
+
+/** Blocks the pager hid. practiceReveal's self-assessment row is hidden in scrolled mode too. */
+const HIDDEN_BLOCKS = '.reading-content [hidden]:not(.practice-self-assess)';
 
 /** Click through landing → book → first section. Returns false when the
  *  synced content needed for the journey isn't present. */
@@ -33,6 +80,8 @@ async function openFirstSection(page: Page): Promise<boolean> {
 }
 
 test.describe('Paged reading mode', () => {
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+
 	test('shows pagination controls on a section page', async ({ page }) => {
 		test.skip(!(await openFirstSection(page)), 'No section content available');
 
@@ -68,9 +117,9 @@ test.describe('Paged reading mode', () => {
 	// designed exception: a page holding a single block taller than the window.
 	// The paginator splits between blocks, never inside one, so a long worked
 	// example, a big table or a long flat list (the preface's 60 reviewers)
-	// keeps a page of its own and scrolls there. The test splits <main> and
-	// nested <section>s itself before counting, so a wrapper the paginator
-	// wrongly took as one block shows up as many blocks and still fails.
+	// keeps a page of its own and scrolls there. shownPage() splits the body
+	// wrapper and nested <section>s itself before counting, so a wrapper the
+	// paginator wrongly took as one block shows up as many blocks and still fails.
 	test('every page of a section fits the viewport', async ({ page }) => {
 		test.skip(!(await openFirstSection(page)), 'No section content available');
 
@@ -79,30 +128,11 @@ test.describe('Paged reading mode', () => {
 		const next = nav.getByRole('button', { name: 'Næsta síða' });
 
 		for (let i = 0; i < 40; i++) {
-			const { visible, count, headed, atomic, viewport } = await page.evaluate((atomicSelector) => {
-				const root = document.querySelector('article.cnx-module') as HTMLElement;
-				const main = root.querySelector(':scope > main');
-				const flat = (el: Element): Element[] =>
-					el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
-				const blocks = [
-					...Array.from(root.children).filter((el) => el.tagName !== 'MAIN'),
-					...(main ? Array.from(main.children) : [])
-				].flatMap(flat);
-				const shown = blocks.filter((el) => (el as HTMLElement).offsetParent !== null);
-				return {
-					visible: shown.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0),
-					count: shown.length,
-					// Headings followed by one block: kept together even when they
-					// overrun, rather than strand the heading on a page of its own
-					headed: shown.slice(0, -1).every((el) => /^H[2-4]$/.test(el.tagName)),
-					atomic: shown.length === 1 && shown[0].matches(atomicSelector),
-					viewport: window.innerHeight
-				};
-			}, ATOMIC_SELECTOR);
+			const { visible, count, headed, viewport } = await shownPage(page);
 			const ok = visible <= viewport || count === 1 || headed;
 			expect(
 				ok,
-				`page ${i + 1}: ${Math.round(visible)}px of content in ${count} block(s) in a ${viewport}px window${atomic ? ' (unsplittable)' : ''}`
+				`page ${i + 1}: ${Math.round(visible)}px of content in ${count} block(s) in a ${viewport}px window`
 			).toBe(true);
 			if (await next.isDisabled()) break;
 			await next.click();
@@ -118,7 +148,9 @@ test.describe('Paged reading mode', () => {
 
 		// Switch to "Samfellt skrun" via localStorage (the settings store
 		// persists there) and reload — the controls must disappear and no
-		// content block may remain hidden
+		// content block may remain hidden. On main no setting is rendered yet
+		// (D06), so this writes the stored choice a picker will write; the seed
+		// does not run again on the reload.
 		await page.evaluate(() => {
 			const raw = localStorage.getItem('namsbokasafn:settings');
 			const state = raw ? JSON.parse(raw) : {};
@@ -136,7 +168,7 @@ test.describe('Paged reading mode', () => {
 		await page.waitForTimeout(1000);
 
 		await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toHaveCount(0);
-		await expect(page.locator('.reading-content [hidden]')).toHaveCount(0);
+		await expect(page.locator(HIDDEN_BLOCKS)).toHaveCount(0);
 	});
 
 	// The tests below each failed before the fix they guard (QA 2026-10-03,
@@ -145,19 +177,7 @@ test.describe('Paged reading mode', () => {
 	/** True when the shown page is an overrun the paginator allows: one block
 	 *  taller than a page, or headings kept with the one block after them. */
 	async function allowedOverrun(page: Page): Promise<boolean> {
-		return page.evaluate(() => {
-			const root = document.querySelector('article.cnx-module') as HTMLElement;
-			const main = root.querySelector(':scope > main');
-			const flat = (el: Element): Element[] =>
-				el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
-			const shown = [
-				...Array.from(root.children).filter((el) => el.tagName !== 'MAIN'),
-				...(main ? Array.from(main.children) : [])
-			]
-				.flatMap(flat)
-				.filter((el) => (el as HTMLElement).offsetParent !== null);
-			return shown.slice(0, -1).every((el) => /^H[2-4]$/.test(el.tagName));
-		});
+		return (await shownPage(page)).headed;
 	}
 
 	test('page 1 shows its controls on arrival', async ({ page }) => {
@@ -295,6 +315,8 @@ test.describe('Paged reading mode', () => {
 				isMobile: device.touch,
 				hasTouch: device.touch
 			});
+			// Its own context, which the describe's page seed does not reach
+			await seedSettings(context, PAGED);
 			const page = await context.newPage();
 			const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
 			const next = nav.getByRole('button', { name: 'Næsta síða' });
@@ -360,14 +382,8 @@ test.describe('Paged reading mode', () => {
 		const urls = sectionsContaining('<p', 50).filter((u) => !/\/\d+-0-[^/]*\/$/.test(u));
 		test.skip(urls.length === 0, 'No section content available');
 
-		await page.addInitScript(() => {
-			const key = 'namsbokasafn:settings';
-			const stored = JSON.parse(localStorage.getItem(key) || '{}');
-			localStorage.setItem(
-				key,
-				JSON.stringify({ ...stored, shortcutPreferences: { nextSection: 'w' } })
-			);
-		});
+		// Added to the describe's 'paged' seed, which runs first
+		await seedSettings(page, { shortcutPreferences: { nextSection: 'w' } });
 		await page.goto(urls[0]);
 		await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toBeVisible({
 			timeout: 15000
@@ -415,11 +431,17 @@ test.describe('Paged reading mode', () => {
 		}
 	});
 
-	for (const kind of ['summary', 'exercises', 'key-terms'] as const) {
+	// The kind names the test as v1.1 did; the type is the table of contents' one,
+	// which readerPolicy.shouldPage reads (ruling 2)
+	for (const { kind, type } of [
+		{ kind: 'summary', type: 'summary' },
+		{ kind: 'exercises', type: 'exercises' },
+		{ kind: 'key-terms', type: 'glossary' }
+	] as const) {
 		test(`a chapter ${kind} page scrolls instead of paging`, async ({ page }) => {
 			// Siggi, 2026-10-04: rollups are reference lists; paged, chapter 1's
 			// exercises were one 23,120px page
-			const url = rollupSection(kind);
+			const url = rollupSection(type);
 			test.skip(!url, `No synced ${kind} page`);
 
 			await page.goto(url!);
@@ -427,7 +449,7 @@ test.describe('Paged reading mode', () => {
 			await page.evaluate(() => document.fonts.ready);
 			await page.waitForTimeout(1500);
 			await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toHaveCount(0);
-			await expect(page.locator('.reading-content [hidden]')).toHaveCount(0);
+			await expect(page.locator(HIDDEN_BLOCKS)).toHaveCount(0);
 
 			// And ← / → are section keys again there
 			const nextHref = await page.locator('a.nav-btn-next').getAttribute('href');
