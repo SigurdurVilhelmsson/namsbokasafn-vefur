@@ -341,6 +341,10 @@ const CASES: [string, string, boolean][] = [
 	['a contenteditable="false" island in an editable host', '<div contenteditable="true"><span data-focus tabindex="0" contenteditable="false">x</span></div>', false],
 	['contenteditable="false"', '<div data-focus tabindex="0" contenteditable="false"></div>', false],
 	['contenteditable="FALSE" (the value is case-insensitive)', '<div data-focus tabindex="0" contenteditable="FALSE"></div>', false],
+	['an invalid value alone inherits: nothing is editable', '<div data-focus tabindex="0" contenteditable="yes"></div>', false],
+	['an invalid value inside an editable host inherits editable', '<div contenteditable="true"><b data-focus tabindex="0" contenteditable="bogus">x</b></div>', true],
+	['an invalid value inside a "false" island inherits not editable', '<div contenteditable="true"><span contenteditable="false"><b data-focus tabindex="0" contenteditable="bogus">x</b></span></div>', false],
+	['" false" with a space is invalid, so it inherits from its host', '<div contenteditable="true"><b data-focus tabindex="0" contenteditable=" false">x</b></div>', true],
 	['a button', '<button data-focus>b</button>', false],
 	['a link', '<a data-focus href="#x">a</a>', false],
 	['a role="textbox" div without contenteditable', '<div data-focus tabindex="0" role="textbox"></div>', false]

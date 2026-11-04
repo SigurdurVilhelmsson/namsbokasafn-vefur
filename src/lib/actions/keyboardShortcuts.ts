@@ -108,17 +108,24 @@ const SHORTCUT_METADATA: Record<
  *
  * Any <input> counts, a checkbox or radio too: a radio group and a range slider use the
  * arrows, and Space toggles a checkbox, so neither the section shortcuts nor the pager may
- * take those keys from it. Editable content counts by the nearest contenteditable
- * attribute, so "", "true" and "plaintext-only" do, an element inside an editable host
- * does, and a contenteditable="false" island does not, in any letter case. That is what
- * isContentEditable computes in a browser for the attribute's valid values; jsdom does
- * not implement isContentEditable, so the rule is written out.
+ * take those keys from it. Editable content counts by the nearest valid contenteditable
+ * value, in any letter case: "", "true" and "plaintext-only" do, so an element inside an
+ * editable host does, and a contenteditable="false" island does not. Any other value is
+ * invalid and inherits, as the HTML spec says, so the search goes on to the next ancestor
+ * with the attribute. That is what isContentEditable computes in a browser; jsdom does not
+ * implement isContentEditable, so the rule is written out.
  */
+const EDITABLE_VALUES = new Set(['', 'true', 'plaintext-only']);
+
 export function isTyping(el: Element | null = document.activeElement): boolean {
 	if (!el) return false;
 	if (el.matches('input, textarea, select')) return true;
-	const host = el.closest('[contenteditable]');
-	return host !== null && host.getAttribute('contenteditable')!.toLowerCase() !== 'false';
+	for (let host = el.closest('[contenteditable]'); host; host = host.parentElement?.closest('[contenteditable]') ?? null) {
+		const value = host.getAttribute('contenteditable')!.toLowerCase();
+		if (value === 'false') return false;
+		if (EDITABLE_VALUES.has(value)) return true;
+	}
+	return false;
 }
 
 /**
