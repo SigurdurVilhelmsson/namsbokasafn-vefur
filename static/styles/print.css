@@ -451,6 +451,12 @@ a.print-exercise-link {
   text-decoration-thickness: 0.5pt;
 }
 
+/* An answer stays on one page: split, its number sat at the foot of one page
+   and its text started the next (chapter 20's answer 23, 2026-11-04 run). */
+.answer-entry {
+  break-inside: avoid;
+}
+
 a[href]:not([href^="#"]):not([href^="/"])::after {
   /* External absolute URLs — append the URL in a footnote-like style. */
   content: " (" attr(href) ")";
