@@ -2,7 +2,8 @@
   PagedReaderControls - Hybrid viewport-aware pagination (reader plan P0.4)
 
   Outer level: the sub-section boundaries already present in the prerendered
-  HTML (article.cnx-module > main > section; buildUnits in utils/paginate.ts).
+  HTML (article.cnx-module > main > section, or efni's planned .cnx-body in
+  place of main; buildUnits and MODULE_BODY_SELECTOR in utils/paginate.ts).
   Inner level: viewport-fitting page splits computed by utils/paginate.ts over
   measured block heights.
 
