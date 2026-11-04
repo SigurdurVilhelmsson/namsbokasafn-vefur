@@ -3,6 +3,7 @@ import type { PageLoad } from './$types';
 import { loadTableOfContents } from '$lib/utils/contentLoader';
 import { books, getBook } from '$lib/types/book';
 import { extractArticle, markMachineTranslated } from '$lib/utils/printContent';
+import { scopeFootnoteBackLinks } from '$lib/utils/printFootnotes';
 
 export const prerender = true;
 
@@ -53,7 +54,9 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			bookTitle: book.title,
 			bookSubtitle: book.subtitle,
 			attribution: book.attribution,
-			blocks
+			// Every appendix is one document here, and each numbers its footnote references
+			// from fnref-1, so they get names unique in the render (PDF plan, Task 3.1's note).
+			blocks: scopeFootnoteBackLinks(blocks, 'vidauki')
 		};
 	} catch (e) {
 		if (isHttpError(e)) throw e;
