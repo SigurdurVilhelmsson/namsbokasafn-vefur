@@ -20,7 +20,7 @@
 	import { settings } from '$lib/stores/settings';
 	// Aliased: the component has its own announce() and announcement
 	import { announce as speak, announcement as liveText } from '$lib/stores/announcer';
-	import { keyBelongsElsewhere } from '$lib/actions/keyboardShortcuts';
+	import { isTyping, keyBelongsElsewhere } from '$lib/actions/keyboardShortcuts';
 	import {
 		paginate,
 		buildUnits as buildContentUnits,
@@ -114,15 +114,6 @@
 			container.querySelector<HTMLElement>('article.cnx-module') ??
 			container.querySelector<HTMLElement>('.reading-content') ??
 			container
-		);
-	}
-
-	function isTyping(): boolean {
-		const el = document.activeElement;
-		if (!el) return false;
-		const tag = el.tagName;
-		return (
-			tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (el as HTMLElement).isContentEditable
 		);
 	}
 

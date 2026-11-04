@@ -103,16 +103,22 @@ const SHORTCUT_METADATA: Record<
 // =============================================================================
 
 /**
- * Check if user is typing in an input field
+ * One rule for "a key typed here belongs to the field", read by the global shortcuts and
+ * by the pager's keyAction (KeyContext.typing; plan step S8.4, register CODE-18).
+ *
+ * Any <input> counts, a checkbox or radio too: a radio group and a range slider use the
+ * arrows, and Space toggles a checkbox, so neither the section shortcuts nor the pager may
+ * take those keys from it. Editable content counts by the nearest contenteditable
+ * attribute, so "", "true" and "plaintext-only" do, an element inside an editable host
+ * does, and a contenteditable="false" island does not, in any letter case. That is what
+ * isContentEditable computes in a browser for the attribute's valid values; jsdom does
+ * not implement isContentEditable, so the rule is written out.
  */
-function isTyping(): boolean {
-	const activeElement = document.activeElement;
-	if (!activeElement) return false;
-
-	const tagName = activeElement.tagName.toLowerCase();
-	const isEditable = activeElement.getAttribute('contenteditable') === 'true';
-
-	return tagName === 'input' || tagName === 'textarea' || tagName === 'select' || isEditable;
+export function isTyping(el: Element | null = document.activeElement): boolean {
+	if (!el) return false;
+	if (el.matches('input, textarea, select')) return true;
+	const host = el.closest('[contenteditable]');
+	return host !== null && host.getAttribute('contenteditable')!.toLowerCase() !== 'false';
 }
 
 /**

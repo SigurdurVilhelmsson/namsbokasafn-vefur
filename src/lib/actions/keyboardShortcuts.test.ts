@@ -288,11 +288,71 @@ describe('the section shortcuts and a paged section', () => {
 		expect([clicks.next.mock.calls.length, clicks.prev.mock.calls.length]).toEqual([1, 1]);
 	});
 
+	it('typing in editable content keeps → from changing section, contenteditable="" included', () => {
+		document.body.insertAdjacentHTML('beforeend', '<div id="ed" tabindex="0" contenteditable=""></div>');
+		(document.getElementById('ed') as HTMLElement).focus();
+		expect(press('ArrowRight')).toBe(false);
+		expect(clicks.next).not.toHaveBeenCalled();
+	});
+
 	it('reads the mark at each key, so → changes section again once the mark is gone', () => {
 		const wrapper = markPaged();
 		press('ArrowRight');
 		wrapper.remove();
 		expect(press('ArrowRight')).toBe(true);
 		expect(clicks.next).toHaveBeenCalledTimes(1);
+	});
+});
+
+// One typing rule for the global shortcuts and the pager (plan step S8.4, register CODE-18)
+let isTyping: typeof import('./keyboardShortcuts').isTyping;
+function focus(html: string, selector = '[data-focus]'): Element {
+	document.body.innerHTML = html;
+	const el = document.querySelector<HTMLElement>(selector)!;
+	el.focus();
+	return el;
+}
+const CASES: [string, string, boolean][] = [
+	['a text input', '<input data-focus type="text">', true],
+	['a search input', '<input data-focus type="search">', true],
+	['a checkbox (Space toggles it)', '<input data-focus type="checkbox">', true],
+	['a radio (the arrows move it)', '<input data-focus type="radio">', true],
+	['a range slider (the arrows move it)', '<input data-focus type="range">', true],
+	['a textarea', '<textarea data-focus></textarea>', true],
+	['a select', '<select data-focus><option>a</option></select>', true],
+	['contenteditable="true"', '<div data-focus tabindex="0" contenteditable="true"></div>', true],
+	['contenteditable=""', '<div data-focus tabindex="0" contenteditable=""></div>', true],
+	['contenteditable="plaintext-only"', '<div data-focus tabindex="0" contenteditable="plaintext-only"></div>', true],
+	['a focusable element inside an editable host', '<div contenteditable="true"><span data-focus tabindex="0">x</span></div>', true],
+	['a contenteditable="false" island in an editable host', '<div contenteditable="true"><span data-focus tabindex="0" contenteditable="false">x</span></div>', false],
+	['contenteditable="false"', '<div data-focus tabindex="0" contenteditable="false"></div>', false],
+	['contenteditable="FALSE" (the value is case-insensitive)', '<div data-focus tabindex="0" contenteditable="FALSE"></div>', false],
+	['a button', '<button data-focus>b</button>', false],
+	['a link', '<a data-focus href="#x">a</a>', false],
+	['a role="textbox" div without contenteditable', '<div data-focus tabindex="0" role="textbox"></div>', false]
+];
+
+describe('isTyping: one rule for the shortcuts and the pager (S8.4, CODE-18)', () => {
+	beforeEach(async () => {
+		isTyping = (await import('./keyboardShortcuts')).isTyping;
+	});
+	afterEach(() => {
+		document.body.innerHTML = '';
+	});
+
+	it.each(CASES)('%s → %s', (_name, html, expected) => {
+		focus(html);
+		expect(isTyping()).toBe(expected);
+	});
+
+	it('nothing focused (the body) is not typing; a null element is not typing', () => {
+		(document.activeElement as HTMLElement | null)?.blur();
+		expect(isTyping()).toBe(false);
+		expect(isTyping(null)).toBe(false);
+	});
+
+	it('takes an element, so a caller can ask about one that is not focused', () => {
+		document.body.innerHTML = '<input id="i">';
+		expect(isTyping(document.getElementById('i'))).toBe(true);
 	});
 });

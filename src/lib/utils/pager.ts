@@ -182,7 +182,8 @@ export type PageKey = Pick<
  */
 export interface KeyContext {
 	/** Focus is in an <input> of any type (a checkbox too), a textarea, a select or
-	 *  editable content: isTyping() as v1.1 computed it */
+	 *  editable content: keyboardShortcuts.ts's isTyping(), the global shortcuts' rule too
+	 *  (S8.4, CODE-18) */
 	typing: boolean;
 	/** keyBelongsElsewhere(): an open dialog, a selection being extended with Shift and
 	 *  an arrow, or a focused box that scrolls sideways */
