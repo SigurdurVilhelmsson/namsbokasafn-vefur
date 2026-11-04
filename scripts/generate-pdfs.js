@@ -65,6 +65,8 @@ import {
 	writeMergedDests
 } from './lib/pdf-links.js';
 import { assertPrintable, pdfBooks } from './lib/pdf-books.js';
+import { loadBookConfig } from './lib/book-config.js';
+import { pdfBookInfo } from './lib/pdf-attribution.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -237,7 +239,13 @@ function addOutline(doc, items) {
 	doc.catalog.set(PDFName.of('Outlines'), outlineRef);
 }
 
-async function generateForBook(page, baseUrl, bookSlug) {
+async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
+	// The title comes from book.ts, the source the /print routes render from,
+	// and never from toc.json's `title`: generate-toc.js falls back to the slug
+	// there when efni's toc has none, so the chemistry toc.json (live too) says
+	// "efnafraedi-2e". Resolved before any printing, so a book without a book.ts
+	// entry fails at once.
+	const bookInfo = pdfBookInfo(bookConfig, bookSlug);
 	const toc = loadToc(bookSlug);
 	const bookOutDir = join(OUTPUT_DIR, bookSlug);
 	const bookTmpDir = join(TMP_DIR, bookSlug);
@@ -337,7 +345,7 @@ async function generateForBook(page, baseUrl, bookSlug) {
 
 	// --- Stamp + write standalone chapter PDFs, assemble the full book -------
 
-	const bookTitle = toc.title ?? bookSlug;
+	const bookTitle = bookInfo.title;
 	const merged = await PDFDocument.create();
 	merged.setTitle(bookTitle, { showInWindowTitleBar: true });
 	merged.setLanguage('is');
@@ -519,6 +527,9 @@ async function main() {
 
 	console.log(`Generating PDFs for ${targetBooks.length} book(s): ${targetBooks.join(', ')}`);
 
+	// Titles, from src/lib/types/book.ts.
+	const bookConfig = await loadBookConfig(ROOT);
+
 	mkdirSync(OUTPUT_DIR, { recursive: true });
 	mkdirSync(TMP_DIR, { recursive: true });
 
@@ -549,7 +560,7 @@ async function main() {
 		for (const slug of targetBooks) {
 			console.log(`\n=== ${slug} ===`);
 			try {
-				await generateForBook(page, url, slug);
+				await generateForBook(page, url, slug, bookConfig);
 			} catch (e) {
 				console.error(`  Failed for ${slug}:`, e.message);
 				exitCode = 1;
