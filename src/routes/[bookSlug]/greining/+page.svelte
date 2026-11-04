@@ -10,7 +10,7 @@
 	import { loadTableOfContents, findSectionBySlug } from '$lib/utils/contentLoader';
 	import { formatLocalDate, getTodayDateString } from '$lib/utils/storeHelpers';
 	import { countsExport, recallSummaryLine, recallTotals } from '$lib/utils/counters';
-	import { clearAllStorage, deleteLocalCaches } from '$lib/utils/storageMigration';
+	import { clearAllStorage, clearExpirationRecords, deleteLocalCaches } from '$lib/utils/storageMigration';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 	import {
 		AnalyticsTabs,
@@ -194,14 +194,17 @@
 		}
 	}
 
-	// Erase everything this site keeps in this browser: downloaded books and the browsing
-	// caches first, then every namsbokasafn key, then reload at once, before any store can
-	// write its in-memory state back (plan step S3.2, PED-14).
+	// Erase everything this site keeps in this browser: the service worker's expiry records,
+	// downloaded books and the browsing caches first, then every namsbokasafn key, then reload
+	// at once, before any store can write its in-memory state back (plan step S3.2, PED-14).
+	// The records go before the caches: a page the worker caches in between then leaves at
+	// most a record of a deleted entry, never a cached entry that no record would expire.
 	async function handleEraseAll() {
 		// It names the recall entries (S5.2), which it erases too (S5.4).
 		const message =
 			'Eyða öllu sem Námsbókasafn geymir í þessum vafra: framvindu, bókamerkjum, yfirstrikunum, athugasemdum, minnisspjöldum, upprifjunum, námsmarkmiðum, æfingadæmum, tölfræði og stillingum? Niðurhalaðar bækur eyðast líka. Þetta er ekki hægt að afturkalla.';
 		if (!confirm(message)) return;
+		await clearExpirationRecords();
 		await deleteLocalCaches();
 		clearAllStorage();
 		location.reload();
