@@ -423,6 +423,34 @@ article.cnx-module a[href] {
   text-decoration-thickness: 0.5pt;
 }
 
+/* Exercise ↔ answer links (PDF plan Task 3.3). The print chapter loader
+   (src/lib/utils/printAnswers.ts) turns an answered exercise's number into a
+   link to its answer, and the answer's number into a link back, and marks the
+   entry .print-linked. The link takes the place and box of the number app.css
+   draws with ::before, which stands down, so the page reads as before; dark
+   amber + underline like the content links above (the underline carries it in
+   greyscale). The exercise and answer-key articles are .chapter-resource, not
+   .cnx-module, so the content-link rule does not reach these. */
+.eoc-exercise.print-linked::before,
+.answer-entry.print-linked::before {
+  content: none;
+}
+
+a.print-answer-link,
+a.print-exercise-link {
+  position: absolute;
+  left: 0;
+  top: 0;
+  min-width: 2.5rem;
+  padding-right: 0.5rem;
+  text-align: right;
+  font-weight: 700;
+  color: #8a5e14;
+  text-decoration: underline;
+  text-underline-offset: 1.5px;
+  text-decoration-thickness: 0.5pt;
+}
+
 a[href]:not([href^="#"]):not([href^="/"])::after {
   /* External absolute URLs — append the URL in a footnote-like style. */
   content: " (" attr(href) ")";
