@@ -564,8 +564,9 @@
 </script>
 
 {#if ready && !failed && flatPages.length > 0}
-	<!-- D20: proposed (S8.2): 'Síðuflakk', 'Fyrri síða', 'Fyrri', 'Næsta síða' and 'Næsta',
-	     as v1.1 wrote them at dde768e; the label is pager.ts's positionLabel (S8.1) -->
+	<!-- 'Síðuflakk', 'Fyrri síða', 'Fyrri', 'Næsta síða' and 'Næsta', as v1.1 wrote them at
+	     dde768e (S8.2); the label is pager.ts's positionLabel (S8.1). Checked by [USER] as D20
+	     batch 9 (2026-11-04). -->
 	<nav class="paged-nav" aria-label="Síðuflakk" bind:this={navEl}>
 		<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
 			<Icon name="chevron-left" size="sm" />
