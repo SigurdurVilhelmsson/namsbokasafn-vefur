@@ -137,6 +137,28 @@ async function startDevServer(port) {
 	return { server, url };
 }
 
+/**
+ * Run `fn` with a fresh page, closed afterwards. One page reused for every
+ * print kept the earlier chapters' decoded figures: the browser's memory rose
+ * to 6.2 GB by chapter 10 of a whole-book run, against 3.2 GB for chapter 10
+ * printed on its own page.
+ */
+async function withPrintPage(context, fn) {
+	const page = await context.newPage();
+	try {
+		// Render PDFs with *screen* styles. The /print routes are styled
+		// unconditionally by print.css, while app.css carries a global
+		// `@media print` block meant for users printing the reading view — it
+		// hides <header>/<aside> (killing section titles and note boxes) and
+		// flattens colors. Emulating screen media keeps it out of the PDFs;
+		// Chromium still honors break-* and @page rules when printing.
+		await page.emulateMedia({ media: 'screen' });
+		return await fn(page);
+	} finally {
+		await page.close();
+	}
+}
+
 async function getPdfPageCount(file) {
 	const bytes = readFileSync(file);
 	const doc = await PDFDocument.load(bytes);
@@ -255,7 +277,7 @@ function addOutline(doc, items) {
 	doc.catalog.set(PDFName.of('Outlines'), outlineRef);
 }
 
-async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
+async function generateForBook(context, baseUrl, bookSlug, bookConfig) {
 	// Title, metadata and licence line come from book.ts, the source the /print
 	// routes render from, and never from toc.json's `title`: generate-toc.js
 	// falls back to the slug there when efni's toc has none, so the chemistry
@@ -284,7 +306,7 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 	// the run log.
 	const images = { prints: 0, loaded: 0 };
 	const printRoute = async (url, outFile) => {
-		const report = await printToPdf(page, url, outFile);
+		const report = await withPrintPage(context, (page) => printToPdf(page, url, outFile));
 		images.prints++;
 		images.loaded += report.loaded;
 	};
@@ -588,23 +610,19 @@ async function main() {
 	});
 	const context = await browser.newContext({
 		viewport: { width: 794, height: 1123 }, // A4 at 96 DPI
-		deviceScaleFactor: 1
+		deviceScaleFactor: 1,
+		// The dev server's PWA worker (vite.config.ts, devOptions) would take
+		// every page after the first and pass each figure through its runtime
+		// caches. The print routes need no worker.
+		serviceWorkers: 'block'
 	});
-	const page = await context.newPage();
-	// Render PDFs with *screen* styles. The /print routes are styled
-	// unconditionally by print.css, while app.css carries a global
-	// `@media print` block meant for users printing the reading view — it
-	// hides <header>/<aside> (killing section titles and note boxes) and
-	// flattens colors. Emulating screen media keeps it out of the PDFs;
-	// Chromium still honors break-* and @page rules when printing.
-	await page.emulateMedia({ media: 'screen' });
 
 	let exitCode = 0;
 	try {
 		for (const slug of targetBooks) {
 			console.log(`\n=== ${slug} ===`);
 			try {
-				await generateForBook(page, url, slug, bookConfig);
+				await generateForBook(context, url, slug, bookConfig);
 			} catch (e) {
 				console.error(`  Failed for ${slug}:`, e.message);
 				exitCode = 1;

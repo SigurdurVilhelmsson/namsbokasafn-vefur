@@ -129,4 +129,13 @@ describe('scripts/generate-pdfs.js (source text)', () => {
 		expect(code).not.toMatch(/\.pdf\s*\(\s*\{/);
 		expect(callArgs(code, 'printToPdf').length).toBeGreaterThan(0);
 	});
+
+	it('prints each route on a fresh page, with no service worker', () => {
+		// One page reused for all 25 prints held the earlier chapters' figures: the
+		// browser reached 6.2 GB, and two of three whole-book runs stopped with
+		// Chromium's "Printing failed".
+		expect(code).toMatch(/\bserviceWorkers\s*:\s*'block'/);
+		expect(code).toMatch(/withPrintPage\s*\(\s*context\s*,\s*\(page\)\s*=>\s*printToPdf\s*\(/);
+		expect(code).toMatch(/await\s+page\.close\s*\(\s*\)/);
+	});
 });
