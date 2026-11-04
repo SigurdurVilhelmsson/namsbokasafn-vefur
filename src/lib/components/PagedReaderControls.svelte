@@ -14,9 +14,12 @@
 -->
 <script lang="ts">
 	import { tick } from 'svelte';
+	import { get } from 'svelte/store';
 	import Icon from '$lib/components/Icon.svelte';
 	import { browser } from '$app/environment';
 	import { settings } from '$lib/stores/settings';
+	// Aliased: the component has its own announce() and announcement
+	import { announce as speak, announcement as liveText } from '$lib/stores/announcer';
 	import { keyBelongsElsewhere } from '$lib/actions/keyboardShortcuts';
 	import {
 		paginate,
@@ -197,7 +200,8 @@
 	}
 
 	/** Announce what the label shows; it used to count flat pages over the
-	 *  whole section while the label counted per sub-section (QA E19). */
+	 *  whole section while the label counted per sub-section (QA E19). The
+	 *  effect below passes a change on to the app's one polite region. */
 	function announce() {
 		const f = flatPages[current];
 		announcement = f ? positionLabel(f, pageCounts()) : '';
@@ -504,6 +508,22 @@
 		};
 	});
 
+	// The position is spoken through the app's one polite region (LiveAnnouncer; plan
+	// step S8.3, register UI-01), so the pager's own region no longer competes with it.
+	// Only a change is spoken, as from that region: setting `announcement` to the text
+	// it holds changes nothing, so a re-split that keeps the page is silent. When the
+	// pager fails or goes, it takes its text back unless something else was announced
+	// since, so the region never describes pages that are not on screen.
+	$effect(() => {
+		const text = ready && !failed ? announcement : '';
+		if (!text) return;
+		speak(text);
+		return () => {
+			const now = get(liveText);
+			if (now === text || now === '') speak('');
+		};
+	});
+
 	let flat = $derived(flatPages[current]);
 	let label = $derived(flat ? positionLabel(flat, pageCounts()) : '');
 </script>
@@ -534,11 +554,6 @@
 	</nav>
 
 {/if}
-<!-- Outside the {#if}: a live region inserted together with its text is not
-     reliably announced -->
-<div class="sr-only" role="status" aria-live="polite" aria-atomic="true">
-	{ready && !failed ? announcement : ''}
-</div>
 
 <style>
 	.paged-nav {
@@ -580,17 +595,5 @@
 		/* Not --text-tertiary: 2.90:1 on --bg-primary fails AA (QA E18) */
 		color: var(--text-secondary);
 		text-align: center;
-	}
-
-	.sr-only {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		padding: 0;
-		margin: -1px;
-		overflow: hidden;
-		clip: rect(0, 0, 0, 0);
-		white-space: nowrap;
-		border: 0;
 	}
 </style>

@@ -349,17 +349,52 @@ test.describe('Paged reading mode', () => {
 		expect(new URL(page.url()).hash).toBe(`#${found!.id}`);
 	});
 
+	// Since S8.3 the pager speaks through the app's one polite region (register UI-01)
+	// instead of a region of its own, which competed with it: the region says what the
+	// label shows on arrival, on every page and after 'Fyrri', and a re-split that keeps
+	// the page says nothing. The locator matches the atomic polite regions: the shared
+	// one, and search's while search is open, so this test never opens search.
 	test('the screen reader hears the position the label shows', async ({ page }) => {
 		const urls = sectionsContaining('<p', 1);
 		test.skip(urls.length === 0, 'No section content available');
+		test.setTimeout(120000);
 
 		await page.goto(urls[0]);
 		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
+		const label = nav.locator('.paged-nav-label');
+		const next = nav.getByRole('button', { name: 'Næsta síða' });
+		const region = page.locator('[aria-live="polite"][aria-atomic="true"]');
 		await expect(nav).toBeVisible({ timeout: 15000 });
-		await nav.getByRole('button', { name: 'Næsta síða' }).click();
-		const label = (await nav.locator('.paged-nav-label').textContent())!.trim();
-		// Filtered: the PWA updater has a status region of its own
-		await expect(page.getByRole('status').filter({ hasText: 'Hluti' })).toHaveText(label);
+		await expect(region).toHaveCount(1);
+		const says = async () => expect(region).toHaveText((await label.textContent())!.trim());
+
+		await says();
+		for (let i = 0; ; i++) {
+			expect(i, `more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
+			const text = (await label.textContent())!.trim();
+			if (LAST_PAGE.test(text)) break;
+			await next.click();
+			await expect(label).not.toHaveText(text);
+			await says();
+		}
+		await nav.getByRole('button', { name: 'Fyrri síða' }).click();
+		await says();
+
+		// A re-split that keeps the page (here a resize to the same size) is silent
+		await page.evaluate(() => {
+			const w = window as unknown as { __spoken: string[] };
+			w.__spoken = [];
+			const el = document.querySelector('[aria-live="polite"][aria-atomic="true"]')!;
+			new MutationObserver(() => w.__spoken.push(el.textContent ?? '')).observe(el, {
+				childList: true,
+				characterData: true,
+				subtree: true
+			});
+			window.dispatchEvent(new Event('resize'));
+		});
+		await page.waitForTimeout(1500);
+		expect(await page.evaluate(() => (window as unknown as { __spoken: string[] }).__spoken)).toEqual([]);
+		await says();
 	});
 
 	for (const device of [
