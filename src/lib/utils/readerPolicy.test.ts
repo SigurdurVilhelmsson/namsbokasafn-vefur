@@ -15,7 +15,9 @@ import {
 	resolveReadingMode,
 	shouldPage,
 	skippedByStudySession,
-	UNCHOSEN_READING_MODE
+	UNCHOSEN_READING_MODE,
+	pagedSectionMark,
+	endMarkerActive
 } from './readerPolicy';
 
 const ROLLUPS: SectionType[] = ['glossary', 'equations', 'summary', 'exercises', 'answer-key'];
@@ -107,5 +109,21 @@ describe('the reading mode (S8.2: D06, PED-01, PED-35, ruling 2)', () => {
 		['?lestur=toString', null]
 	] as const)('%j asks for %s', (search, mode) => {
 		expect(readingModeFromSearch(search)).toBe(mode);
+	});
+});
+
+describe('the pager state on the section page (S8.4, CODE-17)', () => {
+	it('marks a paged section from mount until its pager fails, with the state as the value', () => {
+		expect(pagedSectionMark(true, 'pending')).toBe('pending');
+		expect(pagedSectionMark(true, 'ready')).toBe('ready');
+		expect(pagedSectionMark(true, 'end')).toBe('end');
+		expect(pagedSectionMark(true, 'failed')).toBeUndefined();
+		expect(pagedSectionMark(false, 'ready')).toBeUndefined();
+	});
+
+	it('lets the end marker read a scrolled section, or a paged one whose pager failed', () => {
+		expect(endMarkerActive(false, 'ready')).toBe(true);
+		expect(endMarkerActive(true, 'failed')).toBe(true);
+		for (const state of ['pending', 'ready', 'end'] as const) expect(endMarkerActive(true, state)).toBe(false);
 	});
 });
