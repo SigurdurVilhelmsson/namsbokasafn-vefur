@@ -8,6 +8,7 @@
 	import { reader } from '$lib/stores';
 	import { isSectionRead, calcChapterProgress } from '$lib/stores/reader';
 	import { getChapterPath, getSectionPath } from '$lib/utils/contentLoader';
+	import { textbookPhrase } from '$lib/utils/metaDescription';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import BookAttribution from '$lib/components/BookAttribution.svelte';
 
@@ -65,7 +66,8 @@
 
 <svelte:head>
 	<title>Kafli {data.chapter.number}: {data.chapter.title} | {data.book?.title ?? data.bookSlug}</title>
-	<meta name="description" content="Kafli {data.chapter.number}: {data.chapter.title}. Efnafræði kennslubók á íslensku." />
+	<!-- D20: proposed (M18): the description ends with the book's own subject, from textbookPhrase() -->
+	<meta name="description" content="Kafli {data.chapter.number}: {data.chapter.title}. {textbookPhrase(data.book)}." />
 	<meta name="robots" content="index, follow" />
 	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/kafli/{chapterPath}/" />
 	<meta property="og:title" content="Kafli {data.chapter.number}: {data.chapter.title} | {data.book?.title ?? data.bookSlug}" />

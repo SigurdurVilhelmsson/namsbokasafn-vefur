@@ -33,6 +33,7 @@
 		shouldPage
 	} from '$lib/utils/readerPolicy';
 	import { createObjectiveKey } from '$lib/utils/storeHelpers';
+	import { textbookPhrase } from '$lib/utils/metaDescription';
 	import { fade, fly } from 'svelte/transition';
 
 	let { data }: { data: PageData } = $props();
@@ -316,11 +317,12 @@
 
 <svelte:head>
 	<title>{data.section.section} {data.section.title} | Námsbókasafn</title>
-	<meta name="description" content="{data.section.section} {data.section.title} – Efnafræði kennslubók á íslensku" />
+	<!-- D20: proposed (M18): both descriptions end with the book's own subject, from textbookPhrase() -->
+	<meta name="description" content="{data.section.section} {data.section.title} – {textbookPhrase(data.book)}" />
 	<meta name="robots" content="index, follow" />
 	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/kafli/{data.chapterSlug}/{data.sectionSlug}/" />
 	<meta property="og:title" content="{data.section.section} {data.section.title} | Námsbókasafn" />
-	<meta property="og:description" content="{data.section.section} {data.section.title} – Efnafræði kennslubók á íslensku" />
+	<meta property="og:description" content="{data.section.section} {data.section.title} – {textbookPhrase(data.book)}" />
 	<meta property="og:type" content="article" />
 	<meta property="og:url" content="https://namsbokasafn.is/{data.bookSlug}/kafli/{data.chapterSlug}/{data.sectionSlug}/" />
 </svelte:head>
