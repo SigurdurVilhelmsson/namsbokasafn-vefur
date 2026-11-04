@@ -15,9 +15,10 @@
  *     measured first, then the front matter is re-printed with page numbers
  *     fed in via downloads/<slug>/toc-pages.json)
  *   - PDF bookmarks (outline) for the TOC, every chapter and the appendices
- *   - document metadata (title, author, subject = licence, keywords,
- *     language) on the book and on every chapter PDF, from
- *     src/lib/types/book.ts (scripts/lib/pdf-attribution.js)
+ *   - a licence line in the folio band of every numbered page, and document
+ *     metadata (title, author, subject = licence, keywords, language) on the
+ *     book and on every chapter PDF, all from src/lib/types/book.ts
+ *     (scripts/lib/pdf-attribution.js)
  *
  * Standalone chapter PDFs are stamped with the same book-absolute page
  * numbers, so a printed chapter matches the full book and its TOC.
@@ -69,7 +70,12 @@ import {
 } from './lib/pdf-links.js';
 import { assertPrintable, pdfBooks } from './lib/pdf-books.js';
 import { loadBookConfig } from './lib/book-config.js';
-import { applyDocumentInfo, chapterDocInfo, pdfBookInfo } from './lib/pdf-attribution.js';
+import {
+	applyDocumentInfo,
+	chapterDocInfo,
+	footerLineX,
+	pdfBookInfo
+} from './lib/pdf-attribution.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -86,6 +92,14 @@ const HEADER_BASELINE = 806;
 const STAMP_FONT_SIZE = 9;
 const HEADER_COLOR = rgb(0.42, 0.42, 0.42);
 const FOLIO_COLOR = rgb(0.2, 0.2, 0.2);
+// The licence line shares the folio's baseline, centred, smaller and in the
+// running header's grey (#6b6b6b, about 5.3:1 on white, so it holds in a
+// greyscale copy). FOLIO_RESERVE keeps it clear of the folio: MARGIN_X plus
+// room for a four-digit folio at 9 pt (about 20 pt) and a gap. The body text
+// ends 22mm (62 pt) above the paper edge, well above this baseline.
+const LICENCE_FONT_SIZE = 7;
+const LICENCE_COLOR = HEADER_COLOR;
+const FOLIO_RESERVE = MARGIN_X + 36;
 
 function parseArgs(argv) {
 	const args = { book: null, port: 5180 };
@@ -169,8 +183,12 @@ function encodableText(font, text) {
  *
  * Book conventions: odd page numbers are recto (folio + header on the right),
  * even are verso (on the left). Chapter openers pass headerText: null.
+ *
+ * licenceLine is centred in the folio band of every page that gets a folio.
+ * It is drawn as given, not through encodableText: a licence statement with a
+ * character the font lacks must stop the run, not print a '?'.
  */
-async function stampPages(doc, pageInfo) {
+async function stampPages(doc, pageInfo, licenceLine) {
 	const font = await doc.embedFont(StandardFonts.Helvetica);
 	const fontItalic = await doc.embedFont(StandardFonts.HelveticaOblique);
 	const pages = doc.getPages();
@@ -191,6 +209,15 @@ async function stampPages(doc, pageInfo) {
 			size: STAMP_FONT_SIZE,
 			font,
 			color: FOLIO_COLOR
+		});
+
+		const licenceWidth = font.widthOfTextAtSize(licenceLine, LICENCE_FONT_SIZE);
+		page.drawText(licenceLine, {
+			x: footerLineX(width, licenceWidth, FOLIO_RESERVE),
+			y: FOOTER_BASELINE,
+			size: LICENCE_FONT_SIZE,
+			font,
+			color: LICENCE_COLOR
 		});
 
 		if (info.headerText) {
@@ -243,11 +270,11 @@ function addOutline(doc, items) {
 }
 
 async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
-	// Title and metadata come from book.ts, the source the /print routes render
-	// from, and never from toc.json's `title`: generate-toc.js falls back to the
-	// slug there when efni's toc has none, so the chemistry toc.json (live too)
-	// says "efnafraedi-2e". Resolved before any printing, so a book without a
-	// book.ts entry fails at once.
+	// Title, metadata and licence line come from book.ts, the source the /print
+	// routes render from, and never from toc.json's `title`: generate-toc.js
+	// falls back to the slug there when efni's toc has none, so the chemistry
+	// toc.json (live too) says "efnafraedi-2e". Resolved before any printing, so
+	// a book without a book.ts entry fails at once.
 	const bookInfo = pdfBookInfo(bookConfig, bookSlug);
 	const toc = loadToc(bookSlug);
 	const bookOutDir = join(OUTPUT_DIR, bookSlug);
@@ -386,7 +413,7 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 			standalone,
 			chapterDocInfo(bookInfo, { number: part.chapterNum, title: part.title })
 		);
-		await stampPages(standalone, headerForPage);
+		await stampPages(standalone, headerForPage, bookInfo.licenceLine);
 		// Append the standalone-only colophon as an unstamped addendum page (so a
 		// chapter shared on its own still carries full CC-BY attribution). It is
 		// deliberately absent from the merged book below.
@@ -474,16 +501,24 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 			startPage: glossaryPart.startPage
 		});
 	}
-	await stampPages(merged, (i) => {
-		if (i < frontPageCount) return null; // front matter is unnumbered
-		const pageNumber = i - frontPageCount + 1;
-		const part = [...partStarts].reverse().find((p) => pageNumber >= p.startPage);
-		if (!part) return null;
-		return {
-			pageNumber,
-			headerText: pageNumber === part.startPage ? null : part.header(pageNumber)
-		};
-	});
+	// Front matter carries no folio band, so no licence line either: its
+	// colophon states the licence in full. Every numbered page does, chapter
+	// openers, appendices and glossary included, so a page copied on its own
+	// still names its licence and source.
+	await stampPages(
+		merged,
+		(i) => {
+			if (i < frontPageCount) return null; // front matter is unnumbered
+			const pageNumber = i - frontPageCount + 1;
+			const part = [...partStarts].reverse().find((p) => pageNumber >= p.startPage);
+			if (!part) return null;
+			return {
+				pageNumber,
+				headerText: pageNumber === part.startPage ? null : part.header(pageNumber)
+			};
+		},
+		bookInfo.licenceLine
+	);
 
 	addOutline(merged, outlineItems);
 

@@ -1,9 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { PDFDocument, PDFName, PDFString } from 'pdf-lib';
+import { PDFDocument, PDFName, PDFString, StandardFonts } from 'pdf-lib';
 import { books, retiredBooks } from '../../src/lib/types/book.ts';
 import { LICENCES, validateAttribution } from '../../src/lib/data/licences.ts';
 import { creditLine, MACHINE_TRANSLATION_CREDIT } from '../../src/lib/data/bookCredits.ts';
-import { applyDocumentInfo, chapterDocInfo, pdfBookInfo } from './pdf-attribution.js';
+import {
+	SITE_HOST,
+	applyDocumentInfo,
+	chapterDocInfo,
+	footerLineX,
+	pdfBookInfo
+} from './pdf-attribution.js';
 
 // What loadBookConfig() returns, from the same modules (book-config.test.js
 // checks that the esbuild bundle and these imports agree).
@@ -70,6 +76,7 @@ describe('pdfBookInfo: licence facts come from the descriptor', () => {
 		const info = pdfBookInfo(withLicence('CC-BY-NC-SA-4.0'), 'tilraunabok');
 		expect(info.subject).toContain('CC BY-NC-SA 4.0');
 		expect(info.subject).toContain('https://creativecommons.org/licenses/by-nc-sa/4.0/');
+		expect(info.licenceLine).toBe(`CC BY-NC-SA 4.0 · openstax.org · ${SITE_HOST}`);
 		expect(info.keywords).toContain('CC BY-NC-SA 4.0');
 	});
 
@@ -78,8 +85,14 @@ describe('pdfBookInfo: licence facts come from the descriptor', () => {
 			const licence = LICENCES[book.attribution.derivativeLicence];
 			const info = pdfBookInfo(config, book.slug);
 			expect(info.subject).toContain(licence.url);
-			expect(info.keywords).toContain(licence.name);
+			expect(info.licenceLine.startsWith(`${licence.name} · `)).toBe(true);
 		}
+	});
+
+	it('builds the footer line from the licence, the source host and the site', () => {
+		expect(pdfBookInfo(config, 'efnafraedi-2e').licenceLine).toBe(
+			'CC BY 4.0 · openstax.org · namsbokasafn.is'
+		);
 	});
 });
 
@@ -124,6 +137,7 @@ describe('chapterDocInfo', () => {
 			'Efnasamsetning og lausnir',
 			...info.keywords.slice(1)
 		]);
+		expect(chapter.licenceLine).toBe(info.licenceLine);
 	});
 });
 
@@ -145,5 +159,40 @@ describe('applyDocumentInfo', () => {
 			'Efnafræði, Efnasamsetning og lausnir, kennslubók, íslensk þýðing, Chemistry 2e, OpenStax, Rice University, CC BY 4.0'
 		);
 		expect(reread.catalog.lookup(PDFName.of('Lang'), PDFString).decodeText()).toBe('is');
+	});
+});
+
+describe('the footer licence line in the stamp font', () => {
+	it('encodes in Helvetica (WinAnsi) for every licence, middle dot included', async () => {
+		const doc = await PDFDocument.create();
+		const font = await doc.embedFont(StandardFonts.Helvetica);
+		for (const code of Object.keys(LICENCES)) {
+			const { licenceLine } = pdfBookInfo(withLicence(code), 'tilraunabok');
+			expect(licenceLine).toContain('·');
+			expect(() => font.encodeText(licenceLine)).not.toThrow();
+		}
+		// Control: a character WinAnsi lacks does throw, so the check can fail.
+		expect(() => font.encodeText('CC BY 4.0 → openstax.org')).toThrow();
+	});
+
+	it('fits beside the folio on A4 at the stamp size, for every licence', async () => {
+		const doc = await PDFDocument.create();
+		const font = await doc.embedFont(StandardFonts.Helvetica);
+		for (const code of Object.keys(LICENCES)) {
+			const { licenceLine } = pdfBookInfo(withLicence(code), 'tilraunabok');
+			const width = font.widthOfTextAtSize(licenceLine, 7);
+			expect(() => footerLineX(595.28, width, 51 + 36)).not.toThrow();
+		}
+	});
+});
+
+describe('footerLineX', () => {
+	it('centres the line', () => {
+		expect(footerLineX(600, 200, 80)).toBe(200);
+	});
+
+	it('throws when the line would reach the folio', () => {
+		expect(() => footerLineX(600, 441, 80)).toThrow(/run into the folio/);
+		expect(footerLineX(600, 440, 80)).toBe(80);
 	});
 });

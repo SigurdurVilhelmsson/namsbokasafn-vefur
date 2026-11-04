@@ -1,7 +1,7 @@
 /**
- * The title and document metadata of the generated PDFs
- * (scripts/generate-pdfs.js; docs/plans/2026-07-01-pdf-redesign-plan.md, Task
- * 4.2). Pure: every fact comes from the book registry that
+ * The title, document metadata and footer licence line of the generated PDFs
+ * (scripts/generate-pdfs.js; docs/plans/2026-07-01-pdf-redesign-plan.md, Tasks
+ * 4.2 and 4.3). Pure: every fact comes from the book registry that
  * scripts/lib/book-config.js loads from src/lib/types/book.ts, so a title, a
  * licence or a credit has one source, the same one the /print routes render.
  *
@@ -12,8 +12,12 @@
  * content never names a human as its translator.
  */
 
+/** The reader's host, named in the footer licence line beside the source's. */
+export const SITE_HOST = 'namsbokasafn.is';
+
 /**
- * Everything the PDFs say about a book: its title and document metadata.
+ * Everything the PDFs say about a book: its title, document metadata and the
+ * licence line stamped in the folio band.
  *
  * Throws when the book has no entry in book.ts (a retired book has none in
  * `books` either) or its attribution is incomplete: a PDF must never fall back
@@ -44,6 +48,7 @@ export function pdfBookInfo(config, slug) {
 
 	// The colophon's credit line (src/routes/print/[bookSlug]/colophon), verbatim.
 	const credit = config.creditLine(book.slug, book.status, attribution.translators);
+	const sourceHost = new URL(attribution.sourceUrl).hostname.replace(/^www\./, '');
 
 	return {
 		title: book.title,
@@ -58,7 +63,9 @@ export function pdfBookInfo(config, slug) {
 			attribution.originalTitle,
 			attribution.publisher,
 			licence.name
-		]
+		],
+		// D20: proposed — e.g. "CC BY 4.0 · openstax.org · namsbokasafn.is"
+		licenceLine: [licence.name, sourceHost, SITE_HOST].join(' · ')
 	};
 }
 
@@ -94,4 +101,23 @@ export function applyDocumentInfo(doc, info) {
 	doc.setSubject(info.subject);
 	doc.setKeywords([info.keywords.join(', ')]);
 	doc.setLanguage('is');
+}
+
+/**
+ * Left edge of the licence line, centred on the page. Throws if the line would
+ * reach into `sideReserve` points from either edge, where the folio sits: the
+ * line and the folio share a baseline, so a line that long would print over
+ * the page number.
+ *
+ * @param {number} pageWidth
+ * @param {number} textWidth
+ * @param {number} sideReserve
+ */
+export function footerLineX(pageWidth, textWidth, sideReserve) {
+	if (textWidth > pageWidth - 2 * sideReserve) {
+		throw new Error(
+			`The footer licence line is ${textWidth.toFixed(1)} pt wide and would run into the folio (room: ${(pageWidth - 2 * sideReserve).toFixed(1)} pt)`
+		);
+	}
+	return (pageWidth - textWidth) / 2;
 }
