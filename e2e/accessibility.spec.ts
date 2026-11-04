@@ -4,12 +4,14 @@
  *
  * These verify fundamental a11y requirements across key pages.
  *
- * The "Accessibility ratchet" block at the end runs axe-core on five surfaces against
- * e2e/a11y-baseline.json (plan step S1.1); see e2e/helpers/axe.ts.
+ * The "Accessibility ratchet" block runs axe-core on five surfaces against
+ * e2e/a11y-baseline.json (plan step S1.1); see e2e/helpers/axe.ts. The block after it
+ * scans the book home's PDF button, which no build without PDFs renders.
  */
 
+import AxeBuilder from '@axe-core/playwright';
 import { test, expect, type Page } from '@playwright/test';
-import { fieldsLabelledOnlyByPlaceholder, scanSurface, settle } from './helpers/axe';
+import { WCAG_TAGS, fieldsLabelledOnlyByPlaceholder, scanSurface, settle } from './helpers/axe';
 import { firstModuleSection, publishedBook } from './helpers/content-fixtures';
 
 test.describe('Landing Page Accessibility', () => {
@@ -348,4 +350,63 @@ test.describe('Accessibility ratchet (axe, WCAG 2.1 A and AA)', () => {
 		for (const f of await fieldsLabelledOnlyByPlaceholder(page, '[role="dialog"]')) unnamed.push(`search: ${f}`);
 		expect(unnamed).toEqual([]);
 	});
+});
+
+// ---------------------------------------------------------------------------------------
+// The book home's PDF button, which the ratchet's surfaces never render
+// ---------------------------------------------------------------------------------------
+
+/**
+ * 'Sækja bók sem PDF' shows only when /downloads/<book>/manifest.json exists, and CI has no
+ * PDFs, so the book-home surface above never contains it. The manifest is read by the book
+ * layout's universal load with SvelteKit's fetch. A prerender with no manifest gets a 404,
+ * whose body the load never reads, so nothing is inlined in the page: hydration runs the load
+ * again in the browser and fetches the file over the network, where page.route() answers it.
+ * No file under static/downloads/ is needed. A build made WITH PDFs inlines the real manifest
+ * and never asks, so the button renders from that one: the name's size is matched as a pattern.
+ */
+const PDF_MANIFEST = BOOK && {
+	generatedAt: '2026-11-04T00:00:00.000Z',
+	bookSlug: BOOK,
+	// scripts/generate-pdfs.js names the whole book `<slug>-bok.pdf`; 48,234,496 bytes is "46 MB".
+	full: { file: `${BOOK}-bok.pdf`, sizeBytes: 48_234_496, pageCount: 1200 },
+	chapters: []
+};
+
+test.describe('PDF download button on the book home (axe, WCAG 2.1 A and AA)', () => {
+	// No service worker: page.route() does not see requests a service worker makes.
+	test.use({ serviceWorkers: 'block', reducedMotion: 'reduce' });
+
+	for (const theme of THEMES) {
+		for (const viewport of VIEWPORTS) {
+			test(`${theme} theme at ${viewport.width} px: the button and its row have no failure`, async ({ page }) => {
+				test.skip(!BOOK, 'no published book is synced');
+				await page.setViewportSize(viewport);
+				await page.route(`**/downloads/${BOOK}/manifest.json`, (route) => route.fulfill({ json: PDF_MANIFEST }));
+				await seedTheme(page, theme);
+				await page.goto(`/${BOOK}/`);
+				await page.waitForLoadState('networkidle');
+				if (theme === 'dark') await expect(page.locator('html')).toHaveClass(/(^|\s)dark(\s|$)/);
+				else await expect(page.locator('html')).not.toHaveClass(/(^|\s)dark(\s|$)/);
+
+				// The name carries the size, as generate-pdfs.js's manifest gives it ("46 MB" from
+				// the fixture; whatever size a build with real PDFs inlined).
+				const button = page.getByRole('link', { name: /^Sækja bók sem PDF \(\d+(,\d)? (B|KB|MB)\)$/ });
+				await expect(button).toBeVisible();
+				await expect(button).toHaveAttribute('href', new RegExp(`^/downloads/${BOOK}/[a-zA-Z0-9._-]+\\.pdf$`));
+
+				await settle(page);
+				const results = await new AxeBuilder({ page }).include('.book-home-actions').withTags(WCAG_TAGS).analyze();
+				const failures = results.violations.flatMap((v) =>
+					v.nodes.map((n) => `${v.id} (${v.impact}): ${n.target.join(' ')}\n    ${n.failureSummary ?? ''}`)
+				);
+				expect(failures, failures.join('\n')).toEqual([]);
+				// Not a vacuous pass: axe measured the button's text against its fill.
+				const contrastPassed = results.passes
+					.find((r) => r.id === 'color-contrast')
+					?.nodes.some((n) => n.target.join(' ').includes('pdf-btn'));
+				expect(contrastPassed, "axe measured the PDF button's contrast and passed it").toBe(true);
+			});
+		}
+	}
 });

@@ -1,12 +1,37 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import tailwindcss from '@tailwindcss/vite';
-import { defineConfig } from 'vite';
-import { runtimeCaching } from './src/lib/sw/runtimeCaching';
+import { defineConfig, type Plugin } from 'vite';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { runtimeCaching, APP_SHELL_FILE } from './src/lib/sw/runtimeCaching';
 
-export default defineConfig({
+/**
+ * `vite preview` serves .svelte-kit/output, not build/, so it has no /200.html:
+ * adapter-static writes the SPA shell straight into build/. nginx serves
+ * build/200.html as a file, and the service worker precaches it (offline cold
+ * start), so preview serves it the same way, or the worker's install fails on a 404
+ * and no e2e test gets a worker. Preview only; the build is unchanged.
+ */
+function previewAppShell(): Plugin {
+	return {
+		name: 'nb-preview-app-shell',
+		configurePreviewServer(server) {
+			const file = resolve(server.config.root, 'build', APP_SHELL_FILE);
+			server.middlewares.use((req, res, next) => {
+				if ((req.url ?? '').split('?')[0] !== `/${APP_SHELL_FILE}` || !existsSync(file)) return next();
+				res.setHeader('content-type', 'text/html; charset=utf-8');
+				res.setHeader('cache-control', 'no-cache, must-revalidate');
+				res.end(readFileSync(file));
+			});
+		}
+	};
+}
+
+export default defineConfig(({ command }) => ({
 	plugins: [
 		tailwindcss(),
+		previewAppShell(),
 		sveltekit(),
 		SvelteKitPWA({
 			// Service worker registration strategy
@@ -15,6 +40,15 @@ export default defineConfig({
 			// Ensure SW is registered from root, not relative to current path
 			scope: '/',
 			base: '/',
+			// Precache the SPA shell that adapter-static writes (svelte.config.js), with a
+			// revision: the adapter runs after the worker is generated, so `spa` derives
+			// it from _app/version.json, which changes with every build. The navigation
+			// route in runtimeCaching.ts serves it only when a page load fails offline.
+			// Build only: `vite dev` makes its own worker from these options (devOptions),
+			// and there `spa` throws before any build has run (no version.json) or
+			// precaches a /200.html the dev server answers with a 404, so the dev worker
+			// never installs (src/lib/sw/devWorker.test.ts).
+			kit: command === 'build' ? { adapterFallback: APP_SHELL_FILE, spa: true } : {},
 
 			// Workbox configuration
 			workbox: {
@@ -32,7 +66,9 @@ export default defineConfig({
 				// Answers the page's "do you serve downloaded books?" check (see that file).
 				importScripts: ['/sw-offline-book.js'],
 
-				// Don't fallback on document based (non-cached) requests
+				// Never serve the shell in place of a page that loads: an online page load
+				// must get the prerendered page. The offline fallback is a route in
+				// runtimeCaching.ts that answers only when the network fails.
 				navigateFallback: null
 			},
 
@@ -88,4 +124,4 @@ export default defineConfig({
 	preview: {
 		port: 4173
 	}
-});
+}));

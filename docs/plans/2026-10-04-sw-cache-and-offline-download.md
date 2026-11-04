@@ -49,7 +49,7 @@ A hard load of a frozen book's page runs the **old** `offline.ts` (the frozen pa
 
 ## Out of scope (named, on the worklist)
 
-- **Offline cold start.** `navigateFallback: null` plus `globIgnores: ['**/prerendered/**']` precaches no HTML page, so a hard load of a section URL offline fails whatever is downloaded. A downloaded book is readable offline from an open tab (client-side navigation).
+- **Offline cold start.** `navigateFallback: null` plus `globIgnores: ['**/prerendered/**']` precaches no HTML page, so a hard load of a section URL offline fails whatever is downloaded. A downloaded book is readable offline from an open tab (client-side navigation). _Done 2026-11-04 (worklist `bl-offline-cold-start`, [USER] chose the fallback shell): the worker precaches the SPA shell (`/200.html`) and a NetworkOnly route for page loads answers with it only when the network fails, so the app boots and reads the book from `offline-book:<slug>`; an online page load still gets the prerendered page. Limits are in CLAUDE.md, "Service worker caching and offline download"; tests in `e2e/offline-cold-start.spec.ts`._
 - **First visit.** A tab no service worker controls yet can download (the active worker is checked), but cannot read offline until the page is opened again; the button says so.
 - **ETag churn.** A post-build step that restores `build/content/**` mtimes from `static/content/**` would make unchanged files answer 304 across deploys. Detector: `curl -sI` one figure before and after a deploy with no content change; `last-modified` must not move. _Done another way (`fix/deploy-etag-churn`): `deploy.js` runs rsync with `--checksum --no-times`, which covers every file, not only `content/`, and needs no one-off deploy to realign mtimes._
 

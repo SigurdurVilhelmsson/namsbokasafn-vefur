@@ -15,9 +15,19 @@
  *     measured first, then the front matter is re-printed with page numbers
  *     fed in via downloads/<slug>/toc-pages.json)
  *   - PDF bookmarks (outline) for the TOC, every chapter and the appendices
+ *   - a licence line in the folio band of every numbered page, and document
+ *     metadata (title, author, subject = licence, keywords, language) on the
+ *     book and on every chapter PDF, all from src/lib/types/book.ts
+ *     (scripts/lib/pdf-attribution.js)
  *
  * Standalone chapter PDFs are stamped with the same book-absolute page
  * numbers, so a printed chapter matches the full book and its TOC.
+ *
+ * Each route is printed only once every image on it has loaded
+ * (scripts/lib/pdf-print.js); one that fails or is still loading after the
+ * bound stops that book with a list of the images, and nothing is written for
+ * it, since a missing figure would print as nothing and move every page number
+ * after it.
  *
  * Output: static/downloads/<slug>/
  *   - <slug>-kafli-NN.pdf       (one per chapter)
@@ -62,9 +72,18 @@ import {
 	harvestDests,
 	findCollidingNames,
 	mergeChapterDests,
+	namespaceChapterLinks,
 	writeMergedDests
 } from './lib/pdf-links.js';
-import { assertPrintable, pdfBooks } from './lib/pdf-books.js';
+import { pdfBooks } from './lib/pdf-books.js';
+import { printToPdf } from './lib/pdf-print.js';
+import { loadBookConfig } from './lib/book-config.js';
+import {
+	applyDocumentInfo,
+	chapterDocInfo,
+	footerLineX,
+	pdfBookInfo
+} from './lib/pdf-attribution.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -81,6 +100,14 @@ const HEADER_BASELINE = 806;
 const STAMP_FONT_SIZE = 9;
 const HEADER_COLOR = rgb(0.42, 0.42, 0.42);
 const FOLIO_COLOR = rgb(0.2, 0.2, 0.2);
+// The licence line shares the folio's baseline, centred, smaller and in the
+// running header's grey (#6b6b6b, about 5.3:1 on white, so it holds in a
+// greyscale copy). FOLIO_RESERVE keeps it clear of the folio: MARGIN_X plus
+// room for a four-digit folio at 9 pt (about 20 pt) and a gap. The body text
+// ends 22mm (62 pt) above the paper edge, well above this baseline.
+const LICENCE_FONT_SIZE = 7;
+const LICENCE_COLOR = HEADER_COLOR;
+const FOLIO_RESERVE = MARGIN_X + 36;
 
 function parseArgs(argv) {
 	const args = { book: null, port: 5180 };
@@ -110,26 +137,26 @@ async function startDevServer(port) {
 	return { server, url };
 }
 
-async function printToPdf(page, url, outFile) {
-	assertPrintable(await page.goto(url, { waitUntil: 'load', timeout: 60000 }), url);
-	// Give layout/fonts a beat to settle. Pre-rendered MathJax SVG doesn't need
-	// time, but custom fonts swap async on first request.
-	await page.waitForLoadState('networkidle', { timeout: 30000 }).catch(() => {});
-	await page.evaluate(() => document.fonts?.ready);
-
-	// Headers/footers are stamped afterwards with pdf-lib (continuous book
-	// numbering, running headers), so Chromium prints content only.
-	await page.pdf({
-		path: outFile,
-		format: 'A4',
-		printBackground: true,
-		preferCSSPageSize: true, // honor @page rules in print.css
-		displayHeaderFooter: false,
-		// preferCSSPageSize honours print.css's @page margins (20/22/22/22mm —
-		// symmetric binding-safe sides for double-sided binding); these mirror
-		// that for clarity and any non-CSS-page-size fallback.
-		margin: { top: '20mm', bottom: '22mm', left: '22mm', right: '22mm' }
-	});
+/**
+ * Run `fn` with a fresh page, closed afterwards. One page reused for every
+ * print kept the earlier chapters' decoded figures: the browser's memory rose
+ * to 6.2 GB by chapter 10 of a whole-book run, against a 2.9 GB peak over a
+ * whole run with a page per print.
+ */
+async function withPrintPage(context, fn) {
+	const page = await context.newPage();
+	try {
+		// Render PDFs with *screen* styles. The /print routes are styled
+		// unconditionally by print.css, while app.css carries a global
+		// `@media print` block meant for users printing the reading view — it
+		// hides <header>/<aside> (killing section titles and note boxes) and
+		// flattens colors. Emulating screen media keeps it out of the PDFs;
+		// Chromium still honors break-* and @page rules when printing.
+		await page.emulateMedia({ media: 'screen' });
+		return await fn(page);
+	} finally {
+		await page.close();
+	}
 }
 
 async function getPdfPageCount(file) {
@@ -164,8 +191,12 @@ function encodableText(font, text) {
  *
  * Book conventions: odd page numbers are recto (folio + header on the right),
  * even are verso (on the left). Chapter openers pass headerText: null.
+ *
+ * licenceLine is centred in the folio band of every page that gets a folio.
+ * It is drawn as given, not through encodableText: a licence statement with a
+ * character the font lacks must stop the run, not print a '?'.
  */
-async function stampPages(doc, pageInfo) {
+async function stampPages(doc, pageInfo, licenceLine) {
 	const font = await doc.embedFont(StandardFonts.Helvetica);
 	const fontItalic = await doc.embedFont(StandardFonts.HelveticaOblique);
 	const pages = doc.getPages();
@@ -186,6 +217,15 @@ async function stampPages(doc, pageInfo) {
 			size: STAMP_FONT_SIZE,
 			font,
 			color: FOLIO_COLOR
+		});
+
+		const licenceWidth = font.widthOfTextAtSize(licenceLine, LICENCE_FONT_SIZE);
+		page.drawText(licenceLine, {
+			x: footerLineX(width, licenceWidth, FOLIO_RESERVE),
+			y: FOOTER_BASELINE,
+			size: LICENCE_FONT_SIZE,
+			font,
+			color: LICENCE_COLOR
 		});
 
 		if (info.headerText) {
@@ -237,7 +277,13 @@ function addOutline(doc, items) {
 	doc.catalog.set(PDFName.of('Outlines'), outlineRef);
 }
 
-async function generateForBook(page, baseUrl, bookSlug) {
+async function generateForBook(context, baseUrl, bookSlug, bookConfig) {
+	// Title, metadata and licence line come from book.ts, the source the /print
+	// routes render from, and never from toc.json's `title`: generate-toc.js
+	// falls back to the slug there when efni's toc has none, so the chemistry
+	// toc.json (live too) says "efnafraedi-2e". Resolved before any printing, so
+	// a book without a book.ts entry fails at once.
+	const bookInfo = pdfBookInfo(bookConfig, bookSlug);
 	const toc = loadToc(bookSlug);
 	const bookOutDir = join(OUTPUT_DIR, bookSlug);
 	const bookTmpDir = join(TMP_DIR, bookSlug);
@@ -254,6 +300,17 @@ async function generateForBook(page, baseUrl, bookSlug) {
 	const tocPagesFile = join(bookOutDir, 'toc-pages.json');
 	rmSync(tocPagesFile, { force: true });
 
+	// Every print waits for its images and throws if one did not load
+	// (scripts/lib/pdf-print.js): a missing figure would print as nothing and
+	// move every later page number, so the book stops instead. The count is for
+	// the run log.
+	const images = { prints: 0, loaded: 0 };
+	const printRoute = async (url, outFile) => {
+		const report = await withPrintPage(context, (page) => printToPdf(page, url, outFile));
+		images.prints++;
+		images.loaded += report.loaded;
+	};
+
 	// --- Pass 1: print raw chapter/appendix PDFs and measure them ------------
 
 	const chapterParts = [];
@@ -262,7 +319,7 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		const url = `${baseUrl}/print/${bookSlug}/kafli/${chSlug}/`;
 		const rawFile = join(bookTmpDir, `${bookSlug}-kafli-${chSlug}-raw.pdf`);
 		console.log(`  ${bookSlug} kafli ${chSlug}: ${chapter.title}`);
-		await printToPdf(page, url, rawFile);
+		await printRoute(url, rawFile);
 		chapterParts.push({
 			chapterNum: chapter.number,
 			title: chapter.title,
@@ -276,7 +333,7 @@ async function generateForBook(page, baseUrl, bookSlug) {
 	if ((toc.appendices ?? []).length > 0) {
 		const rawFile = join(bookTmpDir, `${bookSlug}-vidauki-raw.pdf`);
 		console.log(`  ${bookSlug}: appendices (${toc.appendices.length})`);
-		await printToPdf(page, `${baseUrl}/print/${bookSlug}/vidauki/`, rawFile);
+		await printRoute(`${baseUrl}/print/${bookSlug}/vidauki/`, rawFile);
 		appendixPart = { rawFile, pageCount: await getPdfPageCount(rawFile) };
 	}
 
@@ -285,7 +342,7 @@ async function generateForBook(page, baseUrl, bookSlug) {
 	if (existsSync(join(CONTENT_DIR, bookSlug, 'glossary.json'))) {
 		const rawFile = join(bookTmpDir, `${bookSlug}-ordabok-raw.pdf`);
 		console.log(`  ${bookSlug}: glossary (orðaskrá)`);
-		await printToPdf(page, `${baseUrl}/print/${bookSlug}/ordabok/`, rawFile);
+		await printRoute(`${baseUrl}/print/${bookSlug}/ordabok/`, rawFile);
 		glossaryPart = { rawFile, pageCount: await getPdfPageCount(rawFile) };
 	}
 
@@ -325,7 +382,7 @@ async function generateForBook(page, baseUrl, bookSlug) {
 
 	const frontMatterFile = join(bookTmpDir, `${bookSlug}-front.pdf`);
 	console.log(`  ${bookSlug}: front matter (title + TOC)`);
-	await printToPdf(page, `${baseUrl}/print/${bookSlug}/bok/`, frontMatterFile);
+	await printRoute(`${baseUrl}/print/${bookSlug}/bok/`, frontMatterFile);
 	const frontPageCount = await getPdfPageCount(frontMatterFile);
 
 	// Colophon page — identical for every chapter, so render once and append it
@@ -333,14 +390,13 @@ async function generateForBook(page, baseUrl, bookSlug) {
 	// per-chapter colophon; it carries the single front-matter colophon instead.
 	const colophonFile = join(bookTmpDir, `${bookSlug}-colophon.pdf`);
 	console.log(`  ${bookSlug}: colophon (standalone chapters)`);
-	await printToPdf(page, `${baseUrl}/print/${bookSlug}/colophon/`, colophonFile);
+	await printRoute(`${baseUrl}/print/${bookSlug}/colophon/`, colophonFile);
 
 	// --- Stamp + write standalone chapter PDFs, assemble the full book -------
 
-	const bookTitle = toc.title ?? bookSlug;
+	const bookTitle = bookInfo.title;
 	const merged = await PDFDocument.create();
-	merged.setTitle(bookTitle, { showInWindowTitleBar: true });
-	merged.setLanguage('is');
+	applyDocumentInfo(merged, bookInfo);
 
 	const front = await PDFDocument.load(readFileSync(frontMatterFile));
 	for (const p of await merged.copyPages(front, front.getPageIndices())) merged.addPage(p);
@@ -353,7 +409,7 @@ async function generateForBook(page, baseUrl, bookSlug) {
 	// content dangles until we harvest each chapter's dests and rewrite them
 	// against the merged page tree. Also lets us register chapter start pages as
 	// named dests for the clickable table of contents. See scripts/lib/pdf-links.js.
-	const destHarvest = []; // { dests, mergedOffset, chapterNum }
+	const destHarvest = []; // { dests, mergedOffset, chapterNum, pages }
 	const tocDests = {}; // anchor name → merged page index (chapter/appendix starts)
 
 	const chapterEntries = [];
@@ -372,11 +428,11 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		// Standalone chapter file — book-absolute page numbers so a printed
 		// chapter matches the full book and its TOC.
 		const standalone = await PDFDocument.load(readFileSync(part.rawFile));
-		standalone.setTitle(`${bookTitle} — ${part.chapterNum}. ${part.title}`, {
-			showInWindowTitleBar: true
-		});
-		standalone.setLanguage('is');
-		await stampPages(standalone, headerForPage);
+		applyDocumentInfo(
+			standalone,
+			chapterDocInfo(bookInfo, { number: part.chapterNum, title: part.title })
+		);
+		await stampPages(standalone, headerForPage, bookInfo.licenceLine);
 		// Append the standalone-only colophon as an unstamped addendum page (so a
 		// chapter shared on its own still carries full CC-BY attribution). It is
 		// deliberately absent from the merged book below.
@@ -392,9 +448,14 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		outlineItems.push({ title: `${part.chapterNum}. ${part.title}`, pageIndex: mergedOffset });
 		tocDests[`kafli-${part.chapterNum}`] = mergedOffset;
 		const src = await PDFDocument.load(readFileSync(part.rawFile));
-		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: part.chapterNum });
 		const copied = await merged.copyPages(src, src.getPageIndices());
 		for (const p of copied) merged.addPage(p);
+		destHarvest.push({
+			dests: harvestDests(src),
+			mergedOffset,
+			chapterNum: part.chapterNum,
+			pages: copied
+		});
 
 		chapterEntries.push({
 			chapterNum: part.chapterNum,
@@ -411,9 +472,9 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		outlineItems.push({ title: 'Viðaukar', pageIndex: mergedOffset });
 		tocDests['vidaukar'] = mergedOffset;
 		const src = await PDFDocument.load(readFileSync(appendixPart.rawFile));
-		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 90 });
 		const copied = await merged.copyPages(src, src.getPageIndices());
 		for (const p of copied) merged.addPage(p);
+		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 90, pages: copied });
 	}
 
 	if (glossaryPart) {
@@ -421,15 +482,16 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		outlineItems.push({ title: 'Orðaskrá', pageIndex: mergedOffset });
 		tocDests['ordaskra'] = mergedOffset;
 		const src = await PDFDocument.load(readFileSync(glossaryPart.rawFile));
-		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 91 });
 		const copied = await merged.copyPages(src, src.getPageIndices());
 		for (const p of copied) merged.addPage(p);
+		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 91, pages: copied });
 	}
 
 	// Rebuild the merged catalog /Dests: harvested content dests (rebased to the
 	// merged page tree) so every in-content link resolves again, plus chapter /
 	// appendix start pages for the clickable TOC. Colliding auto-ids (footnote
-	// anchors) are namespaced per chapter so they don't clobber.
+	// anchors) are namespaced per chapter so they don't clobber, and each part's
+	// links to them are renamed with them, or they would point at nothing.
 	const collidingNames = findCollidingNames(destHarvest.map((h) => h.dests));
 	// `gloss-N` are intentionally shared: many chapters link the same glossary
 	// entry, and each chapter carries a hidden placeholder target for it (so
@@ -439,8 +501,10 @@ async function generateForBook(page, baseUrl, bookSlug) {
 		if (name.startsWith('gloss-')) collidingNames.delete(name);
 	}
 	const registry = new Map();
-	for (const { dests, mergedOffset, chapterNum } of destHarvest) {
+	let renamedLinks = 0;
+	for (const { dests, mergedOffset, chapterNum, pages } of destHarvest) {
 		mergeChapterDests(registry, dests, mergedOffset, chapterNum, collidingNames);
+		renamedLinks += namespaceChapterLinks(merged, pages, dests, chapterNum, collidingNames);
 	}
 	for (const [name, mergedPageIndex] of Object.entries(tocDests)) {
 		registry.set(name, { mergedPageIndex, params: [PDFName.of('Fit')] });
@@ -464,21 +528,31 @@ async function generateForBook(page, baseUrl, bookSlug) {
 			startPage: glossaryPart.startPage
 		});
 	}
-	await stampPages(merged, (i) => {
-		if (i < frontPageCount) return null; // front matter is unnumbered
-		const pageNumber = i - frontPageCount + 1;
-		const part = [...partStarts].reverse().find((p) => pageNumber >= p.startPage);
-		if (!part) return null;
-		return {
-			pageNumber,
-			headerText: pageNumber === part.startPage ? null : part.header(pageNumber)
-		};
-	});
+	// Front matter carries no folio band, so no licence line either: its
+	// colophon states the licence in full. Every numbered page does, chapter
+	// openers, appendices and glossary included, so a page copied on its own
+	// still names its licence and source.
+	await stampPages(
+		merged,
+		(i) => {
+			if (i < frontPageCount) return null; // front matter is unnumbered
+			const pageNumber = i - frontPageCount + 1;
+			const part = [...partStarts].reverse().find((p) => pageNumber >= p.startPage);
+			if (!part) return null;
+			return {
+				pageNumber,
+				headerText: pageNumber === part.startPage ? null : part.header(pageNumber)
+			};
+		},
+		bookInfo.licenceLine
+	);
 
 	addOutline(merged, outlineItems);
 
 	const fullBookFile = join(bookOutDir, `${bookSlug}-bok.pdf`);
-	console.log(`  ${bookSlug}: assembling bok.pdf (${merged.getPageCount()} pages)`);
+	console.log(
+		`  ${bookSlug}: assembling bok.pdf (${merged.getPageCount()} pages; ${images.loaded} images loaded in ${images.prints} prints, none missing; ${collidingNames.size} shared anchor names namespaced, ${renamedLinks} links renamed with them)`
+	);
 	writeFileSync(fullBookFile, await merged.save());
 
 	const manifest = {
@@ -519,6 +593,9 @@ async function main() {
 
 	console.log(`Generating PDFs for ${targetBooks.length} book(s): ${targetBooks.join(', ')}`);
 
+	// Titles, licences and credits, from src/lib/types/book.ts.
+	const bookConfig = await loadBookConfig(ROOT);
+
 	mkdirSync(OUTPUT_DIR, { recursive: true });
 	mkdirSync(TMP_DIR, { recursive: true });
 
@@ -533,23 +610,19 @@ async function main() {
 	});
 	const context = await browser.newContext({
 		viewport: { width: 794, height: 1123 }, // A4 at 96 DPI
-		deviceScaleFactor: 1
+		deviceScaleFactor: 1,
+		// The dev server's PWA worker (vite.config.ts, devOptions) would take
+		// every page after the first and pass each figure through its runtime
+		// caches. The print routes need no worker.
+		serviceWorkers: 'block'
 	});
-	const page = await context.newPage();
-	// Render PDFs with *screen* styles. The /print routes are styled
-	// unconditionally by print.css, while app.css carries a global
-	// `@media print` block meant for users printing the reading view — it
-	// hides <header>/<aside> (killing section titles and note boxes) and
-	// flattens colors. Emulating screen media keeps it out of the PDFs;
-	// Chromium still honors break-* and @page rules when printing.
-	await page.emulateMedia({ media: 'screen' });
 
 	let exitCode = 0;
 	try {
 		for (const slug of targetBooks) {
 			console.log(`\n=== ${slug} ===`);
 			try {
-				await generateForBook(page, url, slug);
+				await generateForBook(context, url, slug, bookConfig);
 			} catch (e) {
 				console.error(`  Failed for ${slug}:`, e.message);
 				exitCode = 1;

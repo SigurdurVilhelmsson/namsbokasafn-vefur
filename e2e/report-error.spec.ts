@@ -109,6 +109,11 @@ test.describe('The privacy page (PED-14)', () => {
 		await expect(main).toContainText('opnar tölvupóstforritið');
 		await expect(main).toContainText('Eyða öllum gögnum á þessu tæki');
 		await expect(main.getByRole('link', { name: 'Námsgreiningu' })).toHaveAttribute('href', /\/greining\/$/);
+		// The erase empties the service worker's list of recently fetched pages and figures
+		// (bl-erase-workbox-expiration), so what stays no longer names it.
+		const erase = page.locator('section[aria-labelledby="erase"]');
+		await expect(erase).toContainText('Eftir standa forrit vefsins sjálfs og afrit sem vafrinn geymir sjálfur');
+		await expect(erase).not.toContainText('sótti nýlega');
 		await expect(main).toContainText('ekki lögfræðiráðgjöf');
 	});
 });

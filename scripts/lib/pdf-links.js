@@ -25,7 +25,9 @@
  * (observed: only footnote-return anchors `fnref-N`) would clobber in a flat dict.
  * `mergeChapterDests` namespaces a name only when it is known to collide, so the
  * globally-unique content ids (`CNX_Chem_NN_*`) stay untouched and cross-chapter
- * resolution keeps working.
+ * resolution keeps working. The links that point at a namespaced name are the one
+ * exception to "don't touch the annotations": `namespaceChapterLinks` renames them
+ * the same way, or they would point at a name the merged book no longer has.
  */
 
 import { PDFName, PDFArray, PDFDict, PDFNumber, PDFRef } from 'pdf-lib';
@@ -137,9 +139,77 @@ export function addGoToLink(doc, page, rect, name) {
  */
 export function mergeChapterDests(registry, chapterDests, pageOffset, chapterNum, collidingNames) {
 	for (const [name, { pageIndex, params }] of chapterDests) {
-		const key = collidingNames.has(name) ? `c${String(chapterNum).padStart(2, '0')}__${name}` : name;
+		const key = collidingNames.has(name) ? namespacedDestName(name, chapterNum) : name;
 		registry.set(key, { mergedPageIndex: pageOffset + pageIndex, params, sourceName: name });
 	}
+}
+
+/**
+ * The name a colliding destination gets in the merged book: `cNN__<name>`.
+ *
+ * @param {string} name
+ * @param {number} chapterNum
+ */
+export function namespacedDestName(name, chapterNum) {
+	return `c${String(chapterNum).padStart(2, '0')}__${name}`;
+}
+
+/**
+ * Point one part's link annotations at the names `mergeChapterDests` gave its
+ * colliding destinations. Without this, every link to a namespaced name dangles
+ * in the merged book: the catalog holds `c03__fnref-1`, while the footnote's
+ * back link on chapter 3's page still says `/fnref-1`, which no longer exists
+ * (36 of 36 footnote back links in the 2026-11-04 `-bok.pdf`).
+ *
+ * A link is rewritten only when its name collides and this part owns a
+ * destination of that name (Chromium links only to ids in the same document, so
+ * a part's links always mean its own destinations). Names exempt from
+ * namespacing, such as the shared `gloss-N`, are simply not in `collidingNames`.
+ * Reads both forms of a GoTo link: `/Dest name` and `/A << /S /GoTo /D name >>`.
+ *
+ * @param {import('pdf-lib').PDFDocument} doc  the merged book
+ * @param {Array<import('pdf-lib').PDFPage>} pages  the part's pages, as copied into `doc`
+ * @param {Map<string, any>} chapterDests  the part's destinations, from harvestDests
+ * @param {number} chapterNum  the number mergeChapterDests namespaced them with
+ * @param {Set<string>} collidingNames  the names mergeChapterDests namespaced
+ * @returns {number} how many links were rewritten
+ */
+export function namespaceChapterLinks(doc, pages, chapterDests, chapterNum, collidingNames) {
+	const renamed = (dest) => {
+		if (!(dest instanceof PDFName)) return null;
+		// The same spelling harvestDests keys the destinations by.
+		const name = dest.toString().replace(/^\//, '');
+		if (!collidingNames.has(name) || !chapterDests.has(name)) return null;
+		return PDFName.of(namespacedDestName(name, chapterNum));
+	};
+
+	let rewritten = 0;
+	for (const page of pages) {
+		const annots = doc.context.lookup(page.node.get(PDFName.of('Annots')));
+		if (!(annots instanceof PDFArray)) continue;
+		for (let i = 0; i < annots.size(); i++) {
+			const annot = doc.context.lookup(annots.get(i));
+			if (!(annot instanceof PDFDict)) continue;
+			if (annot.get(PDFName.of('Subtype'))?.toString() !== '/Link') continue;
+
+			const direct = renamed(annot.get(PDFName.of('Dest')));
+			if (direct) {
+				annot.set(PDFName.of('Dest'), direct);
+				rewritten++;
+				continue;
+			}
+			const action = doc.context.lookup(annot.get(PDFName.of('A')));
+			if (!(action instanceof PDFDict) || action.get(PDFName.of('S'))?.toString() !== '/GoTo') {
+				continue;
+			}
+			const viaAction = renamed(doc.context.lookup(action.get(PDFName.of('D'))));
+			if (viaAction) {
+				action.set(PDFName.of('D'), viaAction);
+				rewritten++;
+			}
+		}
+	}
+	return rewritten;
 }
 
 /**

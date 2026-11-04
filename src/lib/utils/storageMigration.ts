@@ -94,11 +94,114 @@ export function getStorageSize(): number {
 }
 
 /**
+ * workbox-expiration's database, written by the service worker's ExpirationPlugin: the URL
+ * and time of every page and figure in the browsing caches (up to 500 and 100), so a list of
+ * what was read (node_modules/workbox-expiration/models/CacheTimestampsModel.js).
+ */
+export const EXPIRATION_DB = 'workbox-expiration';
+const EXPIRATION_STORE = 'cache-entries';
+/** The erase waits at most this long for that database, then goes on. */
+export const EXPIRATION_CLEAR_TIMEOUT_MS = 2000;
+
+export type ExpirationClearResult = 'cleared' | 'absent' | 'failed' | 'timed-out';
+
+/**
+ * Empty the service worker's expiry records, the list above (worklist row
+ * bl-erase-workbox-expiration). /greining's erase runs it before deleteLocalCaches().
+ *
+ * It empties the database's one store through a connection of its own and leaves the empty
+ * database, because deleting it cannot finish while the worker runs: workbox opens the
+ * database once per cache, keeps that connection, and never closes it on a versionchange (it
+ * gives idb's openDB no `blocking` callback, and idb listens for versionchange only then).
+ * Measured in Chromium on 2026-11-04: a deleteDatabase from the page fired `blocked` at once
+ * and was still pending 3 s later, an open queued behind it stayed pending as long (so would
+ * the worker's first open for a cache it had not written yet), and it ran only when the worker
+ * stopped, after the page had reloaded. Opening at the current version fires no versionchange,
+ * so the clear is never blocked, and the worker's own connections stay valid: its next cache
+ * write adds a record as before (e2e/data-erase.spec.ts).
+ *
+ * 🔴 Opening a database that does not exist creates it, empty, at version 1; workbox's own
+ * open(name, 1) would then run no upgrade and never make its store, and every later write of
+ * the worker would fail. So the upgrade is aborted, which creates nothing.
+ *
+ * Like deleteLocalCaches it never throws (a failure is logged), and it waits at most
+ * `timeoutMs`: the erase must still clear localStorage and reload.
+ */
+export async function clearExpirationRecords(
+	timeoutMs = EXPIRATION_CLEAR_TIMEOUT_MS
+): Promise<ExpirationClearResult> {
+	if (!browser) return 'absent';
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	const timedOut = new Promise<'timed-out'>((resolve) => {
+		timer = setTimeout(() => resolve('timed-out'), timeoutMs);
+	});
+	const result = await Promise.race([emptyExpirationStore(), timedOut]);
+	clearTimeout(timer);
+	if (result === 'timed-out') {
+		console.error(`The service worker's expiry records did not answer within ${timeoutMs} ms`);
+	}
+	return result;
+}
+
+function emptyExpirationStore(): Promise<Exclude<ExpirationClearResult, 'timed-out'>> {
+	return new Promise((resolve) => {
+		const fail = (e: unknown) => {
+			console.error("Could not clear the service worker's expiry records:", e);
+			resolve('failed');
+		};
+		let request: IDBOpenDBRequest;
+		try {
+			// Reading `indexedDB` throws where storage is blocked (Firefox with cookies off).
+			if (typeof indexedDB === 'undefined') return resolve('absent');
+			request = indexedDB.open(EXPIRATION_DB);
+		} catch (e) {
+			return fail(e);
+		}
+		let creating = false;
+		request.onupgradeneeded = () => {
+			// No version was asked for, so this fires only when the database does not exist.
+			creating = true;
+			request.transaction?.abort();
+		};
+		request.onerror = (event) => {
+			event.preventDefault();
+			if (creating) resolve('absent');
+			else fail(request.error);
+		};
+		request.onsuccess = () => {
+			const db = request.result;
+			// Never be the connection that blocks someone else's upgrade or delete.
+			db.onversionchange = () => db.close();
+			if (!db.objectStoreNames.contains(EXPIRATION_STORE)) {
+				db.close();
+				return resolve('absent');
+			}
+			try {
+				const tx = db.transaction(EXPIRATION_STORE, 'readwrite');
+				tx.objectStore(EXPIRATION_STORE).clear();
+				tx.oncomplete = () => {
+					db.close();
+					resolve('cleared');
+				};
+				tx.onabort = () => {
+					db.close();
+					fail(tx.error);
+				};
+			} catch (e) {
+				db.close();
+				fail(e);
+			}
+		};
+	});
+}
+
+/**
  * Delete what this site keeps for the reader in Cache Storage (plan step S3.2, PED-14):
  * every downloaded book (`offline-book:<slug>`) and the browsing caches of pages and
  * figures, which also show what was read. The service worker's precache (the app itself)
- * stays. Run it before clearAllStorage(): with the record of downloads gone but the caches
- * kept, a book shows as 'Sótt (0 B)' while its files stay on the device.
+ * stays; its expiry records go with clearExpirationRecords(). Run it before
+ * clearAllStorage(): with the record of downloads gone but the caches kept, a book shows as
+ * 'Sótt (0 B)' while its files stay on the device.
  *
  * It never throws: where Cache Storage fails (it has rejected in private windows), the erase
  * must still clear localStorage, so a failure is logged and the deletions that worked stand.

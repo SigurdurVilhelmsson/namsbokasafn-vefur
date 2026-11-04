@@ -6,9 +6,13 @@
  * as it would in build/sw.js. e2e/offline.spec.ts checks the real emitted sw.js.
  */
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import {
 	runtimeCaching,
+	appShellNavigation,
+	APP_SHELL_FILE,
 	sizeGatePlugin,
 	offlineFallbackPlugin,
 	offlineImageFallbackPlugin,
@@ -204,8 +208,64 @@ describe('routes', () => {
 	});
 });
 
+describe('offline cold start: the page-load route (serialized)', () => {
+	const matches = rebuilt(appShellNavigation);
+	const load = (path: string, { mode = 'navigate', sameOrigin = true } = {}) =>
+		matches({
+			// A Request with mode 'navigate' cannot be constructed outside a worker.
+			request: { mode } as Request,
+			url: new URL(`http://localhost${path}`),
+			sameOrigin
+		});
+
+	it.each([
+		'/',
+		'/efnafraedi-2e/',
+		'/efnafraedi-2e',
+		'/efnafraedi-2e/kafli/01/1-1-efnafraedi-i-samhengi/',
+		'/efnafraedi-2e/ordabok/',
+		'/personuvernd/',
+		// "print" as a prefix of a segment, not the /print/ routes
+		'/printed-book/'
+	])('a page load of %s may fall back to the shell', (path) => {
+		expect(load(path)).toBe(true);
+	});
+
+	it.each([
+		['/print/efnafraedi-2e/bok/', 'the PDF routes'],
+		['/print', 'the PDF routes'],
+		['/content/efnafraedi-2e/chapters/01/1-1-x.html', 'a raw content file'],
+		['/content', 'raw content'],
+		['/downloads/efnafraedi-2e/bok.pdf', 'a PDF'],
+		['/sitemap.xml', 'a file'],
+		['/fonts/OFL.txt', 'a file'],
+		['/200.html', 'the shell itself']
+	])('a page load of %s (%s) is left to the browser', (path) => {
+		expect(load(path)).toBe(false);
+	});
+
+	it.each(['cors', 'same-origin', 'no-cors'])('a %s request (not a page load) is not matched', (mode) => {
+		expect(load('/efnafraedi-2e/', { mode })).toBe(false);
+	});
+
+	it('a page load of another origin is not matched', () => {
+		expect(load('/efnafraedi-2e/', { sameOrigin: false })).toBe(false);
+	});
+
+	it('goes to the network, and only a failed fetch gets the precached shell', () => {
+		const route = runtimeCaching.find((r) => r.urlPattern === appShellNavigation);
+		expect(route?.handler).toBe('NetworkOnly');
+		expect(route?.options).toEqual({ precacheFallback: { fallbackURL: `/${APP_SHELL_FILE}` } });
+	});
+
+	it('the shell is the file adapter-static writes (svelte.config.js `fallback`)', () => {
+		const config = readFileSync(join(process.cwd(), 'svelte.config.js'), 'utf8');
+		expect(config).toMatch(new RegExp(`\\bfallback:\\s*'${APP_SHELL_FILE.replace('.', '\\.')}'`));
+	});
+});
+
 describe('plugin order (key order is plugin order in workbox-build)', () => {
-	it.each(runtimeCaching.map((r) => [r.options.cacheName, r] as const))(
+	it.each(runtimeCaching.filter((r) => 'plugins' in r.options).map((r) => [r.options.cacheName, r] as const))(
 		'%s: expiration comes before the plugins list',
 		(_name, route) => {
 			const keys = Object.keys(route.options);
@@ -214,7 +274,7 @@ describe('plugin order (key order is plugin order in workbox-build)', () => {
 	);
 
 	it('pages: the downloaded-book fallback is the last plugin', () => {
-		expect(runtimeCaching[0].options.plugins.at(-1)).toBe(offlineFallbackPlugin);
+		expect(runtimeCaching[0].options.plugins?.at(-1)).toBe(offlineFallbackPlugin);
 	});
 
 	it('figures: the downloaded copy is used only when the strategy failed', () => {
@@ -224,6 +284,6 @@ describe('plugin order (key order is plugin order in workbox-build)', () => {
 	// StaleWhileRevalidate treats a cachedResponseWillBeUsed result as a cache hit, so
 	// an ONLINE reader would get the downloaded copy instead of a re-rendered figure.
 	it('figures: no plugin answers cache misses from the downloaded copy', () => {
-		expect(runtimeCaching[1].options.plugins.some((p) => 'cachedResponseWillBeUsed' in p)).toBe(false);
+		expect(runtimeCaching[1].options.plugins?.some((p) => 'cachedResponseWillBeUsed' in p)).toBe(false);
 	});
 });

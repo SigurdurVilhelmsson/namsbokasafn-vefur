@@ -9,6 +9,7 @@ import {
 	type TermIndex
 } from '$lib/utils/printGlossary';
 import { extractArticle, markMachineTranslated } from '$lib/utils/printContent';
+import { linkExercisesToAnswers } from '$lib/utils/printAnswers';
 
 export const prerender = true;
 
@@ -97,7 +98,10 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			attribution: book.attribution,
 			chapter,
 			chapterFolder: folder,
-			blocks
+			// Exercise ↔ answer links (PDF plan Task 3.3): the sections and the answer key
+			// are one document here, so each answered exercise links to its answer and back.
+			// The anchors are scoped by chapter number to stay unique in the merged book.
+			blocks: linkExercisesToAnswers(blocks, String(chapter.number).padStart(2, '0'))
 		};
 	} catch (e) {
 		if (isHttpError(e)) throw e;

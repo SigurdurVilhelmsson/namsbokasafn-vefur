@@ -5,11 +5,15 @@
  *   browser: every namsbokasafn key, the downloaded books and the browsing caches, then reloads.
  *   The stores write their defaults back on the reload, so the test checks that no key still
  *   holds seeded data, not that the keys are gone.
+ * - It also empties the service worker's expiry records (IndexedDB `workbox-expiration`, the
+ *   URL and time of each page and figure it cached), with a real worker controlling the page
+ *   (worklist row bl-erase-workbox-expiration).
  * - 'Hreinsa tölfræði' (it was 'Hreinsa gögn') says what it clears, and that the rest stays.
  * - /prof no longer claims to adapt the next question.
  */
 import { expect, test, type Page } from '@playwright/test';
 import { firstModuleSection, publishedBook } from './helpers/content-fixtures';
+import { openControlled } from './helpers/service-worker';
 
 const BOOK = publishedBook();
 const SECTION = BOOK ? firstModuleSection(BOOK) : null;
@@ -72,6 +76,102 @@ const storedKeys = (page: Page) =>
 		)
 	);
 
+type ExpiryRecords = { exists: boolean; store: boolean; records: { url: string; timestamp: number }[] };
+
+/**
+ * What the service worker's expiry database holds, read the way clearExpirationRecords opens
+ * it: an open with no version, whose upgrade is aborted, so a missing database is not created.
+ */
+const expiryRecords = (page: Page) =>
+	page.evaluate(
+		() =>
+			new Promise<ExpiryRecords>((resolve, reject) => {
+				const request = indexedDB.open('workbox-expiration');
+				request.onupgradeneeded = () => request.transaction?.abort();
+				request.onerror = (event) => {
+					event.preventDefault();
+					resolve({ exists: false, store: false, records: [] });
+				};
+				request.onsuccess = () => {
+					const db = request.result;
+					if (!db.objectStoreNames.contains('cache-entries')) {
+						db.close();
+						return resolve({ exists: true, store: false, records: [] });
+					}
+					const all = db.transaction('cache-entries').objectStore('cache-entries').getAll();
+					all.onsuccess = () => {
+						db.close();
+						resolve({
+							exists: true,
+							store: true,
+							records: all.result.map((e: { url: string; timestamp: number }) => ({ url: e.url, timestamp: e.timestamp }))
+						});
+					};
+					all.onerror = () => {
+						db.close();
+						reject(all.error);
+					};
+				};
+			})
+	);
+
+test.describe("The erase and the service worker's expiry records", () => {
+	test("'Eyða öllum gögnum á þessu tæki' empties the worker's list of fetched pages and figures; the precache and the app stay", async ({
+		page
+	}) => {
+		test.skip(!SECTION, 'no published book is synced');
+		const [, chapter, section] = SECTION!.match(/\/kafli\/([^/]+)\/([^/]+)\//)!;
+		await openControlled(page, `/${BOOK}/`);
+		await page.goto(SECTION!);
+		await expect(page.locator('.reading-content')).toBeVisible();
+		const sectionUrl = new URL(`/content/${BOOK}/chapters/${chapter}/${section}.html`, page.url()).href;
+		// The section's file and four of its figures, fetched through the worker: a prerendered
+		// section page carries its text, and loads figures only as they scroll in.
+		const figures = await page.evaluate(async (url) => {
+			const html = await (await fetch(url)).text();
+			const srcs = [...html.matchAll(/<img\b[^>]*?\ssrc="(\/content\/[^"]+)"/g)].map((m) => m[1]).slice(0, 4);
+			for (const src of srcs) await (await fetch(src)).blob();
+			return srcs.map((src) => new URL(src, location.href).href);
+		}, sectionUrl);
+		expect(figures.length, 'the section has figures').toBeGreaterThan(0);
+		// The worker writes its records after it answers, so wait for the section and a figure.
+		await expect
+			.poll(async () => {
+				const urls = (await expiryRecords(page)).records.map((r) => r.url);
+				return urls.includes(sectionUrl) && figures.some((f) => urls.includes(f));
+			})
+			.toBe(true);
+
+		await page.goto(`/${BOOK}/greining/`);
+		await page.waitForLoadState('networkidle');
+		page.on('dialog', (dialog) => void dialog.accept());
+		const erasedAt = await page.evaluate(() => Date.now());
+		const reloaded = page.waitForEvent('load');
+		await page.getByRole('button', { name: 'Eyða öllum gögnum á þessu tæki' }).click();
+		await reloaded;
+		await expect(page.getByText('Engin virkni skráð enn.')).toBeVisible();
+
+		// No record from before the erase is left. The reloaded page's own fetches may be listed:
+		// they come after it.
+		const after = await expiryRecords(page);
+		expect(after.records.filter((r) => r.timestamp < erasedAt).map((r) => r.url)).toEqual([]);
+		expect(after.records.map((r) => r.url)).not.toContain(sectionUrl);
+		// If the database is there, workbox's store is in it: an erase that made an empty
+		// database would leave the worker unable to write a record ever again.
+		if (after.exists) expect(after.store).toBe(true);
+		// The precache (the app itself) stays, and the worker still controls the page.
+		expect((await page.evaluate(() => caches.keys())).some((n) => n.startsWith('workbox-precache'))).toBe(true);
+		expect(await page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+
+		// The worker's own connection still works after the clear: the section's file, fetched
+		// through it again, is listed again.
+		await page.goto(SECTION!);
+		await expect(page.locator('.reading-content')).toBeVisible();
+		await page.evaluate(async (url) => void (await (await fetch(url)).text()), sectionUrl);
+		await expect.poll(async () => (await expiryRecords(page)).records.map((r) => r.url)).toContain(sectionUrl);
+	});
+});
+
 test.describe('Honest data controls (S3.2)', () => {
 	test.use({ serviceWorkers: 'block' });
 
@@ -117,6 +217,9 @@ test.describe('Honest data controls (S3.2)', () => {
 		for (const [key, value] of Object.entries(after)) expect(value, `${key} after the erase`).not.toContain(MARK);
 		expect((await page.evaluate(() => caches.keys())).filter((n) => n.startsWith('offline-book:'))).toEqual([]);
 		expect(JSON.parse(after['namsbokasafn:offline'] ?? '{"books":{}}').books[BOOK!]).toBeUndefined();
+		// With no worker there are no expiry records, and clearing them must not create their
+		// database: an empty one would keep the worker from ever making its store.
+		expect(await expiryRecords(page)).toEqual({ exists: false, store: false, records: [] });
 
 		await expect(page.getByText('Engin virkni skráð enn.')).toBeVisible();
 		await page.goto(`/${BOOK}/bokamerki/`);

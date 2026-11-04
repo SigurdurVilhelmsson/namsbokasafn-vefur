@@ -1,6 +1,7 @@
 /**
- * Service-worker runtime caching for book content, shared by vite.config.ts (which
- * hands it to workbox's generateSW), the offline store and the tests.
+ * Service-worker runtime caching for book content, and the route that boots the app
+ * offline when a page load fails (the offline cold start), shared by vite.config.ts
+ * (which hands it to workbox's generateSW), the offline store and the tests.
  *
  * ⚠️ workbox-build SERIALIZES every function below into build/sw.js with
  * `fn.toString()`. Two rules, each pinned by runtimeCaching.test.ts and by
@@ -42,6 +43,34 @@ export const BROWSE_IMAGE_MAX_BYTES = 1048576;
  * downloaded books (static/sw-offline-book.js answers; an older worker does not).
  */
 export const OFFLINE_CAPS_MESSAGE = 'NB_OFFLINE_BOOK_CAPS';
+
+/**
+ * The SPA shell (svelte.config.js, adapter-static `fallback`), precached by
+ * vite.config.ts (`kit.spa`) so the worker can boot the app offline.
+ */
+export const APP_SHELL_FILE = '200.html';
+
+/**
+ * Route matcher for the offline cold start: a same-origin page load (`navigate`)
+ * of an app page. Left out: `/print/` (the PDF routes, never read offline),
+ * `/content/` and `/downloads/` (raw files), and any path whose last segment has a
+ * dot (`/sitemap.xml`, a PDF): an app page ends in `/` (trailingSlash 'always'),
+ * and the app shell answering a file would show "Síða fannst ekki" for a file
+ * that exists, where the browser's own offline page tells the truth.
+ */
+export const appShellNavigation = ({
+	request,
+	url,
+	sameOrigin
+}: {
+	request: Request;
+	url: URL;
+	sameOrigin: boolean;
+}) =>
+	request.mode === 'navigate' &&
+	sameOrigin &&
+	!/^\/(?:print|content|downloads)(?:\/|$)/.test(url.pathname) &&
+	!/\.[^/]*$/.test(url.pathname);
 
 /** The downloaded-book cache of `bookSlug`. */
 export const offlineCacheName = (bookSlug: string): string => `${OFFLINE_CACHE_PREFIX}${bookSlug}`;
@@ -183,5 +212,18 @@ export const runtimeCaching = [
 			expiration: { maxEntries: 100, maxAgeSeconds: 7 * DAY, purgeOnQuotaError: true },
 			plugins: [sizeGatePlugin, offlineImageFallbackPlugin]
 		}
+	},
+	{
+		// Offline cold start: a page load goes to the network exactly as with no route
+		// (NetworkOnly stores nothing, and an answer the server gives, a 404 included,
+		// is passed on). Only when the network FAILS (offline, a dropped connection)
+		// does workbox's PrecacheFallbackPlugin answer with the precached SPA shell,
+		// which boots the app; its loaders then read toc.json and the section from the
+		// routes above, and so from a downloaded book. Not `navigateFallback`, which
+		// serves the shell for every page load, online too, in place of the
+		// prerendered page.
+		urlPattern: appShellNavigation,
+		handler: 'NetworkOnly' as const,
+		options: { precacheFallback: { fallbackURL: `/${APP_SHELL_FILE}` } }
 	}
 ];
