@@ -517,8 +517,12 @@
 	// step S8.3, register UI-01), so the pager's own region no longer competes with it.
 	// Only a change is spoken, as from that region: setting `announcement` to the text
 	// it holds changes nothing, so a re-split that keeps the page is silent. When the
-	// pager fails or goes, it takes its text back unless something else was announced
-	// since, so the region never describes pages that are not on screen.
+	// pager fails or goes, it takes its text back, so the region never describes pages
+	// that are not on screen; text announced later stays. But an announcement still
+	// pending (announce() leaves the region empty for 50 ms first) is cancelled too,
+	// whoever made it: the region cannot tell them apart. So code that turns paging off
+	// and announces should announce after the flush (after `await tick()`). The exact
+	// fix is cancelling by owner in announcer.ts, after S4.5.
 	$effect(() => {
 		const text = ready && !failed ? announcement : '';
 		if (!text) return;

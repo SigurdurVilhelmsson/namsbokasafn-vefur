@@ -604,7 +604,10 @@ test.describe('Paged reading mode', () => {
 		await page.goto(`${urls[0]}#sub-1-p-99`);
 		const label = page.getByRole('navigation', { name: 'Síðuflakk' }).locator('.paged-nav-label');
 		await expect(label).toHaveText(/^Hluti 2 af \d+ · Síða (\d+) af \1$/, { timeout: 15000 });
-		await expect(page).toHaveURL(/#sub-1(-p-\d+)?$/);
+		// The last page must differ from the first, and the hash must name it exactly
+		const pages = labelCounts((await label.textContent())!).pages;
+		expect(pages, `${urls[0]}: unit 2 has one page; pick another fixture`).toBeGreaterThan(1);
+		await expect(page).toHaveURL(new RegExp(`#sub-1-p-${pages - 1}$`));
 	});
 });
 
@@ -783,6 +786,9 @@ test.describe('The pager through a ?lestur= link, with no seed (S8.2)', () => {
 		await page.waitForTimeout(2000);
 		await expect(pager(page)).toHaveCount(0);
 		await expect(hiddenBlocks(page)).toHaveCount(0);
+		// The pager spoke on the section before; gone, it took its words back from the
+		// app's one live region (S8.3, UI-01), which outlives it
+		await expect(page.locator('[aria-live="polite"][aria-atomic="true"]')).not.toHaveText(/^Hluti/);
 		expect(await storedRaw(page)).toBe(FRESH_PROFILE);
 	});
 });

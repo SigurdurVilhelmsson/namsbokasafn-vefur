@@ -13,7 +13,9 @@
  * the chapter's exercise page (by `data-exercise-id` or `id`); an answer with no number
  * gets an 'Æfing' button instead.
  *
- * Arriving with a hash scrolls that exercise or answer into view and highlights it for 2 s.
+ * On every page it is mounted on (section, appendix, answer key), arriving with a hash
+ * scrolls the element with that id smoothly to the centre 100 ms after mount and
+ * highlights it for 2 s, whatever the element is.
  */
 
 import { browser } from '$app/environment';
