@@ -8,7 +8,7 @@
   measured block heights.
 
   Pages are applied by HIDING out-of-page blocks rather than moving them:
-  the DOM the content actions (practiceProblems, glossaryTerms, ...) enhanced
+  the DOM the content actions (practiceReveal, glossaryTerms, equations, ...) enhanced
   stays intact, so their listeners survive page turns. Restoring visibility
   (mode switch, destroy, failure) returns the exact scrolled experience.
 -->
@@ -50,7 +50,9 @@
 		/** Fired when the reader advances past the last page of the last
 		 *  sub-section — the paged-mode equivalent of "scrolled to the end" */
 		oncomplete?: () => void;
-		/** Fired when a sub-section's last page is advanced past */
+		/** Fired once per sub-section when its last page is advanced past. The section page
+		 *  passes none: call 2 ruled recall once per section (2026-10-23); plan step S11.7
+		 *  would wire it only under a later ruling. */
 		onsubsectioncomplete?: (index: number) => void;
 	}
 
@@ -227,7 +229,7 @@
 	 *  does in scrolled mode, even when the reader skipped sub-sections (came in
 	 *  by a link to a later one). It used to need every sub-section paged
 	 *  through, which left that reader a "Næsta" that did nothing and no
-	 *  recall prompt (Siggi, 2026-10-04). */
+	 *  recall prompt ([USER], 2026-10-04). */
 	function completeSection() {
 		if (completionFired) return;
 		completionFired = true;
@@ -238,7 +240,7 @@
 		if (!flatPages[current]) return;
 		target = null;
 		const step = stepNext(current, pageCounts(), { section: completionFired, units: completedUnits });
-		// Advancing past a sub-section's last page marks it read
+		// Leaving a sub-section's last page reports it once, through onsubsectioncomplete
 		if (step.unitComplete !== null) markUnitComplete(step.unitComplete);
 		if (step.index !== null) showPage(step.index);
 		else if (step.sectionComplete) completeSection();
@@ -348,7 +350,7 @@
 			// A deep-link target outranks the page's first block: a late image
 			// can push the target onto the next page, which used to hide it
 			// ~100ms after landing (QA E8)
-			// Content rebuilt under us (bionic reading): the old target is gone
+			// A target that has left the document (its content was replaced) can no longer hold a page
 			if (target && !target.isConnected) target = null;
 			const index = pageAfterResplit(
 				{ target: target ? itemForElement(target) : null, anchor },
@@ -423,7 +425,7 @@
 			const fromHash = resolveHash(window.location.hash);
 			target = elementForHash(window.location.hash);
 			// Scroll to the content on arrival too, past the learning objectives
-			// above it, so page 1 gets a whole page (Siggi, 2026-10-04). Sizing
+			// above it, so page 1 gets a whole page ([USER], 2026-10-04). Sizing
 			// page 1 to the room under the objectives left 5.3 at 1280x720 with
 			// the title alone and its controls below the fold.
 			showPage(fromHash ?? 0, { keepHash: target !== null });
@@ -476,8 +478,11 @@
 			});
 			cleanups.push(unsubscribe);
 
-			// Content swaps under us (e.g. bionic reading restoring its
-			// innerHTML snapshot) orphan our element references — rebuild
+			// Re-split if a direct child of the content root is added or removed. With efni's
+			// markup those are the header and the body (sometimes a section after it), so this
+			// rarely fires. Bionic reading wraps and unwraps text in place and never triggers
+			// it; the settings subscription above re-splits for that. Whether to keep it is
+			// CODE-27's question (M11).
 			observer = new MutationObserver(() => scheduleRecompute());
 			observer.observe(root, { childList: true });
 			cleanups.push(() => observer?.disconnect());
@@ -529,10 +534,9 @@
 </script>
 
 {#if ready && !failed && flatPages.length > 0}
-	<!-- data-paged-reader: the global ←/→ section shortcut steps aside for it -->
 	<!-- D20: proposed (S8.2): 'Síðuflakk', 'Fyrri síða', 'Fyrri', 'Næsta síða' and 'Næsta',
 	     as v1.1 wrote them at dde768e; the label is pager.ts's positionLabel (S8.1) -->
-	<nav class="paged-nav" aria-label="Síðuflakk" data-paged-reader bind:this={navEl}>
+	<nav class="paged-nav" aria-label="Síðuflakk" bind:this={navEl}>
 		<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
 			<Icon name="chevron-left" size="sm" />
 			Fyrri
@@ -592,7 +596,8 @@
 
 	.paged-nav-label {
 		font-size: 0.8125rem;
-		/* Not --text-tertiary: 2.90:1 on --bg-primary fails AA (QA E18) */
+		/* --text-secondary: v1.1 moved off --text-tertiary when that was 2.90:1 (QA E18).
+		   Both pass AA since S2.1 (tokens.test.ts); the position is information, not a hint. */
 		color: var(--text-secondary);
 		text-align: center;
 	}

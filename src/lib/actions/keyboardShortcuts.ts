@@ -140,14 +140,15 @@ export function keyBelongsElsewhere(event: KeyboardEvent): boolean {
 	return false;
 }
 
-/**
- * Navigate to previous/next section by clicking the section nav link
- * (`data-nav` on NavigationButtons). Returns false when there is none, so the
- * key keeps its default on pages without section navigation.
- */
 /** Keys the paged reader turns pages with (PagedReaderControls). */
 const PAGE_TURN_KEYS = new Set(['ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', ' ']);
 
+/**
+ * Go to the previous or next section by clicking the section nav link (`data-nav` on
+ * NavigationButtons). Returns false, so the key keeps its default, when there is no such
+ * link, when it is disabled, or when the section is paged ([data-paged-section]) and
+ * `key` is one the pager turns pages with.
+ */
 function navigatePrevNext(direction: 'prev' | 'next', key: string): boolean {
 	// A paged section turns pages with these keys; leave them to it. Keyed on
 	// the section page's mark, present from mount, not on the page controls:

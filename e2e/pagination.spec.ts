@@ -507,7 +507,7 @@ test.describe('Paged reading mode', () => {
 	});
 
 	test('arrival scrolls past the learning objectives to the content', async ({ page }) => {
-		// Siggi, 2026-10-04: page 1 gets a full page rather than the room left
+		// [USER], 2026-10-04: page 1 gets a full page rather than the room left
 		// under the objectives, which on 5.3 at 1280x720 was the title alone
 		const urls = sectionsContaining('<p', 3);
 		test.skip(urls.length === 0, 'No section content available');
@@ -536,7 +536,7 @@ test.describe('Paged reading mode', () => {
 		{ kind: 'key-equations', type: 'equations' }
 	] as const) {
 		test(`a chapter ${kind} page scrolls instead of paging`, async ({ page }) => {
-			// Siggi, 2026-10-04: rollups are reference lists; paged, chapter 1's
+			// [USER], 2026-10-04: rollups are reference lists; paged, chapter 1's
 			// exercises were one 23,120px page
 			const url = rollupSection(type);
 			test.skip(!url, `No synced ${kind} page`);
@@ -564,7 +564,7 @@ test.describe('Paged reading mode', () => {
 	test('Næsta on the last page finishes the section, even after skipping parts', async ({
 		page
 	}) => {
-		// Siggi, 2026-10-04: as in scrolled mode, reaching the end completes the
+		// [USER], 2026-10-04: as in scrolled mode, reaching the end completes the
 		// section. A reader who came in by a link to a later part used to get a
 		// "Næsta" that did nothing, and never saw the recall prompt.
 		const urls = sectionsContaining('<section', 5);
