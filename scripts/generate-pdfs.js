@@ -66,6 +66,7 @@ import {
 	harvestDests,
 	findCollidingNames,
 	mergeChapterDests,
+	namespaceChapterLinks,
 	writeMergedDests
 } from './lib/pdf-links.js';
 import { assertPrintable, pdfBooks } from './lib/pdf-books.js';
@@ -390,7 +391,7 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 	// content dangles until we harvest each chapter's dests and rewrite them
 	// against the merged page tree. Also lets us register chapter start pages as
 	// named dests for the clickable table of contents. See scripts/lib/pdf-links.js.
-	const destHarvest = []; // { dests, mergedOffset, chapterNum }
+	const destHarvest = []; // { dests, mergedOffset, chapterNum, pages }
 	const tocDests = {}; // anchor name → merged page index (chapter/appendix starts)
 
 	const chapterEntries = [];
@@ -429,9 +430,14 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 		outlineItems.push({ title: `${part.chapterNum}. ${part.title}`, pageIndex: mergedOffset });
 		tocDests[`kafli-${part.chapterNum}`] = mergedOffset;
 		const src = await PDFDocument.load(readFileSync(part.rawFile));
-		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: part.chapterNum });
 		const copied = await merged.copyPages(src, src.getPageIndices());
 		for (const p of copied) merged.addPage(p);
+		destHarvest.push({
+			dests: harvestDests(src),
+			mergedOffset,
+			chapterNum: part.chapterNum,
+			pages: copied
+		});
 
 		chapterEntries.push({
 			chapterNum: part.chapterNum,
@@ -448,9 +454,9 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 		outlineItems.push({ title: 'Viðaukar', pageIndex: mergedOffset });
 		tocDests['vidaukar'] = mergedOffset;
 		const src = await PDFDocument.load(readFileSync(appendixPart.rawFile));
-		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 90 });
 		const copied = await merged.copyPages(src, src.getPageIndices());
 		for (const p of copied) merged.addPage(p);
+		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 90, pages: copied });
 	}
 
 	if (glossaryPart) {
@@ -458,15 +464,16 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 		outlineItems.push({ title: 'Orðaskrá', pageIndex: mergedOffset });
 		tocDests['ordaskra'] = mergedOffset;
 		const src = await PDFDocument.load(readFileSync(glossaryPart.rawFile));
-		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 91 });
 		const copied = await merged.copyPages(src, src.getPageIndices());
 		for (const p of copied) merged.addPage(p);
+		destHarvest.push({ dests: harvestDests(src), mergedOffset, chapterNum: 91, pages: copied });
 	}
 
 	// Rebuild the merged catalog /Dests: harvested content dests (rebased to the
 	// merged page tree) so every in-content link resolves again, plus chapter /
 	// appendix start pages for the clickable TOC. Colliding auto-ids (footnote
-	// anchors) are namespaced per chapter so they don't clobber.
+	// anchors) are namespaced per chapter so they don't clobber, and each part's
+	// links to them are renamed with them, or they would point at nothing.
 	const collidingNames = findCollidingNames(destHarvest.map((h) => h.dests));
 	// `gloss-N` are intentionally shared: many chapters link the same glossary
 	// entry, and each chapter carries a hidden placeholder target for it (so
@@ -476,8 +483,10 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 		if (name.startsWith('gloss-')) collidingNames.delete(name);
 	}
 	const registry = new Map();
-	for (const { dests, mergedOffset, chapterNum } of destHarvest) {
+	let renamedLinks = 0;
+	for (const { dests, mergedOffset, chapterNum, pages } of destHarvest) {
 		mergeChapterDests(registry, dests, mergedOffset, chapterNum, collidingNames);
+		renamedLinks += namespaceChapterLinks(merged, pages, dests, chapterNum, collidingNames);
 	}
 	for (const [name, mergedPageIndex] of Object.entries(tocDests)) {
 		registry.set(name, { mergedPageIndex, params: [PDFName.of('Fit')] });
@@ -523,7 +532,9 @@ async function generateForBook(page, baseUrl, bookSlug, bookConfig) {
 	addOutline(merged, outlineItems);
 
 	const fullBookFile = join(bookOutDir, `${bookSlug}-bok.pdf`);
-	console.log(`  ${bookSlug}: assembling bok.pdf (${merged.getPageCount()} pages)`);
+	console.log(
+		`  ${bookSlug}: assembling bok.pdf (${merged.getPageCount()} pages; ${collidingNames.size} shared anchor names namespaced, ${renamedLinks} links renamed with them)`
+	);
 	writeFileSync(fullBookFile, await merged.save());
 
 	const manifest = {
