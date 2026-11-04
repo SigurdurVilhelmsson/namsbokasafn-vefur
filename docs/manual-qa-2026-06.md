@@ -39,6 +39,14 @@ release branch has a real CI result on its current head — `feature/reader-v1.1
 behind `main`: merge `main` in and let CI run before relying on "all green" for
 D–E or G._
 
+_2026-11-04: the merge advice above no longer applies: neither release branch is
+ever merged into main (strategy C), and main is never merged into
+`feature/reader-v1.2` ([CODE-04]). Batches D–E run first on S0.3's trial build,
+which was never pushed and so has no CI; S0.3's note records its checks
+(svelte-check and lint clean, 863 unit tests passing, all 19 pagination tests
+passing, and only #249's three expected flashcard e2e failures). Batch E's rerun
+at S9.6 and batch G run on main builds, under main's CI._
+
 **Automated verification of Batches A & B (2026-06-17):** driven end-to-end with
 Playwright/Chromium against `npm run dev`, using **in-app SPA navigation**
 (clicking Næsta / book links) so the SvelteKit component-reuse path the
