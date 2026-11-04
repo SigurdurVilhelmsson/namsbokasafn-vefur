@@ -6,7 +6,8 @@
  *
  * The "Accessibility ratchet" block runs axe-core on five surfaces against
  * e2e/a11y-baseline.json (plan step S1.1); see e2e/helpers/axe.ts. The block after it
- * scans the book home's PDF button, which no build without PDFs renders.
+ * scans the three PdfDownloadButton variants (book home, chapter page, section toolbar),
+ * which no build without PDFs renders.
  */
 
 import AxeBuilder from '@axe-core/playwright';

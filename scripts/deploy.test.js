@@ -84,6 +84,13 @@ describe('parsePrecacheManifest', () => {
 	it('throws on an entry with no URL it can read', () => {
 		expect(() => parsePrecacheManifest('e.precacheAndRoute([{url:"a.js"},{revision:"x"}],{})')).toThrow(/revision/);
 	});
+
+	it('throws on a truncated sw.js, whose array never closes, instead of returning the entries before the cut', () => {
+		// A build cut off mid-write (a full disk, say): the browser could not parse this worker at all.
+		expect(() => parsePrecacheManifest('e.precacheAndRoute([{url:"a.js",revision:null},{url:"b.js"')).toThrow(
+			/never closes/
+		);
+	});
 });
 
 describe('missingPrecacheEntries', () => {
