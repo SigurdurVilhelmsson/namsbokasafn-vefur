@@ -39,7 +39,7 @@
  */
 
 import { spawnSync } from 'child_process';
-import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'fs';
+import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, statSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -143,6 +143,113 @@ export function missingServiceWorkerImports(buildDir) {
 }
 
 /**
+ * The value of one JavaScript string literal, given its quote and the text
+ * between the quotes.
+ */
+function stringLiteralValue(quote, body) {
+	const json = quote === '"' ? body : body.replace(/\\'/g, "'").replace(/"/g, '\\"');
+	return JSON.parse(`"${json}"`);
+}
+
+/**
+ * The URLs in a generated service worker's precache manifest, read from its
+ * `precacheAndRoute([...], {...})` call. workbox-build writes it minified,
+ * `precacheAndRoute([{url:"_app/immutable/…",revision:null},…,{url:"200.html",revision:"…"}],{})`,
+ * and in development mode with quoted keys; a plain string entry is a URL too.
+ * Whatever follows the array (the options object, which can hold regular
+ * expressions) is never read.
+ *
+ * 🔴 It throws rather than return [] when it finds no manifest, an empty one or
+ * an entry it cannot read: a parser that silently finds nothing would pass
+ * every build, which is the failure this check exists to catch.
+ * @param {string} source the text of sw.js
+ * @returns {string[]} the URLs, as written (relative, or with a leading slash)
+ */
+export function parsePrecacheManifest(source) {
+	const call = /precacheAndRoute\(\s*\[/.exec(source);
+	if (!call) throw new Error('no precacheAndRoute([...]) call');
+	// Split the array into its top-level elements, skipping string contents.
+	const elements = [];
+	let depth = 0;
+	let start = call.index + call[0].length;
+	let end = -1;
+	for (let i = start; i < source.length && end < 0; i++) {
+		const ch = source[i];
+		if (ch === '"' || ch === "'" || ch === '`') {
+			for (i++; i < source.length && source[i] !== ch; i++) if (source[i] === '\\') i++;
+		} else if (ch === '[' || ch === '{' || ch === '(') depth++;
+		else if (depth > 0 && (ch === ']' || ch === '}' || ch === ')')) depth--;
+		else if (depth === 0 && (ch === ',' || ch === ']')) {
+			elements.push(source.slice(start, i).trim());
+			start = i + 1;
+			if (ch === ']') end = i;
+		}
+	}
+	if (end < 0) throw new Error('the precache array never closes');
+	// A trailing comma leaves one empty element at the end.
+	if (elements.at(-1) === '') elements.pop();
+	if (elements.length === 0) throw new Error('the precache manifest is empty');
+
+	return elements.map((element) => {
+		const plain = /^(["'])((?:\\.|(?!\1)[^\\])*)\1$/s.exec(element);
+		if (plain) return stringLiteralValue(plain[1], plain[2]);
+		const url = /^\{(?:.*?[,{\s])?(?:url|"url"|'url')\s*:\s*(["'])((?:\\.|(?!\1)[^\\])*)\1/s.exec(element);
+		if (url) return stringLiteralValue(url[1], url[2]);
+		throw new Error(`cannot read the precache entry ${element.slice(0, 120)}`);
+	});
+}
+
+/**
+ * The file in the build that a precache URL names. URLs resolve against sw.js,
+ * which sits at the build's root (join() treats a leading `/` or `./` alike);
+ * a URL ending in `/` names its index.html.
+ * @returns {string | null} null for a URL on another origin, which no build holds
+ */
+function precacheFile(buildDir, url) {
+	if (/^[a-z][a-z0-9+.-]*:|^\/\//i.test(url)) return null;
+	let path = url.replace(/[?#].*$/s, '');
+	try {
+		path = decodeURIComponent(path);
+	} catch {
+		// Not percent-encoded after all: use it as written.
+	}
+	if (path === '' || path.endsWith('/')) path += 'index.html';
+	return join(buildDir, path);
+}
+
+/**
+ * Precache entries of the build's service worker whose files the build does
+ * not contain. The browser installs a new worker only once EVERY precache URL
+ * has loaded, so one missing file fails the install and readers silently keep
+ * the old worker. Since the offline cold start, the manifest holds /200.html,
+ * the one precached file from outside client/.
+ *
+ * Throws when sw.js exists but no manifest can be read from it (see
+ * parsePrecacheManifest).
+ * @returns {{ precached: string[], missing: string[] }} every precache URL and
+ *   the missing ones, as written in sw.js; both [] when there is no sw.js
+ */
+export function missingPrecacheEntries(buildDir) {
+	const swFile = join(buildDir, 'sw.js');
+	if (!existsSync(swFile)) return { precached: [], missing: [] };
+	let precached;
+	try {
+		precached = parsePrecacheManifest(readFileSync(swFile, 'utf8'));
+	} catch (err) {
+		throw new Error(
+			`Could not read the precache manifest in ${swFile} (${err.message}), so the deploy cannot check ` +
+				'that the build holds every file it lists. If the worker format changed, update parsePrecacheManifest.',
+			{ cause: err }
+		);
+	}
+	const missing = precached.filter((url) => {
+		const file = precacheFile(buildDir, url);
+		return file !== null && !(existsSync(file) && statSync(file).isFile());
+	});
+	return { precached, missing };
+}
+
+/**
  * Run one deploy. Throws before rsync runs if a precondition fails.
  * @returns {{ status: number, deleted: string[], transferred: string[] }}
  */
@@ -153,6 +260,13 @@ export function deploy({ source, build, target, apply, log = console.log }) {
 		throw new Error(
 			`The build's sw.js imports ${missingImports.join(', ')}, which the build does not contain: ` +
 				'that service worker would install with no routes, and offline reading would stop.'
+		);
+	}
+	const precache = missingPrecacheEntries(build);
+	if (precache.missing.length > 0) {
+		throw new Error(
+			`The build's sw.js precaches ${precache.missing.join(', ')}, which the build does not contain: ` +
+				'browsers would fail to install that service worker, and readers would silently keep the old one.'
 		);
 	}
 	// The freeze covers withheld books only. A published book with no content in
@@ -184,6 +298,9 @@ export function deploy({ source, build, target, apply, log = console.log }) {
 
 	log(apply ? 'Deploying.' : 'DRY RUN: nothing will change. Pass --apply to deploy.');
 	log(`  build:  ${build} (version ${version})`);
+	if (precache.precached.length > 0) {
+		log(`  precache: ${precache.precached.length} files listed in sw.js, all in the build`);
+	}
 	log(`  target: ${target}`);
 	log('  rules:');
 	for (const rule of rules) log(`    ${rule}`);

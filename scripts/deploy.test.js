@@ -4,7 +4,15 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from 'os';
 import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
-import { deploy, missingServiceWorkerImports, parseArgs, rsyncArgs, summarizeItemized } from './deploy.js';
+import {
+	deploy,
+	missingPrecacheEntries,
+	missingServiceWorkerImports,
+	parseArgs,
+	parsePrecacheManifest,
+	rsyncArgs,
+	summarizeItemized
+} from './deploy.js';
 import { deployExcludes, deployFilterRules } from './deploy-excludes.js';
 
 // A string, not new URL(): the jsdom test environment replaces the global URL class.
@@ -31,6 +39,107 @@ describe('missingServiceWorkerImports', () => {
 	it('ignores a variable importScripts (the workbox loader)', () => {
 		writeFileSync(join(dir, 'sw.js'), 'importScripts(l);');
 		expect(missingServiceWorkerImports(dir)).toEqual([]);
+	});
+});
+
+// The shape of the generated build/sw.js (workbox-build, minified), cut down to
+// four entries: a static file, a hashed asset, the app shell from outside
+// client/ and the web manifest, then the options object and the routes.
+const swWithManifest = (entries) =>
+	'if(!self.define){let e,s={};self.define=(n,i)=>{}}define(["./workbox-e3b96b77"],function(e){"use strict";' +
+	'importScripts("/sw-offline-book.js"),self.addEventListener("message",e=>{e.data&&"SKIP_WAITING"===e.data.type&&self.skipWaiting()}),' +
+	`e.precacheAndRoute([${entries}],{ignoreURLParametersMatching:[/^utm_/,/^fbclid$/]}),e.cleanupOutdatedCaches(),` +
+	'e.registerRoute(/^.*\\/content\\/.*\\.(html|md|json)$/,new e.NetworkFirst({cacheName:"book-content",plugins:[{url:"not-an-entry.js"}]}),"GET")});';
+const REAL_ENTRIES =
+	'{url:"sw-offline-book.js",revision:"278a4c4531eb169f94474be24ad65432"},' +
+	'{url:"_app/immutable/assets/0.eqFiCA1O.css",revision:null},' +
+	'{url:"200.html",revision:"673b2cb6b20b44b4d399b99a334aed1f"},' +
+	'{url:"manifest.webmanifest",revision:"0a0720349041c245581b42826138be9d"}';
+const REAL_URLS = ['sw-offline-book.js', '_app/immutable/assets/0.eqFiCA1O.css', '200.html', 'manifest.webmanifest'];
+const REAL_SW = join(dirname(DEPLOY_SCRIPT), '..', 'build', 'sw.js');
+
+describe('parsePrecacheManifest', () => {
+	it("reads every URL in workbox's minified call, and nothing after the array", () => {
+		expect(parsePrecacheManifest(swWithManifest(REAL_ENTRIES))).toEqual(REAL_URLS);
+	});
+
+	it("reads development mode's quoted keys, and a plain string entry", () => {
+		const sw = 'workbox.precacheAndRoute([\n  {\n    "revision": "abc",\n    "url": "/200.html"\n  },\n  "_app/x.js",\n], {});';
+		expect(parsePrecacheManifest(sw)).toEqual(['/200.html', '_app/x.js']);
+	});
+
+	it('does not split an entry at a comma or bracket inside a string', () => {
+		expect(parsePrecacheManifest('precacheAndRoute([{url:"a,b].js",revision:"]"}],{})')).toEqual(['a,b].js']);
+	});
+
+	// 🔴 A parser that finds nothing would pass every build.
+	it('throws when there is no precacheAndRoute call', () => {
+		expect(() => parsePrecacheManifest('e.precache([{url:"200.html",revision:null}])')).toThrow(/precacheAndRoute/);
+	});
+
+	it('throws on an empty manifest', () => {
+		expect(() => parsePrecacheManifest('e.precacheAndRoute([],{})')).toThrow(/empty/);
+	});
+
+	it('throws on an entry with no URL it can read', () => {
+		expect(() => parsePrecacheManifest('e.precacheAndRoute([{url:"a.js"},{revision:"x"}],{})')).toThrow(/revision/);
+	});
+});
+
+describe('missingPrecacheEntries', () => {
+	let dir;
+	beforeEach(() => {
+		dir = mkdtempSync(join(tmpdir(), 'sw-precache-'));
+		writeFileSync(join(dir, 'sw.js'), swWithManifest(REAL_ENTRIES));
+		for (const url of REAL_URLS) write(dir, url, 'x');
+	});
+	afterEach(() => rmSync(dir, { recursive: true, force: true }));
+
+	it('is satisfied when the build holds every precached file', () => {
+		expect(missingPrecacheEntries(dir)).toEqual({ precached: REAL_URLS, missing: [] });
+	});
+
+	// 🔴 The app shell is the one precached file from outside client/: without
+	// it the browser fails the install and readers keep the old worker.
+	it('names a precached file the build lacks', () => {
+		rmSync(join(dir, '200.html'));
+		expect(missingPrecacheEntries(dir).missing).toEqual(['200.html']);
+	});
+
+	it('resolves a leading slash, a query string and a directory URL', () => {
+		mkdirSync(join(dir, 'kafli'));
+		writeFileSync(
+			join(dir, 'sw.js'),
+			swWithManifest('{url:"/200.html",revision:"1"},{url:"./manifest.webmanifest?v=2",revision:"2"},{url:"kafli/",revision:"3"},{url:"_app",revision:"4"}')
+		);
+		// kafli/ has no index.html, and _app is a directory, not a file.
+		expect(missingPrecacheEntries(dir).missing).toEqual(['kafli/', '_app']);
+		write(dir, 'kafli/index.html', 'x');
+		expect(missingPrecacheEntries(dir).missing).toEqual(['_app']);
+	});
+
+	it('leaves a URL on another origin to that origin', () => {
+		writeFileSync(join(dir, 'sw.js'), swWithManifest('{url:"https://cdn.example/a.js",revision:"1"},{url:"200.html",revision:"2"}'));
+		expect(missingPrecacheEntries(dir).missing).toEqual([]);
+	});
+
+	it('checks nothing when the build has no sw.js', () => {
+		rmSync(join(dir, 'sw.js'));
+		rmSync(join(dir, '200.html'));
+		expect(missingPrecacheEntries(dir)).toEqual({ precached: [], missing: [] });
+	});
+
+	// 🔴 sw.js present and 0 entries read is an error, never "nothing missing".
+	it('throws, naming sw.js, when sw.js has no manifest it can read', () => {
+		writeFileSync(join(dir, 'sw.js'), 'self.addEventListener("fetch",()=>{});');
+		expect(() => missingPrecacheEntries(dir)).toThrow(/sw\.js.*precacheAndRoute/s);
+	});
+
+	// The real worker, when a build is present (CI tests before it builds).
+	it.skipIf(!existsSync(REAL_SW))("reads the real build's manifest, and finds every file in the build", () => {
+		const { precached, missing } = missingPrecacheEntries(dirname(REAL_SW));
+		expect(precached.length).toBeGreaterThanOrEqual(100);
+		expect(missing).toEqual([]);
 	});
 });
 
@@ -236,6 +345,33 @@ function makeFixture() {
 
 const onServer = (root, rel) => existsSync(join(root, 'server', rel));
 
+// The precache check runs before rsync, so these need no rsync.
+describe('deploy refuses a worker the browser could not install', () => {
+	let root;
+	beforeEach(() => {
+		root = makeFixture();
+	});
+	afterEach(() => rmSync(root, { recursive: true, force: true }));
+
+	const run = (apply) =>
+		deploy({ source: join(root, 'efni'), build: join(root, 'build'), target: join(root, 'server') + '/', apply, log: () => {} });
+
+	// 🔴 One missing precache file fails the browser's install of the new
+	// worker, and readers silently keep the old one.
+	it('refuses when the service worker precaches a file the build lacks', () => {
+		write(root, 'build/sw-offline-book.js', '');
+		write(root, 'build/sw.js', swWithManifest('{url:"index.html",revision:"1"},{url:"200.html",revision:"2"}'));
+		expect(() => run(true)).toThrow(/precaches 200\.html,/);
+		expect(onServer(root, 'stale/index.html')).toBe(true);
+	});
+
+	it('refuses when sw.js has no precache manifest it can read', () => {
+		write(root, 'build/sw.js', 'self.addEventListener("fetch",()=>{});');
+		expect(() => run(true)).toThrow(/precache manifest/);
+		expect(onServer(root, 'stale/index.html')).toBe(true);
+	});
+});
+
 describe.skipIf(!hasRsync && !process.env.CI)('deploy against a real rsync', () => {
 	let root;
 	const quiet = () => {};
@@ -431,6 +567,16 @@ describe.skipIf(!hasRsync && !process.env.CI)('deploy against a real rsync', () 
 		rmSync(join(root, 'build/content/efnafraedi-2e'), { recursive: true });
 		expect(() => run(true)).toThrow(/efnafraedi-2e/);
 		expect(onServer(root, 'stale/index.html')).toBe(true);
+	});
+
+	it('deploys when the build holds every precached file, and says how many it checked', () => {
+		write(root, 'build/sw-offline-book.js', '');
+		write(root, 'build/sw.js', swWithManifest('{url:"index.html",revision:"1"},{url:"_app/version.json",revision:"2"}'));
+		const lines = [];
+		const result = deploy({ source: join(root, 'efni'), build: join(root, 'build'), target: join(root, 'server') + '/', apply: true, log: (line) => lines.push(line) });
+		expect(result.status).toBe(0);
+		expect(onServer(root, 'sw.js')).toBe(true);
+		expect(lines.some((line) => /precache: 2 files/.test(line))).toBe(true);
 	});
 
 	it('warns when the efni tree lacks a frozen book', () => {

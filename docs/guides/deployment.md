@@ -265,8 +265,12 @@ refuses to run if it holds no books: the list of books to protect is derived
 from it, plus every book vefur registers, so a frozen book stays protected even
 when that efni checkout lacks it (the run prints a warning). It also refuses if
 the build has no content for a book the allowlist publishes, since deploying
-would delete that live book. It hands rsync these rules, and prints them on
-every run:
+would delete that live book, and if the build's service worker would not work:
+its `sw.js` imports a file the build lacks, its precache manifest lists one (the
+browser then fails the new worker's install, and readers keep the old one), or
+it has no precache manifest the script can read. The run prints how many
+precached files it checked (121 on 2026-11-04). It hands rsync these rules, and
+prints them on every run:
 
 - `P /_app/immutable/**` — keeps the hashed CSS/JS of earlier builds on the
   server while the new build's files upload. The frozen books' pages are never
