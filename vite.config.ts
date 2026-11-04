@@ -28,7 +28,7 @@ function previewAppShell(): Plugin {
 	};
 }
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
 	plugins: [
 		tailwindcss(),
 		previewAppShell(),
@@ -44,7 +44,11 @@ export default defineConfig({
 			// revision: the adapter runs after the worker is generated, so `spa` derives
 			// it from _app/version.json, which changes with every build. The navigation
 			// route in runtimeCaching.ts serves it only when a page load fails offline.
-			kit: { adapterFallback: APP_SHELL_FILE, spa: true },
+			// Build only: `vite dev` makes its own worker from these options (devOptions),
+			// and there `spa` throws before any build has run (no version.json) or
+			// precaches a /200.html the dev server answers with a 404, so the dev worker
+			// never installs (src/lib/sw/devWorker.test.ts).
+			kit: command === 'build' ? { adapterFallback: APP_SHELL_FILE, spa: true } : {},
 
 			// Workbox configuration
 			workbox: {
@@ -120,4 +124,4 @@ export default defineConfig({
 	preview: {
 		port: 4173
 	}
-});
+}));
