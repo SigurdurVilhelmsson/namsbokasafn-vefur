@@ -145,13 +145,21 @@ class SearchIndexWorker {
 		}
 
 		this.isBuilding = true;
+		// Whatever index was ready is another book's, and a failed build must not leave it
+		// standing for this one: isReady with this book's slug would skip every retry below,
+		// and search() would answer from the old index (the worker keeps it when a build fails).
+		this.isReady = false;
 		this.bookSlug = bookSlug;
 
 		this.buildPromise = this.doBuildIndex(toc, bookSlug);
-		await this.buildPromise;
-
-		this.isBuilding = false;
-		this.buildPromise = null;
+		try {
+			await this.buildPromise;
+		} finally {
+			// Even when the build rejects (the caller still gets the rejection): left set, every
+			// later call returned the same rejected promise and search never recovered.
+			this.isBuilding = false;
+			this.buildPromise = null;
+		}
 	}
 
 	private async doBuildIndex(toc: TableOfContents, bookSlug: string): Promise<void> {

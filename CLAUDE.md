@@ -668,7 +668,6 @@ As of 2026-11-04 (`main` `c6f4331`):
 - **Known, not fixed** (details in each step's PR body and the archive):
   - the erase on /greining leaves the precache and the HTTP cache (the privacy page says so);
   - a stored practice problem unwraps its links, and PED-13's step 2 (fetching the section by the stored address) is not built;
-  - `buildIndex` leaves `isBuilding` set if a build rejects;
   - the June code review's open items, listed in the status header of `docs/code-review-2026-06.md`: M5's flashcard and quiz half (another open tab overwrites a running session; after S4.5, because `feature/reader-m4` rewrites `flashcard.ts`), M8 (search worker replies carry no id), M12 (the pomodoro timer counts ticks) and most of §4;
   - a hard load of a frozen book runs its 2026-08-19 bundles (the old search crawl, white on amber, 'kort' and the mouse-only selection popup, and, since S6.1 shipped, a settings rewrite in the old full format that makes the profile read as pre-seam) and its old HTML, without S6.2's pre-paint script, until that book is deployed again;
   - leaving a section paged through a `?lestur=` link saves its scroll position as if it were scrolled, so a later visit without a link offers 'Haltu áfram að lesa' at a false percentage (CODE-07; S9.3 fixes it before any classroom link, keyed on the pager being ready, not on `paged`);
