@@ -10,6 +10,7 @@ import {
 } from '$lib/utils/printGlossary';
 import { extractArticle, markMachineTranslated } from '$lib/utils/printContent';
 import { linkExercisesToAnswers } from '$lib/utils/printAnswers';
+import { scopeFootnoteBackLinks } from '$lib/utils/printFootnotes';
 
 export const prerender = true;
 
@@ -92,16 +93,19 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			}
 		}
 
+		const scope = String(chapter.number).padStart(2, '0');
 		return {
 			bookTitle: book.title,
 			bookSubtitle: book.subtitle,
 			attribution: book.attribution,
 			chapter,
 			chapterFolder: folder,
-			// Exercise ↔ answer links (PDF plan Task 3.3): the sections and the answer key
-			// are one document here, so each answered exercise links to its answer and back.
-			// The anchors are scoped by chapter number to stay unique in the merged book.
-			blocks: linkExercisesToAnswers(blocks, String(chapter.number).padStart(2, '0'))
+			// The sections and the answer key are one document here. Each section numbers
+			// its footnote references from fnref-1, so they get names unique in the chapter
+			// (PDF plan, Task 3.1's note), and each answered exercise links to its answer and
+			// back (Task 3.3). Both sets of anchors are scoped by chapter number, to stay
+			// unique in the merged book.
+			blocks: linkExercisesToAnswers(scopeFootnoteBackLinks(blocks, scope), scope)
 		};
 	} catch (e) {
 		if (isHttpError(e)) throw e;

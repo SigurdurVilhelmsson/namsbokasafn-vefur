@@ -43,6 +43,8 @@
  * at prerender, where there is no DOMParser.
  */
 
+import { readAttr, hasClass } from './printContent';
+
 /** A rendered block of the print chapter (the loader's PrintBlock satisfies this). */
 export interface PrintAnswerBlock {
 	type: string;
@@ -69,27 +71,6 @@ const exerciseLinkLabel = (n: string) => `Fara í æfingu ${n}`;
 const LINKED_CLASS = 'print-linked';
 
 const OPEN_DIV = /<div\b([^>]*)>/gi;
-
-const attrPatterns = new Map<string, RegExp>();
-
-/**
- * An attribute's value from a start tag's attribute string, as written in the markup
- * (entities not decoded). Anchored on whitespace, so `id` never matches inside
- * `data-exercise-id`.
- */
-function readAttr(attrs: string, name: string): string | undefined {
-	let re = attrPatterns.get(name);
-	if (!re) {
-		re = new RegExp(`(?:^|\\s)${name}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, 'i');
-		attrPatterns.set(name, re);
-	}
-	const m = re.exec(attrs);
-	return m ? (m[1] ?? m[2]) : undefined;
-}
-
-function hasClass(attrs: string, cls: string): boolean {
-	return (readAttr(attrs, 'class') ?? '').split(/\s+/).includes(cls);
-}
 
 function addClass(attrs: string, cls: string): string {
 	return attrs.replace(
