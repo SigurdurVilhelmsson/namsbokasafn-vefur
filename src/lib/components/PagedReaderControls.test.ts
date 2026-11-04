@@ -11,6 +11,18 @@
  * Teardown discipline: a test that holds the fonts releases them before its pager is
  * unmounted (afterEach does it too). On main's code before S8.4, a pager unmounted while
  * it waited woke up later with live listeners and stole every later test's keys.
+ *
+ * Release is tested directly, not through a later test (S8.4's review): track() records
+ * every listener of the kinds the pager adds, with its signal, every settings subscription
+ * and every MutationObserver, and held() says which of them are still live. Without it the
+ * guards in next(), prev() and the hash handler hid a leaked listener, and only a leak into
+ * the next test showed it.
+ *
+ * One way jsdom is stricter than a browser: vitest leaves Node's AbortController in place
+ * and converts each signal for jsdom on first use, so a listener added with a signal that
+ * is ALREADY aborted stays attached, where a browser never attaches it. The current code
+ * never does that; a mutant that drops one of init's abort checks can, so such a mutant
+ * fails here through a listener a browser would not have.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { flushSync, mount, unmount } from 'svelte';
@@ -25,6 +37,76 @@ const realRect = Element.prototype.getBoundingClientRect;
 const realStyle = window.getComputedStyle;
 let fonts: { release: () => void; reject: (e: Error) => void } | null = null;
 let mounted: ReturnType<typeof mount>[] = [];
+
+const PAGER_EVENTS = new Set(['keydown', 'hashchange', 'resize', 'touchstart', 'touchend', 'load']);
+const realAdd = window.EventTarget.prototype.addEventListener;
+// vitest's jsdom global is the window, with addEventListener as its own property
+const realWindowAdd = window.addEventListener;
+const RealObserver = window.MutationObserver;
+let added: { type: string; signal: AbortSignal | undefined }[] = [];
+let subscriptions: { ended: boolean }[] = [];
+let observers: { disconnected: boolean }[] = [];
+
+/** Record what the pager adds from here on: listeners of its kinds, settings subscriptions, observers */
+function track() {
+	const recording = (add: typeof realAdd) =>
+		function (
+			this: EventTarget,
+			type: string,
+			listener: EventListenerOrEventListenerObject | null,
+			options?: boolean | AddEventListenerOptions
+		) {
+			if (PAGER_EVENTS.has(type)) added.push({ type, signal: typeof options === 'object' ? options.signal : undefined });
+			return add.call(this, type, listener, options);
+		};
+	window.EventTarget.prototype.addEventListener = recording(realAdd);
+	window.addEventListener = recording(realWindowAdd) as typeof window.addEventListener;
+	const subscribe = settings.subscribe;
+	vi.spyOn(settings, 'subscribe').mockImplementation((run, invalidate) => {
+		const record = { ended: false };
+		subscriptions.push(record);
+		const unsubscribe = subscribe(run, invalidate);
+		return () => {
+			record.ended = true;
+			unsubscribe();
+		};
+	});
+	window.MutationObserver = class extends RealObserver {
+		private record = { disconnected: false };
+		constructor(callback: MutationCallback) {
+			super(callback);
+			observers.push(this.record);
+		}
+		disconnect() {
+			this.record.disconnected = true;
+			super.disconnect();
+		}
+	};
+}
+
+/** What the pager added and still holds: listeners with no signal or a live one, open subscriptions, connected observers */
+function held() {
+	return {
+		listeners: added.filter((a) => !a.signal?.aborted).map((a) => a.type),
+		subscriptions: subscriptions.filter((r) => !r.ended).length,
+		observers: observers.filter((r) => !r.disconnected).length
+	};
+}
+const NOTHING_HELD = { listeners: [], subscriptions: 0, observers: 0 };
+const LIVE_PAGER = {
+	listeners: ['load', 'resize', 'keydown', 'hashchange', 'touchstart', 'touchend'],
+	subscriptions: 1,
+	observers: 1
+};
+
+/** The page-turn keys the pager took (preventDefault): none, once it has failed or gone */
+function keysTaken(): string[] {
+	return ['ArrowRight', ' ', 'PageDown'].filter((k) => {
+		const event = new KeyboardEvent('keydown', { key: k, cancelable: true });
+		window.dispatchEvent(event);
+		return event.defaultPrevented;
+	});
+}
 
 /** Three sub-sections of 3, 2 and 1 pages at jsdom's 768 px window (a 446 px budget) */
 function content(): HTMLElement {
@@ -138,6 +220,12 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
+	window.EventTarget.prototype.addEventListener = realAdd;
+	window.addEventListener = realWindowAdd;
+	window.MutationObserver = RealObserver;
+	added = [];
+	subscriptions = [];
+	observers = [];
 	fonts?.release();
 	await settle();
 	vi.advanceTimersByTime(1500);
@@ -265,6 +353,51 @@ describe('a failed pager gives the section back (CODE-17, KEEP-03)', () => {
 		expect(arrow.defaultPrevented).toBe(false);
 		expect(poke(c)).toEqual([0, 0, 0, 0, 0]);
 		expect(states).toEqual(['pending', 'failed']);
+	});
+});
+
+describe('a pager lets go of everything it added (CODE-17; S8.4 review)', () => {
+	it('after a failed re-split: no listener, subscription or observer left, and no key taken', async () => {
+		track();
+		const c = content();
+		open(c);
+		await settle();
+		// The control: a live pager holds them all and takes the keys
+		expect(held()).toEqual(LIVE_PAGER);
+		expect(keysTaken()).toEqual(['ArrowRight', ' ', 'PageDown']);
+		history.replaceState(null, '', '/');
+		failNextResplit();
+		expect(held()).toEqual(NOTHING_HELD);
+		expect(keysTaken()).toEqual([]);
+	});
+
+	it('unmounted while live: nothing left, and no key taken', async () => {
+		track();
+		const { pager } = open(content());
+		await settle();
+		expect(held()).toEqual(LIVE_PAGER);
+		drop(pager);
+		expect(held()).toEqual(NOTHING_HELD);
+		expect(keysTaken()).toEqual([]);
+	});
+
+	it('an init that fails after adding its listeners (the observer throws) lets go of them', async () => {
+		track();
+		const Tracking = window.MutationObserver;
+		window.MutationObserver = class {
+			constructor() {
+				throw new Error('forced');
+			}
+		} as never;
+		try {
+			open(content());
+			await settle();
+		} finally {
+			window.MutationObserver = Tracking;
+		}
+		expect(added.map((a) => a.type)).toEqual(LIVE_PAGER.listeners);
+		expect(held()).toEqual(NOTHING_HELD);
+		expect(keysTaken()).toEqual([]);
 	});
 });
 
