@@ -1,7 +1,9 @@
 /**
- * Tests for search index utilities, focusing on XSS prevention
+ * Tests for search index utilities: XSS prevention, and a build that fails and is retried.
  */
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
+import type { TableOfContents } from '$lib/types/content';
+import type { WorkerMessage, WorkerResponse } from '$lib/workers/search.types';
 import { escapeHtml, highlightQuery } from './searchIndex';
 
 describe('escapeHtml', () => {
@@ -116,5 +118,93 @@ describe('highlightQuery', () => {
 		const result = highlightQuery('Tom & Jerry', 'Tom');
 		expect(result).toContain('&amp;');
 		expect(result).toContain('<mark');
+	});
+});
+
+describe('buildSearchIndex after a failed build', () => {
+	const toc = {
+		title: 'bok',
+		chapters: [{ number: 1, title: 'Kafli', sections: [{ number: '1.1', title: 'Hluti', file: '1-1-hluti.html' }] }]
+	} as TableOfContents;
+
+	/**
+	 * A stand-in for the search worker: it answers each 'build' with the next reply in
+	 * `replies` (on a microtask, as a real worker answers later) and records every build.
+	 */
+	function fakeWorker(replies: WorkerResponse[]) {
+		const builds: string[] = [];
+		class FakeWorker {
+			onmessage: ((event: MessageEvent<WorkerResponse>) => void) | null = null;
+			onerror: ((event: unknown) => void) | null = null;
+			postMessage(message: WorkerMessage) {
+				if (message.type !== 'build') return;
+				builds.push(message.bookSlug);
+				const reply = replies.shift() ?? { type: 'build-complete', documentCount: 1 };
+				queueMicrotask(() => this.onmessage?.({ data: reply } as MessageEvent<WorkerResponse>));
+			}
+		}
+		return { FakeWorker, builds };
+	}
+
+	/** A fresh copy of the module, so each test has its own singleton index. */
+	async function loadSearchIndex() {
+		vi.resetModules();
+		return import('./searchIndex');
+	}
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
+	});
+
+	it("rejects with the worker's build-error, and the next call for the same book builds again", async () => {
+		vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, text: async () => '<p>efni</p>' })));
+		const { FakeWorker, builds } = fakeWorker([{ type: 'build-error', error: 'Fuse failed' }]);
+		vi.stubGlobal('Worker', FakeWorker);
+		const { buildSearchIndex, isSearchIndexReady } = await loadSearchIndex();
+		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+		await expect(buildSearchIndex(toc, 'bok')).rejects.toThrow('Fuse failed');
+		expect(isSearchIndexReady()).toBe(false);
+
+		await expect(buildSearchIndex(toc, 'bok')).resolves.toBeUndefined();
+		expect(isSearchIndexReady()).toBe(true);
+		expect(builds).toEqual(['bok', 'bok']);
+		error.mockRestore();
+	});
+
+	it("a failed build for another book leaves no index ready, so a retry for that book builds instead of reading the old one's", async () => {
+		vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, text: async () => '<p>efni</p>' })));
+		const { FakeWorker, builds } = fakeWorker([
+			{ type: 'build-complete', documentCount: 1 },
+			{ type: 'build-error', error: 'Fuse failed' }
+		]);
+		vi.stubGlobal('Worker', FakeWorker);
+		const { buildSearchIndex, isSearchIndexReady } = await loadSearchIndex();
+		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+		await buildSearchIndex(toc, 'bok-a');
+		expect(isSearchIndexReady()).toBe(true);
+		await expect(buildSearchIndex(toc, 'bok-b')).rejects.toThrow('Fuse failed');
+		expect(isSearchIndexReady()).toBe(false);
+
+		await buildSearchIndex(toc, 'bok-b');
+		expect(isSearchIndexReady()).toBe(true);
+		expect(builds).toEqual(['bok-a', 'bok-b', 'bok-b']);
+		error.mockRestore();
+	});
+
+	it('recovers on the main-thread path too (no Worker): a build that throws, then a good one', async () => {
+		vi.stubGlobal('Worker', undefined);
+		vi.stubGlobal('fetch', vi.fn(async () => ({ ok: true, text: async () => '<p>efni</p>' })));
+		const { buildSearchIndex, isSearchIndexReady } = await loadSearchIndex();
+		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+		// A table of contents with no chapters makes the build throw before any fetch.
+		await expect(buildSearchIndex({ title: 'bok' } as TableOfContents, 'bok')).rejects.toThrow(TypeError);
+		expect(isSearchIndexReady()).toBe(false);
+
+		await expect(buildSearchIndex(toc, 'bok')).resolves.toBeUndefined();
+		expect(isSearchIndexReady()).toBe(true);
+		warn.mockRestore();
 	});
 });

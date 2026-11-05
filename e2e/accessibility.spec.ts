@@ -6,7 +6,8 @@
  *
  * The "Accessibility ratchet" block runs axe-core on five surfaces against
  * e2e/a11y-baseline.json (plan step S1.1); see e2e/helpers/axe.ts. The block after it
- * scans the book home's PDF button, which no build without PDFs renders.
+ * scans the three PdfDownloadButton variants (book home, chapter page, section toolbar),
+ * which no build without PDFs renders.
  */
 
 import AxeBuilder from '@axe-core/playwright';
@@ -353,60 +354,140 @@ test.describe('Accessibility ratchet (axe, WCAG 2.1 A and AA)', () => {
 });
 
 // ---------------------------------------------------------------------------------------
-// The book home's PDF button, which the ratchet's surfaces never render
+// The PDF download buttons, which the ratchet's surfaces never render
 // ---------------------------------------------------------------------------------------
 
 /**
- * 'Sækja bók sem PDF' shows only when /downloads/<book>/manifest.json exists, and CI has no
- * PDFs, so the book-home surface above never contains it. The manifest is read by the book
- * layout's universal load with SvelteKit's fetch. A prerender with no manifest gets a 404,
+ * PdfDownloadButton shows only when /downloads/<book>/manifest.json lists its file, and CI has
+ * no PDFs, so the surfaces above never contain one of its three variants: 'Sækja bók sem PDF'
+ * on the book home (primary), and 'Sækja kafla N sem PDF' on the chapter page (compact) and in
+ * the section page's toolbar (icon). Every page under /<book>/ gets the manifest from the book
+ * layout's universal load, with SvelteKit's fetch. A prerender with no manifest gets a 404,
  * whose body the load never reads, so nothing is inlined in the page: hydration runs the load
  * again in the browser and fetches the file over the network, where page.route() answers it.
  * No file under static/downloads/ is needed. A build made WITH PDFs inlines the real manifest
- * and never asks, so the button renders from that one: the name's size is matched as a pattern.
+ * and never asks, so the buttons render from that one: the names' sizes are matched as a pattern.
  */
+const PDF_CHAPTER = (() => {
+	const m = SECTION?.match(/\/kafli\/(\d+)\//);
+	return m ? Number(m[1]) : null;
+})();
+
 const PDF_MANIFEST = BOOK && {
 	generatedAt: '2026-11-04T00:00:00.000Z',
 	bookSlug: BOOK,
 	// scripts/generate-pdfs.js names the whole book `<slug>-bok.pdf`; 48,234,496 bytes is "46 MB".
 	full: { file: `${BOOK}-bok.pdf`, sizeBytes: 48_234_496, pageCount: 1200 },
-	chapters: []
+	// The chapter the section scan opens, which both chapter variants look up by chapterNum. A
+	// chapter is `<slug>-kafli-NN.pdf`; 3,250,586 bytes is "3,1 MB".
+	chapters:
+		PDF_CHAPTER === null
+			? []
+			: [
+					{
+						chapterNum: PDF_CHAPTER,
+						title: `Kafli ${PDF_CHAPTER}`,
+						file: `${BOOK}-kafli-${String(PDF_CHAPTER).padStart(2, '0')}.pdf`,
+						sizeBytes: 3_250_586,
+						pageCount: 64,
+						startPage: 1
+					}
+				]
 };
 
-test.describe('PDF download button on the book home (axe, WCAG 2.1 A and AA)', () => {
+const PDF_SIZE = String.raw`\(\d+(,\d)? (B|KB|MB)\)`;
+
+interface PdfButton {
+	variant: 'primary' | 'compact' | 'icon';
+	where: string;
+	path: string | null;
+	/** The link's accessible name, size included. */
+	name: RegExp;
+	/** The button's container, which axe scans. */
+	scope: string;
+	/**
+	 * axe rules that must have measured the button and passed it, so an empty or wrong scope
+	 * cannot pass. An icon-only link has no text, so axe measures no colour for it (WCAG
+	 * 1.4.11's non-text contrast is outside axe): its name is what axe can check.
+	 */
+	measured: string[];
+}
+
+const PDF_BUTTONS: PdfButton[] = [
+	{
+		variant: 'primary',
+		where: 'book home',
+		path: BOOK && `/${BOOK}/`,
+		name: new RegExp(`^Sækja bók sem PDF ${PDF_SIZE}$`),
+		scope: '.book-home-actions',
+		measured: ['color-contrast', 'link-name']
+	},
+	{
+		variant: 'compact',
+		where: 'chapter page',
+		path: SECTION && SECTION.replace(/[^/]+\/$/, ''),
+		name: new RegExp(`^Sækja kafla ${PDF_CHAPTER} sem PDF ${PDF_SIZE}$`),
+		scope: '.chapter-view div:has(> a.pdf-btn-compact)',
+		measured: ['color-contrast', 'link-name']
+	},
+	{
+		variant: 'icon',
+		where: 'section page',
+		path: SECTION,
+		name: new RegExp(`^Sækja kafla ${PDF_CHAPTER} sem PDF ${PDF_SIZE}$`),
+		// The toolbar beside the reading time: print, PDF, share, notes and bookmark.
+		scope: 'div:has(> a.pdf-btn-icon)',
+		measured: ['link-name']
+	}
+];
+
+test.describe('PDF download buttons (axe, WCAG 2.1 A and AA)', () => {
 	// No service worker: page.route() does not see requests a service worker makes.
 	test.use({ serviceWorkers: 'block', reducedMotion: 'reduce' });
 
-	for (const theme of THEMES) {
-		for (const viewport of VIEWPORTS) {
-			test(`${theme} theme at ${viewport.width} px: the button and its row have no failure`, async ({ page }) => {
-				test.skip(!BOOK, 'no published book is synced');
-				await page.setViewportSize(viewport);
-				await page.route(`**/downloads/${BOOK}/manifest.json`, (route) => route.fulfill({ json: PDF_MANIFEST }));
-				await seedTheme(page, theme);
-				await page.goto(`/${BOOK}/`);
-				await page.waitForLoadState('networkidle');
-				if (theme === 'dark') await expect(page.locator('html')).toHaveClass(/(^|\s)dark(\s|$)/);
-				else await expect(page.locator('html')).not.toHaveClass(/(^|\s)dark(\s|$)/);
+	// The scan also runs label-content-name-mismatch (WCAG 2.5.3, the visible text must be in
+	// the name), which the compact button failed while it showed its size without the name's
+	// parentheses. It is not in `measured`: it applies only while a button has an aria-label.
+	for (const pdf of PDF_BUTTONS) {
+		for (const theme of THEMES) {
+			for (const viewport of VIEWPORTS) {
+				test(`${pdf.where} (${pdf.variant}), ${theme} theme at ${viewport.width} px: the button and its container have no failure`, async ({
+					page
+				}) => {
+					test.skip(!pdf.path, 'no published book is synced');
+					await page.setViewportSize(viewport);
+					await page.route(`**/downloads/${BOOK}/manifest.json`, (route) => route.fulfill({ json: PDF_MANIFEST }));
+					await seedTheme(page, theme);
+					await page.goto(pdf.path!);
+					await page.waitForLoadState('networkidle');
+					if (theme === 'dark') await expect(page.locator('html')).toHaveClass(/(^|\s)dark(\s|$)/);
+					else await expect(page.locator('html')).not.toHaveClass(/(^|\s)dark(\s|$)/);
 
-				// The name carries the size, as generate-pdfs.js's manifest gives it ("46 MB" from
-				// the fixture; whatever size a build with real PDFs inlined).
-				const button = page.getByRole('link', { name: /^Sækja bók sem PDF \(\d+(,\d)? (B|KB|MB)\)$/ });
-				await expect(button).toBeVisible();
-				await expect(button).toHaveAttribute('href', new RegExp(`^/downloads/${BOOK}/[a-zA-Z0-9._-]+\\.pdf$`));
+					// The name carries the size, as generate-pdfs.js's manifest gives it ("46 MB" and
+					// "3,1 MB" from the fixture; whatever size a build with real PDFs inlined). The icon
+					// variant has no text: its name is its aria-label (its title says the same).
+					const button = page.locator(`a.pdf-btn-${pdf.variant}`);
+					await expect(button).toBeVisible();
+					await expect(button).toHaveRole('link');
+					await expect(button).toHaveAccessibleName(pdf.name);
+					await expect(button).toHaveAttribute('href', new RegExp(`^/downloads/${BOOK}/[a-zA-Z0-9._-]+\\.pdf$`));
 
-				await settle(page);
-				const results = await new AxeBuilder({ page }).include('.book-home-actions').withTags(WCAG_TAGS).analyze();
-				const failures = results.violations.flatMap((v) =>
-					v.nodes.map((n) => `${v.id} (${v.impact}): ${n.target.join(' ')}\n    ${n.failureSummary ?? ''}`)
-				);
-				expect(failures, failures.join('\n')).toEqual([]);
-				// Not a vacuous pass: axe measured the button's text against its fill.
-				const contrastPassed = results.passes
-					.find((r) => r.id === 'color-contrast')
-					?.nodes.some((n) => n.target.join(' ').includes('pdf-btn'));
-				expect(contrastPassed, "axe measured the PDF button's contrast and passed it").toBe(true);
-			});
+					await settle(page);
+					const results = await new AxeBuilder({ page }).include(pdf.scope).withTags(WCAG_TAGS).analyze();
+					const failures = results.violations.flatMap((v) =>
+						v.nodes.map((n) => `${v.id} (${v.impact}): ${n.target.join(' ')}\n    ${n.failureSummary ?? ''}`)
+					);
+					expect(failures, failures.join('\n')).toEqual([]);
+					// Not a vacuous pass: axe measured the button itself (its element or its text), the
+					// one PDF button in the scope.
+					for (const rule of pdf.measured) {
+						const passed = results.passes
+							.find((r) => r.id === rule)
+							?.nodes.some((n) => n.target.join(' ').includes('pdf-btn') || n.html.includes('pdf-btn'));
+						expect(passed, `axe's ${rule} rule measured the ${pdf.variant} PDF button and passed it`).toBe(true);
+					}
+				});
+			}
 		}
 	}
 });
