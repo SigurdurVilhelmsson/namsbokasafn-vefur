@@ -135,7 +135,8 @@
 		justify-content: center;
 		padding: 0.5rem;
 		border-radius: 0.5rem;
-		color: rgb(156 163 175); /* text-gray-400 */
+		/* Icon that identifies a control: 3:1 needed (WCAG 1.4.11); tertiary is 4.5:1 on every surface. */
+		color: var(--text-tertiary);
 		text-decoration: none;
 		transition: all 0.15s ease;
 	}

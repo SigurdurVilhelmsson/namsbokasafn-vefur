@@ -401,7 +401,7 @@
 			<!-- Print button -->
 			<button
 				onclick={handlePrint}
-				class="p-2 rounded-lg transition-colors text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200"
+				class="p-2 rounded-lg transition-colors text-[var(--text-tertiary)] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200"
 				aria-label="Prenta kafla"
 				title="Prenta"
 			>
@@ -420,7 +420,7 @@
 				onclick={handleShare}
 				class="p-2 rounded-lg transition-colors {shareSuccess
 					? 'text-green-500 bg-green-50 dark:bg-green-900/20'
-					: 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-strong)]'}"
+					: 'text-[var(--text-tertiary)] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-strong)]'}"
 				aria-label={shareSuccess ? 'Hlekkur afritaður' : 'Deila kafla'}
 				title={shareSuccess ? 'Hlekkur afritaður!' : 'Deila'}
 			>
@@ -433,7 +433,7 @@
 			<!-- Annotations button -->
 			<button
 				onclick={() => (showAnnotationSidebar = true)}
-				class="p-2 rounded-lg transition-colors text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-strong)]"
+				class="p-2 rounded-lg transition-colors text-[var(--text-tertiary)] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-strong)]"
 				aria-label="Opna athugasemdir"
 				title="Athugasemdir"
 			>
@@ -443,7 +443,7 @@
 				onclick={toggleBookmark}
 				class="p-2 rounded-lg transition-colors {isBookmarked
 					? 'text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-					: 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}"
+					: 'text-[var(--text-tertiary)] hover:bg-gray-100 dark:hover:bg-gray-800'}"
 				aria-label={isBookmarked ? 'Fjarlægja bókamerki' : 'Bæta við bókamerki'}
 			>
 				<svg class="w-5 h-5" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
