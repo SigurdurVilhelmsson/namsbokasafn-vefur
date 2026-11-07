@@ -29,11 +29,11 @@ it. Nothing is edited in the lane. It only pulls `main`.
 - **Its `.env.production`:** copied from the main checkout. Since S3.3 (decision
   D03) no code reads its `VITE_API_URL`, so builds from the lane send nothing to
   the editorial server; the line is dead and can go.
-- **No sync runs in the lane.** A deploy from the lane publishes no new content,
-  and a sync run in another checkout never reaches it (`sync-content.js` writes
-  to its own checkout's `static/content`). Publishing new content has no written
-  procedure yet: write one before the chemistry hold lifts (see `CLAUDE.md`,
-  Current Development Status).
+- **A sync runs in the lane only in a content deploy.** A train publishes no
+  new content, and a sync run in another checkout never reaches the lane
+  (`sync-content.js` writes to its own checkout's `static/content`). New
+  content is published by "The checklist for a content deploy" below, which
+  syncs into the lane from a separate checkout of the named efni commit.
 
 It was made like this (the two rsync calls only read from the server):
 
@@ -199,6 +199,132 @@ deploy.
    made-up `/_app/immutable/` path answers 404, and a page that does not exist
    prints the `STOP` line for the app shell. The check sees only the files each
    page's HTML names, not the ones the app loads later.
+
+### The checklist for a content deploy
+
+A content deploy publishes new pages from efni. It runs in the lane too, so the
+lane is still the only place a deploy starts, and after it the lane's content
+is the server's again. Written 2026-11-05 for the chemistry release (efni
+register §C207). It has not run yet; correct it where the first run shows it
+wrong.
+
+**Before you start.** Each of these is a stop:
+
+- [USER] has lifted the hold for this book, in writing.
+- The efni commit to publish is named, and it is on efni's `origin/main`.
+- The redirect rows for every page the release renames are merged to vefur
+  `main` (`src/lib/data/sectionRedirects.ts`). A row is inert until its target
+  page is published, so the rows go first (CLAUDE.md, "A rename retires a reader
+  URL"). Step 4 below finds any row that is missing.
+- No `D20: proposed` string waits on `main` (step 2 of the train checklist).
+
+1. **Check out the efni commit on its own,** never the efni working checkout,
+   which holds whatever branch a session left there:
+
+   ```bash
+   sha=<the efni commit>
+   git -C ~/dev/repos/namsbokasafn-efni fetch origin
+   git -C ~/dev/repos/namsbokasafn-efni worktree add --detach ~/dev/repos/namsbokasafn-efni-release $sha
+   git -C ~/dev/repos/namsbokasafn-efni merge-base --is-ancestor $sha origin/main && echo "on origin/main" || echo "STOP: not on origin/main"
+   git -C ~/dev/repos/namsbokasafn-efni-release status --porcelain | head
+   ```
+
+   Only `on origin/main` and an empty status pass.
+
+2. **Update the lane and keep a copy of the book as it is now:**
+
+   ```bash
+   cd ~/dev/repos/namsbokasafn-vefur-deploy
+   git pull --ff-only
+   npm ci
+   book=efnafraedi-2e
+   before=~/.cache/content-deploy/$(date +%F)-$book-before
+   mkdir -p ~/.cache/content-deploy && cp -a static/content/$book $before
+   ```
+
+   Check first that the lane's copy is still the server's (step 4 of the train
+   checklist, run before the sync). If it is not, stop: the copy is the
+   baseline for every check below.
+
+3. **Sync that one book, dry run first:**
+
+   ```bash
+   node scripts/sync-content.js --source ~/dev/repos/namsbokasafn-efni-release --dry-run $book
+   node scripts/sync-content.js --source ~/dev/repos/namsbokasafn-efni-release $book
+   cat static/content/$book/sync-stamp.json
+   ```
+
+   Name the book, so nothing else is synced, and never pass `--prune`. While
+   [USER]'s hold is written only in prose, the allowlist does not stop the sync;
+   that is why the first condition above is a stop. Read the output:
+   - `deleting toc.json` and `deleting sync-stamp.json` are expected;
+     `Regenerating toc.json...` must appear and
+     `Warning: Failed to regenerate` must not, or the book vanishes from the
+     build with exit 0;
+   - `Stamped sync-stamp.json: efni <sha>` must name `$sha`, and the stamp must
+     say `"onOriginMain": true` and `"dirty": false`;
+   - an unresolved conflict count is a stop (two pages for one module; the
+     sync's exit code stays 0 on purpose).
+
+4. **Check every page the sync removed:**
+
+   ```bash
+   node scripts/check-content-renames.js $before static/content/$book
+   ```
+
+   It pairs the two trees on `data-module-id`. Only
+   `every removed page has its redirect` passes. A `STOP rename` line needs a
+   redirect row (merge it to `main`, pull, then run step 4 again); a
+   `STOP deleted` line is a module the release drops, which must be expected.
+   Measured 2026-11-05: a whole-book re-render of chemistry renamed 34 pages
+   against efni `main`'s prepared tree, so expect a long list.
+
+5. **Build:** `npm run build`. Its `validate-content.js` must pass.
+
+6. **Compare with the server.** Run the checksum command from step 4 of the
+   train checklist. This time the lists differ, by design: every changed file
+   must sit under `chapters/`, or be `toc.json`, `offline-manifest.json`,
+   `glossary.json`, `index.json`, `slug-map.*.json` or `sync-stamp.json`. A
+   difference anywhere else is a stop.
+
+7. **Dry run, and read it** (step 5 of the train checklist). Now the deletions
+   include the renamed pages, under `content/$book/chapters/` and under
+   `$book/kafli/`. Each must be one of step 4's renames, and its old address
+   must have a redirect stub in the build:
+
+   ```bash
+   ls build/$book/kafli/<chapter>/<old slug>/index.html
+   ```
+
+   The sitemap diff drops each old address and adds its new one; nothing else
+   may appear or disappear.
+
+8. **Back up the live build** (step 6 of the train checklist), then **deploy**
+   with `--apply`.
+
+9. **Check the live site.** The train checklist's step 8, then the content
+   itself. A page address always answers 200 (the app shell), so fetch a
+   content file and a control:
+
+   ```bash
+   site=https://namsbokasafn.is
+   f=$(ls build/content/$book/chapters/01/ | grep -m1 '^1-1-')
+   curl -fsS "$site/content/$book/chapters/01/$f" | grep -c 'data-module-id'
+   curl -s -o /dev/null -w 'control: %{http_code} %{size_download} bytes\n' "$site/content/$book/chapters/01/no-such-page.html"
+   diff <(curl -fsS "$site/content/$book/sync-stamp.json") build/content/$book/sync-stamp.json && echo "live stamp matches"
+   ```
+
+   The first must print 1 or more, the control a 404 of about 160 bytes, and
+   the stamps must match. Then open one old address from step 4 in a browser:
+   it must land on its new page.
+
+10. **Tidy up:** `git -C ~/dev/repos/namsbokasafn-efni worktree remove ~/dev/repos/namsbokasafn-efni-release`.
+    Keep `$before` until the release has been live for a while. To roll back,
+    restore the backup from step 8 (the train checklist's step 6 shows how).
+
+The PDFs are not part of this. They ship separately (see "Refreshing the
+PDFs"), and not before their links into the reader are fixed (CLAUDE.md,
+Known, not fixed).
 
 ## Before you deploy
 
