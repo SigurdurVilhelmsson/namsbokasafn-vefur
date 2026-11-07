@@ -27,12 +27,18 @@
  * `foot-00001`, a footnote id chapter 1 and the appendices each hold once.
  * `mergeChapterDests` namespaces a name only when it is known to collide, so the
  * globally-unique content ids (`CNX_Chem_NN_*`) stay untouched and cross-chapter
- * resolution keeps working. The links that point at a namespaced name are the one
+ * resolution keeps working. The links that point at a namespaced name are one
  * exception to "don't touch the annotations": `namespaceChapterLinks` renames them
  * the same way, or they would point at a name the merged book no longer has.
+ *
+ * The other exception is a link into the reader whose page is in another part of the
+ * book. The print loaders write it as a link to the live site
+ * (`src/lib/utils/printLinks.ts`), which is right for the chapter's own PDF; in the
+ * book, `linkSiteUrisToDests` turns it into a jump to that page's anchor ([USER]'s
+ * ruling of 2026-11-07: a link whose target is in the same PDF jumps there).
  */
 
-import { PDFName, PDFArray, PDFDict, PDFNumber, PDFRef } from 'pdf-lib';
+import { PDFName, PDFArray, PDFDict, PDFNumber, PDFRef, PDFString, PDFHexString } from 'pdf-lib';
 
 /**
  * Read a document's catalog `/Dests` name-dictionary.
@@ -244,4 +250,65 @@ export function writeMergedDests(doc, registry) {
 		if (!pageRef) continue;
 		dests.set(PDFName.of(name), doc.context.obj([pageRef, ...params]));
 	}
+}
+
+/** The live site, where the print loaders send links to pages outside their render. */
+export const SITE_ORIGIN = 'https://namsbokasafn.is';
+
+/**
+ * The anchor name the print renders give the reader page a site link opens:
+ * `sec-<basename>` for a section of `bookSlug`, `vidauki-<letter>` for an appendix,
+ * null for any other page or site. The same names as `readerAnchor` in
+ * `src/lib/utils/printLinks.ts`; both are tested against `printLinks.cases.json`.
+ *
+ * @param {string} url  an absolute URL, as a URI link annotation holds it
+ * @param {string} bookSlug
+ * @returns {string | null}
+ */
+export function anchorForSiteUrl(url, bookSlug) {
+	if (!url.startsWith(`${SITE_ORIGIN}/`)) return null;
+	const path = url.slice(SITE_ORIGIN.length).split(/[?#]/, 1)[0];
+	const parts = path.split('/').filter(Boolean);
+	if (parts[0] !== bookSlug) return null;
+	if (parts.length === 4 && parts[1] === 'kafli') return `sec-${parts[3]}`;
+	if (parts.length === 3 && parts[1] === 'vidauki') return `vidauki-${parts[2]}`;
+	return null;
+}
+
+/**
+ * In the merged book, turn each URI link to a reader page the book holds into a jump to
+ * that page's anchor: a chapter's link to an appendix, written as a site link because the
+ * chapter's own PDF has no appendices. A link with a fragment lands at the start of its
+ * page, because a part has a destination for an element only when that part links to it.
+ * A link whose anchor the book has no destination for stays a site link.
+ *
+ * @param {import('pdf-lib').PDFDocument} doc  the merged book
+ * @param {{ has(name: string): boolean }} destNames  the names the book has destinations
+ *   for: the registry `mergeChapterDests` filled
+ * @param {string} bookSlug
+ * @returns {number} how many links were turned
+ */
+export function linkSiteUrisToDests(doc, destNames, bookSlug) {
+	let turned = 0;
+	for (const page of doc.getPages()) {
+		const annots = doc.context.lookup(page.node.get(PDFName.of('Annots')));
+		if (!(annots instanceof PDFArray)) continue;
+		for (let i = 0; i < annots.size(); i++) {
+			const annot = doc.context.lookup(annots.get(i));
+			if (!(annot instanceof PDFDict)) continue;
+			if (annot.get(PDFName.of('Subtype'))?.toString() !== '/Link') continue;
+			const action = doc.context.lookup(annot.get(PDFName.of('A')));
+			if (!(action instanceof PDFDict) || action.get(PDFName.of('S'))?.toString() !== '/URI') {
+				continue;
+			}
+			const uri = action.lookup(PDFName.of('URI'));
+			if (!(uri instanceof PDFString || uri instanceof PDFHexString)) continue;
+			const name = anchorForSiteUrl(uri.decodeText(), bookSlug);
+			if (!name || !destNames.has(name)) continue;
+			annot.delete(PDFName.of('A'));
+			annot.set(PDFName.of('Dest'), PDFName.of(name));
+			turned++;
+		}
+	}
+	return turned;
 }

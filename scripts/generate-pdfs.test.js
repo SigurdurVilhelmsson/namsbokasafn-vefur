@@ -120,6 +120,15 @@ describe('scripts/generate-pdfs.js (source text)', () => {
 		]);
 	});
 
+	it("turns the chapters' site links into jumps in the book only, once every anchor is known", () => {
+		// A chapter's appendix link is a site link (its own PDF has no appendices); the
+		// book holds the appendix, so there it must jump ([USER], 2026-11-07).
+		expect(callArgs(code, 'linkSiteUrisToDests')).toEqual([['merged', 'registry', 'bookSlug']]);
+		const turn = code.search(/\blinkSiteUrisToDests\s*\(/);
+		expect(turn).toBeGreaterThan(code.search(/\bmergeChapterDests\s*\(/));
+		expect(turn).toBeLessThan(code.search(/\bwriteMergedDests\s*\(\s*merged/));
+	});
+
 	it('prints only through pdf-print.js, which waits for every image', () => {
 		// A print that did not wait for the lazy-loaded figures dropped some of them
 		// and moved every page number after them (chapter 10: 112, 108, 105 pages).

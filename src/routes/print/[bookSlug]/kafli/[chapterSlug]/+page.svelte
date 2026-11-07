@@ -42,6 +42,16 @@
 	{@html block.content}
 {/each}
 
+<!-- Invisible self-target links: Chromium only creates a named destination for
+     an element that an in-document link targets. These give every section's
+     anchor a destination, so the book PDF's merge can turn a site link from
+     another part into a jump to it (scripts/lib/pdf-links.js). -->
+<div class="toc-anchor-targets" aria-hidden="true">
+	{#each data.anchors as anchor (anchor)}
+		<a href="#{anchor}">·</a>
+	{/each}
+</div>
+
 <!-- The attribution colophon is NOT rendered inline here: generate-pdfs.js
      appends a dedicated colophon page (/print/<slug>/colophon) to the standalone
      chapter PDF only, so it never repeats through the merged full book. -->
