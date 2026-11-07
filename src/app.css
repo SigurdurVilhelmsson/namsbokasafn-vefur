@@ -1601,10 +1601,18 @@ td:has(> math.assistive-mathml) {
 /* Dark theme: figure images sit on a white card. Every composed vector figure
    from efni is line art on a transparent background, which would otherwise
    draw black lines straight onto the dark page (efni C140 ㊶). Raster figures
-   are opaque white already, so with the card all figures look alike. */
+   are opaque white already, so with the card all figures look alike.
+   The card's padding sits outside the image's size: efni's H1 gives each image
+   width/height attributes (register §C201), and under Tailwind's border-box the
+   padding would go inside them and draw the picture 1rem smaller. content-box
+   alone would let a full-width figure overflow the column by 1rem, so max-width
+   keeps the card inside it. (Not `width: auto`: that drops the box the
+   attributes reserve before the image loads.) */
 .dark .reading-content figure img {
   background-color: #ffffff;
   padding: 0.5rem;
+  box-sizing: content-box;
+  max-width: calc(100% - 1rem);
 }
 
 .reading-content figcaption {
