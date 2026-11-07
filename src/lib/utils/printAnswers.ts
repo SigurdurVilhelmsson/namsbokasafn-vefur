@@ -61,10 +61,9 @@ export function answerAnchorId(scope: string, key: string): string {
 	return `ans-${scope}-${key}`;
 }
 
-// The reader's aria-labels for the same two links (answerLinks.ts, createNumberLink).
-// D20: proposed (reused from answerLinks.ts)
+// The reader's aria-labels for the same two links (answerLinks.ts, createNumberLink),
+// checked for print by [USER] as D20 batch 10 (2026-11-07).
 const answerLinkLabel = (n: string) => `Fara í svar við æfingu ${n}`;
-// D20: proposed (reused from answerLinks.ts)
 const exerciseLinkLabel = (n: string) => `Fara í æfingu ${n}`;
 
 /** Added to a linked exercise or answer entry, so print.css hides its ::before number. */

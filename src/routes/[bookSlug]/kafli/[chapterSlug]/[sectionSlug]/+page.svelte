@@ -317,7 +317,8 @@
 
 <svelte:head>
 	<title>{data.section.section} {data.section.title} | Námsbókasafn</title>
-	<!-- D20: proposed (M18): both descriptions end with the book's own subject, from textbookPhrase() -->
+	<!-- Both descriptions end with the book's own subject, from textbookPhrase() (M18; checked by
+	     [USER] as D20 batch 10, 2026-11-07) -->
 	<meta name="description" content="{data.section.section} {data.section.title} – {textbookPhrase(data.book)}" />
 	<meta name="robots" content="index, follow" />
 	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/kafli/{data.chapterSlug}/{data.sectionSlug}/" />

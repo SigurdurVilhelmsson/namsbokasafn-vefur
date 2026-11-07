@@ -12,7 +12,8 @@
  */
 export function textbookPhrase(book: { title?: string | null } | null | undefined): string {
 	const title = book?.title?.trim();
-	// D20: proposed (M18): '<title> kennslubók á íslensku' is new for every book but
-	// chemistry, whose phrase is the old one, and so is 'Kennslubók á íslensku'
+	// '<title> kennslubók á íslensku' is new for every book but chemistry, whose phrase is the
+	// old one, and so is 'Kennslubók á íslensku' (M18; checked by [USER] as D20 batch 10,
+	// 2026-11-07)
 	return title ? `${title} kennslubók á íslensku` : 'Kennslubók á íslensku';
 }
