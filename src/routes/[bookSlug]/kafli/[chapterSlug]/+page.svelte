@@ -66,7 +66,8 @@
 
 <svelte:head>
 	<title>Kafli {data.chapter.number}: {data.chapter.title} | {data.book?.title ?? data.bookSlug}</title>
-	<!-- D20: proposed (M18): the description ends with the book's own subject, from textbookPhrase() -->
+	<!-- The description ends with the book's own subject, from textbookPhrase() (M18; checked by
+	     [USER] as D20 batch 10, 2026-11-07) -->
 	<meta name="description" content="Kafli {data.chapter.number}: {data.chapter.title}. {textbookPhrase(data.book)}." />
 	<meta name="robots" content="index, follow" />
 	<link rel="canonical" href="https://namsbokasafn.is/{data.bookSlug}/kafli/{chapterPath}/" />

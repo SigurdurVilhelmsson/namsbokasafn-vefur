@@ -50,21 +50,24 @@ export function pdfBookInfo(config, slug) {
 	const credit = config.creditLine(book.slug, book.status, attribution.translators);
 	const sourceHost = new URL(attribution.sourceUrl).hostname.replace(/^www\./, '');
 
+	// The Author, Subject, fixed keywords and footer line below were checked by [USER] as
+	// D20 batch 10 (2026-11-07), who added 'námsbók' to the keywords then.
 	return {
 		title: book.title,
-		// D20: proposed — the original authors and publisher, then the colophon's credit
+		// The original authors and publisher, then the colophon's credit
 		author: `${attribution.originalAuthors.join(', ')} (${attribution.publisher}); ${credit}`,
-		// D20: proposed — the colophon's licence sentence, verbatim
+		// The colophon's licence sentence, verbatim
 		subject: `Leyfi: ${licence.name} (${licence.fullName}) — ${licence.url}`,
 		keywords: [
 			book.title,
-			'kennslubók', // D20: proposed
-			'íslensk þýðing', // D20: proposed
+			'kennslubók',
+			'námsbók',
+			'íslensk þýðing',
 			attribution.originalTitle,
 			attribution.publisher,
 			licence.name
 		],
-		// D20: proposed — e.g. "CC BY 4.0 · openstax.org · namsbokasafn.is"
+		// e.g. "CC BY 4.0 · openstax.org · namsbokasafn.is"
 		licenceLine: [licence.name, sourceHost, SITE_HOST].join(' · ')
 	};
 }

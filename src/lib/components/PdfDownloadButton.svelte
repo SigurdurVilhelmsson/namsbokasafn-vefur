@@ -72,8 +72,9 @@
 		>
 			<Icon name="download" size="sm" />
 			<span>{label}</span>
-			<!-- D20: proposed: the size in parentheses, as the primary button shows it, so the
-			     visible text is in the link's name (WCAG 2.5.3; axe's label-content-name-mismatch) -->
+			<!-- The size in parentheses, as the primary button shows it, so the visible text is
+			     in the link's name (WCAG 2.5.3; axe's label-content-name-mismatch). Checked by
+			     [USER] as D20 batch 10 (2026-11-07). -->
 			<span class="pdf-btn-size">({sizeLabel})</span>
 		</a>
 	{:else}

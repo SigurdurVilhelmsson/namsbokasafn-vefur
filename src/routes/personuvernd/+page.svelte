@@ -124,8 +124,9 @@
 			<section aria-labelledby="erase">
 				<h2 id="erase">Að eyða gögnunum</h2>
 				<ul>
-					<!-- D20: proposed: 'Eftir standa' no longer names the list of pages and figures fetched
-					     recently, which the erase now empties (bl-erase-workbox-expiration). -->
+					<!-- 'Eftir standa' no longer names the list of pages and figures fetched recently,
+					     which the erase now empties (bl-erase-workbox-expiration). Checked by [USER] as
+					     D20 batch 10 (2026-11-07). -->
 					<li>
 						Í {#if greiningHref}<a href={greiningHref}>Námsgreiningu</a>{:else}Námsgreiningu{/if} er
 						hnappurinn „Eyða öllum gögnum á þessu tæki“. Hann eyðir öllu sem talið er upp hér að ofan,
@@ -150,7 +151,8 @@
 				<h2 id="more">Gott að vita</h2>
 				<p>Þessi síða lýsir því hvernig vefurinn virkar. Hún er ekki lögfræðiráðgjöf.</p>
 				<p>Spurningar? Sendu okkur línu með <a href="/feedback/">endurgjafarforminu</a>.</p>
-				<!-- D20: proposed: the date moves with the erase item's change (bl-erase-workbox-expiration). -->
+				<!-- The date moves with the erase item's change (bl-erase-workbox-expiration; checked by
+				     [USER] as D20 batch 10, 2026-11-07). -->
 				<p class="updated">Síðast uppfært 4. nóvember 2026.</p>
 			</section>
 		</div>

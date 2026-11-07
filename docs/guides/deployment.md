@@ -74,10 +74,12 @@ deploy.
 
 2. **Check that no UI text waits for its check** (decision D20). New or changed
    Icelandic strings merge marked `D20: proposed` and are checked as one batch
-   before the train that ships them:
+   before the train that ships them. The check reads `scripts/` as well as `src/`,
+   because the PDFs' metadata and footer strings live in `scripts/lib/` (D20 batch
+   10 had five there, which a `src`-only check never saw):
 
    ```bash
-   git grep -n -A4 'D20: proposed' -- src; s=$?; if [ $s -eq 1 ]; then echo "no proposed strings"; else echo "STOP: strings marked 'D20: proposed' are unchecked, or git grep failed (status $s)"; fi
+   git grep -n -A4 'D20: proposed' -- src scripts; s=$?; if [ $s -eq 1 ]; then echo "no proposed strings"; else echo "STOP: strings marked 'D20: proposed' are unchecked, or git grep failed (status $s)"; fi
    ```
 
    Only `no proposed strings` passes. On `STOP`, check the listed strings as one

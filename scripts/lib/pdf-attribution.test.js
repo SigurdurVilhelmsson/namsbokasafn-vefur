@@ -63,6 +63,24 @@ describe('pdfBookInfo: the title', () => {
 	});
 });
 
+describe('pdfBookInfo: the keywords', () => {
+	// [USER] added 'námsbók' when checking D20 batch 10 (2026-11-07).
+	it("list 'námsbók' once, beside 'kennslubók'", () => {
+		const { keywords } = pdfBookInfo(config, 'efnafraedi-2e');
+		expect(keywords.slice(keywords.indexOf('kennslubók'), keywords.indexOf('kennslubók') + 2)).toEqual([
+			'kennslubók',
+			'námsbók'
+		]);
+	});
+
+	it("never list 'námsbók' twice", () => {
+		for (const book of books) {
+			const { keywords } = pdfBookInfo(config, book.slug);
+			expect(keywords.filter((k) => k === 'námsbók')).toHaveLength(1);
+		}
+	});
+});
+
 describe('pdfBookInfo: licence facts come from the descriptor', () => {
 	it('names the licence and its URL in the subject', () => {
 		expect(pdfBookInfo(config, 'efnafraedi-2e').subject).toBe(
@@ -156,7 +174,7 @@ describe('applyDocumentInfo', () => {
 		expect(reread.getAuthor()).toBe(info.author);
 		expect(reread.getSubject()).toContain('https://creativecommons.org/licenses/by/4.0/');
 		expect(reread.getKeywords()).toBe(
-			'Efnafræði, Efnasamsetning og lausnir, kennslubók, íslensk þýðing, Chemistry 2e, OpenStax, Rice University, CC BY 4.0'
+			'Efnafræði, Efnasamsetning og lausnir, kennslubók, námsbók, íslensk þýðing, Chemistry 2e, OpenStax, Rice University, CC BY 4.0'
 		);
 		expect(reread.catalog.lookup(PDFName.of('Lang'), PDFString).decodeText()).toBe('is');
 	});
