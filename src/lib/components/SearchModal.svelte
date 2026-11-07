@@ -393,7 +393,7 @@
 						{#if loading}
 							Leitar...
 						{:else if query.length >= 2 && searchFailed}
-							<!-- D20: proposed: a failed search says so, not 'Engar niðurstöður fundust' ([USER]'s wording, 2026-11-07) -->
+							<!-- A failed search says so, not 'Engar niðurstöður fundust' ([USER]'s wording). Checked by [USER] as D20 batch 11 (2026-11-07). -->
 							Leitin tókst ekki. Reyndu aftur.
 						{:else if query.length >= 2 && results.length === 0}
 							Engar niðurstöður fundust fyrir {query}
@@ -402,7 +402,7 @@
 						{/if}
 					</div>
 					{#if query.length >= 2 && !loading && searchFailed}
-						<!-- D20: proposed: a failed search says so, not 'Engar niðurstöður fundust' ([USER]'s wording, 2026-11-07) -->
+						<!-- A failed search says so, not 'Engar niðurstöður fundust' ([USER]'s wording). Checked by [USER] as D20 batch 11 (2026-11-07). -->
 						<p class="text-center text-sm text-[var(--text-secondary)]">Leitin tókst ekki. Reyndu aftur.</p>
 					{:else if query.length >= 2 && !loading && results.length === 0}
 						<p class="text-center text-sm text-[var(--text-secondary)]">
