@@ -123,14 +123,21 @@
 			filters.chapterSlug = selectedChapter;
 		}
 
-		const searchResults = await searchContent(query, toc, bookSlug, filters);
-		results = searchResults;
-		loading = false;
+		// A search rejects when its index build fails; the spinner must stop either way. The
+		// next keystroke builds again (searchIndex.ts clears a failed build).
+		try {
+			const searchResults = await searchContent(query, toc, bookSlug, filters);
+			results = searchResults;
 
-		// Add to search history after successful search
-		if (searchResults.length > 0) {
-			addToSearchHistory(query, searchResults.length);
-			refreshHistory();
+			// Add to search history after successful search
+			if (searchResults.length > 0) {
+				addToSearchHistory(query, searchResults.length);
+				refreshHistory();
+			}
+		} catch (error) {
+			console.error('Villa við leit:', error);
+		} finally {
+			loading = false;
 		}
 	}
 
