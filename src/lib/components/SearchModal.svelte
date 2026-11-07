@@ -33,6 +33,8 @@
 	let query = $state('');
 	let results: SearchResult[] = $state<SearchResult[]>([]);
 	let loading = $state(false);
+	/** The last search failed (its index build or the worker), so there are no results to show */
+	let searchFailed = $state(false);
 	let indexing = $state(false);
 	let toc = $state<TableOfContents | null>(null);
 	let chapters = $state<{ slug: string; title: string }[]>([]);
@@ -117,6 +119,7 @@
 		}
 
 		loading = true;
+		searchFailed = false;
 
 		const filters: SearchFilters = {};
 		if (selectedChapter) {
@@ -136,6 +139,9 @@
 			}
 		} catch (error) {
 			console.error('Villa við leit:', error);
+			// An earlier query's results are not this query's answer
+			results = [];
+			searchFailed = true;
 		} finally {
 			loading = false;
 		}
@@ -386,13 +392,19 @@
 					<div class="sr-only" aria-live="polite" aria-atomic="true">
 						{#if loading}
 							Leitar...
+						{:else if query.length >= 2 && searchFailed}
+							<!-- D20: proposed: a failed search says so, not 'Engar niðurstöður fundust' ([USER]'s wording, 2026-11-07) -->
+							Leitin tókst ekki. Reyndu aftur.
 						{:else if query.length >= 2 && results.length === 0}
 							Engar niðurstöður fundust fyrir {query}
 						{:else if results.length > 0}
 							{results.length} {results.length === 1 ? 'niðurstaða' : 'niðurstöður'} fundust
 						{/if}
 					</div>
-					{#if query.length >= 2 && !loading && results.length === 0}
+					{#if query.length >= 2 && !loading && searchFailed}
+						<!-- D20: proposed: a failed search says so, not 'Engar niðurstöður fundust' ([USER]'s wording, 2026-11-07) -->
+						<p class="text-center text-sm text-[var(--text-secondary)]">Leitin tókst ekki. Reyndu aftur.</p>
+					{:else if query.length >= 2 && !loading && results.length === 0}
 						<p class="text-center text-sm text-[var(--text-secondary)]">
 							Engar niðurstöður fundust fyrir &quot;{query}&quot;
 							{#if selectedChapter}í völdum kafla{/if}
