@@ -274,7 +274,7 @@ wrong.
 
    It pairs the two trees on `data-module-id`. Only
    `every removed page has its redirect` passes. A `STOP rename` line needs a
-   redirect row (merge it to `main`, pull, and run from step 2 again); a
+   redirect row (merge it to `main`, pull, then run step 4 again); a
    `STOP deleted` line is a module the release drops, which must be expected.
    Measured 2026-11-05: a whole-book re-render of chemistry renamed 34 pages
    against efni `main`'s prepared tree, so expect a long list.
