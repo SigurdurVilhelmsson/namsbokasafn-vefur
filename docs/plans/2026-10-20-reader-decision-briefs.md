@@ -6,11 +6,14 @@
 
 **Costs** are in sessions (one focused 1–3 hour session) and come only from the plan's step estimates, report §8 or the register; "not estimated" means none of them gives a number. "Proposed" marks an Icelandic string that no native speaker has checked yet (D20).
 
+**Updated 2026-11-07** for S9.0's first chunk: D11–D13 and D21 each gain an **Evidence (S9.0 prep)** block and a **Measured 2026-11-07** block, from what M8 recorded and from the live pager after train 11, with the shared method and figures under [What M8 measured, for S9.0](#what-m8-measured-for-s90-2026-11-07). Their questions, options and the review's recommendations are unchanged, and nothing is preselected.
+
 ## Contents
 
 - Ruled in this session: [D01](#d01--text-on-the-amber-buttons-and-the-focus-ring-colour), [D02](#d02--existing-readers-saved-settings-chosen-or-migrate-once), [D03](#d03--the-page-view-event-sent-to-the-editorial-server), [D04](#d04--srs-the-rating-step-a-due-only-æfa-a-confident-error-message), [D05](#d05--release-timing-for-predict-first-and-the-srs-fixes), [D06](#d06--the-pager-until-call-3-dark-or-early-opt-in), [D07](#d07--p13-what-card-a-selection-makes), [D08](#d08--p11-kvörðun-action-list-per-section-half-or-defer), [D09](#d09--pilot-classes-and-a-counts-only-export), [D10](#d10--does-an-early-mark-read-open-the-recall-prompt), [D18](#d18--recall-read-back-with-a-delete-now-or-later), [D19](#d19--chapters-cleared-for-machine-translated-standards), [D20](#d20--who-checks-new-icelandic-strings), [KEEP-01](#keep-01--reword-claudemds-design-principle)
 - Open calls: [CALL1](#call1--page-height-budget), [CALL2](#call2--recall-per-section-or-sub-section), [CALL3](#call3--launch-default-reading-mode), [CALL4](#call4--how-often-the-pre-question-appears)
 - Ruled later: [D11](#d11--keys-and-oversized-worked-examples), [D12](#d12--a-title-on-every-page-figures-and-their-text), [D13](#d13--continue-reading-find-in-page-the-page-label), [D14](#d14--atkinson-family-and-font-caching), [D15](#d15--theme-when-unchosen-the-chrome-typeface), [D16](#d16--the-pre-questions-form-source-guess-and-placement), [D17](#d17--student-controls-and-fading), [D21](#d21--the-crossovers-term-margin-and-consent), [D22](#d22--key-term-starter-decks-per-book-or-shared), [D23](#d23--retiring-the-v12-branch), [D24](#d24--streaks-behind-halda-röð-daga), [D25](#d25--later-scope-after-the-crossover)
+- S9.0 prep (2026-11-07): [what M8 measured](#what-m8-measured-for-s90-2026-11-07), and the appendix's [live pager script](#s90-the-live-pager)
 - [Appendix: re-measure scripts](#appendix-re-measure-scripts)
 
 ## Ruled in this session
@@ -767,6 +770,37 @@ Issues: PED-06, PED-07, PED-24, PED-17. Sources: report 8.4, 8.5, 4.8, B.2; regi
 
 ## Ruled at later decision sessions
 
+### What M8 measured, for S9.0 (2026-11-07)
+
+_Written for S9.0's first chunk. It adds evidence to D11–D13 and D21 below; it recommends nothing._
+
+**Where and how.** The rest of this file measured efni's ② preview. These figures come from the live site instead: build `1794077349564` (train 11, from `main` `2467598`), whose chemistry is the 2026-08 sync, opened with `?lestur=sidur` links. Headless Chromium, a fresh profile per run, service workers and GoatCounter blocked. The script is in the appendix ([S9.0: the live pager](#s90-the-live-pager)).
+
+**Three measures, defined.** Each has a near-twin in CALL1 that it must not be compared with.
+
+- _Lines shown_ on a page: the visible `p` and `li` outside figures, each one's height divided by its line height, summed. CALL1's "9.2–10.6 lines" is what a page can hold at the budget, not what a page shows.
+- _Fill_: from the top of the page's first visible block to the bottom of its last, as a share of the window's height, after the page turn's scroll. CALL1's 53–67% is the budget's share of the window.
+- _Overflows the window_: the page's last visible block ends below the window, so the reader must scroll to see it. Counted apart: _'Næsta' below the window_, where the page controls end below it; that also happened on pages that do not overflow.
+
+**§1.1 (`1-1-efnafraedi-i-samhengi`), page by page.**
+
+| Window   | Pages | Text pages | Lines shown on a text page (min / median / max) | Fill of a text page (median, range) | Figure pages            | Overflow the window                  | 'Næsta' below the window |
+| -------- | ----- | ---------- | ----------------------------------------------- | ----------------------------------- | ----------------------- | ------------------------------------ | ------------------------ |
+| 390×844  | 17    | 13         | 5 / 20 / 41                                     | 64% (23–139%)                       | 4, figure only          | 2 (one paragraph each: 34, 41 lines) | 4                        |
+| 768×1024 | 10    | 7          | 10 / 18 / 21                                    | 51% (42–63%)                        | 3 figure only, 1 shared | 0                                    | 0                        |
+| 1280×800 | 15    | 11         | 7 / 8 / 16                                      | 31% (24–60%)                        | 4, figure only          | 0                                    | 2 (both on figure pages) |
+| 1280×720 | 16    | 12         | 5 / 8 / 16                                      | 32% (26–67%)                        | 4, figure only          | 1 (figure 1.5, 581 px)               | 4                        |
+
+- On desktop a text page shows one or two paragraphs. At 1280×720 the first three pages show one paragraph each (5, 7 and 7 lines): what S8.4's session saw on a scratch build with the preview content holds on the live build.
+- The section has four parts ('Hluti'); the counts above are over all of them.
+
+**What M8 recorded, not re-measured here.**
+
+- S8.4's full e2e run with 'paged' seeded for every spec (#379's head, chemistry from efni `d24681b8`): the control passed 275 and skipped 31; the seeded run passed 230, failed 45 and skipped the same 31. The failures by class: A 4 and B 31 by design (a fresh profile; the recall prompt reached by scrolling the end marker, which stands down while paged), C 8 (fixtures acting on content the pager hides), timing 2. None is an app bug (the plan's note after S8.4).
+- The pager reports `pending`, then `ready` ⇄ `end`, or `failed`. A pager that fails gives the section back to scrolling and says nothing [UI-05].
+- `PAGE_BUDGET` still holds v1.1's values (scroll offset 96 px, bottom clearance 76, first gap below 150, floor 240), pinned until S9.5 applies CALL1.
+- Train 11's live check (#386): on §1.2 with `?lestur=sidur` the bar read 'Hluti 1 af 3 · Síða 1 af 10' after 2.2 s; without a link, with `?lestur=skrun` and on a rollup, nothing paged.
+
 ### D11 · Keys and oversized worked examples
 
 _Ruled at S9.0, before S9.1._
@@ -785,6 +819,19 @@ _Ruled at S9.0, before S9.1._
 
 - By the code, Space and PageDown skip the unseen rest of a tall page, whatever the example policy [CODE-06].
 
+**Evidence (S9.0 prep).** The live build, §3.1 (`3-1-formulumassi-og-molhugtakid`) and §1.1.
+
+- Each of §3.1's 8 worked examples gets a page of its own, and every one of those pages overflows the window, at 390×844 and at 1280×800 [PED-02].
+- At 390×844 all 8 are taller than the window (995–1,834 px against 844). At 1280×800 four are (933–1,512 px against 800); the other four (780–787 px) are shorter than the window but still overflow, because the page starts 174 px down.
+- Space on Dæmi 3.1's page, with focus on no control, turned to the next page. The example's last 328 px (390×844) or 161 px (1280×800) were never on screen [CODE-06].
+- Oversized blocks are not only examples: at 390×844 two of §1.1's pages each hold one paragraph, of 34 and 41 lines, and overflow the window.
+
+**Measured 2026-11-07.**
+
+- `s90-measure.mjs`, §3.1 at 390×844 → 29 pages; the examples on pages 2.5, 2.9 and 3.12–3.17 ('Hluti' and 'Síða'), 995, 1,022, 1,135, 1,172, 1,452, 1,519, 1,631 and 1,834 px tall, each page overflowing. At 1280×800 → 27 pages; 780, 787 (three), 933, 1,215, 1,474 and 1,512 px, each page overflowing, each example's top at 174 px.
+- The same script, Space on 'Hluti 2 af 4 · Síða 5 af 9' → 'Síða 6 af 9' at both sizes; the example ended at 1,172 px in an 844 px window, and at 961 px in an 800 px one.
+- `git show origin/main:src/lib/utils/pager.ts`, `keyAction`'s comment → "→ PageDown and Space turn forward … Space on a page taller than the window still turns it".
+
 Issues: CODE-06, PED-02, PED-26.
 
 ### D12 · A title on every page; figures and their text
@@ -800,6 +847,18 @@ _Ruled at S9.0, before S9.2._
 - **(c) Title kept for screen readers only; lightbox.** The h1 stays in the page but hidden from sight [UI-05, UI-19]. Cost: Not estimated.
 
 **Recommendation.** The review's (8.5): a title on every page, the lightbox. PED-03's reviewers wanted the lightbox first, then a keep-with-figure flag with a capped figure or thumbnail.
+
+**Evidence (S9.0 prep).** The live build, §1.1, at 390×844, 768×1024, 1280×800 and 1280×720.
+
+- The section title is on page 1 only. On every later page, at all four sizes, the `h1` is not rendered: it is in the first block, which the pager hides, so it is gone for screen readers as well as from sight [UI-19, UI-05].
+- None of §1.1's 4 figures shares a page with the paragraph that cites it, at any of the four sizes [PED-03]. Each figure has a page of its own, except at 768×1024, where figure 1.3 shares one with a paragraph that does not cite it.
+- Every figure fits whole in the window, except figure 1.5 (581 px) at 1280×720.
+- Figure 1.2's citation is on the page before the figure (390×844: page 3, the figure on 4; 1280×800: page 2, the figure on 3). Clicking 'Mynd 1.2' turned to the figure's page without opening the lightbox, and the browser's Back returned to the citing page. Where the other three figures' citations sit was not measured.
+
+**Measured 2026-11-07.**
+
+- `s90-measure.mjs` → the `h1` rendered on page 1 and on no later page at any size; the figure's citing paragraph on the figure's page 0 times in 16 (4 figures × 4 sizes); the figures 226–581 px tall, all whole in the window but 1.5 at 1280×720 (its page ends at 745 px).
+- `s90-figlink.mjs` → before: 'Síða 3 af 5' (390×844) and 'Síða 2 af 4' (1280×800), figure not shown; after the click: the next page, the address's hash `#CNX_Chem_01_01_Alchemist`, the figure in the window, no dialog open; after Back: the citing page again.
 
 Issues: UI-19, UI-05, UI-09, PED-03.
 
@@ -817,6 +876,18 @@ _Ruled at S9.0, before S11.1._
 - **(d) An overall page count.** [UI-29]. Cost: Not estimated.
 
 **Recommendation.** The review's (8.5): offer the page, 'until-found', the spec's label.
+
+**Evidence (S9.0 prep).** The live build, §1.1 at 1280×800.
+
+- Find-in-page: the pager hides the other pages with `hidden=""` (all 6 hidden elements on page 1, each `display: none`), not `hidden="until-found"`. The browser's find does not search `display: none` content, so as built it cannot reach another page (that last point is how browsers work, not a measurement here) [CODE-08].
+- Continue-reading, a return after a paged visit [CODE-07]: a reader who left from page 4 of 15 (the last page of the first part), through the app to §1.2, had 53% saved, at 354 px. A plain return offered 'Haltu áfram að lesa' with 'Þú varst komin(n) 53% í gegnum þennan kafla'.
+- A return through the link opened page 1 ('Hluti 1 af 4 · Síða 1 af 4'; the page was not restored) and showed the same offer. 'Halda áfram' there scrolled the window to 354 px and stayed on page 1.
+- The label as shipped is 'Hluti N af M · Síða X af Y': pages are counted within each part, and nothing counts them over the section (§1.1's parts have 4, 3, 3 and 5 pages at this size) [UI-29].
+
+**Measured 2026-11-07.**
+
+- `s90-measure.mjs` → hidden attribute values `{"": 6}`, 6 of 6 `display: none`; left on 'Hluti 1 af 4 · Síða 4 af 4'; `scrollPositions` for §1.1 `{scrollY: 354, percentage: 53}`; the plain return's offer as quoted; the link return's label as quoted, with the offer shown.
+- `s90-continue.mjs` → before 'Halda áfram': 'Síða 1 af 4' at 448 px; after: 'Síða 1 af 4' at 354 px, no hash.
 
 Issues: CODE-07, CODE-08, UI-29.
 
@@ -906,6 +977,21 @@ _Ruled at S9.0, before S10.1._
 **Recommendation.** The review's (8.5): the first term M9 is ready. PED-35 and S10.1 add: fix the rule and margin in writing first (e.g. paged at most 1 of 3 main-idea items worse on average); get consent if results will be published.
 
 - One class with three main-idea items can expose large harms, not prove equivalence [PED-35].
+
+**Evidence (S9.0 prep).**
+
+- The site cannot tell a link visit from a plain one. GoatCounter's `count.js` takes the path from the page's canonical link when there is one, and section pages carry one without the query, so a `?lestur=sidur` visit counts as a visit to the plain address. The site loads `count.js` once per full page load and calls it nowhere else, so moves between sections inside the app are not counted at all.
+- The counts-only export (D09, S5.5) holds four counts per book, `recallShown`, `recallSaved`, `recallSkipped` and `recallAbandoned`; nothing in the reader records which mode a section was read in. Under D03 nothing else leaves the device, so as built the reader gives a crossover none of its outcomes.
+- The link rule as built: a `?lestur=` link's mode lasts until the reader leaves the section pages ([USER], 2026-11-04: so until S9.0 rules it). S9.3's in-view switch must clear an active link whichever rule is chosen (S8.4's note) [PED-35].
+- Timing: the plan put M8 on the live site, dark, "about late February 2027 at 1.5 sessions a week, early April at one". It went live on 2026-11-07 (train 11); S8.1–S8.4 merged on 2026-11-03 and 2026-11-04. The plan's remaining estimates stand: M9 about 6.75 sessions (4–5 more under D06's early opt-in), S10.1 0.75 and S10.2 0.5 plus the lessons. Its dates for M9 and the crossover were set when M8 was expected in late February.
+- The term also needs the May 2027 exam dates, which only [USER] has.
+
+**Measured 2026-11-07.**
+
+- `curl -fsS https://gc.zgo.at/count.js | tr ';' '\n' | grep -n canonical` → `get_path` reads `link[rel="canonical"]` and returns that link's `pathname + search`.
+- `curl -fsS <§1.1's address> | grep -o '<link rel="canonical"[^>]*>'` → `href="https://namsbokasafn.is/efnafraedi-2e/kafli/01/1-1-efnafraedi-i-samhengi/"`, no query.
+- `git show origin/main:src/app.html` → `count.js` injected after `load`; `git grep -n goatcounter origin/main -- src` → no other call (the privacy page's link only).
+- `git show origin/main:src/lib/utils/counters.ts` → `COUNTER_EVENTS = ['recallShown', 'recallSaved', 'recallSkipped', 'recallAbandoned']`.
 
 Issues: PED-35, PED-01.
 
@@ -1045,4 +1131,309 @@ PAIRS = [
 ]
 for name, fg, bg in PAIRS:
     print(f'{ratio(fg, bg):6.2f}:1  {name} ({fg} on {bg})')
+```
+
+### S9.0: the live pager
+
+Run from a checkout with `node_modules` (Playwright and its Chromium): `node <path>/s90-measure.mjs > s90-measure.json`. It printed the figures in [What M8 measured, for S9.0](#what-m8-measured-for-s90-2026-11-07) and in D11–D13's blocks on 2026-11-07, against build `1794077349564`. It walks every page of §1.1 at four window sizes and of §3.1 at two, presses Space on the first overflowing example page, and checks how pages are hidden and what a return visit offers. It never presses the last 'Næsta', so no end-of-section step runs.
+
+Two smaller checks used the same setup (1280×800 unless named, a fresh profile, service workers and GoatCounter blocked):
+
+- `s90-continue.mjs` (D13): open §1.1 with `?lestur=sidur`, turn three pages, leave through the link to §1.2, open §1.1 with the link again, press 'Halda áfram', and read the label, `scrollY` and the hash before and after.
+- `s90-figlink.mjs` (D12), at 390×844 and 1280×800: turn to the page showing the first `a[href="#CNX_Chem_01_01_Alchemist"]`, click it, read the label, the hash and whether the figure is in the window and a dialog is open; then go Back and read them again.
+
+```js
+// S9.0 prep: what the live pager does with chemistry §1.1 (and §3.1's worked examples).
+// Live site, ?lestur=sidur, fresh profile per run, service workers and GoatCounter blocked.
+// Run from a checkout with node_modules: node <path>/s90-measure.mjs > s90-measure.json
+// (SITE=... measures another server)
+import { createRequire } from "node:module";
+const require = createRequire(`${process.cwd()}/package.json`);
+const { chromium } = require("playwright");
+
+const SITE = process.env.SITE ?? "https://namsbokasafn.is";
+const S11 = "/efnafraedi-2e/kafli/01/1-1-efnafraedi-i-samhengi/";
+const S12 = "/efnafraedi-2e/kafli/01/1-2-efnishamur-og-flokkun-efnis/";
+const S31 = "/efnafraedi-2e/kafli/03/3-1-formulumassi-og-molhugtakid/";
+const VIEWPORTS = [
+  { name: "phone 390x844", width: 390, height: 844 },
+  { name: "tablet 768x1024", width: 768, height: 1024 },
+  { name: "desktop 1280x800", width: 1280, height: 800 },
+  { name: "desktop 1280x720", width: 1280, height: 720 },
+];
+const NEXT = 'nav[aria-label="Síðuflakk"] button[aria-label="Næsta síða"]';
+
+const browser = await chromium.launch();
+const out = {
+  site: SITE,
+  at: new Date().toISOString(),
+  version: null,
+  s11: [],
+  s31: [],
+  d13: {},
+};
+out.version = (await (await fetch(SITE + "/_app/version.json")).json()).version;
+
+async function fresh(viewport) {
+  const context = await browser.newContext({
+    serviceWorkers: "block",
+    viewport,
+  });
+  await context.route(/gc\.zgo\.at/, (r) => r.abort());
+  const page = await context.newPage();
+  return { context, page };
+}
+
+const label = (page) =>
+  page.evaluate(
+    () =>
+      document.querySelector(".paged-nav-label")?.textContent?.trim() ?? null,
+  );
+const parse = (l) => {
+  const m = /Hluti (\d+) af (\d+) · Síða (\d+) af (\d+)/.exec(l ?? "");
+  return m ? { unit: +m[1], units: +m[2], page: +m[3], pages: +m[4] } : null;
+};
+
+// Everything measured on the page as shown (after the pager's scroll)
+const measurePage = (page) =>
+  page.evaluate(() => {
+    const shown = (el) =>
+      !el.closest("[hidden]") && el.getClientRects().length > 0;
+    const art =
+      document.querySelector("[data-paged-section] article") ??
+      document.querySelector("article.cnx-module");
+    const vh = window.innerHeight;
+    const textEls = [...art.querySelectorAll("p, li")].filter(
+      (el) => shown(el) && !el.closest("figure, li li"),
+    );
+    const lineOf = (el) => {
+      const cs = getComputedStyle(el);
+      const lh =
+        cs.lineHeight === "normal"
+          ? parseFloat(cs.fontSize) * 1.2
+          : parseFloat(cs.lineHeight);
+      return Math.round(el.getBoundingClientRect().height / lh);
+    };
+    const blocks = [
+      ...art.querySelectorAll(
+        "p, li, figure, h1, h2, h3, h4, table, .example, .note, .equation, ol, ul",
+      ),
+    ].filter(shown);
+    const top = Math.min(...blocks.map((b) => b.getBoundingClientRect().top));
+    const bottom = Math.max(
+      ...blocks.map((b) => b.getBoundingClientRect().bottom),
+    );
+    const nav = document
+      .querySelector('nav[aria-label="Síðuflakk"]')
+      ?.getBoundingClientRect();
+    const h1 = art.querySelector("h1");
+    const h1r = h1?.getBoundingClientRect();
+    const figures = [...art.querySelectorAll("figure[id]")]
+      .filter(shown)
+      .map((f) => {
+        const r = f.getBoundingClientRect();
+        const cite = art.querySelector(`a[href="#${CSS.escape(f.id)}"]`);
+        const citeBlock = cite?.closest("p, li");
+        return {
+          id: f.id,
+          number: f.dataset.figureNumber ?? null,
+          height: Math.round(r.height),
+          wholeInWindow: r.top >= 0 && r.bottom <= vh,
+          citedOnThisPage: citeBlock ? shown(citeBlock) : null,
+        };
+      });
+    const examples = [...art.querySelectorAll(".example")]
+      .filter(shown)
+      .map((e) => {
+        const r = e.getBoundingClientRect();
+        return {
+          label: e.querySelector(".example-label")?.textContent?.trim() ?? null,
+          height: Math.round(r.height),
+          top: Math.round(r.top),
+          bottom: Math.round(r.bottom),
+        };
+      });
+    return {
+      scrollY: Math.round(window.scrollY),
+      innerHeight: vh,
+      paragraphs: textEls.filter((el) => el.tagName === "P").length,
+      lines: textEls.reduce((n, el) => n + lineOf(el), 0),
+      contentTop: Math.round(top),
+      contentBottom: Math.round(bottom),
+      fillPct: Math.round(((bottom - top) / vh) * 100),
+      overflowsWindow: bottom > vh,
+      navBottom: nav ? Math.round(nav.bottom) : null,
+      nextBelowWindow: nav ? nav.bottom > vh : null,
+      titleShown: h1 ? shown(h1) : null,
+      titleInWindow: h1 && shown(h1) ? h1r.bottom > 0 && h1r.top < vh : false,
+      figures,
+      examples,
+    };
+  });
+
+async function openPaged(page, path) {
+  await page.goto(SITE + path + "?lestur=sidur", { waitUntil: "load" });
+  await page.locator(NEXT).waitFor({ state: "visible", timeout: 15000 });
+  await page.waitForTimeout(800); // late image loads re-split the pages
+}
+
+async function turn(page) {
+  const before = await label(page);
+  await page.locator(NEXT).click();
+  await page
+    .waitForFunction(
+      (b) =>
+        document.querySelector(".paged-nav-label")?.textContent?.trim() !== b,
+      before,
+      { timeout: 5000 },
+    )
+    .catch(() => {});
+  await page.waitForTimeout(400);
+}
+
+/** Every page of a section, in order, measured; stops on the last page (no end-of-section step) */
+async function walk(page) {
+  const pages = [];
+  for (let i = 0; i < 200; i++) {
+    const l = await label(page);
+    pages.push({ label: l, ...(await measurePage(page)) });
+    const p = parse(l);
+    if (!p || (p.unit === p.units && p.page === p.pages)) break;
+    await turn(page);
+  }
+  return pages;
+}
+
+// §1.1 at each window size
+for (const vp of VIEWPORTS) {
+  const { context, page } = await fresh({ width: vp.width, height: vp.height });
+  await openPaged(page, S11);
+  out.s11.push({ viewport: vp.name, pages: await walk(page) });
+  await context.close();
+}
+
+// §3.1's worked examples, and Space on a page taller than the window (D11)
+for (const vp of [VIEWPORTS[0], VIEWPORTS[2]]) {
+  const { context, page } = await fresh({ width: vp.width, height: vp.height });
+  await openPaged(page, S31);
+  const pages = await walk(page);
+  const tall = pages
+    .filter((p) => p.examples.length && p.overflowsWindow)
+    .map((p) => p.label);
+  let space = null;
+  if (tall.length) {
+    // back to the first overflowing example page, then Space with focus on no control
+    await page.goto(SITE + S31 + "?lestur=sidur", { waitUntil: "load" });
+    await page.locator(NEXT).waitFor({ state: "visible", timeout: 15000 });
+    await page.waitForTimeout(800);
+    for (let i = 0; i < 200 && (await label(page)) !== tall[0]; i++)
+      await turn(page);
+    const before = await measurePage(page);
+    await page.evaluate(() =>
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement.blur()
+        : null,
+    );
+    await page.keyboard.press(" ");
+    await page.waitForTimeout(600);
+    space = {
+      pageBefore: tall[0],
+      labelAfter: await label(page),
+      exampleBottomBefore: before.examples.map((e) => e.bottom),
+      innerHeight: before.innerHeight,
+    };
+  }
+  out.s31.push({
+    viewport: vp.name,
+    pageCount: pages.length,
+    examplePages: pages
+      .filter((p) => p.examples.length)
+      .map(({ label: l, examples, overflowsWindow, innerHeight }) => ({
+        label: l,
+        examples,
+        overflowsWindow,
+        innerHeight,
+      })),
+    space,
+  });
+  await context.close();
+}
+
+// D13 at 1280x800: how hidden pages are hidden, and a return visit after a paged one
+{
+  const { context, page } = await fresh({ width: 1280, height: 800 });
+  await openPaged(page, S11);
+  out.d13.hiddenAttribute = await page.evaluate(() => {
+    const hidden = [
+      ...document.querySelectorAll("[data-paged-section] [hidden]"),
+    ];
+    const values = {};
+    for (const el of hidden)
+      values[JSON.stringify(el.getAttribute("hidden"))] =
+        (values[JSON.stringify(el.getAttribute("hidden"))] ?? 0) + 1;
+    return {
+      count: hidden.length,
+      values,
+      displayNone: hidden.filter(
+        (el) => getComputedStyle(el).display === "none",
+      ).length,
+    };
+  });
+  for (let i = 0; i < 3; i++) await turn(page);
+  out.d13.leftOn = await label(page);
+  // leave the section through the app (beforeNavigate saves the scroll position)
+  await page.evaluate((href) => {
+    const a = [...document.querySelectorAll("a[href]")].find((x) =>
+      x.getAttribute("href")?.includes(href),
+    );
+    a?.click();
+  }, "1-2-efnishamur");
+  await page
+    .waitForURL((u) => u.pathname === S12, { timeout: 10000 })
+    .catch(() => {});
+  out.d13.leftTo = new URL(page.url()).pathname;
+  out.d13.savedScroll = await page.evaluate(() => {
+    const raw = localStorage.getItem("namsbokasafn:reader");
+    try {
+      const r = JSON.parse(raw);
+      const pos = r?.scrollPositions ?? r?.state?.scrollPositions ?? null;
+      return pos
+        ? Object.fromEntries(
+            Object.entries(pos).filter(([k]) => k.includes("1-1-")),
+          )
+        : raw?.slice(0, 300);
+    } catch {
+      return raw?.slice(0, 300) ?? null;
+    }
+  });
+  // a plain return visit: is 'Haltu áfram að lesa' offered, and at what percentage?
+  await page.goto(SITE + S11, { waitUntil: "load" });
+  await page.waitForTimeout(2500);
+  out.d13.plainReturn = await page.evaluate(() => {
+    const offer = [...document.querySelectorAll("p")].find(
+      (p) => p.textContent?.trim() === "Haltu áfram að lesa",
+    );
+    return {
+      offered: !!offer,
+      text:
+        offer?.parentElement?.textContent?.replace(/\s+/g, " ").trim() ?? null,
+    };
+  });
+  // a return visit through the link: which page opens?
+  await page.goto(SITE + S11 + "?lestur=sidur", { waitUntil: "load" });
+  await page.locator(NEXT).waitFor({ state: "visible", timeout: 15000 });
+  await page.waitForTimeout(800);
+  out.d13.linkReturn = {
+    label: await label(page),
+    offered: await page.evaluate(() =>
+      [...document.querySelectorAll("p")].some(
+        (p) => p.textContent?.trim() === "Haltu áfram að lesa",
+      ),
+    ),
+  };
+  await context.close();
+}
+
+await browser.close();
+console.log(JSON.stringify(out, null, 1));
 ```
