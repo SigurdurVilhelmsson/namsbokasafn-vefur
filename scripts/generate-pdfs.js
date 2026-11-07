@@ -73,7 +73,8 @@ import {
 	findCollidingNames,
 	mergeChapterDests,
 	namespaceChapterLinks,
-	writeMergedDests
+	writeMergedDests,
+	linkSiteUrisToDests
 } from './lib/pdf-links.js';
 import { pdfBooks } from './lib/pdf-books.js';
 import { printToPdf } from './lib/pdf-print.js';
@@ -509,6 +510,9 @@ async function generateForBook(context, baseUrl, bookSlug, bookConfig) {
 	for (const [name, mergedPageIndex] of Object.entries(tocDests)) {
 		registry.set(name, { mergedPageIndex, params: [PDFName.of('Fit')] });
 	}
+	// A chapter's link to an appendix is a site link, right for the chapter's own PDF;
+	// the book holds the appendix, so here it jumps there ([USER]'s ruling, 2026-11-07).
+	const siteLinksTurned = linkSiteUrisToDests(merged, registry, bookSlug);
 	writeMergedDests(merged, registry);
 
 	// Continuous folios + running headers across the whole assembled book.
@@ -551,7 +555,7 @@ async function generateForBook(context, baseUrl, bookSlug, bookConfig) {
 
 	const fullBookFile = join(bookOutDir, `${bookSlug}-bok.pdf`);
 	console.log(
-		`  ${bookSlug}: assembling bok.pdf (${merged.getPageCount()} pages; ${images.loaded} images loaded in ${images.prints} prints, none missing; ${collidingNames.size} shared anchor names namespaced, ${renamedLinks} links renamed with them)`
+		`  ${bookSlug}: assembling bok.pdf (${merged.getPageCount()} pages; ${images.loaded} images loaded in ${images.prints} prints, none missing; ${collidingNames.size} shared anchor names namespaced, ${renamedLinks} links renamed with them; ${siteLinksTurned} site links turned into jumps)`
 	);
 	writeFileSync(fullBookFile, await merged.save());
 

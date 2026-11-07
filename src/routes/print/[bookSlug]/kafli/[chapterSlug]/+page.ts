@@ -1,6 +1,11 @@
 import { error, isHttpError } from '@sveltejs/kit';
 import type { PageLoad } from './$types';
-import { loadTableOfContents, findChapterBySlug, getChapterPath } from '$lib/utils/contentLoader';
+import {
+	loadTableOfContents,
+	findChapterBySlug,
+	getChapterPath,
+	getSectionPath
+} from '$lib/utils/contentLoader';
 import { books, getBook } from '$lib/types/book';
 import {
 	sortGlossaryTerms,
@@ -11,6 +16,7 @@ import {
 import { extractArticle, markMachineTranslated } from '$lib/utils/printContent';
 import { linkExercisesToAnswers } from '$lib/utils/printAnswers';
 import { scopeFootnoteBackLinks } from '$lib/utils/printFootnotes';
+import { readerAnchor, anchorArticle, resolveReaderLinks } from '$lib/utils/printLinks';
 
 export const prerender = true;
 
@@ -62,12 +68,24 @@ export const load: PageLoad = async ({ params, fetch }) => {
 		}
 
 		const blocks: PrintBlock[] = [];
+		// Each section's anchor, named from its reader address, so a link into the reader
+		// that names a section of this chapter can jump to it (src/lib/utils/printLinks.ts).
+		const anchors: string[] = [];
 		for (const section of chapter.sections) {
 			const url = `/content/${bookSlug}/chapters/${folder}/${section.file}`;
 			const res = await fetch(url);
 			if (!res.ok) continue; // tolerate missing files (e.g., partial books) — don't break the build
 			const html = await res.text();
-			const article = linkGlossaryTerms(extractArticle(html), termIndex);
+			let article = linkGlossaryTerms(extractArticle(html), termIndex);
+			const anchor = readerAnchor(
+				`/${bookSlug}/kafli/${folder}/${getSectionPath(section)}`,
+				bookSlug
+			);
+			const anchored = anchor ? anchorArticle(article, anchor) : null;
+			if (anchor && anchored) {
+				article = anchored;
+				anchors.push(anchor);
+			}
 			blocks.push({
 				title: section.title,
 				type: section.type ?? 'section',
@@ -104,8 +122,16 @@ export const load: PageLoad = async ({ params, fetch }) => {
 			// its footnote references from fnref-1, so they get names unique in the chapter
 			// (PDF plan, Task 3.1's note), and each answered exercise links to its answer and
 			// back (Task 3.3). Both sets of anchors are scoped by chapter number, to stay
-			// unique in the merged book.
-			blocks: linkExercisesToAnswers(scopeFootnoteBackLinks(blocks, scope), scope)
+			// unique in the merged book. Links into the reader then jump to a section of
+			// this chapter, or open the live site.
+			blocks: resolveReaderLinks(
+				linkExercisesToAnswers(scopeFootnoteBackLinks(blocks, scope), scope),
+				bookSlug
+			),
+			// The page links to each anchor from a hidden block, because Chromium makes a
+			// PDF destination only for an element an in-document link targets. The book
+			// PDF's merge needs them to turn a site link from another part into a jump.
+			anchors
 		};
 	} catch (e) {
 		if (isHttpError(e)) throw e;

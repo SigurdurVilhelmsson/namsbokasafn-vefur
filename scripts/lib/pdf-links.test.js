@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { PDFDocument, PDFName, PDFArray, PDFDict, PDFNumber } from 'pdf-lib';
+import {
+	PDFDocument,
+	PDFName,
+	PDFArray,
+	PDFDict,
+	PDFNumber,
+	PDFString,
+	PDFHexString
+} from 'pdf-lib';
 import {
 	harvestDests,
 	defineNamedDest,
@@ -8,8 +16,11 @@ import {
 	mergeChapterDests,
 	namespaceChapterLinks,
 	namespacedDestName,
-	writeMergedDests
+	writeMergedDests,
+	anchorForSiteUrl,
+	linkSiteUrisToDests
 } from './pdf-links.js';
+import table from '../../src/lib/utils/printLinks.cases.json';
 
 /** A blank A4 PDF with `n` pages. */
 async function makeDoc(n) {
@@ -267,5 +278,126 @@ describe('namespaceChapterLinks', () => {
 		const renamed = namespaceChapterLinks(merged, pages, harvestDests(doc), 4, new Set(['fnref-1']));
 		expect(renamed).toBe(0);
 		expect(linkTargets(merged).map((l) => l.name)).toEqual(['gloss-7', 'fnref-1']);
+	});
+});
+
+describe('anchorForSiteUrl (the case table the print loaders share)', () => {
+	it.each(table.cases)('$site → anchor $anchor', ({ site, anchor }) => {
+		expect(anchorForSiteUrl(site, table.book)).toBe(anchor);
+	});
+
+	it('reads no other origin', () => {
+		const book = table.book;
+		expect(anchorForSiteUrl(`http://127.0.0.1:5180/${book}/vidauki/B/`, book)).toBe(null);
+		expect(anchorForSiteUrl(`https://namsbokasafn.is.example.com/${book}/vidauki/B/`, book)).toBe(
+			null
+		);
+		expect(anchorForSiteUrl(`https://openstax.org/${book}/vidauki/B/`, book)).toBe(null);
+	});
+});
+
+/** A link in the `/A << /S /URI /URI (…) >>` form Chromium writes for an absolute href. */
+function addUriLink(doc, page, uri, { hex = false } = {}) {
+	const annot = doc.context.obj({
+		Type: 'Annot',
+		Subtype: 'Link',
+		Rect: [0, 0, 10, 10],
+		A: { Type: 'Action', S: 'URI', URI: hex ? PDFHexString.fromText(uri) : PDFString.of(uri) }
+	});
+	let annots = doc.context.lookup(page.node.get(PDFName.of('Annots')));
+	if (!(annots instanceof PDFArray)) {
+		annots = doc.context.obj([]);
+		page.node.set(PDFName.of('Annots'), annots);
+	}
+	annots.push(doc.context.register(annot));
+}
+
+/** Every Link annotation in `doc`: the page it sits on, and its URI or destination name. */
+function linkActions(doc) {
+	const out = [];
+	doc.getPages().forEach((page, pageIndex) => {
+		const annots = doc.context.lookup(page.node.get(PDFName.of('Annots')));
+		if (!(annots instanceof PDFArray)) return;
+		for (let i = 0; i < annots.size(); i++) {
+			const annot = doc.context.lookup(annots.get(i));
+			const dest = annot.get(PDFName.of('Dest'));
+			const action = doc.context.lookup(annot.get(PDFName.of('A')));
+			const uri = action instanceof PDFDict ? action.lookup(PDFName.of('URI')) : undefined;
+			out.push({
+				pageIndex,
+				dest: dest ? dest.toString().replace(/^\//, '') : null,
+				uri: uri ? uri.decodeText() : null
+			});
+		}
+	});
+	return out;
+}
+
+/**
+ * A book as generate-pdfs.js merges one: a one-page chapter whose page carries the given
+ * site links, then two pages of appendices with `vidauki-A` and `vidauki-B` destinations.
+ * Returns the reloaded book and how many links the rewrite turned.
+ */
+async function bookWithSiteLinks(links, { rewrite = true } = {}) {
+	const chapter = await makeDoc(1);
+	for (const { uri, hex } of links) addUriLink(chapter, chapter.getPage(0), uri, { hex });
+	const appendices = await makeDoc(2);
+	defineNamedDest(appendices, 'vidauki-A', appendices.getPage(0).ref);
+	defineNamedDest(appendices, 'vidauki-B', appendices.getPage(1).ref);
+
+	const merged = await PDFDocument.create();
+	const registry = new Map();
+	for (const [num, doc] of [
+		[1, chapter],
+		[90, appendices]
+	]) {
+		const mergedOffset = merged.getPageCount();
+		for (const p of await merged.copyPages(doc, doc.getPageIndices())) merged.addPage(p);
+		mergeChapterDests(registry, harvestDests(doc), mergedOffset, num, new Set());
+	}
+	const turned = rewrite ? linkSiteUrisToDests(merged, registry, table.book) : 0;
+	writeMergedDests(merged, registry);
+	const book = await PDFDocument.load(await merged.save(), { updateMetadata: false });
+	return { book, turned };
+}
+
+describe('linkSiteUrisToDests', () => {
+	const site = `https://namsbokasafn.is/${table.book}`;
+
+	it('is needed: without it, a chapter’s appendix link leaves the book', async () => {
+		const { book } = await bookWithSiteLinks([{ uri: `${site}/vidauki/B/` }], { rewrite: false });
+		expect(linkActions(book)).toEqual([{ pageIndex: 0, dest: null, uri: `${site}/vidauki/B/` }]);
+	});
+
+	it('turns a site link to an appendix the book holds into a jump to it', async () => {
+		const { book, turned } = await bookWithSiteLinks([{ uri: `${site}/vidauki/B/` }]);
+		expect(turned).toBe(1);
+		const [link] = linkActions(book);
+		expect(link).toEqual({ pageIndex: 0, dest: 'vidauki-B', uri: null });
+		expect(resolve(book, link.dest)).toBe(2);
+	});
+
+	it('lands a link with a fragment at the start of its appendix', async () => {
+		const { book } = await bookWithSiteLinks([{ uri: `${site}/vidauki/A/#fs-idm379479808` }]);
+		const [link] = linkActions(book);
+		expect(link.dest).toBe('vidauki-A');
+		expect(resolve(book, link.dest)).toBe(1);
+	});
+
+	it('reads a URI written as a hex string', async () => {
+		const { book } = await bookWithSiteLinks([{ uri: `${site}/vidauki/B/`, hex: true }]);
+		expect(linkActions(book)[0].dest).toBe('vidauki-B');
+	});
+
+	it('leaves site links to pages the book has no destination for, and other sites', async () => {
+		const uris = [
+			`${site}/lotukerfi/`,
+			`${site}/vidauki/Z/`,
+			`https://namsbokasafn.is/edlisfraedi-2e/vidauki/B/`,
+			'https://openstax.org/details/books/chemistry-2e'
+		];
+		const { book, turned } = await bookWithSiteLinks(uris.map((uri) => ({ uri })));
+		expect(turned).toBe(0);
+		expect(linkActions(book).map((l) => l.uri)).toEqual(uris);
 	});
 });

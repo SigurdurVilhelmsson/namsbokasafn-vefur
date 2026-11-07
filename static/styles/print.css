@@ -457,7 +457,12 @@ a.print-exercise-link {
   break-inside: avoid;
 }
 
-a[href]:not([href^="#"]):not([href^="/"])::after {
+/* Not after a link to namsbokasafn.is: the print loaders send links into the reader
+   there (src/lib/utils/printLinks.ts), and those print as text only ([USER],
+   2026-11-07). */
+a[href]:not([href^="#"]):not([href^="/"]):not(
+    [href^="https://namsbokasafn.is/"]
+  )::after {
   /* External absolute URLs — append the URL in a footnote-like style. */
   content: " (" attr(href) ")";
   font-size: 0.85em;

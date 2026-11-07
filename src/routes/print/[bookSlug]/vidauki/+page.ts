@@ -4,6 +4,7 @@ import { loadTableOfContents } from '$lib/utils/contentLoader';
 import { books, getBook } from '$lib/types/book';
 import { extractArticle, markMachineTranslated } from '$lib/utils/printContent';
 import { scopeFootnoteBackLinks } from '$lib/utils/printFootnotes';
+import { readerAnchor, resolveReaderLinks } from '$lib/utils/printLinks';
 
 export const prerender = true;
 
@@ -23,6 +24,8 @@ interface PrintBlock {
 	letter: string;
 	title: string;
 	content: string;
+	/** The id the page puts on the appendix's wrapper, which starts its page. */
+	anchor: string | null;
 }
 
 export const load: PageLoad = async ({ params, fetch }) => {
@@ -46,17 +49,24 @@ export const load: PageLoad = async ({ params, fetch }) => {
 				title: appendix.title,
 				// Appendices carry no per-item review flag and are MT like the rest,
 				// so always mark them (reviewed=false) → "Vélþýtt efni" watermark.
-				content: markMachineTranslated(extractArticle(html), false)
+				content: markMachineTranslated(extractArticle(html), false),
+				anchor: readerAnchor(`/${bookSlug}/vidauki/${appendix.letter}`, bookSlug)
 			});
 		}
 
+		const anchors = blocks.flatMap((b) => (b.anchor ? [b.anchor] : []));
 		return {
 			bookTitle: book.title,
 			bookSubtitle: book.subtitle,
 			attribution: book.attribution,
 			// Every appendix is one document here, and each numbers its footnote references
 			// from fnref-1, so they get names unique in the render (PDF plan, Task 3.1's note).
-			blocks: scopeFootnoteBackLinks(blocks, 'vidauki')
+			// Links into the reader then jump to an appendix, or open the live site
+			// (src/lib/utils/printLinks.ts).
+			blocks: resolveReaderLinks(scopeFootnoteBackLinks(blocks, 'vidauki'), bookSlug, anchors),
+			// Linked from a hidden block on the page, so each gets a PDF destination and the
+			// book PDF's merge can point the chapters' appendix links at it.
+			anchors
 		};
 	} catch (e) {
 		if (isHttpError(e)) throw e;

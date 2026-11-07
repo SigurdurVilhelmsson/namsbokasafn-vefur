@@ -36,12 +36,24 @@
   not in entries()). Trust comes from the content source, not the runtime.
 -->
 {#each data.blocks as block (block.letter)}
-	<div class="print-appendix">
+	<!-- The anchor sits on the wrapper because the wrapper starts the page. -->
+	<div class="print-appendix" id={block.anchor}>
 		<p class="appendix-eyebrow">Viðauki {block.letter}</p>
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html block.content}
 	</div>
 {/each}
+
+<!-- Invisible self-target links: Chromium only creates a named destination for
+     an element that an in-document link targets, and nothing in the appendices
+     links to their starts. These give each appendix a destination, so the book
+     PDF's merge can point the chapters' appendix links at it
+     (scripts/lib/pdf-links.js). -->
+<div class="toc-anchor-targets" aria-hidden="true">
+	{#each data.anchors as anchor (anchor)}
+		<a href="#{anchor}">·</a>
+	{/each}
+</div>
 
 <!-- No inline colophon: the appendices only appear inside the full book, whose
      front matter carries the single authoritative colophon. -->
