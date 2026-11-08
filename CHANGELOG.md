@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Reader v1.1 — draft of the v1.1.0 entry
+
+_A draft, written in plan step S11.4 before calls 3 and 2 are applied (`docs/plans/2026-10-15-reader-v1.1-v1.2-review-plan.md`). When call 3 is ruled and its step is done (S11.5 or S11.6), S11.4 sets version 1.1.0, turns this into `## [1.1.0]` and tags it. Until then the pager is dark: a section pages only under a `?lestur=sidur` link, or once a reader who paged chose a mode in the reading view._
+
+- **Accessibility (M1, M2):** an accessibility ratchet in CI (axe on five surfaces at two widths and both themes, the colour tokens' contrast, white on amber kept at zero). Settings closes without a jump, the closed sidebar leaves the Tab order, and the phone tabs have names. Role tokens for the amber (`--on-accent`, `--accent-strong`, `--accent-fill-hover`) and one focus ring over a solid gap, with no `outline: none` left in the text.
+- **What the site says (M3):** practice review keeps the whole question and its maths. 'Hreinsa gögn' says what it clears, and the erase is real. /prof no longer claims to adapt. A privacy page (`/personuvernd`), the page-view ruling in code, and 'Tilkynna villu' from the machine-translation notice.
+- **Section-end recall (M5, P0.2):** a free-recall prompt once per section, at its end (call 2), kept off rollups, introductions and the Formáli, accessible and bounded. A saved recall is read back, with 'Eyða', on a return visit. Local counters with a summary on /greining and a counts-only export.
+- **Settings (M6):** the store keeps only what the reader set, with a version and a profile-age marker, and builds older or newer than it carry unknown settings through. A pre-paint script applies a stored dark theme and line width before the page draws.
+- **Flashcards (M7):** the selection popup works by touch and keyboard and stays on screen; a card can be deleted. A flashcard is a 'minnisspjald'.
+- **The paged reader (M8, M9, M11; dark):** hybrid viewport-aware pages (P0.4), split to the window and the font size.
+  - Keys, swipes and a position label: 'Hluti N af M · Síða X af Y', counting parts only, with the footnotes named. The screen reader hears the same position and the sub-section's name.
+  - Space and PageDown scroll a tall page before turning it. A worked example taller than a page breaks once, before its 'Lausn' part (D11's trial).
+  - The section title stands above every page, and a turn keeps focus on the page.
+  - 'Síðuskipt' / 'Samfellt skrun' in view, a radio group that keeps the reader's place. 'Ljúka kafla' ends a section, and the recall prompt takes the page's place.
+  - The machine-translation notice and 'Tilkynna villu' on every page. A figure link opens the lightbox over the page. Images load a part ahead, not all at once.
+  - The page controls docked in a bar. Call 1's page budget: §1.2's pages fill 68% of a 1280 × 800 window.
+  - Print and find-in-page reach the whole section. The sidebar's ring follows the pages. In-content links work on a second click, a page's address names a block, and a return visit offers the page left on.
+- **Settings' line height and width (S11.3)** are radio groups.
+- **Predict-first flashcards (M4, P0.3)** join this entry when S4.5 merges them into `main` (January 2027).
+- **Also on `main` since the June entry (S11.4 completes this list from the train PRs):** the service-worker cache and offline book download (#260); deploys that keep unchanged files' ETags (#263); the organic chemistry book retired; the erase on /greining empties the service worker's expiry records, and a failed offline page load gets the app shell (#381–#383); a failed search says so (#387, #388); the PDFs' links into the reader (#391); dark-theme figure cards that keep their size (#392); the front page credits the machine translation (#398).
+
 ### June 2026 audit remediation (PRs #108–#118, #126, #130–#131)
 
 - **Security:** content-sync book slugs passed via `execFileSync` argv (no shell interpolation); CI no longer persists the content-repo PAT into the workspace; CSP hardened (`object-src`, `base-uri`, `frame-ancestors`, `form-action`, narrowed `img-src`); nginx `immutable` caching scoped to hashed `/_app/` bundles only

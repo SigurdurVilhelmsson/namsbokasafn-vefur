@@ -186,7 +186,7 @@ Pagination changes the contract:
 
 - A **sub-section is read** when the user advances past its last inner page (Next from the last page → marks prior sub-section read AND advances).
 - The **whole section is read** when all sub-sections are read.
-- The free-recall prompt (P0.2) fires on **sub-section** completion, not whole-section. Granularity is closer to the research's "between sections" cadence and avoids the trap of asking for a recall over 4000 words at once.
+- The free-recall prompt (P0.2) fires on **sub-section** completion, not whole-section. Granularity is closer to the research's "between sections" cadence and avoids the trap of asking for a recall over 4000 words at once. _(See [Erratum: recall once per section (2026-11)](#erratum-recall-once-per-section-2026-11).)_
 - Manual "mark as read" remains for accessibility (and for users who already finished and want to skip).
 
 ### Cross-references and in-page links
@@ -272,14 +272,14 @@ Pagination changes the contract:
 3. Deep-link `#sub-3-p-2` lands directly on that page after hydration.
 4. Continuous-scroll toggle restores byte-identical reading experience to today's implementation.
 5. All existing E2E tests pass; new pagination tests pass.
-6. Read-detection still marks sections complete (now via "advanced past last page"); free-recall prompt fires per sub-section.
+6. Read-detection still marks sections complete (now via "advanced past last page"); free-recall prompt fires per sub-section. _(See [Erratum: recall once per section (2026-11)](#erratum-recall-once-per-section-2026-11).)_
 7. No layout shift after MathJax / image load completes (page-break runs after).
 
 ### Sequencing inside P0
 
 P0.1 (measure) and P0.2 (free recall) are independent and can ship first — they sharpen the existing scrolled experience. P0.3 (predict-first flashcards) is fully orthogonal. P0.4 (this) should ship last in P0 because the free-recall prompt's hooking point changes from "scrolled to bottom" to "advanced past last inner page," and it's cheaper to write the free-recall code once against the new contract than to migrate it.
 
-Recommended order: **P0.1 → P0.3 → P0.2 (scaffold against scrolled mode) → P0.4 (rewires P0.2's trigger to per-sub-section).**
+Recommended order: **P0.1 → P0.3 → P0.2 (scaffold against scrolled mode) → P0.4 (rewires P0.2's trigger to per-sub-section).** _(See [Erratum: recall once per section (2026-11)](#erratum-recall-once-per-section-2026-11).)_
 
 ---
 
@@ -367,3 +367,13 @@ _Added 2026-10-17 from the reader v1.1/v1.2 review (`docs/plans/2026-10-15-reade
 **P1.4 (typography).** Reader v1.2 ships the original Atkinson Hyperlegible, version 1.006, not Atkinson Hyperlegible Next. Rello & Baeza-Yates 2013 and Wery & Diliberto 2017 test neither Atkinson nor display polarity. For fonts, see Azzarello et al. 2026 (a meta-analysis of dyslexia fonts); for polarity, Piepenbrock et al. 2013 and 2014 and Dobres et al. 2017 (a legibility advantage for dark text on a light background), while Legge et al. 1985 found reading rate unaffected.
 
 The review's citation audit (report, Appendix B.1) also rates the bases given for P0.2, P0.3 and P1.1–P1.3 as partly supported or overstated. Those corrections are recorded there, not here.
+
+## Erratum: recall once per section (2026-11)
+
+_Added 2026-11-08 for plan step S11.4, as `docs/decisions/2026-10-23-reader-call2-recall-once-per-section.md` lists it. The text above stays as written in April; each line this erratum corrects links here._
+
+Call 2 was ruled on 2026-10-23: the free-recall prompt comes **once per section**, at its end, as built (option (a)). Three lines above still describe a prompt after each sub-section:
+
+- **P0.4's contract** ("fires on sub-section completion, not whole-section"): it fires once, when the reader finishes the section, at 'Ljúka kafla' on the last page while paging or at the end of the content while scrolling. A type gate keeps it off rollups, introductions and the Formáli [PED-04], and it comes once per section (D10).
+- **Acceptance criterion 6** ("free-recall prompt fires per sub-section"): once per section. The pager's per-sub-section hook (`onsubsectioncomplete`) stays unwired; plan step S11.7 would wire it only under a later ruling.
+- **The recommended order** ("P0.4 (rewires P0.2's trigger to per-sub-section)"): P0.4 leaves P0.2's trigger once per section.
