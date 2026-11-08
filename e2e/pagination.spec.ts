@@ -1794,4 +1794,59 @@ test.describe('The MT notice, figures and images (S9.4)', () => {
 		);
 		expect(shown).toBe(0);
 	});
+
+	/** Marks the first visible in-text link to a figure on another part of the section, or false */
+	const markFigureLink = (page: Page) =>
+		page.evaluate(() => {
+			const link = Array.from(document.querySelectorAll<HTMLAnchorElement>('.reading-content a[href^="#"]')).find((a) => {
+				if (a.offsetParent === null) return false;
+				const target = document.getElementById(decodeURIComponent(a.getAttribute('href')!.slice(1)));
+				return !!target?.matches('figure') && !!target.querySelector('img');
+			});
+			link?.setAttribute('data-test-figure-link', '');
+			return !!link;
+		});
+
+	// PED-03, D12 (the lightbox alone): a 'Mynd' link opens the figure over the current page, so
+	// the page and its label stay; Escape gives focus back to the link
+	for (const device of [
+		{ name: 'clicked at 1280px', viewport: { width: 1280, height: 800 }, touch: false },
+		{ name: 'tapped at 390px', viewport: { width: 390, height: 844 }, touch: true }
+	]) {
+		test(`a 'Mynd' link opens the lightbox and keeps the page, ${device.name}`, async ({ browser }) => {
+			test.setTimeout(180000);
+			const context = await browser.newContext({
+				viewport: device.viewport,
+				hasTouch: device.touch,
+				isMobile: device.touch,
+				serviceWorkers: 'block'
+			});
+			await seedSettings(context, PAGED);
+			const page = await context.newPage();
+			await openPaged(page, SECTION!);
+			const label = pagerLabel(page);
+			const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+			for (let i = 0; !(await markFigureLink(page)); i++) {
+				const text = (await label.textContent())!.trim();
+				expect(LAST_PAGE.test(text), `${SECTION}: no page with a link to a figure`).toBe(false);
+				expect(i).toBeLessThan(PAGE_CAP);
+				await next.click();
+				await expect(label).not.toHaveText(text);
+				await page.waitForTimeout(200);
+			}
+			const shown = (await label.textContent())!.trim();
+			const link = page.locator('[data-test-figure-link]');
+			if (device.touch) await link.tap();
+			else await link.click();
+
+			const lightbox = page.getByRole('dialog');
+			await expect(lightbox).toBeVisible();
+			await expect(label).toHaveText(shown);
+			await page.keyboard.press('Escape');
+			await expect(lightbox).toHaveCount(0);
+			await expect(label).toHaveText(shown);
+			if (!device.touch) await expect(link).toBeFocused();
+			await context.close();
+		});
+	}
 });

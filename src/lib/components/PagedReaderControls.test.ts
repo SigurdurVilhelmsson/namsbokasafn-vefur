@@ -794,3 +794,70 @@ describe('the machine-translation notice (S9.4)', () => {
 		expect(nav()!.querySelector('[role="note"]')).toBeNull();
 	});
 });
+
+// Plan step S9.4 (PED-03, D12): a 'Mynd' link opens the lightbox over the current page; a table
+// link keeps the page jump
+describe('figure links (S9.4)', () => {
+	function withFigure(): HTMLElement {
+		const container = document.body.appendChild(document.createElement('div'));
+		const p = (inner = 'x') => `<p data-h="300">${inner}</p>`;
+		container.innerHTML =
+			'<article class="cnx-module"><main><section>' +
+			'<h2 data-h="40">S</h2>' +
+			p('<a href="#fig">Mynd 1.2</a> <a href="#tab">Tafla 1.1</a>') +
+			p() +
+			p() +
+			'<figure id="fig" data-h="300"><img src="/x.png" alt="a"><figcaption>Mynd 1.2</figcaption></figure>' +
+			'<table id="tab" data-h="100"><tr><td>t</td></tr></table>' +
+			'</section></main></article>';
+		return container;
+	}
+	const click = (a: HTMLAnchorElement) => {
+		const event = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
+		a.dispatchEvent(event);
+		flushSync();
+		return event.defaultPrevented;
+	};
+	const lightbox = () => document.querySelector('[role="dialog"][aria-modal="true"]');
+
+	beforeEach(() => {
+		HTMLImageElement.prototype.decode = () => Promise.resolve();
+	});
+	afterEach(() => {
+		document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+		delete (HTMLImageElement.prototype as { decode?: unknown }).decode;
+	});
+
+	it("a 'Mynd' link opens the lightbox and keeps the page", async () => {
+		const c = withFigure();
+		open(c);
+		await settle();
+		vi.advanceTimersByTime(1500);
+		await settle();
+		const before = label();
+		expect(click(c.querySelector<HTMLAnchorElement>('a[href="#fig"]')!)).toBe(true);
+		expect(lightbox()).not.toBeNull();
+		expect(label()).toBe(before);
+	});
+
+	it('a table link is left to the page jump', async () => {
+		const c = withFigure();
+		open(c);
+		await settle();
+		vi.advanceTimersByTime(1500);
+		await settle();
+		expect(click(c.querySelector<HTMLAnchorElement>('a[href="#tab"]')!)).toBe(false);
+		expect(lightbox()).toBeNull();
+	});
+
+	it('a failed pager leaves figure links alone', async () => {
+		const c = withFigure();
+		open(c);
+		await settle();
+		vi.advanceTimersByTime(1500);
+		await settle();
+		failNextResplit();
+		expect(click(c.querySelector<HTMLAnchorElement>('a[href="#fig"]')!)).toBe(false);
+		expect(lightbox()).toBeNull();
+	});
+});

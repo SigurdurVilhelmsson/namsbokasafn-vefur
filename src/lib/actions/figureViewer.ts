@@ -18,7 +18,26 @@ interface FigureViewerState {
 	pinchStartZoom: number;
 	/** Timestamp of last tap for double-tap detection */
 	lastTapTime: number;
+	/** The link that opened the lightbox through openFigure(): focus goes back to it on close */
+	opener?: HTMLElement | null;
 }
+
+function newState(): FigureViewerState {
+	return {
+		lightbox: null,
+		currentImage: null,
+		zoom: 1,
+		pan: { x: 0, y: 0 },
+		isDragging: false,
+		dragStart: { x: 0, y: 0 },
+		pinchStartDistance: 0,
+		pinchStartZoom: 1,
+		lastTapTime: 0
+	};
+}
+
+/** Each figureViewer's state, by the node it is on, so openFigure() reaches the right one */
+const viewers = new WeakMap<HTMLElement, FigureViewerState>();
 
 /**
  * Creates and shows the lightbox for an image
@@ -326,6 +345,28 @@ function closeLightbox(state: FigureViewerState): void {
 		state.lightbox.remove();
 		state.lightbox = null;
 		document.body.style.overflow = '';
+		// Back to the link that opened it, without moving the page (S9.4)
+		if (state.opener?.isConnected) state.opener.focus({ preventScroll: true });
+		state.opener = null;
+	}
+}
+
+/**
+ * Opens the lightbox on a figure's image from outside the action (plan step S9.4, PED-03): in
+ * paged mode an in-text 'Mynd' link opens the figure over the current page instead of turning
+ * to its page. It uses the figureViewer around the image, so that action's destroy closes it.
+ * Given the link, focus moves to 'Loka' and back to the link on close: a keyboard reader who
+ * followed the link is now in a dialog.
+ */
+export function openFigure(img: HTMLImageElement, opener?: HTMLElement): void {
+	let state: FigureViewerState | undefined;
+	for (let el = img.parentElement; el && !state; el = el.parentElement) state = viewers.get(el);
+	state ??= newState();
+	closeLightbox(state);
+	showLightbox(img, state);
+	if (opener) {
+		state.opener = opener;
+		state.lightbox?.querySelector<HTMLElement>('[data-action="close"]')?.focus();
 	}
 }
 
@@ -334,17 +375,8 @@ function closeLightbox(state: FigureViewerState): void {
  * Attach to a container element to enable lightbox on all images within
  */
 export function figureViewer(node: HTMLElement) {
-	const state: FigureViewerState = {
-		lightbox: null,
-		currentImage: null,
-		zoom: 1,
-		pan: { x: 0, y: 0 },
-		isDragging: false,
-		dragStart: { x: 0, y: 0 },
-		pinchStartDistance: 0,
-		pinchStartZoom: 1,
-		lastTapTime: 0
-	};
+	const state = newState();
+	viewers.set(node, state);
 
 	function handleClick(event: Event) {
 		const target = event.target as HTMLElement;
@@ -373,6 +405,7 @@ export function figureViewer(node: HTMLElement) {
 	return {
 		destroy() {
 			node.removeEventListener('click', handleClick);
+			viewers.delete(node);
 			closeLightbox(state);
 		}
 	};

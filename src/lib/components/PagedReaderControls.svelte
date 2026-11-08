@@ -21,6 +21,7 @@
 	// Aliased: the component has its own announce() and announcement
 	import { announce as speak, announcement as liveText } from '$lib/stores/announcer';
 	import { isTyping, keyBelongsElsewhere, scrollsSideways } from '$lib/actions/keyboardShortcuts';
+	import { openFigure } from '$lib/actions/figureViewer';
 	import {
 		paginate,
 		buildUnits as buildContentUnits,
@@ -563,6 +564,24 @@
 		if (turn && (turn === 'next' ? next() : prev())) keepFocusOnPage();
 	}
 
+	/**
+	 * An in-text 'Mynd' link opens the figure in the lightbox over the current page (S9.4, PED-03;
+	 * D12 keeps no figure with its citation), so the reader keeps their page and their place.
+	 * Any other in-page link (a table, a note, an equation) keeps the page jump. Handled before
+	 * SvelteKit's own link handler, which returns on a prevented click.
+	 */
+	function handleContentClick(event: MouseEvent) {
+		if (!ready || failed || event.defaultPrevented || event.button !== 0) return;
+		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+		const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href^="#"]') : null;
+		if (!link) return;
+		const target = elementForHash(link.getAttribute('href') ?? '');
+		const img = target?.matches('figure') ? target.querySelector('img') : null;
+		if (!img) return;
+		event.preventDefault();
+		openFigure(img, link);
+	}
+
 	function handleHashChange() {
 		if (!ready || failed) return;
 		const hash = window.location.hash;
@@ -722,6 +741,7 @@
 			window.addEventListener('resize', onResize, { signal });
 			window.addEventListener('keydown', handleKeyDown, { signal });
 			window.addEventListener('hashchange', handleHashChange, { signal });
+			root.addEventListener('click', handleContentClick, { signal });
 			el.addEventListener('touchstart', handleTouchStart, { passive: true, signal });
 			el.addEventListener('touchend', handleTouchEnd, { passive: true, signal });
 			signal.addEventListener('abort', () => clearTimeout(recomputeTimer), { once: true });
