@@ -177,8 +177,9 @@
       </p>
       <!-- Alternative tagline the editor may swap in later:
            "Þýtt með íslenskri vélþýðingu (Erlendur) og ritstýrt af kennurum með fagþekkingu." -->
+      <!-- D20: proposed — the machine-translation credit, the same text as MACHINE_TRANSLATION_CREDIT ([USER], 2026-11-08) -->
       <p class="hero-credit anim-item" style="--anim-delay: 250ms">
-        Vélþýtt og yfirlesið af starfandi raungreinakennurum.
+        Íslensk vélþýðing (Erlendur, Miðeind)
       </p>
       <div class="hero-actions anim-item" style="--anim-delay: 300ms">
         <a href="#kennslubaekur" class="btn-primary" onclick={(e: MouseEvent) => { e.preventDefault(); scrollTo('kennslubaekur'); }}>
