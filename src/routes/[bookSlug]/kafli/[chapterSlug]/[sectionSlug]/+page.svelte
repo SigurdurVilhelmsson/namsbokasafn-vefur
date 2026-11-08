@@ -34,6 +34,7 @@
 		shouldPage
 	} from '$lib/utils/readerPolicy';
 	import { createObjectiveKey } from '$lib/utils/storeHelpers';
+	import { feedbackHref } from '$lib/utils/feedbackPrefill';
 	import { textbookPhrase } from '$lib/utils/metaDescription';
 	import { fade, fly } from 'svelte/transition';
 
@@ -93,6 +94,12 @@
 	let startAt: HTMLElement | null = $state(null);
 	/** The block a switch to scrolling kept in place. Not $state. */
 	let keptAnchor: HTMLElement | null = null;
+
+	// The machine-translation notice, on an unreviewed section. Paged, it moves into the pager's
+	// container, where the arrival scroll lands, and stands above the section's first page; the
+	// label row carries a compact marker on every page (plan step S9.4; UI-09, ruling 1 kept).
+	let unreviewed = $derived(!data.navigation.current.section.reviewed);
+	let mtLead: HTMLElement | undefined = $state();
 
 	// Print the current section
 	function handlePrint() {
@@ -516,8 +523,9 @@
 	{/if}
 
 	<!-- Machine-translation notice on modules that haven't been human-reviewed.
-	     Replaces the old always-on PilotBanner; driven by per-section provenance. -->
-	{#if !data.navigation.current.section.reviewed}
+	     Replaces the old always-on PilotBanner; driven by per-section provenance. Paged, it
+	     stands inside the pager's container instead (S9.4). -->
+	{#if unreviewed && !paged}
 		<PreviewBanner bookSlug={data.bookSlug} chapterSlug={data.chapterSlug} sectionSlug={data.sectionSlug} />
 	{/if}
 
@@ -670,6 +678,13 @@
 		     before the page controls render, so the ←/→ section shortcut steps aside for the pager.
 		     It sits below the objectives, so the pager's arrival scroll passes them (ruling 1). -->
 		<div bind:this={contentWrapper} data-paged-section={pagedMark}>
+			<!-- Outside the content root, so it is never paginated, shifts no highlight offsets and
+			     trips no observer; the pager shows it above the first page only (S9.4, UI-09) -->
+			{#if unreviewed && paged}
+				<div bind:this={mtLead}>
+					<PreviewBanner bookSlug={data.bookSlug} chapterSlug={data.chapterSlug} sectionSlug={data.sectionSlug} />
+				</div>
+			{/if}
 			<TextHighlighter
 				bookSlug={data.bookSlug}
 				chapterSlug={data.chapterSlug}
@@ -724,6 +739,10 @@
 				onuncover={() => (endUncovered = true)}
 				{startAt}
 				onleave={() => chooseMode('scrolled', { fromPager: true })}
+				lead={unreviewed ? mtLead : null}
+				mtReport={unreviewed
+					? feedbackHref({ bok: data.bookSlug, kafli: data.chapterSlug, hluti: data.sectionSlug })
+					: null}
 			/>
 		{/if}
 

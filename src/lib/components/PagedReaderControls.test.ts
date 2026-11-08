@@ -741,3 +741,56 @@ describe('the way out (S9.3)', () => {
 		expect(nav()!.querySelector('button[aria-pressed]')).toBeNull();
 	});
 });
+
+// Plan step S9.4 (UI-09, PED-15): the machine-translation notice. The full banner stands above
+// the section's first page only (`lead`, in the pager's container above the content), and every
+// page's label row carries a compact 'Vélþýtt' marker with 'Tilkynna villu'.
+describe('the machine-translation notice (S9.4)', () => {
+	function withLead(): { c: HTMLElement; lead: HTMLElement } {
+		const c = content();
+		const lead = document.createElement('div');
+		lead.dataset.h = '120';
+		lead.textContent = 'Vélþýtt efni.';
+		c.prepend(lead);
+		return { c, lead };
+	}
+
+	it('shows the banner on the section’s first page only', async () => {
+		const { c, lead } = withLead();
+		open(c, { lead });
+		await settle();
+		expect(lead.hasAttribute('hidden')).toBe(false);
+		key('ArrowRight');
+		expect(lead.hasAttribute('hidden')).toBe(true);
+		key('ArrowLeft');
+		expect(lead.hasAttribute('hidden')).toBe(false);
+	});
+
+	it('gives the banner back when the pager goes', async () => {
+		const { c, lead } = withLead();
+		const { pager } = open(c, { lead });
+		await settle();
+		key('ArrowRight');
+		drop(pager);
+		expect(lead.hasAttribute('hidden')).toBe(false);
+	});
+
+	it("puts 'Vélþýtt' and 'Tilkynna villu' in the label row, named for the notice", async () => {
+		const c = content();
+		open(c, { mtReport: '/feedback?bok=b&kafli=01&hluti=1-1' });
+		await settle();
+		const marker = nav()!.querySelector<HTMLElement>('[role="note"]');
+		expect(marker?.getAttribute('aria-label')).toBe('Vélþýtt efni');
+		expect(marker?.textContent).toContain('Vélþýtt');
+		expect(marker?.textContent).toContain('Þessi eining hefur ekki enn verið yfirlesin');
+		expect(marker?.querySelector('a')?.getAttribute('href')).toBe('/feedback?bok=b&kafli=01&hluti=1-1');
+		expect(marker?.querySelector('a')?.textContent?.trim()).toBe('Tilkynna villu');
+	});
+
+	it('shows no marker on a reviewed section (no report link given)', async () => {
+		const c = content();
+		open(c);
+		await settle();
+		expect(nav()!.querySelector('[role="note"]')).toBeNull();
+	});
+});

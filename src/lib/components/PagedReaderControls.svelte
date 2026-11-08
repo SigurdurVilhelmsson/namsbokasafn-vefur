@@ -38,7 +38,7 @@
 	} from '$lib/utils/paginate';
 	import {
 		PAGE_BUDGET,
-		pageBudget,
+		pageHeights,
 		encodePageHash,
 		resolvePageHash,
 		positionLabel,
@@ -79,6 +79,12 @@
 		startAt?: HTMLElement | null;
 		/** Shows 'Samfellt skrun' in the label row, the in-view way out (S9.3, UI-05, PED-01) */
 		onleave?: () => void;
+		/** The machine-translation notice in the container above the content: shown above the
+		 *  section's first page only, which is budgeted for it (S9.4, UI-09) */
+		lead?: HTMLElement | null;
+		/** 'Tilkynna villu''s address for an unreviewed section: the label row carries the
+		 *  compact 'Vélþýtt' marker with it on every page; none for a reviewed one (S9.4) */
+		mtReport?: string | null;
 	}
 
 	let {
@@ -89,7 +95,9 @@
 		covered = false,
 		onuncover,
 		startAt = null,
-		onleave
+		onleave,
+		lead = null,
+		mtReport = null
 	}: Props = $props();
 
 	interface Unit {
@@ -148,15 +156,18 @@
 	 *  calibrate() once they render. */
 	let gapAbove = 0;
 	let gapBelow = PAGE_BUDGET.initialGapBelow;
+	/** The notice's share of gapAbove: page 1 has it, the rest do not (S9.4) */
+	let leadInset = 0;
 
 	/** The deep-link / cross-reference target the reader was sent to. While set,
 	 *  a re-split keeps its page on screen; any page turn clears it. */
 	let target: HTMLElement | null = null;
 
-	/** Reading height of a page, scrolled to the content top. It used to be the
-	 *  viewport minus a fixed 260px; the real chrome is larger (QA E1). */
-	function availableHeight(): number {
-		return pageBudget({ innerHeight: window.innerHeight, gapAbove, gapBelow });
+	/** Reading height of a page, scrolled to the content top, and of the section's first page,
+	 *  under the notice. It used to be the viewport minus a fixed 260px; the real chrome is
+	 *  larger (QA E1). */
+	function availableHeights(): { page: number; firstPage: number } {
+		return pageHeights({ innerHeight: window.innerHeight, gapWithLead: gapAbove, leadInset, gapBelow });
 	}
 
 	/** Each unit's page count, and each unit's pages: what pager.ts reads */
@@ -195,11 +206,19 @@
 
 	function computePages() {
 		const first = units[0]?.children[0];
-		if (container && first) {
-			gapAbove = Math.max(0, first.getBoundingClientRect().top - container.getBoundingClientRect().top);
+		const gap = () =>
+			container && first ? Math.max(0, first.getBoundingClientRect().top - container.getBoundingClientRect().top) : 0;
+		gapAbove = gap();
+		// The notice's share of the chrome: measured by hiding it once, here in the restored
+		// layout, where every block shows
+		leadInset = 0;
+		if (lead?.isConnected) {
+			lead.setAttribute('hidden', '');
+			leadInset = Math.max(0, gapAbove - gap());
+			lead.removeAttribute('hidden');
 		}
-		const viewportH = availableHeight();
-		for (const unit of units) {
+		const { page: viewportH, firstPage } = availableHeights();
+		for (const [u, unit] of units.entries()) {
 			unit.cuts = unit.children.map((el) => (EXAMPLE_BREAK_TRIAL ? exampleCut(el) : null));
 			const items = unit.children.map((el, i) => {
 				const cut = unit.cuts[i];
@@ -210,7 +229,7 @@
 				};
 			});
 			unit.pieces = splitPieces(items, viewportH);
-			unit.pages = paginate(unit.pieces, viewportH);
+			unit.pages = paginate(unit.pieces, viewportH, u === 0 ? firstPage : viewportH);
 			if (unit.pages.length === 0) {
 				unit.pages = [{ start: 0, end: unit.pieces.length }];
 			}
@@ -239,6 +258,7 @@
 	}
 
 	function restoreAll() {
+		lead?.removeAttribute('hidden');
 		for (const unit of units) {
 			unit.wrapper?.removeAttribute('hidden');
 			for (const el of unit.children) el.removeAttribute('hidden');
@@ -250,6 +270,8 @@
 	function applyVisibility() {
 		const flat = flatPages[current];
 		if (!flat) return;
+		// The notice stands above the section's first page only (S9.4, UI-09)
+		lead?.toggleAttribute('hidden', current !== 0);
 
 		for (let u = 0; u < units.length; u++) {
 			const unit = units[u];
@@ -816,6 +838,18 @@
 		</button>
 
 		<span class="paged-nav-center">
+			{#if mtReport}
+				<!-- The machine-translation notice on every page (S9.4; UI-09, PED-15): the banner's
+				     own words, its name and sentence for screen readers, and its 'Tilkynna villu'.
+				     No new strings. -->
+				<span class="paged-nav-mt" role="note" aria-label="Vélþýtt efni">
+					<Icon name="triangle-alert" size="sm" class="paged-nav-mt-icon" />
+					<span>Vélþýtt<span class="sr-only">
+							efni. Þessi eining hefur ekki enn verið yfirlesin og kann að innihalda þýðingarvillur.</span
+						></span>
+					<a class="paged-nav-mt-report" href={mtReport}>Tilkynna villu</a>
+				</span>
+			{/if}
 			<span class="paged-nav-label">
 				{label}
 			</span>
@@ -899,6 +933,26 @@
 
 	.paged-nav-leave:hover {
 		text-decoration: underline;
+	}
+
+	.paged-nav-mt {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-size: 0.8125rem;
+		color: var(--text-secondary);
+	}
+
+	/* The banner's amber, as decoration only */
+	:global(.paged-nav-mt-icon) {
+		color: #d97706;
+	}
+
+	/* Bronze text for amber-as-text, underlined, as the banner's link (the accent-text rule) */
+	.paged-nav-mt-report {
+		color: var(--accent-strong);
+		text-decoration: underline;
+		text-underline-offset: 2px;
 	}
 
 	.paged-nav-label {

@@ -56,11 +56,14 @@ export interface PageRange {
  * the page of the next block taller than 0 px, and at the end of the items
  * joins the last page. A negative height (negative margins) counts as 0 px.
  */
-export function paginate(input: PaginateItem[], viewportH: number): PageRange[] {
+export function paginate(input: PaginateItem[], viewportH: number, firstH: number = viewportH): PageRange[] {
 	const items = input.map((item) => (item.height < 0 ? { ...item, height: 0 } : item));
 	const pages: PageRange[] = [];
 	let start = 0;
 	let pageH = 0;
+	// The first page may have less room: on the section's first page the machine-translation
+	// notice stands above the content (S9.4, UI-09)
+	const room = () => (pages.length === 0 ? firstH : viewportH);
 
 	const flush = (end: number) => {
 		if (end > start) {
@@ -86,7 +89,7 @@ export function paginate(input: PaginateItem[], viewportH: number): PageRange[] 
 		// window scrolls there. A heading taller than the page keeps the
 		// block after it, through the headings-only rule below. A 0 px block
 		// always fits, so it never stands in for that block.
-		if (pageH === 0 || item.height === 0 || pageH + item.height <= viewportH) {
+		if (pageH === 0 || item.height === 0 || pageH + item.height <= room()) {
 			pageH += item.height;
 			i++;
 			continue;

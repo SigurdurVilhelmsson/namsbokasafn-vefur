@@ -74,6 +74,29 @@ export function pageBudget({
 	);
 }
 
+/**
+ * The page heights when the machine-translation notice stands above the section's first page
+ * only (plan step S9.4, UI-09). The chrome above the first block was measured with the notice
+ * shown (`gapWithLead`), `leadInset` of it the notice's own: every other page is budgeted
+ * without it, the first page with all of it.
+ */
+export function pageHeights({
+	innerHeight,
+	gapWithLead,
+	leadInset,
+	gapBelow
+}: {
+	innerHeight: number;
+	gapWithLead: number;
+	leadInset: number;
+	gapBelow: number;
+}): { page: number; firstPage: number } {
+	return {
+		page: pageBudget({ innerHeight, gapAbove: gapWithLead - leadInset, gapBelow }),
+		firstPage: pageBudget({ innerHeight, gapAbove: gapWithLead, gapBelow })
+	};
+}
+
 // =============================================================================
 // FLAT POSITIONS
 // =============================================================================

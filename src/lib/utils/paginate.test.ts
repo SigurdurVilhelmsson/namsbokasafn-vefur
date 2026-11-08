@@ -31,6 +31,29 @@ function block(height: number, opts: Partial<PaginateItem> = {}): PaginateItem {
 const heading = (height: number) => block(height, { keepWithNext: true });
 
 describe('paginate', () => {
+	// S9.4 (UI-09): the section's first page also holds the machine-translation notice, so it
+	// can be given less room than the rest
+	it('fills the first page to its own height, and the rest to the page height', () => {
+		expect(paginate([block(200), block(300), block(300)], 650, 400)).toEqual([
+			{ start: 0, end: 1 },
+			{ start: 1, end: 3 }
+		]);
+	});
+
+	it('gives the first page the page height when no first height is given', () => {
+		expect(paginate([block(200), block(300), block(300)], 650)).toEqual([
+			{ start: 0, end: 2 },
+			{ start: 2, end: 3 }
+		]);
+	});
+
+	it('still puts the first block on a first page smaller than it', () => {
+		expect(paginate([block(300), block(100)], 650, 200)).toEqual([
+			{ start: 0, end: 1 },
+			{ start: 1, end: 2 }
+		]);
+	});
+
 	it('puts a short sub-section on a single page', () => {
 		const pages = paginate([block(100), block(120), block(80)], 768);
 		expect(pages).toEqual([{ start: 0, end: 3 }]);

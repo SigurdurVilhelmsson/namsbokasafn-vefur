@@ -608,9 +608,11 @@ test.describe('Paged reading mode', () => {
 			});
 			await page.waitForTimeout(500);
 			// The title is above every page since S9.2 (D12), so no page is the title alone;
-			// 'The title and focus survive page turns' tests that
+			// 'The title and focus survive page turns' tests that. The arrival target is the
+			// pager's container, which since S9.4 opens with the machine-translation notice on
+			// an unreviewed section's first page, above the article.
 			const top = await page.evaluate(
-				() => document.querySelector('article.cnx-module')!.getBoundingClientRect().top
+				() => document.querySelector('[data-paged-section]')!.getBoundingClientRect().top
 			);
 			expect(top, `${url}: content starts at ${Math.round(top)}px`).toBeLessThan(250);
 		}
@@ -1703,4 +1705,93 @@ test.describe('The way out and the section end (S9.3)', () => {
 			expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
 		});
 	}
+});
+
+/** Whether an element named 'Vélþýtt efni' shows in the window below the sticky header */
+const mtNoticeInView = (page: Page) =>
+	page.evaluate(() => {
+		const header = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+		return Array.from(document.querySelectorAll<HTMLElement>('[aria-label="Vélþýtt efni"]')).some((el) => {
+			if (el.offsetParent === null) return false;
+			const r = el.getBoundingClientRect();
+			return r.height > 0 && r.bottom > header && r.top < innerHeight;
+		});
+	});
+
+// Plan step S9.4 (UI-09, PED-15, PED-03, CODE-15): the machine-translation notice travels with
+// the page, a figure link opens the lightbox, and the pager stops downloading every figure.
+test.describe('The MT notice, figures and images (S9.4)', () => {
+	test.skip(!SECTION, 'No synced module section');
+	test.use({ serviceWorkers: 'block' });
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+
+	// UI-09: after the ruled arrival scroll (ruling 1) the notice sat 346-546 px above the window
+	// and no later page brought it back. The full banner now stands above the first page, and
+	// every page's label row carries the compact marker. A page holding one block taller than
+	// the window pushes the label row below it until S9.5 docks it, so such pages are skipped.
+	for (const viewport of [
+		{ width: 390, height: 844 },
+		{ width: 768, height: 1024 },
+		{ width: 1280, height: 800 }
+	]) {
+		test(`'Vélþýtt' is in view on arrival and after each turn of §1.2, at ${viewport.width}px`, async ({ page }) => {
+			const url = sectionUrl('1.2');
+			test.skip(!url, 'No §1.2 synced');
+			test.setTimeout(180000);
+			await page.setViewportSize(viewport);
+			await openPaged(page, url!);
+			await page.waitForTimeout(300);
+
+			expect(await mtNoticeInView(page), 'the notice on arrival').toBe(true);
+			const objectivesBottom = await page.evaluate(() => {
+				const box = Array.from(document.querySelectorAll('h3')).find((h) => h.textContent?.includes('Námsmarkmið'));
+				return box?.closest('div.mb-8')?.getBoundingClientRect().bottom ?? null;
+			});
+			// Ruling 1: the arrival scroll lands on the pager's container, past the objectives. The
+			// notice now opens that container, so the objectives must still end above it. (Their
+			// last few px can show: the container lands 96 px down, under their bottom margin, and
+			// at 768x1024 the scroll stops short, UI-19's arrival shortfall, which no step names.)
+			const containerTop = await page.evaluate(
+				() => document.querySelector('[data-paged-section]')!.getBoundingClientRect().top
+			);
+			if (objectivesBottom !== null) {
+				expect(objectivesBottom, 'the objectives above the arrival target (ruling 1)').toBeLessThanOrEqual(containerTop);
+			}
+
+			await eachPage(page, url!, async (text) => {
+				// An allowed overrun (one block taller than the page, or headings with it) whose
+				// label row really is below the window
+				const { headed } = await shownPage(page);
+				const navTop = await pager(page).evaluate((el) => el.getBoundingClientRect().top);
+				if (headed && navTop >= viewport.height) return;
+				expect(await mtNoticeInView(page), `${text}: the notice`).toBe(true);
+			});
+		});
+	}
+
+	test("the label row's 'Tilkynna villu' reports this section", async ({ page }) => {
+		await openPaged(page, SECTION!);
+		const [, book, , chapter, section] = SECTION!.split('/');
+		const href = (await pager(page).getByRole('link', { name: 'Tilkynna villu' }).getAttribute('href'))!;
+		const url = new URL(href, 'http://x');
+		expect(url.pathname.replace(/\/$/, '')).toBe('/feedback');
+		expect([url.searchParams.get('bok'), url.searchParams.get('kafli'), url.searchParams.get('hluti')]).toEqual([
+			book,
+			chapter,
+			section
+		]);
+	});
+
+	test('the notice and the marker stay out of print', async ({ page }) => {
+		await openPaged(page, SECTION!);
+		await page.emulateMedia({ media: 'print' });
+		await page.waitForTimeout(300);
+		const shown = await page.evaluate(
+			() =>
+				Array.from(document.querySelectorAll<HTMLElement>('[aria-label="Vélþýtt efni"]')).filter(
+					(el) => el.getClientRects().length > 0
+				).length
+		);
+		expect(shown).toBe(0);
+	});
 });
