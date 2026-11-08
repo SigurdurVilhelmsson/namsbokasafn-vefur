@@ -2094,13 +2094,16 @@ test.describe('Print and find-in-page (S11.1)', () => {
 	test.use({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
 	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
 	const url = () => sectionUrl('1.2') ?? SECTION!;
+	/** The print tests' section: §3.1 has practice problems, whose self-assessment rows must stay
+	 *  hidden in print, and D11's broken example, whose other part the pager hides */
+	const printUrl = sectionUrl('3.1');
 
 	/** The blocks that render in print when the section scrolls: what a paged print must match */
 	async function scrolledPrint(browser: Browser): Promise<{ blocks: number[]; selfAssess: number }> {
 		const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
 		const scrolled = await context.newPage();
 		await seedSettings(scrolled, { readingMode: 'scrolled' });
-		await openScrolled(scrolled, url());
+		await openScrolled(scrolled, printUrl!);
 		await scrolled.emulateMedia({ media: 'print' });
 		const result = { blocks: await renderedBlocks(scrolled), selfAssess: await hiddenSelfAssess(scrolled) };
 		await context.close();
@@ -2124,9 +2127,11 @@ test.describe('Print and find-in-page (S11.1)', () => {
 		page,
 		browser
 	}) => {
+		test.skip(!printUrl, 'No §3.1');
 		const control = await scrolledPrint(browser);
 		expect(control.blocks.length).toBeGreaterThan(10);
-		await openPaged(page, url());
+		expect(control.selfAssess, "§3.1's practice rows").toBeGreaterThan(0);
+		await openPaged(page, printUrl!);
 		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
 		for (let i = 0; i < 2; i++) {
 			const text = (await pagerLabel(page).textContent())!.trim();
@@ -2153,8 +2158,9 @@ test.describe('Print and find-in-page (S11.1)', () => {
 	});
 
 	test('print media alone, with no beforeprint, renders the other pages too', async ({ page, browser }) => {
+		test.skip(!printUrl, 'No §3.1');
 		const control = await scrolledPrint(browser);
-		await openPaged(page, url());
+		await openPaged(page, printUrl!);
 		await page.emulateMedia({ media: 'print' });
 		expect(await renderedBlocks(page)).toEqual(control.blocks);
 		expect(await hiddenSelfAssess(page)).toBe(control.selfAssess);
