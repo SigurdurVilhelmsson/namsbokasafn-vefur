@@ -66,8 +66,8 @@
 					<li>námsmarkmið sem þú hefur merkt sem lokið, og hve vel þú telur þig kunna þau;</li>
 					<li>æfingadæmi sem þú hefur opnað og hvernig þér gekk með þau;</li>
 					<li>
-						<!-- S9.5 added the reading-mode and tall-page counts (PED-17). D20: proposed — the
-						     sentence's new end -->
+						<!-- S9.5 added the reading-mode and tall-page counts to the sentence's end (PED-17).
+						     Checked by [USER] as D20 batch 12 (2026-11-08). -->
 						lestrartölfræði í Námsgreiningu: hve lengi og hvenær þú lest, lotur, röð daga og markmið,
 						hve oft upprifjun birtist og hvernig þú brást við henni, og hve oft þú skiptir um
 						lestrarstillingu og hve oft síða var hærri en skjárinn;
@@ -117,8 +117,8 @@
 				</p>
 				<h3>Útflutningur</h3>
 				<p>
-					<!-- D20: proposed — 'tölurnar úr Námsgreiningu' and 'Áður en þú sækir tölurnar' (S9.5:
-					     the counts file holds more than the recall counts) -->
+					<!-- 'tölurnar úr Námsgreiningu' and 'Áður en þú sækir tölurnar' (S9.5: the counts file
+					     holds more than the recall counts). Checked by [USER] as D20 batch 12 (2026-11-08). -->
 					Ef þú flytur út athugasemdir, tölfræði eða tölurnar úr Námsgreiningu verður skráin til á
 					tækinu þínu. Hún fer ekki lengra nema þú sendir hana. Áður en þú sækir tölurnar sérðu
 					nákvæmlega hvað fer í skrána: tölurnar einar, ekkert sem þú skrifaðir.

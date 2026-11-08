@@ -299,8 +299,8 @@
 	>
 		<h2 id="counts-export-title" class="text-lg font-semibold">Flytja út tölur</h2>
 		<p class="mt-2 text-sm text-[var(--text-secondary)]">
-			<!-- S9.5 added the reading-mode and tall-page counts (PED-17). D20: proposed — the list's
-			     new middle -->
+			<!-- S9.5 added the reading-mode and tall-page counts to the list's middle (PED-17).
+			     Checked by [USER] as D20 batch 12 (2026-11-08). -->
 			Skráin geymir aðeins tölurnar hér fyrir neðan: hve oft upprifjun birtist í hverri bók og hvernig
 			þú brást við henni, hve oft þú skiptir um lestrarstillingu og hve oft síða var hærri en skjárinn,
 			og daginn í dag. Ekkert sem þú skrifaðir fer í hana.

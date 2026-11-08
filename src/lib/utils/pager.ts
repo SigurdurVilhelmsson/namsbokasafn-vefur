@@ -213,7 +213,7 @@ export function spokenPosition(
 	pageCounts: readonly number[],
 	heading: string | null
 ): string {
-	// D20: proposed — the spoken position, with and without the sub-section's heading
+	// The spoken position, with and without the sub-section's heading. Checked by [USER] as D20 batch 12 (2026-11-08).
 	const units = `Hluti ${unit + 1} af ${pageCounts.length}`;
 	const pages = `síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
 	return heading ? `${units}: ${heading}, ${pages}` : `${units}, ${pages}`;
