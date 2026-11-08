@@ -140,6 +140,16 @@
 	let run: AbortController | undefined;
 	/** The keys, swipes and hash changes are live (init's last step). Not $state. */
 	let live = false;
+	/** How a block is hidden: 'until-found' where the browser has it, so its find-in-page can
+	 *  reach every page (S11.1, D13), and plain hidden where it does not. There an unknown value
+	 *  is hidden only by the UA's display: none, which Tailwind's preflight leaves alone for
+	 *  until-found and an author display rule beats (CODE-08). Set per run. Not $state. */
+	let hiddenValue = '';
+	/** Printing: every block shows, and pages and re-splits wait for afterprint (S11.1,
+	 *  CODE-08). Not $state. */
+	let printing = false;
+	let resplitAfterPrint = false;
+	let scrollBeforePrint = 0;
 	let reported: PagerState | null = null;
 
 	/** Tell the page the state, on a change only; a destroyed pager says nothing */
@@ -284,7 +294,7 @@
 			if (child === cut) fromCut = true;
 			const hide = part === 'first' ? fromCut : part === 'second' ? !fromCut : false;
 			if (hide && !child.hasAttribute('hidden')) {
-				child.setAttribute('hidden', '');
+				child.setAttribute('hidden', hiddenValue);
 				partHidden.add(child);
 			} else if (!hide && partHidden.has(child)) {
 				child.removeAttribute('hidden');
@@ -303,30 +313,37 @@
 		partHidden.clear();
 	}
 
+	/** Hide a block as this run hides them, or show it */
+	function setHidden(el: Element, hide: boolean) {
+		if (!hide) el.removeAttribute('hidden');
+		else if (el.getAttribute('hidden') !== hiddenValue) el.setAttribute('hidden', hiddenValue);
+	}
+
 	function applyVisibility() {
 		const flat = flatPages[current];
-		if (!flat) return;
-		// The notice stands above the section's first page only (S9.4, UI-09)
+		// While printing every block shows; afterprint applies the page (S11.1)
+		if (!flat || printing) return;
+		// The notice stands above the section's first page only (S9.4, UI-09). Plain hidden:
+		// find-in-page need not reach it.
 		lead?.toggleAttribute('hidden', current !== 0);
 
 		for (let u = 0; u < units.length; u++) {
 			const unit = units[u];
 			// Covered by the section's end, no unit is shown, so every block is hidden
 			const isCurrent = u === flat.unit && !covered;
-			if (unit.wrapper) {
-				unit.wrapper.toggleAttribute('hidden', !isCurrent);
-			}
+			if (unit.wrapper) setHidden(unit.wrapper, !isCurrent);
 			if (isCurrent) {
-				unit.wrapper?.removeAttribute('hidden');
 				const shown = shownParts(unit.pieces, unit.pages[flat.page]);
 				unit.children.forEach((el, i) => {
 					const part = shown.get(i);
-					el.toggleAttribute('hidden', part === undefined);
+					setHidden(el, part === undefined);
 					const cut = unit.cuts[i];
 					if (cut && part) showPart(el, cut, part);
 				});
-			} else if (!unit.wrapper) {
-				for (const el of unit.children) el.setAttribute('hidden', '');
+			} else {
+				// Every block, inside a hidden wrapper too: find-in-page fires beforematch at the
+				// innermost hidden element first, so a match names its block (S11.1)
+				for (const el of unit.children) setHidden(el, true);
 			}
 		}
 	}
@@ -667,6 +684,46 @@
 		}
 	}
 
+	/**
+	 * The browser's find-in-page matched text on a hidden page and is about to show the element
+	 * (S11.1, D13): turn to the page that holds it, as a deep link does, and let the browser scroll
+	 * to the match. It fires at each hidden element from the match outwards, so the block's comes
+	 * first and turns the page, and the wrapper is shown by the time the browser reaches it (a
+	 * wrapper alone opens its sub-section's first page). Covered by the section's end, the page
+	 * is asked to show the page again.
+	 */
+	function handleBeforeMatch(event: Event) {
+		if (!ready || failed || printing) return;
+		const el = event.target;
+		if (!(el instanceof HTMLElement)) return;
+		const index = pageForElement(el);
+		if (index === null) return;
+		if (covered) onuncover?.();
+		target = el;
+		if (index !== current) showPage(index, { scroll: false });
+	}
+
+	/** Print the whole section, not the page on screen (S11.1, CODE-08): every block shows for
+	 *  the print, and afterprint shows the page again where the reader was */
+	function handleBeforePrint() {
+		if (!ready || failed || printing) return;
+		printing = true;
+		scrollBeforePrint = window.scrollY;
+		restoreAll();
+	}
+
+	function handleAfterPrint() {
+		if (!printing) return;
+		printing = false;
+		if (!ready || failed) return;
+		applyVisibility();
+		window.scrollTo({ top: scrollBeforePrint, behavior: 'instant' });
+		if (resplitAfterPrint) {
+			resplitAfterPrint = false;
+			recompute();
+		}
+	}
+
 	function scheduleRecompute() {
 		clearTimeout(recomputeTimer);
 		recomputeTimer = setTimeout(() => recompute(), 150);
@@ -676,6 +733,11 @@
 	 *  block they were looking at (font size, resize, late image loads) */
 	function recompute() {
 		if (!ready || failed) return;
+		// Printing, every block shows: re-split after the print (a print layout can resize)
+		if (printing) {
+			resplitAfterPrint = true;
+			return;
+		}
 		// Covered, nothing of the page is on screen: re-split once it shows again, so the label
 		// does not change behind the section's end (a rotation, a split screen; UI-21)
 		if (covered) {
@@ -875,6 +937,9 @@
 			root.addEventListener('click', handleContentClick, { signal });
 			el.addEventListener('touchstart', handleTouchStart, { passive: true, signal });
 			el.addEventListener('touchend', handleTouchEnd, { passive: true, signal });
+			window.addEventListener('beforeprint', handleBeforePrint, { signal });
+			window.addEventListener('afterprint', handleAfterPrint, { signal });
+			root.addEventListener('beforematch', handleBeforeMatch, { signal });
 			signal.addEventListener('abort', () => clearTimeout(recomputeTimer), { once: true });
 
 			// Typography settings change block heights
@@ -922,6 +987,9 @@
 		appliedCovered = false;
 		resplitWhenUncovered = false;
 		reserve = 0;
+		printing = false;
+		resplitAfterPrint = false;
+		hiddenValue = 'onbeforematch' in document.body ? 'until-found' : '';
 		// untrack: report() reads $state, which must not become this effect's dependencies
 		untrack(report);
 		init(el, controller.signal);

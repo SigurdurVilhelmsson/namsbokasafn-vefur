@@ -39,7 +39,18 @@ const realStyle = window.getComputedStyle;
 let fonts: { release: () => void; reject: (e: Error) => void } | null = null;
 let mounted: ReturnType<typeof mount>[] = [];
 
-const PAGER_EVENTS = new Set(['keydown', 'hashchange', 'resize', 'touchstart', 'touchend', 'load', 'blur']);
+const PAGER_EVENTS = new Set([
+	'keydown',
+	'hashchange',
+	'resize',
+	'touchstart',
+	'touchend',
+	'load',
+	'blur',
+	'beforeprint',
+	'afterprint',
+	'beforematch'
+]);
 const realAdd = window.EventTarget.prototype.addEventListener;
 // vitest's jsdom global is the window, with addEventListener as its own property
 const realWindowAdd = window.addEventListener;
@@ -95,7 +106,17 @@ function held() {
 }
 const NOTHING_HELD = { listeners: [], subscriptions: 0, observers: 0 };
 const LIVE_PAGER = {
-	listeners: ['load', 'resize', 'keydown', 'hashchange', 'touchstart', 'touchend'],
+	listeners: [
+		'load',
+		'resize',
+		'keydown',
+		'hashchange',
+		'touchstart',
+		'touchend',
+		'beforeprint',
+		'afterprint',
+		'beforematch'
+	],
 	subscriptions: 1,
 	observers: 1
 };
@@ -166,17 +187,19 @@ const key = (k: string) => {
 	flushSync();
 };
 
-/** A failure inside a re-split, after it measured and split: it throws as it shows the page */
+/** A failure inside a re-split, after it measured and split: it throws as it shows the page,
+ *  at the first block it hides */
 function failNextResplit() {
-	const realToggle = Element.prototype.toggleAttribute;
-	Element.prototype.toggleAttribute = function () {
-		Element.prototype.toggleAttribute = realToggle;
+	const realSet = Element.prototype.setAttribute;
+	Element.prototype.setAttribute = function (this: Element, name: string, value: string) {
+		if (name !== 'hidden') return realSet.call(this, name, value);
+		Element.prototype.setAttribute = realSet;
 		throw new Error('forced');
 	};
 	window.dispatchEvent(new Event('resize'));
 	vi.advanceTimersByTime(200);
 	flushSync();
-	Element.prototype.toggleAttribute = realToggle;
+	Element.prototype.setAttribute = realSet;
 }
 
 /** Every input the pager listens to; returns the hidden-block count after each */
@@ -941,5 +964,167 @@ describe('lighter images (S9.4)', () => {
 		await settle();
 		expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
 		expect(loading(c)).toEqual(['lazy', 'lazy', 'eager']);
+	});
+});
+
+// Plan step S11.1 (CODE-08), under D13's ruling (a): Ctrl+P and 'Prenta kafla' print the whole
+// section, not the page on screen, and the browser's find-in-page reaches the other pages through
+// hidden="until-found". jsdom knows neither, so a test that needs until-found gives HTMLElement an
+// onbeforematch (the pager's feature test) and dispatches the event the browser would.
+describe('print and find-in-page (S11.1)', () => {
+	afterEach(() => {
+		delete (HTMLElement.prototype as { onbeforematch?: unknown }).onbeforematch;
+	});
+	function withUntilFound() {
+		Object.defineProperty(HTMLElement.prototype, 'onbeforematch', { value: null, configurable: true, writable: true });
+	}
+	const values = (c: HTMLElement) =>
+		Array.from(c.querySelectorAll('.cnx-module [hidden]'), (el) => el.getAttribute('hidden'));
+	/** The browser's find-in-page has matched text in this hidden element */
+	function match(el: Element) {
+		el.dispatchEvent(new Event('beforematch', { bubbles: true }));
+		flushSync();
+	}
+	function openLive(c: HTMLElement, extra: Record<string, unknown> = {}) {
+		const target = document.body.appendChild(document.createElement('div'));
+		const props = liveProps({ container: c, covered: false, ...extra });
+		mounted.push(mount(PagedReaderControls, { target, props: props as never }));
+		flushSync();
+		return props;
+	}
+	const print = (type: 'beforeprint' | 'afterprint') => {
+		window.dispatchEvent(new Event(type));
+		flushSync();
+	};
+
+	it('hides the other pages with hidden="until-found" where the browser has it', async () => {
+		withUntilFound();
+		const c = content();
+		open(c);
+		await settle();
+		const v = values(c);
+		expect(v.length).toBeGreaterThan(0);
+		expect(new Set(v)).toEqual(new Set(['until-found']));
+	});
+
+	it('falls back to plain hidden where the browser lacks it (a control)', async () => {
+		const c = content();
+		open(c);
+		await settle();
+		expect(new Set(values(c))).toEqual(new Set(['']));
+	});
+
+	it('hides every block of a sub-section not on screen, not only its wrapper, so a match names its block', async () => {
+		withUntilFound();
+		const c = content();
+		open(c);
+		await settle();
+		const later = c.querySelectorAll('section')[1];
+		expect(later.hasAttribute('hidden')).toBe(true);
+		expect(Array.from(later.children).every((el) => el.hasAttribute('hidden'))).toBe(true);
+	});
+
+	it("a match on a later sub-section's block turns to its page, and the address says so", async () => {
+		withUntilFound();
+		const c = content();
+		open(c);
+		await settle();
+		const last = c.querySelectorAll('section')[2].querySelector('p')!;
+		match(last);
+		expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
+		expect(last.closest('[hidden]')).toBeNull();
+		expect(window.location.hash).toBe('#sub-2');
+	});
+
+	it('a match on a later page of the same sub-section turns to that page', async () => {
+		withUntilFound();
+		const c = content();
+		open(c);
+		await settle();
+		match(c.querySelectorAll('section')[0].querySelectorAll('p')[2]);
+		expect(label()).toBe('Hluti 1 af 3 · Síða 3 af 3');
+	});
+
+	it("a match on a sub-section's wrapper alone turns to that sub-section's first page", async () => {
+		withUntilFound();
+		const c = content();
+		open(c);
+		await settle();
+		match(c.querySelectorAll('section')[1]);
+		expect(label()).toBe('Hluti 2 af 3 · Síða 1 af 2');
+	});
+
+	it("a match while the section's end covers the page asks the page to uncover it", async () => {
+		withUntilFound();
+		const c = content();
+		const onuncover = vi.fn();
+		const props = openLive(c, { onuncover });
+		await settle();
+		props.covered = true;
+		flushSync();
+		match(c.querySelectorAll('section')[0].querySelectorAll('p')[1]);
+		expect(onuncover).toHaveBeenCalledTimes(1);
+		expect(label()).toBe('Hluti 1 af 3 · Síða 2 af 3');
+	});
+
+	it('beforeprint shows every block; afterprint shows the same page again', async () => {
+		const c = content();
+		open(c);
+		await settle();
+		key('ArrowRight');
+		key('ArrowRight');
+		expect(label()).toBe('Hluti 1 af 3 · Síða 3 af 3');
+		const before = Array.from(c.querySelectorAll('.cnx-module [hidden]'));
+		expect(before.length).toBeGreaterThan(0);
+		print('beforeprint');
+		expect(hidden(c)).toBe(0);
+		print('afterprint');
+		expect(label()).toBe('Hluti 1 af 3 · Síða 3 af 3');
+		expect(Array.from(c.querySelectorAll('.cnx-module [hidden]'))).toEqual(before);
+	});
+
+	it('afterprint returns the window to where it was', async () => {
+		const c = content();
+		open(c);
+		await settle();
+		const scrollTo = vi.spyOn(window, 'scrollTo');
+		Object.defineProperty(window, 'scrollY', { value: 750, configurable: true });
+		try {
+			print('beforeprint');
+			scrollTo.mockClear();
+			print('afterprint');
+			expect(scrollTo).toHaveBeenLastCalledWith({ top: 750, behavior: 'instant' });
+		} finally {
+			delete (window as { scrollY?: unknown }).scrollY;
+		}
+	});
+
+	it('a re-split asked for while printing waits until afterprint', async () => {
+		const c = content();
+		open(c);
+		await settle();
+		print('beforeprint');
+		// A third as tall: the first sub-section would fit on one page
+		for (const p of c.querySelectorAll<HTMLElement>('p')) p.dataset.h = '100';
+		window.dispatchEvent(new Event('resize'));
+		vi.advanceTimersByTime(200);
+		flushSync();
+		expect(hidden(c)).toBe(0);
+		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 3');
+		print('afterprint');
+		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 1');
+		expect(hidden(c)).toBeGreaterThan(0);
+	});
+
+	it("covered by the section's end, afterprint hides the page again", async () => {
+		const c = content();
+		const props = openLive(c);
+		await settle();
+		props.covered = true;
+		flushSync();
+		print('beforeprint');
+		expect(hidden(c)).toBe(0);
+		print('afterprint');
+		expect(Array.from(c.querySelectorAll('.cnx-module p')).every((p) => p.closest('[hidden]'))).toBe(true);
 	});
 });
