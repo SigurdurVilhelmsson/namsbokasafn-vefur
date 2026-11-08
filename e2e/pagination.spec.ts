@@ -1849,4 +1849,57 @@ test.describe('The MT notice, figures and images (S9.4)', () => {
 			await context.close();
 		});
 	}
+
+	// CODE-15: the pager made every figure in the section eager on arrival (on 20.1 all 42).
+	// It now loads the arrival part's images and the next part's. While the section still
+	// scrolls, before the pager is ready, the browser's own lazy loading can fetch a few more
+	// near the top (on 7.3, seven from parts 3 and 4), so the test reads what the pager
+	// controls: only those two parts are made eager, and fewer images are fetched than the
+	// section holds.
+	test('arrival loads the first part’s images and the next part’s, not every figure', async ({ page }) => {
+		const [url] = sectionsContaining('<img', 1);
+		test.skip(!url, 'No section with images');
+		test.setTimeout(120000);
+		const requested = new Set<string>();
+		page.on('request', (r) => {
+			if (r.resourceType() === 'image' && r.url().includes('/content/')) requested.add(new URL(r.url()).pathname);
+		});
+		await openPaged(page, url);
+		await page.waitForTimeout(3000);
+		const units = await page.evaluate((bodySelector) => {
+			const root = document.querySelector('article.cnx-module') as HTMLElement;
+			const out: { src: string; loading: string | null }[][] = [];
+			let intro: Element[] = [];
+			const blocks = Array.from(root.children)
+				.filter((el) => el.tagName !== 'HEADER')
+				.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]));
+			const images = (els: Element[]) =>
+				els.flatMap((b) =>
+					Array.from(b.querySelectorAll('img')).map((i) => ({
+						src: new URL(i.src).pathname,
+						loading: i.getAttribute('loading')
+					}))
+				);
+			for (const b of blocks) {
+				if (b.tagName === 'SECTION') {
+					if (intro.length) out.push(images(intro));
+					intro = [];
+					out.push(images([b]));
+				} else intro.push(b);
+			}
+			if (intro.length) out.push(images(intro));
+			return out;
+		}, MODULE_BODY_SELECTOR);
+		await expect(pagerLabel(page)).toHaveText(/^Hluti 1 af /);
+		const total = units.flat().length;
+		test.skip(units.length < 3 || units.slice(2).flat().length === 0, `${url}: no images past the second part`);
+
+		for (const [u, imgs] of units.entries()) {
+			for (const img of imgs) {
+				if (u <= 1) expect(img.loading, `${img.src} in part ${u + 1}`).toBe('eager');
+				else expect(img.loading, `${img.src} in part ${u + 1}`).not.toBe('eager');
+			}
+		}
+		expect(requested.size, `${url}: ${requested.size} of ${total} images fetched`).toBeLessThan(total);
+	});
 });

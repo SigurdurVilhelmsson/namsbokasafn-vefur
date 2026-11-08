@@ -861,3 +861,76 @@ describe('figure links (S9.4)', () => {
 		expect(lightbox()).toBeNull();
 	});
 });
+
+// Plan step S9.4 (CODE-15): until efni's images carry their sizes (H1), the pager loads the
+// images of the part the reader is in and the next, not every figure in the section
+describe('lighter images (S9.4)', () => {
+	/** Three sub-sections of 3, 2 and 1 pages, each with one lazy image; the last image has its size */
+	function withImages(): HTMLElement {
+		const c = content();
+		c.querySelectorAll('section').forEach((section, i) => {
+			const img = document.createElement('img');
+			img.src = `/img-${i}.png`;
+			img.setAttribute('loading', 'lazy');
+			if (i === 2) {
+				img.setAttribute('width', '400');
+				img.setAttribute('height', '300');
+			}
+			section.querySelector('p')!.append(img);
+		});
+		return c;
+	}
+	const loading = (c: HTMLElement) => Array.from(c.querySelectorAll('img')).map((img) => img.getAttribute('loading'));
+
+	beforeEach(() => {
+		HTMLImageElement.prototype.decode = () => Promise.resolve();
+	});
+	afterEach(() => {
+		delete (HTMLImageElement.prototype as { decode?: unknown }).decode;
+	});
+
+	it("on arrival loads the first part's images and the next part's, not the rest", async () => {
+		const c = withImages();
+		c.querySelectorAll('img')[2].removeAttribute('width');
+		open(c);
+		await settle();
+		vi.advanceTimersByTime(1500);
+		await settle();
+		expect(loading(c)).toEqual(['eager', 'eager', 'lazy']);
+	});
+
+	it('a turn into the next part loads the part after it', async () => {
+		const c = withImages();
+		c.querySelectorAll('img')[2].removeAttribute('width');
+		open(c);
+		await settle();
+		vi.advanceTimersByTime(1500);
+		await settle();
+		for (let i = 0; i < 3; i++) key('ArrowRight');
+		expect(label()).toBe('Hluti 2 af 3 · Síða 1 af 2');
+		expect(loading(c)).toEqual(['eager', 'eager', 'eager']);
+	});
+
+	it('leaves an image that carries its width and height lazy', async () => {
+		const c = withImages();
+		history.replaceState(null, '', '#sub-1');
+		open(c);
+		await settle();
+		vi.advanceTimersByTime(1500);
+		await settle();
+		expect(label()).toBe('Hluti 2 af 3 · Síða 1 af 2');
+		expect(loading(c)[2]).toBe('lazy');
+	});
+
+	it('arriving by a link to the last part loads that part, not the first', async () => {
+		const c = withImages();
+		c.querySelectorAll('img')[2].removeAttribute('width');
+		history.replaceState(null, '', '#sub-2');
+		open(c);
+		await settle();
+		vi.advanceTimersByTime(1500);
+		await settle();
+		expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
+		expect(loading(c)).toEqual(['lazy', 'lazy', 'eager']);
+	});
+});

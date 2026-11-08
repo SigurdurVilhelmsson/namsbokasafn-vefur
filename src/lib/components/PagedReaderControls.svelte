@@ -42,6 +42,7 @@
 		pageHeights,
 		encodePageHash,
 		resolvePageHash,
+		decodePageHash,
 		positionLabel,
 		spokenPosition,
 		keyAction,
@@ -348,6 +349,9 @@
 	function showPage(index: number, { scroll = true, keepHash = false } = {}) {
 		current = Math.max(0, Math.min(index, flatPages.length - 1));
 		applyVisibility();
+		// This part's images and the next part's, ahead of the reader (S9.4, CODE-15)
+		const shownUnit = flatPages[current]?.unit;
+		if (shownUnit !== undefined) loadUnitImages(shownUnit);
 		if (!keepHash) updateHash();
 		announce();
 		if (scroll) scrollToContentTop();
@@ -652,11 +656,47 @@
 		run?.abort();
 	}
 
-	async function loadImages(root: HTMLElement) {
-		const images = Array.from(root.querySelectorAll('img'));
-		for (const img of images) img.loading = 'eager';
+	/**
+	 * Load a part's images and the next part's (S9.4, CODE-15), returning those it set loading:
+	 * content images carry no size yet (efni's H1), so one not loaded measures about 0 px, and a
+	 * lazy image on a hidden page never loads until its page shows. Every figure in the section
+	 * used to load at once (a median of about 2 MB on arrival, up to 25 MB). An image that carries
+	 * its width and height keeps its box unloaded, so it stays lazy.
+	 */
+	function loadUnitImages(unit: number): HTMLImageElement[] {
+		const started: HTMLImageElement[] = [];
+		for (const u of [unit, unit + 1]) {
+			for (const block of units[u]?.children ?? []) {
+				const images = block instanceof HTMLImageElement ? [block] : Array.from(block.querySelectorAll('img'));
+				for (const img of images) {
+					if (img.getAttribute('loading') === 'eager') continue;
+					if (img.hasAttribute('width') && img.hasAttribute('height')) continue;
+					img.setAttribute('loading', 'eager');
+					started.push(img);
+				}
+			}
+		}
+		return started;
+	}
+
+	/** The part a reader arrives in: where they switched from, the address's page or element, or the first */
+	function arrivalUnit(): number {
+		const inUnit = (el: HTMLElement | null) => {
+			const u = el ? units.findIndex((unit) => itemIndexForTarget(unit.children, el) >= 0) : -1;
+			return u >= 0 ? u : null;
+		};
+		const fromStart = startAt?.isConnected ? inUnit(startAt) : null;
+		if (fromStart !== null) return fromStart;
+		const page = decodePageHash(window.location.hash);
+		if (page) return Math.min(page.unit, Math.max(0, units.length - 1));
+		return inUnit(elementForHash(window.location.hash)) ?? 0;
+	}
+
+	/** Load the arrival part's images and the next part's, and wait briefly for them */
+	async function loadArrivalImages() {
+		const started = loadUnitImages(arrivalUnit());
 		const settled = Promise.all(
-			images.filter((img) => !img.complete).map((img) => img.decode().catch(() => undefined))
+			started.filter((img) => !img.complete).map((img) => img.decode().catch(() => undefined))
 		);
 		await Promise.race([settled, new Promise((r) => setTimeout(r, IMAGE_WAIT_MS))]);
 	}
@@ -691,11 +731,13 @@
 				return;
 			}
 
-			// Content images are lazy and carry no dimensions, so one not yet
-			// loaded measures ~0px; and a lazy image on a hidden page never
-			// loads until that page is shown. Load them all now, wait briefly
-			// for them, and let any straggler re-split through its load event.
-			await loadImages(root);
+			// Content images are lazy and carry no dimensions, so one not yet loaded measures
+			// ~0px, and a lazy image on a hidden page never loads until that page is shown. Load
+			// the arrival part's and the next part's now, wait briefly for them, and let any
+			// straggler, or a later part's images as the reader reaches it, re-split through its
+			// load event (S9.4, CODE-15).
+			units = buildUnits(root);
+			await loadArrivalImages();
 			if (signal.aborted) return;
 
 			units = buildUnits(root);
