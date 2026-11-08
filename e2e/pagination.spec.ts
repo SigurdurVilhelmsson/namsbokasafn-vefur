@@ -361,14 +361,12 @@ test.describe('Paged reading mode', () => {
 		}
 		test.skip(!found, 'No in-section link to an image figure');
 
-		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
-		const link = page.locator(`article.cnx-module a[href="#${found!.id}"]`).first();
-		for (let i = 0; i < 60 && !(await link.isVisible()); i++) {
-			await nav.getByRole('button', { name: 'Næsta síða' }).click();
-			await page.waitForTimeout(150);
-		}
-		await expect(link).toBeVisible();
-		await link.click();
+		// Since S9.4 a click on that link opens the figure in the lightbox over the page (D12;
+		// 'a Mynd link opens the lightbox'), so the target is reached by its address, the deep
+		// link a reload or a shared link makes: a late image must not push it off screen (QA E8)
+		await page.goto('about:blank');
+		await page.goto(`${found!.url}#${found!.id}`);
+		await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toBeVisible({ timeout: 15000 });
 		await page.waitForTimeout(2500);
 
 		const shown = await page.evaluate(
