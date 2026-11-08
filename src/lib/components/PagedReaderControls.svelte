@@ -20,7 +20,7 @@
 	import { settings } from '$lib/stores/settings';
 	// Aliased: the component has its own announce() and announcement
 	import { announce as speak, announcement as liveText } from '$lib/stores/announcer';
-	import { isTyping, keyBelongsElsewhere } from '$lib/actions/keyboardShortcuts';
+	import { isTyping, keyBelongsElsewhere, scrollsSideways } from '$lib/actions/keyboardShortcuts';
 	import {
 		paginate,
 		buildUnits as buildContentUnits,
@@ -350,15 +350,40 @@
 
 	let touchStartX = 0;
 	let touchStartY = 0;
+	/** A second finger was down during this gesture; reset by the next one-finger touch */
+	let multiTouch = false;
+	/** This gesture began inside a box that scrolls sideways */
+	let inSidewaysBox = false;
+
+	/** Whether a touch began inside a box that scrolls sideways, up to the content wrapper */
+	function startsInSidewaysBox(target: EventTarget | null): boolean {
+		for (let el = target instanceof Element ? target : null; el && el !== container; el = el.parentElement) {
+			if (scrollsSideways(el)) return true;
+		}
+		return false;
+	}
+
 	function handleTouchStart(event: TouchEvent) {
+		// A second finger's touchstart must not move the start point (CODE-09)
+		if (event.touches.length > 1) {
+			multiTouch = true;
+			return;
+		}
+		multiTouch = false;
 		touchStartX = event.changedTouches[0].clientX;
 		touchStartY = event.changedTouches[0].clientY;
+		inSidewaysBox = startsInSidewaysBox(event.target);
 	}
 	function handleTouchEnd(event: TouchEvent) {
 		const dx = event.changedTouches[0].clientX - touchStartX;
 		const dy = event.changedTouches[0].clientY - touchStartY;
-		// Horizontal swipes only; leave vertical gestures to the browser
-		const turn = swipeAction(dx, dy);
+		// Horizontal swipes only; leave vertical gestures, pinches, selection drags and
+		// drags that scroll a wide box to the browser (S9.1, CODE-09)
+		const turn = swipeAction(dx, dy, {
+			multiTouch: multiTouch || event.touches.length > 0,
+			selecting: !(window.getSelection()?.isCollapsed ?? true),
+			inSidewaysBox
+		});
 		if (turn === 'next') next();
 		else if (turn === 'prev') prev();
 	}

@@ -27,6 +27,7 @@ import {
 	pageAfterResplit,
 	type KeyContext,
 	type PageKey,
+	type TouchContext,
 	pagerState
 } from './pager';
 
@@ -388,12 +389,27 @@ describe('swipes', () => {
 		expect(isPageSwipe(200, NaN)).toBe(false);
 	});
 
+	const clear: TouchContext = { multiTouch: false, selecting: false, inSidewaysBox: false };
+	const far = SWIPE.minDistance + 1;
+
 	it('turns forward on a swipe to the left and back on one to the right', () => {
-		const far = SWIPE.minDistance + 1;
-		expect(swipeAction(-far, 0)).toBe('next');
-		expect(swipeAction(far, 0)).toBe('prev');
-		expect(swipeAction(far, SWIPE.maxDrift)).toBeNull();
-		expect(swipeAction(SWIPE.minDistance, 0)).toBeNull();
+		expect(swipeAction(-far, 0, clear)).toBe('next');
+		expect(swipeAction(far, 0, clear)).toBe('prev');
+		expect(swipeAction(far, SWIPE.maxDrift, clear)).toBeNull();
+		expect(swipeAction(SWIPE.minDistance, 0, clear)).toBeNull();
+	});
+
+	// S9.1, CODE-09: a pinch, a selection drag or a drag that scrolls a wide table is no swipe
+	it('is no turn when a second finger was down', () => {
+		expect(swipeAction(-far, 0, { ...clear, multiTouch: true })).toBeNull();
+	});
+
+	it('is no turn while text is selected', () => {
+		expect(swipeAction(-far, 0, { ...clear, selecting: true })).toBeNull();
+	});
+
+	it('is no turn when the touch began inside a box that scrolls sideways', () => {
+		expect(swipeAction(far, 0, { ...clear, inSidewaysBox: true })).toBeNull();
 	});
 });
 

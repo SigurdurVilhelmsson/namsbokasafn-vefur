@@ -266,8 +266,20 @@ export function isPageSwipe(dx: number, dy: number): boolean {
 	return Math.abs(dx) > SWIPE.minDistance && Math.abs(dy) < SWIPE.maxDrift;
 }
 
+/** What else happened during a touch that makes a sideways drag no swipe (S9.1, CODE-09) */
+export interface TouchContext {
+	/** A second finger was down at some point: a pinch, or a two-finger pan */
+	multiTouch: boolean;
+	/** Text is selected: the drag moved a selection, not the page */
+	selecting: boolean;
+	/** The touch began inside a box that scrolls sideways (keyboardShortcuts.ts's
+	 *  scrollsSideways()): a wide table or a long equation, which the drag scrolls */
+	inSidewaysBox: boolean;
+}
+
 /** The page turn a touch asks for: a swipe to the left turns forward, to the right back */
-export function swipeAction(dx: number, dy: number): PageTurn | null {
+export function swipeAction(dx: number, dy: number, touch: TouchContext): PageTurn | null {
+	if (touch.multiTouch || touch.selecting || touch.inSidewaysBox) return null;
 	if (!isPageSwipe(dx, dy)) return null;
 	return dx < 0 ? 'next' : 'prev';
 }

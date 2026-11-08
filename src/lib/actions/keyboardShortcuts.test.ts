@@ -374,3 +374,42 @@ describe('isTyping: one rule for the shortcuts and the pager (S8.4, CODE-18)', (
 		expect(isTyping(document.getElementById('i'))).toBe(true);
 	});
 });
+
+let scrollsSideways: typeof import('./keyboardShortcuts').scrollsSideways;
+
+// The one overflow rule for the keys and the swipes (S9.1, CODE-09): the pager ignores an
+// arrow pressed, or a swipe begun, inside a box that scrolls sideways
+describe('scrollsSideways (S9.1, CODE-09)', () => {
+	beforeEach(async () => {
+		scrollsSideways = (await import('./keyboardShortcuts')).scrollsSideways;
+	});
+	afterEach(() => {
+		document.body.innerHTML = '';
+	});
+
+	/** jsdom lays nothing out, so the widths are set by hand */
+	function box(overflowX: string, scrollWidth: number, clientWidth: number): HTMLElement {
+		document.body.innerHTML = `<div style="overflow-x: ${overflowX}"></div>`;
+		const el = document.body.firstElementChild as HTMLElement;
+		Object.defineProperty(el, 'scrollWidth', { value: scrollWidth });
+		Object.defineProperty(el, 'clientWidth', { value: clientWidth });
+		return el;
+	}
+
+	it('is true for an overflow-x: auto box wider inside than out', () => {
+		expect(scrollsSideways(box('auto', 500, 300))).toBe(true);
+	});
+
+	it('is true for an overflow-x: scroll box wider inside than out', () => {
+		expect(scrollsSideways(box('scroll', 500, 300))).toBe(true);
+	});
+
+	it('is false for a scrolling box whose content fits', () => {
+		expect(scrollsSideways(box('auto', 300, 300))).toBe(false);
+	});
+
+	it('is false for a box that does not scroll, however wide its content', () => {
+		expect(scrollsSideways(box('visible', 500, 300))).toBe(false);
+		expect(scrollsSideways(box('hidden', 500, 300))).toBe(false);
+	});
+});

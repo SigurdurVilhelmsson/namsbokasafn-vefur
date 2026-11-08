@@ -1018,3 +1018,88 @@ test.describe('The pager through a ?lestur= link, with no seed (S8.2)', () => {
 		expect(await storedRaw(page)).toBe(FRESH_PROFILE);
 	});
 });
+
+/**
+ * A one-finger drag sent through Chromium's debugging protocol, so the browser treats it as
+ * real touch input: it scrolls what a finger would scroll, and the page sees touchstart,
+ * touchmove and touchend as from a screen.
+ */
+async function touchDrag(page: Page, from: { x: number; y: number }, to: { x: number; y: number }) {
+	const cdp = await page.context().newCDPSession(page);
+	await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [from] });
+	const steps = 10;
+	for (let i = 1; i <= steps; i++) {
+		const point = { x: from.x + ((to.x - from.x) * i) / steps, y: from.y + ((to.y - from.y) * i) / steps };
+		await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point] });
+	}
+	await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+	await cdp.detach();
+}
+
+/** The first visible box in the content that scrolls sideways, marked for the test, or null */
+const markSidewaysBox = (page: Page) =>
+	page.evaluate(() => {
+		const box = Array.from(document.querySelectorAll<HTMLElement>('.reading-content *')).find((el) => {
+			if (el.offsetParent === null) return false;
+			const overflowX = getComputedStyle(el).overflowX;
+			const rect = el.getBoundingClientRect();
+			return (
+				(overflowX === 'auto' || overflowX === 'scroll') &&
+				el.scrollWidth > el.clientWidth + 100 &&
+				rect.top >= 0 &&
+				rect.bottom <= window.innerHeight
+			);
+		});
+		if (!box) return null;
+		box.setAttribute('data-test-sideways', '');
+		const rect = box.getBoundingClientRect();
+		return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+	});
+
+// S9.1, CODE-09: on a phone a sideways drag that scrolls a wide table must not also turn the
+// page; elsewhere a swipe still turns it
+test.describe('Swipes in paged mode (S9.1)', () => {
+	test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+
+	test('a drag inside a box that scrolls sideways scrolls the box and keeps the page', async ({ page }) => {
+		test.setTimeout(120000);
+		const [url] = sectionsContaining('<table', 1);
+		test.skip(!url, 'No section with a table');
+		const label = pagerLabel(page);
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+
+		await openPaged(page, url);
+		let middle: { x: number; y: number } | null = null;
+		for (let i = 0; !middle; i++) {
+			expect(i, `${url}: no page with a box that scrolls sideways in view`).toBeLessThan(PAGE_CAP);
+			middle = await markSidewaysBox(page);
+			if (middle) break;
+			const text = (await label.textContent())!.trim();
+			expect(LAST_PAGE.test(text), `${url}: no page with a box that scrolls sideways in view`).toBe(false);
+			await next.click();
+			await expect(label).not.toHaveText(text);
+			await page.waitForTimeout(300);
+		}
+		const shown = (await label.textContent())!.trim();
+
+		await touchDrag(page, { x: middle!.x + 100, y: middle!.y }, { x: middle!.x - 100, y: middle!.y });
+		await page.waitForTimeout(600);
+		await expect(label).toHaveText(shown);
+		const scrolled = await page.locator('[data-test-sideways]').evaluate((el) => el.scrollLeft);
+		expect(scrolled, 'the drag scrolled the box').toBeGreaterThan(0);
+	});
+
+	test('a sideways swipe on the text turns the page', async ({ page }) => {
+		const [url] = sectionsContaining('<p', 1);
+		test.skip(!url, 'No section content available');
+		const label = pagerLabel(page);
+
+		await openPaged(page, url);
+		const shown = (await label.textContent())!.trim();
+		const para = await page.locator('.reading-content p:visible').first().boundingBox();
+		const y = para!.y + Math.min(para!.height / 2, 20);
+		await touchDrag(page, { x: 300, y }, { x: 100, y });
+		await expect(label).not.toHaveText(shown);
+	});
+});

@@ -145,12 +145,19 @@ export function keyBelongsElsewhere(event: KeyboardEvent): boolean {
 	if (!arrow) return false;
 	if (event.shiftKey) return true;
 	for (let el = document.activeElement; el && el !== document.body; el = el.parentElement) {
-		const overflowX = getComputedStyle(el).overflowX;
-		if ((overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth) {
-			return true;
-		}
+		if (scrollsSideways(el)) return true;
 	}
 	return false;
+}
+
+/**
+ * True for a box that scrolls sideways and is wider inside than out: a wide table or a long
+ * equation. The paged reader leaves an arrow pressed, or a swipe begun, inside one to the box
+ * (S9.1, CODE-09).
+ */
+export function scrollsSideways(el: Element): boolean {
+	const overflowX = getComputedStyle(el).overflowX;
+	return (overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth;
 }
 
 /** Keys the paged reader turns pages with (PagedReaderControls). */
