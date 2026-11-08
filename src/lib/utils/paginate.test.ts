@@ -15,8 +15,13 @@ import {
 	itemIndexForTarget,
 	classifyBlock,
 	MODULE_BODY_SELECTOR,
+	exampleCut,
+	splitPieces,
+	shownParts,
+	pieceOf,
 	type PaginateItem,
-	type PageRange
+	type PageRange,
+	type Piece
 } from './paginate';
 
 function block(height: number, opts: Partial<PaginateItem> = {}): PaginateItem {
@@ -550,5 +555,143 @@ describe('itemIndexForTarget', () => {
 
 	it('returns -1 for a target outside the unit', () => {
 		expect(itemIndexForTarget(items, document.createElement('div'))).toBe(-1);
+	});
+});
+
+// D11's trial (2026-11-08): a worked example taller than a page breaks once, before its
+// check-your-learning part. The cut is structural: that part's heading has eight wordings.
+describe('exampleCut', () => {
+	function example(inner: string, cls = 'example'): HTMLElement {
+		const el = document.createElement('aside');
+		el.className = cls;
+		el.innerHTML = inner;
+		return el;
+	}
+	const answer = '<aside class="note check-knowledge-answer"><h4>Svar:</h4><p>1</p></aside>';
+
+	it("is the check-your-learning part's heading, the last one before the answer box", () => {
+		const el = example(
+			`<p class="example-label">Dæmi</p><h4>T</h4><p>Q</p><p class="para-title">Lausn</p><p>S</p><p class="para-title" id="cut">Kannaðu þekkingu þína</p><p>Q2</p>${answer}`
+		);
+		expect(exampleCut(el)?.id).toBe('cut');
+	});
+
+	it('skips a second solution heading (Dæmi 5.15)', () => {
+		const el = example(
+			`<p class="para-title">Lausn: A</p><p>S</p><p class="para-title">Lausn: B</p><p>S2</p><p class="para-title" id="cut">Q</p><p>Q2</p>${answer}`
+		);
+		expect(exampleCut(el)?.id).toBe('cut');
+	});
+
+	it('breaks before the first of two check-your-learning parts (Dæmi 5.3)', () => {
+		const el = example(
+			`<p class="para-title">Lausn</p><p>S</p><p class="para-title" id="cut">Q</p><p>Q2</p>${answer}<p class="para-title">Q</p><p>Q3</p>${answer}`
+		);
+		expect(exampleCut(el)?.id).toBe('cut');
+	});
+
+	it('is null for an example with no answer box', () => {
+		expect(exampleCut(example('<p class="para-title">Lausn</p><p>S</p><p class="para-title">Q</p><p>Q2</p>'))).toBeNull();
+	});
+
+	it('is null when no solution heading comes before the check-your-learning heading', () => {
+		expect(exampleCut(example(`<p>Q</p><p class="para-title">Q</p><p>Q2</p>${answer}`))).toBeNull();
+	});
+
+	it('is null for a box that is not an example', () => {
+		const note = example(`<p class="para-title">Lausn</p><p class="para-title">Q</p>${answer}`, 'note');
+		expect(exampleCut(note)).toBeNull();
+	});
+});
+
+describe('splitPieces', () => {
+	it('keeps a block that cannot break whole', () => {
+		expect(splitPieces([block(900)], 500)).toEqual([{ block: 0, part: 'whole', height: 900, keepWithNext: false }]);
+	});
+
+	it('keeps a breakable block that fits the page whole', () => {
+		expect(splitPieces([{ ...block(400), firstPart: 250 }], 500)).toEqual([
+			{ block: 0, part: 'whole', height: 400, keepWithNext: false }
+		]);
+	});
+
+	it('splits a breakable block taller than the page at its first part', () => {
+		expect(splitPieces([{ ...block(900), firstPart: 600 }], 500)).toEqual([
+			{ block: 0, part: 'first', height: 600, keepWithNext: false },
+			{ block: 0, part: 'second', height: 300, keepWithNext: false }
+		]);
+	});
+
+	it('numbers the pieces by the block they come from', () => {
+		const pieces = splitPieces([heading(30), { ...block(900), firstPart: 600 }, block(100)], 500);
+		expect(pieces.map((p) => [p.block, p.part])).toEqual([
+			[0, 'whole'],
+			[1, 'first'],
+			[1, 'second'],
+			[2, 'whole']
+		]);
+	});
+
+	it('keeps a block whole when its first part is not inside it', () => {
+		expect(splitPieces([{ ...block(900), firstPart: 0 }], 500)[0].part).toBe('whole');
+		expect(splitPieces([{ ...block(900), firstPart: 900 }], 500)[0].part).toBe('whole');
+	});
+});
+
+describe('shownParts', () => {
+	const pieces: Piece[] = [
+		{ block: 0, part: 'whole', height: 100, keepWithNext: false },
+		{ block: 1, part: 'first', height: 600, keepWithNext: false },
+		{ block: 1, part: 'second', height: 300, keepWithNext: false },
+		{ block: 2, part: 'whole', height: 100, keepWithNext: false }
+	];
+
+	it("names each block on the page with the part that shows", () => {
+		expect(shownParts(pieces, { start: 0, end: 2 })).toEqual(
+			new Map([
+				[0, 'whole'],
+				[1, 'first']
+			])
+		);
+		expect(shownParts(pieces, { start: 2, end: 4 })).toEqual(
+			new Map([
+				[1, 'second'],
+				[2, 'whole']
+			])
+		);
+	});
+
+	it('shows a block whole when both its parts are on the page', () => {
+		expect(shownParts(pieces, { start: 1, end: 3 }).get(1)).toBe('whole');
+	});
+});
+
+describe('pieceOf', () => {
+	const split: Piece[] = [
+		{ block: 0, part: 'whole', height: 100, keepWithNext: false },
+		{ block: 1, part: 'first', height: 600, keepWithNext: false },
+		{ block: 1, part: 'second', height: 300, keepWithNext: false }
+	];
+	const whole: Piece[] = [
+		{ block: 0, part: 'whole', height: 100, keepWithNext: false },
+		{ block: 1, part: 'whole', height: 900, keepWithNext: false }
+	];
+
+	it("finds a split block's part", () => {
+		expect(pieceOf(split, 1, 'second')).toBe(2);
+		expect(pieceOf(split, 1, 'first')).toBe(1);
+	});
+
+	it("gives a split block's first part for the whole block", () => {
+		expect(pieceOf(split, 1, 'whole')).toBe(1);
+	});
+
+	it('gives a whole block for either of its parts', () => {
+		expect(pieceOf(whole, 1, 'second')).toBe(1);
+	});
+
+	it('is -1 for a block that is not there', () => {
+		expect(pieceOf(whole, 5, 'whole')).toBe(-1);
+		expect(pieceOf(whole, -1, 'whole')).toBe(-1);
 	});
 });

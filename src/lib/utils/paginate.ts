@@ -192,3 +192,88 @@ export function buildUnits(root: HTMLElement): ContentUnit[] {
 export function itemIndexForTarget(items: HTMLElement[], target: HTMLElement): number {
 	return items.findIndex((el) => el === target || el.contains(target) || target.contains(el));
 }
+
+// =============================================================================
+// D11'S TRIAL: AN OVERSIZED WORKED EXAMPLE BREAKS ONCE
+// =============================================================================
+
+/**
+ * D11 (2026-11-08) trials one break in a worked example taller than a page, before its
+ * check-your-learning part, so that part and its 'Sýna svar' open the next page; batch E
+ * judges it on §3.1. The one switch: false keeps every example whole, so it scrolls
+ * (D11's (b)), and leaves everything else in place.
+ */
+export const EXAMPLE_BREAK_TRIAL = true;
+
+/**
+ * The direct child a worked example breaks before: the last `p.para-title` before its
+ * first answer box (`aside.check-knowledge-answer`), when a solution heading comes before
+ * it. Matched on structure only: that heading has eight wordings in chemistry. In all 289
+ * chemistry examples (② preview, 2026-11-08) this is the check-your-learning heading; it
+ * skips Dæmi 5.15's second solution heading, and keeps Dæmi 5.3's, 12.3's and 13.9's
+ * second check-your-learning part with the first. Null for anything else.
+ */
+export function exampleCut(el: Element): Element | null {
+	if (!el.matches('aside.example')) return null;
+	const children = Array.from(el.children);
+	const answer = children.findIndex((child) => child.matches('aside.check-knowledge-answer'));
+	if (answer < 0) return null;
+	const headings = children.slice(0, answer).filter((child) => child.matches('p.para-title'));
+	return headings.length >= 2 ? headings[headings.length - 1] : null;
+}
+
+/** A measured block, with the height of the part before its cut when it can break */
+export interface BreakableItem extends PaginateItem {
+	firstPart?: number;
+}
+
+/** What of a block a piece is: all of it, or the part before or from its cut */
+export type BlockPart = 'whole' | 'first' | 'second';
+
+/** What paginate() pages: a block, or one part of a block it broke */
+export interface Piece extends PaginateItem {
+	block: number;
+	part: BlockPart;
+}
+
+/**
+ * The pieces to page: every block whole, except a breakable block taller than the page,
+ * which goes in as its two parts. One that fits stays whole: broken, its first part could
+ * close a page and send the check-your-learning part to the next one, which is worse than
+ * the whole example opening the next page.
+ */
+export function splitPieces(items: BreakableItem[], viewportH: number): Piece[] {
+	return items.flatMap(({ height, keepWithNext, firstPart }, block): Piece[] => {
+		const breaks = firstPart !== undefined && firstPart > 0 && firstPart < height && height > viewportH;
+		if (!breaks) return [{ block, part: 'whole', height, keepWithNext }];
+		return [
+			{ block, part: 'first', height: firstPart, keepWithNext: false },
+			{ block, part: 'second', height: height - firstPart, keepWithNext: false }
+		];
+	});
+}
+
+/** The blocks a page shows, each with the part of it that shows */
+export function shownParts(pieces: readonly Piece[], range: PageRange): Map<number, BlockPart> {
+	const shown = new Map<number, BlockPart>();
+	for (const piece of pieces.slice(range.start, range.end)) {
+		const before = shown.get(piece.block);
+		shown.set(piece.block, before && before !== piece.part ? 'whole' : piece.part);
+	}
+	return shown;
+}
+
+/**
+ * The piece holding a block's part, or -1 when the block is not there. A block now whole
+ * answers for either part; a block now broken answers 'whole' with its first part. So a
+ * place kept across a re-split, which can break or join a block, still finds its piece.
+ */
+export function pieceOf(pieces: readonly Piece[], block: number, part: BlockPart): number {
+	let first = -1;
+	for (let i = 0; i < pieces.length; i++) {
+		if (pieces[i].block !== block) continue;
+		if (pieces[i].part === part || pieces[i].part === 'whole') return i;
+		if (first < 0) first = i;
+	}
+	return first;
+}

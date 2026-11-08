@@ -20,13 +20,20 @@
 	import { settings } from '$lib/stores/settings';
 	// Aliased: the component has its own announce() and announcement
 	import { announce as speak, announcement as liveText } from '$lib/stores/announcer';
-	import { isTyping, keyBelongsElsewhere } from '$lib/actions/keyboardShortcuts';
+	import { isTyping, keyBelongsElsewhere, scrollsSideways } from '$lib/actions/keyboardShortcuts';
 	import {
 		paginate,
 		buildUnits as buildContentUnits,
 		itemIndexForTarget,
 		classifyBlock,
-		type PageRange
+		EXAMPLE_BREAK_TRIAL,
+		exampleCut,
+		splitPieces,
+		shownParts,
+		pieceOf,
+		type BlockPart,
+		type PageRange,
+		type Piece
 	} from '$lib/utils/paginate';
 	import {
 		PAGE_BUDGET,
@@ -42,8 +49,10 @@
 		pageAfterResplit,
 		flatIndexForItem,
 		pagerState,
+		keyScroll,
 		type ItemPosition,
-		type PagerState
+		type PagerState,
+		type VerticalSpan
 	} from '$lib/utils/pager';
 
 	interface Props {
@@ -65,6 +74,10 @@
 	interface Unit {
 		wrapper: HTMLElement | null; // the <section>, or null for intro content
 		children: HTMLElement[];
+		/** Per block, the child an oversized worked example breaks before (D11's trial) */
+		cuts: (Element | null)[];
+		/** What the pages index: each block, or the two parts of a block that broke */
+		pieces: Piece[];
 		pages: PageRange[];
 	}
 
@@ -146,7 +159,13 @@
 	}
 
 	function buildUnits(root: HTMLElement): Unit[] {
-		return buildContentUnits(root).map((unit) => ({ ...unit, pages: [] }));
+		return buildContentUnits(root).map((unit) => ({ ...unit, cuts: [], pieces: [], pages: [] }));
+	}
+
+	/** The height of a block's part before its cut, margin above included */
+	function firstPartHeight(el: HTMLElement, cut: Element): number {
+		const marginTop = parseFloat(getComputedStyle(el).marginTop) || 0;
+		return cut.getBoundingClientRect().top - el.getBoundingClientRect().top + marginTop;
 	}
 
 	function computePages() {
@@ -156,16 +175,42 @@
 		}
 		const viewportH = availableHeight();
 		for (const unit of units) {
-			const items = unit.children.map((el) => ({
-				height: measure(el),
-				...classifyBlock(el)
-			}));
-			unit.pages = paginate(items, viewportH);
+			unit.cuts = unit.children.map((el) => (EXAMPLE_BREAK_TRIAL ? exampleCut(el) : null));
+			const items = unit.children.map((el, i) => {
+				const cut = unit.cuts[i];
+				return {
+					height: measure(el),
+					...classifyBlock(el),
+					firstPart: cut ? firstPartHeight(el, cut) : undefined
+				};
+			});
+			unit.pieces = splitPieces(items, viewportH);
+			unit.pages = paginate(unit.pieces, viewportH);
 			if (unit.pages.length === 0) {
-				unit.pages = [{ start: 0, end: unit.children.length }];
+				unit.pages = [{ start: 0, end: unit.pieces.length }];
 			}
 		}
 		flatPages = units.flatMap((unit, u) => unit.pages.map((_, p) => ({ unit: u, page: p })));
+	}
+
+	/** Children of a broken example that the pager hid; only these does it show again, so
+	 *  what practiceReveal hides (the answer, the self-assessment row) stays its own */
+	const partHidden = new Set<Element>();
+
+	/** Show one part of a broken block: hide its children before the cut, or from it */
+	function showPart(el: HTMLElement, cut: Element, part: BlockPart) {
+		let fromCut = false;
+		for (const child of Array.from(el.children)) {
+			if (child === cut) fromCut = true;
+			const hide = part === 'first' ? fromCut : part === 'second' ? !fromCut : false;
+			if (hide && !child.hasAttribute('hidden')) {
+				child.setAttribute('hidden', '');
+				partHidden.add(child);
+			} else if (!hide && partHidden.has(child)) {
+				child.removeAttribute('hidden');
+				partHidden.delete(child);
+			}
+		}
 	}
 
 	function restoreAll() {
@@ -173,6 +218,8 @@
 			unit.wrapper?.removeAttribute('hidden');
 			for (const el of unit.children) el.removeAttribute('hidden');
 		}
+		for (const child of partHidden) child.removeAttribute('hidden');
+		partHidden.clear();
 	}
 
 	function applyVisibility() {
@@ -187,14 +234,23 @@
 			}
 			if (isCurrent) {
 				unit.wrapper?.removeAttribute('hidden');
-				const range = unit.pages[flat.page];
+				const shown = shownParts(unit.pieces, unit.pages[flat.page]);
 				unit.children.forEach((el, i) => {
-					el.toggleAttribute('hidden', i < range.start || i >= range.end);
+					const part = shown.get(i);
+					el.toggleAttribute('hidden', part === undefined);
+					const cut = unit.cuts[i];
+					if (cut && part) showPart(el, cut, part);
 				});
 			} else if (!unit.wrapper) {
 				for (const el of unit.children) el.setAttribute('hidden', '');
 			}
 		}
+	}
+
+	/** The blocks a page shows, in order: one per piece, a broken block once */
+	function pageBlocks(unit: Unit, range: PageRange): HTMLElement[] {
+		const blocks = unit.pieces.slice(range.start, range.end).map((piece) => unit.children[piece.block]);
+		return blocks.filter((el, i) => blocks.indexOf(el) === i);
 	}
 
 	function scrollToContentTop() {
@@ -278,10 +334,16 @@
 	}
 
 	/** The block an element is or sits in, or null when it is in no unit */
+	/** The piece an element is or sits in, or null when it is in no unit. In a broken
+	 *  example, an element at or after the cut is in the second part (D11's trial). */
 	function itemForElement(el: HTMLElement): ItemPosition | null {
 		for (let u = 0; u < units.length; u++) {
-			const item = itemIndexForTarget(units[u].children, el);
-			if (item >= 0) return { unit: u, item };
+			const block = itemIndexForTarget(units[u].children, el);
+			if (block < 0) continue;
+			const cut = units[u].cuts[block];
+			const fromCut =
+				!!cut && (el === cut || !!(cut.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING));
+			return { unit: u, item: pieceOf(units[u].pieces, block, fromCut ? 'second' : 'first') };
 		}
 		return null;
 	}
@@ -301,6 +363,28 @@
 		}
 	}
 
+	/** The part of the window a page is read in: below where a turn puts the content's top,
+	 *  above the bottom clearance the floating controls take */
+	function readingView(): VerticalSpan {
+		return { top: PAGE_BUDGET.scrollOffset, bottom: window.innerHeight - PAGE_BUDGET.bottomClearance };
+	}
+
+	/** The page on screen, from its first block's top to its last block's bottom; the
+	 *  reading view itself when it shows no block, so a key turns */
+	function pageSpan(): VerticalSpan {
+		const flat = flatPages[current];
+		const unit = flat ? units[flat.unit] : undefined;
+		const range = flat && unit ? unit.pages[flat.page] : undefined;
+		const rects = (range && unit ? pageBlocks(unit, range) : [])
+			.map((el) => el.getBoundingClientRect())
+			.filter((rect) => rect.height > 0);
+		if (rects.length === 0) return readingView();
+		return {
+			top: Math.min(...rects.map((rect) => rect.top)),
+			bottom: Math.max(...rects.map((rect) => rect.bottom))
+		};
+	}
+
 	function handleKeyDown(event: KeyboardEvent) {
 		// Getters, so each is read only when keyAction needs it, in v1.1's order
 		const turn = keyAction(event, {
@@ -317,21 +401,49 @@
 		});
 		if (!turn) return;
 		event.preventDefault();
-		if (turn === 'next') next();
+		// D11: Space and PageDown scroll a page taller than the window before they turn it
+		const distance = keyScroll(event.key, turn, pageSpan(), readingView());
+		if (distance !== 0) window.scrollBy({ top: distance });
+		else if (turn === 'next') next();
 		else prev();
 	}
 
 	let touchStartX = 0;
 	let touchStartY = 0;
+	/** A second finger was down during this gesture; reset by the next one-finger touch */
+	let multiTouch = false;
+	/** This gesture began inside a box that scrolls sideways */
+	let inSidewaysBox = false;
+
+	/** Whether a touch began inside a box that scrolls sideways, up to the content wrapper */
+	function startsInSidewaysBox(target: EventTarget | null): boolean {
+		for (let el = target instanceof Element ? target : null; el && el !== container; el = el.parentElement) {
+			if (scrollsSideways(el)) return true;
+		}
+		return false;
+	}
+
 	function handleTouchStart(event: TouchEvent) {
+		// A second finger's touchstart must not move the start point (CODE-09)
+		if (event.touches.length > 1) {
+			multiTouch = true;
+			return;
+		}
+		multiTouch = false;
 		touchStartX = event.changedTouches[0].clientX;
 		touchStartY = event.changedTouches[0].clientY;
+		inSidewaysBox = startsInSidewaysBox(event.target);
 	}
 	function handleTouchEnd(event: TouchEvent) {
 		const dx = event.changedTouches[0].clientX - touchStartX;
 		const dy = event.changedTouches[0].clientY - touchStartY;
-		// Horizontal swipes only; leave vertical gestures to the browser
-		const turn = swipeAction(dx, dy);
+		// Horizontal swipes only; leave vertical gestures, pinches, selection drags and
+		// drags that scroll a wide box to the browser (S9.1, CODE-09)
+		const turn = swipeAction(dx, dy, {
+			multiTouch: multiTouch || event.touches.length > 0,
+			selecting: !(window.getSelection()?.isCollapsed ?? true),
+			inSidewaysBox
+		});
 		if (turn === 'next') next();
 		else if (turn === 'prev') prev();
 	}
@@ -356,13 +468,20 @@
 	function recompute() {
 		if (!ready || failed) return;
 		try {
-			const anchor = pageAnchor(flatPages[current], unitPages());
+			const before = pageAnchor(flatPages[current], unitPages());
+			// Kept as a block and its part: a re-split can break or join an example, which
+			// renumbers the pieces after it
+			const held = before ? units[before.unit]?.pieces[before.item] : undefined;
 
 			restoreAll();
 			const root = contentRoot();
 			if (!root) return;
 			units = buildUnits(root);
 			computePages();
+			const anchor =
+				before && held && units[before.unit]
+					? { unit: before.unit, item: pieceOf(units[before.unit].pieces, held.block, held.part) }
+					: null;
 
 			// A deep-link target outranks the page's first block: a late image
 			// can push the target onto the next page, which used to hide it
@@ -407,7 +526,7 @@
 		if (!navEl || !ready) return;
 		const shown = flatPages[current] && units[flatPages[current].unit];
 		const range = shown && shown.pages[flatPages[current].page];
-		const last = range && shown.children[range.end - 1];
+		const last = range && pageBlocks(shown, range).at(-1);
 		if (!last) return;
 		const measured = navEl.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom;
 		if (measured > 0 && Math.abs(measured - gapBelow) > 8) {

@@ -10,8 +10,8 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
-import { MODULE_BODY_SELECTOR } from '../src/lib/utils/paginate';
-import { PAGE_BUDGET } from '../src/lib/utils/pager';
+import { MODULE_BODY_SELECTOR, EXAMPLE_BREAK_TRIAL } from '../src/lib/utils/paginate';
+import { PAGE_BUDGET, KEY_SCROLL } from '../src/lib/utils/pager';
 import {
 	sectionsContaining,
 	rollupSection,
@@ -67,6 +67,29 @@ async function shownPage(page: Page) {
 			viewport: window.innerHeight
 		};
 	}, MODULE_BODY_SELECTOR);
+}
+
+/**
+ * Where the page on screen ends, against the bottom of the part of the window it is read
+ * in (the pager's own view: the window less PAGE_BUDGET's bottom clearance), in px
+ */
+async function pageEnd(page: Page) {
+	return page.evaluate(
+		({ bodySelector, clearance }) => {
+			const root = document.querySelector('article.cnx-module') as HTMLElement;
+			const flat = (el: Element): Element[] =>
+				el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
+			const shown = Array.from(root.children)
+				.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
+				.flatMap(flat)
+				.filter((el) => (el as HTMLElement).offsetParent !== null);
+			return {
+				end: Math.max(...shown.map((el) => el.getBoundingClientRect().bottom)),
+				viewBottom: window.innerHeight - clearance
+			};
+		},
+		{ bodySelector: MODULE_BODY_SELECTOR, clearance: PAGE_BUDGET.bottomClearance }
+	);
 }
 
 /** Blocks the pager hid. practiceReveal's self-assessment row is hidden in scrolled mode too. */
@@ -504,6 +527,46 @@ test.describe('Paged reading mode', () => {
 		await nav.getByRole('button', { name: 'Fyrri síða' }).focus();
 		await page.keyboard.press('Space');
 		await expect(label).toHaveText(first);
+	});
+
+	// D11 (2026-11-08), CODE-06: on a page taller than the window, Space scrolls until the
+	// page's end is in view, and only then turns. The page is the first one found at run time
+	// whose end is below the window, in the section with the most worked examples.
+	test('Space scrolls a page taller than the window before it turns the page', async ({ page }) => {
+		test.setTimeout(120000);
+		const [url] = sectionsContaining('check-knowledge-answer', 1);
+		test.skip(!url, 'No section with a worked example');
+		const label = pagerLabel(page);
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+
+		await openPaged(page, url);
+		for (let i = 0; ; i++) {
+			expect(i, `${url}: no page taller than the window`).toBeLessThan(PAGE_CAP);
+			const { end, viewBottom } = await pageEnd(page);
+			if (end > viewBottom + KEY_SCROLL.tolerance) break;
+			const text = (await label.textContent())!.trim();
+			expect(LAST_PAGE.test(text), `${url}: no page taller than the window`).toBe(false);
+			await next.click();
+			await expect(label).not.toHaveText(text);
+			await page.waitForTimeout(300);
+		}
+		const tall = (await label.textContent())!.trim();
+
+		await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+		for (let presses = 1; ; presses++) {
+			expect(presses, `${tall}: Space never turned the page`).toBeLessThan(20);
+			const before = await pageEnd(page);
+			await page.keyboard.press('Space');
+			await page.waitForTimeout(250);
+			if ((await label.textContent())!.trim() !== tall) {
+				expect(presses, `${tall}: Space turned the page at once`).toBeGreaterThan(1);
+				expect(
+					before.end,
+					`${tall}: Space turned the page while its end was ${Math.round(before.end - before.viewBottom)}px below the window`
+				).toBeLessThanOrEqual(before.viewBottom + KEY_SCROLL.tolerance);
+				break;
+			}
+		}
 	});
 
 	test('arrival scrolls past the learning objectives to the content', async ({ page }) => {
@@ -953,5 +1016,147 @@ test.describe('The pager through a ?lestur= link, with no seed (S8.2)', () => {
 		// app's one live region (S8.3, UI-01), which outlives it
 		await expect(page.locator('[aria-live="polite"][aria-atomic="true"]')).not.toHaveText(/^Hluti/);
 		expect(await storedRaw(page)).toBe(FRESH_PROFILE);
+	});
+});
+
+/**
+ * A one-finger drag sent through Chromium's debugging protocol, so the browser treats it as
+ * real touch input: it scrolls what a finger would scroll, and the page sees touchstart,
+ * touchmove and touchend as from a screen.
+ */
+async function touchDrag(page: Page, from: { x: number; y: number }, to: { x: number; y: number }) {
+	const cdp = await page.context().newCDPSession(page);
+	await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [from] });
+	const steps = 10;
+	for (let i = 1; i <= steps; i++) {
+		const point = { x: from.x + ((to.x - from.x) * i) / steps, y: from.y + ((to.y - from.y) * i) / steps };
+		await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point] });
+	}
+	await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+	await cdp.detach();
+}
+
+/** The first visible box in the content that scrolls sideways, marked for the test, or null */
+const markSidewaysBox = (page: Page) =>
+	page.evaluate(() => {
+		const box = Array.from(document.querySelectorAll<HTMLElement>('.reading-content *')).find((el) => {
+			if (el.offsetParent === null) return false;
+			const overflowX = getComputedStyle(el).overflowX;
+			const rect = el.getBoundingClientRect();
+			return (
+				(overflowX === 'auto' || overflowX === 'scroll') &&
+				el.scrollWidth > el.clientWidth + 100 &&
+				rect.top >= 0 &&
+				rect.bottom <= window.innerHeight
+			);
+		});
+		if (!box) return null;
+		box.setAttribute('data-test-sideways', '');
+		const rect = box.getBoundingClientRect();
+		return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+	});
+
+// S9.1, CODE-09: on a phone a sideways drag that scrolls a wide table must not also turn the
+// page; elsewhere a swipe still turns it
+test.describe('Swipes in paged mode (S9.1)', () => {
+	test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+
+	test('a drag inside a box that scrolls sideways scrolls the box and keeps the page', async ({ page }) => {
+		test.setTimeout(120000);
+		const [url] = sectionsContaining('<table', 1);
+		test.skip(!url, 'No section with a table');
+		const label = pagerLabel(page);
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+
+		await openPaged(page, url);
+		let middle: { x: number; y: number } | null = null;
+		for (let i = 0; !middle; i++) {
+			expect(i, `${url}: no page with a box that scrolls sideways in view`).toBeLessThan(PAGE_CAP);
+			middle = await markSidewaysBox(page);
+			if (middle) break;
+			const text = (await label.textContent())!.trim();
+			expect(LAST_PAGE.test(text), `${url}: no page with a box that scrolls sideways in view`).toBe(false);
+			await next.click();
+			await expect(label).not.toHaveText(text);
+			await page.waitForTimeout(300);
+		}
+		const shown = (await label.textContent())!.trim();
+
+		await touchDrag(page, { x: middle!.x + 100, y: middle!.y }, { x: middle!.x - 100, y: middle!.y });
+		await page.waitForTimeout(600);
+		await expect(label).toHaveText(shown);
+		const scrolled = await page.locator('[data-test-sideways]').evaluate((el) => el.scrollLeft);
+		expect(scrolled, 'the drag scrolled the box').toBeGreaterThan(0);
+	});
+
+	test('a sideways swipe on the text turns the page', async ({ page }) => {
+		const [url] = sectionsContaining('<p', 1);
+		test.skip(!url, 'No section content available');
+		const label = pagerLabel(page);
+
+		await openPaged(page, url);
+		const shown = (await label.textContent())!.trim();
+		const para = await page.locator('.reading-content p:visible').first().boundingBox();
+		const y = para!.y + Math.min(para!.height / 2, 20);
+		await touchDrag(page, { x: 300, y }, { x: 100, y });
+		await expect(label).not.toHaveText(shown);
+	});
+});
+
+// D11's trial (2026-11-08), S9.1's restated acceptance: at 390 px Dæmi 3.1 is taller than a
+// page, so it breaks before its check-your-learning part. Space scrolls the first part to its
+// end, the turn opens the second, and 'Sýna svar' is on that page, reached by Space if the part
+// runs past the window.
+test.describe("D11's 'Lausn' trial (S9.1)", () => {
+	test.use({ viewport: { width: 390, height: 844 } });
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+
+	test("Dæmi 3.1 breaks before its check-your-learning part, and Space reaches 'Sýna svar'", async ({
+		page
+	}) => {
+		test.skip(!EXAMPLE_BREAK_TRIAL, 'The trial is switched off');
+		test.setTimeout(120000);
+		const [url] = sectionsContaining('>Dæmi 3.1<', 1);
+		test.skip(!url, 'No Dæmi 3.1 synced');
+		const label = pagerLabel(page);
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+		const example = page.locator('aside.example', {
+			has: page.locator('p.example-label', { hasText: /^Dæmi 3\.1$/ })
+		});
+		const exampleLabel = example.locator('p.example-label');
+		const reveal = example.getByRole('button', { name: 'Sýna svar' });
+
+		await openPaged(page, url);
+		for (let i = 0; !(await exampleLabel.isVisible()); i++) {
+			expect(i, `${url}: never reached Dæmi 3.1`).toBeLessThan(PAGE_CAP);
+			const text = (await label.textContent())!.trim();
+			await next.click();
+			await expect(label).not.toHaveText(text);
+			await page.waitForTimeout(300);
+		}
+		await expect(reveal, "the first part's page holds no 'Sýna svar'").toBeHidden();
+		const firstPart = (await label.textContent())!.trim();
+
+		await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+		for (let presses = 0; (await label.textContent())!.trim() === firstPart; presses++) {
+			expect(presses, `${firstPart}: Space never turned the page`).toBeLessThan(20);
+			await page.keyboard.press('Space');
+			await page.waitForTimeout(250);
+		}
+		await expect(exampleLabel, "the second part's page starts after the example's label").toBeHidden();
+		await expect(reveal).toBeVisible();
+
+		const inView = async () => {
+			const box = (await reveal.boundingBox())!;
+			return box.y >= 0 && box.y + box.height <= 844;
+		};
+		const secondPart = (await label.textContent())!.trim();
+		for (let presses = 0; !(await inView()); presses++) {
+			expect(presses, "Space never brought 'Sýna svar' into view").toBeLessThan(10);
+			await page.keyboard.press('Space');
+			await page.waitForTimeout(250);
+			await expect(label, "Space turned past 'Sýna svar'").toHaveText(secondPart);
+		}
 	});
 });

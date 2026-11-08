@@ -15,6 +15,8 @@ import {
 	resolvePageHash,
 	positionLabel,
 	keyAction,
+	KEY_SCROLL,
+	keyScroll,
 	SWIPE,
 	isPageSwipe,
 	swipeAction,
@@ -25,6 +27,7 @@ import {
 	pageAfterResplit,
 	type KeyContext,
 	type PageKey,
+	type TouchContext,
 	pagerState
 } from './pager';
 
@@ -299,6 +302,67 @@ describe('keyAction', () => {
 	});
 });
 
+// D11 (2026-11-08), CODE-06: Space and PageDown scroll a page taller than the window before
+// they turn it. The geometry is arbitrary on purpose: the helper takes the window it is given
+// and reads no page budget.
+describe('keyScroll', () => {
+	const view = { top: 100, bottom: 700 }; // 600 px of window
+	const screen = 600 - KEY_SCROLL.overlap; // the most one press moves
+
+	it("scrolls Space down by the rest of a page that ends below the window, when that's under a screen", () => {
+		expect(keyScroll(' ', 'next', { top: 100, bottom: 950 }, view)).toBe(250);
+	});
+
+	it('scrolls Space down by a screen less the overlap when more than a screen is left', () => {
+		expect(keyScroll(' ', 'next', { top: 100, bottom: 3000 }, view)).toBe(screen);
+	});
+
+	it('scrolls PageDown as it scrolls Space', () => {
+		expect(keyScroll('PageDown', 'next', { top: 100, bottom: 950 }, view)).toBe(250);
+	});
+
+	it("turns when the page's end is in view", () => {
+		expect(keyScroll(' ', 'next', { top: 100, bottom: 650 }, view)).toBe(0);
+	});
+
+	it("turns when the page's end is below the window by no more than the tolerance", () => {
+		expect(keyScroll(' ', 'next', { top: 100, bottom: 700 + KEY_SCROLL.tolerance }, view)).toBe(0);
+	});
+
+	it("scrolls when the page's end is below the window by more than the tolerance", () => {
+		expect(keyScroll(' ', 'next', { top: 100, bottom: 701 + KEY_SCROLL.tolerance }, view)).toBe(1 + KEY_SCROLL.tolerance);
+	});
+
+	it("scrolls Shift+Space up by the rest of a page whose top is above the window", () => {
+		expect(keyScroll(' ', 'prev', { top: -150, bottom: 650 }, view)).toBe(-250);
+	});
+
+	it('scrolls PageUp up by at most a screen less the overlap', () => {
+		expect(keyScroll('PageUp', 'prev', { top: -2000, bottom: 650 }, view)).toBe(-screen);
+	});
+
+	it("turns back when the page's top is in view, wherever its end is", () => {
+		expect(keyScroll('PageUp', 'prev', { top: 100, bottom: 3000 }, view)).toBe(0);
+	});
+
+	it("turns forward when the page's end is in view, wherever its top is", () => {
+		expect(keyScroll('PageDown', 'next', { top: -2000, bottom: 650 }, view)).toBe(0);
+	});
+
+	it('never scrolls for an arrow key', () => {
+		expect(keyScroll('ArrowRight', 'next', { top: 100, bottom: 3000 }, view)).toBe(0);
+		expect(keyScroll('ArrowLeft', 'prev', { top: -2000, bottom: 650 }, view)).toBe(0);
+	});
+
+	it('still moves forward in a window shorter than two overlaps', () => {
+		expect(keyScroll(' ', 'next', { top: 100, bottom: 3000 }, { top: 100, bottom: 140 })).toBe(20);
+	});
+
+	it('turns when the window shows no content at all', () => {
+		expect(keyScroll(' ', 'next', { top: 100, bottom: 3000 }, { top: 100, bottom: 100 })).toBe(0);
+	});
+});
+
 describe('swipes', () => {
 	// v1.1's thresholds (dde768e :314); no e2e test swipes
 	it("holds v1.1's thresholds", () => {
@@ -325,12 +389,27 @@ describe('swipes', () => {
 		expect(isPageSwipe(200, NaN)).toBe(false);
 	});
 
+	const clear: TouchContext = { multiTouch: false, selecting: false, inSidewaysBox: false };
+	const far = SWIPE.minDistance + 1;
+
 	it('turns forward on a swipe to the left and back on one to the right', () => {
-		const far = SWIPE.minDistance + 1;
-		expect(swipeAction(-far, 0)).toBe('next');
-		expect(swipeAction(far, 0)).toBe('prev');
-		expect(swipeAction(far, SWIPE.maxDrift)).toBeNull();
-		expect(swipeAction(SWIPE.minDistance, 0)).toBeNull();
+		expect(swipeAction(-far, 0, clear)).toBe('next');
+		expect(swipeAction(far, 0, clear)).toBe('prev');
+		expect(swipeAction(far, SWIPE.maxDrift, clear)).toBeNull();
+		expect(swipeAction(SWIPE.minDistance, 0, clear)).toBeNull();
+	});
+
+	// S9.1, CODE-09: a pinch, a selection drag or a drag that scrolls a wide table is no swipe
+	it('is no turn when a second finger was down', () => {
+		expect(swipeAction(-far, 0, { ...clear, multiTouch: true })).toBeNull();
+	});
+
+	it('is no turn while text is selected', () => {
+		expect(swipeAction(-far, 0, { ...clear, selecting: true })).toBeNull();
+	});
+
+	it('is no turn when the touch began inside a box that scrolls sideways', () => {
+		expect(swipeAction(far, 0, { ...clear, inSidewaysBox: true })).toBeNull();
 	});
 });
 
