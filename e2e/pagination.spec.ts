@@ -1206,9 +1206,20 @@ const shownTags = (page: Page) =>
 			.map((el) => el.tagName);
 	}, MODULE_BODY_SELECTOR);
 
+/** Where focus is: on the article, on <body>, or inside a hidden block */
+const focusAt = (page: Page) =>
+	page.evaluate(() => {
+		const active = document.activeElement;
+		return {
+			tag: active?.tagName ?? 'none',
+			body: !active || active === document.body,
+			hidden: !!active?.closest('[hidden]')
+		};
+	});
+
 // Plan step S9.2 (D12, 2026-11-08; UI-19, UI-05, UI-01): the section title stays above every
 // page, so its h1 is there on every page for sight and for screen readers, and no page is the
-// title alone.
+// title alone; a key turn that hides the focus moves it to the article.
 test.describe('The title and focus survive page turns (S9.2)', () => {
 	test.skip(!SECTION, 'No synced module section');
 	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
@@ -1264,4 +1275,52 @@ test.describe('The title and focus survive page turns (S9.2)', () => {
 			}
 		});
 	}
+
+	// After the rescue keyBelongsElsewhere() walks up from the article, so a box around it that
+	// scrolls sideways would take the arrows from then on: every → must still turn, and Space
+	// must still act, on a section with a wide table at phone width
+	test('a key turn moves focus off a hidden element to the article, and the keys still turn pages', async ({
+		page
+	}) => {
+		const [url] = sectionsContaining('<table', 1);
+		test.skip(!url, 'No section with a table');
+		test.setTimeout(180000);
+		await page.setViewportSize({ width: 390, height: 844 });
+		await openPaged(page, url);
+		const label = pagerLabel(page);
+
+		// Something on page 1 the turn will hide: a link, a button or a term
+		const focused = await page.evaluate(() => {
+			const el = Array.from(
+				document.querySelectorAll<HTMLElement>('article.cnx-module :is(a[href], button, [tabindex="0"])')
+			).find((e) => e.offsetParent !== null);
+			el?.focus();
+			return el ? `<${el.tagName.toLowerCase()}>` : null;
+		});
+		if (!focused) await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+
+		for (let i = 0; ; i++) {
+			expect(i, `${url}: more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
+			const text = (await label.textContent())!.trim();
+			if (LAST_PAGE.test(text)) break;
+			await page.keyboard.press('ArrowRight');
+			await expect(label, `${text}: → did not turn the page`).not.toHaveText(text);
+			const at = await focusAt(page);
+			expect(
+				at.body || at.hidden,
+				`${text}: after → from ${i === 0 ? (focused ?? '<body>') : 'the page'}, focus is on <${at.tag.toLowerCase()}>${at.hidden ? ' in a hidden block' : ''}`
+			).toBe(false);
+
+			if (i === 0) {
+				// Space acts with focus on the article: it scrolls a tall page or turns
+				const before = { text: (await label.textContent())!.trim(), y: await page.evaluate(() => scrollY) };
+				await page.keyboard.press('Space');
+				await expect
+					.poll(async () => ({ text: (await label.textContent())!.trim(), y: await page.evaluate(() => scrollY) }), {
+						message: `${before.text}: Space did nothing with focus on the article`
+					})
+					.not.toEqual(before);
+			}
+		}
+	});
 });
