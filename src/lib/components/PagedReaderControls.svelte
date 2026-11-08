@@ -69,9 +69,14 @@
 		onsubsectioncomplete?: (index: number) => void;
 		/** Each change of state, for the section page's ← / → step-aside and end marker */
 		onstatechange?: (state: PagerState) => void;
+		/** The section's end (the recall prompt) is open in the page's place: hide the page and
+		 *  hold re-splits until it closes (S9.3, UI-21) */
+		covered?: boolean;
+		/** 'Fyrri' or ← while covered: the page should show the page again, not turn back */
+		onuncover?: () => void;
 	}
 
-	let { container, oncomplete, onsubsectioncomplete, onstatechange }: Props = $props();
+	let { container, oncomplete, onsubsectioncomplete, onstatechange, covered = false, onuncover }: Props = $props();
 
 	interface Unit {
 		wrapper: HTMLElement | null; // the <section>, or null for intro content
@@ -94,6 +99,10 @@
 	let completionFired = $state(false);
 
 	let recomputeTimer: ReturnType<typeof setTimeout> | undefined;
+	/** A re-split held while covered. Not $state. */
+	let resplitWhenUncovered = false;
+	/** Whether the page on screen is covered, as last applied. Not $state. */
+	let appliedCovered = false;
 	/** This effect run's controller: its abort removes every listener init added. Not $state. */
 	let run: AbortController | undefined;
 	/** The keys, swipes and hash changes are live (init's last step). Not $state. */
@@ -230,7 +239,8 @@
 
 		for (let u = 0; u < units.length; u++) {
 			const unit = units[u];
-			const isCurrent = u === flat.unit;
+			// Covered by the section's end, no unit is shown, so every block is hidden
+			const isCurrent = u === flat.unit && !covered;
 			if (unit.wrapper) {
 				unit.wrapper.toggleAttribute('hidden', !isCurrent);
 			}
@@ -324,9 +334,14 @@
 		return false;
 	}
 
-	/** Turn to the previous page; true when a page turned */
+	/** Turn to the previous page; true when a page turned. While covered, ask the page to show
+	 *  the page again instead (UI-21). */
 	function prev(): boolean {
 		if (!ready || failed) return false;
+		if (covered) {
+			onuncover?.();
+			return false;
+		}
 		target = null;
 		const index = stepPrev(current, pageCounts());
 		if (index === null) return false;
@@ -515,6 +530,12 @@
 	 *  block they were looking at (font size, resize, late image loads) */
 	function recompute() {
 		if (!ready || failed) return;
+		// Covered, nothing of the page is on screen: re-split once it shows again, so the label
+		// does not change behind the section's end (a rotation, a split screen; UI-21)
+		if (covered) {
+			resplitWhenUncovered = true;
+			return;
+		}
 		try {
 			const before = pageAnchor(flatPages[current], unitPages());
 			// Kept as a block and its part: a re-split can break or join an example, which
@@ -693,6 +714,8 @@
 		completedUnits.clear();
 		live = false;
 		reported = null;
+		appliedCovered = false;
+		resplitWhenUncovered = false;
 		// untrack: report() reads $state, which must not become this effect's dependencies
 		untrack(report);
 		init(el, controller.signal);
@@ -728,7 +751,25 @@
 		};
 	});
 
+	// The section's end covering the page (S9.3, UI-21): hide the page and bring the content top
+	// into view, as a turn does; uncovered, show the page again and run any re-split held back
+	$effect(() => {
+		const now = covered;
+		if (!ready || failed || now === appliedCovered) return;
+		appliedCovered = now;
+		untrack(() => {
+			applyVisibility();
+			if (now) scrollToContentTop();
+			else if (resplitWhenUncovered) {
+				resplitWhenUncovered = false;
+				recompute();
+			}
+		});
+	});
+
 	let flat = $derived(flatPages[current]);
+	/** The last page of the section, whose button finishes it (ruling 3) */
+	let lastPage = $derived(current === flatPages.length - 1);
 	let label = $derived(flat ? positionLabel(flat, pageCounts()) : '');
 </script>
 
@@ -746,14 +787,21 @@
 			{label}
 		</span>
 
+		<!-- On the last page the button finishes the section (ruling 3), so it says so (UI-20).
+		     D20: proposed — 'Ljúka kafla' -->
 		<button
 			class="paged-nav-btn"
 			onclick={next}
-			disabled={current === flatPages.length - 1 && completionFired}
-			aria-label="Næsta síða"
+			disabled={lastPage && completionFired}
+			aria-label={lastPage ? 'Ljúka kafla' : 'Næsta síða'}
 		>
-			Næsta
-			<Icon name="chevron-right" size="sm" />
+			{#if lastPage}
+				Ljúka kafla
+				<Icon name="check" size="sm" />
+			{:else}
+				Næsta
+				<Icon name="chevron-right" size="sm" />
+			{/if}
 		</button>
 	</nav>
 

@@ -18,7 +18,7 @@
 	import BookAttribution from '$lib/components/BookAttribution.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import PagedReaderControls from '$lib/components/PagedReaderControls.svelte';
-	import type { PagerState } from '$lib/utils/pager';
+	import { PAGE_BUDGET, type PagerState } from '$lib/utils/pager';
 	import { readDetection } from '$lib/actions/readDetection';
 	import RecallPrompt from '$lib/components/RecallPrompt.svelte';
 	import RecallReadBack from '$lib/components/RecallReadBack.svelte';
@@ -43,6 +43,12 @@
 	let shareTimeout: ReturnType<typeof setTimeout>;
 	let showRecallPrompt = $state(false);
 	let showRecallReadBack = $state(false);
+	// The reader went back from the section's end with 'Fyrri' or ←, to see the last page again
+	let endUncovered = $state(false);
+	// The section whose end is open. The prompt sits inside {#key} (S9.3), which rebuilds on a
+	// section change before afterNavigate resets showRecallPrompt, so without this a second
+	// prompt mounted for the next section and was abandoned at once (counted twice; PED-17)
+	let endFor = $state('');
 	// reachedEnd() runs once per visit to a section, whichever end gets there first (S8.4)
 	let endReached = false;
 	let showContinuePrompt = $state(false);
@@ -143,6 +149,7 @@
 
 		showRecallPrompt = false;
 		showRecallReadBack = false;
+		endUncovered = false;
 		endReached = false;
 
 		// Reset the continue-reading prompt, then check this section's saved position
@@ -253,6 +260,7 @@
 	function reachedEnd() {
 		if (endReached) return;
 		endReached = true;
+		endFor = sectionKey;
 		reader.markAsRead(data.bookSlug, data.chapterSlug, data.sectionSlug);
 		if (recallOwed) {
 			recallStore.markPrompted(data.bookSlug, data.chapterSlug, data.sectionSlug);
@@ -273,7 +281,28 @@
 		const next =
 			document.querySelector<HTMLElement>('[data-nav="next"]') ??
 			document.querySelector<HTMLElement>('[data-nav="sections"]');
-		next?.focus();
+		if (!next) return;
+		next.focus({ preventScroll: true });
+		// A plain focus() scrolls the link only just into view, at the window's bottom edge under
+		// the timer pill and the toasts; outside the clear band, centre it (S9.3, UI-20)
+		const rect = next.getBoundingClientRect();
+		const top = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+		if (rect.top < top || rect.bottom > window.innerHeight - PAGE_BUDGET.bottomClearance) {
+			next.scrollIntoView({ block: 'center' });
+		}
+	}
+
+	/**
+	 * 'Ljúka kafla' on the last page (ruling 3; S9.3, UI-20): the section's end, and then on to
+	 * the next section. When nothing opens (the prompt shown on an earlier visit, no recall
+	 * saved), focus goes straight to the next-section link; else it goes there when the prompt
+	 * or the read-back closes. Not in scrolled mode, whose end marker comes into view while the
+	 * reader may be anywhere.
+	 */
+	function finishFromPager() {
+		endUncovered = false;
+		reachedEnd();
+		if (!showRecallPrompt && !showRecallReadBack) focusAfterRecall();
 	}
 
 	function closeRecallPrompt() {
@@ -285,6 +314,11 @@
 		showRecallReadBack = false;
 		focusAfterRecall();
 	}
+
+	// Paged, the section's end takes the page's place: the pager hides the page while the
+	// prompt or the read-back is open, until the reader goes back with 'Fyrri' (S9.3, UI-21)
+	let endHere = $derived(endFor === sectionKey);
+	let endCovered = $derived(paged && endHere && (showRecallPrompt || showRecallReadBack) && !endUncovered);
 
 	// Reactive checks using subscribed state
 	let isRead = $derived(isSectionRead(progress, data.bookSlug, data.chapterSlug, data.sectionSlug));
@@ -548,13 +582,40 @@
 			</TextHighlighter>
 		</div>
 
+		<!-- The section's end: the free-recall prompt, in place of the old 'Vel gert!' celebration
+		     (P0.2), or a section already recalled reads its entry back (S5.5). Between the content
+		     and the pager, so paged it takes the page's place (S9.3, UI-21); scrolled, it sits at
+		     the end of the content as before. -->
+		{#if showRecallPrompt && endHere}
+			<RecallPrompt
+				bookSlug={data.bookSlug}
+				chapterSlug={data.chapterSlug}
+				sectionSlug={data.sectionSlug}
+				sectionNumber={data.navigation.current.section.number}
+				onsaved={focusAfterRecall}
+				onclose={closeRecallPrompt}
+			/>
+		{/if}
+		{#if showRecallReadBack && endHere}
+			<RecallReadBack
+				bookSlug={data.bookSlug}
+				chapterSlug={data.chapterSlug}
+				sectionSlug={data.sectionSlug}
+				sectionNumber={data.navigation.current.section.number}
+				onclose={closeRecallReadBack}
+			/>
+		{/if}
+
 		{#if paged}
-			<!-- 'Næsta' on the last page is the section's end (ruling 3), so it runs reachedEnd.
-			     v1.1 passed markAsRead (dde768e :442), which under D10 no longer opens the prompt. -->
+			<!-- 'Ljúka kafla' on the last page is the section's end (ruling 3), so it runs reachedEnd
+			     and then leads on (finishFromPager). v1.1 passed markAsRead (dde768e :442), which
+			     under D10 no longer opens the prompt. -->
 			<PagedReaderControls
 				container={contentWrapper}
-				oncomplete={reachedEnd}
+				oncomplete={finishFromPager}
 				onstatechange={(state) => (pagerState = state)}
+				covered={endCovered}
+				onuncover={() => (endUncovered = true)}
 			/>
 		{/if}
 
@@ -577,28 +638,6 @@
 		></div>
 	{/key}
 
-	<!-- Free-recall prompt, in place of the old 'Vel gert!' celebration (P0.2) -->
-	{#if showRecallPrompt}
-		<RecallPrompt
-			bookSlug={data.bookSlug}
-			chapterSlug={data.chapterSlug}
-			sectionSlug={data.sectionSlug}
-			sectionNumber={data.navigation.current.section.number}
-			onsaved={focusAfterRecall}
-			onclose={closeRecallPrompt}
-		/>
-	{/if}
-
-	<!-- A section already recalled reads its entry back at the end instead (S5.5) -->
-	{#if showRecallReadBack}
-		<RecallReadBack
-			bookSlug={data.bookSlug}
-			chapterSlug={data.chapterSlug}
-			sectionSlug={data.sectionSlug}
-			sectionNumber={data.navigation.current.section.number}
-			onclose={closeRecallReadBack}
-		/>
-	{/if}
 
 	<!-- Mark as read button at bottom. Not under a working pager (UI-04), where 'Næsta' on the
 	     last page finishes the section (ruling 3) and the toolbar keeps 'Merkja sem lesið'; a

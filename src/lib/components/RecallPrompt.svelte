@@ -93,8 +93,10 @@
 		// only while focus is idle: the prompt opens 1.5 s after the section's end comes into
 		// view, which a keyboard user reaches by tabbing, so focus may sit on 'Næsti kafli' or
 		// another control by then, and taking it would move them somewhere they did not go.
+		// A control the press disabled counts as idle: paged, 'Ljúka kafla' opens the prompt and is
+		// disabled in the same update (S9.3), and focus left there would fall to <body>
 		const active = document.activeElement;
-		const focusIdle = !active || active === document.body;
+		const focusIdle = !active || active === document.body || active.matches(':disabled');
 		if (keyboardLikely && focusIdle) textareaElement?.focus();
 
 		return () => {

@@ -679,7 +679,7 @@ test.describe('Paged reading mode', () => {
 			await next.click();
 			await expect(label).not.toHaveText(text);
 		}
-		await next.click();
+		await nav.getByRole('button', { name: 'Ljúka kafla' }).click();
 		await expect(page.getByRole('region', { name: 'Upprifjun' })).toBeVisible();
 	});
 
@@ -780,12 +780,13 @@ test.describe('Paged reading mode', () => {
 			await next.click();
 			await expect(label).not.toHaveText(text);
 		}
-		await next.click();
+		// The last page's button finishes the section (ruling 3), and says so since S9.3
+		await nav.getByRole('button', { name: 'Ljúka kafla' }).click();
 		const prompt = page.getByRole('region', { name: 'Upprifjun', exact: true });
 		await expect(prompt).toBeVisible();
 		await expect(page.locator('[data-paged-section="end"]')).toBeAttached();
 		// Skip the prompt: focus goes to the next-section link (S5.3). Escape would skip it
-		// only from inside its box, and focus is still on 'Næsta'.
+		// only from inside its box.
 		await prompt.getByRole('button', { name: 'Sleppa' }).click();
 		await expect(prompt).toHaveCount(0);
 		const path = new URL(page.url()).pathname;
@@ -814,13 +815,18 @@ test.describe('Paged reading mode', () => {
 			await next.click();
 			await expect(label).not.toHaveText(text);
 		}
-		await next.click();
+		// The last page's button finishes the section (ruling 3), and says so since S9.3
+		await nav.getByRole('button', { name: 'Ljúka kafla' }).click();
 		const prompt = page.getByRole('region', { name: 'Upprifjun', exact: true });
 		await expect(prompt).toBeVisible();
 		await prompt.getByRole('textbox').fill('Efni er allt sem hefur massa og tekur pláss.');
 		await prompt.getByRole('button', { name: 'Vista', exact: true }).click();
 		// The saved message stays until 'Loka'
 		await expect(prompt.getByRole('button', { name: 'Loka' })).toBeVisible();
+		// Since S9.3 the prompt takes the page's place and re-splits wait behind it; 'Fyrri'
+		// shows the last page again, with the prompt still open, and re-splits run
+		await nav.getByRole('button', { name: 'Fyrri síða' }).click();
+		await expect(label).toHaveText(LAST_PAGE);
 
 		// The next re-split fails: measuring a block of the section throws
 		const failed = page.waitForEvent('console', (m) => m.text().startsWith('Paged mode recompute failed'));
@@ -952,24 +958,32 @@ test.describe('The pager through a ?lestur= link, with no seed (S8.2)', () => {
 		expect(new URL(page.url()).pathname).toBe(path);
 	});
 
-	test("the first page does not spend the recall prompt; the last 'Næsta' opens it", async ({ page }) => {
+	test("the first page does not spend the recall prompt; 'Ljúka kafla' on the last page opens it", async ({ page }) => {
 		await openPaged(page, withLink(SECTION!, 'sidur'));
 		// The end marker sits just under the page controls, in view on the first page, so it
 		// would fire after 1.5 s if it did not stand down while paged
 		await expect(page.locator('[data-section-end]')).toBeInViewport({ ratio: 0.5 });
 		await page.waitForTimeout(3000);
 		await expect(recall(page)).toHaveCount(0);
-		await expect(page.getByRole('button', { name: 'Merkja kafla sem lesinn' })).toBeVisible();
+		// Since S9.3 no bottom completion button sits under a working pager (UI-04)
+		await expect(page.getByRole('button', { name: 'Merkja kafla sem lesinn' })).toHaveCount(0);
 
+		const label = pagerLabel(page);
 		const next = page.getByRole('button', { name: 'Næsta síða' });
-		for (let i = 0; i < 100 && (await recall(page).count()) === 0; i++) {
+		for (let i = 0; i < 100 && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+			const text = (await label.textContent())!.trim();
 			await next.click();
+			await expect(label).not.toHaveText(text);
 		}
+		await expect(recall(page)).toHaveCount(0);
+		// The last page's button finishes the section (ruling 3), and says so since S9.3
+		const finish = page.getByRole('button', { name: 'Ljúka kafla' });
+		await finish.click();
 		await expect(recall(page)).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Merkja kafla sem lesinn' })).toHaveCount(0);
-		// It opened on the last page: the last unit's last page, where 'Næsta' is spent
-		await expect(pagerLabel(page)).toHaveText(/^Hluti (\d+) af \1 · Síða (\d+) af \2$/);
-		await expect(next).toBeDisabled();
+		// It opened on the last page: the last unit's last page, where the button is spent
+		await expect(label).toHaveText(/^Hluti (\d+) af \1 · Síða (\d+) af \2$/);
+		await expect(finish).toBeDisabled();
 	});
 
 	test("?lestur=skrun overrides a stored 'paged' without changing storage", async ({ page }) => {
@@ -1368,6 +1382,9 @@ async function forcePagerFailure(page: Page) {
 // section leads to the next.
 test.describe('The way out and the section end (S9.3)', () => {
 	test.skip(!SECTION, 'No synced module section');
+	// No service worker, so the one-time offline-ready toast never covers the bottom corner
+	// these tests measure (it did at 768x1024, where the next-section link ends the document)
+	test.use({ serviceWorkers: 'block' });
 	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
 
 	// UI-04: on every page of v1.1 the bottom 'Merkja kafla sem lesinn' sat under the pager and
@@ -1420,5 +1437,103 @@ test.describe('The way out and the section end (S9.3)', () => {
 			Object.keys(saved.scrollPositions ?? {}).filter((k) => k.includes(slug)),
 			'a scroll position saved for the paged section'
 		).toEqual([]);
+	});
+
+	/** Walks to the last page with 'Næsta' */
+	async function toLastPage(page: Page, url: string) {
+		const label = pagerLabel(page);
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+		for (let i = 0; !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+			expect(i, `${url}: more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
+			const text = (await label.textContent())!.trim();
+			await next.click();
+			await expect(label).not.toHaveText(text);
+			await page.waitForTimeout(200);
+		}
+	}
+
+	/** Whether a control lies inside the window, below the sticky header, and is the element there */
+	const inView = (page: Page, selector: string) =>
+		page.evaluate((sel) => {
+			const el = document.querySelector<HTMLElement>(sel);
+			if (!el) return `${sel}: not found`;
+			const r = el.getBoundingClientRect();
+			const header = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+			if (r.top < header || r.bottom > innerHeight) return `${sel}: at ${Math.round(r.top)}-${Math.round(r.bottom)} of ${innerHeight}`;
+			const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+			return hit && (hit === el || el.contains(hit)) ? 'ok' : `${sel}: covered by <${hit?.tagName.toLowerCase()}>`;
+		}, selector);
+
+	// UI-20, UI-21: the last page's button says it finishes the section; the prompt then takes
+	// the page's place, its controls in view on a tablet and a phone, and after it focus is on
+	// the next-section link, in view
+	for (const viewport of [
+		{ width: 768, height: 1024 },
+		{ width: 390, height: 844 }
+	]) {
+		test(`'Ljúka kafla' opens the prompt in the page's place, and leads on, at ${viewport.width}px`, async ({
+			page
+		}) => {
+			test.setTimeout(180000);
+			await page.setViewportSize(viewport);
+			await openPaged(page, SECTION!);
+			await toLastPage(page, SECTION!);
+			await pager(page).getByRole('button', { name: 'Ljúka kafla' }).click();
+			const prompt = page.getByRole('region', { name: 'Upprifjun', exact: true });
+			await expect(prompt).toBeVisible();
+			await page.waitForTimeout(400);
+
+			expect(await shownTags(page), 'blocks of the page still shown beside the prompt').toEqual([]);
+			for (const [what, control] of [
+				['the box', prompt.getByRole('textbox')],
+				['Sleppa', prompt.getByRole('button', { name: 'Sleppa', exact: true })],
+				['Vista', prompt.getByRole('button', { name: 'Vista', exact: true })]
+			] as const) {
+				await control.evaluate((el) => el.setAttribute('data-test-at', ''));
+				expect(await inView(page, '[data-test-at]'), what).toBe('ok');
+				await control.evaluate((el) => el.removeAttribute('data-test-at'));
+			}
+
+			await prompt.getByRole('button', { name: 'Sleppa' }).click();
+			await expect(prompt).toHaveCount(0);
+			const next = page.locator('[data-nav="next"]');
+			await expect(next).toBeFocused();
+			expect(await inView(page, '[data-nav="next"]'), 'the next-section link').toBe('ok');
+			expect((await shownTags(page)).length, 'the last page is shown again').toBeGreaterThan(0);
+		});
+	}
+
+	// UI-20 (3): on a section whose prompt has already shown and has no saved recall, nothing
+	// opens at the end, so the hand-off matters most there
+	test("'Ljúka kafla' with nothing to show moves focus straight to the next-section link", async ({ page }) => {
+		test.setTimeout(180000);
+		await openPaged(page, SECTION!);
+		await toLastPage(page, SECTION!);
+		await pager(page).getByRole('button', { name: 'Ljúka kafla' }).click();
+		const prompt = page.getByRole('region', { name: 'Upprifjun', exact: true });
+		await prompt.getByRole('button', { name: 'Sleppa' }).click();
+		await expect(prompt).toHaveCount(0);
+
+		await page.reload();
+		await expect(pager(page)).toBeVisible({ timeout: 15000 });
+		await page.waitForTimeout(300);
+		await toLastPage(page, SECTION!);
+		await pager(page).getByRole('button', { name: 'Ljúka kafla' }).click();
+		await expect(prompt).toHaveCount(0);
+		await expect(page.locator('[data-nav="next"]')).toBeFocused();
+		expect(await inView(page, '[data-nav="next"]'), 'the next-section link').toBe('ok');
+	});
+
+	// UI-21: 'Fyrri' from the prompt shows the last page again rather than turning back
+	test("'Fyrri' from the prompt shows the last page again", async ({ page }) => {
+		test.setTimeout(180000);
+		await openPaged(page, SECTION!);
+		await toLastPage(page, SECTION!);
+		const last = (await pagerLabel(page).textContent())!.trim();
+		await pager(page).getByRole('button', { name: 'Ljúka kafla' }).click();
+		await expect(page.getByRole('region', { name: 'Upprifjun', exact: true })).toBeVisible();
+		await pager(page).getByRole('button', { name: 'Fyrri síða' }).click();
+		await expect(pagerLabel(page)).toHaveText(last);
+		expect((await shownTags(page)).length, 'the last page is shown').toBeGreaterThan(0);
 	});
 });

@@ -30,6 +30,7 @@ import { get } from 'svelte/store';
 import { ANNOUNCE_DELAY_MS, announcement } from '$lib/stores/announcer';
 import { settings } from '$lib/stores/settings';
 import LiveAnnouncer from './LiveAnnouncer.svelte';
+import { liveProps } from './testProps.svelte.js';
 import PagedReaderControls from './PagedReaderControls.svelte';
 import type { PagerState } from '$lib/utils/pager';
 
@@ -261,10 +262,13 @@ describe('the pager reports its state (CODE-17)', () => {
 		await settle();
 		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 3');
 		const next = () => (document.querySelector('button[aria-label="Næsta síða"]') as HTMLButtonElement).click();
-		for (let i = 0; i < 6; i++) {
+		for (let i = 0; i < 5; i++) {
 			next();
 			flushSync();
 		}
+		// The last page's button finishes the section (S9.3, UI-20)
+		(document.querySelector('button[aria-label="Ljúka kafla"]') as HTMLButtonElement).click();
+		flushSync();
 		expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
 		expect(oncomplete).toHaveBeenCalledTimes(1);
 		key('ArrowLeft');
@@ -605,5 +609,87 @@ describe('a key or swipe turn keeps focus on the page (S9.2, UI-01)', () => {
 		key('ArrowRight');
 		drop(pager);
 		expect(article().hasAttribute('tabindex')).toBe(false);
+	});
+});
+
+// Plan step S9.3 (UI-20, UI-21): the last page's button says it finishes the section, and while
+// the section's end (the recall prompt) is open the pager hides the page in its place
+describe("the section's end (S9.3)", () => {
+	const button = (name: string) => document.querySelector<HTMLButtonElement>(`button[aria-label="${name}"]`);
+	const shown = (c: HTMLElement) =>
+		Array.from(c.querySelectorAll<HTMLElement>('.cnx-module p, .cnx-module h2')).filter(
+			(el) => !el.closest('[hidden]')
+		).length;
+	function openLive(c: HTMLElement, extra: Record<string, unknown> = {}) {
+		const target = document.body.appendChild(document.createElement('div'));
+		const props = liveProps({ container: c, covered: false, ...extra });
+		const pager = mount(PagedReaderControls, { target, props: props as never });
+		mounted.push(pager);
+		flushSync();
+		return props;
+	}
+	async function toLastPage() {
+		for (let i = 0; i < 5; i++) {
+			button('Næsta síða')!.click();
+			flushSync();
+		}
+	}
+
+	it("labels the last page's button 'Ljúka kafla', and every other page's 'Næsta'", async () => {
+		const c = content();
+		open(c);
+		await settle();
+		expect(button('Næsta síða')?.textContent?.trim()).toBe('Næsta');
+		expect(button('Ljúka kafla')).toBeNull();
+		await toLastPage();
+		expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
+		expect(button('Næsta síða')).toBeNull();
+		expect(button('Ljúka kafla')?.textContent?.trim()).toBe('Ljúka kafla');
+	});
+
+	it('covered, it hides the page and keeps the label; uncovered, it shows the page again', async () => {
+		const c = content();
+		const props = openLive(c);
+		await settle();
+		await toLastPage();
+		expect(shown(c)).toBe(2);
+		props.covered = true;
+		flushSync();
+		expect(shown(c)).toBe(0);
+		expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
+		props.covered = false;
+		flushSync();
+		expect(shown(c)).toBe(2);
+	});
+
+	it("'Fyrri' and ← while covered ask the page to uncover, and turn no page", async () => {
+		const c = content();
+		const onuncover = vi.fn();
+		const props = openLive(c, { onuncover });
+		await settle();
+		await toLastPage();
+		props.covered = true;
+		flushSync();
+		button('Fyrri síða')!.click();
+		key('ArrowLeft');
+		expect(onuncover).toHaveBeenCalledTimes(2);
+		expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
+	});
+
+	it('a resize while covered re-splits only once uncovered, so the label holds', async () => {
+		const c = content();
+		const props = openLive(c);
+		await settle();
+		props.covered = true;
+		flushSync();
+		// A third as tall: the first sub-section would fit on one page
+		for (const p of c.querySelectorAll<HTMLElement>('p')) p.dataset.h = '100';
+		window.dispatchEvent(new Event('resize'));
+		vi.advanceTimersByTime(200);
+		flushSync();
+		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 3');
+		props.covered = false;
+		flushSync();
+		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 1');
 	});
 });
