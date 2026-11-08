@@ -8,12 +8,14 @@
 
 **Updated 2026-11-07** for S9.0's first chunk: D11–D13 and D21 each gain an **Evidence (S9.0 prep)** block and a **Measured 2026-11-07** block, from what M8 recorded and from the live pager after train 11, with the shared method and figures under [What M8 measured, for S9.0](#what-m8-measured-for-s90-2026-11-07). Their questions, options and the review's recommendations are unchanged, and nothing is preselected.
 
+**Updated 2026-11-08:** D21's S9.0 prep block gains what the address bar and 'Deila' show once a `?lestur=` link's mode carries on to other sections, with a **Measured 2026-11-08** block and its script in the appendix ([S9.0: the address after a link](#s90-the-address-after-a-link)). It adds evidence for the link rule and recommends nothing.
+
 ## Contents
 
 - Ruled in this session: [D01](#d01--text-on-the-amber-buttons-and-the-focus-ring-colour), [D02](#d02--existing-readers-saved-settings-chosen-or-migrate-once), [D03](#d03--the-page-view-event-sent-to-the-editorial-server), [D04](#d04--srs-the-rating-step-a-due-only-æfa-a-confident-error-message), [D05](#d05--release-timing-for-predict-first-and-the-srs-fixes), [D06](#d06--the-pager-until-call-3-dark-or-early-opt-in), [D07](#d07--p13-what-card-a-selection-makes), [D08](#d08--p11-kvörðun-action-list-per-section-half-or-defer), [D09](#d09--pilot-classes-and-a-counts-only-export), [D10](#d10--does-an-early-mark-read-open-the-recall-prompt), [D18](#d18--recall-read-back-with-a-delete-now-or-later), [D19](#d19--chapters-cleared-for-machine-translated-standards), [D20](#d20--who-checks-new-icelandic-strings), [KEEP-01](#keep-01--reword-claudemds-design-principle)
 - Open calls: [CALL1](#call1--page-height-budget), [CALL2](#call2--recall-per-section-or-sub-section), [CALL3](#call3--launch-default-reading-mode), [CALL4](#call4--how-often-the-pre-question-appears)
 - Ruled later: [D11](#d11--keys-and-oversized-worked-examples), [D12](#d12--a-title-on-every-page-figures-and-their-text), [D13](#d13--continue-reading-find-in-page-the-page-label), [D14](#d14--atkinson-family-and-font-caching), [D15](#d15--theme-when-unchosen-the-chrome-typeface), [D16](#d16--the-pre-questions-form-source-guess-and-placement), [D17](#d17--student-controls-and-fading), [D21](#d21--the-crossovers-term-margin-and-consent), [D22](#d22--key-term-starter-decks-per-book-or-shared), [D23](#d23--retiring-the-v12-branch), [D24](#d24--streaks-behind-halda-röð-daga), [D25](#d25--later-scope-after-the-crossover)
-- S9.0 prep (2026-11-07): [what M8 measured](#what-m8-measured-for-s90-2026-11-07), and the appendix's [live pager script](#s90-the-live-pager)
+- S9.0 prep (2026-11-07): [what M8 measured](#what-m8-measured-for-s90-2026-11-07), and the appendix's [live pager script](#s90-the-live-pager); (2026-11-08) the appendix's [address after a link](#s90-the-address-after-a-link) script, for D21's link rule
 - [Appendix: re-measure scripts](#appendix-re-measure-scripts)
 
 ## Ruled in this session
@@ -983,6 +985,7 @@ _Ruled at S9.0, before S10.1._
 - The site cannot tell a link visit from a plain one. GoatCounter's `count.js` takes the path from the page's canonical link when there is one, and section pages carry one without the query, so a `?lestur=sidur` visit counts as a visit to the plain address. The site loads `count.js` once per full page load and calls it nowhere else, so moves between sections inside the app are not counted at all.
 - The counts-only export (D09, S5.5) holds four counts per book, `recallShown`, `recallSaved`, `recallSkipped` and `recallAbandoned`; nothing in the reader records which mode a section was read in. Under D03 nothing else leaves the device, so as built the reader gives a crossover none of its outcomes.
 - The link rule as built: a `?lestur=` link's mode lasts until the reader leaves the section pages ([USER], 2026-11-04: so until S9.0 rules it). S9.3's in-view switch must clear an active link whichever rule is chosen (S8.4's note) [PED-35].
+- What the address and 'Deila' show once the link's mode carries on [PED-35]. On the section the link opens, the address keeps `?lestur=sidur`, and 'Deila' copies it, with the page's hash after a page turn. The sections the mode is carried into (by → after the last 'Næsta', or by 'Næsti kafli') are paged, but their address has no link: a reload there scrolls the section, and 'Deila' copies the plain address, which opens scrolled for whoever receives it, at the top even when it carries a page's hash. So under the rule as built, the address and the screen disagree from the second section on. On a phone 'Deila' hands the share sheet the same address (`handleShare`); no phone was used.
 - Timing: the plan put M8 on the live site, dark, "about late February 2027 at 1.5 sessions a week, early April at one". It went live on 2026-11-07 (train 11); S8.1–S8.4 merged on 2026-11-03 and 2026-11-04. The plan's remaining estimates stand: M9 about 6.75 sessions (4–5 more under D06's early opt-in), S10.1 0.75 and S10.2 0.5 plus the lessons. Its dates for M9 and the crossover were set when M8 was expected in late February.
 - The term also needs the May 2027 exam dates, which only [USER] has.
 
@@ -992,6 +995,14 @@ _Ruled at S9.0, before S10.1._
 - `curl -fsS <§1.1's address> | grep -o '<link rel="canonical"[^>]*>'` → `href="https://namsbokasafn.is/efnafraedi-2e/kafli/01/1-1-efnafraedi-i-samhengi/"`, no query.
 - `git show origin/main:src/app.html` → `count.js` injected after `load`; `git grep -n goatcounter origin/main -- src` → no other call (the privacy page's link only).
 - `git show origin/main:src/lib/utils/counters.ts` → `COUNTER_EVENTS = ['recallShown', 'recallSaved', 'recallSkipped', 'recallAbandoned']`.
+
+**Measured 2026-11-08.** The live build `1794077349564` at 1280×800, a fresh profile per run, service workers and GoatCounter blocked; the script is in the appendix ([S9.0: the address after a link](#s90-the-address-after-a-link)).
+
+- `s90-linkaddress.mjs`, §1.1 with the link → page 1's address `…/1-1-efnafraedi-i-samhengi/?lestur=sidur`, and 'Deila' copied it; page 2's `…/1-1-efnafraedi-i-samhengi/?lestur=sidur#sub-0-p-1`, copied as is. 15 presses of 'Næsta' reached the mark `end` and the recall prompt; after 'Sleppa', one → opened `…/1-2-efnishamur-og-flokkun-efnis/`, no query, the mark `ready`, 'Hluti 1 af 3 · Síða 1 af 10', and 'Deila' copied the plain address. A reload there: no mark and no page bar.
+- The same script, 'Næsti kafli' from §1.1's page 1 → §1.2 as above; two pages on, the address `…/1-2-efnishamur-og-flokkun-efnis/#sub-0-p-2`, copied as is; 'Næsti kafli' again → `…/1-3-edlis-og-efnaeiginleikar/`, no query, the mark `ready`, 'Hluti 1 af 1 · Síða 1 af 10', and the plain address copied. A reload of §1.3: no mark and no page bar.
+- The address copied on §1.2's third page, opened in a fresh profile → no mark, `scrollY` 0, and no element with the id `sub-0-p-2`.
+- Control, §1.1 with no link → no mark, and 'Deila' copied the plain address.
+- Headless Chromium here has no `navigator.share`, so every copy went through the clipboard. `git show origin/main:'src/routes/[bookSlug]/kafli/[chapterSlug]/[sectionSlug]/+page.svelte'` → `handleShare` gives `navigator.share`, when there is one, the same `window.location.href`.
 
 Issues: PED-35, PED-01.
 
@@ -1431,6 +1442,179 @@ for (const vp of [VIEWPORTS[0], VIEWPORTS[2]]) {
       ),
     ),
   };
+  await context.close();
+}
+
+await browser.close();
+console.log(JSON.stringify(out, null, 1));
+```
+
+### S9.0: the address after a link
+
+Run like the script above: `node <path>/s90-linkaddress.mjs > s90-linkaddress.json`. It printed D21's **Measured 2026-11-08** figures on 2026-11-08, against build `1794077349564`. Unlike `s90-measure.mjs`, it presses §1.1's last 'Næsta', so the end-of-section step runs and the recall prompt is skipped, in a profile thrown away after the run.
+
+```js
+// S9.0 prep, the link rule: what the address bar and 'Deila' show once a ?lestur=sidur visit
+// moves on to other sections inside the app, and what a reload or a copied address opens.
+// Live site, 1280x800, fresh profile per run, service workers and GoatCounter blocked.
+// Run from a checkout with node_modules: node <path>/s90-linkaddress.mjs > s90-linkaddress.json
+import { createRequire } from "node:module";
+const require = createRequire(`${process.cwd()}/package.json`);
+const { chromium } = require("playwright");
+
+const SITE = process.env.SITE ?? "https://namsbokasafn.is";
+const S11 = "/efnafraedi-2e/kafli/01/1-1-efnafraedi-i-samhengi/";
+const NEXT = 'nav[aria-label="Síðuflakk"] button[aria-label="Næsta síða"]';
+const SHARE = 'button[aria-label="Deila kafla"]';
+const NEXT_SECTION = 'a[data-nav="next"]';
+
+const browser = await chromium.launch();
+const out = {
+  site: SITE,
+  at: new Date().toISOString(),
+  version: (await (await fetch(SITE + "/_app/version.json")).json()).version,
+};
+
+// 'Deila' calls navigator.share when there is one, else the clipboard: record either
+async function fresh() {
+  const context = await browser.newContext({
+    serviceWorkers: "block",
+    viewport: { width: 1280, height: 800 },
+  });
+  await context.route(/gc\.zgo\.at/, (r) => r.abort());
+  await context.addInitScript(() => {
+    window.__shared = [];
+    window.__nativeShare = typeof navigator.share === "function";
+    if (window.__nativeShare)
+      navigator.share = async (d) =>
+        window.__shared.push({ via: "share", url: d.url });
+    Clipboard.prototype.writeText = async function (t) {
+      window.__shared.push({ via: "clipboard", url: t });
+    };
+  });
+  return { context, page: await context.newPage() };
+}
+
+const state = (page) =>
+  page.evaluate(() => ({
+    address: location.href,
+    mark:
+      document
+        .querySelector("[data-paged-section]")
+        ?.getAttribute("data-paged-section") ?? null,
+    label:
+      document.querySelector(".paged-nav-label")?.textContent?.trim() ?? null,
+    hiddenBlocks: document.querySelectorAll("[hidden]").length,
+    scrollY: Math.round(scrollY),
+    hashTarget: location.hash
+      ? !!document.getElementById(decodeURIComponent(location.hash.slice(1)))
+      : null,
+  }));
+
+async function share(page) {
+  await page.locator(SHARE).click();
+  await page.waitForTimeout(300);
+  return page.evaluate(() => ({
+    native: window.__nativeShare,
+    ...window.__shared.at(-1),
+  }));
+}
+
+const pagerReady = (page) =>
+  page.waitForFunction(
+    () =>
+      document
+        .querySelector("[data-paged-section]")
+        ?.getAttribute("data-paged-section") === "ready",
+    null,
+    { timeout: 20000 },
+  );
+
+async function moved(page, from) {
+  await page.waitForFunction((f) => location.pathname !== f, from, {
+    timeout: 15000,
+  });
+  await page.waitForTimeout(2500); // the next section mounts; its pager, if any, gets ready
+}
+
+async function openLinked(page) {
+  await page.goto(SITE + S11 + "?lestur=sidur", { waitUntil: "load" });
+  await pagerReady(page);
+  await page.waitForTimeout(500);
+}
+
+// 1. The pager's own way on: 'Næsta' to the end, 'Sleppa' on the recall prompt, then →
+{
+  const { context, page } = await fresh();
+  const r = (out.pagerWay = {});
+  await openLinked(page);
+  r.s11page1 = { ...(await state(page)), share: await share(page) };
+  await page.locator(NEXT).click();
+  await page.waitForTimeout(400);
+  r.s11page2 = { ...(await state(page)), share: await share(page) };
+  r.nextPresses = 1;
+  while ((await state(page)).mark !== "end" && r.nextPresses < 60) {
+    await page.locator(NEXT).click();
+    await page.waitForTimeout(250);
+    r.nextPresses++;
+  }
+  const skip = page.getByRole("button", { name: "Sleppa" });
+  r.recallPrompt = await skip.isVisible();
+  if (r.recallPrompt) await skip.click();
+  await page.waitForTimeout(400);
+  r.s11end = await state(page);
+  const from = new URL(page.url()).pathname;
+  await page.evaluate(() => document.activeElement?.blur?.());
+  await page.keyboard.press("ArrowRight");
+  await moved(page, from);
+  r.s12 = { ...(await state(page)), share: await share(page) };
+  await page.reload({ waitUntil: "load" });
+  await page.waitForTimeout(3500);
+  r.s12reloaded = await state(page);
+  await context.close();
+}
+
+// 2. 'Næsti kafli' from §1.1's first page, twice; a page turn and 'Deila' on §1.2; a reload
+{
+  const { context, page } = await fresh();
+  const r = (out.nextSectionLink = {});
+  await openLinked(page);
+  let from = new URL(page.url()).pathname;
+  await page.locator(NEXT_SECTION).first().click();
+  await moved(page, from);
+  r.s12 = { ...(await state(page)), share: await share(page) };
+  await page.locator(NEXT).click();
+  await page.waitForTimeout(300);
+  await page.locator(NEXT).click();
+  await page.waitForTimeout(500);
+  r.s12page3 = { ...(await state(page)), share: await share(page) };
+  from = new URL(page.url()).pathname;
+  await page.locator(NEXT_SECTION).first().click();
+  await moved(page, from);
+  r.s13 = { ...(await state(page)), share: await share(page) };
+  await page.reload({ waitUntil: "load" });
+  await page.waitForTimeout(3500);
+  r.s13reloaded = await state(page);
+  await context.close();
+}
+
+// 3. The address 'Deila' copied on §1.2's third page, opened by someone else
+{
+  const { context, page } = await fresh();
+  await page.goto(out.nextSectionLink.s12page3.share.url, {
+    waitUntil: "load",
+  });
+  await page.waitForTimeout(3500);
+  out.copiedAddressOpened = await state(page);
+  await context.close();
+}
+
+// Control: §1.1 with no link
+{
+  const { context, page } = await fresh();
+  await page.goto(SITE + S11, { waitUntil: "load" });
+  await page.waitForTimeout(3500);
+  out.controlNoLink = { ...(await state(page)), share: await share(page) };
   await context.close();
 }
 
