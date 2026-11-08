@@ -502,6 +502,31 @@
   padding-bottom: 0.5rem;
 }
 
+/* The pager's other pages, under hidden="until-found" (S11.1, D13; CODE-08): the browser hides
+   their content (content-visibility: hidden) but keeps each box, so a note's padding and border
+   stood as an empty frame and every margin moved the page. On screen they leave the flow and take
+   no room, as display: none did; in print they render, for a print that starts without
+   beforeprint (on beforeprint the pager shows every block itself). Where the browser lacks
+   until-found the pager hides with plain hidden, which these rules never match. */
+@media screen {
+  [data-paged-section] [hidden="until-found"] {
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+}
+
+@media print {
+  [data-paged-section] [hidden="until-found"] {
+    content-visibility: visible;
+  }
+}
+
 /* The dock (S9.5; UI-12, [USER]'s layout of 2026-11-08): while a section pages, below 1024 px
    the idle timer pill hides, and a running one keeps the pager bar's left end free
    (24 px + 76 px + 8 px). From 1024 px the pill stays, in the bar's right end. */

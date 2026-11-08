@@ -9,7 +9,7 @@
  * interim default is.
  */
 
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Browser, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { MODULE_BODY_SELECTOR, EXAMPLE_BREAK_TRIAL } from '../src/lib/utils/paginate';
 import { PAGE_BUDGET, KEY_SCROLL } from '../src/lib/utils/pager';
@@ -63,7 +63,7 @@ async function shownPage(page: Page) {
 			.filter((el) => el.tagName !== 'HEADER')
 			.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
 			.flatMap(flat)
-			.filter((el) => (el as HTMLElement).offsetParent !== null);
+			.filter((el) => (el as HTMLElement).offsetParent !== null && !el.closest('[hidden]'));
 		return {
 			visible: shown.reduce((sum, el) => sum + el.getBoundingClientRect().height, 0),
 			count: shown.length,
@@ -89,7 +89,7 @@ async function pageEnd(page: Page) {
 				.filter((el) => el.tagName !== 'HEADER')
 				.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
 				.flatMap(flat)
-				.filter((el) => (el as HTMLElement).offsetParent !== null);
+				.filter((el) => (el as HTMLElement).offsetParent !== null && !el.closest('[hidden]'));
 			return {
 				end: Math.max(...shown.map((el) => el.getBoundingClientRect().bottom)),
 				viewBottom: window.innerHeight - clearance
@@ -1037,7 +1037,8 @@ const markSidewaysBox = (page: Page) =>
 		const barTop = document.querySelector('nav.paged-nav')?.getBoundingClientRect().top ?? window.innerHeight;
 		const visible = (rect: DOMRect) => ({ top: Math.max(rect.top, 0), bottom: Math.min(rect.bottom, barTop) });
 		const box = Array.from(document.querySelectorAll<HTMLElement>('.reading-content *')).find((el) => {
-			if (el.offsetParent === null) return false;
+			// Under hidden="until-found" (S11.1) a block on another page keeps an offsetParent
+			if (el.offsetParent === null || el.closest('[hidden]')) return false;
 			const overflowX = getComputedStyle(el).overflowX;
 			const v = visible(el.getBoundingClientRect());
 			return (overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth + 100 && v.bottom - v.top >= 80;
@@ -1192,7 +1193,7 @@ const shownTags = (page: Page) =>
 			.filter((el) => el.tagName !== 'HEADER')
 			.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
 			.flatMap(flat)
-			.filter((el) => (el as HTMLElement).offsetParent !== null)
+			.filter((el) => (el as HTMLElement).offsetParent !== null && !el.closest('[hidden]'))
 			.map((el) => el.tagName);
 	}, MODULE_BODY_SELECTOR);
 
@@ -1286,7 +1287,7 @@ test.describe('The title and focus survive page turns (S9.2)', () => {
 		const focused = await page.evaluate(() => {
 			const el = Array.from(
 				document.querySelectorAll<HTMLElement>('article.cnx-module :is(a[href], button, [tabindex="0"])')
-			).find((e) => e.offsetParent !== null);
+			).find((e) => e.offsetParent !== null && !e.closest('[hidden]'));
 			el?.focus();
 			return el ? `<${el.tagName.toLowerCase()}>` : null;
 		});
@@ -1518,7 +1519,10 @@ test.describe('The way out and the section end (S9.3)', () => {
 				.filter((el) => el.tagName !== 'HEADER')
 				.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
 				.flatMap(flat)
-				.find((el) => (el as HTMLElement).offsetParent !== null && el.getBoundingClientRect().height > 0)!;
+				.find(
+					(el) =>
+						(el as HTMLElement).offsetParent !== null && !el.closest('[hidden]') && el.getBoundingClientRect().height > 0
+				)!;
 			first.setAttribute('data-test-anchor', '');
 			return first.getBoundingClientRect().top;
 		}, MODULE_BODY_SELECTOR);
@@ -1754,7 +1758,7 @@ test.describe('The MT notice, figures and images (S9.4)', () => {
 	const markFigureLink = (page: Page) =>
 		page.evaluate(() => {
 			const link = Array.from(document.querySelectorAll<HTMLAnchorElement>('.reading-content a[href^="#"]')).find((a) => {
-				if (a.offsetParent === null) return false;
+				if (a.offsetParent === null || a.closest('[hidden]')) return false;
 				const target = document.getElementById(decodeURIComponent(a.getAttribute('href')!.slice(1)));
 				return !!target?.matches('figure') && !!target.querySelector('img');
 			});
@@ -1891,7 +1895,7 @@ test.describe('The chrome, the budget and call 1 (S9.5)', () => {
 				lines.push(
 					await page.evaluate(() =>
 						Array.from(document.querySelectorAll<HTMLElement>('article.cnx-module p, article.cnx-module li'))
-							.filter((el) => el.offsetParent !== null && !el.querySelector('p, li'))
+							.filter((el) => el.offsetParent !== null && !el.closest('[hidden]') && !el.querySelector('p, li'))
 							.reduce((sum, el) => {
 								const lh = parseFloat(getComputedStyle(el).lineHeight) || 1;
 								return sum + Math.round(el.getBoundingClientRect().height / lh);
@@ -1974,7 +1978,7 @@ test.describe('The chrome, the budget and call 1 (S9.5)', () => {
 						.filter((el) => el.tagName !== 'HEADER')
 						.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
 						.flatMap(flat)
-						.filter((el) => (el as HTMLElement).offsetParent !== null)
+						.filter((el) => (el as HTMLElement).offsetParent !== null && !el.closest('[hidden]'))
 						.map((el) => el.getBoundingClientRect())
 						.filter((r) => r.height > 0);
 					const top = (document.querySelector('header.header')?.getBoundingClientRect().bottom ?? 0) + gap;
@@ -2054,4 +2058,131 @@ test.describe('The chrome, the budget and call 1 (S9.5)', () => {
 			expect(covered).toEqual([]);
 		});
 	}
+});
+
+/**
+ * The module body's blocks, as the paginator splits them, by their index in that list: those
+ * that render (a box with height) under the media now in effect. Print media is set by the test.
+ */
+const renderedBlocks = (page: Page) =>
+	page.evaluate((bodySelector) => {
+		const root = document.querySelector('article.cnx-module') as HTMLElement;
+		const flat = (el: Element): Element[] =>
+			el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
+		return Array.from(root.children)
+			.filter((el) => el.tagName !== 'HEADER')
+			.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
+			.flatMap(flat)
+			.map((el, i) => (el.getBoundingClientRect().height > 0 ? i : -1))
+			.filter((i) => i >= 0);
+	}, MODULE_BODY_SELECTOR);
+
+const printEvent = (page: Page, type: 'beforeprint' | 'afterprint') =>
+	page.evaluate((t) => window.dispatchEvent(new Event(t)), type);
+
+/** practiceReveal's hidden self-assessment rows: hidden in scrolled mode and in print too */
+const hiddenSelfAssess = (page: Page) => page.locator('.reading-content .practice-self-assess[hidden]').count();
+
+// Plan step S11.1 (CODE-08), under D13's ruling (a): Ctrl+P and 'Prenta kafla' print the whole
+// section, not the page on screen, and the browser's find-in-page reaches the other pages, which
+// the pager hides with hidden="until-found". Chromium has until-found, so these run its path; a
+// browser without it gets plain hidden (the jsdom tests' control). No test can drive the browser's
+// own find bar: the match test runs the HTML standard's reveal steps (beforematch at each hidden
+// element from the match outwards, then hidden removed), as the browser does.
+test.describe('Print and find-in-page (S11.1)', () => {
+	test.skip(!SECTION, 'No synced module section');
+	test.use({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+	const url = () => sectionUrl('1.2') ?? SECTION!;
+
+	/** The blocks that render in print when the section scrolls: what a paged print must match */
+	async function scrolledPrint(browser: Browser): Promise<{ blocks: number[]; selfAssess: number }> {
+		const context = await browser.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
+		const scrolled = await context.newPage();
+		await seedSettings(scrolled, { readingMode: 'scrolled' });
+		await openScrolled(scrolled, url());
+		await scrolled.emulateMedia({ media: 'print' });
+		const result = { blocks: await renderedBlocks(scrolled), selfAssess: await hiddenSelfAssess(scrolled) };
+		await context.close();
+		return result;
+	}
+
+	test('on screen the other pages are hidden until found and take no room', async ({ page }) => {
+		await openPaged(page, url());
+		const boxes = await page.evaluate((selector) => {
+			return Array.from(document.querySelectorAll(selector), (el) => {
+				const r = el.getBoundingClientRect();
+				return { value: el.getAttribute('hidden'), area: r.width * r.height };
+			});
+		}, HIDDEN_BLOCKS);
+		expect(boxes.length).toBeGreaterThan(0);
+		expect(new Set(boxes.map((b) => b.value))).toEqual(new Set(['until-found']));
+		expect(boxes.filter((b) => b.area > 0)).toEqual([]);
+	});
+
+	test('beforeprint prints every block the scrolled section prints, and afterprint brings the page back', async ({
+		page,
+		browser
+	}) => {
+		const control = await scrolledPrint(browser);
+		expect(control.blocks.length).toBeGreaterThan(10);
+		await openPaged(page, url());
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+		for (let i = 0; i < 2; i++) {
+			const text = (await pagerLabel(page).textContent())!.trim();
+			await next.click();
+			await expect(pagerLabel(page)).not.toHaveText(text);
+		}
+		await page.waitForTimeout(300);
+		const label = (await pagerLabel(page).textContent())!.trim();
+		const hiddenBefore = await hiddenBlocks(page).count();
+		const scrollBefore = await page.evaluate(() => window.scrollY);
+		expect(hiddenBefore).toBeGreaterThan(0);
+
+		await printEvent(page, 'beforeprint');
+		await expect(hiddenBlocks(page)).toHaveCount(0);
+		await page.emulateMedia({ media: 'print' });
+		expect(await renderedBlocks(page)).toEqual(control.blocks);
+		expect(await hiddenSelfAssess(page)).toBe(control.selfAssess);
+
+		await page.emulateMedia({ media: 'screen' });
+		await printEvent(page, 'afterprint');
+		await expect(pagerLabel(page)).toHaveText(label);
+		await expect(hiddenBlocks(page)).toHaveCount(hiddenBefore);
+		expect(Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore)).toBeLessThanOrEqual(2);
+	});
+
+	test('print media alone, with no beforeprint, renders the other pages too', async ({ page, browser }) => {
+		const control = await scrolledPrint(browser);
+		await openPaged(page, url());
+		await page.emulateMedia({ media: 'print' });
+		expect(await renderedBlocks(page)).toEqual(control.blocks);
+		expect(await hiddenSelfAssess(page)).toBe(control.selfAssess);
+	});
+
+	test("find-in-page's match on the last page turns to that page", async ({ page }) => {
+		await openPaged(page, url());
+		const before = (await pagerLabel(page).textContent())!.trim();
+		const revealed = await page.evaluate(() => {
+			const ps = document.querySelectorAll<HTMLElement>('article.cnx-module p');
+			const match = ps[ps.length - 1];
+			// The HTML standard's ancestor revealing algorithm, as find-in-page runs it
+			const fired: string[] = [];
+			for (let el: HTMLElement | null = match; el; el = el.parentElement) {
+				if (el.getAttribute('hidden') !== 'until-found') continue;
+				fired.push(el.tagName);
+				el.dispatchEvent(new Event('beforematch', { bubbles: true }));
+				el.removeAttribute('hidden');
+			}
+			match.setAttribute('data-test-match', '');
+			return fired;
+		});
+		expect(revealed.length, 'the last paragraph starts on a hidden page').toBeGreaterThan(0);
+		await expect(pagerLabel(page)).toHaveText(LAST_PAGE);
+		expect(before).not.toMatch(LAST_PAGE);
+		const match = page.locator('[data-test-match]');
+		await expect(match).toBeVisible();
+		expect(await match.evaluate((el) => !!el.closest('[hidden]'))).toBe(false);
+		expect(new URL(page.url()).hash).toMatch(/^#sub-\d+(-p-\d+)?$/);
+	});
 });
