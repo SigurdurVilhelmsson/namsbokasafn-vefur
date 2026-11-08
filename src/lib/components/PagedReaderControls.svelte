@@ -406,6 +406,13 @@
 		announce();
 		if (scroll) scrollToContentTop();
 		report();
+		// Once the label row for this page has rendered, check it fits the reserve (S9.5)
+		if (live) {
+			const signal = run?.signal;
+			tick().then(() => {
+				if (!signal?.aborted) calibrate({ growOnly: true });
+			});
+		}
 	}
 
 	function markUnitComplete(unitIndex: number) {
@@ -753,14 +760,26 @@
 
 	/** Measure the real gap between the last block and the bottom of the page
 	 *  controls, now that they exist, and re-split if the estimate was off. */
-	function calibrate() {
+	/**
+	 * Measure the gap between the last block and the bottom of the page controls on the page
+	 * shown, and re-split if the estimate was off. From the last block's bottom margin edge: that
+	 * margin is already in the page's height (pageHeight()). At init it corrects the estimate
+	 * either way; after a turn it only grows it (`growOnly`), since the label row wraps to a
+	 * different height on different pages (at 375 px, 'Síða 14 af 27' takes a line more than
+	 * 'Síða 1 af 27'), and a page whose row is taller than the one measured overran by the
+	 * difference (S9.5). It re-splits at most once for each new, taller row.
+	 */
+	function calibrate({ growOnly = false } = {}) {
 		if (!navEl || !ready) return;
 		const shown = flatPages[current] && units[flatPages[current].unit];
 		const range = shown && shown.pages[flatPages[current].page];
 		const last = range && pageBlocks(shown, range).at(-1);
 		if (!last) return;
-		const measured = navEl.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom;
-		if (measured > 0 && Math.abs(measured - gapBelow) > 8) {
+		const lastEdge = last.getBoundingClientRect().bottom + (parseFloat(getComputedStyle(last).marginBottom) || 0);
+		const measured = navEl.getBoundingClientRect().bottom - lastEdge;
+		if (!(measured > 0)) return;
+		const off = measured - gapBelow;
+		if (off > 8 || (!growOnly && off < -8)) {
 			gapBelow = measured;
 			recompute();
 		}
