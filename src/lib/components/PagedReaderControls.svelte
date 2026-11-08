@@ -1007,7 +1007,7 @@
 
 			<!-- On the last page the button finishes the section (ruling 3), so it says so (UI-20),
 			     at every width: a check mark alone is too easy to misread for it.
-			     D20: proposed — 'Ljúka kafla' -->
+			     'Ljúka kafla': Checked by [USER] as D20 batch 12 (2026-11-08). -->
 			<button
 				class="paged-nav-btn"
 				onclick={next}
@@ -1040,7 +1040,7 @@
 				{/if}
 				{#if onleave}
 					<!-- The in-view way out (S9.3, UI-05, PED-01), the toolbar's 'Samfellt skrun' again;
-					     v1.1's Lestrarstilling label. D20: proposed — 'Samfellt skrun' -->
+					     v1.1's Lestrarstilling label. Checked by [USER] as D20 batch 12 (2026-11-08). -->
 					<button class="paged-nav-leave" aria-pressed="false" onclick={() => onleave?.()}>Samfellt skrun</button>
 				{/if}
 			</div>

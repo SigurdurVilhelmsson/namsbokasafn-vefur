@@ -465,7 +465,7 @@
 <article class="max-w-4xl mx-auto px-1 sm:px-0">
 	<!-- The in-view way out (S9.3; UI-05, PED-01): the first control in the reading region, before
 	     the objectives, so a reader meets it before page 1. v1.1's Lestrarstilling words.
-	     D20: proposed — 'Lestrarstilling' (the group's name), 'Síðuskipt', 'Samfellt skrun' -->
+	     'Lestrarstilling' (the group's name), 'Síðuskipt' and 'Samfellt skrun': Checked by [USER] as D20 batch 12 (2026-11-08). -->
 	{#if showModeSwitch}
 		<div class="mb-3 flex justify-end">
 			<div role="group" aria-label="Lestrarstilling" class="inline-flex gap-0.5 rounded-lg border border-[var(--border-color)] p-0.5 text-sm">

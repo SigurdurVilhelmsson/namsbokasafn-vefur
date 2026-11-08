@@ -177,7 +177,7 @@
       </p>
       <!-- Alternative tagline the editor may swap in later:
            "Þýtt með íslenskri vélþýðingu (Erlendur) og ritstýrt af kennurum með fagþekkingu." -->
-      <!-- D20: proposed — the machine-translation credit, the same text as MACHINE_TRANSLATION_CREDIT ([USER], 2026-11-08) -->
+      <!-- The machine-translation credit, the same text as MACHINE_TRANSLATION_CREDIT ([USER], 2026-11-08). Checked by [USER] as D20 batch 12 (2026-11-08). -->
       <p class="hero-credit anim-item" style="--anim-delay: 250ms">
         Íslensk vélþýðing (Erlendur, Miðeind)
       </p>
