@@ -15,6 +15,7 @@ import {
 	resolvePageHash,
 	positionLabel,
 	spokenPosition,
+	firstInView,
 	keyAction,
 	KEY_SCROLL,
 	keyScroll,
@@ -599,5 +600,37 @@ describe('pagerState (S8.4, CODE-17)', () => {
 		expect(pagerState({ ...base, current: 2 })).toBe('ready');
 		expect(pagerState({ ...base, current: 1, sectionComplete: true })).toBe('ready');
 		expect(pagerState({ ...base, current: 2, sectionComplete: true })).toBe('end');
+	});
+});
+
+// Plan step S9.3 (CODE-07): switching to paged opens the page holding the block the reader is
+// at: the first block with at least half of it below the top of the reading view, or one that
+// runs past the view's bottom (a block taller than the view, which the reader is inside)
+describe('firstInView', () => {
+	const span = (top: number, bottom: number) => ({ top, bottom });
+	const VIEW = span(96, 724);
+
+	it('skips a block whose last sliver shows under the top: the page before', () => {
+		// After a switch to scrolling the page's first block sits under the running title, and
+		// the block before it ends just above, still below the view's top
+		expect(firstInView([span(-60, 140), span(156, 400)], VIEW)).toBe(1);
+	});
+
+	it('takes a block half or more of which is below the top', () => {
+		expect(firstInView([span(-100, 300), span(310, 500)], VIEW)).toBe(0);
+		expect(firstInView([span(-150, 250), span(260, 500)], VIEW)).toBe(1);
+	});
+
+	it('takes a block that runs past the bottom of the view, however much is above', () => {
+		expect(firstInView([span(-700, 1500), span(1510, 1600)], VIEW)).toBe(0);
+	});
+
+	it('skips a block above the top, and one with no height', () => {
+		expect(firstInView([span(-400, -100), span(200, 200), span(200, 500)], VIEW)).toBe(2);
+	});
+
+	it('gives -1 when there is no block in view', () => {
+		expect(firstInView([span(-400, -100)], VIEW)).toBe(-1);
+		expect(firstInView([], VIEW)).toBe(-1);
 	});
 });

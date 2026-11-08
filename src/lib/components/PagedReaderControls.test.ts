@@ -693,3 +693,51 @@ describe("the section's end (S9.3)", () => {
 		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 1');
 	});
 });
+
+// Plan step S9.3 (UI-05, PED-01, CODE-07): the in-view way out. The pager names the block its
+// page starts with, so the section page can keep it in view across a switch to scrolling;
+// opens the page holding a given block on the way back; and offers 'Samfellt skrun' in the
+// label row.
+describe('the way out (S9.3)', () => {
+	type WithAnchor = { shownAnchor: () => HTMLElement | null };
+	const blocks = (c: HTMLElement) => Array.from(c.querySelectorAll<HTMLElement>('.cnx-module h2, .cnx-module p'));
+
+	it('shownAnchor() names the first block of the page shown, and follows a turn', async () => {
+		const c = content();
+		const { pager } = open(c);
+		await settle();
+		expect((pager as unknown as WithAnchor).shownAnchor()).toBe(blocks(c)[0]);
+		key('ArrowRight');
+		// Page 2 of the first sub-section starts with its second paragraph
+		expect((pager as unknown as WithAnchor).shownAnchor()).toBe(blocks(c)[2]);
+	});
+
+	it('opens the page holding startAt, ahead of a page hash', async () => {
+		history.replaceState(null, '', '#sub-0-p-2');
+		const c = content();
+		// The second sub-section's second paragraph: its page 2
+		const start = c.querySelectorAll('section')[1].querySelectorAll('p')[1] as HTMLElement;
+		open(c, { startAt: start });
+		await settle();
+		expect(label()).toBe('Hluti 2 af 3 · Síða 2 af 2');
+	});
+
+	it("offers 'Samfellt skrun' in the label row when given onleave, not pressed", async () => {
+		const c = content();
+		const onleave = vi.fn();
+		open(c, { onleave });
+		await settle();
+		const leave = nav()!.querySelector<HTMLButtonElement>('button[aria-pressed]');
+		expect(leave?.textContent?.trim()).toBe('Samfellt skrun');
+		expect(leave?.getAttribute('aria-pressed')).toBe('false');
+		leave!.click();
+		expect(onleave).toHaveBeenCalledTimes(1);
+	});
+
+	it('offers no switch without onleave', async () => {
+		const c = content();
+		open(c);
+		await settle();
+		expect(nav()!.querySelector('button[aria-pressed]')).toBeNull();
+	});
+});

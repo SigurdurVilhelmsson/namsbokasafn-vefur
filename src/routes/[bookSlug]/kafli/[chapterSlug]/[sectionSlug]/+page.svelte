@@ -8,7 +8,7 @@
 	import type { PageData } from './$types';
 	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
 	import { isSectionRead, isSectionBookmarked, getSavedScrollPosition, type ScrollPositions } from '$lib/stores/reader';
-	import { readingMode, type ReadingMode } from '$lib/stores/settings';
+	import { readingMode, settings, type ReadingMode } from '$lib/stores/settings';
 	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
@@ -18,7 +18,8 @@
 	import BookAttribution from '$lib/components/BookAttribution.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import PagedReaderControls from '$lib/components/PagedReaderControls.svelte';
-	import { PAGE_BUDGET, type PagerState } from '$lib/utils/pager';
+	import { PAGE_BUDGET, decodePageHash, firstInView, type PagerState } from '$lib/utils/pager';
+	import { buildUnits } from '$lib/utils/paginate';
 	import { readDetection } from '$lib/actions/readDetection';
 	import RecallPrompt from '$lib/components/RecallPrompt.svelte';
 	import RecallReadBack from '$lib/components/RecallReadBack.svelte';
@@ -78,6 +79,20 @@
 	// completion button stand down (plan step S9.3; CODE-07, UI-04). Keyed on the pager, not
 	// the mode: a failed pager gives the section back to scrolling, and they return with it.
 	let pagerWorking = $derived(pagedMark !== undefined);
+
+	// The in-view way out (plan step S9.3; UI-05, PED-01, CODE-07). It shows while the section
+	// pages, and after the reader switched to scrolling here, so they can switch back; never
+	// for a reader who has not paged, since offering paging to everyone is the picker S11.3
+	// owns (D06). Choosing stores the mode, as D06 allows for a pick, and replaces a link's mode
+	// for the rest of the visit.
+	let switchedOff = $state(false);
+	let showModeSwitch = $derived(paged || switchedOff);
+	let pagerControls: ReturnType<typeof PagedReaderControls> | undefined = $state();
+	let scrollButton: HTMLButtonElement | undefined = $state();
+	/** Where the reader was when they switched to paged: the pager opens that page */
+	let startAt: HTMLElement | null = $state(null);
+	/** The block a switch to scrolling kept in place. Not $state. */
+	let keptAnchor: HTMLElement | null = null;
 
 	// Print the current section
 	function handlePrint() {
@@ -150,6 +165,9 @@
 		showRecallPrompt = false;
 		showRecallReadBack = false;
 		endUncovered = false;
+		switchedOff = false;
+		startAt = null;
+		keptAnchor = null;
 		endReached = false;
 
 		// Reset the continue-reading prompt, then check this section's saved position
@@ -320,6 +338,64 @@
 	let endHere = $derived(endFor === sectionKey);
 	let endCovered = $derived(paged && endHere && (showRecallPrompt || showRecallReadBack) && !endUncovered);
 
+	/** The first block of the content on screen, in the scrolled layout */
+	function firstBlockOnScreen(): HTMLElement | null {
+		const root = contentWrapper?.querySelector<HTMLElement>('article.cnx-module');
+		if (!root) return null;
+		const blocks = buildUnits(root).flatMap((unit) => unit.children);
+		const spans = blocks.map((el) => {
+			const rect = el.getBoundingClientRect();
+			return { top: rect.top, bottom: rect.bottom };
+		});
+		const i = firstInView(spans, {
+			top: PAGE_BUDGET.scrollOffset,
+			bottom: window.innerHeight - PAGE_BUDGET.bottomClearance
+		});
+		return i >= 0 ? blocks[i] : null;
+	}
+
+	/**
+	 * 'Síðuskipt' or 'Samfellt skrun'. To scrolling: the block the page started with stays where
+	 * it was on screen (its top is measured before the pager shows every block again, and the
+	 * window scrolled by the difference after), and the page hash goes, which would otherwise
+	 * reopen that page on the way back. To paged: the pager opens the page holding the block
+	 * on screen. From the label row's button, which leaves with the pager, focus goes to the
+	 * toolbar's.
+	 */
+	async function chooseMode(mode: ReadingMode, { fromPager = false } = {}) {
+		if ((mode === 'paged') === paged) return;
+		linkMode = null;
+		if (mode === 'scrolled') {
+			const anchor = pagerControls?.shownAnchor() ?? null;
+			const before = anchor?.getBoundingClientRect().top;
+			keptAnchor = anchor;
+			switchedOff = true;
+			startAt = null;
+			showContinuePrompt = false;
+			settings.setReadingMode('scrolled');
+			if (decodePageHash(window.location.hash)) {
+				try {
+					history.replaceState(history.state, '', window.location.pathname + window.location.search);
+				} catch {
+					/* the hash is cosmetic */
+				}
+			}
+			await tick();
+			if (anchor?.isConnected && before !== undefined) {
+				window.scrollBy({ top: anchor.getBoundingClientRect().top - before });
+			}
+			if (fromPager) scrollButton?.focus({ preventScroll: true });
+		} else {
+			// Straight back, the block the switch kept in place is still where the reader left
+			// it: reopen its page, which a guess from the screen may miss by one
+			const kept = keptAnchor?.isConnected ? keptAnchor.getBoundingClientRect() : null;
+			const keptInView =
+				kept && kept.top >= PAGE_BUDGET.scrollOffset / 2 && kept.top < window.innerHeight - PAGE_BUDGET.bottomClearance;
+			startAt = keptInView ? keptAnchor : firstBlockOnScreen();
+			settings.setReadingMode('paged');
+		}
+	}
+
 	// Reactive checks using subscribed state
 	let isRead = $derived(isSectionRead(progress, data.bookSlug, data.chapterSlug, data.sectionSlug));
 	let isBookmarked = $derived(isSectionBookmarked(bookmarks, data.bookSlug, data.chapterSlug, data.sectionSlug));
@@ -372,6 +448,35 @@
 </svelte:head>
 
 <article class="max-w-4xl mx-auto px-1 sm:px-0">
+	<!-- The in-view way out (S9.3; UI-05, PED-01): the first control in the reading region, before
+	     the objectives, so a reader meets it before page 1. v1.1's Lestrarstilling words.
+	     D20: proposed — 'Lestrarstilling' (the group's name), 'Síðuskipt', 'Samfellt skrun' -->
+	{#if showModeSwitch}
+		<div class="mb-3 flex justify-end">
+			<div role="group" aria-label="Lestrarstilling" class="inline-flex gap-0.5 rounded-lg border border-[var(--border-color)] p-0.5 text-sm">
+				<button
+					aria-pressed={paged}
+					onclick={() => chooseMode('paged')}
+					class="rounded-md px-3 py-1 font-medium transition-colors {paged
+						? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
+						: 'text-[var(--text-secondary)] hover:bg-[var(--accent-subtle)]'}"
+				>
+					Síðuskipt
+				</button>
+				<button
+					bind:this={scrollButton}
+					aria-pressed={!paged}
+					onclick={() => chooseMode('scrolled')}
+					class="rounded-md px-3 py-1 font-medium transition-colors {!paged
+						? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
+						: 'text-[var(--text-secondary)] hover:bg-[var(--accent-subtle)]'}"
+				>
+					Samfellt skrun
+				</button>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Continue where you left off prompt -->
 	{#if showContinuePrompt && savedPosition && !pagerWorking}
 		<div
@@ -611,11 +716,14 @@
 			     and then leads on (finishFromPager). v1.1 passed markAsRead (dde768e :442), which
 			     under D10 no longer opens the prompt. -->
 			<PagedReaderControls
+				bind:this={pagerControls}
 				container={contentWrapper}
 				oncomplete={finishFromPager}
 				onstatechange={(state) => (pagerState = state)}
 				covered={endCovered}
 				onuncover={() => (endUncovered = true)}
+				{startAt}
+				onleave={() => chooseMode('scrolled', { fromPager: true })}
 			/>
 		{/if}
 

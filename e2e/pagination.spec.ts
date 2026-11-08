@@ -1536,4 +1536,171 @@ test.describe('The way out and the section end (S9.3)', () => {
 		await expect(pagerLabel(page)).toHaveText(last);
 		expect((await shownTags(page)).length, 'the last page is shown').toBeGreaterThan(0);
 	});
+
+	const modeGroup = (page: Page) => page.getByRole('group', { name: 'Lestrarstilling' });
+
+	/** Turns up to `n` pages with 'Næsta', stopping before the last */
+	async function turn(page: Page, n: number) {
+		const label = pagerLabel(page);
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+		for (let i = 0; i < n && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+			const text = (await label.textContent())!.trim();
+			await next.click();
+			await expect(label).not.toHaveText(text);
+			await page.waitForTimeout(300);
+		}
+	}
+
+	/** Marks the page's first shown block (data-test-anchor) and gives its top */
+	const markFirstShown = (page: Page) =>
+		page.evaluate((bodySelector) => {
+			const root = document.querySelector('article.cnx-module') as HTMLElement;
+			const flat = (el: Element): Element[] =>
+				el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
+			const first = Array.from(root.children)
+				.filter((el) => el.tagName !== 'HEADER')
+				.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
+				.flatMap(flat)
+				.find((el) => (el as HTMLElement).offsetParent !== null && el.getBoundingClientRect().height > 0)!;
+			first.setAttribute('data-test-anchor', '');
+			return first.getBoundingClientRect().top;
+		}, MODULE_BODY_SELECTOR);
+
+	/** Presses a button without Playwright scrolling it into view first, as a click on a
+	 *  control already reached would */
+	const press = (button: ReturnType<Page['getByRole']>) => button.evaluate((el) => (el as HTMLElement).click());
+
+	// UI-05, PED-01: the way out comes before page 1 in the Tab order, ahead of the objectives
+	test("Tab reaches 'Samfellt skrun' before any objective button, and the switch leads the reading region", async ({
+		page
+	}) => {
+		test.setTimeout(120000);
+		await page.setViewportSize({ width: 1280, height: 800 });
+		await openPaged(page, SECTION!);
+		const first = await page.evaluate(() => {
+			const region = document.querySelector('[data-paged-section]')!.parentElement!.closest('article')!;
+			const control = region.querySelector<HTMLElement>(
+				'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			);
+			return control?.textContent?.trim() ?? null;
+		});
+		expect(first, 'the reading region opens with the switch').toBe('Síðuskipt');
+
+		await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+		let reached = '';
+		for (let i = 0; i < 300; i++) {
+			await page.keyboard.press('Tab');
+			reached = await page.evaluate(() => {
+				const a = document.activeElement as HTMLElement | null;
+				return a?.getAttribute('aria-label') || a?.textContent?.trim() || '';
+			});
+			if (reached === 'Samfellt skrun' || /^Merkja markmið/.test(reached)) break;
+		}
+		expect(reached).toBe('Samfellt skrun');
+	});
+
+	// CODE-07, PED-01: the place survives the switch, and the choice is stored
+	for (const viewport of [
+		{ width: 1280, height: 800 },
+		{ width: 390, height: 844 }
+	]) {
+		test(`'Samfellt skrun' keeps the page's first block in place and stores the choice, at ${viewport.width}px`, async ({
+			page
+		}) => {
+			test.setTimeout(120000);
+			await page.setViewportSize(viewport);
+			await openPaged(page, SECTION!);
+			await turn(page, 2);
+			const before = await markFirstShown(page);
+
+			await press(modeGroup(page).getByRole('button', { name: 'Samfellt skrun' }));
+			await expect(pager(page)).toHaveCount(0);
+			await page.waitForTimeout(300);
+			await expect(page.locator(HIDDEN_BLOCKS)).toHaveCount(0);
+			const after = await page.locator('[data-test-anchor]').evaluate((el) => el.getBoundingClientRect().top);
+			expect(Math.abs(after - before), `the block moved from ${Math.round(before)} to ${Math.round(after)}px`).toBeLessThanOrEqual(100);
+			expect((await stored(page))?.readingMode).toBe('scrolled');
+			await expect(modeGroup(page).getByRole('button', { name: 'Samfellt skrun' })).toHaveAttribute('aria-pressed', 'true');
+			await expect(modeGroup(page).getByRole('button', { name: 'Síðuskipt' })).toHaveAttribute('aria-pressed', 'false');
+		});
+	}
+
+	test("'Síðuskipt' after 'Samfellt skrun' opens the same page again, in view", async ({ page }) => {
+		test.setTimeout(120000);
+		await page.setViewportSize({ width: 1280, height: 800 });
+		await openPaged(page, SECTION!);
+		await turn(page, 2);
+		const shown = (await pagerLabel(page).textContent())!.trim();
+		await press(modeGroup(page).getByRole('button', { name: 'Samfellt skrun' }));
+		await expect(pager(page)).toHaveCount(0);
+		await page.waitForTimeout(300);
+
+		await press(modeGroup(page).getByRole('button', { name: 'Síðuskipt' }));
+		await expect(pagerLabel(page)).toHaveText(shown, { timeout: 15000 });
+		expect((await stored(page))?.readingMode).toBe('paged');
+		const navTop = await pager(page).evaluate((el) => el.getBoundingClientRect().top);
+		expect(navTop, 'the page controls in view').toBeLessThan(800);
+	});
+
+	test("the label row's 'Samfellt skrun' leaves paging, and focus goes to the toolbar's", async ({ page }) => {
+		test.setTimeout(120000);
+		await openPaged(page, SECTION!);
+		await turn(page, 1);
+		await pager(page).getByRole('button', { name: 'Samfellt skrun' }).click();
+		await expect(pager(page)).toHaveCount(0);
+		const toolbar = modeGroup(page).getByRole('button', { name: 'Samfellt skrun' });
+		await expect(toolbar).toBeFocused();
+		await expect(toolbar).toHaveAttribute('aria-pressed', 'true');
+		await expect(page.locator(HIDDEN_BLOCKS)).toHaveCount(0);
+	});
+
+	// D06: no picker is rendered before S11.3, so a reader who has not paged meets no switch
+	test('a reader who has not paged sees no switch', async ({ browser }) => {
+		const context = await browser.newContext({ serviceWorkers: 'block' });
+		const page = await context.newPage();
+		await page.goto(SECTION!);
+		await expect(page.locator('.reading-content').first()).toBeVisible({ timeout: 15000 });
+		await page.evaluate(() => document.fonts.ready);
+		await page.waitForTimeout(1500);
+		await expect(page.locator('[data-paged-section]')).toHaveCount(0);
+		await expect(page.getByRole('group', { name: 'Lestrarstilling' })).toHaveCount(0);
+		await context.close();
+	});
+
+	// UI-11 (fixed on main in S2.2): closing Settings on a page past the first keeps the place
+	test('closing Settings on a page past the first keeps the place', async ({ page }) => {
+		test.setTimeout(120000);
+		await page.setViewportSize({ width: 1280, height: 800 });
+		await openPaged(page, SECTION!);
+		await turn(page, 2);
+		const y = await page.evaluate(() => scrollY);
+		const navBefore = await pager(page).evaluate((el) => el.getBoundingClientRect().bottom);
+		// A coordinate click: an element click scrolls the sticky header's button 'into view'
+		// under html's scroll-padding-top first, the very 412 px jump under test (UI-11's note)
+		const opener = page.getByRole('button', { name: 'Stillingar' });
+		const box = (await opener.boundingBox())!;
+		await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+		await expect(page.getByRole('dialog')).toBeVisible();
+		await page.keyboard.press('Escape');
+		await expect(page.getByRole('dialog')).toHaveCount(0);
+		expect(Math.abs((await page.evaluate(() => scrollY)) - y)).toBeLessThanOrEqual(2);
+		await expect(opener).toBeFocused();
+		const navAfter = await pager(page).evaluate((el) => el.getBoundingClientRect().bottom);
+		expect(Math.abs(navAfter - navBefore), 'the page controls stay where they were').toBeLessThanOrEqual(2);
+	});
+
+	// The ratchet scans a section unseeded, where no switch shows, so the new controls are
+	// scanned here: WCAG 2.1 A/AA on the switch and the label row, in both themes
+	for (const theme of ['light', 'dark'] as const) {
+		test(`axe finds nothing on the switch and the label row, ${theme}`, async ({ page }) => {
+			await openPaged(page, SECTION!);
+			if (theme === 'dark') await page.evaluate(() => document.documentElement.classList.add('dark'));
+			const { violations } = await new AxeBuilder({ page })
+				.include('[role="group"][aria-label="Lestrarstilling"]')
+				.include('nav[aria-label="Síðuflakk"]')
+				.withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+				.analyze();
+			expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
+		});
+	}
 });

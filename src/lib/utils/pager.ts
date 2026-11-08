@@ -251,6 +251,22 @@ export interface VerticalSpan {
 const SCROLLING_KEYS = new Set([' ', 'PageDown', 'PageUp']);
 
 /**
+ * The block the reader is at, for a switch to paged that opens the page holding it (plan step
+ * S9.3, CODE-07): the first block with at least half of it below the top of the reading view,
+ * or one that runs past the view's bottom (taller than the view, the reader inside it). A
+ * block showing only its last sliver under the top is passed over: after a switch to
+ * scrolling, the block before the page's first one ends just below the view's top, under the
+ * running title, and taking it would reopen the page before. -1 when no block is in view.
+ */
+export function firstInView(spans: readonly VerticalSpan[], view: VerticalSpan): number {
+	return spans.findIndex(({ top, bottom }) => {
+		const height = bottom - top;
+		if (!(height > 0) || bottom <= view.top) return false;
+		return bottom >= view.bottom || bottom - Math.max(top, view.top) >= height / 2;
+	});
+}
+
+/**
  * How far a key scrolls the window before the page turns, in px (down is positive), or 0
  * to turn now (D11, 2026-11-08; CODE-06). Space and PageDown scroll down while the page's
  * end is below the window, Shift+Space and PageUp up while its top is above it; each press
