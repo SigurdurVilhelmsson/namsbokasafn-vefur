@@ -754,7 +754,7 @@
 					{#if placeOffer}
 						<!-- The saved place, offered at the content top (S11.3, D13). 'Haltu áfram að lesa' and
 						     'Halda áfram' are the scrolled prompt's. 'Þú varst síðast hér:' and 'Byrja á byrjun'
-						     (D13's word): D20: proposed -->
+						     (D13's word): Checked by [USER] as D20 batch 13 (2026-11-08). -->
 						<div
 							class="mb-4 p-4 rounded-xl bg-[var(--accent-light)] border border-[var(--accent-subtle)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
 							role="status"

@@ -233,7 +233,7 @@ export function positionLabel(
 	// '?lestur=sidur' link until a reading-mode picker is rendered (D06).
 	const pages = `Síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
 	const { kind, part, parts } = partOf(unit, pageCounts.length, kinds);
-	// 'Neðanmálsgreinar' names the footnotes (S11.3, [USER]'s choice of 2026-11-08). D20: proposed
+	// 'Neðanmálsgreinar' names the footnotes (S11.3, [USER]'s choice of 2026-11-08). Checked by [USER] as D20 batch 13 (2026-11-08).
 	if (kind === 'footnotes') return `Neðanmálsgreinar · ${pages}`;
 	if (kind === 'intro' || parts <= 1) return pages;
 	return `Hluti ${part} af ${parts} · ${pages}`;
@@ -275,7 +275,7 @@ export function spokenPosition(
 	const pages = `síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
 	const { kind, part, parts } = partOf(unit, pageCounts.length, kinds);
 	// As the label reads (S11.3): the footnotes named, the intro's page alone, no 'Hluti' in a
-	// section of one part. D20: proposed
+	// section of one part. Checked by [USER] as D20 batch 13 (2026-11-08).
 	if (kind === 'footnotes') return `Neðanmálsgreinar, ${pages}`;
 	if (kind === 'intro') return `Síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
 	if (parts <= 1) return heading ? `${heading}, ${pages}` : `Síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
