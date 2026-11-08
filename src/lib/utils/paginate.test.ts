@@ -386,10 +386,34 @@ describe('buildUnits', () => {
 			)
 		);
 		expect(units.map((u) => tags(u.children))).toEqual([
-			['header', 'p', 'p', 'figure'],
+			['p', 'p', 'figure'],
 			['h2', 'p'],
 			['h2', 'p']
 		]);
+	});
+
+	// D12 (2026-11-08): the section title stays on every page, so the article's own
+	// <header> is no block of any page and the pager never hides it (UI-19, UI-05)
+	it('keeps the module header out of every unit, so its h1 is never paged', () => {
+		const root = article('<header><h1>T</h1></header><main><p>a</p><section><h2>S</h2><p>b</p></section></main>');
+		const header = root.querySelector('header')!;
+		const units = buildUnits(root);
+		expect(units.flatMap((u) => u.children).filter((el) => el === header || el.contains(header))).toEqual([]);
+	});
+
+	// 14.3, 14.4 and 16.3 on efni's ② preview open their body with a sub-section, so the
+	// intro held the header alone: a page with nothing but the title (UI-19)
+	it('starts with the first sub-section when the body opens with one', () => {
+		const units = buildUnits(article('<header><h1>T</h1></header><main><section><h2>S</h2><p>a</p></section></main>'));
+		expect(units.map((u) => [u.wrapper?.tagName.toLowerCase() ?? null, tags(u.children)])).toEqual([
+			['section', ['h2', 'p']]
+		]);
+	});
+
+	// Only the article's own <header> is the running title; one inside the body is content
+	it('pages a <header> inside the body as a block', () => {
+		const units = buildUnits(article('<header><h1>T</h1></header><main><header><p>h</p></header><p>a</p></main>'));
+		expect(units.map((u) => tags(u.children))).toEqual([['header', 'p']]);
 	});
 
 	it('makes each sub-section its own unit, with the <section> as wrapper', () => {
@@ -408,10 +432,7 @@ describe('buildUnits', () => {
 					'<section><h3>A.2</h3><p>d</p></section></section></main>'
 			)
 		);
-		expect(units.map((u) => tags(u.children))).toEqual([
-			['header'],
-			['h2', 'p', 'h3', 'p', 'p', 'h3', 'p']
-		]);
+		expect(units.map((u) => tags(u.children))).toEqual([['h2', 'p', 'h3', 'p', 'p', 'h3', 'p']]);
 	});
 
 	// Blocks between or after sub-sections are units of their own, like the intro
@@ -423,7 +444,6 @@ describe('buildUnits', () => {
 			)
 		);
 		expect(units.map((u) => [u.wrapper?.tagName.toLowerCase() ?? null, tags(u.children)])).toEqual([
-			[null, ['header']],
 			['section', ['p']],
 			[null, ['p']],
 			['section', ['p']],
@@ -458,7 +478,7 @@ describe('buildUnits', () => {
 
 		it('pages a <main> body block by block (the control)', () => {
 			expect(withMain).toEqual([
-				{ wrapper: null, blocks: ['header:T', 'p:a', 'figure:f'] },
+				{ wrapper: null, blocks: ['p:a', 'figure:f'] },
 				{ wrapper: 'section', blocks: ['h2:S1', 'p:b', 'h3:S1.1', 'p:c'] },
 				{ wrapper: null, blocks: ['p:d'] },
 				{ wrapper: 'section', blocks: ['h2:S2', 'p:e'] },
@@ -520,10 +540,10 @@ describe('buildUnits', () => {
 			)
 		);
 		expect(units.map((u) => tags(u.children))).toEqual([
-			['header', 'p', 'aside'],
+			['p', 'aside'],
 			['h2', 'aside', 'div', 'p']
 		]);
-		const solution = units[0].children[2].querySelector('.para-title');
+		const solution = units[0].children[1].querySelector('.para-title');
 		expect(units.flatMap((u) => u.children)).not.toContain(solution);
 	});
 });

@@ -161,13 +161,21 @@ export const MODULE_BODY_SELECTOR = 'main, .cnx-body';
  * so the wrapper is looked through rather than treated as one block, which made
  * a whole section a single page. Markup without a wrapper (the shape this was
  * first written against) still works.
+ *
+ * The module's own <header> (a direct child of the root: the h1, and the static
+ * objectives box the section page hides when it shows its own) is in no unit, so
+ * the pager never hides it and the title stays above every page (D12, 2026-11-08;
+ * UI-19, UI-05). Its height falls into the chrome measured above the first block,
+ * so it comes off every page's budget. A body that opens with a sub-section then
+ * starts with that unit, where its header used to be a page of its own.
  */
 export function buildUnits(root: HTMLElement): ContentUnit[] {
 	const result: ContentUnit[] = [];
 	let intro: HTMLElement[] = [];
-	const blocks = (Array.from(root.children) as HTMLElement[]).flatMap((el) =>
-		el.matches(MODULE_BODY_SELECTOR) ? (Array.from(el.children) as HTMLElement[]) : [el]
-	);
+	const blocks = (Array.from(root.children) as HTMLElement[]).flatMap((el) => {
+		if (el.tagName === 'HEADER') return [];
+		return el.matches(MODULE_BODY_SELECTOR) ? (Array.from(el.children) as HTMLElement[]) : [el];
+	});
 
 	for (const child of blocks) {
 		if (child.tagName === 'SECTION') {
