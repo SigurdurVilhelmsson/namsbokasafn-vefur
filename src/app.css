@@ -169,6 +169,9 @@
      is the scroll container (no overflow wrapper), so this lives on <html>. */
   html {
     scroll-padding-top: 5rem;
+    /* The bottom corner controls' height (the tools button, the timer pill), so focus() and
+       anchor scrolling stop above them (S9.5; UI-12, WCAG technique C43) */
+    scroll-padding-bottom: 5rem;
   }
 }
 
@@ -497,6 +500,25 @@
 [data-paged-section] .reading-content {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;
+}
+
+/* The dock (S9.5; UI-12, [USER]'s layout of 2026-11-08): while a section pages, below 1024 px
+   the idle timer pill hides, and a running one keeps the pager bar's left end free
+   (24 px + 76 px + 8 px). From 1024 px the pill stays, in the bar's right end. */
+/* While a section pages, the docked bar is the bottom chrome: the scroll padding that keeps
+   focused things clear of the floating corner controls would push the bar itself (a Tab to
+   'Næsta' on a full page scrolled the page up 80 px), so it is 0 there */
+html:has([data-paged-section]) {
+  scroll-padding-bottom: 0;
+}
+
+@media (max-width: 1023px) {
+  body:has([data-paged-section]) .pomodoro.timer-idle {
+    display: none;
+  }
+  body:has(.pomodoro.timer-running) .paged-nav {
+    padding-left: 108px;
+  }
 }
 
 .reading-content h1,

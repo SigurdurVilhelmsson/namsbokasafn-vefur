@@ -450,66 +450,10 @@ test.describe('Paged reading mode', () => {
 		await says();
 	});
 
-	for (const device of [
-		{ name: 'a phone', viewport: { width: 375, height: 667 }, touch: true },
-		{ name: 'a desktop', viewport: { width: 1280, height: 720 }, touch: false }
-	]) {
-		test(`the page buttons take taps on ${device.name}`, async ({ browser }) => {
-			const urls = sectionsContaining('<p', 3);
-			test.skip(urls.length === 0, 'No section content available');
-			test.setTimeout(300000);
-
-			const context = await browser.newContext({
-				viewport: device.viewport,
-				isMobile: device.touch,
-				hasTouch: device.touch
-			});
-			// Its own context, which the describe's page seed does not reach
-			await seedSettings(context, PAGED);
-			const page = await context.newPage();
-			const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
-			const next = nav.getByRole('button', { name: 'Næsta síða' });
-			const blocked: string[] = [];
-
-			for (const url of urls) {
-				await page.goto(url);
-				await expect(nav).toBeVisible({ timeout: 15000 });
-				for (let i = 0; i < 40; i++) {
-					await page.waitForTimeout(300);
-					const r = await nav.evaluate((navEl) => {
-						const covered = (b: Element) => {
-							const box = b.getBoundingClientRect();
-							const y = box.top + box.height / 2;
-							return [box.left + 6, box.left + box.width / 2, box.right - 6].some(
-								(x) => !b.contains(document.elementFromPoint(x, y))
-							);
-						};
-						const box = navEl.getBoundingClientRect();
-						// By name: since S9.3 the label row holds 'Samfellt skrun' between them, and
-						// the last page's button says 'Ljúka kafla'
-						const prev = navEl.querySelector('button[aria-label="Fyrri síða"]')!;
-						const nxt = navEl.querySelector('button[aria-label="Næsta síða"], button[aria-label="Ljúka kafla"]')!;
-						return {
-							// The tools button's top edge: 16px margin + 48px button
-							clear: box.bottom <= window.innerHeight - 64,
-							label: navEl.querySelector('.paged-nav-label')?.textContent?.trim(),
-							prev: covered(prev),
-							next: covered(nxt)
-						};
-					});
-					// An allowed overrun scrolls, so its controls can land anywhere,
-					// under the corner buttons too; every other page must keep them clear
-					if ((!r.clear || r.prev || r.next) && !(await allowedOverrun(page))) {
-						blocked.push(`${url} ${r.label} clear=${r.clear} prev=${r.prev} next=${r.next}`);
-					}
-					if (LAST_PAGE.test(r.label ?? '')) break;
-					await next.evaluate((b: HTMLButtonElement) => b.click());
-				}
-			}
-			expect(blocked).toEqual([]);
-			await context.close();
-		});
-	}
+	// The S8 tap test ('the page buttons take taps') kept the controls 64 px above the window's
+	// bottom and exempted every allowed overrun. Since S9.5 the controls are a bar docked at the
+	// bottom with the corner controls in its ends, so 'nothing covers Fyrri or Næsta' (S9.5's
+	// describe) is the guard, on every page.
 
 	test('→ on arrival never changes section before the pages are ready', async ({ page }) => {
 		const urls = sectionsContaining('<img', 1);
@@ -1088,27 +1032,31 @@ async function touchDrag(page: Page, from: { x: number; y: number }, to: { x: nu
 /** The first visible box in the content that scrolls sideways, marked for the test, or null */
 const markSidewaysBox = (page: Page) =>
 	page.evaluate(() => {
+		// In view: at least 80 px of it between the window's top and the docked bar's top (since
+		// S9.5 a table taller than its window is common at phone widths)
+		const barTop = document.querySelector('nav.paged-nav')?.getBoundingClientRect().top ?? window.innerHeight;
+		const visible = (rect: DOMRect) => ({ top: Math.max(rect.top, 0), bottom: Math.min(rect.bottom, barTop) });
 		const box = Array.from(document.querySelectorAll<HTMLElement>('.reading-content *')).find((el) => {
 			if (el.offsetParent === null) return false;
 			const overflowX = getComputedStyle(el).overflowX;
-			const rect = el.getBoundingClientRect();
-			return (
-				(overflowX === 'auto' || overflowX === 'scroll') &&
-				el.scrollWidth > el.clientWidth + 100 &&
-				rect.top >= 0 &&
-				rect.bottom <= window.innerHeight
-			);
+			const v = visible(el.getBoundingClientRect());
+			return (overflowX === 'auto' || overflowX === 'scroll') && el.scrollWidth > el.clientWidth + 100 && v.bottom - v.top >= 80;
 		});
 		if (!box) return null;
 		box.setAttribute('data-test-sideways', '');
 		const rect = box.getBoundingClientRect();
-		return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+		const v = visible(rect);
+		return { x: rect.left + rect.width / 2, y: (v.top + v.bottom) / 2 };
 	});
 
 // S9.1, CODE-09: on a phone a sideways drag that scrolls a wide table must not also turn the
 // page; elsewhere a swipe still turns it
 test.describe('Swipes in paged mode (S9.1)', () => {
-	test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+	// Touch at phone width, without Chromium's mobile-viewport emulation: under `isMobile` it
+	// sticks the docked bar (S9.5) to a scrollport about 2.15 times the window on tall pages
+	// (1436 px for 667), and a click on the bar misses. A minimal sticky page does not reproduce
+	// it, nor does `hasTouch` alone, which keeps the touch events these tests send.
+	test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
 	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
 
 	test('a drag inside a box that scrolls sideways scrolls the box and keeps the page', async ({ page }) => {
@@ -2045,4 +1993,65 @@ test.describe('The chrome, the budget and call 1 (S9.5)', () => {
 		expect(tall, 'the test needs at least one tall page at 375x667').toBeGreaterThan(0);
 		await expect.poll(async () => (await storedCounts(page, book)).pageTooTall ?? 0).toBe(tall);
 	});
+
+	// UI-12: nothing covers 'Fyrri' and 'Næsta'. The S8 tap test exempted every allowed overrun
+	// (32 of 34 pages of 1.2 in the review's count), every covered page among them. This guard
+	// exempts none: on every page, after scrolling to the end of one taller than its window, the
+	// point three px inside each end and the middle of each button finds the button.
+	for (const device of [
+		{ name: '375x667 touch', viewport: { width: 375, height: 667 }, touch: true },
+		{ name: '390x844 touch', viewport: { width: 390, height: 844 }, touch: true },
+		{ name: '768x1024 touch', viewport: { width: 768, height: 1024 }, touch: true },
+		{ name: '1280x720', viewport: { width: 1280, height: 720 }, touch: false },
+		{ name: '1280x800', viewport: { width: 1280, height: 800 }, touch: false }
+	]) {
+		test(`nothing covers 'Fyrri' or 'Næsta' on any page, at ${device.name}`, async ({ browser }) => {
+			test.setTimeout(300000);
+			// Touch events and the coarse pointer at phone and tablet widths, without Chromium's
+			// mobile-viewport emulation: under `isMobile` it sticks the docked bar to a scrollport
+			// about 2.15 times the window on tall pages (1436 px for 667), while `innerHeight`,
+			// `clientHeight` and `visualViewport` all say 667. A minimal sticky page does not
+			// reproduce it, nor does `hasTouch` alone. So this arm is touch at phone widths, not
+			// phone emulation; batch E checks the bar on a real phone.
+			const context = await browser.newContext({
+				viewport: device.viewport,
+				hasTouch: device.touch,
+				serviceWorkers: 'block'
+			});
+			await seedSettings(context, PAGED);
+			const page = await context.newPage();
+			const covered: string[] = [];
+			for (const url of [SECTION!, sectionUrl('1.2')].filter((u): u is string => !!u)) {
+				await openPaged(page, url);
+				await eachPage(page, url, async (text) => {
+					await page.waitForTimeout(200);
+					const r = await page.evaluate(() => {
+						const nav = document.querySelector<HTMLElement>('nav.paged-nav')!;
+						// A page taller than its window: to its end, where its controls are
+						const navBox = nav.getBoundingClientRect();
+						if (navBox.bottom > innerHeight) window.scrollBy(0, navBox.bottom - innerHeight + 4);
+						const probe = (b: Element | null) => {
+							if (!b) return 'missing';
+							const box = b.getBoundingClientRect();
+							if (box.bottom > innerHeight || box.top < 0) return `off screen (${Math.round(box.top)}-${Math.round(box.bottom)})`;
+							const y = box.top + box.height / 2;
+							const hits = [box.left + 3, box.left + box.width / 2, box.right - 3].map((x) => {
+								const hit = document.elementFromPoint(x, y);
+								if (!hit) return `nothing at (${Math.round(x)}, ${Math.round(y)}) in a ${innerWidth}x${innerHeight} window`;
+								return b === hit || b.contains(hit) ? null : `<${hit.tagName.toLowerCase()} class="${hit.className}">`;
+							});
+							return hits.find((h) => h) ?? 'clear';
+						};
+						return {
+							prev: probe(nav.querySelector('button[aria-label="Fyrri síða"]')),
+							next: probe(nav.querySelector('button[aria-label="Næsta síða"], button[aria-label="Ljúka kafla"]'))
+						};
+					});
+					if (r.prev !== 'clear' || r.next !== 'clear') covered.push(`${url} ${text}: Fyrri ${r.prev}, Næsta ${r.next}`);
+				});
+			}
+			await context.close();
+			expect(covered).toEqual([]);
+		});
+	}
 });

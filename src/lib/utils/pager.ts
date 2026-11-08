@@ -35,6 +35,14 @@ export type PageTurn = 'next' | 'prev';
  * budget-maximise-usable-lines.md), and S9.5 applies it here, so a new budget is an
  * edit to these constants.
  */
+/**
+ * Call 1, ruled (a), maximise usable lines (docs/decisions/2026-10-23-reader-call1-page-budget-
+ * maximise-usable-lines.md): step 1 removes the budget's artefacts, step 2 drops the bottom
+ * clearance once the floating chrome is docked, or it covers 'Næsta' (UI-12). S9.5 docked it
+ * (the pager's bar), so step 2 is in force. PAGE_BUDGET reads this one constant.
+ */
+export const CALL1_STEP: 1 | 2 = 2;
+
 export const PAGE_BUDGET: Readonly<{
 	scrollOffset: number;
 	bottomClearance: number;
@@ -45,10 +53,10 @@ export const PAGE_BUDGET: Readonly<{
 	/** Where a page turn scrolls the top of the content to, below the window's top, when the
 	 *  header is not measured; the pager measures it since S9.5 (contentTop()) */
 	scrollOffset: 96,
-	/** Room kept free under the page controls for what floats in the bottom corners and
-	 *  centre: the tools button and timer pill on phones, the timer pill on desktop, the
-	 *  focus-mode bar. Each covered 'Næsta' (QA E18). */
-	bottomClearance: 76,
+	/** Room kept free under the page controls for what floated in the bottom corners and
+	 *  centre (each covered 'Næsta', QA E18): 76 px until S9.5 docked them into the pager's bar,
+	 *  0 under call 1's step 2 */
+	bottomClearance: CALL1_STEP === 2 ? 0 : 76,
 	/** The gap between the last block and the bottom of the page controls, until the
 	 *  controls exist and are measured */
 	initialGapBelow: 150,

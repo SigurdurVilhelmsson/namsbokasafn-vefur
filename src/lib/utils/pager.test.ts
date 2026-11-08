@@ -6,6 +6,7 @@ import { describe, it, expect } from 'vitest';
 import type { PageRange } from './paginate';
 import {
 	PAGE_BUDGET,
+	CALL1_STEP,
 	pageBudget,
 	pageHeights,
 	flatPositions,
@@ -64,14 +65,15 @@ describe('pageHeights', () => {
 });
 
 describe('pageBudget', () => {
-	// v1.1's values at dde768e (:64, :68, :77, :87), with call 1's step 1 (S9.5): the content
-	// top is measured under the header (headerGap), and the fixed 96 is only the fallback. The
-	// 76 px clearance goes with step 2, once the floating chrome is docked. The formula tests
-	// below stay computed from the constants.
-	it('holds the values of call 1, step 1', () => {
+	// Call 1's ruled values (S9.5): step 1 measures the content top under the header
+	// (headerGap; the fixed 96 is only the fallback), and step 2, with the floating chrome
+	// docked in the pager's bar, drops the 76 px clearance. The formula tests below stay
+	// computed from the constants.
+	it("holds call 1's values, at step 2", () => {
+		expect(CALL1_STEP).toBe(2);
 		expect(PAGE_BUDGET).toEqual({
 			scrollOffset: 96,
-			bottomClearance: 76,
+			bottomClearance: 0,
 			initialGapBelow: 150,
 			floor: 240,
 			headerGap: 8

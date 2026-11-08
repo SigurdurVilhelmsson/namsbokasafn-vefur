@@ -557,7 +557,9 @@
 	/** The part of the window a page is read in: below where a turn puts the content's top,
 	 *  above the bottom clearance the floating controls take */
 	function readingView(): VerticalSpan {
-		return { top: contentTop(), bottom: window.innerHeight - PAGE_BUDGET.bottomClearance };
+		// Down to the docked bar's top when it is on screen: text under it is not read (S9.5)
+		const barTop = navEl?.getBoundingClientRect().top ?? Infinity;
+		return { top: contentTop(), bottom: Math.min(window.innerHeight - PAGE_BUDGET.bottomClearance, barTop) };
 	}
 
 	/** The page on screen, from its first block's top to its last block's bottom; the
@@ -788,7 +790,13 @@
 		const last = range && pageBlocks(shown, range).at(-1);
 		if (!last) return;
 		const lastEdge = last.getBoundingClientRect().bottom + (parseFloat(getComputedStyle(last).marginBottom) || 0);
-		const measured = navEl.getBoundingClientRect().bottom - lastEdge;
+		// From the bar's place in the flow, not its rect: docked, it sticks to the window's bottom
+		// when a page runs past it, and its rect then says nothing about the gap (S9.5). It follows
+		// the container, with its own top margin and height; the recall prompt between them is
+		// covered-only, when re-splits wait.
+		const barTop = container ? container.getBoundingClientRect().bottom : navEl.getBoundingClientRect().top;
+		const measured =
+			barTop - lastEdge + (parseFloat(getComputedStyle(navEl).marginTop) || 0) + navEl.offsetHeight;
 		if (!(measured > 0)) return;
 		const off = measured - gapBelow;
 		if (off > 8 || (!growOnly && off < -8)) {
@@ -975,6 +983,11 @@
 	<!-- 'Síðuflakk', 'Fyrri síða', 'Fyrri', 'Næsta síða' and 'Næsta', as v1.1 wrote them at
 	     dde768e (S8.2); the label is pager.ts's positionLabel (S8.1). Checked by [USER] as D20
 	     batch 9 (2026-11-04). -->
+	<!-- The docked bar (S9.5; UI-12, [USER]'s layout of 2026-11-08): it sticks to the window's
+	     bottom when a page runs past it, and keeps its ends free for the floating corner
+	     controls (the tools button below 1024 px, the timer pill from 1024 px, a running timer
+	     on the left below 1024 px; app.css hides the idle pill there while a section pages).
+	     Below 640 px 'Fyrri' and 'Næsta' show their arrows only; their names are unchanged. -->
 	<nav
 		class="paged-nav"
 		aria-label="Síðuflakk"
@@ -982,63 +995,111 @@
 		data-page-height={Math.round(heights.page)}
 		data-first-page-height={Math.round(heights.firstPage)}
 	>
-		<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
-			<Icon name="chevron-left" size="sm" />
-			Fyrri
-		</button>
+		<div class="paged-nav-row">
+			<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
+				<Icon name="chevron-left" size="sm" />
+				<span class="paged-nav-word">Fyrri</span>
+			</button>
 
-		<span class="paged-nav-center">
-			{#if mtReport}
-				<!-- The machine-translation notice on every page (S9.4; UI-09, PED-15): the banner's
-				     own words, its name and sentence for screen readers, and its 'Tilkynna villu'.
-				     No new strings. -->
-				<span class="paged-nav-mt" role="note" aria-label="Vélþýtt efni">
-					<Icon name="triangle-alert" size="sm" class="paged-nav-mt-icon" />
-					<span>Vélþýtt<span class="sr-only">
-							efni. Þessi eining hefur ekki enn verið yfirlesin og kann að innihalda þýðingarvillur.</span
-						></span>
-					<a class="paged-nav-mt-report" href={mtReport}>Tilkynna villu</a>
-				</span>
-			{/if}
 			<span class="paged-nav-label">
 				{label}
 			</span>
-			{#if onleave}
-				<!-- The in-view way out (S9.3, UI-05, PED-01), the toolbar's 'Samfellt skrun' again;
-				     v1.1's Lestrarstilling label. D20: proposed — 'Samfellt skrun' -->
-				<button class="paged-nav-leave" aria-pressed="false" onclick={() => onleave?.()}>Samfellt skrun</button>
-			{/if}
-		</span>
 
-		<!-- On the last page the button finishes the section (ruling 3), so it says so (UI-20).
-		     D20: proposed — 'Ljúka kafla' -->
-		<button
-			class="paged-nav-btn"
-			onclick={next}
-			disabled={lastPage && completionFired}
-			aria-label={lastPage ? 'Ljúka kafla' : 'Næsta síða'}
-		>
-			{#if lastPage}
-				Ljúka kafla
-				<Icon name="check" size="sm" />
-			{:else}
-				Næsta
-				<Icon name="chevron-right" size="sm" />
-			{/if}
-		</button>
+			<!-- On the last page the button finishes the section (ruling 3), so it says so (UI-20),
+			     at every width: a check mark alone is too easy to misread for it.
+			     D20: proposed — 'Ljúka kafla' -->
+			<button
+				class="paged-nav-btn"
+				onclick={next}
+				disabled={lastPage && completionFired}
+				aria-label={lastPage ? 'Ljúka kafla' : 'Næsta síða'}
+			>
+				{#if lastPage}
+					Ljúka kafla
+					<Icon name="check" size="sm" />
+				{:else}
+					<span class="paged-nav-word">Næsta</span>
+					<Icon name="chevron-right" size="sm" />
+				{/if}
+			</button>
+		</div>
+
+		{#if mtReport || onleave}
+			<div class="paged-nav-sub">
+				{#if mtReport}
+					<!-- The machine-translation notice on every page (S9.4; UI-09, PED-15): the banner's
+					     own words, its name and sentence for screen readers, and its 'Tilkynna villu'.
+					     No new strings. -->
+					<span class="paged-nav-mt" role="note" aria-label="Vélþýtt efni">
+						<Icon name="triangle-alert" size="sm" class="paged-nav-mt-icon" />
+						<span>Vélþýtt<span class="sr-only">
+								efni. Þessi eining hefur ekki enn verið yfirlesin og kann að innihalda þýðingarvillur.</span
+							></span>
+						<a class="paged-nav-mt-report" href={mtReport}>Tilkynna villu</a>
+					</span>
+				{/if}
+				{#if onleave}
+					<!-- The in-view way out (S9.3, UI-05, PED-01), the toolbar's 'Samfellt skrun' again;
+					     v1.1's Lestrarstilling label. D20: proposed — 'Samfellt skrun' -->
+					<button class="paged-nav-leave" aria-pressed="false" onclick={() => onleave?.()}>Samfellt skrun</button>
+				{/if}
+			</div>
+		{/if}
 	</nav>
 
 {/if}
 
 <style>
+	/* The docked bar. Its background hides the text it sticks over; z-index 30 keeps it under
+	   the corner controls (40), whose places its padding keeps free. */
 	.paged-nav {
+		position: sticky;
+		bottom: 0;
+		z-index: 30;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		margin-top: 1.5rem;
+		padding: 0.5rem 0;
+		border-top: 1px solid var(--border-color);
+		background-color: var(--bg-primary);
+	}
+
+	/* Below 1024 px the tools button's corner (16 px + 48 px + 8 px) */
+	@media (max-width: 1023px) {
+		.paged-nav {
+			padding-right: 72px;
+		}
+	}
+
+	/* From 1024 px the timer pill's corner (24 px + 76 px + 8 px), and its height */
+	@media (min-width: 1024px) {
+		.paged-nav {
+			padding-right: 108px;
+			min-height: 4.5rem;
+		}
+	}
+
+	.paged-nav-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.75rem;
-		margin-top: 1.5rem;
-		padding: 0.5rem 0;
-		border-top: 1px solid var(--border-color);
+	}
+
+	.paged-nav-sub {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		column-gap: 1rem;
+	}
+
+	/* Below 640 px the arrows alone ([USER], 2026-11-08); the names stay the buttons' names */
+	@media (max-width: 639px) {
+		.paged-nav-word {
+			display: none;
+		}
 	}
 
 	.paged-nav-btn {
@@ -1063,13 +1124,6 @@
 	.paged-nav-btn:disabled {
 		opacity: 0.4;
 		cursor: not-allowed;
-	}
-
-	.paged-nav-center {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.125rem;
 	}
 
 	/* A quiet text button: the way out is there, not loud. Bronze text, underlined on hover
@@ -1106,6 +1160,7 @@
 	}
 
 	.paged-nav-label {
+		flex: 1;
 		font-size: 0.8125rem;
 		/* --text-secondary: v1.1 moved off --text-tertiary when that was 2.90:1 (QA E18).
 		   Both pass AA since S2.1 (tokens.test.ts); the position is information, not a hint. */

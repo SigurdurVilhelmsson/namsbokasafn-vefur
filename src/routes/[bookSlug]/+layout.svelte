@@ -98,9 +98,13 @@
 		{/if}
 
 		<!-- Main content area with max-width for comfortable reading -->
+		<!-- overflow-x-clip, not -hidden: hidden made <main> a scroll container, which the pager's
+		     docked bar then stuck to instead of the window (S9.5). min-w-0 keeps what hidden also
+		     did: a flex item that is no scroll container takes its content's width, so a wide table
+		     widened the page past the window. -->
 		<main
 			id="main-content"
-			class="flex-1 overflow-x-hidden {focusMode ? '' : 'lg:ml-[320px]'}"
+			class="min-w-0 flex-1 overflow-x-clip {focusMode ? '' : 'lg:ml-[320px]'}"
 		>
 			<div class="mx-auto max-w-7xl px-4 py-6">
 				{@render children()}

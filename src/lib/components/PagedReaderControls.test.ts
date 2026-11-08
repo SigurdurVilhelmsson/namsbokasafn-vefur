@@ -109,7 +109,12 @@ function keysTaken(): string[] {
 	});
 }
 
-/** Three sub-sections of 3, 2 and 1 pages at jsdom's 768 px window (a 446 px budget) */
+/**
+ * Three sub-sections of 3, 2 and 1 pages in a 446 px budget: the harness's 604 px window less
+ * the 8 px content top (no header in jsdom: PAGE_BUDGET.headerGap alone) and the 150 px gap
+ * estimate, with no clearance under call 1's step 2 (S9.5). It was jsdom's 768 px window less
+ * the fixed 96 px offset and the 76 px clearance before.
+ */
 function content(): HTMLElement {
 	const container = document.body.appendChild(document.createElement('div'));
 	const block = (tag: string, h: number) => `<${tag} data-h="${h}">x</${tag}>`;
@@ -204,8 +209,11 @@ function poke(container: HTMLElement): number[] {
 	return counts;
 }
 
+const realInnerHeight = window.innerHeight;
+
 beforeEach(() => {
 	vi.useFakeTimers();
+	Object.defineProperty(window, 'innerHeight', { value: 604, configurable: true, writable: true });
 	Element.prototype.getBoundingClientRect = function (this: Element) {
 		const h = Number((this as HTMLElement).dataset?.h ?? 0);
 		return { top: 0, bottom: h, height: h, left: 0, right: 0, width: 0, x: 0, y: 0, toJSON() {} } as DOMRect;
@@ -241,6 +249,7 @@ afterEach(async () => {
 	vi.restoreAllMocks();
 	Element.prototype.getBoundingClientRect = realRect;
 	window.getComputedStyle = realStyle;
+	Object.defineProperty(window, 'innerHeight', { value: realInnerHeight, configurable: true, writable: true });
 	history.replaceState(null, '', '/');
 });
 
