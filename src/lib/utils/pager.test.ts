@@ -7,6 +7,7 @@ import type { PageRange } from './paginate';
 import {
 	PAGE_BUDGET,
 	pageBudget,
+	pageHeights,
 	flatPositions,
 	flatIndexOf,
 	positionAt,
@@ -35,6 +36,32 @@ import {
 
 // Three units of 3, 4 and 7 pages: flat indexes 0-2, 3-6 and 7-13
 const COUNTS = [3, 4, 7];
+
+// S9.4 (UI-09): the machine-translation notice stands above the section's first page only.
+// Measured with every block shown, the chrome above the first block includes it; the other
+// pages get that chrome without it, the first page all of it.
+describe('pageHeights', () => {
+	const at = { innerHeight: 800, gapWithLead: 200, leadInset: 120, gapBelow: 100 };
+
+	it('budgets every page but the first without the notice', () => {
+		expect(pageHeights(at).page).toBe(pageBudget({ innerHeight: 800, gapAbove: 80, gapBelow: 100 }));
+	});
+
+	it('budgets the first page with it', () => {
+		expect(pageHeights(at).firstPage).toBe(pageBudget({ innerHeight: 800, gapAbove: 200, gapBelow: 100 }));
+	});
+
+	it('gives the first page the notice’s height less than the rest', () => {
+		const { page, firstPage } = pageHeights(at);
+		expect(page - firstPage).toBe(120);
+	});
+
+	it('budgets every page alike with no notice', () => {
+		const { page, firstPage } = pageHeights({ ...at, leadInset: 0 });
+		expect(firstPage).toBe(page);
+		expect(page).toBe(pageBudget({ innerHeight: 800, gapAbove: 200, gapBelow: 100 }));
+	});
+});
 
 describe('pageBudget', () => {
 	// Today's values, v1.1's at dde768e (:64, :68, :77, :87). S9.5 changes this pin

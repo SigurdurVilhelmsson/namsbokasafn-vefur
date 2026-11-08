@@ -361,14 +361,12 @@ test.describe('Paged reading mode', () => {
 		}
 		test.skip(!found, 'No in-section link to an image figure');
 
-		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
-		const link = page.locator(`article.cnx-module a[href="#${found!.id}"]`).first();
-		for (let i = 0; i < 60 && !(await link.isVisible()); i++) {
-			await nav.getByRole('button', { name: 'Næsta síða' }).click();
-			await page.waitForTimeout(150);
-		}
-		await expect(link).toBeVisible();
-		await link.click();
+		// Since S9.4 a click on that link opens the figure in the lightbox over the page (D12;
+		// 'a Mynd link opens the lightbox'), so the target is reached by its address, the deep
+		// link a reload or a shared link makes: a late image must not push it off screen (QA E8)
+		await page.goto('about:blank');
+		await page.goto(`${found!.url}#${found!.id}`);
+		await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toBeVisible({ timeout: 15000 });
 		await page.waitForTimeout(2500);
 
 		const shown = await page.evaluate(
@@ -608,9 +606,11 @@ test.describe('Paged reading mode', () => {
 			});
 			await page.waitForTimeout(500);
 			// The title is above every page since S9.2 (D12), so no page is the title alone;
-			// 'The title and focus survive page turns' tests that
+			// 'The title and focus survive page turns' tests that. The arrival target is the
+			// pager's container, which since S9.4 opens with the machine-translation notice on
+			// an unreviewed section's first page, above the article.
 			const top = await page.evaluate(
-				() => document.querySelector('article.cnx-module')!.getBoundingClientRect().top
+				() => document.querySelector('[data-paged-section]')!.getBoundingClientRect().top
 			);
 			expect(top, `${url}: content starts at ${Math.round(top)}px`).toBeLessThan(250);
 		}
@@ -1703,4 +1703,201 @@ test.describe('The way out and the section end (S9.3)', () => {
 			expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
 		});
 	}
+});
+
+/** Whether an element named 'Vélþýtt efni' shows in the window below the sticky header */
+const mtNoticeInView = (page: Page) =>
+	page.evaluate(() => {
+		const header = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+		return Array.from(document.querySelectorAll<HTMLElement>('[aria-label="Vélþýtt efni"]')).some((el) => {
+			if (el.offsetParent === null) return false;
+			const r = el.getBoundingClientRect();
+			return r.height > 0 && r.bottom > header && r.top < innerHeight;
+		});
+	});
+
+// Plan step S9.4 (UI-09, PED-15, PED-03, CODE-15): the machine-translation notice travels with
+// the page, a figure link opens the lightbox, and the pager stops downloading every figure.
+test.describe('The MT notice, figures and images (S9.4)', () => {
+	test.skip(!SECTION, 'No synced module section');
+	test.use({ serviceWorkers: 'block' });
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+
+	// UI-09: after the ruled arrival scroll (ruling 1) the notice sat 346-546 px above the window
+	// and no later page brought it back. The full banner now stands above the first page, and
+	// every page's label row carries the compact marker. A page holding one block taller than
+	// the window pushes the label row below it until S9.5 docks it, so such pages are skipped.
+	for (const viewport of [
+		{ width: 390, height: 844 },
+		{ width: 768, height: 1024 },
+		{ width: 1280, height: 800 }
+	]) {
+		test(`'Vélþýtt' is in view on arrival and after each turn of §1.2, at ${viewport.width}px`, async ({ page }) => {
+			const url = sectionUrl('1.2');
+			test.skip(!url, 'No §1.2 synced');
+			test.setTimeout(180000);
+			await page.setViewportSize(viewport);
+			await openPaged(page, url!);
+			await page.waitForTimeout(300);
+
+			expect(await mtNoticeInView(page), 'the notice on arrival').toBe(true);
+			const objectivesBottom = await page.evaluate(() => {
+				const box = Array.from(document.querySelectorAll('h3')).find((h) => h.textContent?.includes('Námsmarkmið'));
+				return box?.closest('div.mb-8')?.getBoundingClientRect().bottom ?? null;
+			});
+			// Ruling 1: the arrival scroll lands on the pager's container, past the objectives. The
+			// notice now opens that container, so the objectives must still end above it. (Their
+			// last few px can show: the container lands 96 px down, under their bottom margin, and
+			// at 768x1024 the scroll stops short, UI-19's arrival shortfall, which no step names.)
+			const containerTop = await page.evaluate(
+				() => document.querySelector('[data-paged-section]')!.getBoundingClientRect().top
+			);
+			if (objectivesBottom !== null) {
+				expect(objectivesBottom, 'the objectives above the arrival target (ruling 1)').toBeLessThanOrEqual(containerTop);
+			}
+
+			await eachPage(page, url!, async (text) => {
+				// An allowed overrun (one block taller than the page, or headings with it) whose
+				// label row really is below the window
+				const { headed } = await shownPage(page);
+				const navTop = await pager(page).evaluate((el) => el.getBoundingClientRect().top);
+				if (headed && navTop >= viewport.height) return;
+				expect(await mtNoticeInView(page), `${text}: the notice`).toBe(true);
+			});
+		});
+	}
+
+	test("the label row's 'Tilkynna villu' reports this section", async ({ page }) => {
+		await openPaged(page, SECTION!);
+		const [, book, , chapter, section] = SECTION!.split('/');
+		const href = (await pager(page).getByRole('link', { name: 'Tilkynna villu' }).getAttribute('href'))!;
+		const url = new URL(href, 'http://x');
+		expect(url.pathname.replace(/\/$/, '')).toBe('/feedback');
+		expect([url.searchParams.get('bok'), url.searchParams.get('kafli'), url.searchParams.get('hluti')]).toEqual([
+			book,
+			chapter,
+			section
+		]);
+	});
+
+	test('the notice and the marker stay out of print', async ({ page }) => {
+		await openPaged(page, SECTION!);
+		await page.emulateMedia({ media: 'print' });
+		await page.waitForTimeout(300);
+		const shown = await page.evaluate(
+			() =>
+				Array.from(document.querySelectorAll<HTMLElement>('[aria-label="Vélþýtt efni"]')).filter(
+					(el) => el.getClientRects().length > 0
+				).length
+		);
+		expect(shown).toBe(0);
+	});
+
+	/** Marks the first visible in-text link to a figure on another part of the section, or false */
+	const markFigureLink = (page: Page) =>
+		page.evaluate(() => {
+			const link = Array.from(document.querySelectorAll<HTMLAnchorElement>('.reading-content a[href^="#"]')).find((a) => {
+				if (a.offsetParent === null) return false;
+				const target = document.getElementById(decodeURIComponent(a.getAttribute('href')!.slice(1)));
+				return !!target?.matches('figure') && !!target.querySelector('img');
+			});
+			link?.setAttribute('data-test-figure-link', '');
+			return !!link;
+		});
+
+	// PED-03, D12 (the lightbox alone): a 'Mynd' link opens the figure over the current page, so
+	// the page and its label stay; Escape gives focus back to the link
+	for (const device of [
+		{ name: 'clicked at 1280px', viewport: { width: 1280, height: 800 }, touch: false },
+		{ name: 'tapped at 390px', viewport: { width: 390, height: 844 }, touch: true }
+	]) {
+		test(`a 'Mynd' link opens the lightbox and keeps the page, ${device.name}`, async ({ browser }) => {
+			test.setTimeout(180000);
+			const context = await browser.newContext({
+				viewport: device.viewport,
+				hasTouch: device.touch,
+				isMobile: device.touch,
+				serviceWorkers: 'block'
+			});
+			await seedSettings(context, PAGED);
+			const page = await context.newPage();
+			await openPaged(page, SECTION!);
+			const label = pagerLabel(page);
+			const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+			for (let i = 0; !(await markFigureLink(page)); i++) {
+				const text = (await label.textContent())!.trim();
+				expect(LAST_PAGE.test(text), `${SECTION}: no page with a link to a figure`).toBe(false);
+				expect(i).toBeLessThan(PAGE_CAP);
+				await next.click();
+				await expect(label).not.toHaveText(text);
+				await page.waitForTimeout(200);
+			}
+			const shown = (await label.textContent())!.trim();
+			const link = page.locator('[data-test-figure-link]');
+			if (device.touch) await link.tap();
+			else await link.click();
+
+			const lightbox = page.getByRole('dialog');
+			await expect(lightbox).toBeVisible();
+			await expect(label).toHaveText(shown);
+			await page.keyboard.press('Escape');
+			await expect(lightbox).toHaveCount(0);
+			await expect(label).toHaveText(shown);
+			if (!device.touch) await expect(link).toBeFocused();
+			await context.close();
+		});
+	}
+
+	// CODE-15: the pager made every figure in the section eager on arrival (on 20.1 all 42).
+	// It now loads the arrival part's images and the next part's. While the section still
+	// scrolls, before the pager is ready, the browser's own lazy loading can fetch a few more
+	// near the top (on 7.3, seven from parts 3 and 4), so the test reads what the pager
+	// controls: only those two parts are made eager, and fewer images are fetched than the
+	// section holds.
+	test('arrival loads the first part’s images and the next part’s, not every figure', async ({ page }) => {
+		const [url] = sectionsContaining('<img', 1);
+		test.skip(!url, 'No section with images');
+		test.setTimeout(120000);
+		const requested = new Set<string>();
+		page.on('request', (r) => {
+			if (r.resourceType() === 'image' && r.url().includes('/content/')) requested.add(new URL(r.url()).pathname);
+		});
+		await openPaged(page, url);
+		await page.waitForTimeout(3000);
+		const units = await page.evaluate((bodySelector) => {
+			const root = document.querySelector('article.cnx-module') as HTMLElement;
+			const out: { src: string; loading: string | null }[][] = [];
+			let intro: Element[] = [];
+			const blocks = Array.from(root.children)
+				.filter((el) => el.tagName !== 'HEADER')
+				.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]));
+			const images = (els: Element[]) =>
+				els.flatMap((b) =>
+					Array.from(b.querySelectorAll('img')).map((i) => ({
+						src: new URL(i.src).pathname,
+						loading: i.getAttribute('loading')
+					}))
+				);
+			for (const b of blocks) {
+				if (b.tagName === 'SECTION') {
+					if (intro.length) out.push(images(intro));
+					intro = [];
+					out.push(images([b]));
+				} else intro.push(b);
+			}
+			if (intro.length) out.push(images(intro));
+			return out;
+		}, MODULE_BODY_SELECTOR);
+		await expect(pagerLabel(page)).toHaveText(/^Hluti 1 af /);
+		const total = units.flat().length;
+		test.skip(units.length < 3 || units.slice(2).flat().length === 0, `${url}: no images past the second part`);
+
+		for (const [u, imgs] of units.entries()) {
+			for (const img of imgs) {
+				if (u <= 1) expect(img.loading, `${img.src} in part ${u + 1}`).toBe('eager');
+				else expect(img.loading, `${img.src} in part ${u + 1}`).not.toBe('eager');
+			}
+		}
+		expect(requested.size, `${url}: ${requested.size} of ${total} images fetched`).toBeLessThan(total);
+	});
 });
