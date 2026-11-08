@@ -5,6 +5,7 @@
 	import { onDestroy } from 'svelte';
 	import { fade, scale } from 'svelte/transition';
 	import Icon from '$lib/components/Icon.svelte';
+	import SegmentedControl from '$lib/components/SegmentedControl.svelte';
 	import {
 		settings,
 		fontSize,
@@ -263,45 +264,23 @@
 						</div>
 					</fieldset>
 
-					<!-- Line Height -->
-					<div>
-						<span id="settings-line-height-label" class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
-							Línubil
-						</span>
-						<div class="grid grid-cols-3 gap-2 sm:flex" role="group" aria-labelledby="settings-line-height-label">
-							{#each lineHeights as height (height.value)}
-								<button
-									aria-pressed={$lineHeight === height.value}
-									onclick={() => settings.setLineHeight(height.value)}
-									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineHeight === height.value
-										? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-sm'
-										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
-								>
-									{#if $lineHeight === height.value}<Icon name="check" size="sm" class="mr-1 inline-block align-[-2px]" />{/if}{height.label}
-								</button>
-							{/each}
-						</div>
-					</div>
+					<!-- Line height and line width: radios, so a screen reader hears which is chosen and Tab
+					     enters each group once (S11.3, UI-03) -->
+					<SegmentedControl
+						legend="Línubil"
+						name="settings-line-height"
+						options={lineHeights}
+						value={$lineHeight}
+						onchange={(value) => settings.setLineHeight(value)}
+					/>
 
-					<!-- Line Width -->
-					<div>
-						<span id="settings-line-width-label" class="mb-3 block text-sm font-medium text-[var(--text-primary)]">
-							Línubreidd
-						</span>
-						<div class="grid grid-cols-3 gap-2 sm:flex" role="group" aria-labelledby="settings-line-width-label">
-							{#each lineWidths as width (width.value)}
-								<button
-									aria-pressed={$lineWidth === width.value}
-									onclick={() => settings.setLineWidth(width.value)}
-									class="flex-1 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors {$lineWidth === width.value
-										? 'bg-[var(--accent-color)] text-[var(--on-accent)] shadow-sm'
-										: 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:bg-[var(--bg-tertiary)]'}"
-								>
-									{#if $lineWidth === width.value}<Icon name="check" size="sm" class="mr-1 inline-block align-[-2px]" />{/if}{width.label}
-								</button>
-							{/each}
-						</div>
-					</div>
+					<SegmentedControl
+						legend="Línubreidd"
+						name="settings-line-width"
+						options={lineWidths}
+						value={$lineWidth}
+						onchange={(value) => settings.setLineWidth(value)}
+					/>
 
 					<!-- Glossary Highlighting -->
 					<div>

@@ -7,7 +7,14 @@
 	import { browser } from '$app/environment';
 	import type { PageData } from './$types';
 	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
-	import { isSectionRead, isSectionBookmarked, getSavedScrollPosition, type ScrollPositions } from '$lib/stores/reader';
+	import {
+		isSectionRead,
+		isSectionBookmarked,
+		getSavedScrollPosition,
+		readPagePlace,
+		type PagePlace,
+		type ScrollPositions
+	} from '$lib/stores/reader';
 	import { readingMode, settings, type ReadingMode } from '$lib/stores/settings';
 	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -18,6 +25,7 @@
 	import BookAttribution from '$lib/components/BookAttribution.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import PagedReaderControls from '$lib/components/PagedReaderControls.svelte';
+	import SegmentedControl from '$lib/components/SegmentedControl.svelte';
 	import { PAGE_BUDGET, decodePageHash, firstInView, pageProgress, type PagerState } from '$lib/utils/pager';
 	import { buildUnits } from '$lib/utils/paginate';
 	import { readDetection } from '$lib/actions/readDetection';
@@ -54,7 +62,7 @@
 	// reachedEnd() runs once per visit to a section, whichever end gets there first (S8.4)
 	let endReached = false;
 	let showContinuePrompt = $state(false);
-	let savedPosition: { scrollY: number; percentage: number } | null = $state(null);
+	let savedPosition: { scrollY: number; percentage: number; page: PagePlace | null } | null = $state(null);
 	let continuePromptTimeout: ReturnType<typeof setTimeout>;
 
 	// The pager (plan step S8.2), dark: a section pages only under a '?lestur=sidur' link or a
@@ -89,7 +97,11 @@
 	let switchedOff = $state(false);
 	let showModeSwitch = $derived(paged || switchedOff);
 	let pagerControls: ReturnType<typeof PagedReaderControls> | undefined = $state();
-	let scrollButton: HTMLButtonElement | undefined = $state();
+	let modeControl: ReturnType<typeof SegmentedControl<ReadingMode>> | undefined = $state();
+	const MODES: { value: ReadingMode; label: string }[] = [
+		{ value: 'paged', label: 'Síðuskipt' },
+		{ value: 'scrolled', label: 'Samfellt skrun' }
+	];
 	/** Where the reader was when they switched to paged: the pager opens that page */
 	let startAt: HTMLElement | null = $state(null);
 	/** The block a switch to scrolling kept in place. Not $state. */
@@ -99,7 +111,20 @@
 	// container, where the arrival scroll lands, and stands above the section's first page; the
 	// label row carries a compact marker on every page (plan step S9.4; UI-09, ruling 1 kept).
 	let unreviewed = $derived(!data.navigation.current.section.reviewed);
-	let mtLead: HTMLElement | undefined = $state();
+	/** What stands above the first page, inside the pager's container: the notice and the offer
+	 *  of a saved place. The pager budgets page 1 for it and re-splits when an item goes. */
+	let pageLead: HTMLElement | undefined = $state();
+
+	// A paged reader's place, for a later visit (plan step S11.3; CODE-07, D13, [USER]'s choice
+	// of 2026-11-08): saved on leaving a paged section, offered on return as a card above page 1,
+	// where the arrival lands. Offered once per visit, and only to a reader who arrived with no
+	// address and did not switch in from scrolling.
+	let savedPlace: PagePlace | null = null;
+	/** The label of the page offered, while the card shows */
+	let placeOffer: string | null = $state(null);
+	let placeOffered = false;
+	/** The pager's last position, for the place saved on leaving. Not $state. */
+	let lastPosition: { index: number; total: number } | null = null;
 
 	// Room at the end of the page that the pager asks for when the document is too short to bring
 	// the content top under the header (S9.5; UI-19's arrival shortfall): blank, after the
@@ -182,15 +207,19 @@
 		keptAnchor = null;
 		pagedReserve = 0;
 		endReached = false;
+		placeOffer = null;
+		placeOffered = false;
+		lastPosition = null;
 
 		// Reset the continue-reading prompt, then check this section's saved position
 		clearTimeout(continuePromptTimeout);
 		showContinuePrompt = false;
 		savedPosition = null;
 		const saved = reader.getScrollPosition(data.bookSlug, data.chapterSlug, data.sectionSlug);
+		savedPlace = readPagePlace(saved?.page);
 		if (saved && saved.percentage > 10) {
 			// Only show prompt if user was past 10% of the document
-			savedPosition = { scrollY: saved.scrollY, percentage: saved.percentage };
+			savedPosition = { scrollY: saved.scrollY, percentage: saved.percentage, page: savedPlace };
 			showContinuePrompt = true;
 			// Auto-hide the prompt after 8 seconds
 			continuePromptTimeout = setTimeout(() => {
@@ -220,6 +249,14 @@
 			const docHeight = document.documentElement.scrollHeight - window.innerHeight;
 			const percentage = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
 			reader.saveScrollPosition(data.bookSlug, data.chapterSlug, data.sectionSlug, scrollTop, percentage);
+		} else if (browser) {
+			// Paged, the place, not the scroll position (S11.3): its part and first block, and the
+			// page's share of the section as the percentage. Nothing for the first page.
+			const place = pagerControls?.currentPlace();
+			if (place && lastPosition && lastPosition.index > 0) {
+				const { index, total } = lastPosition;
+				reader.saveScrollPosition(data.bookSlug, data.chapterSlug, data.sectionSlug, window.scrollY, pageProgress(index, total), place);
+			}
 		}
 	});
 
@@ -232,11 +269,37 @@
 
 	// Handle "Continue where you left off" action
 	function handleContinueReading() {
-		if (savedPosition) {
+		// A place saved while paging names its block: scroll to it, wherever it now sits (S11.3)
+		const block = savedPosition?.page?.block ? document.getElementById(savedPosition.page.block) : null;
+		if (block) {
+			block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		} else if (savedPosition) {
 			window.scrollTo({ top: savedPosition.scrollY, behavior: 'smooth' });
 		}
 		showContinuePrompt = false;
 		clearTimeout(continuePromptTimeout);
+	}
+
+	/** Offer the saved place once the pager is first ready on this visit (S11.3) */
+	function offerPlace() {
+		if (placeOffered) return;
+		placeOffered = true;
+		if (!savedPlace || startAt || window.location.hash) return;
+		placeOffer = pagerControls?.placeLabel(savedPlace) ?? null;
+	}
+
+	/** 'Halda áfram': open the saved place; the card goes when the page turns */
+	function resumePlace() {
+		if (savedPlace) pagerControls?.openPlace(savedPlace);
+		placeOffer = null;
+	}
+
+	/** 'Byrja á byrjun': stay on page 1 and forget the place, as the scrolled prompt's dismissal does */
+	function startFromBeginning() {
+		placeOffer = null;
+		savedPlace = null;
+		reader.clearScrollPosition(data.bookSlug, data.chapterSlug, data.sectionSlug);
+		pagerControls?.focusPage();
 	}
 
 	// Dismiss the continue prompt
@@ -403,7 +466,7 @@
 			if (anchor?.isConnected && before !== undefined) {
 				window.scrollBy({ top: anchor.getBoundingClientRect().top - before });
 			}
-			if (fromPager) scrollButton?.focus({ preventScroll: true });
+			if (fromPager) modeControl?.focus('scrolled');
 		} else {
 			// Straight back, the block the switch kept in place is still where the reader left
 			// it: reopen its page, which a guess from the screen may miss by one
@@ -471,28 +534,19 @@
 	     the objectives, so a reader meets it before page 1. v1.1's Lestrarstilling words.
 	     'Lestrarstilling' (the group's name), 'Síðuskipt' and 'Samfellt skrun': Checked by [USER] as D20 batch 12 (2026-11-08). -->
 	{#if showModeSwitch}
+		<!-- Radios since S11.3 (UI-03): a screen reader hears which mode is on; Tab enters the pair
+		     once, and the arrow keys choose, as a radio group's do -->
 		<div class="mb-3 flex justify-end">
-			<div role="group" aria-label="Lestrarstilling" class="inline-flex gap-0.5 rounded-lg border border-[var(--border-color)] p-0.5 text-sm">
-				<button
-					aria-pressed={paged}
-					onclick={() => chooseMode('paged')}
-					class="rounded-md px-3 py-1 font-medium transition-colors {paged
-						? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
-						: 'text-[var(--text-secondary)] hover:bg-[var(--accent-subtle)]'}"
-				>
-					Síðuskipt
-				</button>
-				<button
-					bind:this={scrollButton}
-					aria-pressed={!paged}
-					onclick={() => chooseMode('scrolled')}
-					class="rounded-md px-3 py-1 font-medium transition-colors {!paged
-						? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
-						: 'text-[var(--text-secondary)] hover:bg-[var(--accent-subtle)]'}"
-				>
-					Samfellt skrun
-				</button>
-			</div>
+			<SegmentedControl
+				bind:this={modeControl}
+				legend="Lestrarstilling"
+				legendHidden
+				variant="inline"
+				name="reading-mode"
+				options={MODES}
+				value={paged ? 'paged' : 'scrolled'}
+				onchange={(mode) => chooseMode(mode)}
+			/>
 		</div>
 	{/if}
 
@@ -692,9 +746,39 @@
 		<div bind:this={contentWrapper} data-paged-section={pagedMark}>
 			<!-- Outside the content root, so it is never paginated, shifts no highlight offsets and
 			     trips no observer; the pager shows it above the first page only (S9.4, UI-09) -->
-			{#if unreviewed && paged}
-				<div bind:this={mtLead}>
-					<PreviewBanner bookSlug={data.bookSlug} chapterSlug={data.chapterSlug} sectionSlug={data.sectionSlug} />
+			{#if paged}
+				<div bind:this={pageLead}>
+					{#if unreviewed}
+						<PreviewBanner bookSlug={data.bookSlug} chapterSlug={data.chapterSlug} sectionSlug={data.sectionSlug} />
+					{/if}
+					{#if placeOffer}
+						<!-- The saved place, offered at the content top (S11.3, D13). 'Haltu áfram að lesa' and
+						     'Halda áfram' are the scrolled prompt's. 'Þú varst síðast hér:' and 'Byrja á byrjun'
+						     (D13's word): D20: proposed -->
+						<div
+							class="mb-4 p-4 rounded-xl bg-[var(--accent-light)] border border-[var(--accent-subtle)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+							role="status"
+						>
+							<div>
+								<p class="font-medium text-[var(--text-primary)]">Haltu áfram að lesa</p>
+								<p class="text-sm text-[var(--text-secondary)]">Þú varst síðast hér: {placeOffer}</p>
+							</div>
+							<div class="flex flex-wrap items-center gap-2">
+								<button
+									onclick={resumePlace}
+									class="px-4 py-2 text-sm font-medium rounded-lg bg-[var(--accent-color)] text-[var(--on-accent)] hover:bg-[var(--accent-fill-hover)] transition-colors"
+								>
+									Halda áfram
+								</button>
+								<button
+									onclick={startFromBeginning}
+									class="px-4 py-2 text-sm font-medium rounded-lg border border-[var(--border-color)] text-[var(--text-primary)] hover:bg-[var(--accent-subtle)] transition-colors"
+								>
+									Byrja á byrjun
+								</button>
+							</div>
+						</div>
+					{/if}
 				</div>
 			{/if}
 			<TextHighlighter
@@ -746,18 +830,26 @@
 				bind:this={pagerControls}
 				container={contentWrapper}
 				oncomplete={finishFromPager}
-				onstatechange={(state) => (pagerState = state)}
+				onstatechange={(state) => {
+					pagerState = state;
+					if (state === 'ready') offerPlace();
+				}}
 				covered={endCovered}
 				onuncover={() => (endUncovered = true)}
 				{startAt}
 				onleave={() => chooseMode('scrolled', { fromPager: true })}
-				lead={unreviewed ? mtLead : null}
+				lead={pageLead ?? null}
 				mtReport={unreviewed
 					? feedbackHref({ bok: data.bookSlug, kafli: data.chapterSlug, hluti: data.sectionSlug })
 					: null}
 				onreserve={(px) => (pagedReserve = px)}
 				ontallpage={() => analyticsStore.countEvent(data.bookSlug, 'pageTooTall')}
-				onposition={(p) => reader.setScrollProgress(pageProgress(p.index, p.total))}
+				onposition={(p) => {
+					reader.setScrollProgress(pageProgress(p.index, p.total));
+					lastPosition = { index: p.index, total: p.total };
+					// The offer is for page 1: a turn, or 'Halda áfram', takes it away
+					if (p.index > 0) placeOffer = null;
+				}}
 			/>
 		{/if}
 

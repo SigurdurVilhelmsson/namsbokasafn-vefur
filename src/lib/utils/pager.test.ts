@@ -326,6 +326,46 @@ describe('positionLabel', () => {
 
 // Plan step S9.2 (UI-05): the position a screen reader hears names the sub-section, with
 // commas where the label has '·', since how screen readers voice '·' is not verified
+// S11.3 (UI-29, D13): the intro and the footnotes are no parts, and a section of one part says no
+// 'Hluti'. The kinds come from the units (paginate.ts's unitKind).
+describe('positionLabel and spokenPosition with the units\' kinds (S11.3)', () => {
+	const KINDS = ['intro', 'part', 'part', 'footnotes'] as const;
+	const PAGES = [2, 5, 4, 1];
+
+	it("counts only parts: the intro's pages say the page alone", () => {
+		expect(positionLabel({ unit: 0, page: 1 }, PAGES, KINDS)).toBe('Síða 2 af 2');
+		expect(positionLabel({ unit: 1, page: 0 }, PAGES, KINDS)).toBe('Hluti 1 af 2 · Síða 1 af 5');
+		expect(positionLabel({ unit: 2, page: 3 }, PAGES, KINDS)).toBe('Hluti 2 af 2 · Síða 4 af 4');
+	});
+
+	it('names the footnotes', () => {
+		expect(positionLabel({ unit: 3, page: 0 }, PAGES, KINDS)).toBe('Neðanmálsgreinar · Síða 1 af 1');
+	});
+
+	it("says no 'Hluti' in a section of one part, with or without an intro", () => {
+		expect(positionLabel({ unit: 1, page: 2 }, [2, 9], ['intro', 'part'])).toBe('Síða 3 af 9');
+		expect(positionLabel({ unit: 0, page: 2 }, [9], ['part'])).toBe('Síða 3 af 9');
+		expect(positionLabel({ unit: 0, page: 2 }, [9])).toBe('Síða 3 af 9');
+	});
+
+	it('numbers the parts past a block of text between them', () => {
+		const kinds = ['intro', 'part', 'intro', 'part'] as const;
+		expect(positionLabel({ unit: 2, page: 0 }, [1, 2, 1, 3], kinds)).toBe('Síða 1 af 1');
+		expect(positionLabel({ unit: 3, page: 1 }, [1, 2, 1, 3], kinds)).toBe('Hluti 2 af 2 · Síða 2 af 3');
+	});
+
+	it('speaks as the label reads', () => {
+		expect(spokenPosition({ unit: 0, page: 0 }, PAGES, null, KINDS)).toBe('Síða 1 af 2');
+		expect(spokenPosition({ unit: 1, page: 0 }, PAGES, 'Flokkun efnis', KINDS)).toBe(
+			'Hluti 1 af 2: Flokkun efnis, síða 1 af 5'
+		);
+		expect(spokenPosition({ unit: 3, page: 0 }, PAGES, null, KINDS)).toBe('Neðanmálsgreinar, síða 1 af 1');
+		expect(spokenPosition({ unit: 1, page: 2 }, [2, 9], 'Ástandsform', ['intro', 'part'])).toBe(
+			'Ástandsform, síða 3 af 9'
+		);
+	});
+});
+
 describe('spokenPosition', () => {
 	it('names the sub-section between the unit and the page', () => {
 		expect(spokenPosition({ unit: 1, page: 2 }, COUNTS, 'Flokkun efnis')).toBe(

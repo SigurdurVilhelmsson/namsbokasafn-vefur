@@ -199,7 +199,9 @@ test.describe('The focus ring (S2.2, D01)', () => {
 				// The dialog moves focus to 'Loka' 50 ms after it opens. Wait for that first, or on a
 				// slow runner it takes focus back from the option mid-test (seen in CI).
 				await expect(dialog.getByRole('button', { name: 'Loka', exact: true })).toBeFocused();
-				const option = dialog.getByRole('group', { name: 'Línubil' }).getByRole('button').first();
+				// Since S11.3 a radio group (SegmentedControl): Tab stops on its checked radio, which covers
+				// its segment, so the ring draws around the segment
+				const option = dialog.getByRole('group', { name: 'Línubil' }).getByRole('radio', { checked: true });
 				await expect(option).toBeVisible();
 				await tabTo(page, option);
 				await expectRing(page, option, 'Settings option');
