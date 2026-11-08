@@ -1274,7 +1274,10 @@ test.describe('The title and focus survive page turns (S9.2)', () => {
 		test(`no page holds the title alone, at ${viewport.width}px`, async ({ page }) => {
 			const urls = [
 				...new Set([
-					...sectionsMatching(/(<main>|class="cnx-body"[^>]*>)\s*<section[\s>]/, 3),
+					// The published book's, so a checkout holding a frozen book tests what CI tests
+					...sectionsMatching(/(<main>|class="cnx-body"[^>]*>)\s*<section[\s>]/, 100)
+						.filter((u) => u.startsWith(`/${BOOK}/`))
+						.slice(0, 3),
 					...[sectionUrl('1.3')].filter((u): u is string => !!u)
 				])
 			];
