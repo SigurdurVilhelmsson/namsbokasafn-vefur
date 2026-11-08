@@ -1152,8 +1152,12 @@
 		color: #d97706;
 	}
 
-	/* Bronze text for amber-as-text, underlined, as the banner's link (the accent-text rule) */
+	/* Bronze text for amber-as-text, underlined, as the banner's link (the accent-text rule).
+	   Centred: on touch screens app.css gives every link 44 px of height, and its text sat at
+	   the top, above 'Vélþýtt'. */
 	.paged-nav-mt-report {
+		display: inline-flex;
+		align-items: center;
 		color: var(--accent-strong);
 		text-decoration: underline;
 		text-underline-offset: 2px;
