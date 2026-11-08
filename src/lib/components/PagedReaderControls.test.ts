@@ -38,7 +38,7 @@ const realStyle = window.getComputedStyle;
 let fonts: { release: () => void; reject: (e: Error) => void } | null = null;
 let mounted: ReturnType<typeof mount>[] = [];
 
-const PAGER_EVENTS = new Set(['keydown', 'hashchange', 'resize', 'touchstart', 'touchend', 'load']);
+const PAGER_EVENTS = new Set(['keydown', 'hashchange', 'resize', 'touchstart', 'touchend', 'load', 'blur']);
 const realAdd = window.EventTarget.prototype.addEventListener;
 // vitest's jsdom global is the window, with addEventListener as its own property
 const realWindowAdd = window.addEventListener;
@@ -580,6 +580,22 @@ describe('a key or swipe turn keeps focus on the page (S9.2, UI-01)', () => {
 		failNextResplit();
 		expect(article().hasAttribute('tabindex')).toBe(false);
 	});
+
+	// Every listener the pager adds takes its run's signal (CODE-17), the article's blur too
+	for (const end of ['fails', 'is unmounted'] as const) {
+		it(`the article's blur listener goes with the run when the pager ${end}`, async () => {
+			track();
+			const { c, term } = withTerm();
+			const { pager } = open(c);
+			await settle();
+			term.focus();
+			key('ArrowRight');
+			expect(held().listeners).toContain('blur');
+			if (end === 'fails') failNextResplit();
+			else drop(pager);
+			expect(held().listeners).not.toContain('blur');
+		});
+	}
 
 	it('an unmounted pager leaves no tabindex on the article', async () => {
 		const { c, term } = withTerm();

@@ -349,7 +349,8 @@
 		if (!root.hasAttribute('tabindex')) {
 			root.setAttribute('tabindex', '-1');
 			focusedArticle = root;
-			root.addEventListener('blur', releaseArticle, { once: true });
+			// The run's signal, like every listener the pager adds (CODE-17)
+			root.addEventListener('blur', releaseArticle, { once: true, signal: run?.signal });
 		}
 		root.focus({ preventScroll: true });
 	}
