@@ -68,6 +68,37 @@ test.describe('Ctrl+P on a section prints the glossary terms and the notes', () 
 		await expectBookTextPrinted(page);
 	});
 
+	// fix/print-header: the block hid every <header>, the section's own included, so a printed
+	// section had no title
+	for (const mode of ['scrolled', 'paged'] as const) {
+		test(`${mode}: the section's title prints, the app's header does not, and the objectives print once`, async ({
+			page
+		}) => {
+			if (mode === 'paged') await seedSettings(page, { readingMode: 'paged' });
+			await openWithTerms(page, URL_1_2!);
+			if (mode === 'paged') {
+				await expect(page.getByRole('navigation', { name: 'Síðuflakk' })).toBeVisible({ timeout: 15000 });
+				await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+			}
+			await page.emulateMedia({ media: 'print' });
+			const titles = await rendering(page, 'article.cnx-module h1');
+			expect(titles, "§1.2's title").toHaveLength(1);
+			expect(titles[0].shown, `${titles[0].what} renders in print`).toBe(true);
+			const printed = await page.evaluate(() => {
+				const shown = (el: Element) => getComputedStyle(el).display !== 'none' && el.getClientRects().length > 0;
+				const app = document.querySelector('header.header');
+				return {
+					appHeader: app ? shown(app) : false,
+					// The page's own objectives box, and the content's copy hidden beside it (hideStaticObjectives)
+					objectives: Array.from(document.querySelectorAll('h2, h3')).filter(
+						(h) => h.textContent?.trim() === 'Námsmarkmið' && shown(h)
+					).length
+				};
+			});
+			expect(printed).toEqual({ appHeader: false, objectives: 1 });
+		});
+	}
+
 	// A control: the fix frees the book's text, not the app's chrome, which stays off paper
 	test("the app's own asides, its nav and its buttons stay out of print", async ({ page }) => {
 		await seedSettings(page, { sidebarOpen: true });

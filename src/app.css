@@ -1938,9 +1938,11 @@ figure[data-figure-review]::before {
    * HIDDEN ELEMENTS
    * ---------------------------------------- */
 
-  /* Navigation and chrome. Only the app's asides: the book's own (notes, examples, its
-     everyday-life boxes) are text, and print (the worklist's bl-print-glossary-terms) */
-  header,
+  /* Navigation and chrome. Only the app's headers and asides: the section's own <header>
+     (its title, and its objectives where the page shows no box of its own) and the book's
+     asides (notes, examples, its everyday-life boxes) are text, and print (the worklist's
+     bl-print-glossary-terms; fix/print-header) */
+  header:not(.reading-content header),
   nav,
   aside:not(.reading-content aside),
   footer,
