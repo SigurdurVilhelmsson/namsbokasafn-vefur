@@ -178,6 +178,9 @@ S4.5 (see "Where to run what").
 
 ## Batch E — Reader v1.1: pagination (the big one, ~30 min)
 
+_2026-11-08: this is batch E as written for v1.1's trial build (S0.4). For the live
+site at S9.6, run "Batch E as M9 amends it" below instead._
+
 This is the batch that genuinely needs judgment, not just verification.
 Use a long, figure-heavy chapter (Chapter 1 has many figures) and an
 equation-heavy section.
@@ -244,6 +247,127 @@ equation-heavy section.
       "Hluti N af M · Síða X af Y", the label's own text.
 - [ ] The "Samfellt skrun" setting is discoverable and its explanation read.
 - [ ] In scrolled mode the section reads top-to-bottom normally.
+
+## Batch E as M9 amends it — the live dark pager (S9.6, ~45 min)
+
+_Written 2026-11-08 for train 12, which ships S9.1–S9.5 dark: no reader sees the pager
+without a link, and no picker is rendered (D06; the opt-in waits for S11.1–S11.3 and
+S11.5). Run it on namsbokasafn.is after the train, at three widths (a phone, the iPad,
+a laptop), with one screen reader. M9's exit criterion is this batch passing._
+
+**How to open a section paged.** Add `?lestur=sidur` to its address. The link's mode
+lasts until you leave the section pages (the link rule, sticky as built). Live addresses
+(live chemistry is the 2026-08 sync, so take slugs from the live site, not efni):
+
+- §1.1 <https://namsbokasafn.is/efnafraedi-2e/kafli/01/1-1-efnafraedi-i-samhengi/?lestur=sidur>
+- §1.2 <https://namsbokasafn.is/efnafraedi-2e/kafli/01/1-2-efnishamur-og-flokkun-efnis/?lestur=sidur> (figures)
+- §3.1 <https://namsbokasafn.is/efnafraedi-2e/kafli/03/3-1-formulumassi-og-molhugtakid/?lestur=sidur> (worked examples, Dæmi 3.1)
+- §5.3 <https://namsbokasafn.is/efnafraedi-2e/kafli/05/5-3-vermi/?lestur=sidur> (equations, 18–27 pages)
+- §14.3 <https://namsbokasafn.is/efnafraedi-2e/kafli/14/14-3-hlutfallslegur-styrkur-syra-og-basa/?lestur=sidur> (opens with a sub-section)
+
+⚠️ 'Síðuskipt' and 'Samfellt skrun' store your choice. After 'Síðuskipt', every section
+pages without a link; tap 'Samfellt skrun' to go back to scrolling.
+
+**On every page (S9.2, S9.4)**
+
+- [ ] The section title stands above every page, not only the first; no page is the
+      title alone (§14.3 opens on its first sub-section).
+- [ ] Page 1 has the full 'Vélþýtt efni' banner above the content; every page's bar
+      has the compact '⚠ Vélþýtt' marker and 'Tilkynna villu', which opens the feedback
+      form with this section filled in. The learning objectives stay above the window on
+      arrival (ruling 1).
+- [ ] "Hluti N af M · Síða X af Y" is accurate.
+
+**The docked bar (S9.5): on a real phone**
+
+_The bar was never seen on a device: in Chrome's phone emulation it stuck too low on tall
+pages, which a plain touch test does not show. This is the check that matters most._
+
+- [ ] iPhone (Safari) and an Android phone (Chrome), portrait: the bar sits at the
+      bottom of the screen. On a page taller than the screen (scroll inside it, or find
+      one on §1.2 or §5.3), the bar **stays on screen at the bottom** while you scroll,
+      and nothing scrolls out from under it unread.
+- [ ] Nothing covers '‹' or '›' (the arrows replace 'Fyrri' and 'Næsta' below 640 px):
+      the tools button sits in the bar's right end, and the timer pill is hidden while
+      the section pages and the timer is idle.
+- [ ] Start a timer (switch to 'Samfellt skrun', start it, tap 'Síðuskipt'): the running
+      timer sits in the bar's left end, clear of '‹'.
+- [ ] The last page's button says 'Ljúka kafla' in words, and the counter stays legible.
+- [ ] The second line ('⚠ Vélþýtt · Tilkynna villu', 'Samfellt skrun') is readable and
+      each part takes a tap.
+- [ ] Rotate to landscape and back: pages re-split, the label stays sane, nothing is
+      covered. Note anything that sits under the iPhone's home indicator.
+- [ ] Swipe left/right turns pages; a sideways drag in a wide table (§2.7) scrolls the
+      table and keeps the page; a pinch never turns; vertical scroll and pull-to-refresh
+      are not hijacked.
+- [ ] On a short page you may see blank space after 'Næsti kafli' at the very end (room
+      added so a page's top can scroll under the header; at most about 116 px measured).
+      Say if it bothers you.
+
+**Keys and pages (S9.1)**
+
+- [ ] → and ← turn a page at once. Space and PageDown on a page taller than the window
+      scroll to its end before turning; Shift+Space and PageUp do the same upwards.
+      Typing in search or a text box never turns pages.
+- [ ] Figures with captions, tables, display equations and notes are never split, and
+      no heading is left as the last line of a page.
+- [ ] **The 'Lausn' trial (D11), §3.1 at all three widths:** a worked example taller
+      than the page breaks once, before its check-your-learning part, so that part and
+      its 'Sýna svar' open the next page; an example that fits stays whole. Verdict:
+      keep it, or switch it off (`EXAMPLE_BREAK_TRIAL` in `paginate.ts`).
+- [ ] Practice problems and glossary tooltips work on later pages.
+- [ ] Reload a deep link (`…#sub-2-p-1`): it opens on that page. Change the font size, or
+      resize the window: pages re-split, and you stay within a page of where you were.
+- [ ] Bionic reading on and off: the bold comes and goes on the page you are on.
+
+**Figures and focus (S9.2, S9.4)**
+
+- [ ] Tap a 'Mynd' link in the text (§1.1, §1.2): the figure opens in the lightbox over
+      the page, and the page and its label stay. Escape or 'Loka' closes it, with focus
+      back on the link. A link to a table still turns to the table's page.
+- [ ] With the keyboard: focus a link in the text and press →: focus moves to the page,
+      not lost. After an arrow-key turn a focus ring is drawn around the page. Verdict:
+      fine, or distracting?
+
+**The way out and the section's end (S9.3)**
+
+- [ ] 'Síðuskipt' / 'Samfellt skrun' sit above the objectives, and 'Samfellt skrun' also
+      under the counter. From a page past the first, 'Samfellt skrun' scrolls the whole
+      section, nothing missing, with the text you were reading where it was. 'Síðuskipt'
+      brings back the same page.
+- [ ] No 'Merkja kafla sem lesinn' button sits under the pager; the toolbar's 'Merkja sem
+      lesið' still works.
+- [ ] 'Ljúka kafla' on the last page opens the recall prompt in the page's place (the
+      page's text gone, the title above). 'Fyrri' shows the last page again. After
+      'Sleppa' or 'Vista', focus is on 'Næsti kafli', in view. On a section already
+      prompted, 'Ljúka kafla' goes straight to 'Næsti kafli'. The section shows read in
+      the sidebar.
+- [ ] Open Settings on a later page and close it (Loka or Escape): the page does not
+      jump.
+
+**Judgment calls: note your verdict**
+
+- [ ] **Page height (call 1, now applied).** Do pages feel right, or too short or too
+      tall? At each width note the lines a page holds and how many pages need window
+      scrolling. Measured locally on §1.2 before the train: the page is 68% of a
+      1280×800 window (24 pages), 76% at 768×1024 (18), 71% at 390×844 (31), 60% at
+      375×667 (35).
+- [ ] The 'Lausn' trial and the focus ring, above.
+- [ ] Default reading mode (call 3) stays open until S10.2; nothing to rule here.
+
+**Screen reader (VoiceOver on the iPad, or NVDA)**
+
+- [ ] On arrival and on each turn it says the position with the sub-section, e.g.
+      "Hluti 2 af 3: Flokkun efnis, síða 4 af 13" (or "Hluti 1 af 3, síða 2 af 2" in an
+      introduction). Is the wording right? (D20 batch 12.)
+- [ ] Headings list the section title (h1) on every page.
+- [ ] 'Samfellt skrun' is reached before the objectives. **After switching to it, a
+      say-all reads the section to the end** (M9's acceptance).
+- [ ] The bar's marker reads "Vélþýtt efni. Þessi eining hefur ekki enn verið yfirlesin
+      og kann að innihalda þýðingarvillur."; 'Ljúka kafla' is announced as a button.
+- [ ] In scrolled mode the section reads top to bottom as before.
+
+---
 
 ## Batch G — Reader v1.2: P1 features (~20 min)
 
