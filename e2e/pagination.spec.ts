@@ -10,10 +10,13 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import { MODULE_BODY_SELECTOR, EXAMPLE_BREAK_TRIAL } from '../src/lib/utils/paginate';
 import { PAGE_BUDGET, KEY_SCROLL } from '../src/lib/utils/pager';
 import {
 	sectionsContaining,
+	sectionsMatching,
+	tocSectionUrls,
 	rollupSection,
 	publishedBook,
 	firstModuleSection
@@ -36,9 +39,11 @@ const samePath = (url: string | URL, path: string) =>
 /**
  * The blocks of the page on screen, split as the paginator splits them: the article's
  * children in document order, looking through the module-body wrapper (<main>, or
- * efni's planned .cnx-body: MODULE_BODY_SELECTOR) and nested <section>s. A wrapper the
- * paginator wrongly took as one block shows up here as many blocks. An unknown child
- * that holds sub-sections is a body wrapper efni has not told us about, so it throws.
+ * efni's planned .cnx-body: MODULE_BODY_SELECTOR) and nested <section>s, and leaving out
+ * the article's own <header>, the running title above every page since S9.2 (D12). A
+ * wrapper the paginator wrongly took as one block shows up here as many blocks. An
+ * unknown child that holds sub-sections is a body wrapper efni has not told us about, so
+ * it throws.
  */
 async function shownPage(page: Page) {
 	return page.evaluate((bodySelector) => {
@@ -55,6 +60,7 @@ async function shownPage(page: Page) {
 		const flat = (el: Element): Element[] =>
 			el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
 		const shown = Array.from(root.children)
+			.filter((el) => el.tagName !== 'HEADER')
 			.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
 			.flatMap(flat)
 			.filter((el) => (el as HTMLElement).offsetParent !== null);
@@ -80,6 +86,7 @@ async function pageEnd(page: Page) {
 			const flat = (el: Element): Element[] =>
 				el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
 			const shown = Array.from(root.children)
+				.filter((el) => el.tagName !== 'HEADER')
 				.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
 				.flatMap(flat)
 				.filter((el) => (el as HTMLElement).offsetParent !== null);
@@ -373,11 +380,14 @@ test.describe('Paged reading mode', () => {
 	});
 
 	// Since S8.3 the pager speaks through the app's one polite region (register UI-01)
-	// instead of a region of its own, which competed with it: the region says what the
-	// label shows on arrival, on every page and after 'Fyrri', and a re-split that keeps
-	// the page says nothing. The locator matches the atomic polite regions: the shared
-	// one, and search's while search is open, so this test never opens search.
-	test('the screen reader hears the position the label shows', async ({ page }) => {
+	// instead of a region of its own, which competed with it: the region says the label's
+	// position on arrival, on every page and after 'Fyrri', and a re-split that keeps
+	// the page says nothing. Since S9.2 it also names the sub-section shown (UI-05):
+	// 'Hluti 2 af 3: Flokkun efnis, síða 4 af 13', commas for the label's '·', the
+	// position alone in the intro. S8.3's "what the label shows" is amended on purpose.
+	// The locator matches the atomic polite regions: the shared one, and search's while
+	// search is open, so this test never opens search.
+	test('the screen reader hears the position the label shows, and the sub-section', async ({ page }) => {
 		const urls = sectionsContaining('<p', 1);
 		test.skip(urls.length === 0, 'No section content available');
 		test.setTimeout(120000);
@@ -389,7 +399,23 @@ test.describe('Paged reading mode', () => {
 		const region = page.locator('[aria-live="polite"][aria-atomic="true"]');
 		await expect(nav).toBeVisible({ timeout: 15000 });
 		await expect(region).toHaveCount(1);
-		const says = async () => expect(region).toHaveText((await label.textContent())!.trim());
+		/** The label's numbers, and the heading of the sub-section on screen (none in the intro) */
+		const says = async () => {
+			const [, unit, units, at, pages] = (await label.textContent())!
+				.trim()
+				.match(/^Hluti (\d+) af (\d+) · Síða (\d+) af (\d+)$/)!;
+			const heading = await page.evaluate((bodySelector) => {
+				const root = document.querySelector('article.cnx-module')!;
+				const shown = Array.from(root.children)
+					.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
+					.find((el) => el.tagName === 'SECTION' && !el.hasAttribute('hidden'));
+				const h = shown && Array.from(shown.children).find((el) => /^H[2-6]$/.test(el.tagName));
+				return h?.textContent?.replace(/\s+/g, ' ').trim() || null;
+			}, MODULE_BODY_SELECTOR);
+			const position = `Hluti ${unit} af ${units}`;
+			const page_ = `síða ${at} af ${pages}`;
+			await expect(region).toHaveText(heading ? `${position}: ${heading}, ${page_}` : `${position}, ${page_}`);
+		};
 
 		await says();
 		for (let i = 0; ; i++) {
@@ -571,7 +597,7 @@ test.describe('Paged reading mode', () => {
 
 	test('arrival scrolls past the learning objectives to the content', async ({ page }) => {
 		// [USER], 2026-10-04: page 1 gets a full page rather than the room left
-		// under the objectives, which on 5.3 at 1280x720 was the title alone
+		// under the objectives, which on 5.3 at 1280x720 left the title alone on page 1
 		const urls = sectionsContaining('<p', 3);
 		test.skip(urls.length === 0, 'No section content available');
 
@@ -581,8 +607,8 @@ test.describe('Paged reading mode', () => {
 				timeout: 15000
 			});
 			await page.waitForTimeout(500);
-			// Page 1 may still be the title alone, when the first paragraph is
-			// too long to share a page with it; that is the split, not the scroll
+			// The title is above every page since S9.2 (D12), so no page is the title alone;
+			// 'The title and focus survive page turns' tests that
 			const top = await page.evaluate(
 				() => document.querySelector('article.cnx-module')!.getBoundingClientRect().top
 			);
@@ -1157,6 +1183,166 @@ test.describe("D11's 'Lausn' trial (S9.1)", () => {
 			await page.keyboard.press('Space');
 			await page.waitForTimeout(250);
 			await expect(label, "Space turned past 'Sýna svar'").toHaveText(secondPart);
+		}
+	});
+});
+
+/** Reader URL of a module section of the published book by its number ('1.2'), or null */
+function sectionUrl(number: string): string | null {
+	if (!BOOK) return null;
+	const [chapter, section] = number.split('.');
+	const file = tocSectionUrls(BOOK).find((u) => new RegExp(`/${chapter}-${section}-[^/]+\\.html$`).test(u));
+	const m = file?.match(/\/chapters\/([^/]+)\/([^/]+)\.html$/);
+	return m ? `/${BOOK}/kafli/${m[1]}/${m[2]}/` : null;
+}
+
+/** Runs `check` on every page of the section open in `page`, first to last, turning with 'Næsta' */
+async function eachPage(page: Page, url: string, check: (text: string) => Promise<void>) {
+	const label = pagerLabel(page);
+	const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+	for (let i = 0; ; i++) {
+		expect(i, `${url}: more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
+		const text = (await label.textContent())!.trim();
+		await check(text);
+		if (LAST_PAGE.test(text)) break;
+		await next.click();
+		await expect(label).not.toHaveText(text);
+		await page.waitForTimeout(300);
+	}
+}
+
+/** The tags of the blocks on screen, as the paginator splits them (the running title left out) */
+const shownTags = (page: Page) =>
+	page.evaluate((bodySelector) => {
+		const root = document.querySelector('article.cnx-module') as HTMLElement;
+		const flat = (el: Element): Element[] =>
+			el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
+		return Array.from(root.children)
+			.filter((el) => el.tagName !== 'HEADER')
+			.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
+			.flatMap(flat)
+			.filter((el) => (el as HTMLElement).offsetParent !== null)
+			.map((el) => el.tagName);
+	}, MODULE_BODY_SELECTOR);
+
+/** Where focus is: on the article, on <body>, or inside a hidden block */
+const focusAt = (page: Page) =>
+	page.evaluate(() => {
+		const active = document.activeElement;
+		return {
+			tag: active?.tagName ?? 'none',
+			body: !active || active === document.body,
+			hidden: !!active?.closest('[hidden]')
+		};
+	});
+
+// Plan step S9.2 (D12, 2026-11-08; UI-19, UI-05, UI-01): the section title stays above every
+// page, so its h1 is there on every page for sight and for screen readers, and no page is the
+// title alone; a key turn that hides the focus moves it to the article.
+test.describe('The title and focus survive page turns (S9.2)', () => {
+	test.skip(!SECTION, 'No synced module section');
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+
+	for (const viewport of [
+		{ width: 390, height: 844 },
+		{ width: 1280, height: 800 }
+	]) {
+		test(`every page of §1.2 has the one h1, and axe finds it, at ${viewport.width}px`, async ({ page }) => {
+			const url = sectionUrl('1.2');
+			test.skip(!url, 'No §1.2 synced');
+			test.setTimeout(180000);
+			await page.setViewportSize(viewport);
+			await openPaged(page, url!);
+			const title = (await page.locator('article.cnx-module > header h1').textContent())!.trim();
+			const h1 = page.getByRole('heading', { level: 1 });
+
+			await eachPage(page, url!, async (text) => {
+				await expect(h1, `${text}: one h1`).toHaveCount(1);
+				await expect(h1, `${text}: the h1 is the section title`).toHaveText(title);
+				await expect(h1).toBeVisible();
+				// A best-practice rule, so the ratchet's WCAG tags leave it out: run by name
+				const { violations } = await new AxeBuilder({ page }).withRules(['page-has-heading-one']).analyze();
+				expect(
+					violations.map((v) => v.id),
+					`${text}: axe`
+				).toEqual([]);
+			});
+		});
+
+		// A body that opens with a sub-section (14.3, 14.4 and 16.3 on efni's ② preview) gave the
+		// title a page of its own, and so did §1.3 at 1280 px, whose first paragraph could not join it
+		test(`no page holds the title alone, at ${viewport.width}px`, async ({ page }) => {
+			const urls = [
+				...new Set([
+					// The published book's, so a checkout holding a frozen book tests what CI tests
+					...sectionsMatching(/(<main>|class="cnx-body"[^>]*>)\s*<section[\s>]/, 100)
+						.filter((u) => u.startsWith(`/${BOOK}/`))
+						.slice(0, 3),
+					...[sectionUrl('1.3')].filter((u): u is string => !!u)
+				])
+			];
+			test.skip(urls.length === 0, 'No §1.3 and no section whose body opens with a sub-section');
+			test.setTimeout(300000);
+			await page.setViewportSize(viewport);
+
+			for (const url of urls) {
+				await openPaged(page, url);
+				await eachPage(page, url, async (text) => {
+					const tags = await shownTags(page);
+					expect(
+						tags.some((tag) => !/^H[1-6]$/.test(tag)),
+						`${url} ${text}: the page shows ${tags.join(', ') || 'no block'}`
+					).toBe(true);
+				});
+			}
+		});
+	}
+
+	// After the rescue keyBelongsElsewhere() walks up from the article, so a box around it that
+	// scrolls sideways would take the arrows from then on: every → must still turn, and Space
+	// must still act, on a section with a wide table at phone width
+	test('a key turn moves focus off a hidden element to the article, and the keys still turn pages', async ({
+		page
+	}) => {
+		const [url] = sectionsContaining('<table', 1);
+		test.skip(!url, 'No section with a table');
+		test.setTimeout(180000);
+		await page.setViewportSize({ width: 390, height: 844 });
+		await openPaged(page, url);
+		const label = pagerLabel(page);
+
+		// Something on page 1 the turn will hide: a link, a button or a term
+		const focused = await page.evaluate(() => {
+			const el = Array.from(
+				document.querySelectorAll<HTMLElement>('article.cnx-module :is(a[href], button, [tabindex="0"])')
+			).find((e) => e.offsetParent !== null);
+			el?.focus();
+			return el ? `<${el.tagName.toLowerCase()}>` : null;
+		});
+		if (!focused) await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+
+		for (let i = 0; ; i++) {
+			expect(i, `${url}: more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
+			const text = (await label.textContent())!.trim();
+			if (LAST_PAGE.test(text)) break;
+			await page.keyboard.press('ArrowRight');
+			await expect(label, `${text}: → did not turn the page`).not.toHaveText(text);
+			const at = await focusAt(page);
+			expect(
+				at.body || at.hidden,
+				`${text}: after → from ${i === 0 ? (focused ?? '<body>') : 'the page'}, focus is on <${at.tag.toLowerCase()}>${at.hidden ? ' in a hidden block' : ''}`
+			).toBe(false);
+
+			if (i === 0) {
+				// Space acts with focus on the article: it scrolls a tall page or turns
+				const before = { text: (await label.textContent())!.trim(), y: await page.evaluate(() => scrollY) };
+				await page.keyboard.press('Space');
+				await expect
+					.poll(async () => ({ text: (await label.textContent())!.trim(), y: await page.evaluate(() => scrollY) }), {
+						message: `${before.text}: Space did nothing with focus on the article`
+					})
+					.not.toEqual(before);
+			}
 		}
 	});
 });

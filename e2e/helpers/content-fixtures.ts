@@ -98,6 +98,20 @@ export function bookWithout(capability: Capability): string | null {
  * URL, so the choice is deterministic.
  */
 export function sectionsContaining(marker: string, limit: number): string[] {
+	return sectionsBy((html) => html.split(marker).length - 1, limit);
+}
+
+/**
+ * Like sectionsContaining, for markup a fixed string cannot name: the section pages
+ * matching `pattern` most often (it is made global, so every match counts).
+ */
+export function sectionsMatching(pattern: RegExp, limit: number): string[] {
+	const global = new RegExp(pattern.source, pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`);
+	return sectionsBy((html) => html.match(global)?.length ?? 0, limit);
+}
+
+/** Reader URLs of the module sections `count` scores above 0, most first, ties by URL */
+function sectionsBy(count: (html: string) => number, limit: number): string[] {
 	const found: { url: string; count: number }[] = [];
 	for (const slug of syncedBooks()) {
 		const chaptersDir = join(CONTENT_DIR, slug, 'chapters');
@@ -108,10 +122,9 @@ export function sectionsContaining(marker: string, limit: number): string[] {
 			for (const file of readdirSync(join(chaptersDir, chapter.name))) {
 				// Module sections only ("1-4-maelingar.html"): rollups route elsewhere.
 				if (!/^\d+-\d+-.+\.html$/.test(file)) continue;
-				const html = readFileSync(join(chaptersDir, chapter.name, file), 'utf-8');
-				const count = html.split(marker).length - 1;
-				if (count > 0) {
-					found.push({ url: `/${slug}/kafli/${chapter.name}/${file.slice(0, -5)}/`, count });
+				const score = count(readFileSync(join(chaptersDir, chapter.name, file), 'utf-8'));
+				if (score > 0) {
+					found.push({ url: `/${slug}/kafli/${chapter.name}/${file.slice(0, -5)}/`, count: score });
 				}
 			}
 		}

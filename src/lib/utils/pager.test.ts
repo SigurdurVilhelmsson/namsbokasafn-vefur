@@ -14,6 +14,7 @@ import {
 	decodePageHash,
 	resolvePageHash,
 	positionLabel,
+	spokenPosition,
 	keyAction,
 	KEY_SCROLL,
 	keyScroll,
@@ -233,6 +234,28 @@ describe('positionLabel', () => {
 
 	it('reads a unit with no page count as one page', () => {
 		expect(positionLabel({ unit: 3, page: 0 }, COUNTS)).toBe('Hluti 4 af 3 · Síða 1 af 1');
+	});
+});
+
+// Plan step S9.2 (UI-05): the position a screen reader hears names the sub-section, with
+// commas where the label has '·', since how screen readers voice '·' is not verified
+describe('spokenPosition', () => {
+	it('names the sub-section between the unit and the page', () => {
+		expect(spokenPosition({ unit: 1, page: 2 }, COUNTS, 'Flokkun efnis')).toBe(
+			'Hluti 2 af 3: Flokkun efnis, síða 3 af 4'
+		);
+	});
+
+	it('gives the position alone for a unit with no heading (the intro)', () => {
+		expect(spokenPosition({ unit: 0, page: 1 }, COUNTS, null)).toBe('Hluti 1 af 3, síða 2 af 3');
+	});
+
+	it('reads an empty heading as none', () => {
+		expect(spokenPosition({ unit: 0, page: 0 }, COUNTS, '')).toBe('Hluti 1 af 3, síða 1 af 3');
+	});
+
+	it('reads a unit with no page count as one page', () => {
+		expect(spokenPosition({ unit: 3, page: 0 }, COUNTS, 'S')).toBe('Hluti 4 af 3: S, síða 1 af 1');
 	});
 });
 

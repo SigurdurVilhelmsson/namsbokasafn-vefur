@@ -38,7 +38,7 @@ const realStyle = window.getComputedStyle;
 let fonts: { release: () => void; reject: (e: Error) => void } | null = null;
 let mounted: ReturnType<typeof mount>[] = [];
 
-const PAGER_EVENTS = new Set(['keydown', 'hashchange', 'resize', 'touchstart', 'touchend', 'load']);
+const PAGER_EVENTS = new Set(['keydown', 'hashchange', 'resize', 'touchstart', 'touchend', 'load', 'blur']);
 const realAdd = window.EventTarget.prototype.addEventListener;
 // vitest's jsdom global is the window, with addEventListener as its own property
 const realWindowAdd = window.addEventListener;
@@ -473,7 +473,7 @@ describe('a pager destroyed while it waits (CODE-17: the mode switch during init
 });
 
 describe('the pager speaks through the shared announcer (S8.3, UI-01)', () => {
-	it('adds no live region of its own; the one region says what the label shows, and is cleared on failure', async () => {
+	it('adds no live region of its own; the one region says the position and sub-section, and is cleared on failure', async () => {
 		const target = document.body.appendChild(document.createElement('div'));
 		mounted.push(mount(LiveAnnouncer, { target }));
 		const c = content();
@@ -482,9 +482,128 @@ describe('the pager speaks through the shared announcer (S8.3, UI-01)', () => {
 		vi.advanceTimersByTime(ANNOUNCE_DELAY_MS);
 		flushSync();
 		expect(document.querySelectorAll('[aria-live]')).toHaveLength(1);
-		expect(get(announcement)).toBe(label());
+		// Since S9.2 it names the sub-section (the fixture's headings read 'x')
+		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 3');
+		expect(get(announcement)).toBe('Hluti 1 af 3: x, síða 1 af 3');
 		failNextResplit();
 		vi.advanceTimersByTime(ANNOUNCE_DELAY_MS);
 		expect(get(announcement)).toBe('');
+	});
+});
+
+// Plan step S9.2 (UI-01, UI-05): a key or swipe turn that hides the focused element, or
+// finds focus on <body>, moves focus to the article, which holds a tabindex only while it
+// has focus (as TextHighlighter's focusArticle() does). 'Fyrri' and 'Næsta' keep their
+// focus for repeated presses (reader plan line 209).
+describe('a key or swipe turn keeps focus on the page (S9.2, UI-01)', () => {
+	const article = () => document.querySelector<HTMLElement>('article.cnx-module')!;
+	/** The content, with a focusable term in the first paragraph of page 1 */
+	function withTerm(): { c: HTMLElement; term: HTMLElement } {
+		const c = content();
+		c.querySelector('p')!.innerHTML = '<dfn class="term" tabindex="0">t</dfn>';
+		return { c, term: c.querySelector<HTMLElement>('dfn')! };
+	}
+	function swipeLeft(c: HTMLElement) {
+		for (const [type, x] of [
+			['touchstart', 300],
+			['touchend', 100]
+		] as const) {
+			const ev = new Event(type) as TouchEvent;
+			Object.defineProperty(ev, 'changedTouches', { value: [{ clientX: x, clientY: 0 }] });
+			Object.defineProperty(ev, 'touches', { value: [] });
+			c.dispatchEvent(ev);
+		}
+		flushSync();
+	}
+
+	it('→ that hides the focused term moves focus to the article', async () => {
+		const { c, term } = withTerm();
+		open(c);
+		await settle();
+		term.focus();
+		key('ArrowRight');
+		expect(label()).toBe('Hluti 1 af 3 · Síða 2 af 3');
+		expect(document.activeElement).toBe(article());
+	});
+
+	it('a swipe that hides the focused term moves focus to the article', async () => {
+		const { c, term } = withTerm();
+		open(c);
+		await settle();
+		term.focus();
+		swipeLeft(c);
+		expect(label()).toBe('Hluti 1 af 3 · Síða 2 af 3');
+		expect(document.activeElement).toBe(article());
+	});
+
+	it('→ with focus on <body> moves focus to the article', async () => {
+		const c = content();
+		open(c);
+		await settle();
+		(document.activeElement as HTMLElement | null)?.blur();
+		expect(document.activeElement).toBe(document.body);
+		key('ArrowRight');
+		expect(document.activeElement).toBe(article());
+	});
+
+	it('the article holds tabindex="-1" only while it has focus', async () => {
+		const { c, term } = withTerm();
+		open(c);
+		await settle();
+		expect(article().hasAttribute('tabindex')).toBe(false);
+		term.focus();
+		key('ArrowRight');
+		expect(article().getAttribute('tabindex')).toBe('-1');
+		(document.querySelector('button[aria-label="Næsta síða"]') as HTMLElement).focus();
+		expect(article().hasAttribute('tabindex')).toBe(false);
+	});
+
+	it("'Næsta' keeps its focus, clicked or with → pressed on it", async () => {
+		const c = content();
+		open(c);
+		await settle();
+		const next = document.querySelector<HTMLButtonElement>('button[aria-label="Næsta síða"]')!;
+		next.focus();
+		next.click();
+		flushSync();
+		key('ArrowRight');
+		expect(label()).toBe('Hluti 1 af 3 · Síða 3 af 3');
+		expect(document.activeElement).toBe(next);
+	});
+
+	it('a pager that fails leaves no tabindex on the article', async () => {
+		const { c, term } = withTerm();
+		open(c);
+		await settle();
+		term.focus();
+		key('ArrowRight');
+		failNextResplit();
+		expect(article().hasAttribute('tabindex')).toBe(false);
+	});
+
+	// Every listener the pager adds takes its run's signal (CODE-17), the article's blur too
+	for (const end of ['fails', 'is unmounted'] as const) {
+		it(`the article's blur listener goes with the run when the pager ${end}`, async () => {
+			track();
+			const { c, term } = withTerm();
+			const { pager } = open(c);
+			await settle();
+			term.focus();
+			key('ArrowRight');
+			expect(held().listeners).toContain('blur');
+			if (end === 'fails') failNextResplit();
+			else drop(pager);
+			expect(held().listeners).not.toContain('blur');
+		});
+	}
+
+	it('an unmounted pager leaves no tabindex on the article', async () => {
+		const { c, term } = withTerm();
+		const { pager } = open(c);
+		await settle();
+		term.focus();
+		key('ArrowRight');
+		drop(pager);
+		expect(article().hasAttribute('tabindex')).toBe(false);
 	});
 });

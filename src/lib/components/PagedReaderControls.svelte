@@ -31,6 +31,7 @@
 		splitPieces,
 		shownParts,
 		pieceOf,
+		unitHeading,
 		type BlockPart,
 		type PageRange,
 		type Piece
@@ -41,6 +42,7 @@
 		encodePageHash,
 		resolvePageHash,
 		positionLabel,
+		spokenPosition,
 		keyAction,
 		swipeAction,
 		stepNext,
@@ -270,12 +272,12 @@
 		}
 	}
 
-	/** Announce what the label shows; it used to count flat pages over the
-	 *  whole section while the label counted per sub-section (QA E19). The
-	 *  effect below passes a change on to the app's one polite region. */
+	/** Announce the position the label shows, counted per sub-section as the label is (it
+	 *  once counted flat pages over the whole section, QA E19), with the sub-section named
+	 *  since S9.2 (UI-05). The effect below passes a change on to the app's one polite region. */
 	function announce() {
 		const f = flatPages[current];
-		announcement = f ? positionLabel(f, pageCounts()) : '';
+		announcement = f ? spokenPosition(f, pageCounts(), unitHeading(units[f.unit]?.wrapper ?? null)) : '';
 	}
 
 	/** `keepHash` leaves an element deep link (#CNX_…) in the URL, so a reload
@@ -307,21 +309,69 @@
 		oncomplete?.();
 	}
 
-	function next() {
-		if (!ready || failed || !flatPages[current]) return;
+	/** Turn to the next page, or finish the section from the last; true when a page turned */
+	function next(): boolean {
+		if (!ready || failed || !flatPages[current]) return false;
 		target = null;
 		const step = stepNext(current, pageCounts(), { section: completionFired, units: completedUnits });
 		// Leaving a sub-section's last page reports it once, through onsubsectioncomplete
 		if (step.unitComplete !== null) markUnitComplete(step.unitComplete);
-		if (step.index !== null) showPage(step.index);
-		else if (step.sectionComplete) completeSection();
+		if (step.index !== null) {
+			showPage(step.index);
+			return true;
+		}
+		if (step.sectionComplete) completeSection();
+		return false;
 	}
 
-	function prev() {
-		if (!ready || failed) return;
+	/** Turn to the previous page; true when a page turned */
+	function prev(): boolean {
+		if (!ready || failed) return false;
 		target = null;
 		const index = stepPrev(current, pageCounts());
-		if (index !== null) showPage(index);
+		if (index === null) return false;
+		showPage(index);
+		return true;
+	}
+
+	/** The article while the pager has given it a tabindex, so a failure or teardown can take
+	 *  it back. Not $state. */
+	let focusedArticle: HTMLElement | null = null;
+
+	/**
+	 * Focus the article for the moment, as TextHighlighter's focusArticle() does: it holds
+	 * tabindex="-1" only until it loses focus, since a standing tabindex would make every
+	 * click in the text move the Tab order back to its top.
+	 */
+	function focusArticle() {
+		const root = contentRoot();
+		if (!root) return;
+		if (!root.hasAttribute('tabindex')) {
+			root.setAttribute('tabindex', '-1');
+			focusedArticle = root;
+			// The run's signal, like every listener the pager adds (CODE-17)
+			root.addEventListener('blur', releaseArticle, { once: true, signal: run?.signal });
+		}
+		root.focus({ preventScroll: true });
+	}
+
+	/** Take back the tabindex focusArticle() gave */
+	function releaseArticle() {
+		focusedArticle?.removeEventListener('blur', releaseArticle);
+		focusedArticle?.removeAttribute('tabindex');
+		focusedArticle = null;
+	}
+
+	/**
+	 * After a key or swipe turn (S9.2, UI-01): focus left in a block the turn hid, or on
+	 * <body>, goes to the article, so it is never on a hidden element and a screen reader
+	 * goes on from the page. Focus anywhere else stays, so 'Fyrri' and 'Næsta' keep theirs
+	 * for repeated presses (reader plan line 209).
+	 */
+	function keepFocusOnPage() {
+		const active = document.activeElement;
+		if (active && active !== document.body && !active.closest('[hidden]')) return;
+		focusArticle();
 	}
 
 	function resolveHash(hash: string): number | null {
@@ -404,8 +454,7 @@
 		// D11: Space and PageDown scroll a page taller than the window before they turn it
 		const distance = keyScroll(event.key, turn, pageSpan(), readingView());
 		if (distance !== 0) window.scrollBy({ top: distance });
-		else if (turn === 'next') next();
-		else prev();
+		else if (turn === 'next' ? next() : prev()) keepFocusOnPage();
 	}
 
 	let touchStartX = 0;
@@ -444,8 +493,7 @@
 			selecting: !(window.getSelection()?.isCollapsed ?? true),
 			inSidewaysBox
 		});
-		if (turn === 'next') next();
-		else if (turn === 'prev') prev();
+		if (turn && (turn === 'next' ? next() : prev())) keepFocusOnPage();
 	}
 
 	function handleHashChange() {
@@ -504,6 +552,7 @@
 	function fail() {
 		failed = true;
 		ready = false;
+		releaseArticle();
 		restoreAll();
 		units = [];
 		flatPages = [];
@@ -651,6 +700,7 @@
 		return () => {
 			controller.abort();
 			clearTimeout(recomputeTimer);
+			releaseArticle();
 			restoreAll();
 			units = [];
 			flatPages = [];
