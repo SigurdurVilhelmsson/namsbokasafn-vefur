@@ -537,6 +537,13 @@ html:has([data-paged-section]) {
   scroll-padding-bottom: 0;
 }
 
+/* The 2 px progress bar measured window scroll, which in paged mode follows the short page shown
+   (about 70 % on §1.2's first page): while a section pages, the label says where the reader is,
+   and the sidebar's ring follows the pager (S11.2, UI-10). Every other route keeps the bar. */
+html:has([data-paged-section]) .scroll-progress {
+  display: none;
+}
+
 @media (max-width: 1023px) {
   body:has([data-paged-section]) .pomodoro.timer-idle {
     display: none;

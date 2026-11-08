@@ -13,6 +13,8 @@ import {
 	flatIndexOf,
 	positionAt,
 	encodePageHash,
+	pageHash,
+	pageProgress,
 	decodePageHash,
 	resolvePageHash,
 	positionLabel,
@@ -266,12 +268,47 @@ describe('the page hash', () => {
 		expect(resolvePageHash('#CNX_Chem_05_01_Fig1', COUNTS)).toBeNull();
 	});
 
+	// CODE-16 (S11.2): past a unit's first page the address names a block, not a page number
+	it("writes the page's anchor id past a unit's first page", () => {
+		expect(pageHash({ unit: 1, page: 3 }, 'fs-idp282283328')).toBe('#fs-idp282283328');
+		expect(pageHash({ unit: 0, page: 1 }, 'CNX_Chem_01_02_States')).toBe('#CNX_Chem_01_02_States');
+	});
+
+	it("keeps '#sub-U' and the bare URL for a unit's first page and the section's, id or not", () => {
+		expect(pageHash({ unit: 2, page: 0 }, 'fs-id1')).toBe('#sub-2');
+		expect(pageHash({ unit: 0, page: 0 }, 'fs-id1')).toBe('');
+	});
+
+	it("falls back to '#sub-U-p-P' with no id, or one the address cannot carry as written", () => {
+		for (const id of [null, '', 'has space', 'ísl', 'sub-3', 'sub-1-p-2', '9starts-with-digit', 'a#b']) {
+			expect(pageHash({ unit: 1, page: 2 }, id), String(id)).toBe('#sub-1-p-2');
+		}
+	});
+
 	it('round-trips every page of a section through resolvePageHash', () => {
 		const counts = [1, 3, 2, 5];
 		flatPositions(counts).forEach((position, index) => {
 			const hash = encodePageHash(position);
 			expect(hash === '' ? 0 : resolvePageHash(hash, counts)).toBe(index);
 		});
+	});
+});
+
+describe('pageProgress (S11.2, UI-10)', () => {
+	it("is the page's share of the section, counting the page on screen", () => {
+		expect(pageProgress(0, 4)).toBe(25);
+		expect(pageProgress(1, 3)).toBe(67);
+	});
+
+	it('is 100 on the last page, so the ring closes', () => {
+		expect(pageProgress(23, 24)).toBe(100);
+		expect(pageProgress(0, 1)).toBe(100);
+	});
+
+	it('stays within 0-100 for an index out of range, and is 0 with no pages', () => {
+		expect(pageProgress(30, 24)).toBe(100);
+		expect(pageProgress(-1, 4)).toBe(25);
+		expect(pageProgress(0, 0)).toBe(0);
 	});
 });
 

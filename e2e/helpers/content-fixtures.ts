@@ -111,6 +111,10 @@ export function sectionsMatching(pattern: RegExp, limit: number): string[] {
 }
 
 /** Reader URLs of the module sections `count` scores above 0, most first, ties by URL */
+export function sectionsScored(count: (html: string) => number, limit: number): string[] {
+	return sectionsBy(count, limit);
+}
+
 function sectionsBy(count: (html: string) => number, limit: number): string[] {
 	const found: { url: string; count: number }[] = [];
 	for (const slug of syncedBooks()) {

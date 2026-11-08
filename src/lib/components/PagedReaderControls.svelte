@@ -40,7 +40,8 @@
 	import {
 		PAGE_BUDGET,
 		pageHeights,
-		encodePageHash,
+		pageHash,
+		PAGE_ANCHOR_ID,
 		resolvePageHash,
 		decodePageHash,
 		positionLabel,
@@ -94,6 +95,18 @@
 		/** A page shown is taller than the part of the window it is read in, so the reader has to
 		 *  scroll it: once each time such a page is shown (S9.5, PED-17's local counter) */
 		ontallpage?: () => void;
+		/** Where the reader is, each time a page shows: for the sidebar's ring (S11.2, UI-10) */
+		onposition?: (position: PagerPosition) => void;
+	}
+
+	interface PagerPosition {
+		unit: number;
+		units: number;
+		page: number;
+		pages: number;
+		/** The page's index among the section's pages, and their count */
+		index: number;
+		total: number;
 	}
 
 	let {
@@ -108,7 +121,8 @@
 		lead = null,
 		mtReport = null,
 		onreserve,
-		ontallpage
+		ontallpage,
+		onposition
 	}: Props = $props();
 
 	interface Unit {
@@ -150,6 +164,8 @@
 	let printing = false;
 	let resplitAfterPrint = false;
 	let scrollBeforePrint = 0;
+	/** The page address this pager last wrote, for isPageHash(). Not $state. */
+	let writtenHash = '';
 	let reported: PagerState | null = null;
 
 	/** Tell the page the state, on a change only; a destroyed pager says nothing */
@@ -397,15 +413,59 @@
 		});
 	}
 
+	/**
+	 * An id that names the page on screen in its address (S11.2, CODE-16): the page's first
+	 * block's own, or the first element's inside it; for a broken example's second part, the
+	 * cut's or one inside it. Only an HTML element's id, unique in the document, that opens this
+	 * same page again and that a fragment carries as written. Null when there is none.
+	 */
+	function pageAnchorId(): string | null {
+		const anchor = shownAnchor();
+		if (!anchor) return null;
+		for (const el of [anchor, ...anchor.querySelectorAll('[id]')]) {
+			if (!(el instanceof HTMLElement) || !PAGE_ANCHOR_ID.test(el.id)) continue;
+			if (document.getElementById(el.id) !== el || pageForElement(el) !== current) continue;
+			return el.id;
+		}
+		return null;
+	}
+
+	/** Write the page's address over the current history entry. Raw replaceState: SvelteKit's
+	 *  own never updates its stored URL either, so it would only silence its dev warning; the
+	 *  pager follows in-content links itself, so that stale URL no longer matters (CODE-10). */
 	function updateHash() {
 		const flat = flatPages[current];
 		if (!flat) return;
-		const hash = encodePageHash(flat) || window.location.pathname + window.location.search;
+		writtenHash = pageHash(flat, flat.page > 0 ? pageAnchorId() : null);
 		try {
-			history.replaceState(history.state, '', hash);
+			history.replaceState(history.state, '', writtenHash || window.location.pathname + window.location.search);
 		} catch {
 			/* history can throw in exotic embeddings; hash is cosmetic */
 		}
+	}
+
+	/**
+	 * Whether a hash is a page address: one this pager wrote, or the '#sub-U-p-P' form. The
+	 * section page drops it on a switch to scrolling (S9.3), where it would send a reload to a
+	 * block instead of the section's top.
+	 */
+	export function isPageHash(hash: string): boolean {
+		return decodePageHash(hash) !== null || (hash !== '' && hash === writtenHash);
+	}
+
+	/** Tell the section page where the reader is (S11.2, UI-10): pushed from showPage, never
+	 *  derived in an effect that reads the pager's $state (CLAUDE.md's effect pitfall) */
+	function reportPosition() {
+		const flat = flatPages[current];
+		if (!flat || !onposition) return;
+		onposition({
+			unit: flat.unit,
+			units: units.length,
+			page: flat.page,
+			pages: units[flat.unit]?.pages.length ?? 1,
+			index: current,
+			total: flatPages.length
+		});
 	}
 
 	/** Announce the position the label shows, counted per sub-section as the label is (it
@@ -426,6 +486,7 @@
 		if (shownUnit !== undefined) loadUnitImages(shownUnit);
 		if (!keepHash) updateHash();
 		announce();
+		reportPosition();
 		if (scroll) scrollToContentTop();
 		report();
 		// Once the label row for this page has rendered, check it fits the reserve (S9.5)
@@ -667,17 +728,58 @@
 		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
 		const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href^="#"]') : null;
 		if (!link) return;
-		const target = elementForHash(link.getAttribute('href') ?? '');
-		const img = target?.matches('figure') ? target.querySelector('img') : null;
-		if (!img) return;
+		const href = link.getAttribute('href') ?? '';
+		const el = elementForHash(href);
+		if (!el) return;
+		// A figure opens in the lightbox over the page (S9.4, PED-03)
+		const img = el.matches('figure') ? el.querySelector('img') : null;
+		if (img) {
+			event.preventDefault();
+			openFigure(img, link);
+			return;
+		}
+		// Anything else on a page, the pager follows itself (S11.2, CODE-10); what is on no page
+		// (outside the content's parts) is left to the browser
+		const index = pageForElement(el);
+		if (index === null) return;
 		event.preventDefault();
-		openFigure(img, link);
+		followLink(el, href, index);
+	}
+
+	/**
+	 * Follow an in-content link to an element on a page (S11.2, CODE-10). SvelteKit ignores a
+	 * click on a link whose hash equals the one it last saw, and the pager's turns rewrite the
+	 * hash behind its back, so a second click on the same link after a turn did nothing: its
+	 * target sat on a hidden page. A history entry, as the browser's own fragment navigation
+	 * makes, so Back returns to the link's page; none when the address already names the target.
+	 * Raw pushState copies SvelteKit's history index, so on Back its popstate handler returns
+	 * early and the pager's hashchange handler shows the page (a runtime test pins it).
+	 */
+	function followLink(el: HTMLElement, href: string, index: number) {
+		target = el;
+		if (window.location.hash !== href) {
+			try {
+				history.pushState(history.state, '', href);
+			} catch {
+				/* the address is cosmetic; the page still turns */
+			}
+		}
+		if (index !== current) showPage(index, { keepHash: true });
+		// showPage parked the content top under the header: a target lower on a tall page, or on
+		// the page already shown, comes into view
+		const rect = el.getBoundingClientRect();
+		const view = readingView();
+		if (rect.top < view.top || rect.bottom > view.bottom) el.scrollIntoView({ block: 'start' });
+		// The link itself may now be on a hidden page (S9.2, UI-01)
+		keepFocusOnPage();
 	}
 
 	function handleHashChange() {
 		if (!ready || failed) return;
 		const hash = window.location.hash;
-		const idx = resolveHash(hash);
+		// Back to the bare URL, the address of the section's first page, which no hash names: Back
+		// from a link followed on that page (S11.2, CODE-10)
+		const idx = hash === '' ? 0 : resolveHash(hash);
 		target = elementForHash(hash);
 		if (idx !== null && idx !== current) {
 			showPage(idx, { keepHash: target !== null });
@@ -699,8 +801,13 @@
 		const index = pageForElement(el);
 		if (index === null) return;
 		if (covered) onuncover?.();
-		target = el;
-		if (index !== current) showPage(index, { scroll: false });
+		// A fragment navigation reveals its target too (a '#' link the pager did not take, an
+		// address typed in): the address already names an element in this block, so keep it, and
+		// hold that element, as a deep link does (S11.2)
+		const named = elementForHash(window.location.hash);
+		const fromAddress = named && el.contains(named) ? named : null;
+		target = fromAddress ?? el;
+		if (index !== current) showPage(index, { scroll: false, keepHash: fromAddress !== null });
 	}
 
 	/** Print the whole section, not the page on screen (S11.1, CODE-08): every block shows for
@@ -1062,6 +1169,8 @@
 		bind:this={navEl}
 		data-page-height={Math.round(heights.page)}
 		data-first-page-height={Math.round(heights.firstPage)}
+		data-page-index={current}
+		data-page-total={flatPages.length}
 	>
 		<div class="paged-nav-row">
 			<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">

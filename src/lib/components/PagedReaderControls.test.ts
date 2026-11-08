@@ -248,6 +248,8 @@ beforeEach(() => {
 		removeEventListener() {}
 	})) as never;
 	window.scrollTo = (() => {}) as never;
+	// jsdom has no scrollIntoView; the pager brings a link's target into view with it (S11.2)
+	Element.prototype.scrollIntoView = () => {};
 	vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
 
@@ -271,6 +273,7 @@ afterEach(async () => {
 	vi.useRealTimers();
 	vi.restoreAllMocks();
 	Element.prototype.getBoundingClientRect = realRect;
+	delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView;
 	window.getComputedStyle = realStyle;
 	Object.defineProperty(window, 'innerHeight', { value: realInnerHeight, configurable: true, writable: true });
 	history.replaceState(null, '', '/');
@@ -872,14 +875,16 @@ describe('figure links (S9.4)', () => {
 		expect(label()).toBe(before);
 	});
 
-	it('a table link is left to the page jump', async () => {
+	// Since S11.2 (CODE-10) the pager follows it itself; before, the click went on to SvelteKit
+	it('a table link turns to the table, with no lightbox', async () => {
 		const c = withFigure();
 		open(c);
 		await settle();
 		vi.advanceTimersByTime(1500);
 		await settle();
-		expect(click(c.querySelector<HTMLAnchorElement>('a[href="#tab"]')!)).toBe(false);
+		expect(click(c.querySelector<HTMLAnchorElement>('a[href="#tab"]')!)).toBe(true);
 		expect(lightbox()).toBeNull();
+		expect(c.querySelector('#tab')!.closest('[hidden]')).toBeNull();
 	});
 
 	it('a failed pager leaves figure links alone', async () => {
@@ -1126,5 +1131,140 @@ describe('print and find-in-page (S11.1)', () => {
 		expect(hidden(c)).toBe(0);
 		print('afterprint');
 		expect(Array.from(c.querySelectorAll('.cnx-module p')).every((p) => p.closest('[hidden]'))).toBe(true);
+	});
+});
+
+// Plan step S11.2 (UI-10, CODE-10, CODE-16): the pager reports where the reader is, for the
+// sidebar's ring; addresses a page past a unit's first by its first block's id, which opens the
+// page holding that block under any window; and follows in-content links itself, since SvelteKit
+// short-circuits a second click on a link whose hash it saw last.
+describe('position, address and links (S11.2)', () => {
+	/** content() with an id on every paragraph ('p-U-I'), and optionally a link in the first */
+	function withIds({ link = '' } = {}): HTMLElement {
+		const c = content();
+		c.querySelectorAll('section').forEach((section, u) =>
+			section.querySelectorAll('p').forEach((p, i) => (p.id = `p-${u}-${i}`))
+		);
+		if (link) c.querySelector('p')!.innerHTML = `<a href="${link}">tafla</a>`;
+		return c;
+	}
+	function click(el: Element): MouseEvent {
+		const event = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
+		el.dispatchEvent(event);
+		flushSync();
+		return event;
+	}
+
+	it('reports the position on arrival and on each turn', async () => {
+		const onposition = vi.fn();
+		open(content(), { onposition });
+		await settle();
+		expect(onposition).toHaveBeenLastCalledWith({ unit: 0, units: 3, page: 0, pages: 3, index: 0, total: 6 });
+		key('ArrowRight');
+		expect(onposition).toHaveBeenLastCalledWith({ unit: 0, units: 3, page: 1, pages: 3, index: 1, total: 6 });
+		for (let i = 0; i < 4; i++) key('ArrowRight');
+		expect(onposition).toHaveBeenLastCalledWith({ unit: 2, units: 3, page: 0, pages: 1, index: 5, total: 6 });
+	});
+
+	it("addresses a page past a unit's first by its first block's id", async () => {
+		open(withIds());
+		await settle();
+		key('ArrowRight');
+		expect(window.location.hash).toBe('#p-0-1');
+		key('ArrowRight');
+		expect(window.location.hash).toBe('#p-0-2');
+	});
+
+	it("keeps '#sub-U' for a unit's first page and the bare URL for the section's", async () => {
+		open(withIds());
+		await settle();
+		for (let i = 0; i < 3; i++) key('ArrowRight');
+		expect(window.location.hash).toBe('#sub-1');
+		for (let i = 0; i < 3; i++) key('ArrowLeft');
+		expect(window.location.hash).toBe('');
+	});
+
+	it('uses an id inside the first block when the block has none', async () => {
+		const c = content();
+		c.querySelectorAll('section')[0].querySelectorAll('p')[1].innerHTML = 'x <span id="inner">y</span>';
+		open(c);
+		await settle();
+		key('ArrowRight');
+		expect(window.location.hash).toBe('#inner');
+	});
+
+	it("falls back to '#sub-U-p-P' when the page's first block carries no id (a control)", async () => {
+		open(content());
+		await settle();
+		key('ArrowRight');
+		expect(window.location.hash).toBe('#sub-0-p-1');
+	});
+
+	it('says which hashes are its page addresses, for the switch to scrolling', async () => {
+		const { pager } = open(withIds());
+		await settle();
+		key('ArrowRight');
+		const api = pager as unknown as { isPageHash: (hash: string) => boolean };
+		expect(api.isPageHash('#p-0-1')).toBe(true);
+		expect(api.isPageHash('#sub-0-p-1')).toBe(true);
+		expect(api.isPageHash('#p-2-0')).toBe(false);
+		expect(api.isPageHash('')).toBe(false);
+	});
+
+	it('takes a click on an in-content link to another page itself: the page turns and the address names the target', async () => {
+		const c = withIds({ link: '#p-2-0' });
+		open(c);
+		await settle();
+		const event = click(c.querySelector('a')!);
+		expect(event.defaultPrevented).toBe(true);
+		expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
+		expect(window.location.hash).toBe('#p-2-0');
+	});
+
+	it('a second click on the same link, after turning back, turns again', async () => {
+		const c = withIds({ link: '#p-2-0' });
+		open(c);
+		await settle();
+		click(c.querySelector('a')!);
+		for (let i = 0; i < 5; i++) key('ArrowLeft');
+		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 3');
+		const event = click(c.querySelector('a')!);
+		expect(event.defaultPrevented).toBe(true);
+		expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
+	});
+
+	it('leaves a link to something outside the pages to the browser', async () => {
+		const c = withIds({ link: '#nowhere' });
+		open(c);
+		await settle();
+		expect(click(c.querySelector('a')!).defaultPrevented).toBe(false);
+	});
+
+	it("back to the bare URL, the address of the section's first page, opens that page", async () => {
+		open(content());
+		await settle();
+		for (let i = 0; i < 3; i++) key('ArrowRight');
+		history.replaceState(null, '', window.location.pathname);
+		window.dispatchEvent(new HashChangeEvent('hashchange'));
+		flushSync();
+		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 3');
+	});
+
+	it('a fragment navigation that reveals its target keeps the address it names', async () => {
+		Object.defineProperty(HTMLElement.prototype, 'onbeforematch', { value: null, configurable: true, writable: true });
+		try {
+			const c = withIds();
+			open(c);
+			await settle();
+			const block = c.querySelector<HTMLElement>('#p-2-0')!;
+			// The browser follows '#p-2-0': the address changes first, then the target is revealed
+			history.replaceState(null, '', '#p-2-0');
+			block.dispatchEvent(new Event('beforematch', { bubbles: true }));
+			flushSync();
+			expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
+			expect(window.location.hash).toBe('#p-2-0');
+		} finally {
+			delete (HTMLElement.prototype as { onbeforematch?: unknown }).onbeforematch;
+		}
 	});
 });

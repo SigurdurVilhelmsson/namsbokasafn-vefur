@@ -42,7 +42,9 @@ interface ReaderState {
 	currentChapter: string | null;
 	currentSection: string | null;
 	bookmarks: string[];
-	scrollProgress: number; // 0-100 percentage of current section scrolled
+	/** Read and written by no code since S11.2: kept so the stored shape stays the same for other
+	 *  tabs and older builds. The live value is `sectionProgress` below, in memory only. */
+	scrollProgress: number;
 	scrollPositions: ScrollPositions; // Per-section scroll positions for persistence
 }
 
@@ -84,6 +86,15 @@ function loadState(): ReaderState {
 	}
 	return defaultState;
 }
+
+/**
+ * How far through the section on screen the reader is, 0-100, for the sidebar's ring. In
+ * memory only (plan step S11.2, UI-10): the pager sets it on every page turn, and S9.3 keeps the
+ * reader store unwritten while the pager works (CODE-07). Saved in the reader store, it was also
+ * rewritten to localStorage on every scroll event, and another tab's scrolling moved this tab's
+ * ring. Nothing read it back from storage: each section starts it at 0.
+ */
+const sectionProgress = writable(0);
 
 function createReaderStore() {
 	const { subscribe, set, update } = writable<ReaderState>(loadState());
@@ -215,12 +226,10 @@ function createReaderStore() {
 
 		reset: () => set(defaultState),
 
-		// Update scroll progress (0-100)
+		// How far through the section on screen the reader is, 0-100: window scroll, or the
+		// pager's page (S11.2). In memory only, never saved: see sectionProgress
 		setScrollProgress: (progress: number) => {
-			update((state) => ({
-				...state,
-				scrollProgress: Math.max(0, Math.min(100, progress))
-			}));
+			sectionProgress.set(Math.max(0, Math.min(100, progress)));
 		},
 
 		// Save scroll position for a section (for reading position persistence)
@@ -274,7 +283,7 @@ export const bookmarks = derived(reader, ($reader) => $reader.bookmarks);
 
 export const readingProgress = derived(reader, ($reader) => $reader.progress);
 
-export const scrollProgress = derived(reader, ($reader) => $reader.scrollProgress);
+export const scrollProgress = { subscribe: sectionProgress.subscribe };
 
 export const scrollPositions = derived(reader, ($reader) => $reader.scrollPositions);
 
