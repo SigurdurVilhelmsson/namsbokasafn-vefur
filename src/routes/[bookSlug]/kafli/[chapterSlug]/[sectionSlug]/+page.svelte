@@ -8,7 +8,7 @@
 	import type { PageData } from './$types';
 	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
 	import { isSectionRead, isSectionBookmarked, getSavedScrollPosition, type ScrollPositions } from '$lib/stores/reader';
-	import { readingMode, type ReadingMode } from '$lib/stores/settings';
+	import { readingMode, settings, type ReadingMode } from '$lib/stores/settings';
 	import ContentRenderer from '$lib/components/ContentRenderer.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import NavigationButtons from '$lib/components/NavigationButtons.svelte';
@@ -18,7 +18,8 @@
 	import BookAttribution from '$lib/components/BookAttribution.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import PagedReaderControls from '$lib/components/PagedReaderControls.svelte';
-	import type { PagerState } from '$lib/utils/pager';
+	import { PAGE_BUDGET, decodePageHash, firstInView, type PagerState } from '$lib/utils/pager';
+	import { buildUnits } from '$lib/utils/paginate';
 	import { readDetection } from '$lib/actions/readDetection';
 	import RecallPrompt from '$lib/components/RecallPrompt.svelte';
 	import RecallReadBack from '$lib/components/RecallReadBack.svelte';
@@ -43,6 +44,12 @@
 	let shareTimeout: ReturnType<typeof setTimeout>;
 	let showRecallPrompt = $state(false);
 	let showRecallReadBack = $state(false);
+	// The reader went back from the section's end with 'Fyrri' or ←, to see the last page again
+	let endUncovered = $state(false);
+	// The section whose end is open. The prompt sits inside {#key} (S9.3), which rebuilds on a
+	// section change before afterNavigate resets showRecallPrompt, so without this a second
+	// prompt mounted for the next section and was abandoned at once (counted twice; PED-17)
+	let endFor = $state('');
 	// reachedEnd() runs once per visit to a section, whichever end gets there first (S8.4)
 	let endReached = false;
 	let showContinuePrompt = $state(false);
@@ -67,6 +74,25 @@
 		modeReady && shouldPage(resolveReadingMode(linkMode, $readingMode), data.navigation.current.section.type)
 	);
 	let pagedMark = $derived(pagedSectionMark(paged, pagerState));
+	// The pager is at work (pending, ready or at the end; not failed), so the section does not
+	// scroll as in scrolled mode, and scrolled mode's continue-reading code and its bottom
+	// completion button stand down (plan step S9.3; CODE-07, UI-04). Keyed on the pager, not
+	// the mode: a failed pager gives the section back to scrolling, and they return with it.
+	let pagerWorking = $derived(pagedMark !== undefined);
+
+	// The in-view way out (plan step S9.3; UI-05, PED-01, CODE-07). It shows while the section
+	// pages, and after the reader switched to scrolling here, so they can switch back; never
+	// for a reader who has not paged, since offering paging to everyone is the picker S11.3
+	// owns (D06). Choosing stores the mode, as D06 allows for a pick, and replaces a link's mode
+	// for the rest of the visit.
+	let switchedOff = $state(false);
+	let showModeSwitch = $derived(paged || switchedOff);
+	let pagerControls: ReturnType<typeof PagedReaderControls> | undefined = $state();
+	let scrollButton: HTMLButtonElement | undefined = $state();
+	/** Where the reader was when they switched to paged: the pager opens that page */
+	let startAt: HTMLElement | null = $state(null);
+	/** The block a switch to scrolling kept in place. Not $state. */
+	let keptAnchor: HTMLElement | null = null;
 
 	// Print the current section
 	function handlePrint() {
@@ -105,8 +131,11 @@
 	let progress = $derived($reader.progress);
 	let bookmarks = $derived($reader.bookmarks);
 
-	// Track scroll progress
+	// Track scroll progress. Not while the pager works: every page turn scrolls, so the reader
+	// store rewrote itself on each one, measuring the page shown rather than progress, and a
+	// tab still reading could write back what another tab had just erased (CODE-07)
 	function handleScroll() {
+		if (pagerWorking) return;
 		const scrollTop = window.scrollY;
 		const docHeight = document.documentElement.scrollHeight - window.innerHeight;
 		if (docHeight > 0) {
@@ -135,6 +164,10 @@
 
 		showRecallPrompt = false;
 		showRecallReadBack = false;
+		endUncovered = false;
+		switchedOff = false;
+		startAt = null;
+		keptAnchor = null;
 		endReached = false;
 
 		// Reset the continue-reading prompt, then check this section's saved position
@@ -166,9 +199,10 @@
 		};
 	});
 
-	// Save scroll position before navigating away
+	// Save scroll position before navigating away; not while the pager works, whose scroll
+	// position says which page was shown, not how far the reader got (CODE-07)
 	beforeNavigate(() => {
-		if (browser) {
+		if (browser && !pagerWorking) {
 			const scrollTop = window.scrollY;
 			const docHeight = document.documentElement.scrollHeight - window.innerHeight;
 			const percentage = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
@@ -244,6 +278,7 @@
 	function reachedEnd() {
 		if (endReached) return;
 		endReached = true;
+		endFor = sectionKey;
 		reader.markAsRead(data.bookSlug, data.chapterSlug, data.sectionSlug);
 		if (recallOwed) {
 			recallStore.markPrompted(data.bookSlug, data.chapterSlug, data.sectionSlug);
@@ -264,7 +299,28 @@
 		const next =
 			document.querySelector<HTMLElement>('[data-nav="next"]') ??
 			document.querySelector<HTMLElement>('[data-nav="sections"]');
-		next?.focus();
+		if (!next) return;
+		next.focus({ preventScroll: true });
+		// A plain focus() scrolls the link only just into view, at the window's bottom edge under
+		// the timer pill and the toasts; outside the clear band, centre it (S9.3, UI-20)
+		const rect = next.getBoundingClientRect();
+		const top = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+		if (rect.top < top || rect.bottom > window.innerHeight - PAGE_BUDGET.bottomClearance) {
+			next.scrollIntoView({ block: 'center' });
+		}
+	}
+
+	/**
+	 * 'Ljúka kafla' on the last page (ruling 3; S9.3, UI-20): the section's end, and then on to
+	 * the next section. When nothing opens (the prompt shown on an earlier visit, no recall
+	 * saved), focus goes straight to the next-section link; else it goes there when the prompt
+	 * or the read-back closes. Not in scrolled mode, whose end marker comes into view while the
+	 * reader may be anywhere.
+	 */
+	function finishFromPager() {
+		endUncovered = false;
+		reachedEnd();
+		if (!showRecallPrompt && !showRecallReadBack) focusAfterRecall();
 	}
 
 	function closeRecallPrompt() {
@@ -275,6 +331,69 @@
 	function closeRecallReadBack() {
 		showRecallReadBack = false;
 		focusAfterRecall();
+	}
+
+	// Paged, the section's end takes the page's place: the pager hides the page while the
+	// prompt or the read-back is open, until the reader goes back with 'Fyrri' (S9.3, UI-21)
+	let endHere = $derived(endFor === sectionKey);
+	let endCovered = $derived(paged && endHere && (showRecallPrompt || showRecallReadBack) && !endUncovered);
+
+	/** The first block of the content on screen, in the scrolled layout */
+	function firstBlockOnScreen(): HTMLElement | null {
+		const root = contentWrapper?.querySelector<HTMLElement>('article.cnx-module');
+		if (!root) return null;
+		const blocks = buildUnits(root).flatMap((unit) => unit.children);
+		const spans = blocks.map((el) => {
+			const rect = el.getBoundingClientRect();
+			return { top: rect.top, bottom: rect.bottom };
+		});
+		const i = firstInView(spans, {
+			top: PAGE_BUDGET.scrollOffset,
+			bottom: window.innerHeight - PAGE_BUDGET.bottomClearance
+		});
+		return i >= 0 ? blocks[i] : null;
+	}
+
+	/**
+	 * 'Síðuskipt' or 'Samfellt skrun'. To scrolling: the block the page started with stays where
+	 * it was on screen (its top is measured before the pager shows every block again, and the
+	 * window scrolled by the difference after), and the page hash goes, which would otherwise
+	 * reopen that page on the way back. To paged: the pager opens the page holding the block
+	 * on screen. From the label row's button, which leaves with the pager, focus goes to the
+	 * toolbar's.
+	 */
+	async function chooseMode(mode: ReadingMode, { fromPager = false } = {}) {
+		if ((mode === 'paged') === paged) return;
+		linkMode = null;
+		if (mode === 'scrolled') {
+			const anchor = pagerControls?.shownAnchor() ?? null;
+			const before = anchor?.getBoundingClientRect().top;
+			keptAnchor = anchor;
+			switchedOff = true;
+			startAt = null;
+			showContinuePrompt = false;
+			settings.setReadingMode('scrolled');
+			if (decodePageHash(window.location.hash)) {
+				try {
+					history.replaceState(history.state, '', window.location.pathname + window.location.search);
+				} catch {
+					/* the hash is cosmetic */
+				}
+			}
+			await tick();
+			if (anchor?.isConnected && before !== undefined) {
+				window.scrollBy({ top: anchor.getBoundingClientRect().top - before });
+			}
+			if (fromPager) scrollButton?.focus({ preventScroll: true });
+		} else {
+			// Straight back, the block the switch kept in place is still where the reader left
+			// it: reopen its page, which a guess from the screen may miss by one
+			const kept = keptAnchor?.isConnected ? keptAnchor.getBoundingClientRect() : null;
+			const keptInView =
+				kept && kept.top >= PAGE_BUDGET.scrollOffset / 2 && kept.top < window.innerHeight - PAGE_BUDGET.bottomClearance;
+			startAt = keptInView ? keptAnchor : firstBlockOnScreen();
+			settings.setReadingMode('paged');
+		}
 	}
 
 	// Reactive checks using subscribed state
@@ -329,8 +448,37 @@
 </svelte:head>
 
 <article class="max-w-4xl mx-auto px-1 sm:px-0">
+	<!-- The in-view way out (S9.3; UI-05, PED-01): the first control in the reading region, before
+	     the objectives, so a reader meets it before page 1. v1.1's Lestrarstilling words.
+	     D20: proposed — 'Lestrarstilling' (the group's name), 'Síðuskipt', 'Samfellt skrun' -->
+	{#if showModeSwitch}
+		<div class="mb-3 flex justify-end">
+			<div role="group" aria-label="Lestrarstilling" class="inline-flex gap-0.5 rounded-lg border border-[var(--border-color)] p-0.5 text-sm">
+				<button
+					aria-pressed={paged}
+					onclick={() => chooseMode('paged')}
+					class="rounded-md px-3 py-1 font-medium transition-colors {paged
+						? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
+						: 'text-[var(--text-secondary)] hover:bg-[var(--accent-subtle)]'}"
+				>
+					Síðuskipt
+				</button>
+				<button
+					bind:this={scrollButton}
+					aria-pressed={!paged}
+					onclick={() => chooseMode('scrolled')}
+					class="rounded-md px-3 py-1 font-medium transition-colors {!paged
+						? 'bg-[var(--accent-color)] text-[var(--on-accent)]'
+						: 'text-[var(--text-secondary)] hover:bg-[var(--accent-subtle)]'}"
+				>
+					Samfellt skrun
+				</button>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Continue where you left off prompt -->
-	{#if showContinuePrompt && savedPosition}
+	{#if showContinuePrompt && savedPosition && !pagerWorking}
 		<div
 			class="mb-4 p-4 rounded-xl bg-[var(--accent-light)] border border-[var(--accent-subtle)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
 			role="alert"
@@ -539,13 +687,43 @@
 			</TextHighlighter>
 		</div>
 
+		<!-- The section's end: the free-recall prompt, in place of the old 'Vel gert!' celebration
+		     (P0.2), or a section already recalled reads its entry back (S5.5). Between the content
+		     and the pager, so paged it takes the page's place (S9.3, UI-21); scrolled, it sits at
+		     the end of the content as before. -->
+		{#if showRecallPrompt && endHere}
+			<RecallPrompt
+				bookSlug={data.bookSlug}
+				chapterSlug={data.chapterSlug}
+				sectionSlug={data.sectionSlug}
+				sectionNumber={data.navigation.current.section.number}
+				onsaved={focusAfterRecall}
+				onclose={closeRecallPrompt}
+			/>
+		{/if}
+		{#if showRecallReadBack && endHere}
+			<RecallReadBack
+				bookSlug={data.bookSlug}
+				chapterSlug={data.chapterSlug}
+				sectionSlug={data.sectionSlug}
+				sectionNumber={data.navigation.current.section.number}
+				onclose={closeRecallReadBack}
+			/>
+		{/if}
+
 		{#if paged}
-			<!-- 'Næsta' on the last page is the section's end (ruling 3), so it runs reachedEnd.
-			     v1.1 passed markAsRead (dde768e :442), which under D10 no longer opens the prompt. -->
+			<!-- 'Ljúka kafla' on the last page is the section's end (ruling 3), so it runs reachedEnd
+			     and then leads on (finishFromPager). v1.1 passed markAsRead (dde768e :442), which
+			     under D10 no longer opens the prompt. -->
 			<PagedReaderControls
+				bind:this={pagerControls}
 				container={contentWrapper}
-				oncomplete={reachedEnd}
+				oncomplete={finishFromPager}
 				onstatechange={(state) => (pagerState = state)}
+				covered={endCovered}
+				onuncover={() => (endUncovered = true)}
+				{startAt}
+				onleave={() => chooseMode('scrolled', { fromPager: true })}
 			/>
 		{/if}
 
@@ -568,31 +746,11 @@
 		></div>
 	{/key}
 
-	<!-- Free-recall prompt, in place of the old 'Vel gert!' celebration (P0.2) -->
-	{#if showRecallPrompt}
-		<RecallPrompt
-			bookSlug={data.bookSlug}
-			chapterSlug={data.chapterSlug}
-			sectionSlug={data.sectionSlug}
-			sectionNumber={data.navigation.current.section.number}
-			onsaved={focusAfterRecall}
-			onclose={closeRecallPrompt}
-		/>
-	{/if}
 
-	<!-- A section already recalled reads its entry back at the end instead (S5.5) -->
-	{#if showRecallReadBack}
-		<RecallReadBack
-			bookSlug={data.bookSlug}
-			chapterSlug={data.chapterSlug}
-			sectionSlug={data.sectionSlug}
-			sectionNumber={data.navigation.current.section.number}
-			onclose={closeRecallReadBack}
-		/>
-	{/if}
-
-	<!-- Mark as read button at bottom -->
-	{#if !isRead}
+	<!-- Mark as read button at bottom. Not under a working pager (UI-04), where 'Næsta' on the
+	     last page finishes the section (ruling 3) and the toolbar keeps 'Merkja sem lesið'; a
+	     failed pager scrolls again, and this is its end-of-content control. -->
+	{#if !isRead && !pagerWorking}
 		<div class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
 			<button
 				onclick={markAsRead}

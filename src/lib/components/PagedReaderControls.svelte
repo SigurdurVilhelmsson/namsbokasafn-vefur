@@ -69,9 +69,28 @@
 		onsubsectioncomplete?: (index: number) => void;
 		/** Each change of state, for the section page's ← / → step-aside and end marker */
 		onstatechange?: (state: PagerState) => void;
+		/** The section's end (the recall prompt) is open in the page's place: hide the page and
+		 *  hold re-splits until it closes (S9.3, UI-21) */
+		covered?: boolean;
+		/** 'Fyrri' or ← while covered: the page should show the page again, not turn back */
+		onuncover?: () => void;
+		/** A block to open on, ahead of the address's hash: where the reader was when they
+		 *  switched to paged (S9.3, CODE-07) */
+		startAt?: HTMLElement | null;
+		/** Shows 'Samfellt skrun' in the label row, the in-view way out (S9.3, UI-05, PED-01) */
+		onleave?: () => void;
 	}
 
-	let { container, oncomplete, onsubsectioncomplete, onstatechange }: Props = $props();
+	let {
+		container,
+		oncomplete,
+		onsubsectioncomplete,
+		onstatechange,
+		covered = false,
+		onuncover,
+		startAt = null,
+		onleave
+	}: Props = $props();
 
 	interface Unit {
 		wrapper: HTMLElement | null; // the <section>, or null for intro content
@@ -94,6 +113,10 @@
 	let completionFired = $state(false);
 
 	let recomputeTimer: ReturnType<typeof setTimeout> | undefined;
+	/** A re-split held while covered. Not $state. */
+	let resplitWhenUncovered = false;
+	/** Whether the page on screen is covered, as last applied. Not $state. */
+	let appliedCovered = false;
 	/** This effect run's controller: its abort removes every listener init added. Not $state. */
 	let run: AbortController | undefined;
 	/** The keys, swipes and hash changes are live (init's last step). Not $state. */
@@ -230,7 +253,8 @@
 
 		for (let u = 0; u < units.length; u++) {
 			const unit = units[u];
-			const isCurrent = u === flat.unit;
+			// Covered by the section's end, no unit is shown, so every block is hidden
+			const isCurrent = u === flat.unit && !covered;
 			if (unit.wrapper) {
 				unit.wrapper.toggleAttribute('hidden', !isCurrent);
 			}
@@ -247,6 +271,22 @@
 				for (const el of unit.children) el.setAttribute('hidden', '');
 			}
 		}
+	}
+
+	/**
+	 * The block the page on screen starts with, for the section page to keep in view across a
+	 * switch to scrolling (S9.3, CODE-07): its first block, or for the second part of a broken
+	 * worked example the child it breaks before, since the block's own top is the first part's.
+	 * Null when no page is shown.
+	 */
+	export function shownAnchor(): HTMLElement | null {
+		const flat = flatPages[current];
+		const unit = flat && units[flat.unit];
+		const range = unit?.pages[flat.page];
+		const piece = range && unit.pieces[range.start];
+		if (!piece) return null;
+		const cut = unit.cuts[piece.block];
+		return piece.part === 'second' && cut instanceof HTMLElement ? cut : unit.children[piece.block];
 	}
 
 	/** The blocks a page shows, in order: one per piece, a broken block once */
@@ -324,9 +364,14 @@
 		return false;
 	}
 
-	/** Turn to the previous page; true when a page turned */
+	/** Turn to the previous page; true when a page turned. While covered, ask the page to show
+	 *  the page again instead (UI-21). */
 	function prev(): boolean {
 		if (!ready || failed) return false;
+		if (covered) {
+			onuncover?.();
+			return false;
+		}
 		target = null;
 		const index = stepPrev(current, pageCounts());
 		if (index === null) return false;
@@ -515,6 +560,12 @@
 	 *  block they were looking at (font size, resize, late image loads) */
 	function recompute() {
 		if (!ready || failed) return;
+		// Covered, nothing of the page is on screen: re-split once it shows again, so the label
+		// does not change behind the section's end (a rotation, a split screen; UI-21)
+		if (covered) {
+			resplitWhenUncovered = true;
+			return;
+		}
 		try {
 			const before = pageAnchor(flatPages[current], unitPages());
 			// Kept as a block and its part: a re-split can break or join an example, which
@@ -614,8 +665,10 @@
 			}
 			ready = true;
 
-			const fromHash = resolveHash(window.location.hash);
-			target = elementForHash(window.location.hash);
+			// Where the reader was when they switched to paged outranks the address (S9.3)
+			const fromStart = startAt?.isConnected ? pageForElement(startAt) : null;
+			const fromHash = fromStart ?? resolveHash(window.location.hash);
+			target = fromStart === null ? elementForHash(window.location.hash) : null;
 			// Scroll to the content on arrival too, past the learning objectives
 			// above it, so page 1 gets a whole page ([USER], 2026-10-04). Sizing
 			// page 1 to the room under the objectives left 5.3 at 1280x720 with
@@ -693,6 +746,8 @@
 		completedUnits.clear();
 		live = false;
 		reported = null;
+		appliedCovered = false;
+		resplitWhenUncovered = false;
 		// untrack: report() reads $state, which must not become this effect's dependencies
 		untrack(report);
 		init(el, controller.signal);
@@ -728,7 +783,25 @@
 		};
 	});
 
+	// The section's end covering the page (S9.3, UI-21): hide the page and bring the content top
+	// into view, as a turn does; uncovered, show the page again and run any re-split held back
+	$effect(() => {
+		const now = covered;
+		if (!ready || failed || now === appliedCovered) return;
+		appliedCovered = now;
+		untrack(() => {
+			applyVisibility();
+			if (now) scrollToContentTop();
+			else if (resplitWhenUncovered) {
+				resplitWhenUncovered = false;
+				recompute();
+			}
+		});
+	});
+
 	let flat = $derived(flatPages[current]);
+	/** The last page of the section, whose button finishes it (ruling 3) */
+	let lastPage = $derived(current === flatPages.length - 1);
 	let label = $derived(flat ? positionLabel(flat, pageCounts()) : '');
 </script>
 
@@ -742,18 +815,32 @@
 			Fyrri
 		</button>
 
-		<span class="paged-nav-label">
-			{label}
+		<span class="paged-nav-center">
+			<span class="paged-nav-label">
+				{label}
+			</span>
+			{#if onleave}
+				<!-- The in-view way out (S9.3, UI-05, PED-01), the toolbar's 'Samfellt skrun' again;
+				     v1.1's Lestrarstilling label. D20: proposed — 'Samfellt skrun' -->
+				<button class="paged-nav-leave" aria-pressed="false" onclick={() => onleave?.()}>Samfellt skrun</button>
+			{/if}
 		</span>
 
+		<!-- On the last page the button finishes the section (ruling 3), so it says so (UI-20).
+		     D20: proposed — 'Ljúka kafla' -->
 		<button
 			class="paged-nav-btn"
 			onclick={next}
-			disabled={current === flatPages.length - 1 && completionFired}
-			aria-label="Næsta síða"
+			disabled={lastPage && completionFired}
+			aria-label={lastPage ? 'Ljúka kafla' : 'Næsta síða'}
 		>
-			Næsta
-			<Icon name="chevron-right" size="sm" />
+			{#if lastPage}
+				Ljúka kafla
+				<Icon name="check" size="sm" />
+			{:else}
+				Næsta
+				<Icon name="chevron-right" size="sm" />
+			{/if}
 		</button>
 	</nav>
 
@@ -792,6 +879,26 @@
 	.paged-nav-btn:disabled {
 		opacity: 0.4;
 		cursor: not-allowed;
+	}
+
+	.paged-nav-center {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.125rem;
+	}
+
+	/* A quiet text button: the way out is there, not loud. Bronze text, underlined on hover
+	   (the accent-text rule), never white on amber. */
+	.paged-nav-leave {
+		padding: 0.25rem 0.5rem;
+		font-size: 0.8125rem;
+		color: var(--accent-strong);
+		text-underline-offset: 2px;
+	}
+
+	.paged-nav-leave:hover {
+		text-decoration: underline;
 	}
 
 	.paged-nav-label {

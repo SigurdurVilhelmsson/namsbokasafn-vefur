@@ -238,6 +238,16 @@ describe('RecallPrompt: touch screens', () => {
 		expect(document.activeElement).toBe(link);
 	});
 
+	// S9.3: paged, 'Ljúka kafla' opens the prompt and is disabled in the same update, so focus
+	// would stay on a control nobody can use (and Chromium drops it to <body>)
+	it('takes focus from a control that was disabled as the prompt opened', () => {
+		const finish = document.body.appendChild(document.createElement('button'));
+		finish.focus();
+		finish.disabled = true;
+		const t = render();
+		expect(document.activeElement).toBe(textarea(t));
+	});
+
 	it('does not focus the box on a touch screen', () => {
 		pointer('coarse');
 		const t = render();
