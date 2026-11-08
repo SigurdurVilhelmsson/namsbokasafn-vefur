@@ -1346,3 +1346,79 @@ test.describe('The title and focus survive page turns (S9.2)', () => {
 		}
 	});
 });
+
+/** The reader store as saved, or null */
+const readerSaved = (page: Page) => page.evaluate(() => localStorage.getItem('namsbokasafn:reader'));
+
+/** Fails the pager's init after its key listener: its observer of the article throws (S8.4) */
+async function forcePagerFailure(page: Page) {
+	await page.addInitScript(() => {
+		const observe = MutationObserver.prototype.observe;
+		MutationObserver.prototype.observe = function (target, options) {
+			if (target instanceof Element && target.matches('article.cnx-module') && options?.childList) {
+				throw new Error('forced pager failure (S8.4)');
+			}
+			return observe.call(this, target, options);
+		};
+	});
+}
+
+// Plan step S9.3 (UI-05, PED-01, CODE-07, UI-04, UI-20, UI-21, UI-11): a reader can leave paging
+// in one tap, scrolled mode's controls stand down while the pager works, and finishing a
+// section leads to the next.
+test.describe('The way out and the section end (S9.3)', () => {
+	test.skip(!SECTION, 'No synced module section');
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+
+	// UI-04: on every page of v1.1 the bottom 'Merkja kafla sem lesinn' sat under the pager and
+	// outweighed 'Næsta'. Keyed on the pager working, not on the mode: a failed pager scrolls
+	// again, and there the button is the end of the content's completion control.
+	test('no completion button sits under a working pager, and a failed pager shows one', async ({ page }) => {
+		test.setTimeout(180000);
+		await openPaged(page, SECTION!);
+		const bottom = page.getByRole('button', { name: 'Merkja kafla sem lesinn' });
+		await eachPage(page, SECTION!, async (text) => {
+			await expect(bottom, `${text}: the bottom completion button`).toHaveCount(0);
+		});
+	});
+
+	test('a failed pager keeps the bottom completion button', async ({ page }) => {
+		await forcePagerFailure(page);
+		const failed = page.waitForEvent('console', (m) => m.text().startsWith('Paged mode init failed'));
+		await page.goto(SECTION!);
+		await failed;
+		await expect(page.getByRole('button', { name: 'Merkja kafla sem lesinn' })).toBeVisible();
+	});
+
+	// CODE-07: scrolled mode's continue-reading code ran under the pager. Every page turn
+	// scrolls, so the reader store rewrote itself on each one (the race that flaked
+	// data-erase.spec.ts), and leaving saved a scroll position whose percentage measured the
+	// page shown, not progress, for a later 'Haltu áfram að lesa'.
+	test('page turns write nothing to the reader store, and leaving saves no scroll position', async ({ page }) => {
+		test.setTimeout(120000);
+		await openPaged(page, SECTION!);
+		const label = pagerLabel(page);
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+		const before = await readerSaved(page);
+		// A reader scrolls a page, then turns: both scroll the window (a turn to where the
+		// content already is would fire no scroll event)
+		for (let i = 0; i < 2 && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+			const text = (await label.textContent())!.trim();
+			await page.mouse.wheel(0, 150);
+			await page.waitForTimeout(200);
+			await next.click();
+			await expect(label).not.toHaveText(text);
+			await page.waitForTimeout(300);
+		}
+		expect(await readerSaved(page), 'the reader store after scrolling and turning twice').toBe(before);
+
+		const slug = SECTION!.split('/').filter(Boolean).at(-1)!;
+		await page.locator('a.nav-btn-next').click();
+		await expect(page).not.toHaveURL((u) => samePath(u, SECTION!));
+		const saved = JSON.parse((await readerSaved(page)) ?? '{}');
+		expect(
+			Object.keys(saved.scrollPositions ?? {}).filter((k) => k.includes(slug)),
+			'a scroll position saved for the paged section'
+		).toEqual([]);
+	});
+});

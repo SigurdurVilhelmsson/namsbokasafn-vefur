@@ -67,6 +67,11 @@
 		modeReady && shouldPage(resolveReadingMode(linkMode, $readingMode), data.navigation.current.section.type)
 	);
 	let pagedMark = $derived(pagedSectionMark(paged, pagerState));
+	// The pager is at work (pending, ready or at the end; not failed), so the section does not
+	// scroll as in scrolled mode, and scrolled mode's continue-reading code and its bottom
+	// completion button stand down (plan step S9.3; CODE-07, UI-04). Keyed on the pager, not
+	// the mode: a failed pager gives the section back to scrolling, and they return with it.
+	let pagerWorking = $derived(pagedMark !== undefined);
 
 	// Print the current section
 	function handlePrint() {
@@ -105,8 +110,11 @@
 	let progress = $derived($reader.progress);
 	let bookmarks = $derived($reader.bookmarks);
 
-	// Track scroll progress
+	// Track scroll progress. Not while the pager works: every page turn scrolls, so the reader
+	// store rewrote itself on each one, measuring the page shown rather than progress, and a
+	// tab still reading could write back what another tab had just erased (CODE-07)
 	function handleScroll() {
+		if (pagerWorking) return;
 		const scrollTop = window.scrollY;
 		const docHeight = document.documentElement.scrollHeight - window.innerHeight;
 		if (docHeight > 0) {
@@ -166,9 +174,10 @@
 		};
 	});
 
-	// Save scroll position before navigating away
+	// Save scroll position before navigating away; not while the pager works, whose scroll
+	// position says which page was shown, not how far the reader got (CODE-07)
 	beforeNavigate(() => {
-		if (browser) {
+		if (browser && !pagerWorking) {
 			const scrollTop = window.scrollY;
 			const docHeight = document.documentElement.scrollHeight - window.innerHeight;
 			const percentage = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
@@ -330,7 +339,7 @@
 
 <article class="max-w-4xl mx-auto px-1 sm:px-0">
 	<!-- Continue where you left off prompt -->
-	{#if showContinuePrompt && savedPosition}
+	{#if showContinuePrompt && savedPosition && !pagerWorking}
 		<div
 			class="mb-4 p-4 rounded-xl bg-[var(--accent-light)] border border-[var(--accent-subtle)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
 			role="alert"
@@ -591,8 +600,10 @@
 		/>
 	{/if}
 
-	<!-- Mark as read button at bottom -->
-	{#if !isRead}
+	<!-- Mark as read button at bottom. Not under a working pager (UI-04), where 'Næsta' on the
+	     last page finishes the section (ruling 3) and the toolbar keeps 'Merkja sem lesið'; a
+	     failed pager scrolls again, and this is its end-of-content control. -->
+	{#if !isRead && !pagerWorking}
 		<div class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
 			<button
 				onclick={markAsRead}
