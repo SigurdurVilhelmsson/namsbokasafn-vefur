@@ -248,6 +248,8 @@ beforeEach(() => {
 		removeEventListener() {}
 	})) as never;
 	window.scrollTo = (() => {}) as never;
+	// jsdom has no scrollIntoView; the pager brings a link's target into view with it (S11.2)
+	Element.prototype.scrollIntoView = () => {};
 	vi.spyOn(console, 'warn').mockImplementation(() => {});
 });
 
@@ -271,6 +273,7 @@ afterEach(async () => {
 	vi.useRealTimers();
 	vi.restoreAllMocks();
 	Element.prototype.getBoundingClientRect = realRect;
+	delete (Element.prototype as { scrollIntoView?: unknown }).scrollIntoView;
 	window.getComputedStyle = realStyle;
 	Object.defineProperty(window, 'innerHeight', { value: realInnerHeight, configurable: true, writable: true });
 	history.replaceState(null, '', '/');
