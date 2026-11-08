@@ -1938,10 +1938,11 @@ figure[data-figure-review]::before {
    * HIDDEN ELEMENTS
    * ---------------------------------------- */
 
-  /* Navigation and chrome */
+  /* Navigation and chrome. Only the app's asides: the book's own (notes, examples, its
+     everyday-life boxes) are text, and print (the worklist's bl-print-glossary-terms) */
   header,
   nav,
-  aside,
+  aside:not(.reading-content aside),
   footer,
   .sidebar,
   [role="navigation"],
@@ -1949,10 +1950,12 @@ figure[data-figure-review]::before {
     display: none !important;
   }
 
-  /* Interactive controls */
+  /* Interactive controls. Not the in-text glossary terms: the tooltip action gives each
+     role="button" (glossaryTerms.ts), but they are words of the text, and every one went
+     missing on paper */
   button,
   .btn,
-  [role="button"],
+  [role="button"]:not(.glossary-term),
   input[type="button"],
   input[type="submit"] {
     display: none !important;
