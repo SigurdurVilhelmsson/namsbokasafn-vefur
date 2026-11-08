@@ -53,9 +53,9 @@
 	// mode the reader picked, never by default (D06). The link is read once, in the browser,
 	// when this page mounts: never at prerender, never stored (PED-35). SvelteKit reuses this
 	// component across sections, so a link's mode lasts until the reader leaves the section
-	// pages ([USER], 2026-11-03; kept on 2026-11-04 for S9.0 to rule with the crossover
-	// design). Until onMount runs nothing pages, so prerender and hydration match main, and a
-	// mode the link overrides never mounts the pager.
+	// pages: ruled at S9.0 (docs/decisions/2026-11-08-reader-lestur-link-rule-sticky-as-built.md).
+	// Until onMount runs nothing pages, so prerender and hydration match main, and a mode the
+	// link overrides never mounts the pager.
 	let linkMode: ReadingMode | null = $state(null);
 	let modeReady = $state(false);
 	// What the pager reports (S8.4, CODE-17): ← / → and the end marker follow it, not the mode
