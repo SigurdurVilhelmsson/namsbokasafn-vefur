@@ -116,8 +116,12 @@
 
 <!-- Bottom-left below lg: the bottom-right corner belongs to the mobile tools
      button (MobileBottomNav), which this pill used to sit on top of. -->
+<!-- `pomodoro` and the state classes let app.css hide the idle pill below 1024 px while a
+     section pages, and keep a running one's corner free in the pager's bar (S9.5, UI-12) -->
 <div
-	class="fixed bottom-6 left-6 z-40 lg:left-auto lg:right-6"
+	class="pomodoro fixed bottom-6 left-6 z-40 lg:left-auto lg:right-6"
+	class:timer-idle={phase === 'idle' && !expanded}
+	class:timer-running={phase !== 'idle'}
 	role="region"
 	aria-label="Einbeitingartímamælir"
 >

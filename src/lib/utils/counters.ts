@@ -12,8 +12,21 @@
 import { books } from '$lib/types/book';
 import { takesSingular } from './plural';
 
-/** The closed list of events. A new event is a new entry here, and nothing else. */
-export const COUNTER_EVENTS = ['recallShown', 'recallSaved', 'recallSkipped', 'recallAbandoned'] as const;
+/**
+ * The closed list of events. A new event is a new entry here, and nothing else. Since S9.5
+ * (PED-17, UI-08): a switch to paged or to scrolled through the reading-mode switch, and a
+ * page shown that is taller than the part of the window it is read in, so the reader has to
+ * scroll it (counted once each time such a page is shown).
+ */
+export const COUNTER_EVENTS = [
+	'recallShown',
+	'recallSaved',
+	'recallSkipped',
+	'recallAbandoned',
+	'switchToPaged',
+	'switchToScrolled',
+	'pageTooTall'
+] as const;
 
 export type CounterEvent = (typeof COUNTER_EVENTS)[number];
 

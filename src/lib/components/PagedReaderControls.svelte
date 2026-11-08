@@ -54,6 +54,7 @@
 		flatIndexForItem,
 		pagerState,
 		keyScroll,
+		KEY_SCROLL,
 		type ItemPosition,
 		type PagerState,
 		type VerticalSpan
@@ -87,6 +88,12 @@
 		/** 'Tilkynna villu''s address for an unreviewed section: the label row carries the
 		 *  compact 'Vélþýtt' marker with it on every page; none for a reviewed one (S9.4) */
 		mtReport?: string | null;
+		/** Room the section page should add at its end, in px, when the document is too short to
+		 *  bring the content top under the header (S9.5; UI-19's arrival shortfall) */
+		onreserve?: (px: number) => void;
+		/** A page shown is taller than the part of the window it is read in, so the reader has to
+		 *  scroll it: once each time such a page is shown (S9.5, PED-17's local counter) */
+		ontallpage?: () => void;
 	}
 
 	let {
@@ -99,7 +106,9 @@
 		startAt = null,
 		onleave,
 		lead = null,
-		mtReport = null
+		mtReport = null,
+		onreserve,
+		ontallpage
 	}: Props = $props();
 
 	interface Unit {
@@ -160,6 +169,8 @@
 	let gapBelow = PAGE_BUDGET.initialGapBelow;
 	/** The notice's share of gapAbove: page 1 has it, the rest do not (S9.4) */
 	let leadInset = 0;
+	/** The page heights the last split used, on the nav for the e2e budget log (S9.5, UI-08) */
+	let heights = $state({ page: 0, firstPage: 0 });
 
 	/** The deep-link / cross-reference target the reader was sent to. While set,
 	 *  a re-split keeps its page on screen; any page turn clears it. */
@@ -169,7 +180,25 @@
 	 *  under the notice. It used to be the viewport minus a fixed 260px; the real chrome is
 	 *  larger (QA E1). */
 	function availableHeights(): { page: number; firstPage: number } {
-		return pageHeights({ innerHeight: window.innerHeight, gapWithLead: gapAbove, leadInset, gapBelow });
+		return pageHeights({
+			innerHeight: window.innerHeight,
+			gapWithLead: gapAbove,
+			leadInset,
+			gapBelow,
+			scrollOffset: contentTop()
+		});
+	}
+
+	/**
+	 * Where a turn parks the content top: just under the sticky header, measured (S9.5; UI-08's
+	 * trim (i), call 1's step 1). A fixed 96 px left about 40 px blank under the 56 px header on
+	 * every page. With no header (focus mode) it is the gap alone. The one offset source: the
+	 * turn's scroll, the reading view and the budget all read it.
+	 */
+	function contentTop(): number {
+		const header = document.querySelector<HTMLElement>('header.header');
+		const bottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
+		return Math.round(bottom) + PAGE_BUDGET.headerGap;
 	}
 
 	/** Each unit's page count, and each unit's pages: what pager.ts reads */
@@ -190,10 +219,14 @@
 		);
 	}
 
-	function measure(el: HTMLElement): number {
+	/** A block's height with both its margins, and the margins, which paginate() collapses with a
+	 *  neighbour's as CSS does (S9.5, CODE-28) */
+	function measure(el: HTMLElement): { height: number; marginTop: number; marginBottom: number } {
 		const rect = el.getBoundingClientRect();
 		const style = getComputedStyle(el);
-		return rect.height + (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
+		const marginTop = parseFloat(style.marginTop) || 0;
+		const marginBottom = parseFloat(style.marginBottom) || 0;
+		return { height: rect.height + marginTop + marginBottom, marginTop, marginBottom };
 	}
 
 	function buildUnits(root: HTMLElement): Unit[] {
@@ -220,12 +253,13 @@
 			lead.removeAttribute('hidden');
 		}
 		const { page: viewportH, firstPage } = availableHeights();
+		heights = { page: viewportH, firstPage };
 		for (const [u, unit] of units.entries()) {
 			unit.cuts = unit.children.map((el) => (EXAMPLE_BREAK_TRIAL ? exampleCut(el) : null));
 			const items = unit.children.map((el, i) => {
 				const cut = unit.cuts[i];
 				return {
-					height: measure(el),
+					...measure(el),
 					...classifyBlock(el),
 					firstPart: cut ? firstPartHeight(el, cut) : undefined
 				};
@@ -319,10 +353,31 @@
 		return blocks.filter((el, i) => blocks.indexOf(el) === i);
 	}
 
+	/** The room asked of the section page so far; it only grows within a visit. Not $state. */
+	let reserve = 0;
+
 	function scrollToContentTop() {
 		if (!container) return;
-		const top = container.getBoundingClientRect().top + window.scrollY - PAGE_BUDGET.scrollOffset;
-		window.scrollTo({ top: Math.max(0, top) });
+		const target = contentTop();
+		window.scrollTo({ top: Math.max(0, container.getBoundingClientRect().top + window.scrollY - target), behavior: 'instant' });
+		// A document too short to bring the content top under the header (a short page, often the
+		// first, under the objectives) left the page lower than budgeted, and its controls with it.
+		// Ask the section page for that much room at its end, and scroll again once it is there
+		// (S9.5; UI-19's arrival shortfall, which the measured content top made bite). Only with
+		// a real layout: jsdom has none.
+		if (!onreserve || document.documentElement.scrollHeight <= window.innerHeight) return;
+		const short = Math.round(container.getBoundingClientRect().top - target);
+		if (short <= 1) return;
+		reserve += short;
+		onreserve(reserve);
+		const signal = run?.signal;
+		tick().then(() => {
+			if (signal?.aborted || !container) return;
+			window.scrollTo({
+				top: Math.max(0, container.getBoundingClientRect().top + window.scrollY - contentTop()),
+				behavior: 'instant'
+			});
+		});
 	}
 
 	function updateHash() {
@@ -356,6 +411,20 @@
 		announce();
 		if (scroll) scrollToContentTop();
 		report();
+		// Once the label row for this page has rendered, check it fits the reserve (S9.5)
+		if (live) {
+			const signal = run?.signal;
+			tick().then(() => {
+				if (signal?.aborted) return;
+				calibrate({ growOnly: true });
+				// Counted for a turn or an arrival (the calls that scroll), not a re-split of the
+				// page already shown
+				if (!scroll) return;
+				const span = pageSpan();
+				const view = readingView();
+				if (span.bottom - span.top > view.bottom - view.top + KEY_SCROLL.tolerance) ontallpage?.();
+			});
+		}
 	}
 
 	function markUnitComplete(unitIndex: number) {
@@ -488,7 +557,9 @@
 	/** The part of the window a page is read in: below where a turn puts the content's top,
 	 *  above the bottom clearance the floating controls take */
 	function readingView(): VerticalSpan {
-		return { top: PAGE_BUDGET.scrollOffset, bottom: window.innerHeight - PAGE_BUDGET.bottomClearance };
+		// Down to the docked bar's top when it is on screen: text under it is not read (S9.5)
+		const barTop = navEl?.getBoundingClientRect().top ?? Infinity;
+		return { top: contentTop(), bottom: Math.min(window.innerHeight - PAGE_BUDGET.bottomClearance, barTop) };
 	}
 
 	/** The page on screen, from its first block's top to its last block's bottom; the
@@ -703,14 +774,32 @@
 
 	/** Measure the real gap between the last block and the bottom of the page
 	 *  controls, now that they exist, and re-split if the estimate was off. */
-	function calibrate() {
+	/**
+	 * Measure the gap between the last block and the bottom of the page controls on the page
+	 * shown, and re-split if the estimate was off. From the last block's bottom margin edge: that
+	 * margin is already in the page's height (pageHeight()). At init it corrects the estimate
+	 * either way; after a turn it only grows it (`growOnly`), since the label row wraps to a
+	 * different height on different pages (at 375 px, 'Síða 14 af 27' takes a line more than
+	 * 'Síða 1 af 27'), and a page whose row is taller than the one measured overran by the
+	 * difference (S9.5). It re-splits at most once for each new, taller row.
+	 */
+	function calibrate({ growOnly = false } = {}) {
 		if (!navEl || !ready) return;
 		const shown = flatPages[current] && units[flatPages[current].unit];
 		const range = shown && shown.pages[flatPages[current].page];
 		const last = range && pageBlocks(shown, range).at(-1);
 		if (!last) return;
-		const measured = navEl.getBoundingClientRect().bottom - last.getBoundingClientRect().bottom;
-		if (measured > 0 && Math.abs(measured - gapBelow) > 8) {
+		const lastEdge = last.getBoundingClientRect().bottom + (parseFloat(getComputedStyle(last).marginBottom) || 0);
+		// From the bar's place in the flow, not its rect: docked, it sticks to the window's bottom
+		// when a page runs past it, and its rect then says nothing about the gap (S9.5). It follows
+		// the container, with its own top margin and height; the recall prompt between them is
+		// covered-only, when re-splits wait.
+		const barTop = container ? container.getBoundingClientRect().bottom : navEl.getBoundingClientRect().top;
+		const measured =
+			barTop - lastEdge + (parseFloat(getComputedStyle(navEl).marginTop) || 0) + navEl.offsetHeight;
+		if (!(measured > 0)) return;
+		const off = measured - gapBelow;
+		if (off > 8 || (!growOnly && off < -8)) {
 			gapBelow = measured;
 			recompute();
 		}
@@ -832,6 +921,7 @@
 		reported = null;
 		appliedCovered = false;
 		resplitWhenUncovered = false;
+		reserve = 0;
 		// untrack: report() reads $state, which must not become this effect's dependencies
 		untrack(report);
 		init(el, controller.signal);
@@ -893,64 +983,123 @@
 	<!-- 'Síðuflakk', 'Fyrri síða', 'Fyrri', 'Næsta síða' and 'Næsta', as v1.1 wrote them at
 	     dde768e (S8.2); the label is pager.ts's positionLabel (S8.1). Checked by [USER] as D20
 	     batch 9 (2026-11-04). -->
-	<nav class="paged-nav" aria-label="Síðuflakk" bind:this={navEl}>
-		<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
-			<Icon name="chevron-left" size="sm" />
-			Fyrri
-		</button>
+	<!-- The docked bar (S9.5; UI-12, [USER]'s layout of 2026-11-08): it sticks to the window's
+	     bottom when a page runs past it, and keeps its ends free for the floating corner
+	     controls (the tools button below 1024 px, the timer pill from 1024 px, a running timer
+	     on the left below 1024 px; app.css hides the idle pill there while a section pages).
+	     Below 640 px 'Fyrri' and 'Næsta' show their arrows only; their names are unchanged. -->
+	<nav
+		class="paged-nav"
+		aria-label="Síðuflakk"
+		bind:this={navEl}
+		data-page-height={Math.round(heights.page)}
+		data-first-page-height={Math.round(heights.firstPage)}
+	>
+		<div class="paged-nav-row">
+			<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
+				<Icon name="chevron-left" size="sm" />
+				<span class="paged-nav-word">Fyrri</span>
+			</button>
 
-		<span class="paged-nav-center">
-			{#if mtReport}
-				<!-- The machine-translation notice on every page (S9.4; UI-09, PED-15): the banner's
-				     own words, its name and sentence for screen readers, and its 'Tilkynna villu'.
-				     No new strings. -->
-				<span class="paged-nav-mt" role="note" aria-label="Vélþýtt efni">
-					<Icon name="triangle-alert" size="sm" class="paged-nav-mt-icon" />
-					<span>Vélþýtt<span class="sr-only">
-							efni. Þessi eining hefur ekki enn verið yfirlesin og kann að innihalda þýðingarvillur.</span
-						></span>
-					<a class="paged-nav-mt-report" href={mtReport}>Tilkynna villu</a>
-				</span>
-			{/if}
 			<span class="paged-nav-label">
 				{label}
 			</span>
-			{#if onleave}
-				<!-- The in-view way out (S9.3, UI-05, PED-01), the toolbar's 'Samfellt skrun' again;
-				     v1.1's Lestrarstilling label. D20: proposed — 'Samfellt skrun' -->
-				<button class="paged-nav-leave" aria-pressed="false" onclick={() => onleave?.()}>Samfellt skrun</button>
-			{/if}
-		</span>
 
-		<!-- On the last page the button finishes the section (ruling 3), so it says so (UI-20).
-		     D20: proposed — 'Ljúka kafla' -->
-		<button
-			class="paged-nav-btn"
-			onclick={next}
-			disabled={lastPage && completionFired}
-			aria-label={lastPage ? 'Ljúka kafla' : 'Næsta síða'}
-		>
-			{#if lastPage}
-				Ljúka kafla
-				<Icon name="check" size="sm" />
-			{:else}
-				Næsta
-				<Icon name="chevron-right" size="sm" />
-			{/if}
-		</button>
+			<!-- On the last page the button finishes the section (ruling 3), so it says so (UI-20),
+			     at every width: a check mark alone is too easy to misread for it.
+			     D20: proposed — 'Ljúka kafla' -->
+			<button
+				class="paged-nav-btn"
+				onclick={next}
+				disabled={lastPage && completionFired}
+				aria-label={lastPage ? 'Ljúka kafla' : 'Næsta síða'}
+			>
+				{#if lastPage}
+					Ljúka kafla
+					<Icon name="check" size="sm" />
+				{:else}
+					<span class="paged-nav-word">Næsta</span>
+					<Icon name="chevron-right" size="sm" />
+				{/if}
+			</button>
+		</div>
+
+		{#if mtReport || onleave}
+			<div class="paged-nav-sub">
+				{#if mtReport}
+					<!-- The machine-translation notice on every page (S9.4; UI-09, PED-15): the banner's
+					     own words, its name and sentence for screen readers, and its 'Tilkynna villu'.
+					     No new strings. -->
+					<span class="paged-nav-mt" role="note" aria-label="Vélþýtt efni">
+						<Icon name="triangle-alert" size="sm" class="paged-nav-mt-icon" />
+						<span>Vélþýtt<span class="sr-only">
+								efni. Þessi eining hefur ekki enn verið yfirlesin og kann að innihalda þýðingarvillur.</span
+							></span>
+						<a class="paged-nav-mt-report" href={mtReport}>Tilkynna villu</a>
+					</span>
+				{/if}
+				{#if onleave}
+					<!-- The in-view way out (S9.3, UI-05, PED-01), the toolbar's 'Samfellt skrun' again;
+					     v1.1's Lestrarstilling label. D20: proposed — 'Samfellt skrun' -->
+					<button class="paged-nav-leave" aria-pressed="false" onclick={() => onleave?.()}>Samfellt skrun</button>
+				{/if}
+			</div>
+		{/if}
 	</nav>
 
 {/if}
 
 <style>
+	/* The docked bar. Its background hides the text it sticks over; z-index 30 keeps it under
+	   the corner controls (40), whose places its padding keeps free. */
 	.paged-nav {
+		position: sticky;
+		bottom: 0;
+		z-index: 30;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		margin-top: 1.5rem;
+		padding: 0.5rem 0;
+		border-top: 1px solid var(--border-color);
+		background-color: var(--bg-primary);
+	}
+
+	/* Below 1024 px the tools button's corner (16 px + 48 px + 8 px) */
+	@media (max-width: 1023px) {
+		.paged-nav {
+			padding-right: 72px;
+		}
+	}
+
+	/* From 1024 px the timer pill's corner (24 px + 76 px + 8 px), and its height */
+	@media (min-width: 1024px) {
+		.paged-nav {
+			padding-right: 108px;
+			min-height: 4.5rem;
+		}
+	}
+
+	.paged-nav-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 0.75rem;
-		margin-top: 1.5rem;
-		padding: 0.5rem 0;
-		border-top: 1px solid var(--border-color);
+	}
+
+	.paged-nav-sub {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		column-gap: 1rem;
+	}
+
+	/* Below 640 px the arrows alone ([USER], 2026-11-08); the names stay the buttons' names */
+	@media (max-width: 639px) {
+		.paged-nav-word {
+			display: none;
+		}
 	}
 
 	.paged-nav-btn {
@@ -975,13 +1124,6 @@
 	.paged-nav-btn:disabled {
 		opacity: 0.4;
 		cursor: not-allowed;
-	}
-
-	.paged-nav-center {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.125rem;
 	}
 
 	/* A quiet text button: the way out is there, not loud. Bronze text, underlined on hover
@@ -1010,14 +1152,19 @@
 		color: #d97706;
 	}
 
-	/* Bronze text for amber-as-text, underlined, as the banner's link (the accent-text rule) */
+	/* Bronze text for amber-as-text, underlined, as the banner's link (the accent-text rule).
+	   Centred: on touch screens app.css gives every link 44 px of height, and its text sat at
+	   the top, above 'Vélþýtt'. */
 	.paged-nav-mt-report {
+		display: inline-flex;
+		align-items: center;
 		color: var(--accent-strong);
 		text-decoration: underline;
 		text-underline-offset: 2px;
 	}
 
 	.paged-nav-label {
+		flex: 1;
 		font-size: 0.8125rem;
 		/* --text-secondary: v1.1 moved off --text-tertiary when that was 2.90:1 (QA E18).
 		   Both pass AA since S2.1 (tokens.test.ts); the position is information, not a hint. */

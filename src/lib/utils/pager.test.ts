@@ -6,6 +6,7 @@ import { describe, it, expect } from 'vitest';
 import type { PageRange } from './paginate';
 import {
 	PAGE_BUDGET,
+	CALL1_STEP,
 	pageBudget,
 	pageHeights,
 	flatPositions,
@@ -64,10 +65,19 @@ describe('pageHeights', () => {
 });
 
 describe('pageBudget', () => {
-	// Today's values, v1.1's at dde768e (:64, :68, :77, :87). S9.5 changes this pin
-	// when it applies call 1; the formula tests below stay computed from the constants.
-	it("holds v1.1's values until call 1 is applied", () => {
-		expect(PAGE_BUDGET).toEqual({ scrollOffset: 96, bottomClearance: 76, initialGapBelow: 150, floor: 240 });
+	// Call 1's ruled values (S9.5): step 1 measures the content top under the header
+	// (headerGap; the fixed 96 is only the fallback), and step 2, with the floating chrome
+	// docked in the pager's bar, drops the 76 px clearance. The formula tests below stay
+	// computed from the constants.
+	it("holds call 1's values, at step 2", () => {
+		expect(CALL1_STEP).toBe(2);
+		expect(PAGE_BUDGET).toEqual({
+			scrollOffset: 96,
+			bottomClearance: 0,
+			initialGapBelow: 150,
+			floor: 240,
+			headerGap: 8
+		});
 	});
 
 	// v1.1 keeps the gap below in a variable it re-measures (calibrate()); the
@@ -87,6 +97,18 @@ describe('pageBudget', () => {
 		expect(pageBudget({ innerHeight, ...gaps })).toBe(
 			innerHeight - PAGE_BUDGET.scrollOffset - gaps.gapAbove - gaps.gapBelow - PAGE_BUDGET.bottomClearance
 		);
+	});
+
+	// S9.5 (UI-08's trim (i), call 1's step 1): a turn parks the content top just under the
+	// sticky header, measured, not at a fixed 96 px that left about 40 px blank under it
+	it('takes the measured content top in place of the fixed offset', () => {
+		const at = { innerHeight: 1000, gapAbove: 40, gapBelow: 100 };
+		expect(pageBudget({ ...at, scrollOffset: 64 })).toBe(pageBudget(at) + PAGE_BUDGET.scrollOffset - 64);
+	});
+
+	it('passes the measured content top through pageHeights', () => {
+		const at = { innerHeight: 1000, gapWithLead: 140, leadInset: 100, gapBelow: 100, scrollOffset: 64 };
+		expect(pageHeights(at).page).toBe(pageBudget({ innerHeight: 1000, gapAbove: 40, gapBelow: 100, scrollOffset: 64 }));
 	});
 
 	it('counts each gap once', () => {

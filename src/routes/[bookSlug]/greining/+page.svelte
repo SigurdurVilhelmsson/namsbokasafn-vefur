@@ -299,8 +299,11 @@
 	>
 		<h2 id="counts-export-title" class="text-lg font-semibold">Flytja út tölur</h2>
 		<p class="mt-2 text-sm text-[var(--text-secondary)]">
+			<!-- S9.5 added the reading-mode and tall-page counts (PED-17). D20: proposed — the list's
+			     new middle -->
 			Skráin geymir aðeins tölurnar hér fyrir neðan: hve oft upprifjun birtist í hverri bók og hvernig
-			þú brást við henni, og daginn í dag. Ekkert sem þú skrifaðir fer í hana.
+			þú brást við henni, hve oft þú skiptir um lestrarstillingu og hve oft síða var hærri en skjárinn,
+			og daginn í dag. Ekkert sem þú skrifaðir fer í hana.
 		</p>
 		<p class="mt-2 text-sm text-[var(--text-secondary)]">
 			Ekkert er sent. Þú ræður hvort og hverjum þú sendir skrána, til dæmis kennaranum þínum.
