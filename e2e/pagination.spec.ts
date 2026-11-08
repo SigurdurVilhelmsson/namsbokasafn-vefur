@@ -10,7 +10,7 @@
  */
 
 import { test, expect, type Page } from '@playwright/test';
-import { MODULE_BODY_SELECTOR } from '../src/lib/utils/paginate';
+import { MODULE_BODY_SELECTOR, EXAMPLE_BREAK_TRIAL } from '../src/lib/utils/paginate';
 import { PAGE_BUDGET, KEY_SCROLL } from '../src/lib/utils/pager';
 import {
 	sectionsContaining,
@@ -1101,5 +1101,62 @@ test.describe('Swipes in paged mode (S9.1)', () => {
 		const y = para!.y + Math.min(para!.height / 2, 20);
 		await touchDrag(page, { x: 300, y }, { x: 100, y });
 		await expect(label).not.toHaveText(shown);
+	});
+});
+
+// D11's trial (2026-11-08), S9.1's restated acceptance: at 390 px Dæmi 3.1 is taller than a
+// page, so it breaks before its check-your-learning part. Space scrolls the first part to its
+// end, the turn opens the second, and 'Sýna svar' is on that page, reached by Space if the part
+// runs past the window.
+test.describe("D11's 'Lausn' trial (S9.1)", () => {
+	test.use({ viewport: { width: 390, height: 844 } });
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+
+	test("Dæmi 3.1 breaks before its check-your-learning part, and Space reaches 'Sýna svar'", async ({
+		page
+	}) => {
+		test.skip(!EXAMPLE_BREAK_TRIAL, 'The trial is switched off');
+		test.setTimeout(120000);
+		const [url] = sectionsContaining('>Dæmi 3.1<', 1);
+		test.skip(!url, 'No Dæmi 3.1 synced');
+		const label = pagerLabel(page);
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+		const example = page.locator('aside.example', {
+			has: page.locator('p.example-label', { hasText: /^Dæmi 3\.1$/ })
+		});
+		const exampleLabel = example.locator('p.example-label');
+		const reveal = example.getByRole('button', { name: 'Sýna svar' });
+
+		await openPaged(page, url);
+		for (let i = 0; !(await exampleLabel.isVisible()); i++) {
+			expect(i, `${url}: never reached Dæmi 3.1`).toBeLessThan(PAGE_CAP);
+			const text = (await label.textContent())!.trim();
+			await next.click();
+			await expect(label).not.toHaveText(text);
+			await page.waitForTimeout(300);
+		}
+		await expect(reveal, "the first part's page holds no 'Sýna svar'").toBeHidden();
+		const firstPart = (await label.textContent())!.trim();
+
+		await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+		for (let presses = 0; (await label.textContent())!.trim() === firstPart; presses++) {
+			expect(presses, `${firstPart}: Space never turned the page`).toBeLessThan(20);
+			await page.keyboard.press('Space');
+			await page.waitForTimeout(250);
+		}
+		await expect(exampleLabel, "the second part's page starts after the example's label").toBeHidden();
+		await expect(reveal).toBeVisible();
+
+		const inView = async () => {
+			const box = (await reveal.boundingBox())!;
+			return box.y >= 0 && box.y + box.height <= 844;
+		};
+		const secondPart = (await label.textContent())!.trim();
+		for (let presses = 0; !(await inView()); presses++) {
+			expect(presses, "Space never brought 'Sýna svar' into view").toBeLessThan(10);
+			await page.keyboard.press('Space');
+			await page.waitForTimeout(250);
+			await expect(label, "Space turned past 'Sýna svar'").toHaveText(secondPart);
+		}
 	});
 });
