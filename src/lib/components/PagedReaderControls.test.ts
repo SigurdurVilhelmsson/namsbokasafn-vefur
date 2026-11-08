@@ -473,7 +473,7 @@ describe('a pager destroyed while it waits (CODE-17: the mode switch during init
 });
 
 describe('the pager speaks through the shared announcer (S8.3, UI-01)', () => {
-	it('adds no live region of its own; the one region says what the label shows, and is cleared on failure', async () => {
+	it('adds no live region of its own; the one region says the position and sub-section, and is cleared on failure', async () => {
 		const target = document.body.appendChild(document.createElement('div'));
 		mounted.push(mount(LiveAnnouncer, { target }));
 		const c = content();
@@ -482,7 +482,9 @@ describe('the pager speaks through the shared announcer (S8.3, UI-01)', () => {
 		vi.advanceTimersByTime(ANNOUNCE_DELAY_MS);
 		flushSync();
 		expect(document.querySelectorAll('[aria-live]')).toHaveLength(1);
-		expect(get(announcement)).toBe(label());
+		// Since S9.2 it names the sub-section (the fixture's headings read 'x')
+		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 3');
+		expect(get(announcement)).toBe('Hluti 1 af 3: x, síða 1 af 3');
 		failNextResplit();
 		vi.advanceTimersByTime(ANNOUNCE_DELAY_MS);
 		expect(get(announcement)).toBe('');

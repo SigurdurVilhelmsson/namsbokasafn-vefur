@@ -193,6 +193,17 @@ export function buildUnits(root: HTMLElement): ContentUnit[] {
 }
 
 /**
+ * A unit's own heading, for the spoken position (plan step S9.2, UI-05): the first h2–h6
+ * among its sub-section's children, its spaces collapsed; null for an intro, which has no
+ * wrapper, and for a sub-section with no heading of its own (a nested one's is not its own).
+ */
+export function unitHeading(wrapper: HTMLElement | null): string | null {
+	const heading = wrapper && Array.from(wrapper.children).find((el) => /^H[2-6]$/.test(el.tagName));
+	const text = heading?.textContent?.replace(/\s+/g, ' ').trim();
+	return text || null;
+}
+
+/**
  * Index of the block a deep-link target lands on, or -1 if it is not in `items`.
  * The target can be a block, sit inside one, or (a nested sub-section, which
  * buildUnits pages block by block) contain blocks: then its first block wins.

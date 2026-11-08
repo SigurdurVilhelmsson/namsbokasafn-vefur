@@ -31,6 +31,7 @@
 		splitPieces,
 		shownParts,
 		pieceOf,
+		unitHeading,
 		type BlockPart,
 		type PageRange,
 		type Piece
@@ -41,6 +42,7 @@
 		encodePageHash,
 		resolvePageHash,
 		positionLabel,
+		spokenPosition,
 		keyAction,
 		swipeAction,
 		stepNext,
@@ -270,12 +272,12 @@
 		}
 	}
 
-	/** Announce what the label shows; it used to count flat pages over the
-	 *  whole section while the label counted per sub-section (QA E19). The
-	 *  effect below passes a change on to the app's one polite region. */
+	/** Announce the position the label shows, counted per sub-section as the label is (it
+	 *  once counted flat pages over the whole section, QA E19), with the sub-section named
+	 *  since S9.2 (UI-05). The effect below passes a change on to the app's one polite region. */
 	function announce() {
 		const f = flatPages[current];
-		announcement = f ? positionLabel(f, pageCounts()) : '';
+		announcement = f ? spokenPosition(f, pageCounts(), unitHeading(units[f.unit]?.wrapper ?? null)) : '';
 	}
 
 	/** `keepHash` leaves an element deep link (#CNX_…) in the URL, so a reload

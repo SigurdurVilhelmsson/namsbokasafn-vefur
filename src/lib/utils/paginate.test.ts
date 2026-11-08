@@ -12,6 +12,7 @@ import {
 	paginate,
 	pageIndexForItem,
 	buildUnits,
+	unitHeading,
 	itemIndexForTarget,
 	classifyBlock,
 	MODULE_BODY_SELECTOR,
@@ -545,6 +546,29 @@ describe('buildUnits', () => {
 		]);
 		const solution = units[0].children[1].querySelector('.para-title');
 		expect(units.flatMap((u) => u.children)).not.toContain(solution);
+	});
+});
+
+// What the spoken position names (S9.2, UI-05): the sub-section's own heading
+describe('unitHeading', () => {
+	const section = (html: string) => {
+		const el = document.createElement('section');
+		el.innerHTML = html;
+		return el;
+	};
+
+	it("gives the sub-section's heading, its spaces collapsed", () => {
+		expect(unitHeading(section('<h2>  Flokkun\n   efnis </h2><p>a</p>'))).toBe('Flokkun efnis');
+	});
+
+	it('takes the first heading among its children, not a nested sub-section\'s', () => {
+		expect(unitHeading(section('<p>a</p><h3>Eigin</h3><section><h4>Undir</h4></section>'))).toBe('Eigin');
+		expect(unitHeading(section('<p>a</p><section><h3>Undir</h3></section>'))).toBeNull();
+	});
+
+	it('gives null for an intro (no wrapper) and an empty heading', () => {
+		expect(unitHeading(null)).toBeNull();
+		expect(unitHeading(section('<h2> </h2>'))).toBeNull();
 	});
 });
 

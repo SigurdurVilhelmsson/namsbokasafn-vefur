@@ -164,6 +164,23 @@ export function positionLabel({ unit, page }: PagePosition, pageCounts: readonly
 	return `Hluti ${unit + 1} af ${pageCounts.length} · Síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
 }
 
+/**
+ * What a screen reader hears on a turn (plan step S9.2, register UI-05): the label's position
+ * with the sub-section named, 'Hluti 2 af 3: Flokkun efnis, síða 4 af 13', or the position
+ * alone for a unit with no heading (the intro). Commas stand where the label has '·', since
+ * how screen readers voice '·' is not verified. The visible label stays positionLabel's.
+ */
+export function spokenPosition(
+	{ unit, page }: PagePosition,
+	pageCounts: readonly number[],
+	heading: string | null
+): string {
+	// D20: proposed — the spoken position, with and without the sub-section's heading
+	const units = `Hluti ${unit + 1} af ${pageCounts.length}`;
+	const pages = `síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
+	return heading ? `${units}: ${heading}, ${pages}` : `${units}, ${pages}`;
+}
+
 // =============================================================================
 // KEYS AND SWIPES
 // =============================================================================

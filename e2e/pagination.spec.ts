@@ -380,11 +380,14 @@ test.describe('Paged reading mode', () => {
 	});
 
 	// Since S8.3 the pager speaks through the app's one polite region (register UI-01)
-	// instead of a region of its own, which competed with it: the region says what the
-	// label shows on arrival, on every page and after 'Fyrri', and a re-split that keeps
-	// the page says nothing. The locator matches the atomic polite regions: the shared
-	// one, and search's while search is open, so this test never opens search.
-	test('the screen reader hears the position the label shows', async ({ page }) => {
+	// instead of a region of its own, which competed with it: the region says the label's
+	// position on arrival, on every page and after 'Fyrri', and a re-split that keeps
+	// the page says nothing. Since S9.2 it also names the sub-section shown (UI-05):
+	// 'Hluti 2 af 3: Flokkun efnis, síða 4 af 13', commas for the label's '·', the
+	// position alone in the intro. S8.3's "what the label shows" is amended on purpose.
+	// The locator matches the atomic polite regions: the shared one, and search's while
+	// search is open, so this test never opens search.
+	test('the screen reader hears the position the label shows, and the sub-section', async ({ page }) => {
 		const urls = sectionsContaining('<p', 1);
 		test.skip(urls.length === 0, 'No section content available');
 		test.setTimeout(120000);
@@ -396,7 +399,23 @@ test.describe('Paged reading mode', () => {
 		const region = page.locator('[aria-live="polite"][aria-atomic="true"]');
 		await expect(nav).toBeVisible({ timeout: 15000 });
 		await expect(region).toHaveCount(1);
-		const says = async () => expect(region).toHaveText((await label.textContent())!.trim());
+		/** The label's numbers, and the heading of the sub-section on screen (none in the intro) */
+		const says = async () => {
+			const [, unit, units, at, pages] = (await label.textContent())!
+				.trim()
+				.match(/^Hluti (\d+) af (\d+) · Síða (\d+) af (\d+)$/)!;
+			const heading = await page.evaluate((bodySelector) => {
+				const root = document.querySelector('article.cnx-module')!;
+				const shown = Array.from(root.children)
+					.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
+					.find((el) => el.tagName === 'SECTION' && !el.hasAttribute('hidden'));
+				const h = shown && Array.from(shown.children).find((el) => /^H[2-6]$/.test(el.tagName));
+				return h?.textContent?.replace(/\s+/g, ' ').trim() || null;
+			}, MODULE_BODY_SELECTOR);
+			const position = `Hluti ${unit} af ${units}`;
+			const page_ = `síða ${at} af ${pages}`;
+			await expect(region).toHaveText(heading ? `${position}: ${heading}, ${page_}` : `${position}, ${page_}`);
+		};
 
 		await says();
 		for (let i = 0; ; i++) {
