@@ -40,8 +40,10 @@ export const PAGE_BUDGET: Readonly<{
 	bottomClearance: number;
 	initialGapBelow: number;
 	floor: number;
+	headerGap: number;
 }> = {
-	/** Where a page turn scrolls the top of the content to, below the window's top */
+	/** Where a page turn scrolls the top of the content to, below the window's top, when the
+	 *  header is not measured; the pager measures it since S9.5 (contentTop()) */
 	scrollOffset: 96,
 	/** Room kept free under the page controls for what floats in the bottom corners and
 	 *  centre: the tools button and timer pill on phones, the timer pill on desktop, the
@@ -51,7 +53,9 @@ export const PAGE_BUDGET: Readonly<{
 	 *  controls exist and are measured */
 	initialGapBelow: 150,
 	/** The smallest page, however short the window */
-	floor: 240
+	floor: 240,
+	/** Between the sticky header's bottom and where a turn parks the content top (S9.5) */
+	headerGap: 8
 };
 
 /**
@@ -62,16 +66,17 @@ export const PAGE_BUDGET: Readonly<{
 export function pageBudget({
 	innerHeight,
 	gapAbove,
-	gapBelow
+	gapBelow,
+	scrollOffset = PAGE_BUDGET.scrollOffset
 }: {
 	innerHeight: number;
 	gapAbove: number;
 	gapBelow: number;
+	/** Where a turn parks the content top: the sticky header's measured bottom plus a small gap
+	 *  since S9.5 (UI-08's trim (i)); PAGE_BUDGET.scrollOffset when not measured */
+	scrollOffset?: number;
 }): number {
-	return Math.max(
-		PAGE_BUDGET.floor,
-		innerHeight - PAGE_BUDGET.scrollOffset - gapAbove - gapBelow - PAGE_BUDGET.bottomClearance
-	);
+	return Math.max(PAGE_BUDGET.floor, innerHeight - scrollOffset - gapAbove - gapBelow - PAGE_BUDGET.bottomClearance);
 }
 
 /**
@@ -84,16 +89,18 @@ export function pageHeights({
 	innerHeight,
 	gapWithLead,
 	leadInset,
-	gapBelow
+	gapBelow,
+	scrollOffset
 }: {
 	innerHeight: number;
 	gapWithLead: number;
 	leadInset: number;
 	gapBelow: number;
+	scrollOffset?: number;
 }): { page: number; firstPage: number } {
 	return {
-		page: pageBudget({ innerHeight, gapAbove: gapWithLead - leadInset, gapBelow }),
-		firstPage: pageBudget({ innerHeight, gapAbove: gapWithLead, gapBelow })
+		page: pageBudget({ innerHeight, gapAbove: gapWithLead - leadInset, gapBelow, scrollOffset }),
+		firstPage: pageBudget({ innerHeight, gapAbove: gapWithLead, gapBelow, scrollOffset })
 	};
 }
 

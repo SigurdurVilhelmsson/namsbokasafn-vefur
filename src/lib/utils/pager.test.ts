@@ -64,10 +64,18 @@ describe('pageHeights', () => {
 });
 
 describe('pageBudget', () => {
-	// Today's values, v1.1's at dde768e (:64, :68, :77, :87). S9.5 changes this pin
-	// when it applies call 1; the formula tests below stay computed from the constants.
-	it("holds v1.1's values until call 1 is applied", () => {
-		expect(PAGE_BUDGET).toEqual({ scrollOffset: 96, bottomClearance: 76, initialGapBelow: 150, floor: 240 });
+	// v1.1's values at dde768e (:64, :68, :77, :87), with call 1's step 1 (S9.5): the content
+	// top is measured under the header (headerGap), and the fixed 96 is only the fallback. The
+	// 76 px clearance goes with step 2, once the floating chrome is docked. The formula tests
+	// below stay computed from the constants.
+	it('holds the values of call 1, step 1', () => {
+		expect(PAGE_BUDGET).toEqual({
+			scrollOffset: 96,
+			bottomClearance: 76,
+			initialGapBelow: 150,
+			floor: 240,
+			headerGap: 8
+		});
 	});
 
 	// v1.1 keeps the gap below in a variable it re-measures (calibrate()); the
@@ -87,6 +95,18 @@ describe('pageBudget', () => {
 		expect(pageBudget({ innerHeight, ...gaps })).toBe(
 			innerHeight - PAGE_BUDGET.scrollOffset - gaps.gapAbove - gaps.gapBelow - PAGE_BUDGET.bottomClearance
 		);
+	});
+
+	// S9.5 (UI-08's trim (i), call 1's step 1): a turn parks the content top just under the
+	// sticky header, measured, not at a fixed 96 px that left about 40 px blank under it
+	it('takes the measured content top in place of the fixed offset', () => {
+		const at = { innerHeight: 1000, gapAbove: 40, gapBelow: 100 };
+		expect(pageBudget({ ...at, scrollOffset: 64 })).toBe(pageBudget(at) + PAGE_BUDGET.scrollOffset - 64);
+	});
+
+	it('passes the measured content top through pageHeights', () => {
+		const at = { innerHeight: 1000, gapWithLead: 140, leadInset: 100, gapBelow: 100, scrollOffset: 64 };
+		expect(pageHeights(at).page).toBe(pageBudget({ innerHeight: 1000, gapAbove: 40, gapBelow: 100, scrollOffset: 64 }));
 	});
 
 	it('counts each gap once', () => {

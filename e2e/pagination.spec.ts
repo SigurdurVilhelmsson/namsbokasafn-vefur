@@ -213,7 +213,13 @@ test.describe('Paged reading mode', () => {
 							document.querySelector('nav.paged-nav')!.getBoundingClientRect().bottom -
 							document.querySelector('[data-paged-section]')!.getBoundingClientRect().top
 					);
-					const limit = viewport - PAGE_BUDGET.scrollOffset - PAGE_BUDGET.bottomClearance + 24;
+					// The content top a turn parks the page at: under the sticky header, measured
+					// since S9.5 (call 1's step 1), not the fixed PAGE_BUDGET.scrollOffset
+					const top = await page.evaluate(
+						(gap) => (document.querySelector('header.header')?.getBoundingClientRect().bottom ?? 0) + gap,
+						PAGE_BUDGET.headerGap
+					);
+					const limit = viewport - top - PAGE_BUDGET.bottomClearance + 24;
 					expect(
 						used,
 						`${url} ${text}: the controls end ${Math.round(used)}px below the content top; the budget allows ${limit}`
@@ -479,7 +485,10 @@ test.describe('Paged reading mode', () => {
 							);
 						};
 						const box = navEl.getBoundingClientRect();
-						const [prev, nxt] = navEl.querySelectorAll('button');
+						// By name: since S9.3 the label row holds 'Samfellt skrun' between them, and
+						// the last page's button says 'Ljúka kafla'
+						const prev = navEl.querySelector('button[aria-label="Fyrri síða"]')!;
+						const nxt = navEl.querySelector('button[aria-label="Næsta síða"], button[aria-label="Ljúka kafla"]')!;
 						return {
 							// The tools button's top edge: 16px margin + 48px button
 							clear: box.bottom <= window.innerHeight - 64,
@@ -493,7 +502,7 @@ test.describe('Paged reading mode', () => {
 					if ((!r.clear || r.prev || r.next) && !(await allowedOverrun(page))) {
 						blocked.push(`${url} ${r.label} clear=${r.clear} prev=${r.prev} next=${r.next}`);
 					}
-					if (await next.isDisabled()) break;
+					if (LAST_PAGE.test(r.label ?? '')) break;
 					await next.evaluate((b: HTMLButtonElement) => b.click());
 				}
 			}
@@ -1747,7 +1756,7 @@ test.describe('The MT notice, figures and images (S9.4)', () => {
 			});
 			// Ruling 1: the arrival scroll lands on the pager's container, past the objectives. The
 			// notice now opens that container, so the objectives must still end above it. (Their
-			// last few px can show: the container lands 96 px down, under their bottom margin, and
+			// last few px can show: the container lands just under the header, beneath their bottom margin, and
 			// at 768x1024 the scroll stops short, UI-19's arrival shortfall, which no step names.)
 			const containerTop = await page.evaluate(
 				() => document.querySelector('[data-paged-section]')!.getBoundingClientRect().top
@@ -1900,4 +1909,79 @@ test.describe('The MT notice, figures and images (S9.4)', () => {
 		}
 		expect(requested.size, `${url}: ${requested.size} of ${total} images fetched`).toBeLessThan(total);
 	});
+});
+
+// Plan step S9.5 (UI-12, UI-08, CODE-28, PED-17): dock the chrome, fix the budget artefacts,
+// set call 1's value
+test.describe('The chrome, the budget and call 1 (S9.5)', () => {
+	test.skip(!SECTION, 'No synced module section');
+	test.use({ serviceWorkers: 'block' });
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+
+	// UI-08: what a page holds, as numbers for call 1: the page height as a share of the window,
+	// the page count, and the median lines a page shows (paragraph and list lines), for §1.2
+	for (const viewport of [
+		{ width: 1280, height: 800 },
+		{ width: 768, height: 1024 },
+		{ width: 390, height: 844 },
+		{ width: 375, height: 667 }
+	]) {
+		test(`logs the budget, the page count and the lines per page of §1.2 at ${viewport.width}x${viewport.height}`, async ({
+			page
+		}) => {
+			const url = sectionUrl('1.2');
+			test.skip(!url, 'No §1.2 synced');
+			test.setTimeout(180000);
+			await page.setViewportSize(viewport);
+			await openPaged(page, url!);
+			await page.waitForTimeout(500);
+			const height = Number(await pager(page).getAttribute('data-page-height'));
+			const lines: number[] = [];
+			let pages = 0;
+			await eachPage(page, url!, async () => {
+				pages++;
+				lines.push(
+					await page.evaluate(() =>
+						Array.from(document.querySelectorAll<HTMLElement>('article.cnx-module p, article.cnx-module li'))
+							.filter((el) => el.offsetParent !== null && !el.querySelector('p, li'))
+							.reduce((sum, el) => {
+								const lh = parseFloat(getComputedStyle(el).lineHeight) || 1;
+								return sum + Math.round(el.getBoundingClientRect().height / lh);
+							}, 0)
+					)
+				);
+			});
+			const sorted = [...lines].sort((a, b) => a - b);
+			const median = sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
+			const line = `${viewport.width}x${viewport.height}: page height ${height} px, ${Math.round((100 * height) / viewport.height)}% of the window; ${pages} pages; median ${median} lines a page`;
+			console.log(`[budget] ${line}`);
+			test.info().annotations.push({ type: 'budget', description: line });
+			expect(height).toBeGreaterThan(0);
+		});
+	}
+
+	// UI-19's arrival shortfall, which the measured content top made bite: a page too short to
+	// scroll far enough left the container lower than budgeted (106 px, not 64, on 5.3's first
+	// page at 1280x720), and its controls under the tools button. The page now adds the missing
+	// room at its end, so arrival lands the container just under the header.
+	for (const viewport of [
+		{ width: 1280, height: 720 },
+		{ width: 768, height: 1024 }
+	]) {
+		test(`arrival lands the content top just under the header, at ${viewport.width}x${viewport.height}`, async ({
+			page
+		}) => {
+			test.setTimeout(120000);
+			await page.setViewportSize(viewport);
+			for (const url of [SECTION!, sectionUrl('5.3')].filter((u): u is string => !!u)) {
+				await openPaged(page, url);
+				await page.waitForTimeout(500);
+				const { top, target } = await page.evaluate((gap) => ({
+					top: document.querySelector('[data-paged-section]')!.getBoundingClientRect().top,
+					target: (document.querySelector('header.header')?.getBoundingClientRect().bottom ?? 0) + gap
+				}), PAGE_BUDGET.headerGap);
+				expect(Math.abs(top - target), `${url}: the container at ${Math.round(top)} px, not ${Math.round(target)}`).toBeLessThanOrEqual(2);
+			}
+		});
+	}
 });

@@ -87,6 +87,9 @@
 		/** 'Tilkynna villu''s address for an unreviewed section: the label row carries the
 		 *  compact 'Vélþýtt' marker with it on every page; none for a reviewed one (S9.4) */
 		mtReport?: string | null;
+		/** Room the section page should add at its end, in px, when the document is too short to
+		 *  bring the content top under the header (S9.5; UI-19's arrival shortfall) */
+		onreserve?: (px: number) => void;
 	}
 
 	let {
@@ -99,7 +102,8 @@
 		startAt = null,
 		onleave,
 		lead = null,
-		mtReport = null
+		mtReport = null,
+		onreserve
 	}: Props = $props();
 
 	interface Unit {
@@ -160,6 +164,8 @@
 	let gapBelow = PAGE_BUDGET.initialGapBelow;
 	/** The notice's share of gapAbove: page 1 has it, the rest do not (S9.4) */
 	let leadInset = 0;
+	/** The page heights the last split used, on the nav for the e2e budget log (S9.5, UI-08) */
+	let heights = $state({ page: 0, firstPage: 0 });
 
 	/** The deep-link / cross-reference target the reader was sent to. While set,
 	 *  a re-split keeps its page on screen; any page turn clears it. */
@@ -169,7 +175,25 @@
 	 *  under the notice. It used to be the viewport minus a fixed 260px; the real chrome is
 	 *  larger (QA E1). */
 	function availableHeights(): { page: number; firstPage: number } {
-		return pageHeights({ innerHeight: window.innerHeight, gapWithLead: gapAbove, leadInset, gapBelow });
+		return pageHeights({
+			innerHeight: window.innerHeight,
+			gapWithLead: gapAbove,
+			leadInset,
+			gapBelow,
+			scrollOffset: contentTop()
+		});
+	}
+
+	/**
+	 * Where a turn parks the content top: just under the sticky header, measured (S9.5; UI-08's
+	 * trim (i), call 1's step 1). A fixed 96 px left about 40 px blank under the 56 px header on
+	 * every page. With no header (focus mode) it is the gap alone. The one offset source: the
+	 * turn's scroll, the reading view and the budget all read it.
+	 */
+	function contentTop(): number {
+		const header = document.querySelector<HTMLElement>('header.header');
+		const bottom = header ? Math.max(0, header.getBoundingClientRect().bottom) : 0;
+		return Math.round(bottom) + PAGE_BUDGET.headerGap;
 	}
 
 	/** Each unit's page count, and each unit's pages: what pager.ts reads */
@@ -190,10 +214,14 @@
 		);
 	}
 
-	function measure(el: HTMLElement): number {
+	/** A block's height with both its margins, and the margins, which paginate() collapses with a
+	 *  neighbour's as CSS does (S9.5, CODE-28) */
+	function measure(el: HTMLElement): { height: number; marginTop: number; marginBottom: number } {
 		const rect = el.getBoundingClientRect();
 		const style = getComputedStyle(el);
-		return rect.height + (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0);
+		const marginTop = parseFloat(style.marginTop) || 0;
+		const marginBottom = parseFloat(style.marginBottom) || 0;
+		return { height: rect.height + marginTop + marginBottom, marginTop, marginBottom };
 	}
 
 	function buildUnits(root: HTMLElement): Unit[] {
@@ -220,12 +248,13 @@
 			lead.removeAttribute('hidden');
 		}
 		const { page: viewportH, firstPage } = availableHeights();
+		heights = { page: viewportH, firstPage };
 		for (const [u, unit] of units.entries()) {
 			unit.cuts = unit.children.map((el) => (EXAMPLE_BREAK_TRIAL ? exampleCut(el) : null));
 			const items = unit.children.map((el, i) => {
 				const cut = unit.cuts[i];
 				return {
-					height: measure(el),
+					...measure(el),
 					...classifyBlock(el),
 					firstPart: cut ? firstPartHeight(el, cut) : undefined
 				};
@@ -319,10 +348,31 @@
 		return blocks.filter((el, i) => blocks.indexOf(el) === i);
 	}
 
+	/** The room asked of the section page so far; it only grows within a visit. Not $state. */
+	let reserve = 0;
+
 	function scrollToContentTop() {
 		if (!container) return;
-		const top = container.getBoundingClientRect().top + window.scrollY - PAGE_BUDGET.scrollOffset;
-		window.scrollTo({ top: Math.max(0, top) });
+		const target = contentTop();
+		window.scrollTo({ top: Math.max(0, container.getBoundingClientRect().top + window.scrollY - target), behavior: 'instant' });
+		// A document too short to bring the content top under the header (a short page, often the
+		// first, under the objectives) left the page lower than budgeted, and its controls with it.
+		// Ask the section page for that much room at its end, and scroll again once it is there
+		// (S9.5; UI-19's arrival shortfall, which the measured content top made bite). Only with
+		// a real layout: jsdom has none.
+		if (!onreserve || document.documentElement.scrollHeight <= window.innerHeight) return;
+		const short = Math.round(container.getBoundingClientRect().top - target);
+		if (short <= 1) return;
+		reserve += short;
+		onreserve(reserve);
+		const signal = run?.signal;
+		tick().then(() => {
+			if (signal?.aborted || !container) return;
+			window.scrollTo({
+				top: Math.max(0, container.getBoundingClientRect().top + window.scrollY - contentTop()),
+				behavior: 'instant'
+			});
+		});
 	}
 
 	function updateHash() {
@@ -488,7 +538,7 @@
 	/** The part of the window a page is read in: below where a turn puts the content's top,
 	 *  above the bottom clearance the floating controls take */
 	function readingView(): VerticalSpan {
-		return { top: PAGE_BUDGET.scrollOffset, bottom: window.innerHeight - PAGE_BUDGET.bottomClearance };
+		return { top: contentTop(), bottom: window.innerHeight - PAGE_BUDGET.bottomClearance };
 	}
 
 	/** The page on screen, from its first block's top to its last block's bottom; the
@@ -832,6 +882,7 @@
 		reported = null;
 		appliedCovered = false;
 		resplitWhenUncovered = false;
+		reserve = 0;
 		// untrack: report() reads $state, which must not become this effect's dependencies
 		untrack(report);
 		init(el, controller.signal);
@@ -893,7 +944,13 @@
 	<!-- 'Síðuflakk', 'Fyrri síða', 'Fyrri', 'Næsta síða' and 'Næsta', as v1.1 wrote them at
 	     dde768e (S8.2); the label is pager.ts's positionLabel (S8.1). Checked by [USER] as D20
 	     batch 9 (2026-11-04). -->
-	<nav class="paged-nav" aria-label="Síðuflakk" bind:this={navEl}>
+	<nav
+		class="paged-nav"
+		aria-label="Síðuflakk"
+		bind:this={navEl}
+		data-page-height={Math.round(heights.page)}
+		data-first-page-height={Math.round(heights.firstPage)}
+	>
 		<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
 			<Icon name="chevron-left" size="sm" />
 			Fyrri

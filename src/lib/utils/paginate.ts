@@ -26,6 +26,31 @@ export interface PaginateItem {
 	/** Headings: if this would be the last item on a page, move it to the
 	 *  top of the next page instead */
 	keepWithNext: boolean;
+	/** The margins inside `height`, which CSS collapses with a neighbour's (S9.5, CODE-28);
+	 *  absent means none */
+	marginTop?: number;
+	marginBottom?: number;
+}
+
+/**
+ * What block `i` adds to a page that starts at `start` (S9.5, CODE-28): its height less the
+ * margin CSS collapses. Between two blocks on a page that is min(the previous one's bottom
+ * margin, its top margin); for the page's first block it is its whole top margin, which already
+ * lies in the chrome measured above the first block. A block of 0 px or less adds nothing.
+ */
+function blockCost(items: readonly PaginateItem[], i: number, start: number): number {
+	const item = items[i];
+	if (item.height <= 0) return 0;
+	const top = item.marginTop ?? 0;
+	const collapsed = i === start ? top : Math.min(items[i - 1].marginBottom ?? 0, top);
+	return Math.max(0, item.height - collapsed);
+}
+
+/** The height a page holding items [start, end) fills, margins collapsed as CSS does (CODE-28) */
+export function pageHeight(items: readonly PaginateItem[], start: number, end: number): number {
+	let height = 0;
+	for (let i = start; i < end; i++) height += blockCost(items, i, start);
+	return height;
 }
 
 /** How the page breaker treats a rendered block: only headings are special */
@@ -89,8 +114,9 @@ export function paginate(input: PaginateItem[], viewportH: number, firstH: numbe
 		// window scrolls there. A heading taller than the page keeps the
 		// block after it, through the headings-only rule below. A 0 px block
 		// always fits, so it never stands in for that block.
-		if (pageH === 0 || item.height === 0 || pageH + item.height <= room()) {
-			pageH += item.height;
+		const cost = blockCost(items, i, start);
+		if (pageH === 0 || item.height === 0 || pageH + cost <= room()) {
+			pageH += cost;
 			i++;
 			continue;
 		}
@@ -109,7 +135,7 @@ export function paginate(input: PaginateItem[], viewportH: number, firstH: numbe
 		}
 		flush(breakAt);
 		// The carried headings now open this page and count against it
-		for (let h = breakAt; h < i; h++) pageH += items[h].height;
+		pageH = pageHeight(items, breakAt, i);
 	}
 
 	// 0 px blocks left after the last break join the page before them
@@ -267,10 +293,13 @@ export interface Piece extends PaginateItem {
 export function splitPieces(items: BreakableItem[], viewportH: number): Piece[] {
 	return items.flatMap(({ height, keepWithNext, firstPart }, block): Piece[] => {
 		const breaks = firstPart !== undefined && firstPart > 0 && firstPart < height && height > viewportH;
-		if (!breaks) return [{ block, part: 'whole', height, keepWithNext }];
+		const { marginTop, marginBottom } = items[block];
+		if (!breaks) return [{ block, part: 'whole', height, keepWithNext, marginTop, marginBottom }];
+		// The top margin belongs to the first part, the bottom margin to the second
+		const none = (margin: number | undefined) => (margin === undefined ? undefined : 0);
 		return [
-			{ block, part: 'first', height: firstPart, keepWithNext: false },
-			{ block, part: 'second', height: height - firstPart, keepWithNext: false }
+			{ block, part: 'first', height: firstPart, keepWithNext: false, marginTop, marginBottom: none(marginBottom) },
+			{ block, part: 'second', height: height - firstPart, keepWithNext: false, marginTop: none(marginTop), marginBottom }
 		];
 	});
 }

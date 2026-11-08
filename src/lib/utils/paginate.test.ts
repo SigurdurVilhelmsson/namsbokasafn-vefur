@@ -10,6 +10,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
 	paginate,
+	pageHeight,
 	pageIndexForItem,
 	buildUnits,
 	unitHeading,
@@ -224,6 +225,40 @@ describe('paginate', () => {
 		const here = dirname(fileURLToPath(import.meta.url));
 		const source = readFileSync(join(here, 'paginate.ts'), 'utf8');
 		expect(source.match(IMPORT)).toBeNull();
+	});
+});
+
+// Plan step S9.5 (CODE-28): CSS collapses adjacent vertical margins, so a page is charged
+// each block's height with both margins, less min(previous bottom, top) between neighbours,
+// and less its first block's top margin, which already lies in the chrome measured above the
+// first block. Pages used to under-fill by 10 px a boundary.
+describe('pageHeight (collapsed margins)', () => {
+	const para = (): PaginateItem => ({ height: 120, keepWithNext: false, marginTop: 10, marginBottom: 10 });
+
+	it('raises a run of three paragraphs by 110 px, not 120, for a fourth', () => {
+		const three = [para(), para(), para()];
+		expect(pageHeight([...three, para()], 0, 4) - pageHeight(three, 0, 3)).toBe(110);
+	});
+
+	it("does not charge a page's first block its top margin", () => {
+		expect(pageHeight([para()], 0, 1)).toBe(110);
+	});
+
+	it('collapses to the larger of two margins at a boundary', () => {
+		const items: PaginateItem[] = [
+			{ height: 120, keepWithNext: false, marginTop: 10, marginBottom: 10 },
+			{ height: 140, keepWithNext: false, marginTop: 20, marginBottom: 20 }
+		];
+		// 100, the 20 px gap (the larger margin, not 10 + 20), 100, and its 20 px bottom margin
+		expect(pageHeight(items, 0, 2)).toBe(240);
+	});
+
+	it('charges blocks with no margins given their height, as before', () => {
+		expect(pageHeight([block(100), block(80)], 0, 2)).toBe(180);
+	});
+
+	it('fills a 440 px page with four such paragraphs, where it used to fit three', () => {
+		expect(paginate([para(), para(), para(), para()], 440)).toEqual([{ start: 0, end: 4 }]);
 	});
 });
 

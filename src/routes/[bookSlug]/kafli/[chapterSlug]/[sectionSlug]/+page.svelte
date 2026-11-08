@@ -101,6 +101,11 @@
 	let unreviewed = $derived(!data.navigation.current.section.reviewed);
 	let mtLead: HTMLElement | undefined = $state();
 
+	// Room at the end of the page that the pager asks for when the document is too short to bring
+	// the content top under the header (S9.5; UI-19's arrival shortfall): blank, after the
+	// section links, never inside the content or the pager's container
+	let pagedReserve = $state(0);
+
 	// Print the current section
 	function handlePrint() {
 		window.print();
@@ -175,6 +180,7 @@
 		switchedOff = false;
 		startAt = null;
 		keptAnchor = null;
+		pagedReserve = 0;
 		endReached = false;
 
 		// Reset the continue-reading prompt, then check this section's saved position
@@ -743,6 +749,7 @@
 				mtReport={unreviewed
 					? feedbackHref({ bok: data.bookSlug, kafli: data.chapterSlug, hluti: data.sectionSlug })
 					: null}
+				onreserve={(px) => (pagedReserve = px)}
 			/>
 		{/if}
 
@@ -787,6 +794,10 @@
 
 <!-- Navigation buttons -->
 <NavigationButtons navigation={data.navigation} bookSlug={data.bookSlug} />
+
+{#if paged && pagedReserve > 0}
+	<div aria-hidden="true" data-paged-reserve style:height="{pagedReserve}px"></div>
+{/if}
 
 
 <!-- Annotation Sidebar -->

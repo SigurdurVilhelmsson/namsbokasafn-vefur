@@ -491,6 +491,14 @@
   font-size: var(--font-size-base);
 }
 
+/* Paged, the content's 3rem of padding above and below sat on every page: above the running
+   title and between the last block and the page controls (S9.5; UI-08's trim (ii), call 1's
+   step 1). The pager's container carries data-paged-section while it pages, not after a failure. */
+[data-paged-section] .reading-content {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
 .reading-content h1,
 .reading-content h2,
 .reading-content h3,
