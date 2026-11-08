@@ -16,6 +16,7 @@ import { PAGE_BUDGET, KEY_SCROLL } from '../src/lib/utils/pager';
 import {
 	sectionsContaining,
 	sectionsMatching,
+	sectionsScored,
 	tocSectionUrls,
 	rollupSection,
 	publishedBook,
@@ -102,6 +103,22 @@ async function pageEnd(page: Page) {
 /** Blocks the pager hid. practiceReveal's self-assessment row is hidden in scrolled mode too. */
 const HIDDEN_BLOCKS = '.reading-content [hidden]:not(.practice-self-assess)';
 
+/**
+ * What the address names: 'unit' for '#sub-U' (a unit's first page), 'block' for the id of an
+ * element on the page shown (S11.2, CODE-16), the hash itself for the '#sub-U-p-P' fallback,
+ * 'bare' for none, and 'other' for anything else
+ */
+const pageAddress = (page: Page) =>
+	page.evaluate(() => {
+		const hash = location.hash;
+		if (!hash) return 'bare';
+		if (/^#sub-\d+$/.test(hash)) return 'unit';
+		if (/^#sub-\d+-p-\d+$/.test(hash)) return hash;
+		const el = document.getElementById(decodeURIComponent(hash.slice(1)));
+		return el && !el.closest('[hidden]') && el.getBoundingClientRect().height > 0 ? 'block' : 'other';
+	});
+const ADDRESSED = /^(unit|block|#sub-\d+-p-\d+)$/;
+
 /** The page count a label gives: units, and pages in the shown unit */
 function labelCounts(text: string): { units: number; pages: number } {
 	const m = text.match(/Hluti \d+ af (\d+) · Síða \d+ af (\d+)/)!;
@@ -139,7 +156,7 @@ test.describe('Paged reading mode', () => {
 		await expect(nav).toBeVisible({ timeout: 15000 });
 		await expect(label).toHaveText(/^Hluti 1 af \d+ · Síða 1 af \d+$/);
 		await nav.getByRole('button', { name: 'Næsta síða' }).click();
-		await expect(page).toHaveURL(/#sub-\d+(-p-\d+)?$/);
+		await expect.poll(() => pageAddress(page)).toMatch(ADDRESSED);
 
 		// On to the next section in the app: SvelteKit reuses the page, and its pager
 		// starts again on the first page, with no page hash
@@ -164,7 +181,8 @@ test.describe('Paged reading mode', () => {
 		await nextButton.click();
 
 		await expect(label).not.toHaveText(before ?? '', { timeout: 5000 });
-		await expect(page).toHaveURL(/#sub-\d+(-p-\d+)?$/);
+		// A unit's first page, or since S11.2 the id of the page's first block (CODE-16)
+		await expect.poll(() => pageAddress(page)).toMatch(ADDRESSED);
 
 		// Fyrri returns to the start
 		await nav.getByRole('button', { name: 'Fyrri síða' }).click();
@@ -815,10 +833,11 @@ test.describe('Paged reading mode', () => {
 		await page.goto(`${urls[0]}#sub-1-p-99`);
 		const label = page.getByRole('navigation', { name: 'Síðuflakk' }).locator('.paged-nav-label');
 		await expect(label).toHaveText(/^Hluti 2 af \d+ · Síða (\d+) af \1$/, { timeout: 15000 });
-		// The last page must differ from the first, and the hash must name it exactly
+		// The last page must differ from the first, and the address must name it: since S11.2 by
+		// its first block's id, or exactly by number when that block has none
 		const pages = labelCounts((await label.textContent())!).pages;
 		expect(pages, `${urls[0]}: unit 2 has one page; pick another fixture`).toBeGreaterThan(1);
-		await expect(page).toHaveURL(new RegExp(`#sub-1-p-${pages - 1}$`));
+		await expect.poll(() => pageAddress(page)).toMatch(new RegExp(`^(block|#sub-1-p-${pages - 1})$`));
 	});
 });
 
@@ -2189,6 +2208,219 @@ test.describe('Print and find-in-page (S11.1)', () => {
 		const match = page.locator('[data-test-match]');
 		await expect(match).toBeVisible();
 		expect(await match.evaluate((el) => !!el.closest('[hidden]'))).toBe(false);
-		expect(new URL(page.url()).hash).toMatch(/^#sub-\d+(-p-\d+)?$/);
+		expect(await pageAddress(page)).toMatch(ADDRESSED);
+	});
+});
+
+/**
+ * Walks the paged section open in `page` for a visible in-content link to an element on another
+ * page that is not a figure (figure links open the lightbox, S9.4): a table, a note, an equation.
+ * Marks the link and its target, and returns the label of the page the link is on, or null.
+ */
+async function markCrossPageLink(page: Page, { firstPageOnly = false } = {}): Promise<string | null> {
+	const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+	for (let i = 0; i < PAGE_CAP; i++) {
+		const found = await page.evaluate(() => {
+			for (const a of document.querySelectorAll<HTMLAnchorElement>('article.cnx-module a[href^="#"]')) {
+				if (a.closest('[hidden]') || a.getBoundingClientRect().height === 0) continue;
+				const id = decodeURIComponent(a.getAttribute('href')!.slice(1));
+				const target = id ? document.getElementById(id) : null;
+				if (!target || target.closest('figure') || !target.closest('[hidden]')) continue;
+				a.setAttribute('data-test-link', '');
+				target.setAttribute('data-test-target', '');
+				return true;
+			}
+			return false;
+		});
+		const text = (await pagerLabel(page).textContent())!.trim();
+		if (found) return text;
+		if (firstPageOnly || LAST_PAGE.test(text) || !(await next.isVisible())) return null;
+		await next.click();
+		await expect(pagerLabel(page)).not.toHaveText(text);
+		await page.waitForTimeout(200);
+	}
+	return null;
+}
+
+/** Sections with in-content links, those with links to tables first */
+const linkSections = (): string[] =>
+	[
+		...new Set(
+			[sectionUrl('2.7'), sectionUrl('1.2'), ...sectionsMatching(/<a\b[^>]*href="#(?!MJX)/, 8)].filter(
+				(u): u is string => !!u
+			)
+		)
+	];
+
+/**
+ * Sections whose body links, in its first 1,200 characters of text, to an element that is not a
+ * figure and sits far below: the link is on the first page and its target on another
+ */
+const earlyLinkSections = (): string[] =>
+	sectionsScored((html) => {
+		const body = html.indexOf('<main');
+		if (body < 0) return 0;
+		const ids = new Map<string, { tag: string; at: number }>();
+		for (const m of html.matchAll(/<(\w+)\b[^>]*\bid="([^"]+)"/g)) ids.set(m[2], { tag: m[1], at: m.index! });
+		for (const m of html.matchAll(/<a\b[^>]*href="#([^"]+)"/g)) {
+			const target = ids.get(m[1]);
+			if (!target || target.tag === 'figure' || m.index! < body) continue;
+			const textBefore = html.slice(body, m.index).replace(/<[^>]+>/g, '').length;
+			if (textBefore < 1200 && target.at - m.index! > 30000) return 1;
+		}
+		return 0;
+	}, 6);
+
+// Plan step S11.2 (register CODE-10): SvelteKit short-circuits a click on a link whose hash equals
+// the hash it last saw, and the pager's page turns rewrite the hash behind its back, so a second
+// click on the same link, after a turn, did nothing: its target sits on a hidden page. Figure
+// links open the lightbox since S9.4; tables, notes and equations still turned the page.
+test.describe('In-content links and the page address (S11.2)', () => {
+	test.skip(!SECTION, 'No synced module section');
+	test.use({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+	const url = () => sectionUrl('1.2') ?? SECTION!;
+
+	/** Opens sections until one has a cross-page link; returns the link page's label, or skips */
+	async function openWithLink(page: Page, options: { firstPageOnly?: boolean } = {}): Promise<string> {
+		for (const url of options.firstPageOnly ? earlyLinkSections() : linkSections()) {
+			await openPaged(page, url);
+			const label = await markCrossPageLink(page, options);
+			if (label) return label;
+		}
+		test.skip(true, 'No section with a link to a table, note or equation on another page');
+		return '';
+	}
+
+	test('a second click on the same link, after turning back to it, shows its target again', async ({ page }) => {
+		const linkLabel = await openWithLink(page);
+		const link = page.locator('[data-test-link]');
+		const target = page.locator('[data-test-target]');
+		const id = await target.getAttribute('id');
+		const after = await link.evaluate(
+			(a) => !!(a.compareDocumentPosition(document.querySelector('[data-test-target]')!) & Node.DOCUMENT_POSITION_FOLLOWING)
+		);
+		await link.click();
+		await expect(target).toBeVisible({ timeout: 2000 });
+		expect(new URL(page.url()).hash).toBe(`#${id}`);
+		// Back to the link's page with the buttons, as a reader would
+		const button = pager(page).getByRole('button', { name: after ? 'Fyrri síða' : 'Næsta síða' });
+		for (let i = 0; i < PAGE_CAP && !(await link.isVisible()); i++) {
+			const text = (await pagerLabel(page).textContent())!.trim();
+			await button.click();
+			await expect(pagerLabel(page)).not.toHaveText(text);
+		}
+		await expect(pagerLabel(page)).toHaveText(linkLabel);
+		await link.click();
+		await expect(target, 'the second click').toBeVisible({ timeout: 2000 });
+		expect(new URL(page.url()).hash).toBe(`#${id}`);
+	});
+
+	test("Back after following a link returns to the link's page", async ({ page }) => {
+		const linkLabel = await openWithLink(page);
+		await page.locator('[data-test-link]').click();
+		await expect(page.locator('[data-test-target]')).toBeVisible({ timeout: 2000 });
+		await page.goBack();
+		await expect(pagerLabel(page)).toHaveText(linkLabel);
+		await expect(page.locator('[data-test-link]')).toBeVisible();
+	});
+
+	/** The current section's ring in the sidebar: its stroke-dashoffset (50.27 empty, 0 closed) */
+	const ringOffset = (page: Page) =>
+		page.locator('.section-ring-progress').first().evaluate((c) => Number(c.getAttribute('stroke-dashoffset')));
+
+	// UI-10: the 2 px bar and the ring measured window scroll, about 70 % on §1.2's first page
+	test('while a section pages the 2 px bar is hidden, and the ring follows the pages to a closed ring', async ({
+		page
+	}) => {
+		await seedSettings(page, { sidebarOpen: true });
+		await openPaged(page, url());
+		await expect(page.locator('.scroll-progress')).toBeAttached();
+		await expect(page.locator('.scroll-progress')).toBeHidden();
+		await expect(page.locator('.section-ring-progress').first()).toBeAttached();
+		// The pager's own index and total on each page: a late figure re-splits the section on the
+		// way (§1.2 went from 20 pages to 24 at 1280x800), so the share is the one at that page
+		const seen: { offset: number; index: number; total: number }[] = [];
+		await eachPage(page, url(), async () => {
+			seen.push({
+				offset: await ringOffset(page),
+				index: Number(await pager(page).getAttribute('data-page-index')),
+				total: Number(await pager(page).getAttribute('data-page-total'))
+			});
+		});
+		expect(seen.length).toBeGreaterThan(2);
+		for (const { offset, index, total } of seen) {
+			const expected = 50.27 - (50.27 * Math.round((100 * (index + 1)) / total)) / 100;
+			expect(offset, `page ${index + 1} of ${total}`).toBeCloseTo(expected, 2);
+		}
+		expect(seen.at(-1)!.offset, 'a closed ring on the last page').toBeCloseTo(0, 2);
+	});
+
+	test('scrolling, and on the glossary, the bar and the ring follow window scroll as before (a control)', async ({
+		page
+	}) => {
+		await seedSettings(page, { readingMode: 'scrolled', sidebarOpen: true });
+		await openScrolled(page, url());
+		const bar = page.locator('.scroll-progress');
+		await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight / 2, behavior: 'instant' }));
+		await expect.poll(() => bar.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(100);
+		await expect.poll(() => ringOffset(page)).toBeLessThan(50);
+		await page.goto(`/${BOOK}/ordabok/`);
+		await expect(bar).toBeAttached();
+		await page.waitForTimeout(1000);
+		await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight / 2, behavior: 'instant' }));
+		await expect.poll(() => bar.evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(100);
+	});
+
+	// CODE-16: '#sub-U-p-P' counted pages, and §1.2's first part is 11 pages at 390 px and 8 at 1280
+	test("an address written at 390x844 past a part's first page opens on that page's first block at 1280x800", async ({
+		browser
+	}) => {
+		const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: 'block' });
+		const small = await phone.newPage();
+		await seedSettings(small, PAGED);
+		await openPaged(small, url());
+		const next = pager(small).getByRole('button', { name: 'Næsta síða' });
+		// Five turns, within the first part when it is that long
+		for (let i = 0; i < 5; i++) {
+			const text = (await pagerLabel(small).textContent())!.trim();
+			const [, at, of] = text.match(/Síða (\d+) af (\d+)$/) ?? [];
+			if (!at || at === of) break;
+			await next.click();
+			await expect(pagerLabel(small)).not.toHaveText(text);
+		}
+		await small.waitForTimeout(300);
+		expect(await pagerLabel(small).textContent()).not.toMatch(/Síða 1 af/);
+		expect(await pageAddress(small), 'the address names a block').toBe('block');
+		const hash = new URL(small.url()).hash;
+		const first = await small.evaluate((h) => {
+			const el = document.getElementById(decodeURIComponent(h.slice(1)))!;
+			return el.getBoundingClientRect().top;
+		}, hash);
+		expect(first, "the block named is near the page's top").toBeLessThan(400);
+		await phone.close();
+
+		const desk = await browser.newContext({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
+		const wide = await desk.newPage();
+		await seedSettings(wide, PAGED);
+		await open(wide, url() + hash);
+		await expect(pager(wide)).toBeVisible({ timeout: 15000 });
+		await wide.waitForTimeout(500);
+		const shown = await wide.evaluate((h) => {
+			const el = document.getElementById(decodeURIComponent(h.slice(1)))!;
+			return !el.closest('[hidden]') && el.getBoundingClientRect().height > 0;
+		}, hash);
+		expect(shown, `${hash} is on the page opened at 1280x800`).toBe(true);
+		await desk.close();
+	});
+
+	test("Back from a link on the section's first page returns to the first page", async ({ page }) => {
+		const linkLabel = await openWithLink(page, { firstPageOnly: true });
+		expect(linkLabel).toMatch(/^Hluti 1 af \d+ · Síða 1 af \d+$/);
+		await page.locator('[data-test-link]').click();
+		await expect(page.locator('[data-test-target]')).toBeVisible({ timeout: 2000 });
+		await page.goBack();
+		await expect(pagerLabel(page)).toHaveText(linkLabel);
+		await expect(page.locator('[data-test-link]')).toBeVisible();
 	});
 });

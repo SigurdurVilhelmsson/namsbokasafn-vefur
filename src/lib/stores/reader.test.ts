@@ -234,6 +234,40 @@ describe('reader store', () => {
 		});
 	});
 
+	// Plan step S11.2 (UI-10): the pager drives the ring on every page turn, and S9.3 keeps the
+	// reader store unwritten while the pager works (CODE-07), so the live value is in memory only
+	describe('section progress (S11.2)', () => {
+		it('the scrollProgress store shows what setScrollProgress set, within 0-100', async () => {
+			const { scrollProgress } = await import('./reader');
+			reader.setScrollProgress(42);
+			expect(get(scrollProgress)).toBe(42);
+			reader.setScrollProgress(140);
+			expect(get(scrollProgress)).toBe(100);
+		});
+
+		it('setScrollProgress writes nothing to localStorage', () => {
+			reader.markAsRead('efnafraedi-2e', '01-inngangur', '1.1');
+			const before = localStorage.getItem('namsbokasafn:reader');
+			vi.mocked(localStorage.setItem).mockClear();
+			reader.setScrollProgress(55);
+			expect(localStorage.setItem).not.toHaveBeenCalled();
+			expect(localStorage.getItem('namsbokasafn:reader')).toBe(before);
+		});
+
+		it("another tab's write does not move this tab's progress", async () => {
+			const { scrollProgress } = await import('./reader');
+			reader.setScrollProgress(30);
+			const other = JSON.parse(localStorage.getItem('namsbokasafn:reader') ?? '{}');
+			window.dispatchEvent(
+				new StorageEvent('storage', {
+					key: 'namsbokasafn:reader',
+					newValue: JSON.stringify({ ...other, scrollProgress: 90 })
+				})
+			);
+			expect(get(scrollProgress)).toBe(30);
+		});
+	});
+
 	describe('reset', () => {
 		it('should reset all state to defaults', () => {
 			reader.markAsRead('efnafraedi-2e', '01-inngangur', '1.1');

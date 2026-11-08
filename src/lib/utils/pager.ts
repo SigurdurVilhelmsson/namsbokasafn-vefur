@@ -148,15 +148,32 @@ export function positionAt(index: number, pageCounts: readonly number[]): PagePo
 const PAGE_HASH = /^#sub-(\d+)(?:-p-(\d+))?$/;
 
 /**
- * The hash that addresses a page: '#sub-U' for a unit's first page, '#sub-U-p-P' past
- * it, and '' for the section's first page, where the component writes the bare URL
- * (pathname and search) instead. P depends on the window and the font size, so a
- * '-p-P' link can open another page on another device (CODE-16; plan step S11.2
- * writes the page's first block id instead, and keeps reading this form).
+ * The page-hash form: '#sub-U' for a unit's first page, '#sub-U-p-P' past it, and '' for
+ * the section's first page, where the component writes the bare URL (pathname and search)
+ * instead. P depends on the window and the font size, so a '-p-P' link can open another
+ * page on another device (CODE-16). Since S11.2 the pager writes it past a unit's first page
+ * only when that page's first block carries no usable id (pageHash), and it still reads it.
  */
 export function encodePageHash({ unit, page }: PagePosition): string {
 	if (unit === 0 && page === 0) return '';
 	return page === 0 ? `#sub-${unit}` : `#sub-${unit}-p-${page}`;
+}
+
+/** An id a page address can carry as written: nothing a fragment would percent-encode, and
+ *  never the page-hash form, which elementForHash does not read as an id */
+export const PAGE_ANCHOR_ID = /^(?!sub-\d)[A-Za-z][\w-]*$/;
+
+/**
+ * The hash the pager writes for a page (plan step S11.2, CODE-16). Past a unit's first page,
+ * the id of the page's first block, or of an element in it: it opens the page that holds that
+ * block under any window or font size, where '#sub-U-p-P' opened whatever page had that number
+ * (§1.2's first part is 11 pages at 390 px and 8 at 1280). '#sub-U-p-P' only when the block
+ * carries no usable id. A unit's first page keeps '#sub-U', and the section's first page the
+ * bare URL (''): both resolve the same everywhere.
+ */
+export function pageHash(position: PagePosition, anchorId: string | null): string {
+	if (position.page > 0 && anchorId && PAGE_ANCHOR_ID.test(anchorId)) return `#${anchorId}`;
+	return encodePageHash(position);
 }
 
 /** The page a page hash names, or null for any other hash ('', '#', an element id) */
@@ -184,6 +201,17 @@ export function resolvePageHash(hash: string, pageCounts: readonly number[]): nu
 	// For a unit the section lacks, the count is 0 and flatIndexOf gives null
 	const count = pageCounts[named.unit] ?? 0;
 	return flatIndexOf({ unit: named.unit, page: Math.min(named.page, count - 1) }, pageCounts);
+}
+
+/**
+ * How far through the section a page is, 0-100, for the sidebar's ring (plan step S11.2,
+ * UI-10): the page's share of the section's pages, counting the page on screen, so the last
+ * page is 100 and the ring closes there. Window scroll measured the short page shown instead
+ * (about 70 % on §1.2's first page).
+ */
+export function pageProgress(index: number, total: number): number {
+	if (total <= 0) return 0;
+	return Math.round((100 * (Math.max(0, Math.min(index, total - 1)) + 1)) / total);
 }
 
 // =============================================================================

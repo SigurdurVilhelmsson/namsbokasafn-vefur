@@ -253,8 +253,9 @@ test.describe('Honest data controls (S3.2)', () => {
 		await page.getByRole('button', { name: 'Eyða öllum gögnum á þessu tæki' }).click();
 		await expect.poll(async () => Object.keys(await storedKeys(reading))).not.toContain('namsbokasafn:reader');
 
-		// Scrolling makes the reading tab save its reader state again.
-		await reading.mouse.wheel(0, 1500);
+		// A bookmark makes the reading tab save its reader state again. Scrolling did, until S11.2
+		// kept the section's progress in memory.
+		await reading.getByRole('button', { name: 'Bæta við bókamerki' }).click();
 		await expect.poll(async () => (await storedKeys(reading))['namsbokasafn:reader'] ?? '').not.toBe('');
 		expect((await storedKeys(reading))['namsbokasafn:reader']).not.toContain(MARK);
 	});

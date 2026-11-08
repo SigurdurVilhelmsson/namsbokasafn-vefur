@@ -18,7 +18,7 @@
 	import BookAttribution from '$lib/components/BookAttribution.svelte';
 	import PdfDownloadButton from '$lib/components/PdfDownloadButton.svelte';
 	import PagedReaderControls from '$lib/components/PagedReaderControls.svelte';
-	import { PAGE_BUDGET, decodePageHash, firstInView, type PagerState } from '$lib/utils/pager';
+	import { PAGE_BUDGET, decodePageHash, firstInView, pageProgress, type PagerState } from '$lib/utils/pager';
 	import { buildUnits } from '$lib/utils/paginate';
 	import { readDetection } from '$lib/actions/readDetection';
 	import RecallPrompt from '$lib/components/RecallPrompt.svelte';
@@ -382,13 +382,17 @@
 		linkMode = null;
 		if (mode === 'scrolled') {
 			const anchor = pagerControls?.shownAnchor() ?? null;
+			// Read before the pager unmounts on the flush: since S11.2 a page's address can be a
+			// block's id, which only the pager knows it wrote
+			const pageAddress =
+				pagerControls?.isPageHash(window.location.hash) ?? decodePageHash(window.location.hash) !== null;
 			const before = anchor?.getBoundingClientRect().top;
 			keptAnchor = anchor;
 			switchedOff = true;
 			startAt = null;
 			showContinuePrompt = false;
 			settings.setReadingMode('scrolled');
-			if (decodePageHash(window.location.hash)) {
+			if (pageAddress) {
 				try {
 					history.replaceState(history.state, '', window.location.pathname + window.location.search);
 				} catch {
@@ -753,6 +757,7 @@
 					: null}
 				onreserve={(px) => (pagedReserve = px)}
 				ontallpage={() => analyticsStore.countEvent(data.bookSlug, 'pageTooTall')}
+				onposition={(p) => reader.setScrollProgress(pageProgress(p.index, p.total))}
 			/>
 		{/if}
 
