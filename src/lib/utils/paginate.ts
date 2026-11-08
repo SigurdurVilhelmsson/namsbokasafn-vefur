@@ -221,6 +221,15 @@ export function buildUnits(root: HTMLElement): ContentUnit[] {
 	return result;
 }
 
+/** What a unit is, for the label (S11.3, UI-29): a sub-section is a part; the intro (text with
+ *  no sub-section of its own) and the footnotes are not */
+export type UnitKind = 'intro' | 'part' | 'footnotes';
+
+export function unitKind(wrapper: HTMLElement | null): UnitKind {
+	if (!wrapper) return 'intro';
+	return wrapper.classList.contains('footnotes') ? 'footnotes' : 'part';
+}
+
 /**
  * A unit's own heading, for the spoken position (plan step S9.2, UI-05): the first h2–h6
  * among its sub-section's children, its spaces collapsed; null for an intro, which has no

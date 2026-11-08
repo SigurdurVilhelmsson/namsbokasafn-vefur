@@ -267,7 +267,7 @@ test.describe('Pre-paint: the stored theme and line width apply before the app r
 
 		await page.getByRole('button', { name: 'Stillingar', exact: true }).filter({ visible: true }).first().click();
 		const dialog = page.getByRole('dialog');
-		await dialog.getByRole('group', { name: 'Línubreidd', exact: true }).getByRole('button', { name: /Breitt/ }).click();
+		await dialog.getByRole('group', { name: 'Línubreidd', exact: true }).getByRole('radio', { name: /Breitt/ }).click();
 		await expect.poll(() => readingWidth(page)).toBe(await token(page, '--line-width-wide'));
 	});
 });
@@ -311,22 +311,24 @@ test.describe('Settings groups say which option is selected (UI-03)', () => {
 		});
 
 		for (const [group, { key, labels }] of Object.entries(SEGMENTS)) {
-			test(`at ${viewport.width} px: ${group} marks the stored value, with aria-pressed and a check mark`, async ({
+			// Since S11.3 the groups are radios (SegmentedControl): checked, not aria-pressed
+			test(`at ${viewport.width} px: ${group} checks the stored value's radio, with a check mark`, async ({
 				page
 			}) => {
 				test.skip(!SECTION, 'no published book is synced');
 				await page.setViewportSize(viewport);
 				const dialog = await openSettings(page);
-				const buttons = dialog.getByRole('group', { name: group, exact: true }).getByRole('button');
+				const fieldset = dialog.getByRole('group', { name: group, exact: true });
+				const radio = (text: string) => fieldset.getByRole('radio', { name: text, exact: true });
 				const label = (value: string) => labels[value as keyof typeof labels];
 
-				/** With nothing stored (S6.1: a fresh profile stores no setting), the default is in effect: one option is pressed */
+				/** With nothing stored (S6.1: a fresh profile stores no setting), the default is in effect: one radio is checked */
 				const pressed = async () => {
 					const values: string[] = [];
 					for (const [v, text] of Object.entries(labels)) {
-						if ((await buttons.filter({ hasText: text }).getAttribute('aria-pressed')) === 'true') values.push(v);
+						if (await radio(text).isChecked()) values.push(v);
 					}
-					expect(values, 'exactly one option is pressed').toHaveLength(1);
+					expect(values, 'exactly one option is checked').toHaveLength(1);
 					return values[0];
 				};
 				const inEffect = async () => (await stored(page, key)) ?? (await pressed());
@@ -334,16 +336,17 @@ test.describe('Settings groups say which option is selected (UI-03)', () => {
 				const check = async () => {
 					const value = await inEffect();
 					for (const [v, text] of Object.entries(labels)) {
-						const button = buttons.filter({ hasText: text });
-						await expect(button, `${text}`).toHaveAttribute('aria-pressed', v === value ? 'true' : 'false');
-						await expect(button.locator('svg'), `${text}'s check mark`).toHaveCount(v === value ? 1 : 0);
+						if (v === value) await expect(radio(text), `${text}`).toBeChecked();
+						else await expect(radio(text), `${text}`).not.toBeChecked();
+						const segment = fieldset.locator('label').filter({ hasText: text });
+						await expect(segment.locator('svg'), `${text}'s check mark`).toHaveCount(v === value ? 1 : 0);
 					}
 				};
 
 				await check();
 				const current = await inEffect();
 				const target = Object.keys(labels).find((v) => v !== current)!;
-				await buttons.filter({ hasText: label(target) }).click();
+				await radio(label(target)).click();
 				await expect.poll(() => stored(page, key)).toBe(target);
 				await check();
 			});

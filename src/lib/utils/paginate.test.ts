@@ -23,7 +23,8 @@ import {
 	pieceOf,
 	type PaginateItem,
 	type PageRange,
-	type Piece
+	type Piece,
+	unitKind
 } from './paginate';
 
 function block(height: number, opts: Partial<PaginateItem> = {}): PaginateItem {
@@ -795,5 +796,24 @@ describe('pieceOf', () => {
 	it('is -1 for a block that is not there', () => {
 		expect(pieceOf(whole, 5, 'whole')).toBe(-1);
 		expect(pieceOf(whole, -1, 'whole')).toBe(-1);
+	});
+});
+
+// S11.3 (UI-29): the label counts sub-sections only
+describe('unitKind', () => {
+	const section = (cls = '') => {
+		const el = document.createElement('section');
+		if (cls) el.className = cls;
+		return el;
+	};
+	it('reads a unit with no wrapper as the intro', () => {
+		expect(unitKind(null)).toBe('intro');
+	});
+	it('reads the footnotes section as footnotes', () => {
+		expect(unitKind(section('footnotes'))).toBe('footnotes');
+	});
+	it('reads any other sub-section as a part', () => {
+		expect(unitKind(section())).toBe('part');
+		expect(unitKind(section('learning-objectives'))).toBe('part');
 	});
 });

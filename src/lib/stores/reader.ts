@@ -31,6 +31,29 @@ export interface ScrollPosition {
 	scrollY: number; // Absolute scroll position in pixels
 	percentage: number; // 0-100 percentage of document scrolled
 	timestamp: string; // When this position was saved
+	/** Where a paged reader was, when they left paging (S11.3) */
+	page?: PagePlace;
+}
+
+/**
+ * Where a paged reader was (plan step S11.3, register CODE-07, D13): the part, and the page's
+ * first block by its id, or by its index in the part when it carries none. A page number would
+ * not do: the split depends on the window and the font size. It lives inside the section's
+ * ScrollPosition record, so #258's renameInReader carries it with the record.
+ */
+export interface PagePlace {
+	unit: number;
+	block: string | null;
+	item: number;
+}
+
+/** A stored place, or null when it has another shape: what localStorage holds is not trusted */
+export function readPagePlace(value: unknown): PagePlace | null {
+	if (!value || typeof value !== 'object') return null;
+	const { unit, block, item } = value as Record<string, unknown>;
+	const index = (n: unknown): n is number => Number.isInteger(n) && (n as number) >= 0;
+	if (!index(unit) || !index(item) || (block !== null && typeof block !== 'string')) return null;
+	return { unit, block, item };
 }
 
 export interface ScrollPositions {
@@ -233,7 +256,14 @@ function createReaderStore() {
 		},
 
 		// Save scroll position for a section (for reading position persistence)
-		saveScrollPosition: (bookSlug: string, chapterSlug: string, sectionSlug: string, scrollY: number, percentage: number) => {
+		saveScrollPosition: (
+			bookSlug: string,
+			chapterSlug: string,
+			sectionSlug: string,
+			scrollY: number,
+			percentage: number,
+			page?: PagePlace
+		) => {
 			const sectionId = createSectionKey(bookSlug, chapterSlug, sectionSlug);
 			// Only save if user has scrolled past the first 5% (to avoid saving initial positions)
 			if (percentage < 5) return;
@@ -245,7 +275,8 @@ function createReaderStore() {
 					[sectionId]: {
 						scrollY,
 						percentage,
-						timestamp: getCurrentTimestamp()
+						timestamp: getCurrentTimestamp(),
+						...(page ? { page } : {})
 					}
 				}
 			}));

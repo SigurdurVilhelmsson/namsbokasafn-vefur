@@ -268,6 +268,32 @@ describe('reader store', () => {
 		});
 	});
 
+	// Plan step S11.3 (CODE-07, D13): where a paged reader was, kept in the section's record
+	describe('the paged place (S11.3)', () => {
+		const page = { unit: 1, block: 'fs-idp42', item: 3 };
+
+		it('saves a place with the scroll position, and reads it back', () => {
+			reader.saveScrollPosition('efnafraedi-2e', '01', '1-2', 0, 40, page);
+			expect(reader.getScrollPosition('efnafraedi-2e', '01', '1-2')?.page).toEqual(page);
+		});
+
+		it('a later save with no place drops the old one', () => {
+			reader.saveScrollPosition('efnafraedi-2e', '01', '1-2', 0, 40, page);
+			reader.saveScrollPosition('efnafraedi-2e', '01', '1-2', 900, 55);
+			expect(reader.getScrollPosition('efnafraedi-2e', '01', '1-2')?.page).toBeUndefined();
+		});
+
+		it('reads a stored place only when it has the right shape', async () => {
+			const { readPagePlace } = await import('./reader');
+			expect(readPagePlace(page)).toEqual(page);
+			expect(readPagePlace({ unit: 0, block: null, item: 0 })).toEqual({ unit: 0, block: null, item: 0 });
+			for (const bad of [null, undefined, 'x', {}, { unit: -1, block: null, item: 0 }, { unit: 1.5, block: null, item: 0 },
+				{ unit: 1, block: 7, item: 0 }, { unit: 1, block: 'a', item: -2 }, { unit: '1', block: 'a', item: 0 }]) {
+				expect(readPagePlace(bad), JSON.stringify(bad)).toBeNull();
+			}
+		});
+	});
+
 	describe('reset', () => {
 		it('should reset all state to defaults', () => {
 			reader.markAsRead('efnafraedi-2e', '01-inngangur', '1.1');

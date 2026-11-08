@@ -31,7 +31,24 @@ const BOOK = publishedBook();
 /** The published book's first module section ('1-1-…'): the fixed fixture of tests 2-4 */
 const SECTION = BOOK ? firstModuleSection(BOOK) : null;
 /** The label on a section's last page: the last unit's last page */
-const LAST_PAGE = /^Hluti (\d+) af \1 · Síða (\d+) af \2$/;
+/** The first page's label: 'Síða 1 af N' after an intro or in a section of one part (S11.3), and
+ *  'Hluti 1 af M · Síða 1 af N' in a section that opens with a part */
+const FIRST_PAGE = /^(?:Hluti 1 af \d+ · )?Síða 1 af \d+$/;
+/** A label's grammar (S11.3): a part ('Hluti N af M'), the footnotes, or neither, then the page */
+const LABEL = /^(?:(?:Hluti (\d+) af (\d+)|(Neðanmálsgreinar)) · )?Síða (\d+) af (\d+)$/;
+
+/**
+ * Whether the pager shows the section's last page, by its own index and count on the nav (S11.2's
+ * diagnostics). The label cannot say since S11.3: the intro's last page reads 'Síða 2 af 2' too.
+ */
+async function onLastPage(page: Page): Promise<boolean> {
+	return page
+		.locator('nav.paged-nav')
+		.evaluate((nav) => Number((nav as HTMLElement).dataset.pageIndex) === Number((nav as HTMLElement).dataset.pageTotal) - 1);
+}
+
+/** A number the nav carries for tests (S9.5's and S11.2's diagnostics) */
+const navNumber = async (page: Page, name: string) => Number(await page.locator('nav.paged-nav').getAttribute(name));
 /** Ends a walk through a section's pages that never reaches the last one */
 const PAGE_CAP = 150;
 const samePath = (url: string | URL, path: string) =>
@@ -119,12 +136,6 @@ const pageAddress = (page: Page) =>
 	});
 const ADDRESSED = /^(unit|block|#sub-\d+-p-\d+)$/;
 
-/** The page count a label gives: units, and pages in the shown unit */
-function labelCounts(text: string): { units: number; pages: number } {
-	const m = text.match(/Hluti \d+ af (\d+) · Síða \d+ af (\d+)/)!;
-	return { units: Number(m[1]), pages: Number(m[2]) };
-}
-
 test.describe('Paged reading mode', () => {
 	test.skip(!SECTION, 'No synced module section');
 	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
@@ -154,7 +165,7 @@ test.describe('Paged reading mode', () => {
 		}
 		expect(samePath(page.url(), SECTION!), `reached ${page.url()}`).toBe(true);
 		await expect(nav).toBeVisible({ timeout: 15000 });
-		await expect(label).toHaveText(/^Hluti 1 af \d+ · Síða 1 af \d+$/);
+		await expect(label).toHaveText(FIRST_PAGE);
 		await nav.getByRole('button', { name: 'Næsta síða' }).click();
 		await expect.poll(() => pageAddress(page)).toMatch(ADDRESSED);
 
@@ -164,7 +175,7 @@ test.describe('Paged reading mode', () => {
 		await nextSection.click();
 		await expect(page).toHaveURL((u) => samePath(u, href) && !u.hash);
 		await expect(nav).toBeVisible({ timeout: 15000 });
-		await expect(label).toHaveText(/^Hluti 1 af \d+ · Síða 1 af \d+$/);
+		await expect(label).toHaveText(FIRST_PAGE);
 	});
 
 	test('Næsta advances and updates the position label and hash', async ({ page }) => {
@@ -174,8 +185,7 @@ test.describe('Paged reading mode', () => {
 
 		const label = nav.locator('.paged-nav-label');
 		const before = await label.textContent();
-		const { units, pages } = labelCounts(before!);
-		expect(units > 1 || pages > 1, `${SECTION} is one page: pick a longer fixture`).toBe(true);
+		expect(await navNumber(page, 'data-page-total'), `${SECTION} is one page: pick a longer fixture`).toBeGreaterThan(1);
 
 		const nextButton = nav.getByRole('button', { name: 'Næsta síða' });
 		await nextButton.click();
@@ -243,7 +253,7 @@ test.describe('Paged reading mode', () => {
 						`${url} ${text}: the controls end ${Math.round(used)}px below the content top; the budget allows ${limit}`
 					).toBeLessThanOrEqual(limit);
 				}
-				if (LAST_PAGE.test(text)) break;
+				if ((await onLastPage(page))) break;
 				await next.click();
 				await expect(label).not.toHaveText(text);
 				await page.waitForTimeout(300);
@@ -349,7 +359,7 @@ test.describe('Paged reading mode', () => {
 			await page.waitForTimeout(1200);
 			const after = (await label.textContent())!.trim();
 			if (after !== before) changes.push(`${before} -> ${after}`);
-			if (LAST_PAGE.test(after)) break;
+			if ((await onLastPage(page))) break;
 			await next.click();
 			await expect(label).not.toHaveText(after);
 		}
@@ -423,9 +433,7 @@ test.describe('Paged reading mode', () => {
 		await expect(region).toHaveCount(1);
 		/** The label's numbers, and the heading of the sub-section on screen (none in the intro) */
 		const says = async () => {
-			const [, unit, units, at, pages] = (await label.textContent())!
-				.trim()
-				.match(/^Hluti (\d+) af (\d+) · Síða (\d+) af (\d+)$/)!;
+			const [, part, parts, footnotes, at, pages] = (await label.textContent())!.trim().match(LABEL)!;
 			const heading = await page.evaluate((bodySelector) => {
 				const root = document.querySelector('article.cnx-module')!;
 				const shown = Array.from(root.children)
@@ -434,16 +442,26 @@ test.describe('Paged reading mode', () => {
 				const h = shown && Array.from(shown.children).find((el) => /^H[2-6]$/.test(el.tagName));
 				return h?.textContent?.replace(/\s+/g, ' ').trim() || null;
 			}, MODULE_BODY_SELECTOR);
-			const position = `Hluti ${unit} af ${units}`;
 			const page_ = `síða ${at} af ${pages}`;
-			await expect(region).toHaveText(heading ? `${position}: ${heading}, ${page_}` : `${position}, ${page_}`);
+			// As the label reads (S11.3): the footnotes named, a part numbered, the intro's page and a
+			// lone part's page with no 'Hluti'
+			const expected = footnotes
+				? `Neðanmálsgreinar, ${page_}`
+				: part
+					? heading
+						? `Hluti ${part} af ${parts}: ${heading}, ${page_}`
+						: `Hluti ${part} af ${parts}, ${page_}`
+					: heading
+						? `${heading}, ${page_}`
+						: `Síða ${at} af ${pages}`;
+			await expect(region).toHaveText(expected);
 		};
 
 		await says();
 		for (let i = 0; ; i++) {
 			expect(i, `more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
 			const text = (await label.textContent())!.trim();
-			if (LAST_PAGE.test(text)) break;
+			if ((await onLastPage(page))) break;
 			await next.click();
 			await expect(label).not.toHaveText(text);
 			await says();
@@ -540,7 +558,7 @@ test.describe('Paged reading mode', () => {
 			const { end, viewBottom } = await pageEnd(page);
 			if (end > viewBottom + KEY_SCROLL.tolerance) break;
 			const text = (await label.textContent())!.trim();
-			expect(LAST_PAGE.test(text), `${url}: no page taller than the window`).toBe(false);
+			expect((await onLastPage(page)), `${url}: no page taller than the window`).toBe(false);
 			await next.click();
 			await expect(label).not.toHaveText(text);
 			await page.waitForTimeout(300);
@@ -635,18 +653,16 @@ test.describe('Paged reading mode', () => {
 		const nav = page.getByRole('navigation', { name: 'Síðuflakk' });
 		await expect(nav).toBeVisible({ timeout: 15000 });
 		const label = nav.locator('.paged-nav-label');
-		const { units } = labelCounts((await label.textContent())!);
+		const units = await navNumber(page, 'data-page-units');
 		expect(units, `${urls[0]} has one part: pick a fixture with sub-sections`).toBeGreaterThanOrEqual(2);
 
 		// Arrive by a link to the last part, skipping every part before it
 		await page.evaluate((u) => (location.hash = `#sub-${u - 1}`), units);
-		await expect(label).toHaveText(new RegExp(`^Hluti ${units} af ${units}`));
+		await expect.poll(() => navNumber(page, 'data-page-unit')).toBe(units - 1);
 		const next = nav.getByRole('button', { name: 'Næsta síða' });
 
-		for (let i = 0; i < 200; i++) {
+		for (let i = 0; i < 200 && !(await onLastPage(page)); i++) {
 			const text = (await label.textContent())!.trim();
-			const m = text.match(/Hluti (\d+) af (\d+) · Síða (\d+) af (\d+)/)!;
-			if (m[1] === m[2] && m[3] === m[4]) break;
 			await next.click();
 			await expect(label).not.toHaveText(text);
 		}
@@ -746,7 +762,7 @@ test.describe('Paged reading mode', () => {
 		await expect(nav).toBeVisible({ timeout: 15000 });
 		const label = nav.locator('.paged-nav-label');
 		const next = nav.getByRole('button', { name: 'Næsta síða' });
-		for (let i = 0; i < PAGE_CAP && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+		for (let i = 0; i < PAGE_CAP && !(await onLastPage(page)); i++) {
 			const text = (await label.textContent())!.trim();
 			await next.click();
 			await expect(label).not.toHaveText(text);
@@ -763,10 +779,10 @@ test.describe('Paged reading mode', () => {
 		const path = new URL(page.url()).pathname;
 
 		await page.keyboard.press('ArrowLeft');
-		await expect(label).not.toHaveText(LAST_PAGE);
+		await expect.poll(() => onLastPage(page)).toBe(false);
 		expect(new URL(page.url()).pathname).toBe(path);
 		await page.keyboard.press('ArrowRight');
-		await expect(label).toHaveText(LAST_PAGE);
+		await expect.poll(() => onLastPage(page)).toBe(true);
 		expect(new URL(page.url()).pathname).toBe(path);
 
 		const nextHref = (await page.locator('a.nav-btn-next').getAttribute('href'))!;
@@ -781,7 +797,7 @@ test.describe('Paged reading mode', () => {
 		await expect(nav).toBeVisible({ timeout: 15000 });
 		const label = nav.locator('.paged-nav-label');
 		const next = nav.getByRole('button', { name: 'Næsta síða' });
-		for (let i = 0; i < PAGE_CAP && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+		for (let i = 0; i < PAGE_CAP && !(await onLastPage(page)); i++) {
 			const text = (await label.textContent())!.trim();
 			await next.click();
 			await expect(label).not.toHaveText(text);
@@ -797,7 +813,7 @@ test.describe('Paged reading mode', () => {
 		// Since S9.3 the prompt takes the page's place and re-splits wait behind it; 'Fyrri'
 		// shows the last page again, with the prompt still open, and re-splits run
 		await nav.getByRole('button', { name: 'Fyrri síða' }).click();
-		await expect(label).toHaveText(LAST_PAGE);
+		await expect.poll(() => onLastPage(page)).toBe(true);
 
 		// The next re-split fails: measuring a block of the section throws
 		const failed = page.waitForEvent('console', (m) => m.text().startsWith('Paged mode recompute failed'));
@@ -832,10 +848,12 @@ test.describe('Paged reading mode', () => {
 
 		await page.goto(`${urls[0]}#sub-1-p-99`);
 		const label = page.getByRole('navigation', { name: 'Síðuflakk' }).locator('.paged-nav-label');
-		await expect(label).toHaveText(/^Hluti 2 af \d+ · Síða (\d+) af \1$/, { timeout: 15000 });
+		// The second unit (since S11.3 its label counts parts only, so the unit is on the nav)
+		await expect(label).toHaveText(/Síða (\d+) af \1$/, { timeout: 15000 });
+		expect(await navNumber(page, 'data-page-unit')).toBe(1);
 		// The last page must differ from the first, and the address must name it: since S11.2 by
 		// its first block's id, or exactly by number when that block has none
-		const pages = labelCounts((await label.textContent())!).pages;
+		const pages = Number((await label.textContent())!.trim().match(LABEL)![5]);
 		expect(pages, `${urls[0]}: unit 2 has one page; pick another fixture`).toBeGreaterThan(1);
 		await expect.poll(() => pageAddress(page)).toMatch(new RegExp(`^(block|#sub-1-p-${pages - 1})$`));
 	});
@@ -877,7 +895,7 @@ async function open(page: Page, url: string) {
 async function openPaged(page: Page, url: string) {
 	await open(page, url);
 	await expect(pager(page)).toBeVisible({ timeout: 15000 });
-	await expect(pagerLabel(page)).toHaveText(/^Hluti 1 af \d+ · Síða 1 af \d+$/);
+	await expect(pagerLabel(page)).toHaveText(FIRST_PAGE);
 	await expect(hiddenBlocks(page).first()).toBeAttached();
 	// The pager adds its key listener just after its controls render
 	await page.waitForTimeout(300);
@@ -942,7 +960,7 @@ test.describe('The pager through a ?lestur= link, with no seed (S8.2)', () => {
 
 		const label = pagerLabel(page);
 		const next = page.getByRole('button', { name: 'Næsta síða' });
-		for (let i = 0; i < 100 && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+		for (let i = 0; i < 100 && !(await onLastPage(page)); i++) {
 			const text = (await label.textContent())!.trim();
 			await next.click();
 			await expect(label).not.toHaveText(text);
@@ -954,7 +972,7 @@ test.describe('The pager through a ?lestur= link, with no seed (S8.2)', () => {
 		await expect(recall(page)).toBeVisible();
 		await expect(page.getByRole('button', { name: 'Merkja kafla sem lesinn' })).toHaveCount(0);
 		// It opened on the last page: the last unit's last page, where the button is spent
-		await expect(label).toHaveText(/^Hluti (\d+) af \1 · Síða (\d+) af \2$/);
+		await expect.poll(() => onLastPage(page)).toBe(true);
 		await expect(finish).toBeDisabled();
 	});
 
@@ -1026,7 +1044,7 @@ test.describe('The pager through a ?lestur= link, with no seed (S8.2)', () => {
 		await expect(hiddenBlocks(page)).toHaveCount(0);
 		// The pager spoke on the section before; gone, it took its words back from the
 		// app's one live region (S8.3, UI-01), which outlives it
-		await expect(page.locator('[aria-live="polite"][aria-atomic="true"]')).not.toHaveText(/^Hluti/);
+		await expect(page.locator('[aria-live="polite"][aria-atomic="true"]')).not.toHaveText(/síða \d+ af/i);
 		expect(await storedRaw(page)).toBe(FRESH_PROFILE);
 	});
 });
@@ -1093,7 +1111,7 @@ test.describe('Swipes in paged mode (S9.1)', () => {
 			middle = await markSidewaysBox(page);
 			if (middle) break;
 			const text = (await label.textContent())!.trim();
-			expect(LAST_PAGE.test(text), `${url}: no page with a box that scrolls sideways in view`).toBe(false);
+			expect((await onLastPage(page)), `${url}: no page with a box that scrolls sideways in view`).toBe(false);
 			await next.click();
 			await expect(label).not.toHaveText(text);
 			await page.waitForTimeout(300);
@@ -1195,7 +1213,7 @@ async function eachPage(page: Page, url: string, check: (text: string) => Promis
 		expect(i, `${url}: more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
 		const text = (await label.textContent())!.trim();
 		await check(text);
-		if (LAST_PAGE.test(text)) break;
+		if ((await onLastPage(page))) break;
 		await next.click();
 		await expect(label).not.toHaveText(text);
 		await page.waitForTimeout(300);
@@ -1315,7 +1333,7 @@ test.describe('The title and focus survive page turns (S9.2)', () => {
 		for (let i = 0; ; i++) {
 			expect(i, `${url}: more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
 			const text = (await label.textContent())!.trim();
-			if (LAST_PAGE.test(text)) break;
+			if ((await onLastPage(page))) break;
 			await page.keyboard.press('ArrowRight');
 			await expect(label, `${text}: → did not turn the page`).not.toHaveText(text);
 			const at = await focusAt(page);
@@ -1388,7 +1406,10 @@ test.describe('The way out and the section end (S9.3)', () => {
 	// scrolls, so the reader store rewrote itself on each one (the race that flaked
 	// data-erase.spec.ts), and leaving saved a scroll position whose percentage measured the
 	// page shown, not progress, for a later 'Haltu áfram að lesa'.
-	test('page turns write nothing to the reader store, and leaving saves no scroll position', async ({ page }) => {
+	// Since S11.3 (D13) leaving saves the place, a part and a block, not the scroll position
+	test('page turns write nothing to the reader store, and leaving saves the place, not a scroll position', async ({
+		page
+	}) => {
 		test.setTimeout(120000);
 		await openPaged(page, SECTION!);
 		const label = pagerLabel(page);
@@ -1396,7 +1417,7 @@ test.describe('The way out and the section end (S9.3)', () => {
 		const before = await readerSaved(page);
 		// A reader scrolls a page, then turns: both scroll the window (a turn to where the
 		// content already is would fire no scroll event)
-		for (let i = 0; i < 2 && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+		for (let i = 0; i < 2 && !(await onLastPage(page)); i++) {
 			const text = (await label.textContent())!.trim();
 			await page.mouse.wheel(0, 150);
 			await page.waitForTimeout(200);
@@ -1410,17 +1431,19 @@ test.describe('The way out and the section end (S9.3)', () => {
 		await page.locator('a.nav-btn-next').click();
 		await expect(page).not.toHaveURL((u) => samePath(u, SECTION!));
 		const saved = JSON.parse((await readerSaved(page)) ?? '{}');
-		expect(
-			Object.keys(saved.scrollPositions ?? {}).filter((k) => k.includes(slug)),
-			'a scroll position saved for the paged section'
-		).toEqual([]);
+		const records = Object.entries(saved.scrollPositions ?? {}).filter(([k]) => k.includes(slug));
+		expect(records, 'one record for the paged section').toHaveLength(1);
+		const place = (records[0][1] as { page?: { unit: unknown; block: unknown; item: unknown } }).page;
+		expect(typeof place?.unit, "the place's part").toBe('number');
+		expect(typeof place?.item, "the place's block index").toBe('number');
+		expect(place?.block === null || typeof place?.block === 'string', "the place's block id, or none").toBe(true);
 	});
 
 	/** Walks to the last page with 'Næsta' */
 	async function toLastPage(page: Page, url: string) {
 		const label = pagerLabel(page);
 		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
-		for (let i = 0; !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+		for (let i = 0; !(await onLastPage(page)); i++) {
 			expect(i, `${url}: more than ${PAGE_CAP} pages`).toBeLessThan(PAGE_CAP);
 			const text = (await label.textContent())!.trim();
 			await next.click();
@@ -1520,7 +1543,7 @@ test.describe('The way out and the section end (S9.3)', () => {
 	async function turn(page: Page, n: number) {
 		const label = pagerLabel(page);
 		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
-		for (let i = 0; i < n && !LAST_PAGE.test((await label.textContent())!.trim()); i++) {
+		for (let i = 0; i < n && !(await onLastPage(page)); i++) {
 			const text = (await label.textContent())!.trim();
 			await next.click();
 			await expect(label).not.toHaveText(text);
@@ -1550,8 +1573,9 @@ test.describe('The way out and the section end (S9.3)', () => {
 	 *  control already reached would */
 	const press = (button: ReturnType<Page['getByRole']>) => button.evaluate((el) => (el as HTMLElement).click());
 
-	// UI-05, PED-01: the way out comes before page 1 in the Tab order, ahead of the objectives
-	test("Tab reaches 'Samfellt skrun' before any objective button, and the switch leads the reading region", async ({
+	// UI-05, PED-01: the way out comes before page 1 in the Tab order, ahead of the objectives.
+	// Since S11.3 (UI-03) it is a radio group: Tab stops once in it, on the mode that is on
+	test('Tab reaches the switch before any objective button, and the switch leads the reading region', async ({
 		page
 	}) => {
 		test.setTimeout(120000);
@@ -1562,7 +1586,7 @@ test.describe('The way out and the section end (S9.3)', () => {
 			const control = region.querySelector<HTMLElement>(
 				'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
 			);
-			return control?.textContent?.trim() ?? null;
+			return (control?.closest('label') ?? control)?.textContent?.trim() ?? null;
 		});
 		expect(first, 'the reading region opens with the switch').toBe('Síðuskipt');
 
@@ -1572,11 +1596,13 @@ test.describe('The way out and the section end (S9.3)', () => {
 			await page.keyboard.press('Tab');
 			reached = await page.evaluate(() => {
 				const a = document.activeElement as HTMLElement | null;
+				if (a?.matches('input[type="radio"]')) return `radio:${a.closest('fieldset')?.querySelector('legend')?.textContent}`;
 				return a?.getAttribute('aria-label') || a?.textContent?.trim() || '';
 			});
-			if (reached === 'Samfellt skrun' || /^Merkja markmið/.test(reached)) break;
+			if (reached === 'radio:Lestrarstilling' || /^Merkja markmið/.test(reached)) break;
 		}
-		expect(reached).toBe('Samfellt skrun');
+		expect(reached).toBe('radio:Lestrarstilling');
+		await expect(modeGroup(page).getByRole('radio', { name: 'Síðuskipt' })).toBeFocused();
 	});
 
 	// CODE-07, PED-01: the place survives the switch, and the choice is stored
@@ -1593,15 +1619,15 @@ test.describe('The way out and the section end (S9.3)', () => {
 			await turn(page, 2);
 			const before = await markFirstShown(page);
 
-			await press(modeGroup(page).getByRole('button', { name: 'Samfellt skrun' }));
+			await press(modeGroup(page).getByRole('radio', { name: 'Samfellt skrun' }));
 			await expect(pager(page)).toHaveCount(0);
 			await page.waitForTimeout(300);
 			await expect(page.locator(HIDDEN_BLOCKS)).toHaveCount(0);
 			const after = await page.locator('[data-test-anchor]').evaluate((el) => el.getBoundingClientRect().top);
 			expect(Math.abs(after - before), `the block moved from ${Math.round(before)} to ${Math.round(after)}px`).toBeLessThanOrEqual(100);
 			expect((await stored(page))?.readingMode).toBe('scrolled');
-			await expect(modeGroup(page).getByRole('button', { name: 'Samfellt skrun' })).toHaveAttribute('aria-pressed', 'true');
-			await expect(modeGroup(page).getByRole('button', { name: 'Síðuskipt' })).toHaveAttribute('aria-pressed', 'false');
+			await expect(modeGroup(page).getByRole('radio', { name: 'Samfellt skrun' })).toBeChecked();
+			await expect(modeGroup(page).getByRole('radio', { name: 'Síðuskipt' })).not.toBeChecked();
 		});
 	}
 
@@ -1611,11 +1637,11 @@ test.describe('The way out and the section end (S9.3)', () => {
 		await openPaged(page, SECTION!);
 		await turn(page, 2);
 		const shown = (await pagerLabel(page).textContent())!.trim();
-		await press(modeGroup(page).getByRole('button', { name: 'Samfellt skrun' }));
+		await press(modeGroup(page).getByRole('radio', { name: 'Samfellt skrun' }));
 		await expect(pager(page)).toHaveCount(0);
 		await page.waitForTimeout(300);
 
-		await press(modeGroup(page).getByRole('button', { name: 'Síðuskipt' }));
+		await press(modeGroup(page).getByRole('radio', { name: 'Síðuskipt' }));
 		await expect(pagerLabel(page)).toHaveText(shown, { timeout: 15000 });
 		expect((await stored(page))?.readingMode).toBe('paged');
 		const navTop = await pager(page).evaluate((el) => el.getBoundingClientRect().top);
@@ -1628,9 +1654,9 @@ test.describe('The way out and the section end (S9.3)', () => {
 		await turn(page, 1);
 		await pager(page).getByRole('button', { name: 'Samfellt skrun' }).click();
 		await expect(pager(page)).toHaveCount(0);
-		const toolbar = modeGroup(page).getByRole('button', { name: 'Samfellt skrun' });
+		const toolbar = modeGroup(page).getByRole('radio', { name: 'Samfellt skrun' });
 		await expect(toolbar).toBeFocused();
-		await expect(toolbar).toHaveAttribute('aria-pressed', 'true');
+		await expect(toolbar).toBeChecked();
 		await expect(page.locator(HIDDEN_BLOCKS)).toHaveCount(0);
 	});
 
@@ -1806,7 +1832,7 @@ test.describe('The MT notice, figures and images (S9.4)', () => {
 			const next = pager(page).getByRole('button', { name: 'Næsta síða' });
 			for (let i = 0; !(await markFigureLink(page)); i++) {
 				const text = (await label.textContent())!.trim();
-				expect(LAST_PAGE.test(text), `${SECTION}: no page with a link to a figure`).toBe(false);
+				expect((await onLastPage(page)), `${SECTION}: no page with a link to a figure`).toBe(false);
 				expect(i).toBeLessThan(PAGE_CAP);
 				await next.click();
 				await expect(label).not.toHaveText(text);
@@ -1868,7 +1894,7 @@ test.describe('The MT notice, figures and images (S9.4)', () => {
 			if (intro.length) out.push(images(intro));
 			return out;
 		}, MODULE_BODY_SELECTOR);
-		await expect(pagerLabel(page)).toHaveText(/^Hluti 1 af /);
+		await expect(pagerLabel(page)).toHaveText(FIRST_PAGE);
 		const total = units.flat().length;
 		test.skip(units.length < 3 || units.slice(2).flat().length === 0, `${url}: no images past the second part`);
 
@@ -1968,9 +1994,9 @@ test.describe('The chrome, the budget and call 1 (S9.5)', () => {
 		const book = SECTION!.split('/')[1];
 		await openPaged(page, SECTION!);
 		const group = page.getByRole('group', { name: 'Lestrarstilling' });
-		await group.getByRole('button', { name: 'Samfellt skrun' }).evaluate((el) => (el as HTMLElement).click());
+		await group.getByRole('radio', { name: 'Samfellt skrun' }).evaluate((el) => (el as HTMLElement).click());
 		await expect(pager(page)).toHaveCount(0);
-		await group.getByRole('button', { name: 'Síðuskipt' }).evaluate((el) => (el as HTMLElement).click());
+		await group.getByRole('radio', { name: 'Síðuskipt' }).evaluate((el) => (el as HTMLElement).click());
 		await expect(pager(page)).toBeVisible({ timeout: 15000 });
 		await expect.poll(() => storedCounts(page, book)).toMatchObject({ switchToScrolled: 1, switchToPaged: 1 });
 	});
@@ -2187,7 +2213,7 @@ test.describe('Print and find-in-page (S11.1)', () => {
 
 	test("find-in-page's match on the last page turns to that page", async ({ page }) => {
 		await openPaged(page, url());
-		const before = (await pagerLabel(page).textContent())!.trim();
+		const beforeLast = await onLastPage(page);
 		const revealed = await page.evaluate(() => {
 			const ps = document.querySelectorAll<HTMLElement>('article.cnx-module p');
 			const match = ps[ps.length - 1];
@@ -2203,8 +2229,8 @@ test.describe('Print and find-in-page (S11.1)', () => {
 			return fired;
 		});
 		expect(revealed.length, 'the last paragraph starts on a hidden page').toBeGreaterThan(0);
-		await expect(pagerLabel(page)).toHaveText(LAST_PAGE);
-		expect(before).not.toMatch(LAST_PAGE);
+		await expect.poll(() => onLastPage(page)).toBe(true);
+		expect(beforeLast).toBe(false);
 		const match = page.locator('[data-test-match]');
 		await expect(match).toBeVisible();
 		expect(await match.evaluate((el) => !!el.closest('[hidden]'))).toBe(false);
@@ -2234,7 +2260,7 @@ async function markCrossPageLink(page: Page, { firstPageOnly = false } = {}): Pr
 		});
 		const text = (await pagerLabel(page).textContent())!.trim();
 		if (found) return text;
-		if (firstPageOnly || LAST_PAGE.test(text) || !(await next.isVisible())) return null;
+		if (firstPageOnly || (await onLastPage(page)) || !(await next.isVisible())) return null;
 		await next.click();
 		await expect(pagerLabel(page)).not.toHaveText(text);
 		await page.waitForTimeout(200);
@@ -2340,13 +2366,21 @@ test.describe('In-content links and the page address (S11.2)', () => {
 		await expect(page.locator('.section-ring-progress').first()).toBeAttached();
 		// The pager's own index and total on each page: a late figure re-splits the section on the
 		// way (§1.2 went from 20 pages to 24 at 1280x800), so the share is the one at that page
+		// Read in one go: a re-split between three reads let the ring and the nav disagree (20 pages
+		// for one, 24 for the other); Svelte updates both in the same flush
 		const seen: { offset: number; index: number; total: number }[] = [];
 		await eachPage(page, url(), async () => {
-			seen.push({
-				offset: await ringOffset(page),
-				index: Number(await pager(page).getAttribute('data-page-index')),
-				total: Number(await pager(page).getAttribute('data-page-total'))
-			});
+			seen.push(
+				await page.evaluate(() => {
+					const nav = document.querySelector<HTMLElement>('nav.paged-nav')!;
+					const ring = document.querySelector('.section-ring-progress')!;
+					return {
+						offset: Number(ring.getAttribute('stroke-dashoffset')),
+						index: Number(nav.dataset.pageIndex),
+						total: Number(nav.dataset.pageTotal)
+					};
+				})
+			);
 		});
 		expect(seen.length).toBeGreaterThan(2);
 		for (const { offset, index, total } of seen) {
@@ -2416,11 +2450,134 @@ test.describe('In-content links and the page address (S11.2)', () => {
 
 	test("Back from a link on the section's first page returns to the first page", async ({ page }) => {
 		const linkLabel = await openWithLink(page, { firstPageOnly: true });
-		expect(linkLabel).toMatch(/^Hluti 1 af \d+ · Síða 1 af \d+$/);
+		expect(linkLabel).toMatch(FIRST_PAGE);
 		await page.locator('[data-test-link]').click();
 		await expect(page.locator('[data-test-target]')).toBeVisible({ timeout: 2000 });
 		await page.goBack();
 		await expect(pagerLabel(page)).toHaveText(linkLabel);
 		await expect(page.locator('[data-test-link]')).toBeVisible();
+	});
+});
+
+/** Reader URLs of sections by the shape of their units: 'I' an intro alone, 'F' with footnotes last */
+const sectionsShaped = (shape: 'one-part' | 'footnotes'): string[] =>
+	sectionsScored((html) => {
+		const body = html.slice(html.indexOf('<main'));
+		const sections = (body.match(/<section\b/g) ?? []).length;
+		const footnotes = /<section[^>]*class="[^"]*footnotes/.test(html);
+		return shape === 'one-part' ? (sections === 0 && !footnotes ? 1 : 0) : footnotes ? 1 : 0;
+	}, 3);
+
+// Plan step S11.3 (CODE-07, UI-29, UI-03) under D13's ruling (a) and [USER]'s choices of
+// 2026-11-08: a return visit offers the saved page in a card above page 1; the label counts parts
+// only, names the footnotes and says no 'Hluti' in a section of one part; the reading-mode pair is
+// a radio group.
+test.describe('The place, the label and the radios (S11.3)', () => {
+	test.skip(!SECTION, 'No synced module section');
+	test.use({ viewport: { width: 1280, height: 800 }, serviceWorkers: 'block' });
+	test.beforeEach(async ({ page }) => seedSettings(page, PAGED));
+	const url = () => sectionUrl('1.2') ?? SECTION!;
+	const card = (page: Page) => page.locator('[data-paged-section] [role="status"]').filter({ hasText: 'Haltu áfram að lesa' });
+
+	/** Pages on, leaves for the next section, and comes back with no address: the label left on */
+	async function leaveAndReturn(page: Page, turns: number): Promise<{ label: string; block: string }> {
+		await openPaged(page, url());
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+		for (let i = 0; i < turns && !(await onLastPage(page)); i++) {
+			const text = (await pagerLabel(page).textContent())!.trim();
+			await next.click();
+			await expect(pagerLabel(page)).not.toHaveText(text);
+		}
+		await page.waitForTimeout(300);
+		const label = (await pagerLabel(page).textContent())!.trim();
+		const block = decodeURIComponent(new URL(page.url()).hash.slice(1));
+		await page.locator('a.nav-btn-next').click();
+		await expect(page).not.toHaveURL((u) => samePath(u, url()));
+		await open(page, url());
+		await expect(pager(page)).toBeVisible({ timeout: 15000 });
+		return { label, block };
+	}
+
+	test("a return visit offers the page left on, and 'Halda áfram' opens it", async ({ page }) => {
+		test.setTimeout(120000);
+		const left = await leaveAndReturn(page, 6);
+		await expect(card(page)).toBeVisible();
+		await expect(card(page)).toContainText(`Þú varst síðast hér: ${left.label}`);
+		await expect(pagerLabel(page)).toHaveText(FIRST_PAGE);
+		await card(page).getByRole('button', { name: 'Halda áfram' }).click();
+		await expect(pagerLabel(page)).toHaveText(left.label);
+		await expect(card(page)).toHaveCount(0);
+		if (left.block && !left.block.startsWith('sub-')) await expect(page.locator(`[id="${left.block}"]`)).toBeVisible();
+		await expect.poll(() => page.evaluate(() => document.activeElement?.matches('article.cnx-module') ?? false)).toBe(true);
+	});
+
+	test("'Byrja á byrjun' stays on page 1 and forgets the place", async ({ page }) => {
+		test.setTimeout(120000);
+		await leaveAndReturn(page, 6);
+		await expect(card(page)).toBeVisible();
+		await card(page).getByRole('button', { name: 'Byrja á byrjun' }).click();
+		await expect(card(page)).toHaveCount(0);
+		await expect(pagerLabel(page)).toHaveText(FIRST_PAGE);
+		const slug = url().split('/').filter(Boolean).at(-1)!;
+		const saved = JSON.parse((await readerSaved(page)) ?? '{}');
+		expect(Object.keys(saved.scrollPositions ?? {}).filter((k) => k.includes(slug))).toEqual([]);
+	});
+
+	test('page 1 fits with the card above it, and again once it goes', async ({ page }) => {
+		test.setTimeout(120000);
+		await leaveAndReturn(page, 6);
+		await expect(card(page)).toBeVisible();
+		await page.waitForTimeout(600);
+		const withCard = await pageEnd(page);
+		expect(withCard.end, 'page 1 ends above the bar, with the card').toBeLessThanOrEqual(withCard.viewBottom + 2);
+		await card(page).getByRole('button', { name: 'Byrja á byrjun' }).click();
+		await page.waitForTimeout(600);
+		const without = await pageEnd(page);
+		expect(without.end, 'page 1 ends above the bar, without it').toBeLessThanOrEqual(without.viewBottom + 2);
+	});
+
+	test('an arrival with an address is not offered the saved place (a control)', async ({ page }) => {
+		test.setTimeout(120000);
+		const left = await leaveAndReturn(page, 6);
+		await expect(card(page)).toBeVisible();
+		await open(page, `${url()}#sub-1`);
+		await expect(pager(page)).toBeVisible({ timeout: 15000 });
+		await page.waitForTimeout(800);
+		await expect(card(page)).toHaveCount(0);
+		expect(left.label).not.toBe('');
+	});
+
+	test("a section of one part says no 'Hluti' on any page", async ({ page }) => {
+		const urls = sectionsShaped('one-part');
+		test.skip(urls.length === 0, 'No section of one part');
+		await openPaged(page, urls[0]);
+		await eachPage(page, urls[0], async (text) => {
+			expect(text, urls[0]).toMatch(/^Síða \d+ af \d+$/);
+		});
+	});
+
+	test('the footnotes are named, the intro is no part, and every label reads as the grammar says', async ({ page }) => {
+		const urls = sectionsShaped('footnotes');
+		test.skip(urls.length === 0, 'No section with footnotes');
+		await openPaged(page, urls[0]);
+		const labels: string[] = [];
+		await eachPage(page, urls[0], async (text) => {
+			expect(text, urls[0]).toMatch(LABEL);
+			labels.push(text);
+		});
+		expect(labels.at(-1), 'the last page is the footnotes').toMatch(/^Neðanmálsgreinar · Síða \d+ af \d+$/);
+		const parts = new Set(labels.map((l) => l.match(LABEL)![2]).filter(Boolean));
+		expect(parts.size, 'one count of parts').toBeLessThanOrEqual(1);
+	});
+
+	test("the 'Lestrarstilling' pair is a radio group whose checked radio is the mode in effect", async ({ page }) => {
+		await openPaged(page, url());
+		const group = page.getByRole('group', { name: 'Lestrarstilling' });
+		await expect(group.getByRole('radio')).toHaveCount(2);
+		await expect(group.getByRole('radio', { name: 'Síðuskipt' })).toBeChecked();
+		await group.getByRole('radio', { name: 'Samfellt skrun' }).check();
+		await expect(pager(page)).toHaveCount(0);
+		await expect(group.getByRole('radio', { name: 'Samfellt skrun' })).toBeChecked();
+		expect((await stored(page)).readingMode).toBe('scrolled');
 	});
 });

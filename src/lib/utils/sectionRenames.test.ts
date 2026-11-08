@@ -99,6 +99,19 @@ describe('renameInReader', () => {
 		expect(s.scrollPositions).toEqual({ [NEW]: { scrollY: 900, percentage: 50, timestamp: '2026-10-05T00:00:00.000Z' } });
 	});
 
+	// S11.3 (CODE-07): a paged reader's place lives inside the scroll-position record, so a
+	// rename carries it with the record
+	it("carries a paged reader's place with its scroll position", () => {
+		const page = { unit: 2, block: 'fs-idp123', item: 4 };
+		const s = renameInReader(
+			{ ...base, scrollPositions: { [OLD]: { scrollY: 0, percentage: 40, timestamp: '2026-11-08T00:00:00.000Z', page } } },
+			R
+		);
+		expect(s.scrollPositions).toEqual({
+			[NEW]: { scrollY: 0, percentage: 40, timestamp: '2026-11-08T00:00:00.000Z', page }
+		});
+	});
+
 	it('renames a bookmark and drops the duplicate', () => {
 		const s = renameInReader({ ...base, bookmarks: [OLD, `${B}/01/x`, NEW] }, R);
 		expect(s.bookmarks).toEqual([NEW, `${B}/01/x`]);

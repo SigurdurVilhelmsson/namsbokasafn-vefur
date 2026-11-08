@@ -22,6 +22,7 @@
 	import { announce as speak, announcement as liveText } from '$lib/stores/announcer';
 	import { isTyping, keyBelongsElsewhere, scrollsSideways } from '$lib/actions/keyboardShortcuts';
 	import { openFigure } from '$lib/actions/figureViewer';
+	import type { PagePlace } from '$lib/stores/reader';
 	import {
 		paginate,
 		buildUnits as buildContentUnits,
@@ -33,6 +34,7 @@
 		shownParts,
 		pieceOf,
 		unitHeading,
+		unitKind,
 		type BlockPart,
 		type PageRange,
 		type Piece
@@ -233,6 +235,10 @@
 	}
 	function unitPages(): PageRange[][] {
 		return units.map((unit) => unit.pages);
+	}
+	/** Each unit's kind: the label counts sub-sections only (S11.3, UI-29) */
+	function unitKinds() {
+		return units.map((unit) => unitKind(unit.wrapper));
 	}
 
 
@@ -453,6 +459,58 @@
 		return decodePageHash(hash) !== null || (hash !== '' && hash === writtenHash);
 	}
 
+	/**
+	 * Where the reader is, for a later visit (plan step S11.3, CODE-07, D13): the part, and the
+	 * page's first block by its id (as the address names it) and by its index in the part. Null
+	 * when no page is shown.
+	 */
+	export function currentPlace(): PagePlace | null {
+		const flat = flatPages[current];
+		const unit = flat && units[flat.unit];
+		const range = unit?.pages[flat.page];
+		const piece = range && unit.pieces[range.start];
+		if (!piece) return null;
+		return { unit: flat.unit, block: pageAnchorId(), item: piece.block };
+	}
+
+	/** The page a saved place opens under today's split: by its block's id while the section
+	 *  holds it, else by its part and block index. Null for a place the section no longer has. */
+	function pageForPlace(place: PagePlace): number | null {
+		const byId = place.block ? document.getElementById(place.block) : null;
+		if (byId && contentRoot()?.contains(byId)) {
+			const index = pageForElement(byId);
+			if (index !== null) return index;
+		}
+		const unit = units[place.unit];
+		if (!unit || place.item >= unit.children.length) return null;
+		return flatIndexForItem({ unit: place.unit, item: pieceOf(unit.pieces, place.item, 'first') }, unitPages());
+	}
+
+	/** The label of the page a saved place opens, for the offer; null when it opens the
+	 *  section's first page, where the reader is anyway, or nothing */
+	export function placeLabel(place: PagePlace): string | null {
+		const index = pageForPlace(place);
+		const flat = index === null || index === 0 ? null : flatPages[index];
+		return flat ? positionLabel(flat, pageCounts(), unitKinds()) : null;
+	}
+
+	/** Open a saved place ('Halda áfram'), with focus on the page; false when the section no
+	 *  longer has it */
+	export function openPlace(place: PagePlace): boolean {
+		if (!ready || failed) return false;
+		const index = pageForPlace(place);
+		if (index === null) return false;
+		target = null;
+		showPage(index);
+		focusArticle();
+		return true;
+	}
+
+	/** Focus the page, for the section page when a control it showed goes ('Byrja á byrjun') */
+	export function focusPage() {
+		if (ready && !failed) focusArticle();
+	}
+
 	/** Tell the section page where the reader is (S11.2, UI-10): pushed from showPage, never
 	 *  derived in an effect that reads the pager's $state (CLAUDE.md's effect pitfall) */
 	function reportPosition() {
@@ -473,7 +531,7 @@
 	 *  since S9.2 (UI-05). The effect below passes a change on to the app's one polite region. */
 	function announce() {
 		const f = flatPages[current];
-		announcement = f ? spokenPosition(f, pageCounts(), unitHeading(units[f.unit]?.wrapper ?? null)) : '';
+		announcement = f ? spokenPosition(f, pageCounts(), unitHeading(units[f.unit]?.wrapper ?? null), unitKinds()) : '';
 	}
 
 	/** `keepHash` leaves an element deep link (#CNX_…) in the URL, so a reload
@@ -1069,6 +1127,14 @@
 			observer.observe(root, { childList: true });
 			signal.addEventListener('abort', () => observer.disconnect(), { once: true });
 
+			// What stands above the first page (the notice, the offer of a saved place) changes its
+			// height when an item comes or goes, and page 1 is budgeted for it (S11.3)
+			if (lead) {
+				const leadObserver = new MutationObserver(() => scheduleRecompute());
+				leadObserver.observe(lead, { childList: true });
+				signal.addEventListener('abort', () => leadObserver.disconnect(), { once: true });
+			}
+
 			live = true;
 			report();
 		} catch (e) {
@@ -1151,7 +1217,7 @@
 	let flat = $derived(flatPages[current]);
 	/** The last page of the section, whose button finishes it (ruling 3) */
 	let lastPage = $derived(current === flatPages.length - 1);
-	let label = $derived(flat ? positionLabel(flat, pageCounts()) : '');
+	let label = $derived(flat ? positionLabel(flat, pageCounts(), unitKinds()) : '');
 </script>
 
 {#if ready && !failed && flatPages.length > 0}
@@ -1171,6 +1237,8 @@
 		data-first-page-height={Math.round(heights.firstPage)}
 		data-page-index={current}
 		data-page-total={flatPages.length}
+		data-page-unit={flat?.unit ?? 0}
+		data-page-units={units.length}
 	>
 		<div class="paged-nav-row">
 			<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">

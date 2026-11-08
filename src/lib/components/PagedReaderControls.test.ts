@@ -1268,3 +1268,67 @@ describe('position, address and links (S11.2)', () => {
 		}
 	});
 });
+
+// Plan step S11.3 (CODE-07, D13): the pager names where the reader is, for a later visit, and
+// opens a saved place again: by the page's first block's id, or by its part and block index.
+describe('the place across visits (S11.3)', () => {
+	type Api = {
+		currentPlace: () => { unit: number; block: string | null; item: number } | null;
+		placeLabel: (place: { unit: number; block: string | null; item: number }) => string | null;
+		openPlace: (place: { unit: number; block: string | null; item: number }) => boolean;
+	};
+	function withIds(): HTMLElement {
+		const c = content();
+		c.querySelectorAll('section').forEach((section, u) =>
+			section.querySelectorAll('p').forEach((p, i) => (p.id = `p-${u}-${i}`))
+		);
+		return c;
+	}
+
+	it("names the page's part and its first block, by id and by index", async () => {
+		const { pager } = open(withIds());
+		await settle();
+		key('ArrowRight');
+		expect((pager as unknown as Api).currentPlace()).toEqual({ unit: 0, block: 'p-0-1', item: 2 });
+	});
+
+	it('names the first block by index alone when it carries no id', async () => {
+		const { pager } = open(content());
+		await settle();
+		for (let i = 0; i < 4; i++) key('ArrowRight');
+		expect((pager as unknown as Api).currentPlace()).toEqual({ unit: 1, block: null, item: 2 });
+	});
+
+	it("labels a saved place as the page it opens now, and the section's first page as nothing", async () => {
+		const { pager } = open(content());
+		await settle();
+		const api = pager as unknown as Api;
+		expect(api.placeLabel({ unit: 1, block: null, item: 2 })).toBe('Hluti 2 af 3 · Síða 2 af 2');
+		expect(api.placeLabel({ unit: 0, block: null, item: 1 })).toBeNull();
+		expect(api.placeLabel({ unit: 9, block: null, item: 0 })).toBeNull();
+	});
+
+	it('opens a place by its block id first, whatever part it was saved in', async () => {
+		const { pager } = open(withIds());
+		await settle();
+		const api = pager as unknown as Api;
+		expect(api.openPlace({ unit: 0, block: 'p-2-0', item: 0 })).toBe(true);
+		flushSync();
+		expect(label()).toBe('Hluti 3 af 3 · Síða 1 af 1');
+	});
+
+	it('opens a place by its part and block index when the id is gone', async () => {
+		const { pager } = open(content());
+		await settle();
+		expect((pager as unknown as Api).openPlace({ unit: 1, block: 'removed', item: 2 })).toBe(true);
+		flushSync();
+		expect(label()).toBe('Hluti 2 af 3 · Síða 2 af 2');
+	});
+
+	it('opens nothing for a place the section no longer has', async () => {
+		const { pager } = open(content());
+		await settle();
+		expect((pager as unknown as Api).openPlace({ unit: 5, block: null, item: 0 })).toBe(false);
+		expect(label()).toBe('Hluti 1 af 3 · Síða 1 af 3');
+	});
+});

@@ -9,7 +9,7 @@
  * around them), and each unit into pages. The component keeps one flat list of every
  * page in reading order; `pageCounts[u]` is unit u's number of pages.
  */
-import { pageIndexForItem, type PageRange } from './paginate';
+import { pageIndexForItem, type PageRange, type UnitKind } from './paginate';
 
 /** A page's place: unit `unit`, page `page` within it, both 0-based */
 export interface PagePosition {
@@ -223,11 +223,40 @@ export function pageProgress(index: number, total: number): number {
  * string, so they cannot disagree again (QA E19, KEEP-04). A unit with no page count
  * reads as one page, as in v1.1.
  */
-export function positionLabel({ unit, page }: PagePosition, pageCounts: readonly number[]): string {
+export function positionLabel(
+	{ unit, page }: PagePosition,
+	pageCounts: readonly number[],
+	kinds?: readonly UnitKind[]
+): string {
 	// The pager's position label, 'Hluti N af M · Síða X af Y', as v1.1 wrote it at dde768e
 	// (S8.1; checked by [USER] as D20 batch 9, 2026-11-04). Readers see it only through a
 	// '?lestur=sidur' link until a reading-mode picker is rendered (D06).
-	return `Hluti ${unit + 1} af ${pageCounts.length} · Síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
+	const pages = `Síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
+	const { kind, part, parts } = partOf(unit, pageCounts.length, kinds);
+	// 'Neðanmálsgreinar' names the footnotes (S11.3, [USER]'s choice of 2026-11-08). D20: proposed
+	if (kind === 'footnotes') return `Neðanmálsgreinar · ${pages}`;
+	if (kind === 'intro' || parts <= 1) return pages;
+	return `Hluti ${part} af ${parts} · ${pages}`;
+}
+
+/**
+ * A unit's kind, its number among the section's parts, and how many parts there are (plan step
+ * S11.3, UI-29, D13). The intro (text before the first sub-section, or between two) and the
+ * footnotes are no parts: v1.1 counted them, so §3.1 read 'Hluti 1 af 4' on its intro and
+ * 'Hluti 4 af 4' on its footnotes. With no kinds every unit is a part, as before.
+ */
+function partOf(
+	unit: number,
+	unitCount: number,
+	kinds?: readonly UnitKind[]
+): { kind: UnitKind; part: number; parts: number } {
+	if (!kinds) return { kind: 'part', part: unit + 1, parts: unitCount };
+	const isPart = (k: UnitKind) => k === 'part';
+	return {
+		kind: kinds[unit] ?? 'part',
+		part: kinds.slice(0, unit + 1).filter(isPart).length,
+		parts: kinds.filter(isPart).length
+	};
 }
 
 /**
@@ -239,11 +268,18 @@ export function positionLabel({ unit, page }: PagePosition, pageCounts: readonly
 export function spokenPosition(
 	{ unit, page }: PagePosition,
 	pageCounts: readonly number[],
-	heading: string | null
+	heading: string | null,
+	kinds?: readonly UnitKind[]
 ): string {
 	// The spoken position, with and without the sub-section's heading. Checked by [USER] as D20 batch 12 (2026-11-08).
-	const units = `Hluti ${unit + 1} af ${pageCounts.length}`;
 	const pages = `síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
+	const { kind, part, parts } = partOf(unit, pageCounts.length, kinds);
+	// As the label reads (S11.3): the footnotes named, the intro's page alone, no 'Hluti' in a
+	// section of one part. D20: proposed
+	if (kind === 'footnotes') return `Neðanmálsgreinar, ${pages}`;
+	if (kind === 'intro') return `Síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
+	if (parts <= 1) return heading ? `${heading}, ${pages}` : `Síða ${page + 1} af ${pageCounts[unit] ?? 1}`;
+	const units = `Hluti ${part} af ${parts}`;
 	return heading ? `${units}: ${heading}, ${pages}` : `${units}, ${pages}`;
 }
 
