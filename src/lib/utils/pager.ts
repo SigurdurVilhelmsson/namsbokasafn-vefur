@@ -196,8 +196,9 @@ export interface KeyContext {
 /**
  * The page turn a key asks for, or null when the key is not the pager's. → PageDown
  * and Space turn forward, ← PageUp and Shift+Space back; never with Ctrl, Cmd or Alt.
- * Space on a page taller than the window still turns it. D11 ruled that it scroll first
- * (docs/decisions/2026-11-08-reader-d11-keys-scroll-first-and-a-lausn-trial.md); S9.1 builds that.
+ * On a page taller than the window, keyScroll() decides whether Space, PageDown,
+ * Shift+Space or PageUp scroll first (D11,
+ * docs/decisions/2026-11-08-reader-d11-keys-scroll-first-and-a-lausn-trial.md).
  */
 export function keyAction(event: PageKey, context: KeyContext): PageTurn | null {
 	if (event.defaultPrevented || context.typing || context.belongsElsewhere) return null;
