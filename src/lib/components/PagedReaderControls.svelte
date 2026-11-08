@@ -42,8 +42,10 @@
 		pageAfterResplit,
 		flatIndexForItem,
 		pagerState,
+		keyScroll,
 		type ItemPosition,
-		type PagerState
+		type PagerState,
+		type VerticalSpan
 	} from '$lib/utils/pager';
 
 	interface Props {
@@ -301,6 +303,28 @@
 		}
 	}
 
+	/** The part of the window a page is read in: below where a turn puts the content's top,
+	 *  above the bottom clearance the floating controls take */
+	function readingView(): VerticalSpan {
+		return { top: PAGE_BUDGET.scrollOffset, bottom: window.innerHeight - PAGE_BUDGET.bottomClearance };
+	}
+
+	/** The page on screen, from its first block's top to its last block's bottom; the
+	 *  reading view itself when it shows no block, so a key turns */
+	function pageSpan(): VerticalSpan {
+		const flat = flatPages[current];
+		const unit = flat ? units[flat.unit] : undefined;
+		const range = flat && unit ? unit.pages[flat.page] : undefined;
+		const rects = (range && unit ? unit.children.slice(range.start, range.end) : [])
+			.map((el) => el.getBoundingClientRect())
+			.filter((rect) => rect.height > 0);
+		if (rects.length === 0) return readingView();
+		return {
+			top: Math.min(...rects.map((rect) => rect.top)),
+			bottom: Math.max(...rects.map((rect) => rect.bottom))
+		};
+	}
+
 	function handleKeyDown(event: KeyboardEvent) {
 		// Getters, so each is read only when keyAction needs it, in v1.1's order
 		const turn = keyAction(event, {
@@ -317,7 +341,10 @@
 		});
 		if (!turn) return;
 		event.preventDefault();
-		if (turn === 'next') next();
+		// D11: Space and PageDown scroll a page taller than the window before they turn it
+		const distance = keyScroll(event.key, turn, pageSpan(), readingView());
+		if (distance !== 0) window.scrollBy({ top: distance });
+		else if (turn === 'next') next();
 		else prev();
 	}
 

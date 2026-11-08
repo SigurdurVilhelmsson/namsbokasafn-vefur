@@ -11,7 +11,7 @@
 
 import { test, expect, type Page } from '@playwright/test';
 import { MODULE_BODY_SELECTOR } from '../src/lib/utils/paginate';
-import { PAGE_BUDGET } from '../src/lib/utils/pager';
+import { PAGE_BUDGET, KEY_SCROLL } from '../src/lib/utils/pager';
 import {
 	sectionsContaining,
 	rollupSection,
@@ -67,6 +67,29 @@ async function shownPage(page: Page) {
 			viewport: window.innerHeight
 		};
 	}, MODULE_BODY_SELECTOR);
+}
+
+/**
+ * Where the page on screen ends, against the bottom of the part of the window it is read
+ * in (the pager's own view: the window less PAGE_BUDGET's bottom clearance), in px
+ */
+async function pageEnd(page: Page) {
+	return page.evaluate(
+		({ bodySelector, clearance }) => {
+			const root = document.querySelector('article.cnx-module') as HTMLElement;
+			const flat = (el: Element): Element[] =>
+				el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
+			const shown = Array.from(root.children)
+				.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
+				.flatMap(flat)
+				.filter((el) => (el as HTMLElement).offsetParent !== null);
+			return {
+				end: Math.max(...shown.map((el) => el.getBoundingClientRect().bottom)),
+				viewBottom: window.innerHeight - clearance
+			};
+		},
+		{ bodySelector: MODULE_BODY_SELECTOR, clearance: PAGE_BUDGET.bottomClearance }
+	);
 }
 
 /** Blocks the pager hid. practiceReveal's self-assessment row is hidden in scrolled mode too. */
@@ -504,6 +527,46 @@ test.describe('Paged reading mode', () => {
 		await nav.getByRole('button', { name: 'Fyrri síða' }).focus();
 		await page.keyboard.press('Space');
 		await expect(label).toHaveText(first);
+	});
+
+	// D11 (2026-11-08), CODE-06: on a page taller than the window, Space scrolls until the
+	// page's end is in view, and only then turns. The page is the first one found at run time
+	// whose end is below the window, in the section with the most worked examples.
+	test('Space scrolls a page taller than the window before it turns the page', async ({ page }) => {
+		test.setTimeout(120000);
+		const [url] = sectionsContaining('check-knowledge-answer', 1);
+		test.skip(!url, 'No section with a worked example');
+		const label = pagerLabel(page);
+		const next = pager(page).getByRole('button', { name: 'Næsta síða' });
+
+		await openPaged(page, url);
+		for (let i = 0; ; i++) {
+			expect(i, `${url}: no page taller than the window`).toBeLessThan(PAGE_CAP);
+			const { end, viewBottom } = await pageEnd(page);
+			if (end > viewBottom + KEY_SCROLL.tolerance) break;
+			const text = (await label.textContent())!.trim();
+			expect(LAST_PAGE.test(text), `${url}: no page taller than the window`).toBe(false);
+			await next.click();
+			await expect(label).not.toHaveText(text);
+			await page.waitForTimeout(300);
+		}
+		const tall = (await label.textContent())!.trim();
+
+		await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+		for (let presses = 1; ; presses++) {
+			expect(presses, `${tall}: Space never turned the page`).toBeLessThan(20);
+			const before = await pageEnd(page);
+			await page.keyboard.press('Space');
+			await page.waitForTimeout(250);
+			if ((await label.textContent())!.trim() !== tall) {
+				expect(presses, `${tall}: Space turned the page at once`).toBeGreaterThan(1);
+				expect(
+					before.end,
+					`${tall}: Space turned the page while its end was ${Math.round(before.end - before.viewBottom)}px below the window`
+				).toBeLessThanOrEqual(before.viewBottom + KEY_SCROLL.tolerance);
+				break;
+			}
+		}
 	});
 
 	test('arrival scrolls past the learning objectives to the content', async ({ page }) => {

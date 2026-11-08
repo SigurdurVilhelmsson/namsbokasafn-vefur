@@ -213,6 +213,46 @@ export function keyAction(event: PageKey, context: KeyContext): PageTurn | null 
 	return null;
 }
 
+/** How Space, PageDown, Shift+Space and PageUp scroll a tall page before turning it, in px */
+export const KEY_SCROLL: Readonly<{ tolerance: number; overlap: number }> = {
+	/** A page's end this close below the window, or its top this close above, counts as in
+	 *  view: measured pages overflow by as little as 1–5 px, and such a page should not cost
+	 *  an extra press (CODE-06) */
+	tolerance: 8,
+	/** What one press keeps of the screen it leaves, so no line is skipped */
+	overlap: 48
+};
+
+/** A box's top and bottom in window coordinates (getBoundingClientRect), in px */
+export interface VerticalSpan {
+	top: number;
+	bottom: number;
+}
+
+/** The keys that scroll a tall page before turning it; the arrows always turn (D11) */
+const SCROLLING_KEYS = new Set([' ', 'PageDown', 'PageUp']);
+
+/**
+ * How far a key scrolls the window before the page turns, in px (down is positive), or 0
+ * to turn now (D11, 2026-11-08; CODE-06). Space and PageDown scroll down while the page's
+ * end is below the window, Shift+Space and PageUp up while its top is above it; each press
+ * moves at most a screen less the overlap. `page` spans the current page's blocks, from
+ * the first one's top to the last one's bottom; `view` is the part of the window the page
+ * is read in. The arrow keys, the buttons and swipes always turn.
+ */
+export function keyScroll(key: string, turn: PageTurn, page: VerticalSpan, view: VerticalSpan): number {
+	if (!SCROLLING_KEYS.has(key)) return 0;
+	const height = view.bottom - view.top;
+	const step = Math.max(height - KEY_SCROLL.overlap, height / 2);
+	if (!(step > 0)) return 0;
+	if (turn === 'next') {
+		const below = page.bottom - view.bottom;
+		return below > KEY_SCROLL.tolerance ? Math.min(below, step) : 0;
+	}
+	const above = view.top - page.top;
+	return above > KEY_SCROLL.tolerance ? -Math.min(above, step) : 0;
+}
+
 /** A swipe turns a page only when it is clearly sideways, in px */
 export const SWIPE: Readonly<{ minDistance: number; maxDrift: number }> = {
 	/** It must travel further than this sideways */
