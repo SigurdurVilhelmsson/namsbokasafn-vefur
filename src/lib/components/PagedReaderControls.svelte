@@ -54,6 +54,7 @@
 		flatIndexForItem,
 		pagerState,
 		keyScroll,
+		KEY_SCROLL,
 		type ItemPosition,
 		type PagerState,
 		type VerticalSpan
@@ -90,6 +91,9 @@
 		/** Room the section page should add at its end, in px, when the document is too short to
 		 *  bring the content top under the header (S9.5; UI-19's arrival shortfall) */
 		onreserve?: (px: number) => void;
+		/** A page shown is taller than the part of the window it is read in, so the reader has to
+		 *  scroll it: once each time such a page is shown (S9.5, PED-17's local counter) */
+		ontallpage?: () => void;
 	}
 
 	let {
@@ -103,7 +107,8 @@
 		onleave,
 		lead = null,
 		mtReport = null,
-		onreserve
+		onreserve,
+		ontallpage
 	}: Props = $props();
 
 	interface Unit {
@@ -410,7 +415,14 @@
 		if (live) {
 			const signal = run?.signal;
 			tick().then(() => {
-				if (!signal?.aborted) calibrate({ growOnly: true });
+				if (signal?.aborted) return;
+				calibrate({ growOnly: true });
+				// Counted for a turn or an arrival (the calls that scroll), not a re-split of the
+				// page already shown
+				if (!scroll) return;
+				const span = pageSpan();
+				const view = readingView();
+				if (span.bottom - span.top > view.bottom - view.top + KEY_SCROLL.tolerance) ontallpage?.();
 			});
 		}
 	}

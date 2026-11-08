@@ -136,3 +136,26 @@ describe('countsExport (S5.5, D09)', () => {
 		expect(countsExport({}, '2026-11-01').split('\n').length).toBeGreaterThan(1);
 	});
 });
+
+// Plan step S9.5 (PED-17, UI-08): how often a reader leaves or returns to paging, and how often
+// a page shown needs window scrolling, as counts per book for call 1 and call 3
+describe('the reading-mode and tall-page events (S9.5)', () => {
+	it('lists them in the closed list', () => {
+		expect(COUNTER_EVENTS).toEqual(expect.arrayContaining(['switchToPaged', 'switchToScrolled', 'pageTooTall']));
+	});
+
+	it('counts them per book', () => {
+		const slug = books[0].slug;
+		let counters = incrementCounter({}, slug, 'switchToScrolled');
+		counters = incrementCounter(counters, slug, 'pageTooTall');
+		counters = incrementCounter(counters, slug, 'pageTooTall');
+		expect(counters[slug]).toEqual({ switchToScrolled: 1, pageTooTall: 2 });
+	});
+
+	it('keeps them through a load, and leaves the recall totals alone', () => {
+		const slug = books[0].slug;
+		const clean = sanitizeCounters({ [slug]: { switchToPaged: 3, recallShown: 1 } });
+		expect(clean[slug]).toEqual({ switchToPaged: 3, recallShown: 1 });
+		expect(recallTotals(clean)).toEqual({ shown: 1, saved: 0, skipped: 0, abandoned: 0 });
+	});
+});

@@ -377,6 +377,8 @@
 	 */
 	async function chooseMode(mode: ReadingMode, { fromPager = false } = {}) {
 		if ((mode === 'paged') === paged) return;
+		// A local count, per book, for calls 1 and 3 (S9.5, PED-17); never sent
+		analyticsStore.countEvent(data.bookSlug, mode === 'paged' ? 'switchToPaged' : 'switchToScrolled');
 		linkMode = null;
 		if (mode === 'scrolled') {
 			const anchor = pagerControls?.shownAnchor() ?? null;
@@ -750,6 +752,7 @@
 					? feedbackHref({ bok: data.bookSlug, kafli: data.chapterSlug, hluti: data.sectionSlug })
 					: null}
 				onreserve={(px) => (pagedReserve = px)}
+				ontallpage={() => analyticsStore.countEvent(data.bookSlug, 'pageTooTall')}
 			/>
 		{/if}
 

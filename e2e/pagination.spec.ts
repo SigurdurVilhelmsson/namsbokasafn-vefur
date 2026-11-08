@@ -1984,4 +1984,65 @@ test.describe('The chrome, the budget and call 1 (S9.5)', () => {
 			}
 		});
 	}
+
+	/** The book's local counters as stored (S5.4's analytics store) */
+	const storedCounts = (page: Page, book: string) =>
+		page.evaluate(
+			(b) => (JSON.parse(localStorage.getItem('namsbokasafn:analytics') ?? '{}').counters ?? {})[b] ?? {},
+			book
+		);
+
+	// PED-17: a switch each way is counted locally, per book, never sent
+	test('a switch to scrolling and back counts once each, in the book’s own counters', async ({ page }) => {
+		const book = SECTION!.split('/')[1];
+		await openPaged(page, SECTION!);
+		const group = page.getByRole('group', { name: 'Lestrarstilling' });
+		await group.getByRole('button', { name: 'Samfellt skrun' }).evaluate((el) => (el as HTMLElement).click());
+		await expect(pager(page)).toHaveCount(0);
+		await group.getByRole('button', { name: 'Síðuskipt' }).evaluate((el) => (el as HTMLElement).click());
+		await expect(pager(page)).toBeVisible({ timeout: 15000 });
+		await expect.poll(() => storedCounts(page, book)).toMatchObject({ switchToScrolled: 1, switchToPaged: 1 });
+	});
+
+	// PED-17, UI-08: a page shown that the reader must scroll is counted once each time it is
+	// shown (a turn or an arrival, not a re-split), for call 1's "pages that need window scroll"
+	test('each page shown that is taller than its window counts once', async ({ page }) => {
+		const url = sectionUrl('1.2');
+		test.skip(!url, 'No §1.2 synced');
+		test.setTimeout(180000);
+		const book = url!.split('/')[1];
+		await page.setViewportSize({ width: 375, height: 667 });
+		await openPaged(page, url!);
+		await page.waitForTimeout(500);
+		let tall = 0;
+		await eachPage(page, url!, async () => {
+			await page.waitForTimeout(200);
+			const isTall = await page.evaluate(
+				({ bodySelector, gap, clearance, tolerance }) => {
+					const root = document.querySelector('article.cnx-module') as HTMLElement;
+					const flat = (el: Element): Element[] =>
+						el.tagName === 'SECTION' ? Array.from(el.children).flatMap(flat) : [el];
+					const rects = Array.from(root.children)
+						.filter((el) => el.tagName !== 'HEADER')
+						.flatMap((el) => (el.matches(bodySelector) ? Array.from(el.children) : [el]))
+						.flatMap(flat)
+						.filter((el) => (el as HTMLElement).offsetParent !== null)
+						.map((el) => el.getBoundingClientRect())
+						.filter((r) => r.height > 0);
+					const top = (document.querySelector('header.header')?.getBoundingClientRect().bottom ?? 0) + gap;
+					const span = Math.max(...rects.map((r) => r.bottom)) - Math.min(...rects.map((r) => r.top));
+					return span > innerHeight - clearance - top + tolerance;
+				},
+				{
+					bodySelector: MODULE_BODY_SELECTOR,
+					gap: PAGE_BUDGET.headerGap,
+					clearance: PAGE_BUDGET.bottomClearance,
+					tolerance: KEY_SCROLL.tolerance
+				}
+			);
+			if (isTall) tall++;
+		});
+		expect(tall, 'the test needs at least one tall page at 375x667').toBeGreaterThan(0);
+		await expect.poll(async () => (await storedCounts(page, book)).pageTooTall ?? 0).toBe(tall);
+	});
 });
