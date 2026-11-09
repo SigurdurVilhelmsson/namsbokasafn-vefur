@@ -1,3 +1,6 @@
+<!--
+  Root Layout - Global styles and theme management
+-->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
@@ -24,10 +27,6 @@
 		}
 	});
 </script>
-
-<!--
-  Root Layout - Global styles and theme management
--->
 
 <svelte:head>
 	<!-- No site-wide description: every page sets its own, and a default here

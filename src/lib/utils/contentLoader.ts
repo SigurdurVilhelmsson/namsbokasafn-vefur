@@ -5,14 +5,8 @@
  * handles caching correctly, serving fresh content when online and
  * falling back to cache when offline.
  */
-import type {
-  TableOfContents,
-  SectionContent,
-  SectionMetadata,
-  Appendix,
-  Chapter
-} from '$lib/types/content';
 
+import type { TableOfContents, SectionContent, SectionMetadata, Appendix, Chapter } from '$lib/types/content';
 import { browser } from '$app/env';
 import { migrateRenamedSections } from '$lib/stores/sectionRenameMigration';
 
@@ -101,30 +95,30 @@ function extractHtmlPageData(html: string): {
  * Extract title from HTML content (from h1 or title tag)
  */
 function extractHtmlTitle(html: string): string {
-  // Try h1 first
-  const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/);
-  if (h1Match) return h1Match[1].trim();
+	// Try h1 first
+	const h1Match = html.match(/<h1[^>]*>([^<]+)<\/h1>/);
+	if (h1Match) return h1Match[1].trim();
 
-  // Try title tag
-  const titleMatch = html.match(/<title>([^<]+)<\/title>/);
-  if (titleMatch) return titleMatch[1].trim();
+	// Try title tag
+	const titleMatch = html.match(/<title>([^<]+)<\/title>/);
+	if (titleMatch) return titleMatch[1].trim();
 
-  return '';
+	return '';
 }
 
 /**
  * Extract article content from HTML (the main content without wrapper)
  */
 function extractHtmlArticleContent(html: string): string {
-  // Extract content between <article> and </article>
-  const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/);
-  if (articleMatch) return articleMatch[0];
+	// Extract content between <article> and </article>
+	const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/);
+	if (articleMatch) return articleMatch[0];
 
-  // Fallback: extract body content
-  const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/);
-  if (bodyMatch) return bodyMatch[1];
+	// Fallback: extract body content
+	const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/);
+	if (bodyMatch) return bodyMatch[1];
 
-  return html;
+	return html;
 }
 
 /**
@@ -141,60 +135,60 @@ export async function loadSectionContent(
 	fetchFn: typeof fetch = fetch,
 	preloadedMetadata?: SectionMetadata
 ): Promise<SectionContent> {
-  let response: Response;
-  try {
-    response = await fetchFn(`/content/${bookSlug}/chapters/${chapterSlug}/${sectionFile}`);
-  } catch {
-    const isOffline = checkOffline();
-    throw new ContentLoadError(
-      isOffline
-        ? 'Gat ekki hlaðið kafla. Þú ert án nettengingar og efnið er ekki í skyndiminni.'
-        : `Gat ekki hlaðið kafla: ${chapterSlug}/${sectionFile}`,
-      0,
-      isOffline
-    );
-  }
+	let response: Response;
+	try {
+		response = await fetchFn(`/content/${bookSlug}/chapters/${chapterSlug}/${sectionFile}`);
+	} catch {
+		const isOffline = checkOffline();
+		throw new ContentLoadError(
+			isOffline
+				? 'Gat ekki hlaðið kafla. Þú ert án nettengingar og efnið er ekki í skyndiminni.'
+				: `Gat ekki hlaðið kafla: ${chapterSlug}/${sectionFile}`,
+			0,
+			isOffline
+		);
+	}
 
-  if (!response.ok) {
-    const isOffline = checkOffline();
-    throw new ContentLoadError(
-      isOffline
-        ? 'Gat ekki hlaðið kafla. Þú ert án nettengingar og efnið er ekki í skyndiminni.'
-        : `Gat ekki hlaðið kafla: ${chapterSlug}/${sectionFile}`,
-      response.status,
-      isOffline
-    );
-  }
+	if (!response.ok) {
+		const isOffline = checkOffline();
+		throw new ContentLoadError(
+			isOffline
+				? 'Gat ekki hlaðið kafla. Þú ert án nettengingar og efnið er ekki í skyndiminni.'
+				: `Gat ekki hlaðið kafla: ${chapterSlug}/${sectionFile}`,
+			response.status,
+			isOffline
+		);
+	}
 
-  const fileContent = await response.text();
+	const fileContent = await response.text();
 
-  // HTML content: pre-rendered from CNXML pipeline
-  const pageData = extractHtmlPageData(fileContent);
-  const articleContent = extractHtmlArticleContent(fileContent);
+	// HTML content: pre-rendered from CNXML pipeline
+	const pageData = extractHtmlPageData(fileContent);
+	const articleContent = extractHtmlArticleContent(fileContent);
 
-  // Get title from preloaded metadata, page-data, or extract from HTML
-  const title = preloadedMetadata?.title || pageData.title || extractHtmlTitle(fileContent);
+	// Get title from preloaded metadata, page-data, or extract from HTML
+	const title = preloadedMetadata?.title || pageData.title || extractHtmlTitle(fileContent);
 
-  // Get section number from preloaded metadata or page-data
-  const section = preloadedMetadata?.section || pageData.section || '';
+	// Get section number from preloaded metadata or page-data
+	const section = preloadedMetadata?.section || pageData.section || '';
 
-  // Get chapter number from preloaded metadata or page-data
-  const chapter = preloadedMetadata?.chapter || pageData.chapter || 0;
+	// Get chapter number from preloaded metadata or page-data
+	const chapter = preloadedMetadata?.chapter || pageData.chapter || 0;
 
-  const sectionContent: SectionContent = {
-    title,
-    section,
-    chapter,
-    objectives: preloadedMetadata?.objectives || [],
-    content: articleContent,
-    readingTime: preloadedMetadata?.readingTime || 5,
-    difficulty: preloadedMetadata?.difficulty,
-    keywords: preloadedMetadata?.keywords,
-    prerequisites: preloadedMetadata?.prerequisites,
-    source: preloadedMetadata?.source
-  };
+	const sectionContent: SectionContent = {
+		title,
+		section,
+		chapter,
+		objectives: preloadedMetadata?.objectives || [],
+		content: articleContent,
+		readingTime: preloadedMetadata?.readingTime || 5,
+		difficulty: preloadedMetadata?.difficulty,
+		keywords: preloadedMetadata?.keywords,
+		prerequisites: preloadedMetadata?.prerequisites,
+		source: preloadedMetadata?.source
+	};
 
-  return sectionContent;
+	return sectionContent;
 }
 
 // ============================================
@@ -321,7 +315,7 @@ export function findSectionBySlug(toc: TableOfContents, chapterPath: string, sec
   // (svarlykill back-button, answer-number links) would otherwise 404. Resolve
   // it to the chapter's first exercises-type section. Books with a real
   // `{n}-exercises.html` matched above, so this only fires for split-slug books.
-  if ((/^\d+-exercises$/).test(sectionPath)) {
+  if (/^\d+-exercises$/.test(sectionPath)) {
     section = chapter.sections.find((s) => s.type === 'exercises');
     if (section) return { chapter, section };
   }

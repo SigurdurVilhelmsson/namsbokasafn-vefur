@@ -1,3 +1,6 @@
+<!--
+  Error Page - Displays user-friendly error messages with offline support
+-->
 <script lang="ts">
 	import { page } from '$app/state';
 	import Icon from '$lib/components/Icon.svelte';
@@ -22,8 +25,8 @@
 		isOffline = !navigator.onLine;
 
 		// Listen for online/offline changes
-		const handleOnline = () => isOffline = false;
-		const handleOffline = () => isOffline = true;
+		const handleOnline = () => (isOffline = false);
+		const handleOffline = () => (isOffline = true);
 		window.addEventListener('online', handleOnline);
 		window.addEventListener('offline', handleOffline);
 
@@ -42,9 +45,8 @@
 
 	// Determine error type and message
 	let errorMessage = $derived(page.error?.message || '');
-
 	let is404 = $derived(page.status === 404);
-	let isOfflineError = $derived(page.status === 503 || isOffline && errorMessage.includes('nettengingar'));
+	let isOfflineError = $derived(page.status === 503 || (isOffline && errorMessage.includes('nettengingar')));
 	let isServerError = $derived(page.status && page.status >= 500 && !isOfflineError);
 
 	function retry() {
@@ -60,10 +62,6 @@
 	}
 </script>
 
-<!--
-  Error Page - Displays user-friendly error messages with offline support
--->
-
 <svelte:head>
 	<title>{is404 ? 'Síða fannst ekki' : isOfflineError ? 'Án nettengingar' : 'Villa'} | Námsbókasafn</title>
 </svelte:head>
@@ -73,57 +71,21 @@
 		<!-- Icon -->
 		<div class="mb-6">
 			{#if isOfflineError || isOffline}
-				<div
-					class="mx-auto w-16 h-16 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center"
-				>
-					<svg
-						class="w-8 h-8 text-yellow-600 dark:text-yellow-400"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"
-						></path>
+				<div class="mx-auto w-16 h-16 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center">
+					<svg class="w-8 h-8 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414" />
 					</svg>
 				</div>
 			{:else if is404}
-				<div
-					class="mx-auto w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center"
-				>
-					<svg
-						class="w-8 h-8 text-blue-600 dark:text-blue-400"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-						></path>
+				<div class="mx-auto w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+					<svg class="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
 					</svg>
 				</div>
 			{:else}
-				<div
-					class="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center"
-				>
-					<svg
-						class="w-8 h-8 text-red-600 dark:text-red-400"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-						></path>
+				<div class="mx-auto w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+					<svg class="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
 					</svg>
 				</div>
 			{/if}
@@ -236,9 +198,9 @@
 
 		<!-- Status code (for debugging in non-offline cases) -->
 		{#if page.status && page.status !== 404 && !isOfflineError}
-			<p
-				class="mt-4 text-sm text-gray-400 dark:text-gray-500"
-			>Villukóði: {page.status}</p>
+			<p class="mt-4 text-sm text-gray-400 dark:text-gray-500">
+				Villukóði: {page.status}
+			</p>
 		{/if}
 	</div>
 </div>

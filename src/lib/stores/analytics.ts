@@ -7,22 +7,8 @@ import { writable, derived, get } from 'svelte/store';
 import { type SectionRename, renameInAnalytics } from '$lib/utils/sectionRenames';
 import { browser } from '$app/env';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
-
-import {
-	validateStoreData,
-	isArray,
-	isObject,
-	isNumber,
-	isNullOrString
-} from '$lib/utils/storeValidation';
-
-import {
-	incrementCounter,
-	sanitizeCounters,
-	type CounterEvent,
-	type Counters
-} from '$lib/utils/counters';
-
+import { validateStoreData, isArray, isObject, isNumber, isNullOrString } from '$lib/utils/storeValidation';
+import { incrementCounter, sanitizeCounters, type CounterEvent, type Counters } from '$lib/utils/counters';
 import {
 	createSectionKey,
 	getCurrentTimestamp,
@@ -634,27 +620,27 @@ function createAnalyticsStore() {
 					current = todayStats.flashcardsReviewed;
 					break;
 				case 'weekly_sections': {
-						// Sum sections visited for the current week
-						const weekStart = getWeekStart(new Date());
-						const weekDates: string[] = [];
-						const startDate = new Date(weekStart);
-						for (let i = 0; i < 7; i++) {
-							const d = new Date(startDate);
-							d.setDate(d.getDate() + i);
-							weekDates.push(formatLocalDate(d));
-						}
-					current = weekDates.reduce((sum, date) => {
-								const stats = state.dailyStats[date];
-								return sum + (stats?.sectionsVisited || 0);
-					}, 0);
-						break;
+					// Sum sections visited for the current week
+					const weekStart = getWeekStart(new Date());
+					const weekDates: string[] = [];
+					const startDate = new Date(weekStart);
+					for (let i = 0; i < 7; i++) {
+						const d = new Date(startDate);
+						d.setDate(d.getDate() + i);
+						weekDates.push(formatLocalDate(d));
 					}
+					current = weekDates.reduce((sum, date) => {
+						const stats = state.dailyStats[date];
+						return sum + (stats?.sectionsVisited || 0);
+					}, 0);
+					break;
+				}
 				case 'streak_days':
 					current = state.currentStreak;
 					break;
 			}
 
-			const percentage = Math.min(100, Math.round(current / goal.target * 100));
+			const percentage = Math.min(100, Math.round((current / goal.target) * 100));
 
 			return {
 				goal,
@@ -682,26 +668,26 @@ function createAnalyticsStore() {
 						current = todayStats.flashcardsReviewed;
 						break;
 					case 'weekly_sections': {
-							const weekStart = getWeekStart(new Date());
-							const weekDates: string[] = [];
-							const startDate = new Date(weekStart);
-							for (let i = 0; i < 7; i++) {
-								const d = new Date(startDate);
-								d.setDate(d.getDate() + i);
-								weekDates.push(formatLocalDate(d));
-							}
-						current = weekDates.reduce((sum, date) => {
-									const stats = state.dailyStats[date];
-									return sum + (stats?.sectionsVisited || 0);
-						}, 0);
-							break;
+						const weekStart = getWeekStart(new Date());
+						const weekDates: string[] = [];
+						const startDate = new Date(weekStart);
+						for (let i = 0; i < 7; i++) {
+							const d = new Date(startDate);
+							d.setDate(d.getDate() + i);
+							weekDates.push(formatLocalDate(d));
 						}
+						current = weekDates.reduce((sum, date) => {
+							const stats = state.dailyStats[date];
+							return sum + (stats?.sectionsVisited || 0);
+						}, 0);
+						break;
+					}
 					case 'streak_days':
 						current = state.currentStreak;
 						break;
 				}
 
-				const percentage = Math.min(100, Math.round(current / goal.target * 100));
+				const percentage = Math.min(100, Math.round((current / goal.target) * 100));
 
 				result.push({
 					goal,

@@ -1,3 +1,6 @@
+<!--
+  KeyboardShortcutsModal - Shows all keyboard shortcuts with editing capability
+-->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -177,10 +180,6 @@
 		};
 	});
 </script>
-
-<!--
-  KeyboardShortcutsModal - Shows all keyboard shortcuts with editing capability
--->
 
 {#if isOpen}
 	<div

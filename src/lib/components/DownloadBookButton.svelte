@@ -1,3 +1,6 @@
+<!--
+  DownloadBookButton - Download book for offline reading with progress indicator
+-->
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
@@ -46,9 +49,11 @@
 	let failedFileCount = $derived(progress?.bookSlug === bookSlug ? progress.failedFiles : 0);
 
 	// Calculate progress percentage
-	let progressPercent = $derived(isDownloading && progress?.totalFiles
-		? Math.round(progress.downloadedFiles / progress.totalFiles * 100)
-		: 0);
+	let progressPercent = $derived(
+		isDownloading && progress?.totalFiles
+			? Math.round((progress.downloadedFiles / progress.totalFiles) * 100)
+			: 0
+	);
 
 	// Overlapping refreshes (a remount just as a download ends): only the latest may write.
 	let refreshSeq = 0;
@@ -110,10 +115,6 @@
 	}
 </script>
 
-<!--
-  DownloadBookButton - Download book for offline reading with progress indicator
--->
-
 <div class="download-book">
 	{#if (status === 'complete' || status === 'outdated' || status === 'incomplete') && !isDownloading && !downloadComplete && !downloadError}
 		<!-- Something is stored: complete, a newer version is out, or files are missing -->
@@ -155,7 +156,7 @@
 
 			{#if !showConfirmDelete}
 				<button
-					onclick={() => showConfirmDelete = true}
+					onclick={() => (showConfirmDelete = true)}
 					class="rounded-lg p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
 					aria-label="Eyða niðurhali"
 					title="Eyða niðurhali"
@@ -172,7 +173,7 @@
 						Já
 					</button>
 					<button
-						onclick={() => showConfirmDelete = false}
+						onclick={() => (showConfirmDelete = false)}
 						class="rounded-lg bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
 					>
 						Nei

@@ -328,9 +328,9 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 						'Æfing',
 						'Fara í æfinguna sem þetta svar tilheyrir',
 						() => {
-						const exercisesSlug = chapterNumber ? `${chapterNumber}-exercises` : exercisesSectionSlug;
-						const url = `/${bookSlug}/kafli/${chapterSlug}/${exercisesSlug}#${exerciseId}`;
-						goto(url);
+							const exercisesSlug = chapterNumber ? `${chapterNumber}-exercises` : exercisesSectionSlug;
+							const url = `/${bookSlug}/kafli/${chapterSlug}/${exercisesSlug}#${exerciseId}`;
+							goto(url);
 						}
 					);
 

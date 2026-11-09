@@ -28,18 +28,18 @@ export type LineHeight = 'normal' | 'relaxed' | 'loose';
 export type LineWidth = 'narrow' | 'medium' | 'wide';
 export type ReadingMode = 'paged' | 'scrolled';
 
-export type ShortcutAction = 
-	'prevSection' |
-	'nextSection' |
-	'goHome' |
-	'goFlashcards' |
-	'goGlossary' |
-	'toggleSidebar' |
-	'toggleFocusMode' |
-	'toggleTheme' |
-	'openSearch' |
-	'showShortcuts' |
-	'closeModal';
+export type ShortcutAction =
+	| 'prevSection'
+	| 'nextSection'
+	| 'goHome'
+	| 'goFlashcards'
+	| 'goGlossary'
+	| 'toggleSidebar'
+	| 'toggleFocusMode'
+	| 'toggleTheme'
+	| 'openSearch'
+	| 'showShortcuts'
+	| 'closeModal';
 
 export const DEFAULT_SHORTCUTS: Record<ShortcutAction, string> = {
 	prevSection: 'ArrowLeft',

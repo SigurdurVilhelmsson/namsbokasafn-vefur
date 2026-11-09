@@ -19,8 +19,13 @@ interface AnnotationState {
 	annotations: Annotation[];
 }
 
-const defaultState: AnnotationState = { annotations: [] };
-const annotationValidators = { annotations: isArray };
+const defaultState: AnnotationState = {
+	annotations: []
+};
+
+const annotationValidators = {
+	annotations: isArray
+};
 
 function loadState(): AnnotationState {
 	if (!browser) return defaultState;
@@ -66,13 +71,13 @@ function createAnnotationStore() {
 			const bKey = ann.bookSlug;
 
 			if (!_sectionIndex.has(sKey)) _sectionIndex.set(sKey, []);
-			(_sectionIndex.get(sKey)!).push(ann);
+			_sectionIndex.get(sKey)!.push(ann);
 
 			if (!_chapterIndex.has(cKey)) _chapterIndex.set(cKey, []);
-			(_chapterIndex.get(cKey)!).push(ann);
+			_chapterIndex.get(cKey)!.push(ann);
 
 			if (!_bookIndex.has(bKey)) _bookIndex.set(bKey, []);
-			(_bookIndex.get(bKey)!).push(ann);
+			_bookIndex.get(bKey)!.push(ann);
 
 			_idIndex.set(ann.id, ann);
 		}
@@ -170,25 +175,25 @@ function createAnnotationStore() {
 		// Get annotations for a specific section (O(1) indexed lookup)
 		getAnnotationsForSection: (bookSlug: string, chapterSlug: string, sectionSlug: string): Annotation[] => {
 			ensureIndex();
-			return (_sectionIndex!).get(`${bookSlug}:${chapterSlug}:${sectionSlug}`) || [];
+			return _sectionIndex!.get(`${bookSlug}:${chapterSlug}:${sectionSlug}`) || [];
 		},
 
 		// Get annotations for a specific chapter (O(1) indexed lookup)
 		getAnnotationsForChapter: (bookSlug: string, chapterSlug: string): Annotation[] => {
 			ensureIndex();
-			return (_chapterIndex!).get(`${bookSlug}:${chapterSlug}`) || [];
+			return _chapterIndex!.get(`${bookSlug}:${chapterSlug}`) || [];
 		},
 
 		// Get annotations for a specific book (O(1) indexed lookup)
 		getAnnotationsForBook: (bookSlug: string): Annotation[] => {
 			ensureIndex();
-			return (_bookIndex!).get(bookSlug) || [];
+			return _bookIndex!.get(bookSlug) || [];
 		},
 
 		// Get annotation by ID (O(1) indexed lookup)
 		getAnnotationById: (id: string): Annotation | undefined => {
 			ensureIndex();
-			return (_idIndex!).get(id);
+			return _idIndex!.get(id);
 		},
 
 		// Get statistics
@@ -242,17 +247,17 @@ function createAnnotationStore() {
 			const bookAnnotations = annotations
 				.filter((ann) => ann.bookSlug === bookSlug)
 				.sort((a, b) => {
-				if (a.chapterSlug !== b.chapterSlug) {
-					return a.chapterSlug.localeCompare(b.chapterSlug);
-				}
-				if (a.sectionSlug !== b.sectionSlug) {
-					return a.sectionSlug.localeCompare(b.sectionSlug);
-				}
-				// Use offsetFromAnchor for v2, startOffset for v1
-				const aOffset = a.range.version === 2 ? a.range.offsetFromAnchor : a.range.startOffset ?? 0;
-				const bOffset = b.range.version === 2 ? b.range.offsetFromAnchor : b.range.startOffset ?? 0;
-				return aOffset - bOffset;
-			});
+					if (a.chapterSlug !== b.chapterSlug) {
+						return a.chapterSlug.localeCompare(b.chapterSlug);
+					}
+					if (a.sectionSlug !== b.sectionSlug) {
+						return a.sectionSlug.localeCompare(b.sectionSlug);
+					}
+					// Use offsetFromAnchor for v2, startOffset for v1
+					const aOffset = a.range.version === 2 ? a.range.offsetFromAnchor : (a.range.startOffset ?? 0);
+					const bOffset = b.range.version === 2 ? b.range.offsetFromAnchor : (b.range.startOffset ?? 0);
+					return aOffset - bOffset;
+				});
 
 			if (bookAnnotations.length === 0) {
 				return '# Engar athugasemdir\n\nÞú hefur ekki bætt við neinum athugasemdum ennþá.';
@@ -282,7 +287,12 @@ function createAnnotationStore() {
 				lines.push('');
 
 				chapterAnnotations.forEach((ann) => {
-					const colorEmoji = ({ yellow: '🟡', green: '🟢', blue: '🔵', pink: '🟣' })[ann.color];
+					const colorEmoji = {
+						yellow: '🟡',
+						green: '🟢',
+						blue: '🔵',
+						pink: '🟣'
+					}[ann.color];
 
 					lines.push(`### ${colorEmoji} ${ann.sectionSlug}`);
 					lines.push('');

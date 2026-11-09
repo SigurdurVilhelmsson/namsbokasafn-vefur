@@ -1,3 +1,6 @@
+<!--
+  Book Layout - Wraps all book-related pages with Header and Sidebar
+-->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
@@ -43,17 +46,14 @@
 		const scrollTop = window.scrollY;
 		const docHeight = document.documentElement.scrollHeight - window.innerHeight;
 		if (docHeight > 0) {
-			scrollProgress = Math.min(100, Math.max(0, scrollTop / docHeight * 100));
+			scrollProgress = Math.min(100, Math.max(0, (scrollTop / docHeight) * 100));
 		} else {
 			scrollProgress = 0;
 		}
 	}
 </script>
 
-<!--
-  Book Layout - Wraps all book-related pages with Header and Sidebar
--->
-<svelte:window onscroll={handleScrollProgress}></svelte:window>
+<svelte:window onscroll={handleScrollProgress} />
 
 {#if !focusMode}
 	<div class="scroll-progress" style="width: {scrollProgress}%"></div>
@@ -85,7 +85,7 @@
 	{#if !focusMode}
 		<Header
 			bind:this={headerComponent}
-			bookSlug={bookSlug}
+			{bookSlug}
 			bookTitle={data.book?.title ?? 'Lesari'}
 			onOpenShortcuts={openShortcuts}
 		/>
@@ -94,10 +94,7 @@
 	<div class="flex">
 		<!-- Hide sidebar in focus mode -->
 		{#if !focusMode}
-			<Sidebar
-				bookSlug={bookSlug}
-				hasPeriodicTable={data.book?.features?.periodicTable ?? false}
-			/>
+			<Sidebar {bookSlug} hasPeriodicTable={data.book?.features?.periodicTable ?? false} />
 		{/if}
 
 		<!-- Main content area with max-width for comfortable reading -->
@@ -117,18 +114,12 @@
 
 	<!-- Focus mode floating navigation -->
 	{#if focusMode}
-		<FocusModeNav
-			bookSlug={bookSlug}
-			onExitFocusMode={toggleFocusMode}
-		/>
+		<FocusModeNav {bookSlug} onExitFocusMode={toggleFocusMode} />
 	{/if}
 
 	<!-- Mobile bottom navigation - hidden in focus mode -->
 	{#if !focusMode}
-		<MobileBottomNav
-			bookSlug={bookSlug}
-			hasPeriodicTable={data.book?.features?.periodicTable ?? false}
-		/>
+		<MobileBottomNav {bookSlug} hasPeriodicTable={data.book?.features?.periodicTable ?? false} />
 	{/if}
 
 	<!-- Pomodoro focus timer -->

@@ -78,8 +78,14 @@ const DOWNLOAD_CONCURRENCY = 4;
 /** Write the held-state record every this many files, so a resume skips them. */
 const FLUSH_EVERY = 50;
 
-const defaultState: OfflineState = { books: {}, currentDownload: null };
-const offlineValidators = { books: isObject };
+const defaultState: OfflineState = {
+	books: {},
+	currentDownload: null
+};
+
+const offlineValidators = {
+	books: isObject
+};
 
 /**
  * Never report a pre-2026-10 download as complete: it lost all but 200 figures to
@@ -172,10 +178,10 @@ function createOfflineStore() {
 		 */
 		forgetBook: (bookSlug: string) =>
 			update((s) => {
-			const books = { ...s.books };
-			delete books[bookSlug];
-			return { ...s, books };
-		}),
+				const books = { ...s.books };
+				delete books[bookSlug];
+				return { ...s, books };
+			}),
 
 		/**
 		 * Mark a download as starting (before its file list is known)
@@ -223,17 +229,17 @@ function createOfflineStore() {
 			failedFiles?: number
 		) =>
 			update((s) => {
-			if (s.currentDownload?.bookSlug !== bookSlug) return s;
-			return {
-				...s,
-				currentDownload: {
-					...s.currentDownload,
-					downloadedFiles,
-					downloadedBytes,
-					failedFiles: failedFiles ?? s.currentDownload.failedFiles
-				}
-			};
-		}),
+				if (s.currentDownload?.bookSlug !== bookSlug) return s;
+				return {
+					...s,
+					currentDownload: {
+						...s.currentDownload,
+						downloadedFiles,
+						downloadedBytes,
+						failedFiles: failedFiles ?? s.currentDownload.failedFiles
+					}
+				};
+			}),
 
 		/**
 		 * Mark a book's download as finished
@@ -251,24 +257,24 @@ function createOfflineStore() {
 		 */
 		setError: (bookSlug: string, error: string) =>
 			update((s) => {
-			const current = s.currentDownload;
-			const busy = current?.status === 'downloading' || current?.status === 'estimating';
-			if (current && current.bookSlug !== bookSlug && busy) return s;
-			return {
-				...s,
-				currentDownload: {
-					bookSlug,
-					totalFiles: 0,
-					downloadedFiles: 0,
-					failedFiles: 0,
-					totalBytes: 0,
-					downloadedBytes: 0,
-					...current?.bookSlug === bookSlug ? current : {},
-					status: 'error',
-					error
-				}
-			};
-		}),
+				const current = s.currentDownload;
+				const busy = current?.status === 'downloading' || current?.status === 'estimating';
+				if (current && current.bookSlug !== bookSlug && busy) return s;
+				return {
+					...s,
+					currentDownload: {
+						bookSlug,
+						totalFiles: 0,
+						downloadedFiles: 0,
+						failedFiles: 0,
+						totalBytes: 0,
+						downloadedBytes: 0,
+						...(current?.bookSlug === bookSlug ? current : {}),
+						status: 'error',
+						error
+					}
+				};
+			}),
 
 		/**
 		 * Clear current download progress
@@ -383,7 +389,7 @@ const normalizePath = (path: string): string =>
 async function readHeld(cache: Cache, bookSlug: string): Promise<HeldState | null> {
 	try {
 		const res = await cache.match(heldStateKey(bookSlug));
-		return res ? await res.json() as HeldState : null;
+		return res ? ((await res.json()) as HeldState) : null;
 	} catch {
 		return null;
 	}
@@ -402,7 +408,7 @@ async function loadManifest(bookSlug: string, toc: TableOfContents): Promise<Off
 	if (toc.offline) {
 		const res = await fetchDirect(`/content/${bookSlug}/offline-manifest.json`);
 		if (!res.ok) throw new Error('Gat ekki hlaðið skráalista bókarinnar');
-		return await res.json() as OfflineManifest;
+		return (await res.json()) as OfflineManifest;
 	}
 
 	const pages = getBookContentUrls(bookSlug, toc).filter((u) => !u.endsWith('/toc.json'));
@@ -430,7 +436,7 @@ export async function loadOfflineToc(bookSlug: string): Promise<TableOfContents 
 	if (!browser) return null;
 	try {
 		const res = await fetch(`/content/${bookSlug}/toc.json`);
-		return res.ok ? await res.json() as TableOfContents : null;
+		return res.ok ? ((await res.json()) as TableOfContents) : null;
 	} catch {
 		return null;
 	}
@@ -472,7 +478,7 @@ class DownloadError extends Error {}
 /** What the reader is shown for a failure; the raw error goes to the console. */
 export function readerMessage(e: unknown): string {
 	if (e instanceof DownloadError) return e.message;
-	if (browser && !navigator.onLine || e instanceof TypeError) {
+	if ((browser && !navigator.onLine) || e instanceof TypeError) {
 		return 'Engin nettenging. Athugaðu tenginguna og reyndu aftur.';
 	}
 	if (e instanceof DOMException && e.name === 'QuotaExceededError') {
@@ -555,7 +561,7 @@ export function downloadBook(bookSlug: string): Promise<DownloadResult> {
 }
 
 async function runDownload(bookSlug: string): Promise<DownloadResult> {
-	if (!await workerServesOfflineBooks()) {
+	if (!(await workerServesOfflineBooks())) {
 		// The update prompt is on screen only when a new worker is waiting.
 		const waiting = (await navigator.serviceWorker?.getRegistration())?.waiting;
 		throw new DownloadError(
@@ -597,13 +603,13 @@ async function runDownload(bookSlug: string): Promise<DownloadResult> {
 		cache.put(
 			heldStateKey(bookSlug),
 			new Response(
-		JSON.stringify({
-			version: manifest.version,
-			complete,
-			total: manifest.files.length,
-			files
-		} satisfies HeldState),
-		{ headers: { 'content-type': 'application/json' } }
+				JSON.stringify({
+					version: manifest.version,
+					complete,
+					total: manifest.files.length,
+					files
+				} satisfies HeldState),
+				{ headers: { 'content-type': 'application/json' } }
 			)
 		);
 
@@ -616,7 +622,7 @@ async function runDownload(bookSlug: string): Promise<DownloadResult> {
 		try {
 			const res = await fetchDirect(f.p);
 			if (!res.ok) throw new Error(`HTTP ${res.status}`);
-			const isPage = (/\.(html|json)$/).test(f.p);
+			const isPage = /\.(html|json)$/.test(f.p);
 			// nginx answers a missing figure with the SPA shell (200, text/html).
 			if (!isPage && (res.headers.get('content-type') ?? '').includes('text/html')) {
 				throw new Error('not an image');
@@ -644,7 +650,7 @@ async function runDownload(bookSlug: string): Promise<DownloadResult> {
 	// (A browser-built list has no version to compare: frozen books.)
 	const endToc = await fetchDirect(tocPath);
 	const endVersion = endToc.ok
-		? (await endToc.clone().json() as TableOfContents).offline?.version ?? null
+		? ((await endToc.clone().json()) as TableOfContents).offline?.version ?? null
 		: undefined;
 	const consistent = endToc.ok && (manifest.version === null || endVersion === manifest.version);
 	if (consistent) await cache.put(tocPath, endToc);

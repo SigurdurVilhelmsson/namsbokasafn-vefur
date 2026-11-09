@@ -446,7 +446,7 @@ export const flashcardSuccessRate = derived(flashcardStore, ($store) => {
 
 	const correct = history.filter((r) => r.wasCorrect).length;
 	return {
-		rate: Math.round(correct / history.length * 100),
+		rate: Math.round((correct / history.length) * 100),
 		total: history.length,
 		correct
 	};

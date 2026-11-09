@@ -36,8 +36,13 @@ interface ObjectivesState {
 	completedObjectives: Record<string, ObjectiveProgress>;
 }
 
-const defaultState: ObjectivesState = { completedObjectives: {} };
-const objectivesValidators = { completedObjectives: isObject };
+const defaultState: ObjectivesState = {
+	completedObjectives: {}
+};
+
+const objectivesValidators = {
+	completedObjectives: isObject
+};
 
 function loadState(): ObjectivesState {
 	if (!browser) return defaultState;

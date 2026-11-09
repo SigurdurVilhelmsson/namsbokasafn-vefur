@@ -245,7 +245,7 @@ function createQuizStore() {
 				}
 
 				const correctCount = newAnswers.filter((a) => a.isCorrect).length;
-				const score = Math.round(correctCount / state.currentSession.questions.length * 100);
+				const score = Math.round((correctCount / state.currentSession.questions.length) * 100);
 
 				return {
 					...state,
@@ -467,10 +467,10 @@ function createQuizStore() {
 			if (!problem) {
 				return { level: 'novice', successRate: 0, attempts: 0 };
 			}
-
-			const successRate = problem.attempts > 0
-				? Math.round(problem.successfulAttempts / problem.attempts * 100)
-				: 0;
+			const successRate =
+				problem.attempts > 0
+					? Math.round((problem.successfulAttempts / problem.attempts) * 100)
+					: 0;
 			return {
 				level: calculateMasteryLevel(successRate, problem.attempts),
 				successRate,
@@ -494,8 +494,14 @@ function createQuizStore() {
 
 			const totalAttempts = problems.reduce((sum, p) => sum + p.attempts, 0);
 			const totalSuccessful = problems.reduce((sum, p) => sum + p.successfulAttempts, 0);
-			const successRate = totalAttempts > 0 ? Math.round(totalSuccessful / totalAttempts * 100) : 0;
-			const lastAttempted = problems.map((p) => p.lastAttempted).filter(Boolean).sort().pop();
+			const successRate =
+				totalAttempts > 0 ? Math.round((totalSuccessful / totalAttempts) * 100) : 0;
+
+			const lastAttempted = problems
+				.map((p) => p.lastAttempted)
+				.filter(Boolean)
+				.sort()
+				.pop();
 
 			// Level, successRate and attempts all use the same totals so the
 			// numbers shown can reproduce the level shown (one merely-viewed
@@ -587,9 +593,10 @@ function createQuizStore() {
 			};
 
 			const scored = problems.map((problem) => {
-				const successRate = problem.attempts > 0
-					? Math.round(problem.successfulAttempts / problem.attempts * 100)
-					: 0;
+				const successRate =
+					problem.attempts > 0
+						? Math.round((problem.successfulAttempts / problem.attempts) * 100)
+						: 0;
 				const level = calculateMasteryLevel(successRate, problem.attempts);
 				const daysSinceAttempt = problem.lastAttempted
 					? (Date.now() - new Date(problem.lastAttempted).getTime()) / (1000 * 60 * 60 * 24)
@@ -629,9 +636,10 @@ function createQuizStore() {
 			const dueForReview = problems.filter((problem) => {
 				if (!problem.lastAttempted) return true;
 
-				const successRate = problem.attempts > 0
-					? Math.round(problem.successfulAttempts / problem.attempts * 100)
-					: 0;
+				const successRate =
+					problem.attempts > 0
+						? Math.round((problem.successfulAttempts / problem.attempts) * 100)
+						: 0;
 				const level = calculateMasteryLevel(successRate, problem.attempts);
 				const daysSinceAttempt =
 					(now - new Date(problem.lastAttempted).getTime()) / (1000 * 60 * 60 * 24);

@@ -1,3 +1,7 @@
+<!--
+  Offline Indicator
+  Shows a small banner when the user is offline (no network connection)
+-->
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
@@ -45,11 +49,6 @@
     showBanner = false;
   }
 </script>
-
-<!--
-  Offline Indicator
-  Shows a small banner when the user is offline (no network connection)
--->
 
 {#if showBanner}
   <div

@@ -1,3 +1,13 @@
+<!--
+  ErrorMessage - Reusable inline error display component
+
+  Usage:
+    <ErrorMessage
+      message="Gat ekki hlaðið efni"
+      type="error"
+      onRetry={() => loadContent()}
+    />
+-->
 <script lang="ts">
 	import { browser } from '$app/env';
 	import Icon from '$lib/components/Icon.svelte';
@@ -50,17 +60,6 @@
 		: message);
 </script>
 
-<!--
-  ErrorMessage - Reusable inline error display component
-
-  Usage:
-    <ErrorMessage
-      message="Gat ekki hlaðið efni"
-      type="error"
-      onRetry={() => loadContent()}
-    />
--->
-
 <div
 	class="rounded-lg border p-4 {style.bg} {style.border}"
 	role="alert"
@@ -78,9 +77,11 @@
 		</div>
 
 		<!-- Content -->
-
 		<div class="flex-1">
-			<p class={style.text}>{displayMessage}</p>
+			<p class="{style.text}">
+				{displayMessage}
+			</p>
+
 			<!-- Actions -->
 			{#if onRetry || showBackLink}
 				<div class="mt-3 flex flex-wrap gap-2">
