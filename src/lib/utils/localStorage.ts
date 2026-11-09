@@ -6,12 +6,10 @@
  */
 
 import { writable } from 'svelte/store';
-import { browser } from '$app/environment';
 
-export interface StorageWarningState {
-	visible: boolean;
-	quotaExceeded: boolean;
-}
+import { browser } from '$app/env';
+
+export interface StorageWarningState { visible: boolean; quotaExceeded: boolean }
 
 const defaultWarning: StorageWarningState = { visible: false, quotaExceeded: false };
 

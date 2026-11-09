@@ -1,11 +1,6 @@
-<!--
-  Print layout — strips all interactive chrome and applies print.css for
-  PDF rendering. The /print/* routes exist solely so Playwright can print
-  them to file via page.pdf(); they are excluded from sitemap and robots.
--->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 
 	let { children }: { children: Snippet } = $props();
 
@@ -20,6 +15,12 @@
 		}
 	});
 </script>
+
+<!--
+  Print layout — strips all interactive chrome and applies print.css for
+  PDF rendering. The /print/* routes exist solely so Playwright can print
+  them to file via page.pdf(); they are excluded from sitemap and robots.
+-->
 
 <svelte:head>
 	<link rel="stylesheet" href="/styles/print.css" />

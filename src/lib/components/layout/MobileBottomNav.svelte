@@ -1,20 +1,11 @@
-<!--
-  MobileBottomNav - Floating Action Button (FAB) for mobile study tools
-  Shows a 48px circle in the bottom-right corner that expands to reveal
-  study tool links (flashcards, glossary, quizzes, periodic table).
-  Hidden on desktop (1024px+ breakpoint).
--->
 <script lang="ts">
 	import { onMount, onDestroy, untrack } from 'svelte';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import Icon from '$lib/components/Icon.svelte';
 
-	interface Props {
-		bookSlug?: string;
-		hasPeriodicTable?: boolean;
-	}
-	let { bookSlug = '', hasPeriodicTable = false }: Props = $props();
+	interface Props { bookSlug?: string; hasPeriodicTable?: boolean }
 
+	let { bookSlug = '', hasPeriodicTable = false }: Props = $props();
 	let expanded = $state(false);
 	// Plain, not $state: the route-change effect below calls close(), which reads
 	// this. As $state it made the timer a dependency of that effect, so opening
@@ -73,7 +64,7 @@
 
 	/** Close on route change */
 	$effect(() => {
-		void $page.url.pathname;
+		void page.url.pathname;
 		untrack(close);
 	});
 
@@ -90,15 +81,15 @@
 
 	/** Study tool definitions */
 	let tools = $derived([
-		...(hasPeriodicTable
+		...hasPeriodicTable
 			? [
-					{
-						href: `/${bookSlug}/lotukerfi`,
-						label: 'Lotukerfi',
-						icon: 'periodic-table' as const
-					}
-				]
-			: []),
+				{
+					href: `/${bookSlug}/lotukerfi`,
+					label: 'Lotukerfi',
+					icon: 'periodic-table' as const
+				}
+			]
+			: [],
 		{
 			href: `/${bookSlug}/prof`,
 			label: 'Próf',
@@ -117,6 +108,12 @@
 	]);
 </script>
 
+<!--
+  MobileBottomNav - Floating Action Button (FAB) for mobile study tools
+  Shows a 48px circle in the bottom-right corner that expands to reveal
+  study tool links (flashcards, glossary, quizzes, periodic table).
+  Hidden on desktop (1024px+ breakpoint).
+-->
 <!-- FAB container — hidden on desktop -->
 <div class="fab-container" class:expanded>
 	<!-- Backdrop when expanded -->
@@ -181,10 +178,10 @@
 			viewBox="0 0 24 24"
 			fill="currentColor"
 		>
-			<rect x="3" y="3" width="8" height="8" rx="1.5" />
-			<rect x="13" y="3" width="8" height="8" rx="1.5" />
-			<rect x="3" y="13" width="8" height="8" rx="1.5" />
-			<rect x="13" y="13" width="8" height="8" rx="1.5" />
+			<rect x="3" y="3" width="8" height="8" rx="1.5"></rect>
+			<rect x="13" y="3" width="8" height="8" rx="1.5"></rect>
+			<rect x="3" y="13" width="8" height="8" rx="1.5"></rect>
+			<rect x="13" y="13" width="8" height="8" rx="1.5"></rect>
 		</svg>
 	</button>
 </div>

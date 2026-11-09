@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { settings, theme } from '$lib/stores';
 	import { onMount } from 'svelte';
 	import type { TableOfContents } from '$lib/types/content';
@@ -25,8 +25,9 @@
 	}
 
 	// Get current route params
-	let chapterSlug = $derived($page.params.chapterSlug);
-	let sectionSlug = $derived($page.params.sectionSlug);
+	let chapterSlug = $derived(page.params.chapterSlug);
+
+	let sectionSlug = $derived(page.params.sectionSlug);
 
 	// Load table of contents
 	onMount(async () => {
@@ -81,7 +82,7 @@
 	}
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window onkeydown={handleKeydown}></svelte:window>
 
 <header class="header">
 	<div class="header-inner">
@@ -123,7 +124,7 @@
 			<!-- Search button. Its name holds the visible "Ctrl+K" hint (WCAG 2.5.3, Label in Name);
 			     axe passes "Leita, Ctrl+K" but not "Leita (Ctrl+K)" or an aria-hidden hint. -->
 			<button
-				onclick={() => (searchOpen = true)}
+				onclick={() => searchOpen = true}
 				class="header-btn"
 				aria-label="Leita, Ctrl+K"
 				title="Leita (Ctrl+K)"
@@ -146,7 +147,7 @@
 
 			<!-- Settings button -->
 			<button
-				onclick={() => (settingsOpen = true)}
+				onclick={() => settingsOpen = true}
 				class="header-btn settings-btn"
 				aria-label="Stillingar"
 				title="Stillingar"
@@ -169,10 +170,19 @@
 </header>
 
 <!-- Search Modal -->
-<SearchModal isOpen={searchOpen} {bookSlug} onClose={() => (searchOpen = false)} />
+
+<SearchModal
+	isOpen={searchOpen}
+	bookSlug={bookSlug}
+	onClose={() => searchOpen = false}
+/>
 
 <!-- Settings Modal -->
-<SettingsModal isOpen={settingsOpen} onClose={() => (settingsOpen = false)} />
+
+<SettingsModal
+	isOpen={settingsOpen}
+	onClose={() => settingsOpen = false}
+/>
 
 <style>
 	/* ====================================
@@ -423,9 +433,22 @@
 		transition: opacity 0.2s, transform 0.3s;
 	}
 
-	.sun-icon { opacity: 1; }
-	.moon-icon { opacity: 0; transform: rotate(-90deg); }
+	.sun-icon {
+		opacity: 1;
+	}
 
-	:global(.dark) .sun-icon { opacity: 0; transform: rotate(90deg); }
-	:global(.dark) .moon-icon { opacity: 1; transform: rotate(0); }
+	.moon-icon {
+		opacity: 0;
+		transform: rotate(-90deg);
+	}
+
+	:global(.dark) .sun-icon {
+		opacity: 0;
+		transform: rotate(90deg);
+	}
+
+	:global(.dark) .moon-icon {
+		opacity: 1;
+		transform: rotate(0);
+	}
 </style>

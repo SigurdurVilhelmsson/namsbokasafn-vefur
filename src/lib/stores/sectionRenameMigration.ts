@@ -6,7 +6,7 @@
  * restored under the new slug. Cheap and idempotent; see sectionRenames.ts.
  */
 
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import type { TableOfContents } from '$lib/types/content';
 import { resolveActiveRenames } from '$lib/utils/sectionRenames';
 import { reader } from './reader';

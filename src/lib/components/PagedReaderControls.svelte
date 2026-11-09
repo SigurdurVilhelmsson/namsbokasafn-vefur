@@ -1,22 +1,8 @@
-<!--
-  PagedReaderControls - Hybrid viewport-aware pagination (reader plan P0.4)
-
-  Outer level: the sub-section boundaries already present in the prerendered
-  HTML (article.cnx-module > main > section, or efni's planned .cnx-body in
-  place of main; buildUnits and MODULE_BODY_SELECTOR in utils/paginate.ts).
-  Inner level: viewport-fitting page splits computed by utils/paginate.ts over
-  measured block heights.
-
-  Pages are applied by HIDING out-of-page blocks rather than moving them:
-  the DOM the content actions (practiceReveal, glossaryTerms, equations, ...) enhanced
-  stays intact, so their listeners survive page turns. Restoring visibility
-  (mode switch, destroy, failure) returns the exact scrolled experience.
--->
 <script lang="ts">
 	import { tick, untrack } from 'svelte';
 	import { get } from 'svelte/store';
 	import Icon from '$lib/components/Icon.svelte';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { settings } from '$lib/stores/settings';
 	// Aliased: the component has its own announce() and announcement
 	import { announce as speak, announcement as liveText } from '$lib/stores/announcer';
@@ -244,11 +230,8 @@
 
 	function contentRoot(): HTMLElement | null {
 		if (!container) return null;
-		return (
-			container.querySelector<HTMLElement>('article.cnx-module') ??
-			container.querySelector<HTMLElement>('.reading-content') ??
-			container
-		);
+
+		return container.querySelector<HTMLElement>('article.cnx-module') ?? container.querySelector<HTMLElement>('.reading-content') ?? container;
 	}
 
 	/** A block's height with both its margins, and the margins, which paginate() collapses with a
@@ -287,7 +270,7 @@
 		const { page: viewportH, firstPage } = availableHeights();
 		heights = { page: viewportH, firstPage };
 		for (const [u, unit] of units.entries()) {
-			unit.cuts = unit.children.map((el) => (EXAMPLE_BREAK_TRIAL ? exampleCut(el) : null));
+			unit.cuts = unit.children.map((el) => EXAMPLE_BREAK_TRIAL ? exampleCut(el) : null);
 			const items = unit.children.map((el, i) => {
 				const cut = unit.cuts[i];
 				return {
@@ -456,7 +439,7 @@
 	 * block instead of the section's top.
 	 */
 	export function isPageHash(hash: string): boolean {
-		return decodePageHash(hash) !== null || (hash !== '' && hash === writtenHash);
+		return decodePageHash(hash) !== null || hash !== '' && hash === writtenHash;
 	}
 
 	/**
@@ -682,7 +665,7 @@
 
 	/** The element an element deep link points at, or null for #sub-… and none */
 	function elementForHash(hash: string): HTMLElement | null {
-		if (hash.length <= 1 || /^#sub-\d+/.test(hash)) return null;
+		if (hash.length <= 1 || (/^#sub-\d+/).test(hash)) return null;
 		try {
 			return contentRoot()?.querySelector<HTMLElement>(`#${CSS.escape(hash.slice(1))}`) ?? null;
 		} catch {
@@ -923,7 +906,7 @@
 			const anchor =
 				before && held && units[before.unit]
 					? { unit: before.unit, item: pieceOf(units[before.unit].pieces, held.block, held.part) }
-					: null;
+				: null;
 
 			// A deep-link target outranks the page's first block: a late image
 			// can push the target onto the next page, which used to hide it
@@ -1026,7 +1009,7 @@
 			barTop - lastEdge + (parseFloat(getComputedStyle(navEl).marginTop) || 0) + navEl.offsetHeight;
 		if (!(measured > 0)) return;
 		const off = measured - gapBelow;
-		if (off > 8 || (!growOnly && off < -8)) {
+		if (off > 8 || !growOnly && off < -8) {
 			gapBelow = measured;
 			recompute();
 		}
@@ -1219,6 +1202,21 @@
 	let lastPage = $derived(current === flatPages.length - 1);
 	let label = $derived(flat ? positionLabel(flat, pageCounts(), unitKinds()) : '');
 </script>
+
+<!--
+  PagedReaderControls - Hybrid viewport-aware pagination (reader plan P0.4)
+
+  Outer level: the sub-section boundaries already present in the prerendered
+  HTML (article.cnx-module > main > section, or efni's planned .cnx-body in
+  place of main; buildUnits and MODULE_BODY_SELECTOR in utils/paginate.ts).
+  Inner level: viewport-fitting page splits computed by utils/paginate.ts over
+  measured block heights.
+
+  Pages are applied by HIDING out-of-page blocks rather than moving them:
+  the DOM the content actions (practiceReveal, glossaryTerms, equations, ...) enhanced
+  stays intact, so their listeners survive page turns. Restoring visibility
+  (mode switch, destroy, failure) returns the exact scrolled experience.
+-->
 
 {#if ready && !failed && flatPages.length > 0}
 	<!-- 'Síðuflakk', 'Fyrri síða', 'Fyrri', 'Næsta síða' and 'Næsta', as v1.1 wrote them at

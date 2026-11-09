@@ -1,11 +1,8 @@
-<!--
-  SearchModal - Global search modal with fuzzy search (⌘K / Ctrl+K)
--->
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { goto } from '$app/navigation';
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { fade, scale } from 'svelte/transition';
 	import { loadTableOfContents } from '$lib/utils/contentLoader';
 	import {
@@ -23,13 +20,9 @@
 	} from '$lib/utils/searchIndex';
 	import type { TableOfContents } from '$lib/types/content';
 
-	interface Props {
-		isOpen?: boolean;
-		bookSlug?: string;
-		onClose?: () => void;
-	}
-	let { isOpen = false, bookSlug = '', onClose }: Props = $props();
+	interface Props { isOpen?: boolean; bookSlug?: string; onClose?: () => void }
 
+	let { isOpen = false, bookSlug = '', onClose }: Props = $props();
 	let query = $state('');
 	let results: SearchResult[] = $state<SearchResult[]>([]);
 	let loading = $state(false);
@@ -212,7 +205,10 @@
 	});
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<!--
+  SearchModal - Global search modal with fuzzy search (⌘K / Ctrl+K)
+-->
+<svelte:window onkeydown={handleKeydown}></svelte:window>
 
 {#if isOpen}
 	<!-- Backdrop -->
@@ -263,13 +259,29 @@
 						/>
 						<div class="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1">
 							{#if loading}
-								<svg class="h-5 w-5 animate-spin text-[var(--accent-strong)]" fill="none" viewBox="0 0 24 24">
-									<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-									<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+								<svg
+									class="h-5 w-5 animate-spin text-[var(--accent-strong)]"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										class="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										stroke-width="4"
+									></circle>
+
+									<path
+										class="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
 								</svg>
 							{/if}
 							<button
-								onclick={() => (showFilters = !showFilters)}
+								onclick={() => showFilters = !showFilters}
 								class="rounded p-1 transition-colors {showFilters || hasActiveFilters
 									? 'bg-[var(--accent-color)]/10 text-[var(--accent-strong)]'
 									: 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'}"
@@ -316,10 +328,28 @@
 
 					<!-- Indexing indicator -->
 					{#if indexing}
-						<div class="flex items-center justify-center gap-2 text-sm text-[var(--text-secondary)]">
-							<svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
-								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+						<div
+							class="flex items-center justify-center gap-2 text-sm text-[var(--text-secondary)]"
+						>
+							<svg
+								class="h-4 w-4 animate-spin"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								></circle>
+
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								></path>
 							</svg>
 							Byggir leitarvísitölu...
 						</div>
@@ -405,9 +435,14 @@
 						<!-- A failed search says so, not 'Engar niðurstöður fundust' ([USER]'s wording). Checked by [USER] as D20 batch 11 (2026-11-07). -->
 						<p class="text-center text-sm text-[var(--text-secondary)]">Leitin tókst ekki. Reyndu aftur.</p>
 					{:else if query.length >= 2 && !loading && results.length === 0}
-						<p class="text-center text-sm text-[var(--text-secondary)]">
-							Engar niðurstöður fundust fyrir &quot;{query}&quot;
-							{#if selectedChapter}í völdum kafla{/if}
+						<p
+							class="text-center text-sm text-[var(--text-secondary)]"
+						>
+							Engar niðurstöður fundust fyrir "{query}" 
+
+							{#if selectedChapter}
+								í völdum kafla
+							{/if}
 						</p>
 					{/if}
 

@@ -1,10 +1,7 @@
-<!--
-  Section View Page - Renders a book section with markdown content
--->
 <script lang="ts">
 	import { onMount, onDestroy, tick } from 'svelte';
 	import { afterNavigate, beforeNavigate } from '$app/navigation';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import type { PageData } from './$types';
 	import { reader, analyticsStore, objectivesStore } from '$lib/stores';
 	import {
@@ -176,7 +173,7 @@
 		const scrollTop = window.scrollY;
 		const docHeight = document.documentElement.scrollHeight - window.innerHeight;
 		if (docHeight > 0) {
-			const progress = Math.round((scrollTop / docHeight) * 100);
+			const progress = Math.round(scrollTop / docHeight * 100);
 			reader.setScrollProgress(progress);
 		}
 	}
@@ -190,7 +187,9 @@
 	// onMount. afterNavigate also fires on initial mount; the key guard skips
 	// hash-only navigations within the same section.
 	let activeSectionKey = '';
-	afterNavigate(() => {
+
+	afterNavigate(({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
 		if (sectionKey === activeSectionKey) return;
 		activeSectionKey = sectionKey;
 
@@ -243,11 +242,13 @@
 
 	// Save scroll position before navigating away; not while the pager works, whose scroll
 	// position says which page was shown, not how far the reader got (CODE-07)
-	beforeNavigate(() => {
+	beforeNavigate(({ shallow, type }) => {
+		if (shallow && type === 'goto') return;
+
 		if (browser && !pagerWorking) {
 			const scrollTop = window.scrollY;
 			const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-			const percentage = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
+			const percentage = docHeight > 0 ? Math.round(scrollTop / docHeight * 100) : 0;
 			reader.saveScrollPosition(data.bookSlug, data.chapterSlug, data.sectionSlug, scrollTop, percentage);
 		} else if (browser) {
 			// Paged, the place, not the scroll position (S11.3): its part and first block, and the
@@ -439,7 +440,7 @@
 	 * toolbar's.
 	 */
 	async function chooseMode(mode: ReadingMode, { fromPager = false } = {}) {
-		if ((mode === 'paged') === paged) return;
+		if (mode === 'paged' === paged) return;
 		// A local count, per book, for calls 1 and 3 (S9.5, PED-17); never sent
 		analyticsStore.countEvent(data.bookSlug, mode === 'paged' ? 'switchToPaged' : 'switchToScrolled');
 		linkMode = null;
@@ -515,6 +516,10 @@
 		)
 	);
 </script>
+
+<!--
+  Section View Page - Renders a book section with markdown content
+-->
 
 <svelte:head>
 	<title>{data.section.section} {data.section.title} | Námsbókasafn</title>
@@ -655,7 +660,7 @@
 			</button>
 			<!-- Annotations button -->
 			<button
-				onclick={() => (showAnnotationSidebar = true)}
+				onclick={() => showAnnotationSidebar = true}
 				class="p-2 rounded-lg transition-colors text-[var(--text-tertiary)] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-strong)]"
 				aria-label="Opna athugasemdir"
 				title="Athugasemdir"
@@ -669,8 +674,18 @@
 					: 'text-[var(--text-tertiary)] hover:bg-gray-100 dark:hover:bg-gray-800'}"
 				aria-label={isBookmarked ? 'Fjarlægja bókamerki' : 'Bæta við bókamerki'}
 			>
-				<svg class="w-5 h-5" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+				<svg
+					class="w-5 h-5"
+					fill={isBookmarked ? 'currentColor' : 'none'}
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+					></path>
 				</svg>
 			</button>
 			{#if !isRead}
@@ -728,7 +743,7 @@
 								<span class="text-xs font-medium text-[var(--accent-strong)]">{i + 1}</span>
 							{/if}
 						</button>
-						<span class="{completed ? 'line-through opacity-70' : ''}">{objective}</span>
+						<span class={completed ? 'line-through opacity-70' : ''}>{objective}</span>
 					</li>
 				{/each}
 			</ul>
@@ -835,14 +850,14 @@
 					if (state === 'ready') offerPlace();
 				}}
 				covered={endCovered}
-				onuncover={() => (endUncovered = true)}
-				{startAt}
+				onuncover={() => endUncovered = true}
+				startAt={startAt}
 				onleave={() => chooseMode('scrolled', { fromPager: true })}
 				lead={pageLead ?? null}
 				mtReport={unreviewed
 					? feedbackHref({ bok: data.bookSlug, kafli: data.chapterSlug, hluti: data.sectionSlug })
 					: null}
-				onreserve={(px) => (pagedReserve = px)}
+				onreserve={(px) => pagedReserve = px}
 				ontallpage={() => analyticsStore.countEvent(data.bookSlug, 'pageTooTall')}
 				onposition={(p) => {
 					reader.setScrollProgress(pageProgress(p.index, p.total));
@@ -903,7 +918,7 @@
 <!-- Annotation Sidebar -->
 <AnnotationSidebar
 	isOpen={showAnnotationSidebar}
-	onClose={() => (showAnnotationSidebar = false)}
+	onClose={() => showAnnotationSidebar = false}
 	bookSlug={data.bookSlug}
 	currentChapter={data.chapterSlug}
 	currentSection={data.sectionSlug}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import { settings, sidebarOpen, reader } from '$lib/stores';
 	import { isSectionRead, calcChapterProgress, scrollProgress } from '$lib/stores/reader';
 	import { onMount } from 'svelte';
@@ -8,20 +8,18 @@
 	import Skeleton from '$lib/components/Skeleton.svelte';
 	import Icon from '$lib/components/Icon.svelte';
 
-	interface Props {
-		bookSlug?: string;
-		hasPeriodicTable?: boolean;
-	}
-	let { bookSlug = '', hasPeriodicTable = false }: Props = $props();
+	interface Props { bookSlug?: string; hasPeriodicTable?: boolean }
 
+	let { bookSlug = '', hasPeriodicTable = false }: Props = $props();
 	let toc: TableOfContents | null = $state(null);
 	let manuallyToggledChapters: Set<number> = $state(new Set());
 	let appendicesExpanded = $state(false);
 	let answerKeyExpanded = $state(false);
 
 	// Get current route params
-	let chapterParam = $derived($page.params.chapterSlug);
-	let sectionParam = $derived($page.params.sectionSlug);
+	let chapterParam = $derived(page.params.chapterSlug);
+
+	let sectionParam = $derived(page.params.sectionSlug);
 
 	// Subscribe to reader progress for reactivity
 	let progress = $derived($reader.progress);
@@ -206,8 +204,8 @@
 
 							<!-- Sections -->
 							{#if expanded}
-								{@const bodySections = chapter.sections.filter(s => !s.type || !reviewTypes.has(s.type))}
-								{@const reviewSections = chapter.sections.filter(s => s.type && reviewTypes.has(s.type))}
+								{@const bodySections = chapter.sections.filter((s) => !s.type || !reviewTypes.has(s.type))}
+								{@const reviewSections = chapter.sections.filter((s) => s.type && reviewTypes.has(s.type))}
 								{@const reviewExpanded = reviewExpandedChapters.has(chapter.number)}
 								<ul id="chapter-{chapter.number}-sections" class="section-list">
 									{#each bodySections as section (section.file)}
@@ -232,17 +230,17 @@
 																	fill="none"
 																	stroke="var(--border-color)"
 																	stroke-width="2"
-																/>
+																></circle>
 																<circle
 																	cx="10" cy="10" r="8"
 																	fill="none"
 																	stroke="var(--accent-strong)"
 																	stroke-width="2"
 																	stroke-dasharray="50.27"
-																	stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)}
+																	stroke-dashoffset={50.27 - 50.27 * $scrollProgress / 100}
 																	stroke-linecap="round"
 																	class="section-ring-progress"
-																/>
+																></circle>
 															</svg>
 															<span class="section-dot section-dot--current"></span>
 														</span>
@@ -254,8 +252,18 @@
 													<span class="section-title">{section.number} {section.title}</span>
 													{#if readingTime && !isReadSection}
 														<span class="section-meta">
-															<svg class="section-meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-																<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+															<svg
+																class="section-meta-icon"
+																fill="none"
+																stroke="currentColor"
+																viewBox="0 0 24 24"
+															>
+																<path
+																	stroke-linecap="round"
+																	stroke-linejoin="round"
+																	stroke-width="2"
+																	d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+																></path>
 															</svg>
 															{readingTime} min
 														</span>
@@ -296,8 +304,27 @@
 																	{:else if isCurrent}
 																		<span class="section-progress-ring">
 																			<svg class="section-ring-svg" viewBox="0 0 20 20">
-																				<circle cx="10" cy="10" r="8" fill="none" stroke="var(--border-color)" stroke-width="2" />
-																				<circle cx="10" cy="10" r="8" fill="none" stroke="var(--accent-strong)" stroke-width="2" stroke-dasharray="50.27" stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)} stroke-linecap="round" class="section-ring-progress" />
+																				<circle
+																					cx="10"
+																					cy="10"
+																					r="8"
+																					fill="none"
+																					stroke="var(--border-color)"
+																					stroke-width="2"
+																				></circle>
+
+																				<circle
+																					cx="10"
+																					cy="10"
+																					r="8"
+																					fill="none"
+																					stroke="var(--accent-strong)"
+																					stroke-width="2"
+																					stroke-dasharray="50.27"
+																					stroke-dashoffset={50.27 - 50.27 * $scrollProgress / 100}
+																					stroke-linecap="round"
+																					class="section-ring-progress"
+																				></circle>
 																			</svg>
 																			<span class="section-dot section-dot--current"></span>
 																		</span>
@@ -309,8 +336,18 @@
 																	<span class="section-title">{section.title}</span>
 																	{#if readingTime && !isReadSection}
 																		<span class="section-meta">
-																			<svg class="section-meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-																				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+																			<svg
+																				class="section-meta-icon"
+																				fill="none"
+																				stroke="currentColor"
+																				viewBox="0 0 24 24"
+																			>
+																				<path
+																					stroke-linecap="round"
+																					stroke-linejoin="round"
+																					stroke-width="2"
+																					d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+																				></path>
 																			</svg>
 																			{readingTime} min
 																		</span>
@@ -339,8 +376,27 @@
 														{:else if isCurrent}
 															<span class="section-progress-ring">
 																<svg class="section-ring-svg" viewBox="0 0 20 20">
-																	<circle cx="10" cy="10" r="8" fill="none" stroke="var(--border-color)" stroke-width="2" />
-																	<circle cx="10" cy="10" r="8" fill="none" stroke="var(--accent-strong)" stroke-width="2" stroke-dasharray="50.27" stroke-dashoffset={50.27 - (50.27 * $scrollProgress / 100)} stroke-linecap="round" class="section-ring-progress" />
+																	<circle
+																		cx="10"
+																		cy="10"
+																		r="8"
+																		fill="none"
+																		stroke="var(--border-color)"
+																		stroke-width="2"
+																	></circle>
+
+																	<circle
+																		cx="10"
+																		cy="10"
+																		r="8"
+																		fill="none"
+																		stroke="var(--accent-strong)"
+																		stroke-width="2"
+																		stroke-dasharray="50.27"
+																		stroke-dashoffset={50.27 - 50.27 * $scrollProgress / 100}
+																		stroke-linecap="round"
+																		class="section-ring-progress"
+																	></circle>
 																</svg>
 																<span class="section-dot section-dot--current"></span>
 															</span>
@@ -352,8 +408,18 @@
 														<span class="section-title">{section.title}</span>
 														{#if readingTime && !isReadSection}
 															<span class="section-meta">
-																<svg class="section-meta-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-																	<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+																<svg
+																	class="section-meta-icon"
+																	fill="none"
+																	stroke="currentColor"
+																	viewBox="0 0 24 24"
+																>
+																	<path
+																		stroke-linecap="round"
+																		stroke-linejoin="round"
+																		stroke-width="2"
+																		d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+																	></path>
 																</svg>
 																{readingTime} min
 															</span>
@@ -395,7 +461,7 @@
 										? `/${bookSlug}${appendix.componentPath}`
 										: `/${bookSlug}/vidauki/${appendix.letter}`}
 									<li>
-										<a {href} class="section-link">
+										<a href={href} class="section-link">
 											<span class="appendix-letter">{appendix.letter}</span>
 											<span class="section-title">{appendix.title}</span>
 										</a>

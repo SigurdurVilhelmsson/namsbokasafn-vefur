@@ -1,11 +1,8 @@
-<!--
-  Root Layout - Global styles and theme management
--->
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { onMount } from 'svelte';
 	import { theme } from '$lib/stores';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { migrateStorageKeys } from '$lib/utils/storageMigration';
 	import PWAUpdater from '$lib/components/PWAUpdater.svelte';
 	import OfflineIndicator from '$lib/components/OfflineIndicator.svelte';
@@ -27,6 +24,10 @@
 		}
 	});
 </script>
+
+<!--
+  Root Layout - Global styles and theme management
+-->
 
 <svelte:head>
 	<!-- No site-wide description: every page sets its own, and a default here

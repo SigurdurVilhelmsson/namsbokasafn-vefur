@@ -5,7 +5,7 @@
  * when the element becomes visible, indicating the user has scrolled to the end.
  */
 
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 
 export interface ReadDetectionOptions {
 	/** Callback when section end is detected */

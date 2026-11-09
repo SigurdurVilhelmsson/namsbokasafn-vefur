@@ -4,7 +4,7 @@
  */
 
 import { writable, derived, get } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isArray, isObject, isNullOrString, isNumber, isBoolean } from '$lib/utils/storeValidation';
 import type {
@@ -446,7 +446,7 @@ export const flashcardSuccessRate = derived(flashcardStore, ($store) => {
 
 	const correct = history.filter((r) => r.wasCorrect).length;
 	return {
-		rate: Math.round((correct / history.length) * 100),
+		rate: Math.round(correct / history.length * 100),
 		total: history.length,
 		correct
 	};

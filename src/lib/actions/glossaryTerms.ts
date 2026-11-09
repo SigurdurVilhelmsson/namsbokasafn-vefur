@@ -17,7 +17,7 @@
  * carries both; tier 4 must stay until no published page relies on it.
  */
 
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { glossaryStore } from '$lib/stores/glossary';
 import { glossaryHighlighting, showTermEnglish } from '$lib/stores/settings';
 import { get } from 'svelte/store';
@@ -214,14 +214,14 @@ function splitCompositeParts(text: string): string[] {
 function singularize(word: string): string[] {
 	if (word.length <= 3) return [];
 	const candidates: string[] = [];
-	if (/[^aeiou]ies$/i.test(word)) {
+	if ((/[^aeiou]ies$/i).test(word)) {
 		candidates.push(word.slice(0, -3) + 'y');
 	}
-	if (/(?:s|x|z|ch|sh)es$/i.test(word)) {
+	if ((/(?:s|x|z|ch|sh)es$/i).test(word)) {
 		candidates.push(word.slice(0, -2));
 		candidates.push(word.slice(0, -1));
 	}
-	if (candidates.length === 0 && /[^s]s$/i.test(word)) {
+	if (candidates.length === 0 && (/[^s]s$/i).test(word)) {
 		candidates.push(word.slice(0, -1));
 	}
 	return candidates;
@@ -443,15 +443,9 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 				// the element's own data-en over the glossary's `english` here: the
 				// glossary value is systematically lowercased, so without this a
 				// screen-reader user hears a different string than the one on screen.
-				const ariaEnglish =
-					(dfnEl.getAttribute('data-en') || '').replace(/\s+/g, ' ').trim() ||
-					glossaryTerm.english ||
-					'';
-				dfnEl.setAttribute(
-					'aria-label',
-					`Skilgreining: ${glossaryTerm.term}` + (ariaEnglish ? ` (${ariaEnglish})` : '')
-				);
+				const ariaEnglish = (dfnEl.getAttribute('data-en') || '').replace(/\s+/g, ' ').trim() || glossaryTerm.english || '';
 
+				dfnEl.setAttribute('aria-label', `Skilgreining: ${glossaryTerm.term}` + (ariaEnglish ? ` (${ariaEnglish})` : ''));
 				processedDfnElements.push(dfnEl);
 
 				// Desktop: hover to show

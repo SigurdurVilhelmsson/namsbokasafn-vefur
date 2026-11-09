@@ -1,11 +1,8 @@
-<!--
-  KeyboardShortcutsModal - Shows all keyboard shortcuts with editing capability
--->
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
 	import { fade, scale } from 'svelte/transition';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 	import { settings, type ShortcutAction } from '$lib/stores/settings';
 	import {
 		getShortcuts,
@@ -180,6 +177,10 @@
 		};
 	});
 </script>
+
+<!--
+  KeyboardShortcutsModal - Shows all keyboard shortcuts with editing capability
+-->
 
 {#if isOpen}
 	<div

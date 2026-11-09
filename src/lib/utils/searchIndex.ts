@@ -4,7 +4,7 @@
  * Index building and search operations are offloaded to a web worker
  * to prevent blocking the main thread.
  */
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import type { TableOfContents } from '$lib/types/content';
 import { getChapterPath, getSectionPath, getChapterFolder } from '$lib/utils/contentLoader';
 import { escapeHtml } from '$lib/utils/html';
@@ -110,17 +110,17 @@ class SearchIndexWorker {
 				break;
 
 			case 'search-results': {
-				// Resolve the oldest pending search
-				// Note: This simple approach assumes searches complete in order
-				// For production, you'd want to use unique IDs
-				const entry = this.pendingSearches.entries().next().value;
-				if (entry) {
-					const [searchId, pending] = entry;
-					pending.resolve(response.results);
-					this.pendingSearches.delete(searchId);
+					// Resolve the oldest pending search
+					// Note: This simple approach assumes searches complete in order
+					// For production, you'd want to use unique IDs
+					const entry = this.pendingSearches.entries().next().value;
+					if (entry) {
+						const [searchId, pending] = entry;
+						pending.resolve(response.results);
+						this.pendingSearches.delete(searchId);
+					}
+					break;
 				}
-				break;
-			}
 
 			case 'cleared':
 				this.isReady = false;
@@ -186,25 +186,25 @@ class SearchIndexWorker {
 				const chapterPath = getChapterPath(chapter);
 				const sectionPath = getSectionPath(section);
 
-				try {
+			try {
 					const response = await fetch(
 						`/content/${bookSlug}/chapters/${chapterFolder}/${section.file}`
 					);
-					if (!response.ok) return;
+				if (!response.ok) return;
 
-					const content = await response.text();
+				const content = await response.text();
 
-					slots[i] = {
-						chapterSlug: chapterPath,
-						sectionSlug: sectionPath,
-						chapterTitle: chapter.title,
-						sectionTitle: section.title,
-						sectionNumber: section.number,
-						content
-					};
+				slots[i] = {
+					chapterSlug: chapterPath,
+					sectionSlug: sectionPath,
+					chapterTitle: chapter.title,
+					sectionTitle: section.title,
+					sectionNumber: section.number,
+					content
+				};
 				} catch (error) {
-					console.error(`Villa við að hlaða ${chapterPath}/${sectionPath}:`, error);
-				}
+				console.error(`Villa við að hlaða ${chapterPath}/${sectionPath}:`, error);
+			}
 			}
 		);
 
@@ -217,11 +217,11 @@ class SearchIndexWorker {
 					reject(new Error('Search index build timeout'));
 				}, 30000);
 
-				const originalHandler = this.worker!.onmessage;
-				this.worker!.onmessage = (event: MessageEvent<WorkerResponse>) => {
+				const originalHandler = (this.worker!).onmessage;
+				(this.worker!).onmessage = (event: MessageEvent<WorkerResponse>) => {
 					if (event.data.type === 'build-complete' || event.data.type === 'build-error') {
 						clearTimeout(timeout);
-						this.worker!.onmessage = originalHandler;
+						(this.worker!).onmessage = originalHandler;
 
 						if (event.data.type === 'build-error') {
 							reject(new Error(event.data.error));
@@ -232,12 +232,9 @@ class SearchIndexWorker {
 					}
 				};
 
-				const message: WorkerMessage = {
-					type: 'build',
-					documents,
-					bookSlug
-				};
-				this.worker!.postMessage(message);
+				const message: WorkerMessage = { type: 'build', documents, bookSlug };
+
+				(this.worker!).postMessage(message);
 			});
 		} else {
 			// Fallback: build index on main thread (should rarely happen)
@@ -264,11 +261,11 @@ class SearchIndexWorker {
 					reject(new Error('Search timeout'));
 				}, 5000);
 
-				const originalHandler = this.worker!.onmessage;
-				this.worker!.onmessage = (event: MessageEvent<WorkerResponse>) => {
+				const originalHandler = (this.worker!).onmessage;
+				(this.worker!).onmessage = (event: MessageEvent<WorkerResponse>) => {
 					if (event.data.type === 'search-results') {
 						clearTimeout(timeout);
-						this.worker!.onmessage = originalHandler;
+						(this.worker!).onmessage = originalHandler;
 						this.pendingSearches.delete(searchId);
 						resolve(event.data.results);
 					} else {
@@ -282,12 +279,9 @@ class SearchIndexWorker {
 					workerFilters.chapterSlug = filters.chapterSlug;
 				}
 
-				const message: WorkerMessage = {
-					type: 'search',
-					query,
-					filters: workerFilters
-				};
-				this.worker!.postMessage(message);
+				const message: WorkerMessage = { type: 'search', query, filters: workerFilters };
+
+				(this.worker!).postMessage(message);
 			});
 		}
 

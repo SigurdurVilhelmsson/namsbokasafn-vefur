@@ -5,7 +5,7 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { type SectionRename, renameInReader } from '$lib/utils/sectionRenames';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import {
 	createSectionKey,
 	createChapterPrefix,
@@ -18,14 +18,8 @@ import { validateStoreData, isObject, isNullOrString, isArray, isNumber } from '
 
 const STORAGE_KEY = 'namsbokasafn:reader';
 
-export interface SectionProgress {
-	read: boolean;
-	lastVisited: string;
-}
-
-export interface ReadingProgress {
-	[sectionId: string]: SectionProgress;
-}
+export interface SectionProgress { read: boolean; lastVisited: string }
+export interface ReadingProgress { [sectionId: string]: SectionProgress }
 
 export interface ScrollPosition {
 	scrollY: number; // Absolute scroll position in pixels
@@ -51,8 +45,8 @@ export interface PagePlace {
 export function readPagePlace(value: unknown): PagePlace | null {
 	if (!value || typeof value !== 'object') return null;
 	const { unit, block, item } = value as Record<string, unknown>;
-	const index = (n: unknown): n is number => Number.isInteger(n) && (n as number) >= 0;
-	if (!index(unit) || !index(item) || (block !== null && typeof block !== 'string')) return null;
+	const index = (n: unknown): n is number => Number.isInteger(n) && n as number >= 0;
+	if (!index(unit) || !index(item) || block !== null && typeof block !== 'string') return null;
 	return { unit, block, item };
 }
 
@@ -177,12 +171,9 @@ function createReaderStore() {
 
 			const { progress } = get({ subscribe });
 			const chapterPrefix = createChapterPrefix(bookSlug, chapterSlug);
+			const readCount = Object.entries(progress).filter(([sectionId, data]) => sectionId.startsWith(chapterPrefix) && data.read).length;
 
-			const readCount = Object.entries(progress).filter(
-				([sectionId, data]) => sectionId.startsWith(chapterPrefix) && data.read
-			).length;
-
-			return Math.round((readCount / totalSections) * 100);
+			return Math.round(readCount / totalSections * 100);
 		},
 
 		// Set current location
@@ -276,7 +267,7 @@ function createReaderStore() {
 						scrollY,
 						percentage,
 						timestamp: getCurrentTimestamp(),
-						...(page ? { page } : {})
+						...page ? { page } : {}
 					}
 				}
 			}));
@@ -344,10 +335,9 @@ export function calcChapterProgress(
 ): number {
 	if (totalSections <= 0) return 0;
 	const chapterPrefix = createChapterPrefix(bookSlug, chapterSlug);
-	const readCount = Object.entries(progress).filter(
-		([sectionId, data]) => sectionId.startsWith(chapterPrefix) && data.read
-	).length;
-	return Math.round((readCount / totalSections) * 100);
+	const readCount = Object.entries(progress).filter(([sectionId, data]) => sectionId.startsWith(chapterPrefix) && data.read).length;
+
+	return Math.round(readCount / totalSections * 100);
 }
 
 /**

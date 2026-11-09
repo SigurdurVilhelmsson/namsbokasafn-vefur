@@ -12,7 +12,7 @@
  */
 
 import { writable, derived, get } from 'svelte/store';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isArray } from '$lib/utils/storeValidation';
 import { generateId, getCurrentTimestamp } from '$lib/utils/storeHelpers';

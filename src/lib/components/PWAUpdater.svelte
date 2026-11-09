@@ -1,16 +1,7 @@
-<!--
-  PWAUpdater - Handles service worker registration and update prompts
-
-  Features:
-  - Registers service worker with periodic update checks
-  - Shows "offline ready" notification when app is cached
-  - Shows "update available" prompt with update/dismiss options
-  - Handles update errors gracefully
--->
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import { browser } from '$app/environment';
+	import { browser } from '$app/env';
 
 	let needRefresh = $state(false);
 	let offlineReady = $state(false);
@@ -117,6 +108,15 @@
 	});
 </script>
 
+<!--
+  PWAUpdater - Handles service worker registration and update prompts
+
+  Features:
+  - Registers service worker with periodic update checks
+  - Shows "offline ready" notification when app is cached
+  - Shows "update available" prompt with update/dismiss options
+  - Handles update errors gracefully
+-->
 <!-- Offline Ready Notification -->
 {#if offlineReady}
 	<div

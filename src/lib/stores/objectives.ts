@@ -5,7 +5,7 @@
 
 import { writable, derived, get } from 'svelte/store';
 import { type SectionRename, renameInObjectives } from '$lib/utils/sectionRenames';
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { safeSetItem, onStorageChange } from '$lib/utils/localStorage';
 import { validateStoreData, isObject } from '$lib/utils/storeValidation';
 import {
@@ -36,13 +36,8 @@ interface ObjectivesState {
 	completedObjectives: Record<string, ObjectiveProgress>;
 }
 
-const defaultState: ObjectivesState = {
-	completedObjectives: {}
-};
-
-const objectivesValidators = {
-	completedObjectives: isObject
-};
+const defaultState: ObjectivesState = { completedObjectives: {} };
+const objectivesValidators = { completedObjectives: isObject };
 
 function loadState(): ObjectivesState {
 	if (!browser) return defaultState;

@@ -3,7 +3,7 @@
  * Migrates localStorage from old hyphenated keys to new colon-separated namespace
  */
 
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 import { BROWSE_IMAGE_CACHE, CONTENT_CACHE, OFFLINE_CACHE_PREFIX } from '$lib/sw/runtimeCaching';
 import { suspendWritesUntilReload } from '$lib/utils/localStorage';
 
