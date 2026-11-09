@@ -120,7 +120,7 @@ were re-run on this report's own commit, with no `build/` in the tree.
 - Docs: CLAUDE.md's "Path alias", `svelte.config.js` mentions (fallback, prerender) and the
   status block.
 
-## Decisions for Siggi
+## Decisions for [USER]
 
 - **`$lib` or `#lib`.** The trial keeps `$lib` with an explicit alias, but kit 3 warns that
   `config.alias` "is deprecated, and will be removed in a future version". The codemod's
