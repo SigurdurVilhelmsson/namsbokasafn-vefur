@@ -23,7 +23,7 @@ is: the real migration is its own step and train in late December (CLAUDE.md, "S
 | `npm ls`                                           | clean                             | clean                                                                        |
 | `npm run check`                                    | 1,044 files, 0 errors, 0 warnings | 1,029 files, 0 errors, 0 warnings ¹                                          |
 | `npm run lint`                                     | pass                              | pass                                                                         |
-| `npm test`                                         | 1,901 passed, 1 skipped           | 1,900 passed, 2 failed ²                                                     |
+| `npm test`                                         | 1,901 passed, 1 skipped           | 1,899 passed, 2 failed, the same 1 skipped ²                                 |
 | `npm run build:no-validate`                        | pass                              | pass, with three workarounds ³                                               |
 | `build/sw.js` precache                             | 122 entries                       | 123: the 20 outside `_app/immutable/` identical, immutable JS 78 → 79        |
 | `NavigationRoute` in the worker                    | 0                                 | 0                                                                            |
@@ -39,7 +39,8 @@ checks `playwright.config.ts` and `e2e/helpers/seedSettings.ts`. No source file 
 `$app/tsconfig` still sets `allowJs`, `checkJs` and `esModuleInterop`.
 
 ² `devWorker.test.ts` finds vite-plugin-pwa's dev plugin by name; `runtimeCaching.test.ts`
-reads the deleted `svelte.config.js`. Both need rewriting.
+reads the deleted `svelte.config.js`. Both need rewriting. Check, lint and the unit tests
+were re-run on this report's own commit, with no `build/` in the tree.
 
 ³ Marked `TRIAL` in `vite.config.ts`; see "Must fix".
 
@@ -54,7 +55,7 @@ reads the deleted `svelte.config.js`. Both need rewriting.
   lockfile loses 321 packages (the Babel and Rollup chain behind workbox 7) and gains 12.
 - `vite.config.ts` on `withPwa(kitOptions, pwaOptions)`: `workbox` → `generateSW`, the
   size cap to the top level, `injectRegister: false`, `navigateFallback: null` kept inside
-  `generateSW` (see trap 1).
+  `generateSW` (see item 3 under "Must fix").
 - Unit-test aliases and mocks for `$app/env` and `$app/state` (473 tests failed to resolve
   `$app/env` without them).
 
@@ -84,8 +85,11 @@ reads the deleted `svelte.config.js`. Both need rewriting.
    route does).
 3. **Trap: `navigateFallback`.** 2.x sets it to `adapterFallback` (`/200.html`) unless the
    key is present inside `generateSW`: the CLAUDE.md "never `navigateFallback`" case. The
-   trial keeps `navigateFallback: null` there and the worker has no `NavigationRoute`;
-   `e2e/offline-cold-start.spec.ts` guards it. Keep both.
+   trial keeps `navigateFallback: null` there and the worker has no `NavigationRoute`
+   (counted by hand). `e2e/offline-cold-start.spec.ts:162` is the guard, but today it stops
+   at its first assertion (the compact-text regex, item 6), so its
+   `not.toContain('NavigationRoute')` line never runs: the guard is dark until item 6 is
+   done. Keep the key, and fix the test first.
 4. **The deploy check vs a minified worker.** 2.x bundles and minifies the worker
    (`precacheAndRoute` becomes `o([…])`), so `deploy.js` refuses the build ("Could not read
    the precache manifest"). The trial sets `minify: false`, and the dry run passes. Keep
@@ -162,7 +166,8 @@ reads the deleted `svelte.config.js`. Both need rewriting.
   revision and the same `NetworkOnly` + `PrecacheFallbackPlugin` route, written over
   several lines with plain names. That test needs its patterns updated, not the app.
 - **With `importScripts("/sw-offline-book.js");` prepended to the built worker by hand**
-  (an experiment, not committed) and the three offline specs rerun against `vite preview`:
+  (an experiment, not committed; the patched `build/` and `.svelte-kit/output/` were deleted
+  afterwards) and the three offline specs rerun against `vite preview`:
   9 pass, 2 fail. The whole-book download (every page and figure offline) and the cold
   start of a downloaded book pass. The two failures are `offline-cold-start.spec.ts:162`
   (format, above) and `offline.spec.ts:171` (the plugin order, trap 2).
