@@ -13,9 +13,9 @@ export default defineConfig({
 		setupFiles: ['src/test/setup.ts', 'src/test/animate-stub.ts'],
 		alias: {
 			$lib: '/src/lib',
-			'$app/environment': '/src/test/mocks/environment.ts',
+			'$app/env': '/src/test/mocks/env.ts',
 			'$app/navigation': '/src/test/mocks/navigation.ts',
-			'$app/stores': '/src/test/mocks/stores.ts'
+			'$app/state': '/src/test/mocks/state.ts'
 		},
 		// Increase timeouts for tests that use vi.resetModules() with dynamic imports
 		// These can be slow when running the full test suite due to module resolution overhead
