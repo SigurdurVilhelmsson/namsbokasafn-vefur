@@ -1,3 +1,5 @@
+import adapter from '@sveltejs/adapter-static';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { SvelteKitPWA } from '@vite-pwa/sveltekit';
 import tailwindcss from '@tailwindcss/vite';
@@ -32,11 +34,35 @@ export default defineConfig(({ command }) => ({
 	plugins: [
 		tailwindcss(),
 		previewAppShell(),
-		sveltekit(),
+		sveltekit({
+			// Enable TypeScript and other preprocessing
+			preprocess: vitePreprocess(),
+
+			// Static adapter for deployment (similar to current Vite build)
+			adapter: adapter({
+				pages: 'build',
+				assets: 'build',
+				fallback: '200.html' /* SPA fallback for unprerendered routes */,
+				precompress: false,
+				strict: false /* Allow gitignored static files (content is generated) */
+			}),
+
+			paths: {
+				relative: false /* Force absolute asset paths — required for deep URLs served via SPA fallback */
+			},
+			prerender: {
+				handleHttpError: 'warn' /* Content may have broken internal links — warn instead of failing */,
+				handleMissingId: 'warn' /* A handful of cross-chapter anchor refs (e.g. "viðauka A") aren't resolvable yet — needs a book-wide id map in the CNXML renderer (tracked in namsbokasafn-efni) */,
+				handleUnseenRoutes: 'warn' /* Some prerenderable routes (e.g. /vidauki) yield no entries when a book has no non-interactive appendix yet; skip them instead of failing the build (they still work via the SPA fallback) */
+			},
+			// Path aliases (same as current React setup)
+			alias: { '$lib': 'src/lib', '$lib/*': 'src/lib/*' }
+		}),
+
 		SvelteKitPWA({
 			// Service worker registration strategy
-			registerType: 'prompt', // Show update prompt to user
-			injectRegister: null, // We'll handle registration manually
+			registerType: 'prompt' /* Show update prompt to user */,
+			injectRegister: null /* We'll handle registration manually */,
 			// Ensure SW is registered from root, not relative to current path
 			scope: '/',
 			base: '/',
@@ -74,7 +100,7 @@ export default defineConfig(({ command }) => ({
 
 			// Development options
 			devOptions: {
-				enabled: true, // Enable PWA in dev mode for testing
+				enabled: true /* Enable PWA in dev mode for testing */,
 				type: 'module',
 				navigateFallback: '/'
 			},
