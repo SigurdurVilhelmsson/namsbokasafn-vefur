@@ -71,6 +71,8 @@ export default defineConfig(({ command }) => ({
 				base: '/',
 				// MathJax bundle pushes chunks above the default 2MB limit (top level in 2.x)
 				maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+				// TRIAL: an unminified worker keeps precacheAndRoute([...]) readable for deploy.js
+				minify: false,
 				// Precache the SPA shell that adapter-static writes (adapter options above), with a
 				// revision: the adapter runs after the worker is generated, so `spa` derives
 				// it from _app/version.json, which changes with every build. The navigation
@@ -89,12 +91,16 @@ export default defineConfig(({ command }) => ({
 					// Exclude server, prerendered, and static content dirs from precache.
 					// prerendered/** warns "no files matched" in SPA mode — expected, harmless.
 					globIgnores: ['server/**', '**/prerendered/**', '**/content/**'],
+					// TRIAL: 2.x appends its own prerendered/** glob, which these ignores empty, and makes
+					// an empty glob an error (1.x warned). false restores 1.x; it would also hide a real miss.
+					globStrict: false,
 	
 					// Runtime caching for book content: routes, limits and the downloaded-book
 					// fallback live in src/lib/sw/runtimeCaching.ts (read its header first).
 					runtimeCaching,
 					// Answers the page's "do you serve downloaded books?" check (see that file).
-					importScripts: ['/sw-offline-book.js'],
+					// TRIAL: the workbox fork has no importScripts; the downloaded-book check is OFF until this is rebuilt.
+					// importScripts: ['/sw-offline-book.js'],
 	
 					// Never serve the shell in place of a page that loads: an online page load
 					// must get the prerendered page. The offline fallback is a route in
