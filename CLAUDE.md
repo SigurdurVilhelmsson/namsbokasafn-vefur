@@ -459,7 +459,15 @@ since #318 and the `frame-src` since #191.
 
 The live file's layout differs from this one, so build any change against a fresh copy of the LIVE
 file and test it, with the live file as the control, before staging it on the server. Verify against
-the server, never against this file: `ssh <host> 'grep -c frame-src /etc/nginx/sites-available/namsbokasafn.is'`.
+the server, never against this file. Count the CSP lines, then those of them that carry the directive;
+both must be 11 (the file from before the `frame-src` change gives 11 and 0, and a bare
+`grep -c frame-src` reads 12, since a comment names it):
+
+```bash
+ssh <host> 'f=/etc/nginx/sites-available/namsbokasafn.is
+  grep -c "add_header Content-Security-Policy" "$f"
+  grep "add_header Content-Security-Policy" "$f" | grep -c frame-src'
+```
 
 ## Two-Repository Workflow
 
