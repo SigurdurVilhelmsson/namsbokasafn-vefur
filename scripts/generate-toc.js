@@ -793,6 +793,6 @@ function main() {
 }
 
 // Only run as a CLI — importing this module (tests) must not start a run.
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
 	main();
 }

@@ -217,7 +217,22 @@ wrong.
 - The redirect rows for every page the release renames are merged to vefur
   `main` (`src/lib/data/sectionRedirects.ts`). A row is inert until its target
   page is published, so the rows go first (CLAUDE.md, "A rename retires a reader
-  URL"). Step 4 below finds any row that is missing.
+  URL"). Write them from the efni commit itself: check it out as in step 1, pull
+  the lane to `main` (`git pull --ff-only`, so it has the generator), check that
+  the lane's content is still the server's (step 4 of the train checklist), and
+  run in the lane:
+
+  ```bash
+  book=efnafraedi-2e
+  node scripts/check-content-renames.js --book $book static/content/$book \
+    ~/dev/repos/namsbokasafn-efni-release/books/$book/05-publication/mt-preview
+  ```
+
+  It prints the rows to add and the existing rows to re-point, ready to paste.
+  It reads efni's `mt-preview` only, so for a book with a `faithful` layer the
+  synced tree can differ: step 4 below, the same check on the synced tree, is
+  the gate.
+
 - No `D20: proposed` string waits on `main` (step 2 of the train checklist).
 
 1. **Check out the efni commit on its own,** never the efni working checkout,
@@ -274,12 +289,22 @@ wrong.
    node scripts/check-content-renames.js $before static/content/$book
    ```
 
-   It pairs the two trees on `data-module-id`. Only
-   `every removed page has its redirect` passes. A `STOP rename` line needs a
-   redirect row (merge it to `main`, pull, then run step 4 again); a
-   `STOP deleted` line is a module the release drops, which must be expected.
+   It pairs the two trees on `data-module-id`, and checks every row the book
+   already has against the new tree. Only `every removed page has its redirect`
+   passes. A `STOP rename` line needs a redirect row; a `STOP stale row` line is
+   an existing row whose target the release renames again, which leaves its old
+   address a 404 (the route goes one hop, and only to a published target), so it
+   must be re-pointed. The tool prints both kinds, ready to paste: merge them to
+   `main`, pull, then run step 4 again. A `STOP deleted` line is a module the
+   release drops, which must be expected. An appendix that keeps its letter
+   prints `ok` and needs no row, since its address is `/vidauki/<letter>/`.
    Measured 2026-11-05: a whole-book re-render of chemistry renamed 34 pages
-   against efni `main`'s prepared tree, so expect a long list.
+   against efni `main`'s prepared tree, so expect a long list. On 2026-11-10 the
+   lane's copy against efni `main` (`363ee8c95`) gave 56 renames, 6 of them
+   appendices: 50 rows to add and both existing chemistry rows to re-point.
+   Against efni's ② preview (`48dbbb7a2`) it gave 26 renames: 20 rows to add
+   and none to re-point. The count depends on the efni commit, so only a run
+   against the release commit says what the rows are.
 
 5. **Build:** `npm run build`. Its `validate-content.js` must pass.
 
