@@ -428,13 +428,12 @@ applied by hand on the server and CI never touches it, so the two drift:
   page has an embed (efni's only embed-bearing pages are 2 physics ch04 files, and physics is
   withheld). Fixing it means editing all 11 blocks, because an `add_header` inside a `location`
   replaces the server-level header wholesale rather than inheriting it.
-- **The live CSP still allows the tutor and editorial hosts**, which nothing calls since S3.3 (#312)
-  and #318. Removing them is optional server work.
 
 **Live on the server since 2026-11-10**, each built from the live file, tested locally against it and
 applied by [USER] with a staged `apply.sh` (the file before each is kept beside it as
-`namsbokasafn.is.bak-2026-11-10*`). The example has the gzip line since #350; the other two reach it in
-their own PRs (#421 for version.json).
+`namsbokasafn.is.bak-2026-11-10*`). The example carries all four: the gzip line since #350, the
+version.json block since #421, the provenance block since #423 and the GoatCounter-only `connect-src`
+since #318.
 
 - **`location = /_app/version.json`**: `Cache-Control: no-cache` instead of `/_app/`'s year-long
   `public, immutable`, since every build rewrites the file and SvelteKit reads it to learn that a new
@@ -446,6 +445,10 @@ their own PRs (#421 for version.json).
 - **`location ~ ^/provenance/.+\.md$`**: the colophon's provenance file as `text/plain; charset=utf-8`
   instead of a download as `application/octet-stream` (`mime.types` has no `.md`). No `add_header`, so
   it inherits the server-level security headers; `try_files` is the same as in `location /`.
+- **`connect-src 'self' https://*.goatcounter.com`** in all 11 CSP headers: the tutor and editorial
+  hosts are gone, since nothing has called them since S3.3 (#312) and #318. Checked before removing
+  them: the one served bundle that still names the editorial host (an old config chunk, kept by the
+  `P /_app/immutable/**` rule) is reached by none of the served pages.
 
 The live file's layout differs from this one, so build any change against a fresh copy of the LIVE
 file and test it, with the live file as the control, before staging it on the server. Verify against
