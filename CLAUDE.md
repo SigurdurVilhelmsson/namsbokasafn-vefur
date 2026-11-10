@@ -421,14 +421,31 @@ skipped sync fails loudly instead of turning every gating test green.
 ⚠️ **`nginx-config-example.conf` is a RECOMMENDATION, not a mirror of production.** nginx is
 applied by hand on the server and CI never touches it, so the two drift:
 
-- **The live CSP has no `frame-src`**: 0 across its 10 `Content-Security-Policy` headers
-  (measured 2026-08-22 and 2026-10-03; the 10 is the control proving the grep matches), so PhET and
-  YouTube embeds would be blocked — `default-src 'self'` catches frames when `frame-src` is absent.
-  Latent while no served page has an embed (efni's only embed-bearing pages are 2 physics ch04
-  files, and physics is withheld). Fixing it means editing all 10 blocks, because an `add_header`
-  inside a `location` replaces the server-level header wholesale rather than inheriting it.
+- **The live CSP has no `frame-src`**: 0 across its 11 `Content-Security-Policy` headers
+  (measured 2026-08-22 and 2026-10-03 with 10, and 2026-11-10 with 11 since the version.json block
+  below; the count is the control proving the grep matches), so PhET and YouTube embeds would be
+  blocked — `default-src 'self'` catches frames when `frame-src` is absent. Latent while no served
+  page has an embed (efni's only embed-bearing pages are 2 physics ch04 files, and physics is
+  withheld). Fixing it means editing all 11 blocks, because an `add_header` inside a `location`
+  replaces the server-level header wholesale rather than inheriting it.
 - **The live CSP still allows the tutor and editorial hosts**, which nothing calls since S3.3 (#312)
   and #318. Removing them is optional server work.
+
+**Live on the server since 2026-11-10**, each built from the live file, tested locally against it and
+applied by [USER] with a staged `apply.sh` (the file before each is kept beside it as
+`namsbokasafn.is.bak-2026-11-10*`). The example has the gzip line since #350; the other two reach it in
+their own PRs (#421 for version.json).
+
+- **`location = /_app/version.json`**: `Cache-Control: no-cache` instead of `/_app/`'s year-long
+  `public, immutable`, since every build rewrites the file and SvelteKit reads it to learn that a new
+  build is out; a browser revalidates it (304 when unchanged). Logging stays off, as in `/_app/`, so
+  the SvelteKit 3 privacy-page line must not say these checks are recorded
+  (`docs/decisions/2026-11-09-kit3-lib-alias-privacy-line-and-buildsw.md`).
+- **`gzip_comp_level 5;`** after `gzip_vary on;` (#350): gzipped bytes, the solusolv figure 149460 →
+  143385, `toc.json` 20375 → 16656, the home page 36635 → 30639.
+- **`location ~ ^/provenance/.+\.md$`**: the colophon's provenance file as `text/plain; charset=utf-8`
+  instead of a download as `application/octet-stream` (`mime.types` has no `.md`). No `add_header`, so
+  it inherits the server-level security headers; `try_files` is the same as in `location /`.
 
 The live file's layout differs from this one, so build any change against a fresh copy of the LIVE
 file and test it, with the live file as the control, before staging it on the server. Verify against
