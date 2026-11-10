@@ -421,19 +421,21 @@ skipped sync fails loudly instead of turning every gating test green.
 ⚠️ **`nginx-config-example.conf` is a RECOMMENDATION, not a mirror of production.** nginx is
 applied by hand on the server and CI never touches it, so the two drift:
 
-- **The live CSP has no `frame-src`**: 0 across its 11 `Content-Security-Policy` headers
-  (measured 2026-08-22 and 2026-10-03 with 10, and 2026-11-10 with 11 since the version.json block
-  below; the count is the control proving the grep matches), so PhET and YouTube embeds would be
-  blocked — `default-src 'self'` catches frames when `frame-src` is absent. Latent while no served
-  page has an embed (efni's only embed-bearing pages are 2 physics ch04 files, and physics is
-  withheld). Fixing it means editing all 11 blocks, because an `add_header` inside a `location`
-  replaces the server-level header wholesale rather than inheriting it.
+- **The live CSP lacked the example's `frame-src` from #191 (July 2026) until 2026-11-10**, so for
+  those months PhET and YouTube embeds would have been blocked (`default-src 'self'` catches frames
+  when `frame-src` is absent); it was latent only because no served page had an embed. Since
+  2026-11-10 all 11 live `Content-Security-Policy` headers equal the example's (list below). A CSP
+  change means editing all 11 blocks, because an `add_header` inside a `location` replaces the
+  server-level header wholesale rather than inheriting it. Check a directive with a pair of counts
+  on the server: `grep -c 'add_header Content-Security-Policy'` and the same lines piped to
+  `grep -c <directive>` must agree (11 and 11). A bare `grep -c frame-src` reads 12, because a
+  comment names it.
 
 **Live on the server since 2026-11-10**, each built from the live file, tested locally against it and
 applied by [USER] with a staged `apply.sh` (the file before each is kept beside it as
-`namsbokasafn.is.bak-2026-11-10*`). The example carries all four: the gzip line since #350, the
-version.json block since #421, the provenance block since #423 and the GoatCounter-only `connect-src`
-since #318.
+`namsbokasafn.is.bak-2026-11-10*`). The example carries all five: the gzip line since #350, the
+version.json block since #421, the provenance block since #423, the GoatCounter-only `connect-src`
+since #318 and the `frame-src` since #191.
 
 - **`location = /_app/version.json`**: `Cache-Control: no-cache` instead of `/_app/`'s year-long
   `public, immutable`, since every build rewrites the file and SvelteKit reads it to learn that a new
@@ -449,6 +451,11 @@ since #318.
   hosts are gone, since nothing has called them since S3.3 (#312) and #318. Checked before removing
   them: the one served bundle that still names the editorial host (an old config chunk, kept by the
   `P /_app/immutable/**` rule) is reached by none of the served pages.
+- **`frame-src https://www.youtube.com https://phet.colorado.edu`** in all 11 CSP headers, after
+  `worker-src`, so content embeds are no longer blocked. The two hosts are efni's
+  `ALLOWED_EMBED_HOSTS` (`tools/lib/embed-resolve.js`): if one side widens its list, tell the other.
+  No served page embeds one yet, so nothing is sent; the click-to-load decision (D03) and the
+  privacy-page line still come before any sync that brings embeds (Known, not fixed, below).
 
 The live file's layout differs from this one, so build any change against a fresh copy of the LIVE
 file and test it, with the live file as the control, before staging it on the server. Verify against
@@ -693,7 +700,7 @@ As of 2026-11-09 (`main` `06cb08e`):
   - a hard load of a frozen book runs its 2026-08-19 bundles (the old search crawl, white on amber, 'kort' and the mouse-only selection popup, and, since S6.1 shipped, a settings rewrite in the old full format that makes the profile read as pre-seam) and its old HTML, without S6.2's pre-paint script, until that book is deployed again;
   - on a paged section: a phone reader can't start the timer (the idle pill is hidden below 1024 px; [USER]'s layout); the lightbox a 'Mynd' link opens places focus but does not trap it (as `figureViewer` always did); find-in-page reaches other pages only where the browser has `until-found` (Firefox from 148, Safari partial from 26.2, unmeasured on a device); after a pager failure or a switch back to scrolling the ring keeps its paged value until the next scroll event;
   - the pager's teardown also cancels another component's announcement still in `announce()`'s 50 ms gap, so code that turns paging off and announces must announce after the flush; cancelling by owner in `announcer.ts` waits for S4.5 (that file must not change before then);
-  - physics embeds load YouTube and PhET with no click-to-load step, which would send readers' IP addresses there: decide it with the CSP `frame-src` fix, before physics is synced.
+  - physics and biology embeds load YouTube and PhET with no click-to-load step, and since 2026-11-10 the live CSP allows them, so a sync that brings one would send readers' IP addresses there: decide click-to-load (D03) and add the `/personuvernd/` line before physics or biology is synced. No served page embeds one today; efni's main renders 2 (physics ch04), and its `embed-mapping.json` files map 47 for physics and 51 for biology.
 - **npm audit** (re-measured 2026-11-09 on `main` `6309548`, for train 15): production tree 0; full tree 19 (5 low, 14 moderate), all development tools: the same count as trains 11–14, and the same 19 packages and 5 advisories as train 14, although this train's updates changed the lockfile.
 - **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
 
