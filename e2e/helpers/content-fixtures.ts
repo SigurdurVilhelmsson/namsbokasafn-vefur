@@ -34,7 +34,11 @@ export type Capability = 'index' | 'glossary';
 interface Toc {
 	index?: unknown;
 	glossary?: unknown;
-	chapters?: { number: number; slug?: string; sections?: { file?: string; title?: string; reviewed?: boolean; type?: string }[] }[];
+	chapters?: {
+		number: number;
+		slug?: string;
+		sections?: { file?: string; title?: string; reviewed?: boolean; type?: string; metadata?: { objectives?: string[] } }[];
+	}[];
 	frontMatter?: { file?: string }[];
 	answerKey?: { chapter: number | string }[];
 }
@@ -335,4 +339,34 @@ export function machineTranslatedSection(slug: string): string | null {
 		if (section?.file) return `/${slug}/kafli/${String(chapter.number).padStart(2, '0')}/${section.file.slice(0, -5)}/`;
 	}
 	return null;
+}
+
+/** A section that lists objectives and a chapter introduction, for the ticks-on-removed-objectives tests. */
+export interface ObjectiveFixture {
+	module: { chapter: string; slug: string; objectives: string[] };
+	introduction: { chapter: string; slug: string };
+	/** The book's objective count once every introduction's list is emptied, as efni's H2 ships it. */
+	totalWithoutIntroductions: number;
+}
+
+/** The book's first non-introduction section with objectives and its first introduction, or null. */
+export function objectiveFixture(slug: string): ObjectiveFixture | null {
+	let module: ObjectiveFixture['module'] | null = null;
+	let introduction: ObjectiveFixture['introduction'] | null = null;
+	let totalWithoutIntroductions = 0;
+	for (const chapter of readToc(slug)?.chapters ?? []) {
+		const folder = String(chapter.number).padStart(2, '0');
+		for (const section of chapter.sections ?? []) {
+			if (!section.file) continue;
+			const sectionSlug = section.file.slice(0, -5);
+			const objectives = section.metadata?.objectives ?? [];
+			if (section.type === 'introduction') {
+				introduction ??= { chapter: folder, slug: sectionSlug };
+				continue;
+			}
+			totalWithoutIntroductions += objectives.length;
+			if (objectives.length) module ??= { chapter: folder, slug: sectionSlug, objectives };
+		}
+	}
+	return module && introduction ? { module, introduction, totalWithoutIntroductions } : null;
 }
