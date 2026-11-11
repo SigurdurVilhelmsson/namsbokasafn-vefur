@@ -572,9 +572,16 @@ export function glossaryTerms(node: HTMLElement, options: GlossaryTermsOptions) 
 			// "R (e. R)" helps nobody. efni's own annotator skips this case.
 			if (dataEn.toLowerCase() === text.toLowerCase()) continue;
 
+			// The English word carries lang="en", so a screen reader says it in English (SF.5,
+			// PED-05); '(e. …)' is Icelandic shorthand and stays in the page's language. The
+			// span's text is unchanged: everything that reads or removes `.term-en` (the
+			// matcher, bionic reading, textAnchor, practice snapshots) handles it whole.
 			const span = document.createElement('span');
 			span.className = TERM_EN_CLASS;
-			span.textContent = ` (e. ${dataEn})`;
+			const word = document.createElement('span');
+			word.lang = 'en';
+			word.textContent = dataEn;
+			span.append(' (e. ', word, ')');
 			termEl.appendChild(span);
 			glossedElements.push(termEl);
 		}
