@@ -63,6 +63,18 @@
     --border-color: #ddd6c9;
     /* Text fields and switch tracks: 3:1 against the page (WCAG 1.4.11). */
     --border-input: #8f7c5c;
+    /* Status colours (plan step SF.1, UI-16), none of them the accent: a -strong tone for
+       text and icons, 4.5:1 on all five surfaces and on its -soft fill (tokens.test.ts),
+       and --on-success for the ink on a success fill. Use them instead of raw palette. */
+    --success-strong: #00714f;
+    --success-soft: #e6f4ec;
+    --on-success: #ffffff;
+    --warning-strong: #9a3412;
+    --warning-soft: #fff1e6;
+    --danger-strong: #b91c1c;
+    --danger-soft: #fdecec;
+    --info-strong: #1d4ed8;
+    --info-soft: #e8f0fe;
     /* The accent is a fill, a border or a decoration, never text: see --accent-strong. */
     --accent-color: #c78c20;
     /* Decision D01: ink on the amber fill (5.12:1), and a lighter hover under it
@@ -118,6 +130,15 @@
     --text-disabled: #6a6560;
     --border-color: #2e2e38;
     --border-input: #7a7670;
+    --success-strong: #00d492;
+    --success-soft: #12302a;
+    --on-success: #16161c;
+    --warning-strong: #fdba74;
+    --warning-soft: #38261a;
+    --danger-strong: #fca5a5;
+    --danger-soft: #3a1d21;
+    --info-strong: #93c5fd;
+    --info-soft: #1b2840;
     --accent-color: #e8a838;
     /* Ink: 8.66:1 on the amber, 10.33:1 on its hover. */
     --on-accent: #16161c;

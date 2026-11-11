@@ -599,7 +599,7 @@
 	<div class="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2">
 		<div class="flex items-center gap-2 sm:gap-3">
 			{#if data.section.readingTime}
-				<span class="inline-flex items-center gap-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+				<span class="inline-flex items-center gap-1 text-xs sm:text-sm text-[var(--text-tertiary)]">
 					<Icon name="clock" size="sm" />
 					<span>~{data.section.readingTime} mín lestími</span>
 				</span>
@@ -607,10 +607,10 @@
 			{#if data.section.difficulty}
 				<span
 					class="text-xs px-2 py-0.5 sm:py-1 rounded-full {data.section.difficulty === 'beginner'
-						? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+						? 'bg-[var(--success-soft)] text-[var(--success-strong)]'
 						: data.section.difficulty === 'intermediate'
-							? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300'
-							: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'}"
+							? 'bg-[var(--warning-soft)] text-[var(--warning-strong)]'
+							: 'bg-[var(--danger-soft)] text-[var(--danger-strong)]'}"
 				>
 					{data.section.difficulty === 'beginner'
 						? 'Byrjandi'
@@ -624,7 +624,7 @@
 			<!-- Print button -->
 			<button
 				onclick={handlePrint}
-				class="p-2 rounded-lg transition-colors text-[var(--text-tertiary)] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-200"
+				class="p-2 rounded-lg transition-colors text-[var(--text-tertiary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--text-secondary)]"
 				aria-label="Prenta kafla"
 				title="Prenta"
 			>
@@ -642,8 +642,8 @@
 			<button
 				onclick={handleShare}
 				class="p-2 rounded-lg transition-colors {shareSuccess
-					? 'text-green-500 bg-green-50 dark:bg-green-900/20'
-					: 'text-[var(--text-tertiary)] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-strong)]'}"
+					? 'text-[var(--success-strong)] bg-[var(--success-soft)]'
+					: 'text-[var(--text-tertiary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--accent-strong)]'}"
 				aria-label={shareSuccess ? 'Hlekkur afritaður' : 'Deila kafla'}
 				title={shareSuccess ? 'Hlekkur afritaður!' : 'Deila'}
 			>
@@ -656,7 +656,7 @@
 			<!-- Annotations button -->
 			<button
 				onclick={() => (showAnnotationSidebar = true)}
-				class="p-2 rounded-lg transition-colors text-[var(--text-tertiary)] hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-[var(--accent-strong)]"
+				class="p-2 rounded-lg transition-colors text-[var(--text-tertiary)] hover:bg-[var(--bg-tertiary)] hover:text-[var(--accent-strong)]"
 				aria-label="Opna athugasemdir"
 				title="Athugasemdir"
 			>
@@ -665,8 +665,8 @@
 			<button
 				onclick={toggleBookmark}
 				class="p-2 rounded-lg transition-colors {isBookmarked
-					? 'text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-					: 'text-[var(--text-tertiary)] hover:bg-gray-100 dark:hover:bg-gray-800'}"
+					? 'text-[var(--accent-strong)] hover:bg-[var(--accent-light)]'
+					: 'text-[var(--text-tertiary)] hover:bg-[var(--bg-tertiary)]'}"
 				aria-label={isBookmarked ? 'Fjarlægja bókamerki' : 'Bæta við bókamerki'}
 			>
 				<svg class="w-5 h-5" fill={isBookmarked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
@@ -676,14 +676,14 @@
 			{#if !isRead}
 				<button
 					onclick={markAsRead}
-					class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium rounded-lg bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
+					class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium rounded-lg border border-transparent bg-[var(--success-soft)] text-[var(--success-strong)] hover:border-[var(--success-strong)] transition-colors"
 					aria-label="Merkja sem lesið"
 				>
 					<Icon name="check" size="sm" />
 					<span class="hidden sm:inline">Merkja sem lesið</span>
 				</button>
 			{:else}
-				<span class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+				<span class="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium text-[var(--success-strong)]">
 					<Icon name="check" size="sm" />
 					<span class="hidden sm:inline">Lesið</span>
 				</span>
@@ -718,8 +718,8 @@
 						<button
 							onclick={() => toggleObjective(i, objective)}
 							class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {completed
-								? 'bg-green-500 border-green-500 text-white'
-								: 'border-[var(--accent-subtle)] hover:border-green-400 dark:hover:border-green-500'}"
+								? 'bg-[var(--success-strong)] border-[var(--success-strong)] text-[var(--on-success)]'
+								: 'border-[var(--accent-subtle)] hover:border-[var(--success-strong)]'}"
 							aria-label={completed ? `Afmerkja markmið ${i + 1}` : `Merkja markmið ${i + 1} sem lokið`}
 						>
 							{#if completed}
