@@ -14,6 +14,7 @@
 		findWeakObjectives
 	} from '$lib/utils/studySession';
 	import { loadTableOfContents } from '$lib/utils/contentLoader';
+	import { currentObjectives } from '$lib/utils/objectivesProgress';
 	import { flashcardStore, reader, quizStore, objectivesStore } from '$lib/stores';
 	import { getDueCards } from '$lib/utils/srs';
 	import Skeleton from '$lib/components/Skeleton.svelte';
@@ -82,7 +83,8 @@
 		const adaptiveProblems = quizStore.getAdaptiveProblems(data.bookSlug, chapterSlug, 5);
 
 		// Find weak objectives
-		const weakObjectives = findWeakObjectives(objState.completedObjectives, {
+		// Not ticks on objectives the table of contents no longer lists
+		const weakObjectives = findWeakObjectives(currentObjectives(objState.completedObjectives, toc, data.bookSlug), {
 			bookSlug: data.bookSlug,
 			chapterSlug
 		});
