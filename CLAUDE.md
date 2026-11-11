@@ -431,11 +431,11 @@ applied by hand on the server and CI never touches it, so the two drift:
   `grep -c <directive>` must agree (11 and 11). A bare `grep -c frame-src` reads 12, because a
   comment names it.
 
-**Live on the server since 2026-11-10**, each built from the live file, tested locally against it and
-applied by [USER] with a staged `apply.sh` (the file before each is kept beside it as
-`namsbokasafn.is.bak-2026-11-10*`). The example carries all five: the gzip line since #350, the
-version.json block since #421, the provenance block since #423, the GoatCounter-only `connect-src`
-since #318 and the `frame-src` since #191.
+**Live on the server since 2026-11-10 and 2026-11-11**, each built from the live file, tested locally
+against it and applied by [USER] with a staged `apply.sh` (the file before each is kept beside it as
+`namsbokasafn.is.bak-2026-11-10*` or `.bak-2026-11-11*`). The example carries all six: the gzip line
+since #350, the version.json block since #421, the provenance block since #423, the GoatCounter-only
+`connect-src` since #318, the `frame-src` since #191 and the section pages' `no-cache` since #428.
 
 - **`location = /_app/version.json`**: `Cache-Control: no-cache` instead of `/_app/`'s year-long
   `public, immutable`, since every build rewrites the file and SvelteKit reads it to learn that a new
@@ -456,6 +456,19 @@ since #318 and the `frame-src` since #191.
   `ALLOWED_EMBED_HOSTS` (`tools/lib/embed-resolve.js`): if one side widens its list, tell the other.
   No served page embeds one yet, so nothing is sent; the click-to-load decision (D03) and the
   privacy-page line still come before any sync that brings embeds (Known, not fixed, below).
+- **`Cache-Control: no-cache` on section pages and redirect stubs** (`/<book>/kafli/<ch>/<slug>/`,
+  since 2026-11-11): a `map $uri $nb_page_cache_control` at the top of the site file and one
+  server-level `add_header Cache-Control $nb_page_cache_control;`, so it reaches only the blocks with
+  no `add_header` of their own (`location /`, the provenance block) and the 11 CSP blocks are
+  untouched. A stub's bytes never change, so its `Last-Modified` stayed at its first deploy and
+  browsers reused it by heuristic, with no request, for about a tenth of its age. The URLs a sync turns
+  into stubs are full pages until then and were cached the same way, so the rule covers every section
+  page rather than a list of stubs, which would need a server step before each content deploy. The
+  map reads `$uri` after `index` has turned `.../<slug>/` into `.../<slug>/index.html`, so the book
+  home, chapter pages, `/print/` and the SPA shell do not match, nor do the 14 structural stubs
+  elsewhere (`/<book>/kafli/` to the book home, appendix A to `/lotukerfi`), which are not renames.
+  A hard load of a section page now revalidates (304 when unchanged). ⚠️ Every site on the server
+  shares the `http` context a map lives in, so a map variable's name must be unique among them.
 
 The live file's layout differs from this one, so build any change against a fresh copy of the LIVE
 file and test it, with the live file as the control, before staging it on the server. Verify against
@@ -637,7 +650,8 @@ the two consult different efni trees and every `reviewed` flag comes from the wr
 
 A title correction renames the rendered file, which renames the URL. `src/lib/data/sectionRedirects.ts`
 holds the old→new map and the section route consumes it, prerendering a ~200-byte meta-refresh stub
-for each retired slug. **It is a checked-in constant, not a reader of efni's `slug-map.<track>.json`** —
+for each retired slug (nginx sends it, like every section page, with `Cache-Control: no-cache`; see
+Security Headers). **It is a checked-in constant, not a reader of efni's `slug-map.<track>.json`** —
 that file is gitignored here and absent in CI and in a clean checkout, so anything derived from it
 would vanish exactly when the build needs it.
 
