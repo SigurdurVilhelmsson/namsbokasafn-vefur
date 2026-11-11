@@ -50,7 +50,7 @@ npm run format           # Prettier formatting
 - `annotation.ts`: Text highlights and notes with export capability
 - `analytics.ts`: Study analytics and reading patterns, and since S5.4 the local counters (`counters`, rules in `src/lib/utils/counters.ts`): per-book counts of the recall prompt shown, saved, skipped and abandoned, never free text and never through `logActivity` (its log keeps 500 entries, its export 100). A new event joins the closed list in `counters.ts`; unknown books and events are dropped on load. They leave the device only in the counts-only file of 'Flytja út' on /greining, which the student sees before saving it (`countsExport()`, D09, S5.5)
 - `glossary.ts`: Glossary state and term lookup
-- `objectives.ts`: Learning objectives tracking
+- `objectives.ts`: Learning objectives tracking. A tick (keyed book/chapter/section/index) stays stored when its objective leaves `toc.json` (efni's H2 empties the chapter introductions' lists), so a view that counts or lists ticks passes them through `currentObjectives()` (`src/lib/utils/objectivesProgress.ts`) first, as /markmid and /nam do
 - `offline.ts`: PWA offline state
 - `recall.ts`: Free-recall entries written after completing a section, and the sections already prompted (D10: once per section). Ported from v1.1 `dde768e` in S5.1 (each entry validated, moved by section renames); `RecallPrompt.svelte` writes it since S5.2 (#332); since S5.5 a saved entry is read back with 'Eyða' after the save and at the end of a return visit (`entriesForSection()`, `RecallEntryCard.svelte`, `RecallReadBack.svelte`; D18's 2026-11-01 follow-up)
 

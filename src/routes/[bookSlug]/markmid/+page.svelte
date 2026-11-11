@@ -8,15 +8,19 @@
 	import type { TableOfContents } from '$lib/types/content';
 	import { objectivesStore, type ConfidenceLevel } from '$lib/stores/objectives';
 	import { loadTableOfContents, findChapterBySlug, findSectionBySlug } from '$lib/utils/contentLoader';
-	import { countBookObjectives, coverage } from '$lib/utils/objectivesProgress';
+	import { countBookObjectives, coverage, currentObjectives } from '$lib/utils/objectivesProgress';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	let { data }: { data: PageData } = $props();
 
+	let toc: TableOfContents | null = $state(null);
+	let loading = $state(true);
+
 	// Only this book's objectives: stored values carry chapter/section slugs
-	// shared across books, but the record keys are book-prefixed
+	// shared across books, but the record keys are book-prefixed. A tick on an
+	// objective the table of contents no longer lists stays stored but is left out.
 	let bookObjectives = $derived(
-		Object.entries($objectivesStore.completedObjectives)
+		Object.entries(currentObjectives($objectivesStore.completedObjectives, toc, data.bookSlug))
 			.filter(([key]) => key.startsWith(`${data.bookSlug}/`))
 			.map(([, value]) => value)
 	);
@@ -24,9 +28,6 @@
 	let lowConfidenceObjectives = $derived(
 		bookObjectives.filter((o) => o.confidence !== undefined && o.confidence <= 2)
 	);
-
-	let toc: TableOfContents | null = $state(null);
-	let loading = $state(true);
 
 	onMount(async () => {
 		try {
