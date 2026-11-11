@@ -16,6 +16,7 @@
 	import { tick, untrack } from 'svelte';
 	import { get } from 'svelte/store';
 	import Icon from '$lib/components/Icon.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import { browser } from '$app/environment';
 	import { settings } from '$lib/stores/settings';
 	// Aliased: the component has its own announce() and announcement
@@ -1241,10 +1242,11 @@
 		data-page-units={units.length}
 	>
 		<div class="paged-nav-row">
-			<button class="paged-nav-btn" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
+			<!-- SF.2 (UI-17): 'Næsta' is the page's main action, filled; 'Fyrri' is secondary. -->
+			<Button variant="secondary" onclick={prev} disabled={current === 0} aria-label="Fyrri síða">
 				<Icon name="chevron-left" size="sm" />
 				<span class="paged-nav-word">Fyrri</span>
-			</button>
+			</Button>
 
 			<span class="paged-nav-label">
 				{label}
@@ -1253,8 +1255,9 @@
 			<!-- On the last page the button finishes the section (ruling 3), so it says so (UI-20),
 			     at every width: a check mark alone is too easy to misread for it.
 			     'Ljúka kafla': Checked by [USER] as D20 batch 12 (2026-11-08). -->
-			<button
-				class="paged-nav-btn"
+			<Button
+				variant="primary"
+				class="paged-nav-next"
 				onclick={next}
 				disabled={lastPage && completionFired}
 				aria-label={lastPage ? 'Ljúka kafla' : 'Næsta síða'}
@@ -1266,7 +1269,7 @@
 					<span class="paged-nav-word">Næsta</span>
 					<Icon name="chevron-right" size="sm" />
 				{/if}
-			</button>
+			</Button>
 		</div>
 
 		{#if mtReport || onleave}
@@ -1340,35 +1343,17 @@
 		column-gap: 1rem;
 	}
 
-	/* Below 640 px the arrows alone ([USER], 2026-11-08); the names stay the buttons' names */
+	/* Below 640 px the arrows alone ([USER], 2026-11-08); the names stay the buttons' names.
+	   'Næsta' keeps a wider button there, so it stays the largest filled control on a phone,
+	   above the 48 px tools button (SF.2, UI-17; e2e/ui-primitives.spec.ts). */
 	@media (max-width: 639px) {
 		.paged-nav-word {
 			display: none;
 		}
-	}
 
-	.paged-nav-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.5rem 1rem;
-		border-radius: 0.625rem;
-		border: 1px solid var(--border-color);
-		background-color: var(--bg-secondary);
-		color: var(--text-primary);
-		font-size: 0.875rem;
-		font-weight: 500;
-		transition: all 0.15s;
-	}
-
-	.paged-nav-btn:hover:not(:disabled) {
-		border-color: var(--accent-color);
-		background-color: var(--accent-light);
-	}
-
-	.paged-nav-btn:disabled {
-		opacity: 0.4;
-		cursor: not-allowed;
+		.paged-nav-row :global(.paged-nav-next) {
+			padding-inline: 1.75rem;
+		}
 	}
 
 	/* A quiet text button: the way out is there, not loud. Bronze text, underlined on hover

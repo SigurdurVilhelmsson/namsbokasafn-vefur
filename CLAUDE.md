@@ -160,7 +160,7 @@ The site uses CSS custom properties for theming. The accent color is **amber/gol
 | Hints                                          | `--text-tertiary` (4.5:1 on all five surfaces) | `#616772` / `#98938d` |
 | Text of a disabled control only                | `--text-disabled`                              | `#8a919c` / `#6a6560` |
 | Text fields and switch tracks                  | `--border-input` (3:1)                         | `#8f7c5c` / `#7a7670` |
-| The focus ring, and native radios              | `--focus-ring` (3:1 on the gap and surfaces)   | `#8a5d0e` / `#e8a838` |
+| The focus ring, radios, and switches when on   | `--focus-ring` (3:1 on the gap and surfaces)   | `#8a5d0e` / `#e8a838` |
 | The band between a control and its ring        | `--focus-gap`                                  | `#ffffff` / `#16161c` |
 
 - 🔴 **Never white on the amber, and never `--accent-color` as text.** White is 2.92:1 light / 2.08:1 dark on the fill; `#c78c20` as text is 2.31–2.92:1. `accentText.test.ts` fails on a white-on-accent class string or rule, including `var(--accent-color, #fallback)`, `rgba()` white and CSS injected from `.ts` files.
@@ -290,6 +290,7 @@ The catalogue carries **two content licences**: most titles are CC BY 4.0, but C
 - `src/lib/actions/lazyImages.ts`: Lazy loading for content images
 - `src/lib/actions/readDetection.ts`: Tracks which sections the user has read
 - `src/lib/components/ContentRenderer.svelte`: Main content renderer for pre-rendered HTML
+- `src/lib/components/ui/`: `Button.svelte` (primary, secondary, ghost; an `<a>` given an href) and `Switch.svelte` (role="switch"; the caller owns the state), plan step SF.2 (UI-17). Use them rather than rebuilding a button or a switch: every state of a switch reaches 3:1 in both themes (off: an `--border-input` track; on: an `--focus-ring` track, as native radios; an `--focus-gap` knob on both), and a disabled button changes colour, never opacity. The pager's 'Næsta' is the primary button, the largest filled control on a paged section at 1280 and 390 px (wider below 640 px, where it shows its arrow alone; the phone's tools button is 48 px), and under a working pager `NavigationButtons` takes `quiet`, so its 'Næsti kafli' card is outlined at every width. `e2e/ui-primitives.spec.ts` measures both.
 - `src/lib/components/layout/`: Header, Sidebar, MobileBottomNav, FocusModeNav
 - `src/lib/components/study/`: Guided study session phases (reading, practice, review, reflect)
 - `src/lib/components/analytics/`: Study analytics tabs and visualizations
