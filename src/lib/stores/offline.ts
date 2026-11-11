@@ -491,7 +491,7 @@ export function readerMessage(e: unknown): string {
  * Whether the ACTIVE service worker serves downloaded books. A worker from before
  * offline-book:<slug> existed (the reader has not accepted the update prompt yet)
  * would never read the download, so the book would say "Sótt" and still not open
- * offline. Asks static/sw-offline-book.js over a message channel; silence = no.
+ * offline. Asks the worker over a message channel (src/lib/sw/messages.ts); silence = no.
  */
 export async function workerServesOfflineBooks(): Promise<boolean> {
 	if (!('serviceWorker' in navigator)) return false;

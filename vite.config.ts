@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, type Plugin } from 'vite';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { runtimeCaching, APP_SHELL_FILE } from './src/lib/sw/runtimeCaching';
+import { APP_SHELL_FILE } from './src/lib/sw/runtimeCaching';
 
 /**
  * `vite preview` serves .svelte-kit/output, not build/, so it has no /200.html:
@@ -29,7 +29,7 @@ function previewAppShell(): Plugin {
 	};
 }
 
-export default defineConfig(({ command }) => ({
+export default defineConfig({
 	plugins: [
 		tailwindcss(),
 		previewAppShell(),
@@ -63,6 +63,16 @@ export default defineConfig(({ command }) => ({
 				alias: { $lib: 'src/lib', '$lib/*': 'src/lib/*' }
 			},
 			{
+				// Our own worker source (src/lib/sw/worker.ts), bundled with the workbox modules it
+				// imports; the precache manifest is injected at self.__WB_MANIFEST.
+				strategies: 'buildSW',
+				// Without it buildSW names the output after the source (worker.js); the
+				// registration, nginx, deploy.js and the tests all use /sw.js.
+				filename: 'sw.js',
+				// Unminified, so scripts/deploy.js can read the precacheAndRoute([...]) call and
+				// refuse a build whose precache lists a file the build lacks (minified, the call
+				// is renamed and the check fails closed).
+				minify: false,
 				// Service worker registration strategy
 				registerType: 'prompt', // Show update prompt to user
 				injectRegister: false, // We'll handle registration manually
@@ -71,43 +81,30 @@ export default defineConfig(({ command }) => ({
 				base: '/',
 				// MathJax bundle pushes chunks above the default 2MB limit (top level in 2.x)
 				maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-				// TRIAL: an unminified worker keeps precacheAndRoute([...]) readable for deploy.js
-				minify: false,
 				// Precache the SPA shell that adapter-static writes (adapter options above), with a
-				// revision: the adapter runs after the worker is generated, so `spa` derives
-				// it from _app/version.json, which changes with every build. The navigation
-				// route in runtimeCaching.ts serves it only when a page load fails offline.
-				// Build only: `vite dev` makes its own worker from these options (devOptions),
-				// and there `spa` throws before any build has run (no version.json) or
-				// precaches a /200.html the dev server answers with a 404, so the dev worker
-				// never installs (src/lib/sw/devWorker.test.ts).
-				kit: command === 'build' ? { adapterFallback: APP_SHELL_FILE, spa: true } : {},
+				// revision: the adapter runs after the worker is built, so `spa` derives it from
+				// _app/version.json, which changes with every build. The page-load route in
+				// src/lib/sw/routes.ts serves it only when a page load fails offline. The plugin
+				// applies these to the build only; the dev worker (`npm run dev`) must not precache
+				// the shell, which the dev server answers with a 404 (src/lib/sw/devWorker.test.ts).
+				kit: { adapterFallback: APP_SHELL_FILE, spa: true },
 	
-				// Workbox configuration (`generateSW`, formerly `workbox`). navigateFallback
-				// must stay in THIS object: 2.x sets it to adapterFallback unless the key is here.
-				generateSW: {
+				// What buildSW bundles and precaches. The routes, the downloaded-book fallback and the
+				// messages the worker answers are code in src/lib/sw/ (worker.ts, routes.ts). No
+				// navigateFallback exists in this strategy: a page load offline gets the shell only
+				// through the page-load route in routes.ts, when the network fails.
+				buildSW: {
+					swSrc: 'src/lib/sw/worker.ts',
 					// Precache essential app shell
 					globPatterns: ['client/**/*.{js,css,html,ico,png,svg,woff,woff2}'],
 					// Exclude server, prerendered, and static content dirs from precache.
-					// prerendered/** warns "no files matched" in SPA mode — expected, harmless.
 					globIgnores: ['server/**', '**/prerendered/**', '**/content/**'],
-					// TRIAL: 2.x appends its own prerendered/** glob, which these ignores empty, and makes
-					// an empty glob an error (1.x warned). false restores 1.x; it would also hide a real miss.
-					globStrict: false,
-	
-					// Runtime caching for book content: routes, limits and the downloaded-book
-					// fallback live in src/lib/sw/runtimeCaching.ts (read its header first).
-					runtimeCaching,
-					// Answers the page's "do you serve downloaded books?" check (see that file).
-					// TRIAL: the workbox fork has no importScripts; the downloaded-book check is OFF until this is rebuilt.
-					// importScripts: ['/sw-offline-book.js'],
-	
-					// Never serve the shell in place of a page that loads: an online page load
-					// must get the prerendered page. The offline fallback is a route in
-					// runtimeCaching.ts that answers only when the network fails.
-					navigateFallback: null
+					// The plugin appends its own prerendered/** glob, which the ignores above empty on
+					// purpose (no section page is precached). 2.x makes an empty glob an error; false
+					// makes it a warning, as 1.x did. e2e/offline-cold-start.spec.ts checks the precache.
+					globStrict: false
 				},
-	
+
 				// Development options
 				devOptions: {
 					enabled: true, // Enable PWA in dev mode for testing
@@ -161,4 +158,4 @@ export default defineConfig(({ command }) => ({
 	preview: {
 		port: 4173
 	}
-}));
+});

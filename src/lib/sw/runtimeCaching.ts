@@ -1,16 +1,11 @@
 /**
- * Service-worker runtime caching for book content, and the route that boots the app
- * offline when a page load fails (the offline cold start), shared by vite.config.ts
- * (which hands it to workbox's generateSW), the offline store and the tests.
+ * Service-worker runtime caching for book content, and the matcher for the route that boots
+ * the app offline when a page load fails (the offline cold start). The worker's routes
+ * (routes.ts) build on these; the app's offline store imports the names and constants, so this
+ * file imports no workbox module.
  *
- * ⚠️ workbox-build SERIALIZES every function below into build/sw.js with
- * `fn.toString()`. Two rules, each pinned by runtimeCaching.test.ts and by
- * e2e/offline.spec.ts reading the emitted sw.js:
- *  - arrow functions only — method shorthand is emitted as `k: async k(){}`, a
- *    SyntaxError in the service worker;
- *  - no identifier from outside the function body — a closure is emitted as a bare
- *    name, a ReferenceError in the service worker. Literals are repeated inline, and
- *    the test checks they still equal the constants exported here.
+ * The worker is bundled from source (worker.ts, vite.config.ts `buildSW`), so these functions
+ * run there as ordinary code: closures and module constants work.
  *
  * Design and measurements: docs/plans/2026-10-04-sw-cache-and-offline-download.md.
  */
@@ -40,13 +35,13 @@ export const BROWSE_IMAGE_MAX_BYTES = 1048576;
 
 /**
  * Message the page posts to the active service worker to ask whether it serves
- * downloaded books (static/sw-offline-book.js answers; an older worker does not).
+ * downloaded books (messages.ts answers; an older worker does not).
  */
 export const OFFLINE_CAPS_MESSAGE = 'NB_OFFLINE_BOOK_CAPS';
 
 /**
- * The SPA shell (svelte.config.js, adapter-static `fallback`), precached by
- * vite.config.ts (`kit.spa`) so the worker can boot the app offline.
+ * The SPA shell (adapter-static's `fallback` in vite.config.ts), precached by vite.config.ts
+ * (`kit.spa`) so the worker can boot the app offline.
  */
 export const APP_SHELL_FILE = '200.html';
 
@@ -75,6 +70,13 @@ export const appShellNavigation = ({
 /** The downloaded-book cache of `bookSlug`. */
 export const offlineCacheName = (bookSlug: string): string => `${OFFLINE_CACHE_PREFIX}${bookSlug}`;
 
+/** The downloaded copy of a book file, from the cache of the book its /content/ URL names. */
+async function downloadedCopy(request: Request): Promise<Response | undefined> {
+	const book = /^\/content\/([^/]+)\//.exec(new URL(request.url).pathname)?.[1];
+	if (!book) return undefined;
+	return caches.match(request.url, { cacheName: offlineCacheName(book), ignoreSearch: true, ignoreVary: true });
+}
+
 /**
  * `cacheWillUpdate`: keep a figure only if it is a real 200 image of at most
  * 1 MiB. nginx answers a missing figure with the SPA shell (`/200.html`, status 200,
@@ -91,8 +93,8 @@ export const sizeGatePlugin = {
 			declared > 0 && !response.headers.get('content-encoding')
 				? declared
 				: (await response.clone().blob()).size;
-		if (size <= 1048576) return response;
-		await (await caches.open('book-images')).delete(request, { ignoreVary: true });
+		if (size <= BROWSE_IMAGE_MAX_BYTES) return response;
+		await (await caches.open(BROWSE_IMAGE_CACHE)).delete(request, { ignoreVary: true });
 		return null;
 	}
 };
@@ -113,14 +115,7 @@ export const offlineFallbackPlugin = {
 		cachedResponse?: Response | null;
 	}) => {
 		if (cachedResponse) return cachedResponse;
-		const match = /^\/content\/([^/]+)\//.exec(new URL(request.url).pathname);
-		if (!match) return null;
-		const hit = await caches.match(request.url, {
-			cacheName: 'offline-book:' + match[1],
-			ignoreSearch: true,
-			ignoreVary: true
-		});
-		return hit || null;
+		return (await downloadedCopy(request)) || null;
 	}
 };
 
@@ -144,14 +139,7 @@ export const offlineFallbackPlugin = {
  */
 export const offlineImageFallbackPlugin = {
 	requestWillFetch: async ({ request, state }: { request: Request; state?: { timer?: number } }) => {
-		const match = /^\/content\/([^/]+)\//.exec(new URL(request.url).pathname);
-		if (!match || !state) return request;
-		const copy = await caches.match(request.url, {
-			cacheName: 'offline-book:' + match[1],
-			ignoreSearch: true,
-			ignoreVary: true
-		});
-		if (!copy) return request;
+		if (!state || !(await downloadedCopy(request))) return request;
 		const controller = new AbortController();
 		state.timer = setTimeout(() => controller.abort(), 4000) as unknown as number;
 		return new Request(request, { signal: controller.signal });
@@ -163,67 +151,5 @@ export const offlineImageFallbackPlugin = {
 	fetchDidFail: async ({ state }: { state?: { timer?: number } }) => {
 		clearTimeout(state?.timer);
 	},
-	handlerDidError: async ({ request }: { request: Request }) => {
-		const match = /^\/content\/([^/]+)\//.exec(new URL(request.url).pathname);
-		if (!match) return undefined;
-		const hit = await caches.match(request.url, {
-			cacheName: 'offline-book:' + match[1],
-			ignoreSearch: true,
-			ignoreVary: true
-		});
-		return hit || undefined;
-	}
+	handlerDidError: async ({ request }: { request: Request }) => (await downloadedCopy(request)) || undefined
 };
-
-const DAY = 60 * 60 * 24;
-
-/**
- * KEY ORDER IS PLUGIN ORDER: workbox-build emits `cacheableResponse` and
- * `expiration` as plugins where their keys sit, then `plugins` — so the fallback
- * runs after ExpirationPlugin (workbox-build runtime-caching-converter.js).
- */
-export const runtimeCaching = [
-	{
-		// NetworkFirst: a deploy's pages are seen on the next load. `no-cache` makes the
-		// browser revalidate instead of answering from its HTTP cache for 24 h
-		// (nginx sends max-age=86400).
-		urlPattern: CONTENT_ROUTE,
-		handler: 'NetworkFirst' as const,
-		options: {
-			cacheName: CONTENT_CACHE,
-			networkTimeoutSeconds: 3,
-			fetchOptions: { cache: 'no-cache' as RequestCache },
-			matchOptions: { ignoreVary: true },
-			cacheableResponse: { statuses: [200] },
-			expiration: { maxEntries: 500, maxAgeSeconds: 30 * DAY, purgeOnQuotaError: true },
-			plugins: [offlineFallbackPlugin]
-		}
-	},
-	{
-		// StaleWhileRevalidate: a figure shows at once from the cache and is refreshed
-		// in the background, so a figure re-rendered under the same name is fresh from
-		// the SECOND view on (the old CacheFirst rule kept it for 30 days).
-		urlPattern: IMAGE_ROUTE,
-		handler: 'StaleWhileRevalidate' as const,
-		options: {
-			cacheName: BROWSE_IMAGE_CACHE,
-			fetchOptions: { cache: 'no-cache' as RequestCache },
-			matchOptions: { ignoreVary: true },
-			expiration: { maxEntries: 100, maxAgeSeconds: 7 * DAY, purgeOnQuotaError: true },
-			plugins: [sizeGatePlugin, offlineImageFallbackPlugin]
-		}
-	},
-	{
-		// Offline cold start: a page load goes to the network exactly as with no route
-		// (NetworkOnly stores nothing, and an answer the server gives, a 404 included,
-		// is passed on). Only when the network FAILS (offline, a dropped connection)
-		// does workbox's PrecacheFallbackPlugin answer with the precached SPA shell,
-		// which boots the app; its loaders then read toc.json and the section from the
-		// routes above, and so from a downloaded book. Not `navigateFallback`, which
-		// serves the shell for every page load, online too, in place of the
-		// prerendered page.
-		urlPattern: appShellNavigation,
-		handler: 'NetworkOnly' as const,
-		options: { precacheFallback: { fallbackURL: `/${APP_SHELL_FILE}` } }
-	}
-];

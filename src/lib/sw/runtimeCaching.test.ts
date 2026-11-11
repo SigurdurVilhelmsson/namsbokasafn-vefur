@@ -1,16 +1,13 @@
 /**
- * The plugins in runtimeCaching.ts run inside the service worker as their SOURCE
- * TEXT (workbox-build serializes them with fn.toString()). So every behavioural test
- * here calls a copy rebuilt from that text in a scope with none of this module's
- * bindings: a closure over a module constant throws a ReferenceError here, exactly
- * as it would in build/sw.js. e2e/offline.spec.ts checks the real emitted sw.js.
+ * The matchers and plugins in runtimeCaching.ts, called directly: the worker (worker.ts) is
+ * bundled from source, so they run there as the same code. Which route uses which plugin, and
+ * in what order, is routes.test.ts.
  */
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import {
-	runtimeCaching,
 	appShellNavigation,
 	APP_SHELL_FILE,
 	sizeGatePlugin,
@@ -20,26 +17,19 @@ import {
 	CONTENT_ROUTE,
 	IMAGE_ROUTE,
 	OFFLINE_BYPASS_QUERY,
-	OFFLINE_CACHE_PREFIX,
 	BROWSE_IMAGE_MAX_BYTES,
 	offlineCacheName
 } from './runtimeCaching';
 
-/** Rebuild a serialized function from its source text, with no closure. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function rebuilt<T extends (...args: any[]) => any>(fn: T): T {
-	return new Function(`return (${fn.toString()});`)() as T;
-}
-
-const sizeGate = rebuilt(sizeGatePlugin.cacheWillUpdate);
-const fallback = rebuilt(offlineFallbackPlugin.cachedResponseWillBeUsed);
-const imageFallback = rebuilt(offlineImageFallbackPlugin.handlerDidError);
+const sizeGate = sizeGatePlugin.cacheWillUpdate;
+const fallback = offlineFallbackPlugin.cachedResponseWillBeUsed;
+const imageFallback = offlineImageFallbackPlugin.handlerDidError;
 const FIGURE = 'http://localhost/content/b/chapters/01/x.svg';
 
 const response = (body: string, headers: Record<string, string> = {}, status = 200) =>
 	new Response(body, { status, headers: { 'content-type': 'image/svg+xml', ...headers } });
 
-describe('size gate (serialized)', () => {
+describe('size gate', () => {
 	const del = vi.fn().mockResolvedValue(true);
 	beforeEach(() => {
 		del.mockClear();
@@ -85,7 +75,7 @@ describe('size gate (serialized)', () => {
 	});
 });
 
-describe('downloaded-book fallback (serialized)', () => {
+describe('downloaded-book fallback', () => {
 	afterEach(() => vi.unstubAllGlobals());
 
 	it('passes a cached response through untouched', async () => {
@@ -115,7 +105,7 @@ describe('downloaded-book fallback (serialized)', () => {
 	});
 });
 
-describe('figure fallback (serialized)', () => {
+describe('figure fallback', () => {
 	afterEach(() => vi.unstubAllGlobals());
 
 	it("serves the book's downloaded copy when the strategy failed", async () => {
@@ -137,9 +127,9 @@ describe('figure fallback (serialized)', () => {
 	});
 });
 
-describe('stalled-network timeout (serialized)', () => {
-	const willFetch = rebuilt(offlineImageFallbackPlugin.requestWillFetch);
-	const didSucceed = rebuilt(offlineImageFallbackPlugin.fetchDidSucceed);
+describe('stalled-network timeout', () => {
+	const willFetch = offlineImageFallbackPlugin.requestWillFetch;
+	const didSucceed = offlineImageFallbackPlugin.fetchDidSucceed;
 	beforeEach(() => vi.useFakeTimers());
 	afterEach(() => {
 		vi.useRealTimers();
@@ -169,24 +159,8 @@ describe('stalled-network timeout (serialized)', () => {
 	});
 });
 
-describe('literals repeated inside serialized functions', () => {
-	it('the size gate uses BROWSE_IMAGE_MAX_BYTES', () => {
-		expect(sizeGatePlugin.cacheWillUpdate.toString()).toContain(String(BROWSE_IMAGE_MAX_BYTES));
-	});
-
-	it('the fallback uses OFFLINE_CACHE_PREFIX', () => {
-		expect(offlineFallbackPlugin.cachedResponseWillBeUsed.toString()).toContain(OFFLINE_CACHE_PREFIX);
-	});
-
-	it('the figure fallback uses OFFLINE_CACHE_PREFIX', () => {
-		expect(offlineImageFallbackPlugin.handlerDidError.toString()).toContain(OFFLINE_CACHE_PREFIX);
-	});
-
-	it('the size gate deletes from BROWSE_IMAGE_CACHE', () => {
-		expect(sizeGatePlugin.cacheWillUpdate.toString()).toContain(BROWSE_IMAGE_CACHE);
-	});
-
-	it('offlineCacheName builds the name the fallback reads', () => {
+describe('downloaded-book cache name', () => {
+	it('offlineCacheName builds the name the fallbacks read', () => {
 		expect(offlineCacheName('b')).toBe('offline-book:b');
 	});
 });
@@ -208,8 +182,8 @@ describe('routes', () => {
 	});
 });
 
-describe('offline cold start: the page-load route (serialized)', () => {
-	const matches = rebuilt(appShellNavigation);
+describe('offline cold start: the page-load route', () => {
+	const matches = appShellNavigation;
 	const load = (path: string, { mode = 'navigate', sameOrigin = true } = {}) =>
 		matches({
 			// A Request with mode 'navigate' cannot be constructed outside a worker.
@@ -252,38 +226,8 @@ describe('offline cold start: the page-load route (serialized)', () => {
 		expect(load('/efnafraedi-2e/', { sameOrigin: false })).toBe(false);
 	});
 
-	it('goes to the network, and only a failed fetch gets the precached shell', () => {
-		const route = runtimeCaching.find((r) => r.urlPattern === appShellNavigation);
-		expect(route?.handler).toBe('NetworkOnly');
-		expect(route?.options).toEqual({ precacheFallback: { fallbackURL: `/${APP_SHELL_FILE}` } });
-	});
-
-	it('the shell is the file adapter-static writes (svelte.config.js `fallback`)', () => {
-		const config = readFileSync(join(process.cwd(), 'svelte.config.js'), 'utf8');
+	it('the shell is the file adapter-static writes (vite.config.ts, the adapter\'s `fallback`)', () => {
+		const config = readFileSync(join(process.cwd(), 'vite.config.ts'), 'utf8');
 		expect(config).toMatch(new RegExp(`\\bfallback:\\s*'${APP_SHELL_FILE.replace('.', '\\.')}'`));
-	});
-});
-
-describe('plugin order (key order is plugin order in workbox-build)', () => {
-	it.each(runtimeCaching.filter((r) => 'plugins' in r.options).map((r) => [r.options.cacheName, r] as const))(
-		'%s: expiration comes before the plugins list',
-		(_name, route) => {
-			const keys = Object.keys(route.options);
-			expect(keys.indexOf('expiration')).toBeLessThan(keys.indexOf('plugins'));
-		}
-	);
-
-	it('pages: the downloaded-book fallback is the last plugin', () => {
-		expect(runtimeCaching[0].options.plugins?.at(-1)).toBe(offlineFallbackPlugin);
-	});
-
-	it('figures: the downloaded copy is used only when the strategy failed', () => {
-		expect(runtimeCaching[1].options.plugins).toContain(offlineImageFallbackPlugin);
-	});
-
-	// StaleWhileRevalidate treats a cachedResponseWillBeUsed result as a cache hit, so
-	// an ONLINE reader would get the downloaded copy instead of a re-rendered figure.
-	it('figures: no plugin answers cache misses from the downloaded copy', () => {
-		expect(runtimeCaching[1].options.plugins?.some((p) => 'cachedResponseWillBeUsed' in p)).toBe(false);
 	});
 });

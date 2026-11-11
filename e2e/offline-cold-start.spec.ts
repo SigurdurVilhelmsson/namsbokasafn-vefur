@@ -163,10 +163,13 @@ test.describe('Offline cold start', () => {
 		request
 	}) => {
 		const sw = await (await request.get('/sw.js')).text();
-		expect(sw).toMatch(/\{url:"200\.html",revision:"[0-9a-f]{32}"\}/);
-		// No navigateFallback: that NavigationRoute would serve the shell online too.
+		// The precache entry buildSW injects, with a revision that changes every build (kit.spa).
+		const shellEntry = /\{[^{}]*"url":\s*"200\.html"[^{}]*\}/.exec(sw)?.[0] ?? '';
+		expect(shellEntry).toMatch(/"revision":\s*"[0-9a-f]{32}"/);
+		// No navigateFallback: that NavigationRoute would serve the shell online too. The
+		// page-load route itself (NetworkOnly with PrecacheFallbackPlugin) is unit-tested in
+		// src/lib/sw/routes.test.ts, and the tests above load pages through it.
 		expect(sw).not.toContain('NavigationRoute');
-		expect(sw).toMatch(/new \w+\.NetworkOnly\(\{plugins:\[new \w+\.PrecacheFallbackPlugin\(\{fallbackURL:"\/200\.html"\}\)\]\}\)/);
 		// The precache install fetches it, so the server must answer it as a page.
 		const shell = await request.get('/200.html');
 		expect(shell.status()).toBe(200);

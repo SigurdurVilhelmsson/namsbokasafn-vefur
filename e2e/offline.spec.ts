@@ -146,29 +146,32 @@ test.describe('Figure cache while browsing', () => {
 		expect(await bodyWithin(notDownloaded, 6_000)).toBe('still waiting');
 	});
 
-	test('the emitted service worker revalidates figures and falls back to downloaded books', async ({
+	// The routes and their plugin order are unit-tested on the objects the worker bundles
+	// (src/lib/sw/routes.test.ts); this checks the worker the build serves.
+	test('the active service worker says it serves downloaded books, from its own code', async ({
+		page,
 		request
 	}) => {
+		const slug = syncedBooks()[0];
+		await openControlled(page, `/${slug}/`);
+		// The page's own check before a download (stores/offline.ts): silence means an older worker.
+		const answer = await page.evaluate(
+			() =>
+				new Promise((resolve) => {
+					const channel = new MessageChannel();
+					channel.port1.onmessage = (event) => resolve(event.data);
+					navigator.serviceWorker.controller!.postMessage({ type: 'NB_OFFLINE_BOOK_CAPS' }, [channel.port2]);
+					setTimeout(() => resolve('no answer'), 5_000);
+				})
+		);
+		expect(answer).toEqual({ offlineBook: 1 });
+
+		// The answer is bundled into sw.js: the worker loads no other script, and the old
+		// capability script is no longer served as one.
 		const sw = await (await request.get('/sw.js')).text();
-		// The worker imports its capability answer; a failed import would leave it with no routes.
-		expect(sw).toContain('importScripts("/sw-offline-book.js")');
-		const caps = await request.get('/sw-offline-book.js');
-		expect(caps.headers()['content-type']).toContain('javascript');
-		const start = sw.search(/png\|jpg/);
-		expect(start).toBeGreaterThan(-1);
-		const imageRoute = sw.slice(start, sw.indexOf('registerRoute', start + 1) >>> 0);
-		expect(sw.search(/html\|md\|json/)).toBeGreaterThan(-1);
-		expect(imageRoute).toContain('StaleWhileRevalidate');
-		expect(imageRoute).toContain('no-cache');
-		// The downloaded-book fallback must run AFTER expiration, or an expired entry
-		// hides the downloaded copy.
-		expect(imageRoute).toContain('handlerDidError');
-		expect(imageRoute).toContain('offline-book:');
-		// ...and never from a cache-hit hook, which would beat the network online.
-		expect(imageRoute).not.toContain('cachedResponseWillBeUsed');
-		// Pages: the fallback must run AFTER expiration, or an expired entry hides it.
-		const contentRoute = sw.slice(sw.search(/html\|md\|json/), start);
-		expect(contentRoute.indexOf('offline-book:')).toBeGreaterThan(contentRoute.indexOf('ExpirationPlugin'));
+		expect(sw).not.toContain('importScripts(');
+		const old = await request.get('/sw-offline-book.js');
+		expect(old.headers()['content-type'] ?? '').not.toContain('javascript');
 	});
 });
 

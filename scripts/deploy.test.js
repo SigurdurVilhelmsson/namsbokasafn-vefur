@@ -58,6 +58,16 @@ const REAL_ENTRIES =
 const REAL_URLS = ['sw-offline-book.js', '_app/immutable/assets/0.eqFiCA1O.css', '200.html', 'manifest.webmanifest'];
 const REAL_SW = join(dirname(DEPLOY_SCRIPT), '..', 'build', 'sw.js');
 
+// The shape of buildSW's build/sw.js (kit 3, vite.config.ts `minify: false`), cut down: workbox's
+// own `function precacheAndRoute(entries, options)` comes first in the bundle, then the call with
+// the injected JSON, the app shell last.
+const BUILDSW_WORKER =
+	'function precacheAndRoute(entries, options) {\n\tprecache(entries, options);\n\taddRoute(options);\n}\n' +
+	'var APP_SHELL_FILE = "200.html";\n' +
+	'precacheAndRoute([\n\t{\n\t\t"url": "_app/immutable/assets/0.DU3QOVH8.css",\n\t\t"revision": null\n\t},\n' +
+	'\t{\n\t\t"url": "200.html",\n\t\t"revision": "63d7c436c014503c629649e3d6c7e371"\n\t}\n], {});\n' +
+	'cleanupOutdatedCaches();\nfor (const route of bookRoutes()) registerRoute(route.match, route.strategy, route.method);\n';
+
 describe('parsePrecacheManifest', () => {
 	it("reads every URL in workbox's minified call, and nothing after the array", () => {
 		expect(parsePrecacheManifest(swWithManifest(REAL_ENTRIES))).toEqual(REAL_URLS);
@@ -66,6 +76,17 @@ describe('parsePrecacheManifest', () => {
 	it("reads development mode's quoted keys, and a plain string entry", () => {
 		const sw = 'workbox.precacheAndRoute([\n  {\n    "revision": "abc",\n    "url": "/200.html"\n  },\n  "_app/x.js",\n], {});';
 		expect(parsePrecacheManifest(sw)).toEqual(['/200.html', '_app/x.js']);
+	});
+
+	it("reads buildSW's unminified worker, past workbox's own precacheAndRoute definition", () => {
+		expect(parsePrecacheManifest(BUILDSW_WORKER)).toEqual(['_app/immutable/assets/0.DU3QOVH8.css', '200.html']);
+	});
+
+	// Minified, the call is renamed and its strings become template literals, so the check fails
+	// closed: this is why vite.config.ts keeps the worker unminified.
+	it("throws on buildSW's minified worker rather than read it wrong", () => {
+		const minified = 'function n(e,t){r(e,t),i(t)}n([{url:`200.html`,revision:`cc4f40c76208b50e091c4c45038769a6`}],{});';
+		expect(() => parsePrecacheManifest(minified)).toThrow(/precacheAndRoute/);
 	});
 
 	it('does not split an entry at a comma or bracket inside a string', () => {

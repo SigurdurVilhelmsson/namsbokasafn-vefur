@@ -45,7 +45,8 @@ describe('the data rule (D03)', () => {
 		const names = FILES.map((path) => relative(ROOT, path));
 		expect(names).toContain('src/routes/[bookSlug]/+layout.svelte');
 		expect(names).toContain('src/app.html');
-		expect(names).toContain('static/sw-offline-book.js');
+		expect(names).toContain('static/styles/content.css');
+		expect(names).toContain('src/lib/sw/worker.ts');
 	});
 
 	// Control: the pattern catches what S3.3 removed.
