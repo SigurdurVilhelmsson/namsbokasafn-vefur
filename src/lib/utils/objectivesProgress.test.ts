@@ -120,15 +120,21 @@ describe("currentObjectives keeps every objective the section pages show", () =>
     expect(Object.keys(currentObjectives(stored, TOC, "chem"))).toEqual(keys);
   });
 
-  // The synced books (gitignored; CI syncs efni's default branch). A resolver stricter than the
-  // section route would hide ticks the reader can see, which is worse than counting an orphan.
+  // The synced books that list objectives (gitignored). A resolver stricter than the section route
+  // would hide ticks the reader can see, which is worse than counting an orphan. toc.json carries
+  // objectives only once process-content.js has run (npm run dev or build): a bare sync's has none,
+  // so in CI's unit job, which runs before the build, this skips rather than passing on nothing.
   const contentDir = join(process.cwd(), "static", "content");
+  const readToc = (book: string) =>
+    JSON.parse(readFileSync(join(contentDir, book, "toc.json"), "utf-8")) as TableOfContents;
   const books = existsSync(contentDir)
-    ? readdirSync(contentDir).filter((book) => existsSync(join(contentDir, book, "toc.json")))
+    ? readdirSync(contentDir)
+        .filter((book) => existsSync(join(contentDir, book, "toc.json")))
+        .filter((book) => everyObjectiveKey(readToc(book), book).length > 0)
     : [];
 
   it.skipIf(books.length === 0).each(books)("in the synced %s", (book) => {
-    const toc = JSON.parse(readFileSync(join(contentDir, book, "toc.json"), "utf-8")) as TableOfContents;
+    const toc = readToc(book);
     const keys = everyObjectiveKey(toc, book);
     const stored = Object.fromEntries(keys.map((k) => [k, tick]));
     expect(Object.keys(currentObjectives(stored, toc, book))).toHaveLength(keys.length);
