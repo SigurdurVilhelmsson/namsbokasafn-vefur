@@ -2,17 +2,19 @@
   PdfDownloadButton - Download a pre-generated PDF of a chapter or full book.
 
   PDFs are produced by scripts/generate-pdfs.js and live as static files at
-  /downloads/{bookSlug}/. The companion manifest.json (loaded by the book
-  layout) tells us which files exist and how big they are. If the manifest
-  is missing or the requested file isn't in it, the button hides itself —
-  this happens during local dev before pdfs are generated.
+  /downloads/{bookSlug}/. The companion manifest.json tells us which files
+  exist and how big they are. The book layout starts loading it without
+  waiting, so `manifest` is usually a promise and the button appears when it
+  resolves; no page waits for it. If the manifest is missing or the requested
+  file isn't in it, the button hides itself — this happens during local dev
+  before pdfs are generated, and on the live site until PDFs are published.
 -->
 <script lang="ts">
 	import type { PdfManifest } from '$lib/types/pdf';
 	import Icon from '$lib/components/Icon.svelte';
 
 	interface Props {
-		manifest: PdfManifest | null;
+		manifest: PdfManifest | null | Promise<PdfManifest | null>;
 		bookSlug: string;
 		/** 'full' = whole book; 'chapter' = single chapter (requires chapterNum). */
 		target: 'full' | 'chapter';
@@ -32,11 +34,28 @@
 		return mb >= 10 ? `${Math.round(mb)} MB` : `${mb.toFixed(1).replace('.', ',')} MB`;
 	}
 
+	// A promise resolves into `arrived`; a plain manifest is used as it is (also when
+	// rendered on the server, where effects do not run).
+	let arrived: PdfManifest | null = $state(null);
+	$effect(() => {
+		const source = manifest;
+		if (!(source instanceof Promise)) return;
+		arrived = null; // another book's list must not stand in while this one loads
+		let current = true;
+		source.then((m) => {
+			if (current) arrived = m;
+		});
+		return () => {
+			current = false;
+		};
+	});
+	let resolved = $derived(manifest instanceof Promise ? arrived : manifest);
+
 	let entry = $derived.by(() => {
-		if (!manifest) return null;
-		if (target === 'full') return manifest.full;
+		if (!resolved) return null;
+		if (target === 'full') return resolved.full;
 		if (chapterNum == null) return null;
-		return manifest.chapters.find((c) => c.chapterNum === chapterNum) ?? null;
+		return resolved.chapters.find((c) => c.chapterNum === chapterNum) ?? null;
 	});
 
 	const SAFE_PDF_FILENAME = /^[a-zA-Z0-9._-]+\.pdf$/;
