@@ -87,7 +87,15 @@ const PAIRS: Pair[] = [
 	// surface outside it. Native radios use --focus-ring as their accent colour too.
 	...['--focus-gap', ...SURFACES].map((bg) => ({ fg: '--focus-ring', bg, min: 3, use: 'focus ring and radios' })),
 	// A light-theme radio has a white face (dark mode paints it dark).
-	{ fg: '--focus-ring', bg: '#ffffff', min: 3, use: 'radio on its white face', themes: ['light'] }
+	{ fg: '--focus-ring', bg: '#ffffff', min: 3, use: 'radio on its white face', themes: ['light'] },
+	// Status colours (plan step SF.1, UI-16), none of them the accent: a strong tone for text
+	// and icons on every surface and on its own soft fill, and an ink on the strong fill (a
+	// completed objective's check). A bar or a boundary in a strong tone needs only 3:1.
+	...['success', 'warning', 'danger', 'info'].flatMap((status) => [
+		...SURFACES.map((bg) => ({ fg: `--${status}-strong`, bg, min: 4.5, use: `${status} text and icons` })),
+		{ fg: `--${status}-strong`, bg: `--${status}-soft`, min: 4.5, use: `${status} text on its soft fill` }
+	]),
+	{ fg: '--on-success', bg: '--success-strong', min: 4.5, use: 'ink on the success fill' }
 ];
 
 const key = (theme: string, p: Pair) => `${theme}: ${p.fg} on ${p.bg} (min ${p.min})`;

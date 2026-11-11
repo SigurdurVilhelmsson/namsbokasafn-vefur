@@ -141,7 +141,7 @@
 		{#if completedCount > 0}
 			<button
 				onclick={clearAllObjectives}
-				class="text-sm px-3 py-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+				class="text-sm px-3 py-1.5 rounded-lg text-[var(--danger-strong)] hover:bg-[var(--danger-soft)] transition-colors"
 			>
 				Hreinsa öll
 			</button>
@@ -173,8 +173,8 @@
 						<span>Metin markmið</span>
 						<span>{Math.min(coverageResult.completed, coverageResult.total)}/{coverageResult.total}</span>
 					</div>
-					<div class="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-						<div class="h-full bg-green-500 rounded-full transition-all duration-300"
+					<div class="h-2 bg-[var(--bg-tertiary)] rounded-full overflow-hidden">
+						<div class="h-full bg-[var(--success-strong)] rounded-full transition-all duration-300"
 							style="width: {Math.min(coverageResult.percentage, 100)}%"></div>
 					</div>
 				</div>
@@ -199,12 +199,12 @@
 
 		<!-- Low Confidence Section -->
 		{#if lowConfidenceObjectives.length > 0}
-			<div class="mb-8 p-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-				<h2 class="text-lg font-semibold text-amber-900 dark:text-amber-100 mb-3 flex items-center gap-2">
+			<div class="mb-8 p-6 rounded-xl bg-[var(--warning-soft)] border border-[var(--border-color)]">
+				<h2 class="text-lg font-semibold text-[var(--warning-strong)] mb-3 flex items-center gap-2">
 					<Icon name="triangle-alert" />
 					Þarfnast endurskoðunar
 				</h2>
-				<p class="text-sm text-amber-800 dark:text-amber-200 mb-4">
+				<p class="text-sm text-[var(--warning-strong)] mb-4">
 					Þessi markmið eru merkt með lágri sjálfsvissu. Íhugaðu að fara aftur í viðkomandi kafla.
 				</p>
 				<div class="space-y-2">
@@ -212,7 +212,7 @@
 						{@const info = getSectionInfo(obj.chapterSlug, obj.sectionSlug)}
 						<a
 							href="/{data.bookSlug}/kafli/{obj.chapterSlug}/{obj.sectionSlug}"
-							class="block p-3 rounded-lg bg-white dark:bg-gray-800 border border-amber-200 dark:border-amber-700 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+							class="block p-3 rounded-lg bg-[var(--bg-secondary)] border border-[var(--border-color)] hover:border-[var(--warning-strong)] transition-colors"
 						>
 							<p class="text-sm font-medium text-gray-900 dark:text-gray-100">{obj.objectiveText}</p>
 							{#if info}
@@ -268,8 +268,8 @@
 										<button
 											onclick={() => toggleObjective(obj.chapterSlug, obj.sectionSlug, obj.objectiveIndex, obj.objectiveText)}
 											class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors {obj.isCompleted
-												? 'bg-green-500 border-green-500 text-white'
-												: 'border-gray-300 dark:border-gray-500 hover:border-green-400'}"
+												? 'bg-[var(--success-strong)] border-[var(--success-strong)] text-[var(--on-success)]'
+												: 'border-[var(--border-input)] hover:border-[var(--success-strong)]'}"
 											aria-label={obj.isCompleted ? 'Afmerkja sem lokið' : 'Merkja sem lokið'}
 										>
 											{#if obj.isCompleted}
@@ -318,9 +318,9 @@
 		{/if}
 
 		<!-- Help text -->
-		<div class="mt-8 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-			<h3 class="font-medium text-blue-900 dark:text-blue-100 mb-2">Um námsmarkmið</h3>
-			<p class="text-sm text-blue-800 dark:text-blue-200">
+		<div class="mt-8 p-4 rounded-lg bg-[var(--info-soft)] border border-[var(--border-color)]">
+			<h3 class="font-medium text-[var(--info-strong)] mb-2">Um námsmarkmið</h3>
+			<p class="text-sm text-[var(--info-strong)]">
 				Námsmarkmið hjálpa þér að fylgjast með hvað þú hefur lært. Þegar þú hefur lesið kafla og skilur efnið,
 				merktu viðeigandi markmið sem lokið. Notaðu sjálfsvissumatið til að bera kennsl á svæði sem þarfnast meiri athygli.
 			</p>
