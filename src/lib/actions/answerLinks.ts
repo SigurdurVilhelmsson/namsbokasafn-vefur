@@ -20,6 +20,7 @@
 
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
+import { scrollBehavior } from '$lib/utils/transitions';
 
 export interface AnswerLinksOptions {
 	bookSlug: string;
@@ -348,7 +349,7 @@ export function answerLinks(node: HTMLElement, options: AnswerLinksOptions) {
 			if (targetElement) {
 				// Scroll to element
 				setTimeout(() => {
-					targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+					targetElement.scrollIntoView({ behavior: scrollBehavior(), block: 'center' });
 					targetElement.classList.add('answer-link-highlight');
 					setTimeout(() => {
 						targetElement.classList.remove('answer-link-highlight');

@@ -44,7 +44,7 @@
 	import { createObjectiveKey } from '$lib/utils/storeHelpers';
 	import { feedbackHref } from '$lib/utils/feedbackPrefill';
 	import { textbookPhrase } from '$lib/utils/metaDescription';
-	import { fade, fly } from 'svelte/transition';
+	import { fade, fly, scrollBehavior } from '$lib/utils/transitions';
 
 	let { data }: { data: PageData } = $props();
 
@@ -272,9 +272,9 @@
 		// A place saved while paging names its block: scroll to it, wherever it now sits (S11.3)
 		const block = savedPosition?.page?.block ? document.getElementById(savedPosition.page.block) : null;
 		if (block) {
-			block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+			block.scrollIntoView({ behavior: scrollBehavior(), block: 'start' });
 		} else if (savedPosition) {
-			window.scrollTo({ top: savedPosition.scrollY, behavior: 'smooth' });
+			window.scrollTo({ top: savedPosition.scrollY, behavior: scrollBehavior() });
 		}
 		showContinuePrompt = false;
 		clearTimeout(continuePromptTimeout);

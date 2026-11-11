@@ -3,7 +3,7 @@
 -->
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { slide, fade } from 'svelte/transition';
+	import { slide, fade } from '$lib/utils/transitions';
 	import Icon from '$lib/components/Icon.svelte';
 	import { annotationStore } from '$lib/stores/annotation';
 	import type { Annotation, HighlightColor } from '$lib/types/annotation';

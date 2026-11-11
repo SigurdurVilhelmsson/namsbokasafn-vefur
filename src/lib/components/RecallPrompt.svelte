@@ -29,7 +29,7 @@
 -->
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { fly } from 'svelte/transition';
+	import { fly } from '$lib/utils/transitions';
 	import Icon from '$lib/components/Icon.svelte';
 	import RecallEntryCard from '$lib/components/RecallEntryCard.svelte';
 	import { recallStore } from '$lib/stores/recall';

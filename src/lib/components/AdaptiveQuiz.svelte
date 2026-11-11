@@ -6,7 +6,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import { fade, slide } from 'svelte/transition';
+	import { fade, slide } from '$lib/utils/transitions';
 	import { quizStore, type PracticeProblem } from '$lib/stores/quiz';
 	import PracticeSnapshot from '$lib/components/PracticeSnapshot.svelte';
 	import { storedAnswerText } from '$lib/utils/practiceSnapshot';

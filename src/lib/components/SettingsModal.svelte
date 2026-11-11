@@ -3,7 +3,7 @@
 -->
 <script lang="ts">
 	import { onDestroy } from 'svelte';
-	import { fade, scale } from 'svelte/transition';
+	import { fade, scale } from '$lib/utils/transitions';
 	import Icon from '$lib/components/Icon.svelte';
 	import SegmentedControl from '$lib/components/SegmentedControl.svelte';
 	import Switch from '$lib/components/ui/Switch.svelte';

@@ -6,7 +6,7 @@
 	import Icon from '$lib/components/Icon.svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { fade, scale } from 'svelte/transition';
+	import { fade, scale } from '$lib/utils/transitions';
 	import { loadTableOfContents } from '$lib/utils/contentLoader';
 	import {
 		searchContent,
