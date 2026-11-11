@@ -893,7 +893,7 @@
 </article>
 
 <!-- Navigation buttons -->
-<NavigationButtons navigation={data.navigation} bookSlug={data.bookSlug} />
+<NavigationButtons navigation={data.navigation} bookSlug={data.bookSlug} quiet={pagerWorking} />
 
 {#if paged && pagedReserve > 0}
 	<div aria-hidden="true" data-paged-reserve style:height="{pagedReserve}px"></div>

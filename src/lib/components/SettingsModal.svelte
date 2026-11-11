@@ -6,6 +6,7 @@
 	import { fade, scale } from 'svelte/transition';
 	import Icon from '$lib/components/Icon.svelte';
 	import SegmentedControl from '$lib/components/SegmentedControl.svelte';
+	import Switch from '$lib/components/ui/Switch.svelte';
 	import {
 		settings,
 		fontSize,
@@ -293,23 +294,13 @@
 									Undirstrika hugtök úr orðasafni í texta
 								</p>
 							</div>
-							<button
+							<Switch
 								id="glossary-highlighting-toggle"
-								role="switch"
-								aria-checked={$glossaryHighlighting}
+								checked={$glossaryHighlighting}
+								onchange={() => settings.toggleGlossaryHighlighting()}
 								aria-labelledby="glossary-highlighting-label"
 								aria-describedby="glossary-highlighting-help"
-								onclick={() => settings.toggleGlossaryHighlighting()}
-								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$glossaryHighlighting
-									? 'bg-[var(--accent-color)]'
-									: 'bg-gray-300 dark:bg-gray-600'}"
-							>
-								<span
-									class="inline-block h-4 w-4 transform rounded-full shadow transition-transform {$glossaryHighlighting
-										? 'translate-x-6 bg-[var(--on-accent)]'
-										: 'translate-x-1 bg-white'}"
-								></span>
-							</button>
+							/>
 						</div>
 					</div>
 
@@ -324,23 +315,13 @@
 									Sýna enska heitið á eftir hugtaki, t.d. „formúlumassa (e. formula mass)“
 								</p>
 							</div>
-							<button
+							<Switch
 								id="show-term-english-toggle"
-								role="switch"
-								aria-checked={$showTermEnglish}
+								checked={$showTermEnglish}
+								onchange={() => settings.toggleShowTermEnglish()}
 								aria-labelledby="show-term-english-label"
 								aria-describedby="show-term-english-help"
-								onclick={() => settings.toggleShowTermEnglish()}
-								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$showTermEnglish
-									? 'bg-[var(--accent-color)]'
-									: 'bg-gray-300 dark:bg-gray-600'}"
-							>
-								<span
-									class="inline-block h-4 w-4 transform rounded-full shadow transition-transform {$showTermEnglish
-										? 'translate-x-6 bg-[var(--on-accent)]'
-										: 'translate-x-1 bg-white'}"
-								></span>
-							</button>
+							/>
 						</div>
 					</div>
 
@@ -355,23 +336,13 @@
 									Útlitsstilling. Ekki hefur verið sýnt að hún bæti lestur
 								</p>
 							</div>
-							<button
+							<Switch
 								id="bionic-reading-toggle"
-								role="switch"
-								aria-checked={$bionicReading}
+								checked={$bionicReading}
+								onchange={() => settings.toggleBionicReading()}
 								aria-labelledby="bionic-reading-label"
 								aria-describedby="bionic-reading-help"
-								onclick={() => settings.toggleBionicReading()}
-								class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {$bionicReading
-									? 'bg-[var(--accent-color)]'
-									: 'bg-gray-300 dark:bg-gray-600'}"
-							>
-								<span
-									class="inline-block h-4 w-4 transform rounded-full shadow transition-transform {$bionicReading
-										? 'translate-x-6 bg-[var(--on-accent)]'
-										: 'translate-x-1 bg-white'}"
-								></span>
-							</button>
+							/>
 						</div>
 					</div>
 

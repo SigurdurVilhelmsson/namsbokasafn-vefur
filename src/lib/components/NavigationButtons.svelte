@@ -9,9 +9,11 @@
 	interface Props {
 		navigation: NavigationContext;
 		bookSlug: string;
+		/** Outlined 'Næsti kafli' at every width: under a working pager 'Næsta' is the main action (SF.2, UI-17). */
+		quiet?: boolean;
 	}
 
-	let { navigation, bookSlug }: Props = $props();
+	let { navigation, bookSlug, quiet = false }: Props = $props();
 
 	let previous = $derived(navigation.previous);
 	let next = $derived(navigation.next);
@@ -120,6 +122,7 @@
 					href="/{bookSlug}/kafli/{getChapterPath(next.chapter)}/{getSectionPath(next.section)}"
 					data-sveltekit-preload-data="hover"
 					class="nav-btn nav-btn-next"
+					class:nav-btn-quiet={quiet}
 					data-nav="next"
 				>
 					<div class="nav-btn-text">
@@ -287,7 +290,8 @@
 		}
 	}
 
-	/* Next button: primary on mobile, outlined on desktop */
+	/* Next button: primary on mobile, outlined on desktop, and outlined everywhere when quiet
+	   (under a working pager, whose 'Næsta' is then the largest filled control). */
 	.nav-btn-next {
 		background: var(--accent-color);
 		color: var(--on-accent);
@@ -301,6 +305,17 @@
 
 	.nav-btn-next .nav-btn-arrow {
 		color: var(--on-accent);
+	}
+
+	.nav-btn-next.nav-btn-quiet {
+		background: transparent;
+		color: var(--text-primary);
+		border: 1px solid var(--border-color);
+	}
+
+	.nav-btn-next.nav-btn-quiet .nav-btn-label,
+	.nav-btn-next.nav-btn-quiet .nav-btn-arrow {
+		color: var(--text-secondary);
 	}
 
 	@media (min-width: 640px) {

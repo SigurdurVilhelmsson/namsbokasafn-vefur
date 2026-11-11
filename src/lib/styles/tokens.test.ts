@@ -75,6 +75,9 @@ const PAIRS: Pair[] = [
 	// accentText.test.ts). D01: ink, so the hover turns lighter in light mode.
 	{ fg: '--on-accent', bg: '--accent-color', min: 4.5, use: 'ink on the accent fill' },
 	{ fg: '--on-accent', bg: '--accent-fill-hover', min: 4.5, use: 'ink on the accent hover' },
+	// A switch's knob (ui/Switch.svelte, SF.2) is --focus-gap on both tracks: --focus-ring when
+	// on (the ring pairs below hold it) and --border-input when off (this pair).
+	{ fg: '--focus-gap', bg: '--border-input', min: 3, use: 'switch knob on the off track' },
 	// Text fields and switch tracks: a boundary needs 3:1 (WCAG 1.4.11).
 	...['--bg-primary', '--bg-secondary', '--accent-light'].map((bg) => ({
 		fg: '--border-input',
