@@ -421,18 +421,66 @@ skipped sync fails loudly instead of turning every gating test green.
 ⚠️ **`nginx-config-example.conf` is a RECOMMENDATION, not a mirror of production.** nginx is
 applied by hand on the server and CI never touches it, so the two drift:
 
-- **The live CSP has no `frame-src`**: 0 across its 10 `Content-Security-Policy` headers
-  (measured 2026-08-22 and 2026-10-03; the 10 is the control proving the grep matches), so PhET and
-  YouTube embeds would be blocked — `default-src 'self'` catches frames when `frame-src` is absent.
-  Latent while no served page has an embed (efni's only embed-bearing pages are 2 physics ch04
-  files, and physics is withheld). Fixing it means editing all 10 blocks, because an `add_header`
-  inside a `location` replaces the server-level header wholesale rather than inheriting it.
-- **The live CSP still allows the tutor and editorial hosts**, which nothing calls since S3.3 (#312)
-  and #318. Removing them is optional server work.
+- **The live CSP lacked the example's `frame-src` from #191 (July 2026) until 2026-11-10**, so for
+  those months PhET and YouTube embeds would have been blocked (`default-src 'self'` catches frames
+  when `frame-src` is absent); it was latent only because no served page had an embed. Since
+  2026-11-10 all 11 live `Content-Security-Policy` headers equal the example's (list below). A CSP
+  change means editing all 11 blocks, because an `add_header` inside a `location` replaces the
+  server-level header wholesale rather than inheriting it. Check a directive with a pair of counts
+  on the server: `grep -c 'add_header Content-Security-Policy'` and the same lines piped to
+  `grep -c <directive>` must agree (11 and 11). A bare `grep -c frame-src` reads 12, because a
+  comment names it.
+
+**Live on the server since 2026-11-10 and 2026-11-11**, each built from the live file, tested locally
+against it and applied by [USER] with a staged `apply.sh` (the file before each is kept beside it as
+`namsbokasafn.is.bak-2026-11-10*` or `.bak-2026-11-11*`). The example carries all six: the gzip line
+since #350, the version.json block since #421, the provenance block since #423, the GoatCounter-only
+`connect-src` since #318, the `frame-src` since #191 and the section pages' `no-cache` since #428.
+
+- **`location = /_app/version.json`**: `Cache-Control: no-cache` instead of `/_app/`'s year-long
+  `public, immutable`, since every build rewrites the file and SvelteKit reads it to learn that a new
+  build is out; a browser revalidates it (304 when unchanged). Logging stays off, as in `/_app/`, so
+  the SvelteKit 3 privacy-page line must not say these checks are recorded
+  (`docs/decisions/2026-11-09-kit3-lib-alias-privacy-line-and-buildsw.md`).
+- **`gzip_comp_level 5;`** after `gzip_vary on;` (#350): gzipped bytes, the solusolv figure 149460 →
+  143385, `toc.json` 20375 → 16656, the home page 36635 → 30639.
+- **`location ~ ^/provenance/.+\.md$`**: the colophon's provenance file as `text/plain; charset=utf-8`
+  instead of a download as `application/octet-stream` (`mime.types` has no `.md`). No `add_header`, so
+  it inherits the server-level security headers; `try_files` is the same as in `location /`.
+- **`connect-src 'self' https://*.goatcounter.com`** in all 11 CSP headers: the tutor and editorial
+  hosts are gone, since nothing has called them since S3.3 (#312) and #318. Checked before removing
+  them: the one served bundle that still names the editorial host (an old config chunk, kept by the
+  `P /_app/immutable/**` rule) is reached by none of the served pages.
+- **`frame-src https://www.youtube.com https://phet.colorado.edu`** in all 11 CSP headers, after
+  `worker-src`, so content embeds are no longer blocked. The two hosts are efni's
+  `ALLOWED_EMBED_HOSTS` (`tools/lib/embed-resolve.js`): if one side widens its list, tell the other.
+  No served page embeds one yet, so nothing is sent; the click-to-load decision (D03) and the
+  privacy-page line still come before any sync that brings embeds (Known, not fixed, below).
+- **`Cache-Control: no-cache` on section pages and redirect stubs** (`/<book>/kafli/<ch>/<slug>/`,
+  since 2026-11-11): a `map $uri $nb_page_cache_control` at the top of the site file and one
+  server-level `add_header Cache-Control $nb_page_cache_control;`, so it reaches only the blocks with
+  no `add_header` of their own (`location /`, the provenance block) and the 11 CSP blocks are
+  untouched. A stub's bytes never change, so its `Last-Modified` stayed at its first deploy and
+  browsers reused it by heuristic, with no request, for about a tenth of its age. The URLs a sync turns
+  into stubs are full pages until then and were cached the same way, so the rule covers every section
+  page rather than a list of stubs, which would need a server step before each content deploy. The
+  map reads `$uri` after `index` has turned `.../<slug>/` into `.../<slug>/index.html`, so the book
+  home, chapter pages, `/print/` and the SPA shell do not match, nor do the 14 structural stubs
+  elsewhere (`/<book>/kafli/` to the book home, appendix A to `/lotukerfi`), which are not renames.
+  A hard load of a section page now revalidates (304 when unchanged). ⚠️ Every site on the server
+  shares the `http` context a map lives in, so a map variable's name must be unique among them.
 
 The live file's layout differs from this one, so build any change against a fresh copy of the LIVE
 file and test it, with the live file as the control, before staging it on the server. Verify against
-the server, never against this file: `ssh <host> 'grep -c frame-src /etc/nginx/sites-available/namsbokasafn.is'`.
+the server, never against this file. Count the CSP lines, then those of them that carry the directive;
+both must be 11 (the file from before the `frame-src` change gives 11 and 0, and a bare
+`grep -c frame-src` reads 12, since a comment names it):
+
+```bash
+ssh <host> 'f=/etc/nginx/sites-available/namsbokasafn.is
+  grep -c "add_header Content-Security-Policy" "$f"
+  grep "add_header Content-Security-Policy" "$f" | grep -c frame-src'
+```
 
 ## Two-Repository Workflow
 
@@ -610,7 +658,8 @@ the two consult different efni trees and every `reviewed` flag comes from the wr
 
 A title correction renames the rendered file, which renames the URL. `src/lib/data/sectionRedirects.ts`
 holds the old→new map and the section route consumes it, prerendering a ~200-byte meta-refresh stub
-for each retired slug. **It is a checked-in constant, not a reader of efni's `slug-map.<track>.json`** —
+for each retired slug (nginx sends it, like every section page, with `Cache-Control: no-cache`; see
+Security Headers). **It is a checked-in constant, not a reader of efni's `slug-map.<track>.json`** —
 that file is gitignored here and absent in CI and in a clean checkout, so anything derived from it
 would vanish exactly when the build needs it.
 
@@ -664,7 +713,7 @@ As of 2026-11-09 (`main` `06cb08e`):
 - **Undeployed on `main`:** lucide 1.69.0 → 1.70.0 (#417, merged 2026-11-09: 5 icons added, the app's unchanged), held for the next code train; otherwise docs only. Train 16 would have shipped it alone and was not deployed ([USER]'s call, 2026-11-09): its dry run showed that no new bytes would reach readers, since the chunk holding the app's icons was byte-identical to the server's.
 - **The reader plan** is `docs/plans/2026-10-15-reader-v1.1-v1.2-review-plan.md` (the report and the 110-issue register sit beside it). Strategy C: v1.1 stays frozen at `dde768e` (tag `reader-v1.1-port-source`) as the porting source, and each piece moves to `main` as a small PR on code-only trains. 🔴 **Never merge v1.2 into main or main into v1.2, and take no P0 file from v1.2** ([CODE-04]). M1–M3 and M5–M8 are live. M9: S9.1–S9.5 live dark since train 12; S9.6 stays open on [USER]'s batch E (`docs/manual-qa-2026-06.md`, "Batch E as M9 amends it") and the reading for call 1, and M9 closes when batch E passes. M11: S11.1–S11.3 live dark since train 13. S11.4's work before the rulings is on `main` (#407: the call-2 erratum in the April plan, a draft of the v1.1.0 CHANGELOG entry, and a note listing what waits). The rest of S11.4 waits on call 3: S11.5 or S11.6, the default-mode e2e, version 1.1.0 and its tag. Call 3 waits on the crossover (S10.1–S10.2), which waits for D21, which waits for the May 2027 exam dates, as does D06's condition. Re-split tuning (CODE-27) waits on exposure. SF.1, SF.2 and batch E wait on neither call but come before S11.4's train. M4 is complete on `feature/reader-m4`, which merges into `main` at S4.5 for one January train (D05); [USER] approved its 10 `D20: proposed` markers and the 'Rétt' rating that S4.2 turned from amber to blue on 2026-11-03 (D20 batch 8), so only batch D's P0.3 items on a build remain before that train. S4.2's six announcer and test-setup files are already on `main` as byte copies (#335), and that merge's one expected conflict is the privacy page's settings item: keep `main`'s line, which covers S4.3's flag too (simulated again with S5.5 merged). After S4.5, finish S5.4's open box: derive prediction outcomes from `reviewHistory` with M4's `classifyPrediction()`. M5 shipped with train 8, except that box and S5.5's compare step, cut per [USER] 2026-11-01. M6 went live with train 9 (S6.3). M7 is closed (train 10, and [USER]'s long-press on a real iPhone and Android phone on 2026-11-02). When `main` next merges into `feature/reader-m4`, take 'spjald' there too: besides the privacy page's settings item, three files conflict where M4 rewrote the region (`e2e/flashcards.spec.ts`, `study/ReviewPhase.svelte`, the /minniskort page): keep M4's side and change its strings, including M4's own 'Kort N af M', 'Ekkert kort á dagskrá' and 'Engin kort eru komin á tíma í dag…', to the forms batch 8 approved ('Spjald N af M', 'Ekkert spjald á dagskrá', 'Engin spjöld eru komin á tíma í dag. Viltu taka aukaæfingu með öllum spjöldunum?'), and remove M4's 10 markers in the same merge (the privacy page's goes with main's line).
 - **Decisions live in `docs/decisions/`.** 🔴 **Never edit one:** a change is a new dated file that names the one it replaces. A plan step's "Decide first" must be on file before the step starts.
-- **For [USER]:** batch E on the live site, the docked bar on a real phone first (Chromium's phone emulation stuck it too low, so it has never been seen on a device), then the three widths, the iPad, a screen reader, the 'Lausn' trial's verdict on §3.1 and the page-height judgment (S9.6's reading for call 1); a real Ctrl+P of a section, scrolled and paged (S11.1's open box: Chromium's `page.pdf()` printed a paged section whole; since train 14 its title, glossary terms and notes print too); S9.3's question: 'Síðuskipt' after 'Samfellt skrun' stores 'paged' as built, so that reader pages every later section without a link (the alternative stores nothing on the way back); train 11's phone check (once the new worker is active, download chemistry in the installed app, switch on flight mode, close the app and open it at a section: it should open, and a book not downloaded should show 'Engin nettenging'); the `gzip_comp_level 5;` line on the server (steps in #350), S5.6's last box (save and skip one recall on a phone, and tell the class), the phone and screen-reader checks (S1.3's last box, S0.4, equations), a glance at GoatCounter's dashboard, the May 2027 exam dates (needed for D21 and D06's check, before S10.1), and #320's question (whether to retire `add-book` and `check-content`).
+- **For [USER]:** batch E on the live site, the docked bar on a real phone first (Chromium's phone emulation stuck it too low, so it has never been seen on a device), then the three widths, the iPad, a screen reader, the 'Lausn' trial's verdict on §3.1 and the page-height judgment (S9.6's reading for call 1); a real Ctrl+P of a section, scrolled and paged (S11.1's open box: Chromium's `page.pdf()` printed a paged section whole; since train 14 its title, glossary terms and notes print too); S9.3's question: 'Síðuskipt' after 'Samfellt skrun' stores 'paged' as built, so that reader pages every later section without a link (the alternative stores nothing on the way back); train 11's phone check (once the new worker is active, download chemistry in the installed app, switch on flight mode, close the app and open it at a section: it should open, and a book not downloaded should show 'Engin nettenging'); S5.6's last box (save and skip one recall on a phone, and tell the class), the phone and screen-reader checks (S1.3's last box, S0.4, equations), a glance at GoatCounter's dashboard, the May 2027 exam dates (needed for D21 and D06's check, before S10.1), and #320's question (whether to retire `add-book` and `check-content`).
 - **SvelteKit 3 is its own step and train, timed by [USER] (2026-11-02) for late December 2026 to the first week of January 2027, between semesters.** Dependabot's security-fix PR #360 (kit 3.1.1 with `adapter-static` 4.0.1 and `@vite-pwa/sveltekit` 2.0.0; it replaced #293 on 2026-11-02) was closed the same day, at [USER]'s word, because it can't merge as is: its CI fails at `npm ci`'s prepare step, because `@vite-pwa/sveltekit` 2.0.0 drops `SvelteKitPWA` and swaps `vite-plugin-pwa` and `workbox-build` for `@unplugin-pwa` 0.0.3 and a workbox fork. Kit 3 also needs code changes: its config moves from `svelte.config.js` into the Vite plugin, the tsconfig changes, `$app/environment` becomes `$app/env` (27 files), `$app/stores` is removed (7 files), `error()` changes (26 lines), and the `cookie` override goes. `npx sv migrate sveltekit-3` does part of it. Its two advisories (Dependabot alerts #1 and #2) are low and need features the site doesn't use; they stay open and should close themselves once kit 3 reaches `main`. `@vite-pwa/sveltekit` 1.x peers kit 2. 2.0.0 admits kit 2 as well as 3, so Dependabot offered it without kit 3, in the development group (#411, 2026-11-09), whose CI failed because `vite.config.ts` imports the dropped `SvelteKitPWA`. Since #415 (2026-11-09) `.github/dependabot.yml` ignores its major bumps beside kit's and `adapter-static`'s, so the new service-worker engine comes with kit 3, and the kit 3 step's PR removes all three ignores. That train must show `build/sw.js` with a precache manifest, `runtimeCaching.ts`'s functions still working from their source text, and `e2e/offline-download.spec.ts` and `e2e/pwa.spec.ts` passing. Build it on a branch and merge it into `main` only when its train is ready, since any train from `main` carries what is merged. S4.5's train is in the same week (D05). The order, confirmed by [USER] on 2026-11-02: kit 3 first, in late December, then `main` into `feature/reader-m4` (2 of its changed lines import `$app/environment`) and `e2e/flashcards.spec.ts`, then S4.5.
 - **Known, not fixed** (details in each step's PR body and the archive):
   - the erase on /greining leaves the precache and the HTTP cache (the privacy page says so);
@@ -673,7 +722,7 @@ As of 2026-11-09 (`main` `06cb08e`):
   - a hard load of a frozen book runs its 2026-08-19 bundles (the old search crawl, white on amber, 'kort' and the mouse-only selection popup, and, since S6.1 shipped, a settings rewrite in the old full format that makes the profile read as pre-seam) and its old HTML, without S6.2's pre-paint script, until that book is deployed again;
   - on a paged section: a phone reader can't start the timer (the idle pill is hidden below 1024 px; [USER]'s layout); the lightbox a 'Mynd' link opens places focus but does not trap it (as `figureViewer` always did); find-in-page reaches other pages only where the browser has `until-found` (Firefox from 148, Safari partial from 26.2, unmeasured on a device); after a pager failure or a switch back to scrolling the ring keeps its paged value until the next scroll event;
   - the pager's teardown also cancels another component's announcement still in `announce()`'s 50 ms gap, so code that turns paging off and announces must announce after the flush; cancelling by owner in `announcer.ts` waits for S4.5 (that file must not change before then);
-  - physics embeds load YouTube and PhET with no click-to-load step, which would send readers' IP addresses there: decide it with the CSP `frame-src` fix, before physics is synced.
+  - physics and biology embeds load YouTube and PhET with no click-to-load step, and since 2026-11-10 the live CSP allows them, so a sync that brings one would send readers' IP addresses there: decide click-to-load (D03) and add the `/personuvernd/` line before physics or biology is synced. No served page embeds one today; efni's main renders 2 (physics ch04), and its `embed-mapping.json` files map 47 for physics and 51 for biology.
 - **npm audit** (re-measured 2026-11-09 on `main` `6309548`, for train 15): production tree 0; full tree 19 (5 low, 14 moderate), all development tools: the same count as trains 11–14, and the same 19 packages and 5 advisories as train 14, although this train's updates changed the lockfile.
 - **Still held:** the chemistry sync ([USER], 2026-09-28). 🔴 **Do not run `sync-content.js`.**
 
