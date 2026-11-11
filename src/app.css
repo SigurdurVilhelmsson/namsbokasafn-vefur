@@ -502,6 +502,22 @@
   box-shadow: 0 0 0 2px var(--focus-gap);
 }
 
+/* The one reduced-motion reset (plan step SF.3, register UI-25): CSS keyframes, hover fades
+   in component styles and smooth scrolling all stop. Outside every @layer, like the ring, so
+   it beats Tailwind's utilities. It cannot reach Svelte's transitions, which run on the Web
+   Animations API: import those from $lib/utils/transitions (ESLint enforces it), and ask
+   scrollBehavior() there before a script scrolls smoothly. e2e/reduced-motion.spec.ts. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Reading content styles */
 .reading-content {
   max-width: 52rem;

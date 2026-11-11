@@ -6,6 +6,7 @@
   import { settings } from '$lib/stores/settings';
   import { onMount, onDestroy } from 'svelte';
   import Icon from '$lib/components/Icon.svelte';
+  import { scrollBehavior } from '$lib/utils/transitions';
   import BookCover from '$lib/components/BookCover.svelte';
   import LicenceBadge from '$lib/components/LicenceBadge.svelte';
   import type { PageData } from './$types';
@@ -95,7 +96,7 @@
   /** Smooth scroll to anchor */
   function scrollTo(id: string) {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (el) el.scrollIntoView({ behavior: scrollBehavior() });
   }
 </script>
 

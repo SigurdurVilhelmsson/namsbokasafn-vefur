@@ -104,6 +104,7 @@ Three rules every store keeps (from S3.2 and S3.1, 2026-10-26):
   - Per-section page logic must not live in `onMount`: SvelteKit reuses the page component when only params change. Use `afterNavigate` with a key guard and/or `{#key}`.
   - A function called from `$effect` makes every `$state` it READS a dependency of that effect, however deep the call. `MobileBottomNav`'s close-on-route effect called `close()`, which read the auto-close timer's `$state`; opening the menu armed the timer, re-ran the effect and closed the menu in the same tick, so the phone tools menu never opened (Feb–Oct 2026, fixed `d6ce301`). Call such helpers through `untrack()`, and keep bookkeeping like timer handles out of `$state`.
 - Math rendering: MathJax (pre-rendered SVG in HTML content)
+- **Motion respects prefers-reduced-motion** (plan step SF.3, UI-25). Import Svelte's transitions from `$lib/utils/transitions`, never `svelte/transition` (ESLint fails it): they run on the Web Animations API, which CSS cannot stop, so the wrappers zero duration and delay under 'reduce'. `app.css`'s one unlayered reset cuts CSS animations and transitions to 0.01 ms and turns smooth scrolling off, but a script's `behavior: 'smooth'` ignores CSS, so pass `scrollBehavior()` from the same module. `e2e/reduced-motion.spec.ts` records every animation while Settings, the selection popup and the recall prompt open (none over 1 ms under 'reduce'; the control animates).
 - Path alias: `$lib/` resolves to `src/lib/`
 
 ## Language Policy

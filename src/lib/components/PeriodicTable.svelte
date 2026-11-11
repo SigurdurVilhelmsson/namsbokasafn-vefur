@@ -3,7 +3,7 @@
   Migrated from React PeriodicTable.tsx
 -->
 <script lang="ts">
-	import { fade, scale } from 'svelte/transition';
+	import { fade, scale } from '$lib/utils/transitions';
 	import Icon from '$lib/components/Icon.svelte';
 	import {
 		ELEMENTS,

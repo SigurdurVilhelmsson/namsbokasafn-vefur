@@ -118,8 +118,9 @@ test.describe('Landing Page Accessibility', () => {
 			const animationDuration = await bookCard.evaluate((el) => {
 				return window.getComputedStyle(el).animationDuration;
 			});
-			// With reduced motion, duration should be 0s or minimal
-			expect(animationDuration === '0s' || animationDuration === '0.01s').toBe(true);
+			// With reduced motion, any animation lasts 0.01 ms or less (app.css's reset, SF.3, reads
+			// '1e-05s'). Compared in seconds: 1e-5 * 1000 is 0.010000000000000002.
+			expect(parseFloat(animationDuration)).toBeLessThanOrEqual(1e-5);
 		}
 	});
 });

@@ -5,7 +5,7 @@
 <script lang="ts">
 	import { onDestroy } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import { fade, scale } from 'svelte/transition';
+	import { fade, scale } from '$lib/utils/transitions';
 	import { analyticsStore } from '$lib/stores/analytics';
 
 	type Phase = 'idle' | 'work' | 'break';

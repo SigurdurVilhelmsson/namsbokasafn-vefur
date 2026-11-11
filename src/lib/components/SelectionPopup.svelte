@@ -10,7 +10,7 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import { scale } from 'svelte/transition';
+	import { scale } from '$lib/utils/transitions';
 	import type { HighlightColor, SelectionAnchor } from '$lib/types/annotation';
 	import { placePopup, type PopupSide } from '$lib/utils/popupPosition';
 

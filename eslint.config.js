@@ -80,6 +80,27 @@ export default tseslint.config(
     },
   },
   {
+    // Plan step SF.3 (UI-25): Svelte's transitions only through $lib/utils/transitions, which
+    // quiets them under prefers-reduced-motion (CSS cannot stop the Web Animations they use).
+    // src/lib/utils/transitions.lint.test.ts checks this rule.
+    files: ['src/**/*.{js,ts,svelte}'],
+    ignores: ['src/lib/utils/transitions.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'svelte/transition',
+              message:
+                "Import transitions from '$lib/utils/transitions', which respects prefers-reduced-motion (UI-25).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
     ignores: [
       'build/',
       '.svelte-kit/',

@@ -4,7 +4,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import { fade, scale } from 'svelte/transition';
+	import { fade, scale } from '$lib/utils/transitions';
 	import { flashcardStore } from '$lib/stores/flashcard';
 	import type { Flashcard, FlashcardDeck } from '$lib/types/flashcard';
 	import { countNoun } from '$lib/utils/plural';

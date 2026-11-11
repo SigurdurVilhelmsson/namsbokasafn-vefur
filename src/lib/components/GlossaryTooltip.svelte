@@ -4,7 +4,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
 	import Icon from '$lib/components/Icon.svelte';
-	import { fade, scale } from 'svelte/transition';
+	import { fade, scale } from '$lib/utils/transitions';
 	import type { GlossaryTerm } from '$lib/types/content';
 
 	interface Props {
