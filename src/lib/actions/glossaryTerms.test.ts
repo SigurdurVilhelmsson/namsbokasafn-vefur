@@ -580,6 +580,37 @@ describe('glossaryTerms action', () => {
 			action.destroy();
 		});
 
+		// Plan step SF.5 (PED-05): a screen reader says the English word in English. Only the
+		// word: '(e. …)' is the Icelandic shorthand for 'enska' and stays in the page's
+		// language. The span's text is unchanged, so every test above still holds.
+		it('marks the English word, and only the word, lang="en"', async () => {
+			const node = createContentNode([{ text: 'efni', dataEn: 'matter' }]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			const span = node.querySelector('span.term-en')!;
+			expect(span.hasAttribute('lang')).toBe(false);
+			expect(Array.from(span.querySelectorAll('[lang]')).map((w) => [w.getAttribute('lang'), w.textContent])).toEqual([
+				['en', 'matter']
+			]);
+			action.destroy();
+		});
+
+		it('marks every gloss: one lang="en" word per span, equal to its data-en', async () => {
+			const node = createContentNode([
+				{ text: 'efni', dataEn: 'matter' },
+				{ text: 'frumefni', dataEn: 'chemical element' }
+			]);
+			const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+			await flush();
+
+			const words = Array.from(node.querySelectorAll('span.term-en')).map((s) =>
+				Array.from(s.querySelectorAll('[lang="en"]')).map((w) => w.textContent)
+			);
+			expect(words).toEqual([['matter'], ['chemical element']]);
+			action.destroy();
+		});
+
 		// Control: without the attribute there is nothing to render. Guards the
 		// assertions above from passing vacuously.
 		it('renders nothing without data-en', async () => {
@@ -707,6 +738,15 @@ describe('glossaryTerms action', () => {
 
 				expect(glossOf(node)).toEqual([' (e. rounding)']);
 				expect(node.querySelector('span.term-en')?.parentElement?.tagName).toBe('DT');
+				action.destroy();
+			});
+
+			it('marks the <dt> gloss\'s English word lang="en" too (SF.5)', async () => {
+				const node = createKeyTermsNode([{ text: 'afrúning', dataEn: 'rounding' }]);
+				const action = glossaryTerms(node, { bookSlug: 'efnafraedi-2e' });
+				await flush();
+
+				expect(node.querySelector('dt span.term-en [lang="en"]')?.textContent).toBe('rounding');
 				action.destroy();
 			});
 
