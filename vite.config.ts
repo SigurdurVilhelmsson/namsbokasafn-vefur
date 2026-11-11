@@ -66,9 +66,8 @@ export default defineConfig({
 				// Our own worker source (src/lib/sw/worker.ts), bundled with the workbox modules it
 				// imports; the precache manifest is injected at self.__WB_MANIFEST.
 				strategies: 'buildSW',
-				// Without it buildSW names the output after the source (worker.js). Readers'
-				// installed workers are registered at /sw.js and update by fetching it again;
-				// deploy.js and the tests read it too.
+				// Without it buildSW names the output after the source (worker.js). deploy.js
+				// and the tests read /sw.js, and readers' installed workers are registered there.
 				filename: 'sw.js',
 				// Unminified, so scripts/deploy.js can read the precacheAndRoute([...]) call and
 				// refuse a build whose precache lists a file the build lacks (minified, the call

@@ -166,6 +166,9 @@ test.describe('Offline cold start', () => {
 		// The precache entry buildSW injects, with a revision that changes every build (kit.spa).
 		const shellEntry = /\{[^{}]*"url":\s*"200\.html"[^{}]*\}/.exec(sw)?.[0] ?? '';
 		expect(shellEntry).toMatch(/"revision":\s*"[0-9a-f]{32}"/);
+		// ...and the app's own scripts, which globStrict: false would let a broken glob drop
+		// with only a warning (kit.spa adds the shell entry either way).
+		expect(sw).toMatch(/"url":\s*"_app\/immutable\/[^"]+\.js"/);
 		// No navigateFallback: that NavigationRoute would serve the shell online too. The
 		// page-load route itself (NetworkOnly with PrecacheFallbackPlugin) is unit-tested in
 		// src/lib/sw/routes.test.ts, and the tests above load pages through it.
