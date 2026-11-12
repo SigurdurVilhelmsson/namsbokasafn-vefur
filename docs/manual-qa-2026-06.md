@@ -9,12 +9,16 @@ you go. Each batch is independent.
 
 - **Batch A–C:** production (namsbokasafn.is) after deploying current `main`,
   or `npm run dev` against main.
-- **Batch D–E:** first on S0.3's trial build (step S0.4): `feature/reader-v1.1`
-  at `dde768e` merged with main `62ea95e` of 2026-10-23, never pushed. Then
-  batch E runs again on `main` at S9.6, as M9 amends it (S9.1; M9's exit
-  criterion is batch E "as amended"). Batch D's P0.3 items also run on a
-  `main` build at S4.5. `feature/reader-v1.1` is never merged into main: its
-  pieces are ported to main as small PRs.
+- **Batch D–E:** on the live site (step S0.4), since 2026-11-12. Until then
+  S0.4 named S0.3's trial build (`feature/reader-v1.1` at `dde768e` merged
+  with main `62ea95e` of 2026-10-23, never pushed), which predated M1–M3 and
+  whose worktrees were removed that day. On the live site the pager is dark,
+  so page a section with `?lestur=sidur`, and batch E is "Batch E as M9
+  amends it" below, which S9.6 also runs there (S9.1; M9's exit criterion is
+  batch E "as amended"). Of batch D only P0.2, the recall prompt, is live:
+  its P0.3 items run on a `main` build at S4.5, and P0.1 comes with M12.
+  `feature/reader-v1.1` is never merged into main: its pieces are ported to
+  main as small PRs.
 - **Batch F:** on the Linode server itself.
 - **Batch G:** a build of `main` after the step that ports each P1 item:
   P1.4 at S12.4, P1.2 at S13.4, P1.3 at S14.4, P1.1 at S14.7, each item
@@ -46,6 +50,11 @@ which was never pushed and so has no CI; S0.3's note records its checks
 (svelte-check and lint clean, 863 unit tests passing, all 19 pagination tests
 passing, and only #249's three expected flashcard e2e failures). Batch E's rerun
 at S9.6 and batch G run on main builds, under main's CI._
+
+_2026-11-12: S0.4 no longer uses S0.3's trial build, whose worktrees were
+removed that day: batches D–E run on the live site, which serves main's code as
+the last train deployed it (train 17, `main` `8754201`), under main's CI, as
+S9.6's batch E and batch G do._
 
 **Automated verification of Batches A & B (2026-06-17):** driven end-to-end with
 Playwright/Chromium against `npm run dev`, using **in-app SPA navigation**
@@ -157,8 +166,8 @@ The reactivity sweep (#112), store fixes (#113, #115, #116) and Icelandic (#117)
 
 ## Batch D — Reader v1.1: measure, predict-first, recall (~15 min)
 
-Run on S0.3's trial build (S0.4); the P0.3 items run again on a `main` build at
-S4.5 (see "Where to run what").
+Run on the live site (S0.4), where only P0.2 is live; the P0.3 items run on a
+`main` build at S4.5, and P0.1 comes with M12 (see "Where to run what").
 
 - [ ] **P0.1:** in a private window (fresh profile), body text uses the
       narrow measure (~70 chars/line). Your normal profile keeps whatever
