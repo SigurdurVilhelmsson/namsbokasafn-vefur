@@ -15,7 +15,7 @@
 - **The two failures the plan thought likeliest did not happen.** #258's rename tests passed, two of them on paged section pages. #260's offline specs passed too, but none of them opens a section page, so they never exercised the pager.
 - **CODE-02 holds**, and no test shows it: on the merged tree the recall store is the one section-keyed store that the rename migration leaves out.
 - **For S8.4's contingency session there are no failures beyond #249's** on this content. One risk is left: CI's content was not tested, and 21 of the tests CI runs on main used the frozen physics book here instead of chemistry (see "What this run cannot show").
-- **The trial build for S0.4 carries one QA aid.** A phone reaches this machine over plain `http://`, which is not a secure context, so the browser has no `crypto.randomUUID()`. Measured on the trial build through a network address, saving a recall entry then failed, so S0.4 could not have tested it. The S0.4 build adds one local commit that gives the app's ID helper a fallback. It sends no page-view event. A phone also needs a port forward to reach it (see "The build for S0.4").
+- **The trial build for S0.4 carries one QA aid.** A phone reaches this machine over plain `http://`, which is not a secure context, so the browser has no `crypto.randomUUID()`. Measured on the trial build through a network address, saving a recall entry then failed, so S0.4 could not have tested it. The S0.4 build adds one local commit that gives the app's ID helper a fallback. It sends no page-view event. A phone also needs a port forward to reach it (see "The build for S0.4"). _2026-11-12: the build and its worktrees were removed, and S0.4 now runs on the live site._
 
 ## What was merged
 
@@ -177,6 +177,8 @@ No test skips here that runs in CI. So every test CI runs on main ran here on th
 
 ## The build for S0.4
 
+_2026-11-12: S0.4 now runs on the live site, not on this build ([USER], 2026-11-12). The build predated M1–M3 and every port since. It and the three worktrees were removed on 2026-11-12, so the "Where" path and the "Serve it" command below no longer work. The live site is served over HTTPS, so S0.4 needs neither the QA aid nor the port forward. This section stays as the record of what the build was. Two parts of it still apply to any local build opened on a phone: main's `generateId()` still has no fallback, and the port forward must be removed if it was ever added (see its last bullet)._
+
 - **Where:** `~/.cache/reader-review/s03/merge/build/`, version `1792793182618`, built with `npm run build` (validation included) from `c8d71bb`: the trial merge `e3beae4` plus one local QA aid, described next. The test results above are for `e3beae4`.
 - **The QA aid, and why S0.4 needs it.** A phone reaches this machine over plain `http://` on a network address, and that is not a secure context, so the browser offers no `crypto.randomUUID()`. The app's `generateId()` (`src/lib/utils/storeHelpers.ts`) calls it with no fallback. Four stores call it when they create an entry: recall, highlights and notes, quiz attempts and study analytics. Measured in Chromium on the unpatched build, through WSL's network address:
   - arriving at a section threw `crypto.randomUUID is not a function`
@@ -216,6 +218,8 @@ No test skips here that runs in CI. So every test CI runs on main ran here on th
 
   Check that both are gone: `netsh interface portproxy show all` no longer lists port 4173, and `Get-NetFirewallRule -DisplayName 'vefur trial 4173'` finds no rule.
 
+  _2026-11-12: S0.4 no longer uses this build, so if these two entries were ever added, remove them now rather than "when S0.4 is done": the firewall rule applies on every network._
+
 - **Keep the worktrees until S0.4 is done.** Then remove all three from the main checkout:
 
   ```bash
@@ -225,3 +229,5 @@ No test skips here that runs in CI. So every test CI runs on main ran here on th
   ```
 
   `e3beae4` and `c8d71bb` are on no branch, so git discards them in a later garbage collection. Nothing from them was ever pushed.
+
+  _2026-11-12: done before S0.4, at [USER]'s word, with these three commands and `git worktree prune`. S0.4 runs on the live site instead. A local build opened on a phone over plain `http://` needs `c8d71bb`'s fallback again, written afresh, since the commit will not survive._
