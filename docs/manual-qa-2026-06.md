@@ -190,6 +190,10 @@ Run on the live site (S0.4), where only P0.2 is live; the P0.3 items run on a
 _2026-11-08: this is batch E as written for v1.1's trial build (S0.4). For the live
 site at S9.6, run "Batch E as M9 amends it" below instead._
 
+_2026-11-12: S0.4 now runs on the live site too, so it also runs "Batch E as M9
+amends it" below, not this batch; the trial build's worktrees were removed that
+day._
+
 This is the batch that genuinely needs judgment, not just verification.
 Use a long, figure-heavy chapter (Chapter 1 has many figures) and an
 equation-heavy section.
